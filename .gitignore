@@ -37,5 +37,6 @@ devtools/devtools-frontend/out/
 packages/inspector/dist/
 
 # Documentation build output
-document/dist/
-
+node_modules
+dist/
+doc_build/
