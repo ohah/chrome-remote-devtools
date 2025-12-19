@@ -30,9 +30,5 @@
   "rust-analyzer.server.extraEnv": {
     "PATH": "${env:USERPROFILE}\\.cargo\\bin;${env:PATH}"
   },
-  "files.exclude": {
-    "**/target": true,
-    "**/node_modules": true
-  },
   "oxc.fmt.experimental": true
 }
