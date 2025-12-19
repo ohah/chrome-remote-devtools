@@ -52,19 +52,75 @@ mise install
 bun install
 ```
 
-### 3. Git Submodule 초기화
-
-```bash
-# devtools-frontend submodule 초기화
-git submodule update --init --recursive
-```
-
-### 4. 프로젝트 빌드
+### 3. 프로젝트 빌드
 
 ```bash
 # 전체 패키지 빌드
 bun run build
 ```
+
+## DevTools Frontend 빌드
+
+DevTools UI는 Chrome DevTools frontend의 포크를 기반으로 합니다. 빌드하려면 [depot_tools](https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up)가 설치되어 있어야 합니다.
+
+### 사전 요구사항
+
+1. **depot_tools 설치**: [depot_tools 설정 가이드](https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up)를 따라 설치하세요.
+
+2. **PATH에 depot_tools 추가**: `gclient`, `gn`, `autoninja` 명령어를 사용할 수 있어야 합니다.
+
+### 빌드 단계
+
+1. **devtools 디렉토리로 이동**:
+   ```bash
+   cd devtools
+   ```
+
+2. **의존성 동기화**:
+   ```bash
+   gclient sync
+   ```
+   이 명령은 devtools-frontend에 필요한 모든 의존성을 다운로드합니다.
+
+3. **빌드 설정 생성**:
+   ```bash
+   cd devtools-frontend
+   gn gen out/Default
+   ```
+
+4. **DevTools 빌드**:
+   ```bash
+   autoninja -C out/Default
+   ```
+
+   또는 npm을 사용할 수도 있습니다:
+   ```bash
+   npm run build
+   ```
+
+5. **빌드 결과물 위치**:
+   빌드된 파일은 `devtools/devtools-frontend/out/Default/gen/front_end`에 있습니다.
+
+### 빠른 빌드 옵션
+
+개발 중 빠른 반복을 위해 타입 체크와 번들링을 건너뛸 수 있습니다:
+
+```bash
+gn gen out/fast-build --args="devtools_skip_typecheck=true devtools_bundle=false"
+autoninja -C out/fast-build
+```
+
+또는 npm으로 fast-build 타겟 사용:
+```bash
+npm run build -- -t fast-build
+```
+
+### 참고사항
+
+- 첫 빌드는 의존성 다운로드와 컴파일로 인해 시간이 걸릴 수 있습니다.
+- 이후 빌드는 증분 빌드로 훨씬 빠릅니다.
+- 빌드는 기본적으로 `Default`를 타겟으로 사용합니다. `-t <name>`으로 다른 타겟을 지정할 수 있습니다.
+- 개발 중에는 DevTools frontend 코드 자체를 수정하는 경우가 아니라면 DevTools를 다시 빌드할 필요가 없습니다.
 
 ## 개발 서버 실행
 

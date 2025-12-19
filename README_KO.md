@@ -70,7 +70,6 @@ bash scripts/init.sh
 ```
 
 이 스크립트는 다음을 수행합니다:
-- DevTools frontend submodule 업데이트
 - Bun 의존성 설치
 - Rust 의존성 설치
 - 레퍼런스 저장소 클론 (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb)
@@ -149,7 +148,7 @@ chrome-remote-devtools/
 │   └── inspector/       # Inspector UI (React + Vite, 웹/데스크탑)
 ├── document/            # RSPress 문서 페이지
 ├── devtools/
-│   └── devtools-frontend/  # DevTools 프론트엔드 (git submodule)
+│   └── devtools-frontend/  # DevTools 프론트엔드
 └── reference/           # 참조 코드 (gitignore)
     ├── chii/
     ├── chobitsu/

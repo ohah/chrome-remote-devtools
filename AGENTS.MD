@@ -91,7 +91,7 @@ chrome-remote-devtools/
 │   ├── docs/            # 문서 소스
 │   └── rspress.config.ts
 ├── devtools/
-│   └── devtools-frontend/  # DevTools 프론트엔드 (git submodule)
+│   └── devtools-frontend/  # DevTools 프론트엔드
 └── reference/           # 참조 코드 (gitignore)
     ├── chii/
     ├── chobitsu/

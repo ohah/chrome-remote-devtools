@@ -70,7 +70,6 @@ bash scripts/init.sh
 ```
 
 This will:
-- Update DevTools frontend submodule
 - Install Bun dependencies
 - Install Rust dependencies
 - Clone reference repositories (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb)
@@ -149,7 +148,7 @@ chrome-remote-devtools/
 │   └── inspector/       # Inspector UI (React + Vite, web/desktop)
 ├── document/            # RSPress documentation site
 ├── devtools/
-│   └── devtools-frontend/  # DevTools frontend (git submodule)
+│   └── devtools-frontend/  # DevTools frontend
 └── reference/           # Reference code (gitignored)
     ├── chii/
     ├── chobitsu/
