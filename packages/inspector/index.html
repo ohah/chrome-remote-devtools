@@ -1,14 +1,37 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri + React + Typescript</title>
-  </head>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chrome Remote DevTools</title>
+  <style>
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: rgb(41 42 45);
+      }
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* React app is now visible / React 앱이 이제 표시됨 */
+    #root {
+      width: 100%;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- React app container / React 앱 컨테이너 -->
+  <div id="root"></div>
+
+  <!-- React app script / React 앱 스크립트 -->
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
