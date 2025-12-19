@@ -1,0 +1,9 @@
+[tools]
+rust = "stable"
+bun = "latest"
+
+[env]
+RUST_BACKTRACE = "1"
+
+
+

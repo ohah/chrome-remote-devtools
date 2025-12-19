@@ -1,0 +1,32 @@
+{
+  "name": "chrome-remote-devtools",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "document"
+  ],
+  "scripts": {
+    "dev": "bun run --filter='*' dev",
+    "dev:server": "bun run --filter='@ohah/chrome-remote-devtools-server' dev",
+    "dev:inspector": "bun run --filter='@ohah/chrome-remote-devtools-inspector' dev",
+    "dev:inspector:desktop": "bun run --filter='@ohah/chrome-remote-devtools-inspector' dev:desktop",
+    "dev:docs": "bun run --filter='document' dev",
+    "lint": "oxlint .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt . --check",
+    "format:rust": "cargo fmt --all",
+    "format:rust:check": "cargo fmt --all -- --check"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "oxfmt": "latest",
+    "oxlint": "latest",
+    "@types/bun": "latest"
+  },
+  "module": "index.ts",
+  "type": "module",
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

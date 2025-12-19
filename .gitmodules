@@ -1,0 +1,3 @@
+[submodule "devtools/devtools-frontend"]
+	path = devtools/devtools-frontend
+	url = https://github.com/ohah/devtools-frontend.git

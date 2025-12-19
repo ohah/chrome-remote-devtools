@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/packages/oxc/main/packages/oxlint/schema.json",
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/*.lock",
+    "**/target/**",
+    "**/*.pdb",
+    "reference/**",
+    "devtools/devtools-frontend/**"
+  ]
+}

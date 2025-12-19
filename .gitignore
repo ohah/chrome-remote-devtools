@@ -1,0 +1,41 @@
+# 참조 코드 (원본 저장소에서 가져온 코드)
+reference/
+
+# Rust
+/target/
+**/*.rs.bk
+
+# Bun/Node
+node_modules/
+dist/
+build/
+.bun/
+*.bun
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# mise
+.mise/
+
+# DevTools 빌드 산출물
+devtools/devtools-frontend/out/
+packages/inspector/dist/
+
+# Documentation build output
+document/dist/
+
