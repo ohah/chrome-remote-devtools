@@ -10,7 +10,7 @@
     "dev": "bun run --filter='*' dev",
     "dev:server": "bun run --filter='@ohah/chrome-remote-devtools-server' dev",
     "dev:inspector": "bun run --filter='@ohah/chrome-remote-devtools-inspector' dev",
-    "dev:inspector:desktop": "bun run --filter='@ohah/chrome-remote-devtools-inspector' dev:desktop",
+    "dev:inspector:tauri": "bun run --filter='@ohah/chrome-remote-devtools-inspector' tauri dev",
     "dev:docs": "bun run --filter='document' dev",
     "lint": "oxlint .",
     "format": "oxfmt .",
