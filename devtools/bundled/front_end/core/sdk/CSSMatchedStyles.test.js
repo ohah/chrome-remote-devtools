@@ -1,0 +1,790 @@
+// Copyright 2022 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import { renderElementIntoDOM } from '../../testing/DOMHelpers.js';
+import { createTarget } from '../../testing/EnvironmentHelpers.js';
+import { describeWithMockConnection, setMockConnectionResponseHandler } from '../../testing/MockConnection.js';
+import { getMatchedStyles, ruleMatch } from '../../testing/StyleHelpers.js';
+import * as SDK from './sdk.js';
+describe('CSSMatchedStyles', () => {
+    describe('computeCSSVariable', () => {
+        const testCssValueEquals = async (text, expectedValue) => {
+            const matchedStyles = await getMatchedStyles({
+                matchedPayload: [
+                    ruleMatch('div', [
+                        { name: '--diamond', value: 'var(--diamond-a) var(--diamond-b)' },
+                        { name: '--diamond-a', value: 'var(--foo)' },
+                        { name: '--diamond-b', value: 'var(--foo)' },
+                        { name: '--foo', value: 'active-foo' },
+                        { name: '--baz', value: 'active-baz !important', important: true },
+                        { name: '--baz', value: 'passive-baz' },
+                        { name: '--dark', value: 'darkgrey' },
+                        { name: '--empty', value: '' },
+                        { name: '--empty2', value: 'var(--empty)' },
+                        { name: '--light', value: 'lightgrey' },
+                        { name: '--theme', value: 'var(--dark)' },
+                        { name: '--shadow', value: '1px var(--theme)' },
+                        { name: '--width', value: '1px' },
+                        { name: '--a', value: 'a' },
+                        { name: '--b', value: 'var(--a)' },
+                        { name: '--valid-fallback', value: 'var(--non-existent, fallback-value)' },
+                        { name: '--var-reference-in-fallback', value: 'var(--non-existent, var(--foo))' },
+                        { name: '--itself', value: 'var(--itself)' },
+                        { name: '--itself-complex', value: '10px var(--itself-complex)' },
+                        { name: '--cycle-1', value: 'var(--cycle-2)' },
+                        { name: '--cycle-2', value: 'var(--cycle-1)' },
+                        { name: '--cycle-a', value: 'var(--cycle-b, 50px)' },
+                        { name: '--cycle-b', value: 'var(--cycle-a)' },
+                        { name: '--cycle-in-fallback', value: 'var(--non-existent, var(--cycle-a))' },
+                        { name: '--non-existent-fallback', value: 'var(--non-existent, var(--another-non-existent))' },
+                        { name: '--out-of-cycle', value: 'var(--cycle-2, 20px)' },
+                        { name: '--non-inherited', value: 'var(--inherited)' },
+                        { name: '--also-inherited-overloaded', value: 'this is overloaded here' },
+                    ]),
+                    ruleMatch('html', [
+                        { name: '--inherited', value: 'var(--also-inherited-overloaded)' },
+                        { name: '--also-inherited-overloaded', value: 'inherited and overloaded' },
+                    ]),
+                ],
+            });
+            const actualValue = matchedStyles.computeCSSVariable(matchedStyles.nodeStyles()[0], text)?.value ?? null;
+            assert.strictEqual(actualValue, expectedValue);
+        };
+        it('should correctly compute the value of an expression that uses a variable', async () => {
+            await testCssValueEquals('--foo', 'active-foo');
+            await testCssValueEquals('--baz', 'active-baz !important');
+            await testCssValueEquals('--does-not-exist', null);
+            await testCssValueEquals('--dark', 'darkgrey');
+            await testCssValueEquals('--light', 'lightgrey');
+            await testCssValueEquals('--theme', 'darkgrey');
+            await testCssValueEquals('--shadow', '1px darkgrey');
+            await testCssValueEquals('--width', '1px');
+            await testCssValueEquals('--diamond', 'active-foo active-foo');
+            await testCssValueEquals('--empty', '');
+            await testCssValueEquals('--empty2', '');
+        });
+        it('correctly resolves the declaration', async () => {
+            const node = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+            node.id = 1;
+            node.parentNode = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+            node.parentNode.id = 2;
+            node.parentNode.parentNode = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+            node.parentNode.parentNode.id = 3;
+            node.parentNode.parentNode.parentNode = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+            node.parentNode.parentNode.parentNode.id = 4;
+            const matchedStyles = await getMatchedStyles({
+                node,
+                matchedPayload: [ruleMatch('div', [{ name: '--foo', value: 'foo1' }])], // styleFoo1
+                inheritedPayload: [
+                    {
+                        matchedCSSRules: [ruleMatch('div', [{ name: '--bar', value: 'bar' }, { name: '--foo', value: 'foo2' }])],
+                    }, // styleFoo2
+                    { matchedCSSRules: [ruleMatch('div', [{ name: '--baz', value: 'baz' }])] }, // styleBaz
+                    { matchedCSSRules: [ruleMatch('div', [{ name: '--foo', value: 'foo3' }])] }, // styleFoo3
+                ],
+                propertyRules: [{
+                        origin: "regular" /* Protocol.CSS.StyleSheetOrigin.Regular */,
+                        style: {
+                            cssProperties: [
+                                { name: 'syntax', value: '*' },
+                                { name: 'inherits', value: 'true' },
+                                { name: 'initial-value', value: 'bar0' },
+                            ],
+                            shorthandEntries: [],
+                        },
+                        propertyName: { text: '--bar' },
+                    }],
+            });
+            // Compute the variable value as it is visible to `startingCascade` and compare with the expectation
+            const testComputedVariableValueEquals = (name, startingCascade, expectedValue, expectedDeclaration) => {
+                const { value, declaration } = matchedStyles.computeCSSVariable(startingCascade, name);
+                assert.strictEqual(value, expectedValue);
+                assert.strictEqual(declaration.declaration, expectedDeclaration);
+            };
+            const styles = matchedStyles.nodeStyles();
+            const styleFoo1 = styles.find(style => style.allProperties().find(p => p.value === 'foo1'));
+            const styleFoo2 = styles.find(style => style.allProperties().find(p => p.value === 'foo2'));
+            const styleFoo3 = styles.find(style => style.allProperties().find(p => p.value === 'foo3'));
+            const styleBaz = styles.find(style => style.allProperties().find(p => p.value === 'baz'));
+            assert.exists(styleFoo1);
+            assert.exists(styleFoo2);
+            assert.exists(styleFoo3);
+            assert.exists(styleBaz);
+            testComputedVariableValueEquals('--foo', styleFoo1, 'foo1', styleFoo1.leadingProperties()[0]);
+            testComputedVariableValueEquals('--bar', styleFoo1, 'bar', styleFoo2.leadingProperties()[0]);
+            testComputedVariableValueEquals('--foo', styleFoo2, 'foo2', styleFoo2.leadingProperties()[1]);
+            testComputedVariableValueEquals('--bar', styleFoo3, 'bar0', matchedStyles.registeredProperties()[0]);
+            testComputedVariableValueEquals('--foo', styleBaz, 'foo3', styleFoo3.leadingProperties()[0]);
+        });
+        describe('cyclic references', () => {
+            it('should return `null` when the variable references itself', async () => {
+                await testCssValueEquals('--itself', null);
+                await testCssValueEquals('--itself-complex', null);
+            });
+            it('should return `null` when there is a simple cycle (1->2->1)', async () => {
+                await testCssValueEquals('--cycle-1', null);
+            });
+            it('should return `null` if the var reference is inside the cycle', async () => {
+                await testCssValueEquals('--cycle-a', null);
+            });
+            it('should return fallback value if the expression is not inside the cycle', async () => {
+                await testCssValueEquals('--out-of-cycle', '20px');
+            });
+        });
+        describe('var references inside fallback', () => {
+            it('should resolve a `var()` reference inside fallback value too', async () => {
+                await testCssValueEquals('--var-reference-in-fallback', 'active-foo');
+            });
+            it('should return null when the fallback value contains a cyclic reference', async () => {
+                await testCssValueEquals('--cycle-in-fallback', null);
+            });
+            it('should return null when the fallback value is non existent too', async () => {
+                await testCssValueEquals('--non-existent-fallback', null);
+            });
+        });
+        it('should resolve a `var()` reference with nothing else', async () => {
+            await testCssValueEquals('--a', 'a');
+        });
+        it('should resolve a `var()` reference until no `var()` references left', async () => {
+            await testCssValueEquals('--b', 'a');
+        });
+        it('should resolve to fallback if the referenced variable does not exist', async () => {
+            await testCssValueEquals('--valid-fallback', 'fallback-value');
+        });
+        it('should correctly resolve the `var()` reference for complex inheritance case', async () => {
+            await testCssValueEquals('--non-inherited', 'inherited and overloaded');
+        });
+        it('resolves vars with css keywords', async () => {
+            const node = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+            node.id = 1;
+            const parent = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+            parent.id = 2;
+            node.parentNode = parent;
+            const matchedStyles = await getMatchedStyles({
+                matchedPayload: [ruleMatch('div', [{ name: '--color', value: 'inherit' }])],
+                inheritedPayload: [{ matchedCSSRules: [ruleMatch('div', [{ name: '--color', value: 'inherited-color' }])] }],
+                node
+            });
+            assert.strictEqual(matchedStyles.computeCSSVariable(matchedStyles.nodeStyles()[0], '--color')?.value, 'inherited-color');
+        });
+        it('correcty handles cycles', async () => {
+            async function compute(name, styleRules, inheritedRules) {
+                const ruleToRuleMatch = (rule, index) => ruleMatch(`.${index}`, rule.split(';')
+                    .filter(decl => decl.trim())
+                    .map(decl => decl.split(':'))
+                    .map(decl => ({ name: decl[0].trim(), value: decl.slice(1).join(':').trim() })));
+                const matchedPayload = styleRules.map(ruleToRuleMatch);
+                const inheritedPayload = inheritedRules.map(ruleTexts => ({ matchedCSSRules: ruleTexts.map((rule, i) => ruleToRuleMatch(rule, i + styleRules.length)) }));
+                const matchedStyles = await getMatchedStyles({ matchedPayload, inheritedPayload });
+                return matchedStyles.computeCSSVariable(matchedStyles.nodeStyles()[0], name)?.value ?? null;
+            }
+            const simpleCycle = `
+        --a: var(--b);
+        --b: var(--a);
+        `;
+            assert.isNull(await compute('--a', [simpleCycle], []));
+            assert.isNull(await compute('--b', [simpleCycle], []));
+            const cycleOnUnusedFallback = `
+        --a: 2;
+        --b: var(--a, var(--c));
+        --c: var(--b);
+        `;
+            assert.strictEqual(await compute('--a', [cycleOnUnusedFallback], []), '2');
+            assert.strictEqual(await compute('--b', [cycleOnUnusedFallback], []), '2');
+            assert.strictEqual(await compute('--c', [cycleOnUnusedFallback], []), '2');
+            const simpleCycleWithFallbacks = `
+        --a: var(--b, 1);
+        --b: var(--a, 2);
+        `;
+            assert.isNull(await compute('--a', [simpleCycleWithFallbacks], []));
+            assert.isNull(await compute('--b', [simpleCycleWithFallbacks], []));
+            const longerCycle = `
+        --a: var(--b);
+        --b: var(--c);
+        --c: var(--a);
+        `;
+            assert.isNull(await compute('--a', [longerCycle], []));
+            assert.isNull(await compute('--b', [longerCycle], []));
+            assert.isNull(await compute('--c', [longerCycle], []));
+            const longerCycleWithFallbacks = `
+        --a: var(--b, 2);
+        --b: var(--c, 3);
+        --c: var(--a, 4);
+        `;
+            assert.isNull(await compute('--a', [longerCycleWithFallbacks], []));
+            assert.isNull(await compute('--b', [longerCycleWithFallbacks], []));
+            assert.isNull(await compute('--c', [longerCycleWithFallbacks], []));
+            const pointingIntoCycle = `
+        ${longerCycle}
+        --d: var(--a);
+        --e: var(--b);
+        `;
+            assert.isNull(await compute('--a', [pointingIntoCycle], []));
+            assert.isNull(await compute('--b', [pointingIntoCycle], []));
+            assert.isNull(await compute('--c', [pointingIntoCycle], []));
+            assert.isNull(await compute('--d', [pointingIntoCycle], []));
+            assert.isNull(await compute('--e', [pointingIntoCycle], []));
+            const pointingIntoCycleWithFallback = `
+        ${longerCycle}
+        --d: var(--a, 4);
+        --e: var(--b, 5);
+        `;
+            assert.isNull(await compute('--a', [pointingIntoCycleWithFallback], []));
+            assert.isNull(await compute('--b', [pointingIntoCycleWithFallback], []));
+            assert.isNull(await compute('--c', [pointingIntoCycleWithFallback], []));
+            assert.strictEqual(await compute('--d', [pointingIntoCycleWithFallback], []), '4');
+            assert.strictEqual(await compute('--e', [pointingIntoCycleWithFallback], []), '5');
+            const multipleEdges = `
+        --a: var(--b);
+        --b: var(--c) var(--d);
+        --c: var(--a) var(--b);
+        --d: var(--c);
+        `;
+            assert.isNull(await compute('--a', [multipleEdges], []));
+            assert.isNull(await compute('--b', [multipleEdges], []));
+            assert.isNull(await compute('--c', [multipleEdges], []));
+            assert.isNull(await compute('--d', [multipleEdges], []));
+            const pointingIntoMultipleEdgeCycle = `
+        ${multipleEdges}
+        --e: var(--c) var(--d);
+        `;
+            assert.isNull(await compute('--a', [pointingIntoMultipleEdgeCycle], []));
+            assert.isNull(await compute('--b', [pointingIntoMultipleEdgeCycle], []));
+            assert.isNull(await compute('--c', [pointingIntoMultipleEdgeCycle], []));
+            assert.isNull(await compute('--d', [pointingIntoMultipleEdgeCycle], []));
+            assert.isNull(await compute('--e', [pointingIntoMultipleEdgeCycle], []));
+            const pointingIntoMultipleEdgeCycleWithFallback = `
+        ${multipleEdges}
+        --e: var(--c, 4) var(--d, 5);
+        `;
+            assert.isNull(await compute('--a', [pointingIntoMultipleEdgeCycleWithFallback], []));
+            assert.isNull(await compute('--b', [pointingIntoMultipleEdgeCycleWithFallback], []));
+            assert.isNull(await compute('--c', [pointingIntoMultipleEdgeCycleWithFallback], []));
+            assert.isNull(await compute('--d', [pointingIntoMultipleEdgeCycleWithFallback], []));
+            assert.strictEqual(await compute('--e', [pointingIntoMultipleEdgeCycleWithFallback], []), '4 5');
+            const multipleCyclesWithFallback = `
+        ${longerCycle}
+        --d: var(--e);
+        --e: var(--f);
+        --f: var(--d);
+        --g: var(--a, var(--d, 5));
+        `;
+            assert.isNull(await compute('--a', [multipleCyclesWithFallback], []));
+            assert.isNull(await compute('--b', [multipleCyclesWithFallback], []));
+            assert.isNull(await compute('--c', [multipleCyclesWithFallback], []));
+            assert.isNull(await compute('--d', [multipleCyclesWithFallback], []));
+            assert.isNull(await compute('--e', [multipleCyclesWithFallback], []));
+            assert.isNull(await compute('--f', [multipleCyclesWithFallback], []));
+            assert.strictEqual(await compute('--g', [multipleCyclesWithFallback], []), '5');
+            const notACycle = `
+        --a: var(--b, 1);
+        `;
+            const inherited = `
+        --a: var(--b);
+        --b: var(--a);
+        `;
+            assert.strictEqual(await compute('--a', [notACycle], [[inherited]]), '1');
+            assert.isNull(await compute('--b', [notACycle], [[inherited]]));
+        });
+    });
+    it('does not hide inherited rules that also apply directly to the node if it contains custom properties', async () => {
+        const parentNode = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+        parentNode.id = 0;
+        const node = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+        node.parentNode = parentNode;
+        node.id = 1;
+        const startColumn = 0, endColumn = 1;
+        const matchedPayload = [
+            ruleMatch('body', [{ name: '--var', value: 'blue' }], { range: { startLine: 0, startColumn, endLine: 0, endColumn } }),
+            ruleMatch('*', [{ name: 'color', value: 'var(--var)' }], { range: { startLine: 1, startColumn, endLine: 1, endColumn } }),
+            ruleMatch('*', [{ name: '--var', value: 'red' }], { range: { startLine: 2, startColumn, endLine: 2, endColumn } }),
+        ];
+        const inheritedPayload = [{ matchedCSSRules: matchedPayload.slice(1) }];
+        const matchedStyles = await getMatchedStyles({
+            node,
+            matchedPayload,
+            inheritedPayload,
+        });
+        assert.deepEqual(matchedStyles.nodeStyles().map(style => style.allProperties().map(prop => prop.propertyText)), [
+            ['--var: red;'],
+            ['color: var(--var);'],
+            ['--var: blue;'],
+            ['--var: red;'],
+        ]);
+    });
+    describe('resolveGlobalKeyword', () => {
+        const inheritedPayload = [{
+                matchedCSSRules: [ruleMatch('.parent', [
+                        { name: 'color', value: 'color-inherited' },
+                        { name: 'border', value: 'border-inherited' },
+                        { name: '--inherited-is-inherited', value: 'inherited-is-inherited' },
+                        { name: '--non-inherited-is-inherited', value: 'non-inherited-is-inherited' },
+                        { name: '--unregistered-is-inherited', value: 'unregistered-is-inherited' },
+                    ])],
+            }];
+        const cssPropertyRegistrations = [
+            {
+                propertyName: '--inherited-is-inherited',
+                syntax: '"<color>"',
+                initialValue: { text: 'inherited-is-inherited-initial' },
+                inherits: true,
+            },
+            {
+                propertyName: '--inherited-is-not-inherited',
+                syntax: '"<color>"',
+                initialValue: { text: 'inherited-is-not-inherited-initial' },
+                inherits: true,
+            },
+            {
+                propertyName: '--non-inherited-is-inherited',
+                syntax: '"<color>"',
+                initialValue: { text: 'non-inherited-is-inherited-initial' },
+                inherits: false,
+            },
+            {
+                propertyName: '--non-inherited-is-not-inherited',
+                syntax: '"<color>"',
+                initialValue: { text: 'non-inherited-is-not-inherited-initial' },
+                inherits: false,
+            },
+        ];
+        function checkResolution(matchedStyles, properties) {
+            const ownProperties = new Map(matchedStyles.nodeStyles()
+                .find(style => style.type === SDK.CSSStyleDeclaration.Type.Regular)
+                ?.allProperties()
+                .map(property => [property.name, property]));
+            for (const { name: propertyName, expectedValue } of properties) {
+                const property = ownProperties.get(propertyName);
+                assert.isOk(property);
+                let resolvedValue = new SDK.CSSMatchedStyles.CSSValueSource(property);
+                while (resolvedValue?.value && SDK.CSSMetadata.CSSMetadata.isCSSWideKeyword(resolvedValue?.value)) {
+                    const { declaration, value } = resolvedValue;
+                    if (!(declaration instanceof SDK.CSSProperty.CSSProperty)) {
+                        break;
+                    }
+                    resolvedValue = matchedStyles.resolveGlobalKeyword(declaration, value);
+                }
+                assert.strictEqual(resolvedValue?.value, expectedValue, propertyName);
+            }
+        }
+        let node;
+        beforeEach(() => {
+            node = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+            node.id = 1;
+            node.nodeType.returns(Node.ELEMENT_NODE);
+            const parent = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+            parent.id = 2;
+            parent.nodeType.returns(Node.ELEMENT_NODE);
+            node.parentNode = parent;
+        });
+        it('correctly resolves the keyword `unset`', async () => {
+            const properties = [
+                // Value is undefined
+                { name: 'background-color', value: 'unset', expectedValue: undefined },
+                // Property inherits, Value is inherited
+                { name: 'color', value: 'unset', expectedValue: 'color-inherited' },
+                // Property inherits, Value is not inherited
+                { name: 'font-size', value: 'unset', expectedValue: undefined },
+                // Value is not inherited
+                { name: 'border', value: 'unset', expectedValue: undefined },
+                // Value is not inherited
+                { name: 'margin', value: 'unset', expectedValue: undefined },
+                // Property inherits, Value is inherited
+                { name: '--inherited-is-inherited', value: 'unset', expectedValue: 'inherited-is-inherited' },
+                // Property inherits, Value is not inherited, so fall back to initial
+                { name: '--inherited-is-not-inherited', value: 'unset', expectedValue: 'inherited-is-not-inherited-initial' },
+                // Value is not inherited, so fall back to initial
+                { name: '--non-inherited-is-inherited', value: 'unset', expectedValue: 'non-inherited-is-inherited-initial' },
+                // Value is not inherited, so fall back to initial
+                {
+                    name: '--non-inherited-is-not-inherited',
+                    value: 'unset',
+                    expectedValue: 'non-inherited-is-not-inherited-initial',
+                },
+                // Value is inherited
+                { name: '--unregistered-is-inherited', value: 'unset', expectedValue: 'unregistered-is-inherited' },
+                // Value is undefined
+                { name: '--unregistered-is-not-inherited', value: 'unset', expectedValue: undefined },
+            ];
+            const matchedStyles = await getMatchedStyles({ matchedPayload: [ruleMatch('div', properties)], inheritedPayload, cssPropertyRegistrations, node });
+            checkResolution(matchedStyles, properties);
+        });
+        it('correctly resolves the keyword `inherits`', async () => {
+            const properties = [
+                // Value is undefined
+                { name: 'background-color', value: 'inherit', expectedValue: undefined },
+                // Property inherits, Value is inherited
+                { name: 'color', value: 'inherit', expectedValue: 'color-inherited' },
+                // Property inherits, Value is not inherited
+                { name: 'font-size', value: 'inherit', expectedValue: undefined },
+                // Property doesn't inherit, but Value is inherited
+                { name: 'border', value: 'inherit', expectedValue: 'border-inherited' },
+                // Value is not inherited
+                { name: 'margin', value: 'inherit', expectedValue: undefined },
+                // Property inherits, Value is inherited
+                { name: '--inherited-is-inherited', value: 'inherit', expectedValue: 'inherited-is-inherited' },
+                // Property inherits, Value is not inherited, so fall back to initial
+                { name: '--inherited-is-not-inherited', value: 'inherit', expectedValue: 'inherited-is-not-inherited-initial' },
+                // Property doesn't inherit, but Value is inherited
+                { name: '--non-inherited-is-inherited', value: 'inherit', expectedValue: 'non-inherited-is-inherited' },
+                // Value is not inherited, so fall back to initial
+                {
+                    name: '--non-inherited-is-not-inherited',
+                    value: 'inherit',
+                    expectedValue: 'non-inherited-is-not-inherited-initial',
+                },
+                // Value is inherited
+                { name: '--unregistered-is-inherited', value: 'inherit', expectedValue: 'unregistered-is-inherited' },
+                // Value is undefined
+                { name: '--unregistered-is-not-inherited', value: 'inherit', expectedValue: undefined },
+            ];
+            const matchedStyles = await getMatchedStyles({ matchedPayload: [ruleMatch('div', properties)], inheritedPayload, cssPropertyRegistrations, node });
+            checkResolution(matchedStyles, properties);
+        });
+        it('correctly resolves the keyword `initial`', async () => {
+            const properties = [
+                // Value is undefined
+                { name: 'background-color', value: 'initial', expectedValue: undefined },
+                // Property inherits, Value is inherited
+                { name: 'color', value: 'initial', expectedValue: undefined },
+                // Property inherits, Value is not inherited
+                { name: 'font-size', value: 'initial', expectedValue: undefined },
+                // Property doesn't inherit
+                { name: 'border', value: 'initial', expectedValue: undefined },
+                // Value is not inherited
+                { name: 'margin', value: 'initial', expectedValue: undefined },
+                // Property inherits, Value is inherited
+                { name: '--inherited-is-inherited', value: 'initial', expectedValue: 'inherited-is-inherited-initial' },
+                // Property inherits, Value is not inherited
+                { name: '--inherited-is-not-inherited', value: 'initial', expectedValue: 'inherited-is-not-inherited-initial' },
+                // Value is not inherited
+                { name: '--non-inherited-is-inherited', value: 'initial', expectedValue: 'non-inherited-is-inherited-initial' },
+                // Value is not inherited
+                {
+                    name: '--non-inherited-is-not-inherited',
+                    value: 'initial',
+                    expectedValue: 'non-inherited-is-not-inherited-initial',
+                },
+                // Value is inherited
+                { name: '--unregistered-is-inherited', value: 'initial', expectedValue: undefined },
+                // Value is undefined
+                { name: '--unregistered-is-not-inherited', value: 'initial', expectedValue: undefined },
+            ];
+            const matchedStyles = await getMatchedStyles({ matchedPayload: [ruleMatch('div', properties)], inheritedPayload, cssPropertyRegistrations, node });
+            checkResolution(matchedStyles, properties);
+        });
+        it('correctly resolves the keyword `revert`', async () => {
+            const properties = [
+                // authored -> user
+                { name: 'font-variant', value: 'revert', expectedValue: 'user-font-variant' },
+                // authored -> user -> ua
+                { name: 'font-size', value: 'revert', expectedValue: 'ua-font-size' },
+                // authored -> ua
+                { name: 'font-weight', value: 'revert', expectedValue: 'ua-font-weight' },
+                // authored -> user -> ua -> void
+                { name: 'font-family', value: 'revert', expectedValue: undefined },
+                // authored -> inherited
+                { name: 'color', value: 'revert', expectedValue: 'color-inherited' },
+                { name: '--inherited-is-inherited', value: 'revert', expectedValue: 'inherited-is-inherited' },
+                // authored -> initial
+                { name: '--inherited-is-not-inherited', value: 'revert', expectedValue: 'inherited-is-not-inherited-initial' },
+                { name: '--non-inherited-is-inherited', value: 'revert', expectedValue: 'non-inherited-is-inherited-initial' },
+                {
+                    name: '--non-inherited-is-not-inherited',
+                    value: 'revert',
+                    expectedValue: 'non-inherited-is-not-inherited-initial',
+                },
+            ];
+            const userRule = ruleMatch('div', [
+                { name: 'font-variant', value: 'user-font-variant' },
+                { name: 'font-size', value: 'revert' },
+                { name: 'font-family', value: 'revert' },
+            ]);
+            userRule.rule.origin = "injected" /* Protocol.CSS.StyleSheetOrigin.Injected */;
+            const uaRule = ruleMatch('div', [
+                { name: 'font-variant', value: 'ua-font-variant' },
+                { name: 'font-size', value: 'ua-font-size' },
+                { name: 'font-weight', value: 'ua-font-weight' },
+                { name: 'font-family', value: 'revert' },
+            ]);
+            uaRule.rule.origin = "user-agent" /* Protocol.CSS.StyleSheetOrigin.UserAgent */;
+            const matchedStyles = await getMatchedStyles({
+                matchedPayload: [uaRule, userRule, ruleMatch('div', properties)],
+                inheritedPayload,
+                cssPropertyRegistrations,
+                node
+            });
+            checkResolution(matchedStyles, properties);
+        });
+        it('correctly resolves the keyword `revert-layer`', async () => {
+            const inlinePayload = ruleMatch('', [{ name: '--element-attached', value: 'revert-layer' }]).rule.style;
+            const properties = [
+                { name: '--element-attached', value: 'author-origin', expectedValue: 'author-origin' },
+                { name: 'font-family', value: 'revert-layer', expectedValue: 'next-layer' },
+                { name: 'font-weight', value: 'revert-layer', expectedValue: 'one-more-layer' },
+                // Value is undefined
+                { name: 'background-color', value: 'revert-layer', expectedValue: undefined },
+                // Property inherits, Value is inherited
+                { name: 'color', value: 'revert-layer', expectedValue: 'color-inherited' },
+                // Property inherits, Value is not inherited
+                { name: 'font-size', value: 'revert-layer', expectedValue: undefined },
+                // Property doesn't inherit
+                { name: 'border', value: 'revert-layer', expectedValue: undefined },
+                // Value is not inherited
+                { name: 'margin', value: 'revert-layer', expectedValue: undefined },
+                // Property inherits, Value is inherited
+                { name: '--inherited-is-inherited', value: 'revert-layer', expectedValue: 'inherited-is-inherited' },
+                // Property inherits, Value is not inherited
+                {
+                    name: '--inherited-is-not-inherited',
+                    value: 'revert-layer',
+                    expectedValue: 'inherited-is-not-inherited-initial',
+                },
+                // Value is not inherited
+                {
+                    name: '--non-inherited-is-inherited',
+                    value: 'revert-layer',
+                    expectedValue: 'non-inherited-is-inherited-initial',
+                },
+                // Value is not inherited
+                {
+                    name: '--non-inherited-is-not-inherited',
+                    value: 'revert-layer',
+                    expectedValue: 'non-inherited-is-not-inherited-initial',
+                },
+                // Value is inherited
+                { name: '--unregistered-is-inherited', value: 'revert-layer', expectedValue: 'unregistered-is-inherited' },
+                // Value is undefined
+                { name: '--unregistered-is-not-inherited', value: 'revert-layer', expectedValue: undefined },
+            ];
+            const mainRule = ruleMatch('div', properties);
+            mainRule.rule.layers = [{ text: 'layer1' }];
+            const sameLayer = ruleMatch('div', [{ name: 'font-family', value: 'same-layer' }]);
+            sameLayer.rule.layers = mainRule.rule.layers;
+            const nextLayer = ruleMatch('div', [{ name: 'font-family', value: 'next-layer' }]);
+            nextLayer.rule.layers = [{ text: 'layer2' }];
+            const oneMoreLayer = ruleMatch('div', [{ name: 'font-weight', value: 'one-more-layer' }]);
+            oneMoreLayer.rule.layers = [{ text: 'outer' }, { text: 'layer3' }];
+            const uaRule = ruleMatch('div', [{ name: 'font-variant', value: 'ua-font-variant' }]);
+            uaRule.rule.origin = "user-agent" /* Protocol.CSS.StyleSheetOrigin.UserAgent */;
+            const matchedStyles = await getMatchedStyles({
+                inlinePayload,
+                matchedPayload: [uaRule, oneMoreLayer, nextLayer, sameLayer, mainRule],
+                inheritedPayload,
+                cssPropertyRegistrations,
+                node,
+            });
+            checkResolution(matchedStyles, properties);
+            // Check for inline style
+            const inlineProperty = matchedStyles.nodeStyles()
+                .find(style => style.type === SDK.CSSStyleDeclaration.Type.Inline)
+                ?.allProperties()
+                ?.find(property => property.name === '--element-attached');
+            assert.isOk(inlineProperty);
+            const resolved = matchedStyles.resolveGlobalKeyword(inlineProperty, "revert-layer" /* SDK.CSSMetadata.CSSWideKeyword.REVERT_LAYER */);
+            assert.strictEqual(resolved?.value, 'author-origin');
+        });
+    });
+    it('can correctly resolve properties by name', async () => {
+        const node = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+        node.id = 1;
+        node.nodeType.returns(Node.ELEMENT_NODE);
+        const parent = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+        parent.id = 2;
+        parent.nodeType.returns(Node.ELEMENT_NODE);
+        node.parentNode = parent;
+        const matchedPayload = [
+            // Property is found in the same rule
+            ruleMatch('div', { '--a': 'A', '--b': 'B' }),
+            // ... in a sibling rule
+            ruleMatch('div', { '--c': 'C', '--d': 'D' }),
+        ];
+        const inheritedPayload = [{
+                matchedCSSRules: [
+                    // ... in an inherited rule
+                    ruleMatch('div', { '--e': 'E' }),
+                    ruleMatch('div', { '--f': 'F' }),
+                    ruleMatch('div', { 'background-color': 'x' }),
+                    ruleMatch('div', { color: 'y' }),
+                ]
+            }];
+        const matchedStyles = await getMatchedStyles({ node, matchedPayload, inheritedPayload });
+        const styles = matchedStyles.nodeStyles();
+        assert.lengthOf(styles, 5);
+        assert.isNull(matchedStyles.resolveProperty('--z', styles[0]));
+        assert.strictEqual(matchedStyles.resolveProperty('--a', styles[0])?.value, 'A');
+        assert.strictEqual(matchedStyles.resolveProperty('--b', styles[0])?.value, 'B');
+        assert.strictEqual(matchedStyles.resolveProperty('--a', styles[1])?.value, 'A');
+        assert.strictEqual(matchedStyles.resolveProperty('--b', styles[1])?.value, 'B');
+        assert.strictEqual(matchedStyles.resolveProperty('--e', styles[0])?.value, 'E');
+        assert.strictEqual(matchedStyles.resolveProperty('--f', styles[0])?.value, 'F');
+        assert.strictEqual(matchedStyles.resolveProperty('--e', styles[1])?.value, 'E');
+        assert.strictEqual(matchedStyles.resolveProperty('--f', styles[1])?.value, 'F');
+        assert.strictEqual(matchedStyles.resolveProperty('color', styles[0])?.value, 'y');
+        assert.isNull(matchedStyles.resolveProperty('background-color', styles[0]));
+    });
+    it('reads attributes from the parent node of a pseudo-element', async () => {
+        const node = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+        node.id = 1;
+        node.nodeType.returns(Node.ELEMENT_NODE);
+        node.getAttribute.callsFake((name) => `parent-${name}`);
+        const pseudoElement = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+        pseudoElement.id = 2;
+        pseudoElement.nodeType.returns(Node.ELEMENT_NODE);
+        pseudoElement.parentNode = node;
+        pseudoElement.pseudoType.returns('before');
+        const matchedStyles = await getMatchedStyles({
+            matchedPayload: [ruleMatch('div::before', { content: 'attr(data-content)' })],
+            node: pseudoElement,
+        });
+        const property = matchedStyles.rawAttributeValueFromStyle(matchedStyles.nodeStyles()[0], 'data-content');
+        assert.strictEqual(property, 'parent-data-content');
+    });
+    it('evaluates variables with attr() calls in the same way as blink', async () => {
+        const attributes = [
+            { name: 'data-test-nonexistent', value: 'attr(data-nonexistent)' },
+            { name: 'data-test-nonexistent-raw-string', value: 'attr(data-nonexistent raw-string)' },
+            { name: 'data-test-empty', value: '' },
+            { name: 'data-test-self-loop', value: 'attr(data-test-self-loop)' },
+            { name: 'data-test-loop-1', value: 'attr(data-test-loop-2 type(<length>), 1px)' },
+            { name: 'data-test-loop-2', value: 'var(--test-loop-1, 2px)' },
+            { name: 'data-test-loop-indirect-2', value: 'attr(data-test-loop-1 type(<length>), 6px)' },
+            { name: 'data-test-number', value: '70' },
+            { name: 'data-test-length', value: 'attr(data-test-number in)' },
+            { name: 'data-test-bad-unit', value: 'attr(data-test-number parsecs, 2px)' },
+            { name: 'data-test-bad-type', value: 'attr(data-test-number type(<nomber>), 2)' },
+            { name: 'data-cant-parse', value: 'attr(' },
+        ];
+        const variables = [
+            { name: '--test-missing', value: 'attr(data-nonexistent)' },
+            { name: '--test-missing-fallback', value: 'attr(data-nonexistent, 2px)' },
+            { name: '--test-missing-var-indirect', value: 'var(--test-missing, 2px)' },
+            { name: '--test-missing-attr-indirect-raw', value: 'attr(data-test-nonexistent, 2px)' },
+            { name: '--test-missing-attr-indirect', value: 'attr(data-test-nonexistent type(*), 2px)' },
+            { name: '--test-missing-raw-string', value: 'attr(data-nonexistent raw-string)' },
+            { name: '--test-missing-raw-string-fallback', value: 'attr(data-nonexistent raw-string, 2px)' },
+            { name: '--test-missing-raw-string-var-indirect', value: 'var(--test-missing-raw-string, 2px)' },
+            { name: '--test-missing-raw-string-attr-indirect', value: 'attr(data-test-nonexistent-raw-string, 2px)' },
+            { name: '--test-empty-any', value: 'attr(data-test-empty type(*))' },
+            { name: '--test-empty-number', value: 'attr(data-test-empty type(<number>))' },
+            { name: '--test-empty-any-fallback', value: 'attr(data-test-empty type(*), 2px)' },
+            { name: '--test-empty-number-fallback', value: 'attr(data-test-empty type(<number>), 2px)' },
+            { name: '--test-self-loop', value: 'attr(data-test-self-loop type(*))' },
+            { name: '--test-self-loop-raw', value: 'attr(data-test-self-loop)' },
+            { name: '--test-self-loop-fallback', value: 'attr(data-test-self-loop type(*), 2px)' },
+            { name: '--test-self-loop-fallback-2', value: 'var(--test-self-loop-fallback, 4px)' },
+            { name: '--test-self-loop-fallback-self', value: 'attr(data-test-self-loop type(*), attr(data-test-self-loop))' },
+            { name: '--test-loop-1', value: 'var(--test-loop-2, 3px)' },
+            { name: '--test-loop-2', value: 'attr(data-test-loop-1 type(<length>), 4px)' },
+            { name: '--test-loop-indirect-1', value: 'attr(data-test-loop-1 type(<length>), 5px)' },
+            { name: '--test-loop-indirect-2', value: 'attr(data-test-loop-indirect-2 type(<length>), 7px)' },
+            { name: '--test-number', value: 'attr(data-test-number type(<number>))' },
+            { name: '--test-number-to-length', value: 'attr(data-test-number in)' },
+            {
+                name: '--test-number-as-length',
+                value: 'attr(data-test-number type(<length>), var(--test-self-loop-fallback-2))'
+            },
+            { name: '--test-length', value: 'attr(data-test-length type(<length>))' },
+            { name: '--test-bad-unit-indirect', value: 'attr(data-test-bad-unit type(*), 4px)' },
+            { name: '--test-bad-type-indirect', value: 'attr(data-test-bad-type type(*), 4)' },
+            { name: '--test-cant-parse', value: 'attr(data-cant-parse type(*), red)' },
+        ];
+        // Create an element
+        const element = document.createElement('div');
+        for (const { name, value } of attributes) {
+            element.setAttribute(name, value);
+        }
+        for (const { name, value } of variables) {
+            element.style.setProperty(name, value);
+        }
+        renderElementIntoDOM(element);
+        const computedProperties = element.computedStyleMap();
+        const node = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+        node.id = 1;
+        node.nodeType.returns(Node.ELEMENT_NODE);
+        // Create a sinon stub to return the requested attribute
+        node.getAttribute.callsFake((name) => attributes.find(attr => attr.name === name)?.value);
+        const matchedStyles = await getMatchedStyles({
+            matchedPayload: [ruleMatch('div', variables)],
+            node,
+        });
+        for (const { name } of variables) {
+            const frontendComputedValue = matchedStyles.computeCSSVariable(matchedStyles.nodeStyles()[0], name)?.value ?? null;
+            const backendComputedValue = computedProperties.get(name) ?? null;
+            if (backendComputedValue === null) {
+                assert.isNull(frontendComputedValue, `evaluating variable ${name}`);
+            }
+            else {
+                assert.strictEqual(frontendComputedValue, backendComputedValue.toString(), `evaluating variable ${name}`);
+            }
+        }
+    });
+});
+describeWithMockConnection('NodeCascade', () => {
+    it('correctly marks custom properties as Overloaded if they are registered as inherits: false', async () => {
+        setMockConnectionResponseHandler('CSS.getEnvironmentVariables', () => ({}));
+        const target = createTarget();
+        const cssModel = new SDK.CSSModel.CSSModel(target);
+        const parentNode = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+        parentNode.id = 0;
+        const node = sinon.createStubInstance(SDK.DOMModel.DOMNode);
+        node.parentNode = parentNode;
+        node.id = 1;
+        const inheritablePropertyPayload = { name: '--inheritable', value: 'green' };
+        const nonInheritablePropertyPayload = { name: '--non-inheritable', value: 'green' };
+        const matchedCSSRules = [{
+                matchingSelectors: [0],
+                rule: {
+                    selectorList: { selectors: [{ text: 'div' }], text: 'div' },
+                    origin: "regular" /* Protocol.CSS.StyleSheetOrigin.Regular */,
+                    style: {
+                        cssProperties: [inheritablePropertyPayload, nonInheritablePropertyPayload],
+                        shorthandEntries: [],
+                    },
+                },
+            }];
+        const cssPropertyRegistrations = [
+            {
+                propertyName: inheritablePropertyPayload.name,
+                initialValue: { text: 'blue' },
+                inherits: true,
+                syntax: '<color>',
+            },
+            {
+                propertyName: nonInheritablePropertyPayload.name,
+                initialValue: { text: 'red' },
+                inherits: false,
+                syntax: '<color>',
+            },
+        ];
+        const matchedStyles = await getMatchedStyles({
+            cssModel,
+            node,
+            matchedPayload: [
+                ruleMatch('div', []),
+            ],
+            inheritedPayload: [{ matchedCSSRules }],
+            cssPropertyRegistrations,
+        });
+        const style = matchedStyles.nodeStyles()[1];
+        const [inheritableProperty, nonInheritableProperty] = style.allProperties();
+        assert.strictEqual(matchedStyles.propertyState(nonInheritableProperty), "Overloaded" /* SDK.CSSMatchedStyles.PropertyState.OVERLOADED */);
+        assert.strictEqual(matchedStyles.propertyState(inheritableProperty), "Active" /* SDK.CSSMatchedStyles.PropertyState.ACTIVE */);
+    });
+    it('correctly computes active properties for nested at-rules', async () => {
+        const outerRule = ruleMatch('a', [{ name: 'color', value: 'var(--inner)' }]);
+        const nestedRule = ruleMatch('&', [{ name: '--inner', value: 'red' }]);
+        nestedRule.rule.nestingSelectors = ['a'];
+        nestedRule.rule.selectorList = { selectors: [], text: '&' };
+        nestedRule.rule.supports = [{
+                text: '(--var:s)',
+                active: true,
+                styleSheetId: nestedRule.rule.styleSheetId,
+            }];
+        const matchedStyles = await getMatchedStyles({
+            matchedPayload: [outerRule, nestedRule],
+        });
+        assert.deepEqual(matchedStyles.availableCSSVariables(matchedStyles.nodeStyles()[0]), ['--inner']);
+    });
+});
+//# sourceMappingURL=CSSMatchedStyles.test.js.map

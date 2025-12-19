@@ -32,9 +32,17 @@ Thumbs.db
 # mise
 .mise/
 
-# DevTools 빌드 산출물
+# DevTools 빌드 산출물 (소스 빌드 결과물은 제외, bundled는 Git에 포함)
 devtools/devtools-frontend/out/
+devtools/.cipd
+devtools/.cipd/tagcache.db
+devtools/.gclient_entries
+devtools/.gclient_previous_sync_commits
+devtools/.gcs_entries
+
 packages/inspector/dist/
+# bundled는 Git에 포함되므로 제외하지 않음 / bundled is included in Git, so don't ignore it
+# devtools/bundled/
 
 # Documentation build output
 node_modules

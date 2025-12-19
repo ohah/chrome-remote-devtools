@@ -1,0 +1,141 @@
+// Copyright 2024 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import * as Trace from '../../../models/trace/trace.js';
+import { getCleanTextContentFromElements, renderElementIntoDOM } from '../../../testing/DOMHelpers.js';
+import { describeWithEnvironment } from '../../../testing/EnvironmentHelpers.js';
+import { getInsightSetOrError } from '../../../testing/InsightHelpers.js';
+import { TraceLoader } from '../../../testing/TraceLoader.js';
+import * as Components from './components.js';
+function getInsightComponents(insightSetComponent) {
+    assert.isOk(insightSetComponent.element.shadowRoot);
+    return [
+        ...insightSetComponent.element.shadowRoot.querySelectorAll('.insight-component-widget')
+    ].map(widgetElement => {
+        const widget = widgetElement.getWidget();
+        assert.isOk(widget);
+        return widget;
+    });
+}
+function getInsightComponentsTitles(insightSetComponent) {
+    return getInsightComponents(insightSetComponent)
+        .flatMap(widget => getCleanTextContentFromElements(widget.element.shadowRoot, '.insight-title'))
+        .filter(Boolean);
+}
+function getPassedInsights(insightSetComponent) {
+    assert.isOk(insightSetComponent.element.shadowRoot);
+    const passedInsightsSection = insightSetComponent.element.shadowRoot.querySelector('.passed-insights-section');
+    assert.isOk(passedInsightsSection);
+    passedInsightsSection.open = true;
+    return getInsightComponents(insightSetComponent)
+        .filter(widget => widget.element.closest('.passed-insights-section'))
+        .flatMap(widget => getCleanTextContentFromElements(widget.element.shadowRoot, '.insight-title'));
+}
+describeWithEnvironment('SidebarSingleInsightSet', () => {
+    it('renders a list of insights', async function () {
+        const parsedTrace = await TraceLoader.traceEngine(this, 'web-dev-with-commit.json.gz');
+        assert.isOk(parsedTrace.insights);
+        // only one navigation in this trace.
+        assert.strictEqual(parsedTrace.insights.size, 1);
+        const insightSet = getInsightSetOrError(parsedTrace.insights, '8463DF94CD61B265B664E7F768183DE3');
+        const component = new Components.SidebarSingleInsightSet.SidebarSingleInsightSet();
+        renderElementIntoDOM(component);
+        component.data = {
+            insightSetKey: insightSet.id,
+            activeCategory: Trace.Insights.Types.InsightCategory.ALL,
+            activeInsight: null,
+            parsedTrace,
+        };
+        await component.updateComplete;
+        const userVisibleTitles = getInsightComponentsTitles(component);
+        assert.deepEqual(userVisibleTitles, [
+            'LCP breakdown',
+            'LCP request discovery',
+            'Render blocking requests',
+            'Document request latency',
+            '3rd parties',
+        ]);
+        const passedInsightTitles = getPassedInsights(component);
+        assert.deepEqual(passedInsightTitles, [
+            'INP breakdown',
+            'Layout shift culprits',
+            'Network dependency tree',
+            'Improve image delivery',
+            'Font display',
+            'Optimize viewport for mobile',
+            'Optimize DOM size',
+            'Duplicated JavaScript',
+            'CSS Selector costs',
+            'Forced reflow',
+            'Use efficient cache lifetimes',
+            'Modern HTTP',
+            'Legacy JavaScript',
+        ]);
+    });
+    it('does not render experimental insights by default', async function () {
+        const parsedTrace = await TraceLoader.traceEngine(this, 'font-display.json.gz');
+        assert.isOk(parsedTrace.insights);
+        const component = new Components.SidebarSingleInsightSet.SidebarSingleInsightSet();
+        renderElementIntoDOM(component);
+        const firstNavigation = parsedTrace.data.Meta.mainFrameNavigations.at(0);
+        const insightSet = getInsightSetOrError(parsedTrace.insights, firstNavigation);
+        component.data = {
+            insightSetKey: insightSet.id,
+            activeCategory: Trace.Insights.Types.InsightCategory.ALL,
+            activeInsight: null,
+            parsedTrace,
+        };
+        await component.updateComplete;
+        const userVisibleTitles = getInsightComponentsTitles(component);
+        assert.deepEqual(userVisibleTitles, [
+            'LCP breakdown',
+            'Layout shift culprits',
+            'Network dependency tree',
+            'Improve image delivery',
+            'Font display',
+            '3rd parties',
+            'Use efficient cache lifetimes',
+        ]);
+        const passedInsightTitles = getPassedInsights(component);
+        assert.deepEqual(passedInsightTitles, [
+            'INP breakdown',
+            'LCP request discovery',
+            'Render blocking requests',
+            'Document request latency',
+            'Optimize viewport for mobile',
+            'Optimize DOM size',
+            'Duplicated JavaScript',
+            'CSS Selector costs',
+            'Forced reflow',
+            'Modern HTTP',
+            'Legacy JavaScript',
+        ]);
+    });
+    it('will render the active insight fully', async function () {
+        const parsedTrace = await TraceLoader.traceEngine(this, 'web-dev-with-commit.json.gz');
+        assert.isOk(parsedTrace.insights);
+        // only one navigation in this trace.
+        assert.strictEqual(parsedTrace.insights.size, 1);
+        const insightSet = getInsightSetOrError(parsedTrace.insights, '8463DF94CD61B265B664E7F768183DE3');
+        const model = insightSet.model.LCPBreakdown;
+        if (!model) {
+            throw new Error('missing LCPBreakdown model');
+        }
+        const component = new Components.SidebarSingleInsightSet.SidebarSingleInsightSet();
+        renderElementIntoDOM(component);
+        component.data = {
+            insightSetKey: insightSet.id,
+            activeCategory: Trace.Insights.Types.InsightCategory.ALL,
+            activeInsight: {
+                model,
+                insightSetKey: insightSet.id,
+            },
+            parsedTrace,
+        };
+        await component.updateComplete;
+        const expandedInsight = getInsightComponents(component).find(insightComponent => insightComponent.selected);
+        assert.isOk(expandedInsight);
+        assert.strictEqual(expandedInsight.model?.title, 'LCP breakdown');
+    });
+});
+//# sourceMappingURL=SidebarSingleInsightSet.test.js.map

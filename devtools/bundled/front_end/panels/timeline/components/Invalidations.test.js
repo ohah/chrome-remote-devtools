@@ -1,0 +1,35 @@
+// Copyright 2023 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import * as Trace from '../../../models/trace/trace.js';
+import { describeWithEnvironment } from '../../../testing/EnvironmentHelpers.js';
+import { allThreadEntriesInTrace } from '../../../testing/TraceHelpers.js';
+import { TraceLoader } from '../../../testing/TraceLoader.js';
+import * as TimelineComponents from './components.js';
+describeWithEnvironment('TimelineComponents Invalidations', () => {
+    it('processes and groups invalidations correctly', async function () {
+        const parsedTrace = await TraceLoader.traceEngine(this, 'style-invalidation-change-attribute.json.gz');
+        const recalcStyleEvent = allThreadEntriesInTrace(parsedTrace).find(event => {
+            return Trace.Types.Events.isRecalcStyle(event) &&
+                event.args.beginData?.stackTrace?.[0].functionName === 'testFuncs.changeAttributeAndDisplay';
+        });
+        if (!recalcStyleEvent) {
+            throw new Error('Could not find update layout tree event');
+        }
+        const invalidations = parsedTrace.data.Invalidations.invalidationsForEvent.get(recalcStyleEvent) ?? [];
+        const { groupedByReason, backendNodeIds } = TimelineComponents.DetailsView.generateInvalidationsList(invalidations);
+        const reasons = Object.keys(groupedByReason);
+        assert.deepEqual(reasons, [
+            'PseudoClass:active',
+            'Attribute (dir)',
+            'Element has pending invalidation list',
+        ]);
+        // Map the backendNodeIds to numbers to avoid casting to Protocol.DOM.backendNodeId
+        assert.deepEqual(Array.from(backendNodeIds).map(Number), [
+            107,
+            110,
+            111,
+        ]);
+    });
+});
+//# sourceMappingURL=Invalidations.test.js.map

@@ -16,7 +16,9 @@
     "format": "oxfmt .",
     "format:check": "oxfmt . --check",
     "format:rust": "cargo fmt --all",
-    "format:rust:check": "cargo fmt --all -- --check"
+    "format:rust:check": "cargo fmt --all -- --check",
+    "build:devtools": "cd devtools/devtools-frontend && gclient sync && gn gen out/Default && autoninja -C out/Default && cd ../.. && bun run copy:devtools-bundled",
+    "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

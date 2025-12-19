@@ -1,0 +1,44 @@
+// Copyright 2020 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import { describeWithEnvironment } from '../../testing/EnvironmentHelpers.js';
+import * as LinearMemoryInspector from './linear_memory_inspector.js';
+function createArray() {
+    const array = [];
+    for (let i = 0; i < 100; ++i) {
+        array.push(i);
+    }
+    return new Uint8Array(array);
+}
+describeWithEnvironment('LinearMemoryInspectorPane', () => {
+    class Uint8Wrapper {
+        array;
+        constructor(array) {
+            this.array = array;
+        }
+        getRange(start, end) {
+            return Promise.resolve(this.array.slice(start, end));
+        }
+        length() {
+            return this.array.length;
+        }
+    }
+    it('can be created', () => {
+        const instance = LinearMemoryInspector.LinearMemoryInspectorPane.LinearMemoryInspectorPane.instance();
+        const arrayWrapper = new Uint8Wrapper(createArray());
+        const scriptId = 'script-id';
+        const title = 'Test Title';
+        instance.create(scriptId, title, arrayWrapper, 10);
+        const tabbedPane = instance.contentElement.querySelector('.tabbed-pane');
+        assert.exists(tabbedPane);
+        const inspector = tabbedPane.querySelector('devtools-linear-memory-inspector-inspector');
+        assert.notInstanceOf(inspector, HTMLSpanElement);
+    });
+    it('placeholder is as expected', () => {
+        const instance = LinearMemoryInspector.LinearMemoryInspectorPane.LinearMemoryInspectorPane.instance();
+        const placeholder = instance.createPlaceholder();
+        assert.deepEqual(placeholder.querySelector('.empty-state-header')?.textContent, 'No open inspections');
+        assert.deepEqual(placeholder.querySelector('.empty-state-description > span')?.textContent, 'On this page you can inspect binary data.');
+    });
+});
+//# sourceMappingURL=LinearMemoryInspectorPane.test.js.map

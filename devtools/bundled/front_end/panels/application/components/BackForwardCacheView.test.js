@@ -1,0 +1,238 @@
+// Copyright 2023 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import * as SDK from '../../../core/sdk/sdk.js';
+import { dispatchClickEvent, raf, renderElementIntoDOM, } from '../../../testing/DOMHelpers.js';
+import { createTarget } from '../../../testing/EnvironmentHelpers.js';
+import { describeWithMockConnection } from '../../../testing/MockConnection.js';
+import { getMainFrame, navigate, setMockResourceTree } from '../../../testing/ResourceTreeHelpers.js';
+import { createViewFunctionStub } from '../../../testing/ViewFunctionHelpers.js';
+import * as ApplicationComponents from './components.js';
+async function renderBackForwardCacheView() {
+    const component = new ApplicationComponents.BackForwardCacheView.BackForwardCacheView();
+    renderElementIntoDOM(component);
+    component.requestUpdate();
+    await component.updateComplete;
+    return component;
+}
+describeWithMockConnection('BackForwardCacheView', () => {
+    let target;
+    let resourceTreeModel;
+    beforeEach(async () => {
+        setMockResourceTree(false);
+        const tabTarget = createTarget({ type: SDK.Target.Type.TAB });
+        createTarget({ parentTarget: tabTarget, subtype: 'prerender' });
+        target = createTarget({ parentTarget: tabTarget });
+        resourceTreeModel =
+            target.model(SDK.ResourceTreeModel.ResourceTreeModel);
+    });
+    it('updates BFCacheView on main frame navigation', async () => {
+        await renderBackForwardCacheView();
+        navigate(getMainFrame(target), {}, "BackForwardCacheRestore" /* Protocol.Page.NavigationType.BackForwardCacheRestore */);
+    });
+    it('updates BFCacheView on BFCache detail update', async () => {
+        await renderBackForwardCacheView();
+        resourceTreeModel.dispatchEventToListeners(SDK.ResourceTreeModel.Events.BackForwardCacheDetailsUpdated, getMainFrame(target));
+    });
+    it('renders status if restored from BFCache', async () => {
+        resourceTreeModel.mainFrame = {
+            url: 'https://www.example.com/',
+            backForwardCacheDetails: {
+                restoredFromCache: true,
+                explanations: [],
+            },
+        };
+        const component = await renderBackForwardCacheView();
+        const renderedStatus = component.contentElement.querySelector('devtools-report-section');
+        assert.strictEqual(renderedStatus?.textContent?.trim(), 'Successfully served from back/forward cache.');
+    });
+    it('renders explanations if not restorable from BFCache', async () => {
+        resourceTreeModel.mainFrame = {
+            url: 'https://www.example.com/',
+            backForwardCacheDetails: {
+                restoredFromCache: false,
+                explanations: [
+                    {
+                        type: "SupportPending" /* Protocol.Page.BackForwardCacheNotRestoredReasonType.SupportPending */,
+                        reason: "WebLocks" /* Protocol.Page.BackForwardCacheNotRestoredReason.WebLocks */,
+                    },
+                    {
+                        type: "PageSupportNeeded" /* Protocol.Page.BackForwardCacheNotRestoredReasonType.PageSupportNeeded */,
+                        reason: "ServiceWorkerUnregistration" /* Protocol.Page.BackForwardCacheNotRestoredReason.ServiceWorkerUnregistration */,
+                    },
+                    {
+                        type: "Circumstantial" /* Protocol.Page.BackForwardCacheNotRestoredReasonType.Circumstantial */,
+                        reason: "MainResourceHasCacheControlNoStore" /* Protocol.Page.BackForwardCacheNotRestoredReason.MainResourceHasCacheControlNoStore */,
+                    },
+                ],
+            },
+        };
+        const component = await renderBackForwardCacheView();
+        const sectionHeaders = component.contentElement.querySelectorAll('devtools-report-section-header');
+        const sectionHeadersText = Array.from(sectionHeaders).map(sectionHeader => sectionHeader.textContent?.trim());
+        assert.deepEqual(sectionHeadersText, ['Actionable', 'Pending Support', 'Not Actionable']);
+        const sections = component.contentElement.querySelectorAll('devtools-report-section');
+        const sectionsText = Array.from(sections).map(section => section.textContent?.trim());
+        const expected = [
+            'Not served from back/forward cache: to trigger back/forward cache, use Chrome\'s back/forward buttons, or use the test button below to automatically navigate away and back.',
+            'Test back/forward cache',
+            'ServiceWorker was unregistered while a page was in back/forward cache.',
+            'Pages that use WebLocks are not currently eligible for back/forward cache.',
+            'Pages whose main resource has cache-control:no-store cannot enter back/forward cache.',
+            'Learn more: back/forward cache eligibility',
+        ];
+        assert.deepEqual(sectionsText, expected);
+    });
+    it('renders explanation tree', async () => {
+        resourceTreeModel.mainFrame = {
+            url: 'https://www.example.com/',
+            backForwardCacheDetails: {
+                restoredFromCache: false,
+                explanationsTree: {
+                    url: 'https://www.example.com',
+                    explanations: [{
+                            type: "SupportPending" /* Protocol.Page.BackForwardCacheNotRestoredReasonType.SupportPending */,
+                            reason: "WebLocks" /* Protocol.Page.BackForwardCacheNotRestoredReason.WebLocks */,
+                        }],
+                    children: [{
+                            url: 'https://www.example.com/frame.html',
+                            explanations: [{
+                                    type: "Circumstantial" /* Protocol.Page.BackForwardCacheNotRestoredReasonType.Circumstantial */,
+                                    reason: "MainResourceHasCacheControlNoStore" /* Protocol.Page.BackForwardCacheNotRestoredReason.MainResourceHasCacheControlNoStore */,
+                                }],
+                            children: [],
+                        }],
+                },
+                explanations: [
+                    {
+                        type: "SupportPending" /* Protocol.Page.BackForwardCacheNotRestoredReasonType.SupportPending */,
+                        reason: "WebLocks" /* Protocol.Page.BackForwardCacheNotRestoredReason.WebLocks */,
+                    },
+                    {
+                        type: "Circumstantial" /* Protocol.Page.BackForwardCacheNotRestoredReasonType.Circumstantial */,
+                        reason: "MainResourceHasCacheControlNoStore" /* Protocol.Page.BackForwardCacheNotRestoredReason.MainResourceHasCacheControlNoStore */,
+                    },
+                ],
+            },
+        };
+        const view = createViewFunctionStub(ApplicationComponents.BackForwardCacheView.BackForwardCacheView);
+        new ApplicationComponents.BackForwardCacheView.BackForwardCacheView(view);
+        const treeData = (await view.nextInput).frameTreeData;
+        const expected = {
+            frameCount: 2,
+            issueCount: 2,
+            node: {
+                text: '(2) https://www.example.com',
+                iconName: 'frame',
+                children: [
+                    {
+                        text: 'WebLocks',
+                    },
+                    {
+                        text: '(1) https://www.example.com/frame.html',
+                        iconName: 'iframe',
+                        children: [
+                            {
+                                text: 'MainResourceHasCacheControlNoStore',
+                            },
+                        ],
+                    },
+                ],
+            },
+        };
+        assert.deepEqual(treeData, expected);
+    });
+    it('renders blocking details if available', async () => {
+        resourceTreeModel.mainFrame = {
+            resourceForURL: () => null,
+            url: 'https://www.example.com/',
+            backForwardCacheDetails: {
+                restoredFromCache: false,
+                explanations: [
+                    {
+                        type: "SupportPending" /* Protocol.Page.BackForwardCacheNotRestoredReasonType.SupportPending */,
+                        reason: "WebLocks" /* Protocol.Page.BackForwardCacheNotRestoredReason.WebLocks */,
+                        details: [
+                            { url: 'https://www.example.com/index.html', lineNumber: 10, columnNumber: 5 },
+                            { url: 'https://www.example.com/script.js', lineNumber: 15, columnNumber: 20 },
+                        ],
+                    },
+                ],
+            },
+        };
+        const component = await renderBackForwardCacheView();
+        const sectionHeaders = component.contentElement.querySelectorAll('devtools-report-section-header');
+        const sectionHeadersText = Array.from(sectionHeaders).map(sectionHeader => sectionHeader.textContent?.trim());
+        assert.deepEqual(sectionHeadersText, ['Pending Support']);
+        const sections = component.contentElement.querySelectorAll('devtools-report-section');
+        const sectionsText = Array.from(sections).map(section => section.textContent?.trim());
+        const expected = [
+            'Not served from back/forward cache: to trigger back/forward cache, use Chrome\'s back/forward buttons, or use the test button below to automatically navigate away and back.',
+            'Test back/forward cache',
+            'Pages that use WebLocks are not currently eligible for back/forward cache.',
+            'Learn more: back/forward cache eligibility',
+        ];
+        assert.deepEqual(sectionsText, expected);
+        const details = component.contentElement.querySelector('.details-list devtools-expandable-list');
+        details.shadowRoot.querySelector('button').click();
+        await raf();
+        const items = details.shadowRoot.querySelectorAll('.expandable-list-items .devtools-link');
+        const detailsText = Array.from(items).map(detail => detail.textContent?.trim());
+        assert.deepEqual(detailsText, ['www.example.com/index.html:11:6', 'www.example.com/script.js:16:21']);
+    });
+    it('can handle delayed navigation history when testing for BFcache availability', async () => {
+        const entries = [
+            {
+                id: 5,
+                url: 'about:blank',
+                userTypedURL: 'about:blank',
+                title: '',
+                transitionType: "typed" /* Protocol.Page.TransitionType.Typed */,
+            },
+            {
+                id: 8,
+                url: 'chrome://terms/',
+                userTypedURL: '',
+                title: '',
+                transitionType: "typed" /* Protocol.Page.TransitionType.Typed */,
+            },
+        ];
+        const stub = sinon.stub();
+        stub.onCall(0).returns({ entries, currentIndex: 0 });
+        stub.onCall(1).returns({ entries, currentIndex: 0 });
+        stub.onCall(2).returns({ entries, currentIndex: 0 });
+        stub.onCall(3).returns({ entries, currentIndex: 0 });
+        stub.onCall(4).returns({ entries, currentIndex: 1 });
+        resourceTreeModel.navigationHistory = stub;
+        resourceTreeModel.navigate = (url) => {
+            resourceTreeModel.frameNavigated({ url }, undefined);
+            return Promise.resolve({ frameId: '', getError() { } });
+        };
+        resourceTreeModel.navigateToHistoryEntry = (entry) => {
+            resourceTreeModel.frameNavigated({ url: entry.url }, undefined);
+        };
+        const navigateToHistoryEntrySpy = sinon.spy(resourceTreeModel, 'navigateToHistoryEntry');
+        resourceTreeModel.storageKeyForFrame = () => Promise.resolve(null);
+        resourceTreeModel.mainFrame = {
+            url: 'about:blank',
+            backForwardCacheDetails: {
+                restoredFromCache: true,
+                explanations: [],
+            },
+        };
+        const component = await renderBackForwardCacheView();
+        const button = component.contentElement.querySelector('[aria-label="Test back/forward cache"]');
+        assert.instanceOf(button, HTMLElement);
+        dispatchClickEvent(button);
+        await new Promise(resolve => {
+            let eventCounter = 0;
+            resourceTreeModel.addEventListener(SDK.ResourceTreeModel.Events.FrameNavigated, () => {
+                if (++eventCounter === 2) {
+                    resolve();
+                }
+            });
+        });
+        sinon.assert.calledOnceWithExactly(navigateToHistoryEntrySpy, entries[0]);
+    });
+});
+//# sourceMappingURL=BackForwardCacheView.test.js.map

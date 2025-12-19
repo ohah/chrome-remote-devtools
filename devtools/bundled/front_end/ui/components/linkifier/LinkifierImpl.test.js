@@ -1,0 +1,73 @@
+// Copyright 2020 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import * as Platform from '../../../core/platform/platform.js';
+import { dispatchClickEvent, getEventPromise, renderElementIntoDOM, } from '../../../testing/DOMHelpers.js';
+import { setupLocaleHooks } from '../../../testing/LocaleHelpers.js';
+import * as RenderCoordinator from '../render_coordinator/render_coordinator.js';
+import * as Linkifier from './linkifier.js';
+const { urlString } = Platform.DevToolsPath;
+describe('Linkifier', () => {
+    setupLocaleHooks();
+    it('renders a link when given a URL', async () => {
+        const component = new Linkifier.Linkifier.Linkifier();
+        component.data = {
+            url: urlString `https://example.com`,
+        };
+        renderElementIntoDOM(component);
+        await RenderCoordinator.done();
+        assert.isNotNull(component.shadowRoot);
+        const link = component.shadowRoot.querySelector('a');
+        assert.instanceOf(link, HTMLAnchorElement);
+        assert.strictEqual(link.innerText, 'example.com');
+    });
+    it('throws when given an invalid URL', () => {
+        const component = new Linkifier.Linkifier.Linkifier();
+        assert.throws(() => {
+            component.data = { url: Platform.DevToolsPath.EmptyUrlString };
+        }, 'Cannot construct a Linkifier without providing a valid string URL.');
+    });
+    it('appends the line number to the URL if given, and adds one to deal with 0 indexing', async () => {
+        const component = new Linkifier.Linkifier.Linkifier();
+        component.data = {
+            url: urlString `https://example.com`,
+            lineNumber: 1,
+        };
+        renderElementIntoDOM(component);
+        await RenderCoordinator.done();
+        assert.isNotNull(component.shadowRoot);
+        const link = component.shadowRoot.querySelector('a');
+        assert.instanceOf(link, HTMLAnchorElement);
+        assert.strictEqual(link.innerText, 'example.com:2');
+    });
+    it('emits an event when clicked', async () => {
+        const component = new Linkifier.Linkifier.Linkifier();
+        component.data = {
+            url: urlString `https://example.com`,
+            lineNumber: 1,
+            columnNumber: 50,
+        };
+        // Suppress the event so that the link is not actually opened in the test
+        // runner by the global handler.
+        component.addEventListener('linkifieractivated', e => {
+            e.stopPropagation();
+            e.preventDefault();
+        });
+        renderElementIntoDOM(component);
+        await RenderCoordinator.done();
+        assert.isNotNull(component.shadowRoot);
+        const link = component.shadowRoot.querySelector('a');
+        assert.instanceOf(link, HTMLAnchorElement);
+        const clickEventPromise = getEventPromise(component, 'linkifieractivated');
+        dispatchClickEvent(link, {
+            cancelable: true,
+        });
+        const clickEvent = await clickEventPromise;
+        assert.deepEqual(clickEvent.data, {
+            url: urlString `https://example.com`,
+            lineNumber: 1,
+            columnNumber: 50,
+        });
+    });
+});
+//# sourceMappingURL=LinkifierImpl.test.js.map

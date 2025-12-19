@@ -1,0 +1,499 @@
+// Copyright 2022 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import { describeWithEnvironment } from '../../../testing/EnvironmentHelpers.js';
+import { getAllNodes, getMainThread } from '../../../testing/TraceHelpers.js';
+import { TraceLoader } from '../../../testing/TraceLoader.js';
+import * as Trace from '../trace.js';
+async function handleEventsFromTraceFile(context, name) {
+    const traceEvents = await TraceLoader.rawEvents(context, name);
+    Trace.Handlers.ModelHandlers.Meta.reset();
+    Trace.Handlers.ModelHandlers.Samples.reset();
+    for (const event of traceEvents) {
+        Trace.Handlers.ModelHandlers.Meta.handleEvent(event);
+        Trace.Handlers.ModelHandlers.Samples.handleEvent(event);
+    }
+    await Trace.Handlers.ModelHandlers.Meta.finalize();
+    await Trace.Handlers.ModelHandlers.Samples.finalize();
+    return Trace.Handlers.ModelHandlers.Samples.data();
+}
+async function handleEventsFromCpuProfile(context, name) {
+    const profile = await TraceLoader.rawCPUProfile(context, name);
+    const contents = Trace.Helpers.SamplesIntegrator.SamplesIntegrator.createFakeTraceFromCpuProfile(profile, Trace.Types.Events.ThreadID(1));
+    Trace.Handlers.ModelHandlers.Samples.reset();
+    for (const event of contents.traceEvents) {
+        Trace.Handlers.ModelHandlers.Meta.handleEvent(event);
+        Trace.Handlers.ModelHandlers.Samples.handleEvent(event);
+    }
+    await Trace.Handlers.ModelHandlers.Meta.finalize();
+    await Trace.Handlers.ModelHandlers.Samples.finalize({ isCPUProfile: true });
+    return Trace.Handlers.ModelHandlers.Samples.data();
+}
+describeWithEnvironment('SamplesHandler', function () {
+    it('finds all the profiles in a real world recording', async () => {
+        const data = await handleEventsFromTraceFile(this, 'multiple-navigations-with-iframes.json.gz');
+        // The same thread id is shared across profiles in the profiled
+        // processes.
+        const threadId = Trace.Types.Events.ThreadID(1);
+        const firstProcessId = Trace.Types.Events.ProcessID(2236123);
+        const secondProcessId = Trace.Types.Events.ProcessID(2154214);
+        const thirdProcessId = Trace.Types.Events.ProcessID(2236084);
+        assert.strictEqual(data.profilesInProcess.size, 3);
+        const profilesFirstProcess = data.profilesInProcess.get(firstProcessId);
+        assert.strictEqual(profilesFirstProcess?.size, 1);
+        assert.exists(profilesFirstProcess?.get(threadId));
+        const profilesSecondProcess = data.profilesInProcess.get(secondProcessId);
+        assert.strictEqual(profilesSecondProcess?.size, 1);
+        assert.exists(profilesSecondProcess?.get(threadId));
+        const profilesThirdProcess = data.profilesInProcess.get(thirdProcessId);
+        assert.strictEqual(profilesThirdProcess?.size, 1);
+        assert.exists(profilesThirdProcess?.get(threadId));
+    });
+    describe('profile calls building', () => {
+        const pid = Trace.Types.Events.ProcessID(0);
+        const id = Trace.Types.Events.ProfileID('0');
+        const tid = Trace.Types.Events.ThreadID(1);
+        function makeProfileChunkEvent(nodes, samples, timeDeltas, ts) {
+            return {
+                cat: '',
+                name: "ProfileChunk" /* Trace.Types.Events.Name.PROFILE_CHUNK */,
+                ph: "P" /* Trace.Types.Events.Phase.SAMPLE */,
+                pid,
+                tid: Trace.Types.Events.ThreadID(0),
+                ts: Trace.Types.Timing.Micro(ts),
+                id,
+                args: {
+                    data: {
+                        cpuProfile: {
+                            samples: samples.map(Trace.Types.Events.CallFrameID),
+                            nodes: nodes.map(node => ({
+                                ...node,
+                                callFrame: { functionName: '', scriptId: 0, columnNumber: 0, lineNumber: 0, url: '' },
+                                id: Trace.Types.Events.CallFrameID(node.id),
+                            })),
+                        },
+                        timeDeltas: timeDeltas.map(Trace.Types.Timing.Micro),
+                    },
+                },
+            };
+        }
+        it('can build profile calls from a CPU profile coming from tracing', async () => {
+            const A = 0;
+            const B = 1;
+            const C = 2;
+            const D = 3;
+            const E = 4;
+            const root = 9;
+            const mockProfileEvent = {
+                name: "Profile" /* Trace.Types.Events.Name.PROFILE */,
+                id,
+                args: { data: { startTime: Trace.Types.Timing.Micro(0) } },
+                cat: '',
+                pid,
+                tid,
+                ts: Trace.Types.Timing.Micro(0),
+                ph: "P" /* Trace.Types.Events.Phase.SAMPLE */,
+            };
+            /**
+             * +------------> (sample at time)
+             * |A|A|A|A|A|A|A|A|A|A|A|A|A|A|A|A|A| |E|E|E|E|E|E|
+             * | |B|B|B|B|B|B| |D|D|D|D|D|D| | | | | | | | | | |
+             * | | |C|C|C|C| | | | | | | | | | | | | | | | | | |
+             * |
+             * V (stack trace depth)
+             */
+            const mockTimeDeltas = [
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 23,
+            ];
+            const mockSamples = [A, B, C, C, C, C, B, A, D, D, D, D, D, D, A, A, A, E, E, E, E, E, E];
+            /*
+             *   A   E
+             *  / \
+             * B   D
+             * |
+             * C
+             */
+            const mockChunks = [
+                makeProfileChunkEvent([{ id: root, children: [A, E] }], [], [], 0),
+                makeProfileChunkEvent([{ id: A, children: [B, D] }, { id: B, children: [C] }, { id: C, children: [] }], mockSamples, mockTimeDeltas, 0),
+                makeProfileChunkEvent([{ id: D, children: [] }], [], [], 0),
+                makeProfileChunkEvent([{ id: E, children: [] }], [], [], 0),
+            ];
+            Trace.Handlers.ModelHandlers.Samples.reset();
+            for (const event of [mockProfileEvent, ...mockChunks]) {
+                Trace.Handlers.ModelHandlers.Samples.handleEvent(event);
+            }
+            await Trace.Handlers.ModelHandlers.Samples.finalize({ isCPUProfile: true });
+            const data = Trace.Handlers.ModelHandlers.Samples.data();
+            const calls = data.profilesInProcess.get(pid)?.get(tid)?.profileCalls.map(call => {
+                const selfTime = data.entryToNode.get(call)?.selfTime;
+                return { ...call, selfTime };
+            });
+            const tree = data.profilesInProcess.get(pid)?.get(tid)?.profileTree;
+            const expectedResult = [
+                { id: A, ts: 0, dur: 154, selfTime: 58, children: [B, D] },
+                { id: B, ts: 1, dur: 27, selfTime: 9, children: [C] },
+                { id: C, ts: 3, dur: 18, selfTime: 18, children: [] },
+                { id: D, ts: 36, dur: 69, selfTime: 69, children: [] },
+                { id: E, ts: 154, dur: 117, selfTime: 117, children: [] },
+            ];
+            assert.exists(tree?.roots);
+            if (!tree?.roots) {
+                // This shouldn't happen, but add this if check to pass ts check.
+                return;
+            }
+            const allNodes = getAllNodes(tree?.roots);
+            const callsTestData = calls?.map(c => {
+                const node = allNodes.find(node => node.id === c.nodeId);
+                const children = node?.children || [];
+                return ({
+                    id: c.nodeId,
+                    dur: Math.round(c.dur || 0),
+                    ts: c.ts,
+                    selfTime: Math.round(c.selfTime || 0),
+                    children: [...children].map(child => child.id) || [],
+                });
+            });
+            assert.deepEqual(callsTestData, expectedResult);
+        });
+        it('can build profile calls from a CPU profile coming from a real world cpuprofile', async () => {
+            const data = await handleEventsFromCpuProfile(this, 'basic.cpuprofile.gz');
+            const threadId = Trace.Types.Events.ThreadID(1);
+            const firstProcessId = Trace.Types.Events.ProcessID(1);
+            const profilesFirstProcess = data.profilesInProcess.get(firstProcessId);
+            const profileData = profilesFirstProcess?.get(threadId);
+            // These particular calls are selected as some have children and others have selfTime
+            const calls = [
+                ...profileData?.profileCalls.slice(0, 4),
+                ...profileData?.profileCalls.slice(10, 15),
+            ].map(call => {
+                const selfTime = data.entryToNode.get(call)?.selfTime;
+                return { ...call, selfTime };
+            });
+            const tree = profileData.profileTree;
+            const expectedResult = [
+                // The initial call stack
+                { id: 2, dur: 2369962, ts: 73029010084, selfTime: 0, children: [3] },
+                { id: 3, dur: 2369962, ts: 73029010084, selfTime: 0, children: [4] },
+                { id: 4, dur: 2369962, ts: 73029010084, selfTime: 0, children: [5] },
+                { id: 5, dur: 2369962, ts: 73029010084, selfTime: 0, children: [6] },
+                // various calls to hrtime
+                { id: 10, dur: 375, ts: 73029011751, selfTime: 375, children: [] },
+                { id: 10, dur: 1083, ts: 73029012251, selfTime: 1083, children: [] },
+                { id: 10, dur: 833, ts: 73029013459, selfTime: 833, children: [] },
+                { id: 10, dur: 917, ts: 73029014417, selfTime: 792, children: [] },
+                { id: 11, dur: 125, ts: 73029014667, selfTime: 125, children: [] },
+            ];
+            assert.exists(tree?.roots);
+            if (!tree?.roots) {
+                // This shouldn't happen, but add this if check to pass ts check.
+                return;
+            }
+            const allNodes = getAllNodes(tree?.roots);
+            const callsTestData = calls?.map(c => {
+                const node = allNodes.find(node => node.id === c.nodeId);
+                const children = node?.children || [];
+                return {
+                    id: c.nodeId,
+                    dur: Math.round(c.dur || 0),
+                    ts: c.ts,
+                    selfTime: Math.round(c.selfTime || 0),
+                    children: [...children].map(child => child.id) || [],
+                };
+            });
+            assert.deepEqual(callsTestData, expectedResult);
+        });
+    });
+    describe('CPU Profile building', () => {
+        it('generates a CPU profile from a trace file', async () => {
+            const data = await handleEventsFromTraceFile(this, 'recursive-blocking-js.json.gz');
+            assert.strictEqual(data.profilesInProcess.size, 1);
+            const profileById = data.profilesInProcess.values().next().value;
+            assert.strictEqual(profileById.size, 1);
+            const cpuProfileData = profileById.values().next().value;
+            const cpuProfile = cpuProfileData.rawProfile;
+            assert.deepEqual(Object.keys(cpuProfile), ['startTime', 'endTime', 'nodes', 'samples', 'timeDeltas', 'lines', 'columns']);
+            assert.lengthOf(cpuProfile.nodes, 153);
+            assert.strictEqual(cpuProfile.startTime, 287510826176);
+            assert.strictEqual(cpuProfile.endTime, 287510847633);
+            assert.strictEqual(cpuProfile.samples?.length, 39471);
+            assert.strictEqual(cpuProfile.samples?.length, cpuProfile.timeDeltas?.length);
+            assert.strictEqual(cpuProfile.samples?.length, cpuProfile.lines?.length);
+        });
+    });
+    describe('CPU Profile parsing', () => {
+        it('generates a parsed CPU profile from a trace file', async () => {
+            const data = await handleEventsFromTraceFile(this, 'recursive-blocking-js.json.gz');
+            assert.strictEqual(data.profilesInProcess.size, 1);
+            const profileById = data.profilesInProcess.values().next().value;
+            assert.strictEqual(profileById.size, 1);
+            const cpuProfileData = profileById.values().next().value;
+            const parsedProfile = cpuProfileData.parsedProfile;
+            assert.strictEqual(parsedProfile.nodes()?.length, 153);
+            // Ensure that we correctly maintain a lineNumber/columnNumber of 0 and don't fall back to -1 because 0 is falsey.
+            const nodesWithZeroLineNumber = parsedProfile.nodes()?.filter(node => node.lineNumber === 0) || [];
+            assert.lengthOf(nodesWithZeroLineNumber, 15);
+            const nodesWithZeroColumnNumber = parsedProfile.nodes()?.filter(node => node.columnNumber === 0) || [];
+            assert.lengthOf(nodesWithZeroColumnNumber, 12);
+            assert.strictEqual(parsedProfile.gcNode?.id, 36);
+            assert.strictEqual(parsedProfile.programNode?.id, 2);
+            assert.strictEqual(parsedProfile.profileStartTime, 287510835.138);
+            assert.strictEqual(parsedProfile.profileEndTime, 287515908.9025441);
+            assert.strictEqual(parsedProfile.maxDepth, 14);
+            assert.strictEqual(parsedProfile.samples?.length, 39471);
+        });
+    });
+    describe('profile source selection', () => {
+        const pid = Trace.Types.Events.ProcessID(42);
+        const tid = Trace.Types.Events.ThreadID(7);
+        function makeProfileEvent(id, source) {
+            return {
+                cat: '',
+                name: "Profile" /* Trace.Types.Events.Name.PROFILE */,
+                ph: "P" /* Trace.Types.Events.Phase.SAMPLE */,
+                pid,
+                tid,
+                ts: Trace.Types.Timing.Micro(0),
+                id,
+                args: { data: { startTime: Trace.Types.Timing.Micro(0), source: source } },
+            };
+        }
+        function makeProfileChunkEvent(id, source, samples, timeDeltas, nodes = [
+            { id: 0, children: [1] },
+            { id: 1, children: [] },
+        ]) {
+            return {
+                cat: '',
+                name: "ProfileChunk" /* Trace.Types.Events.Name.PROFILE_CHUNK */,
+                ph: "P" /* Trace.Types.Events.Phase.SAMPLE */,
+                pid,
+                tid,
+                ts: Trace.Types.Timing.Micro(1),
+                id,
+                args: {
+                    data: {
+                        source: source,
+                        cpuProfile: {
+                            samples: samples.map(Trace.Types.Events.CallFrameID),
+                            nodes: nodes.map(n => ({
+                                id: Trace.Types.Events.CallFrameID(n.id),
+                                children: n.children,
+                                callFrame: { functionName: '', scriptId: 0, columnNumber: 0, lineNumber: 0, url: '' },
+                            })),
+                        },
+                        timeDeltas: timeDeltas.map(Trace.Types.Timing.Micro),
+                    },
+                },
+            };
+        }
+        function makeProfileStream({ id, source, samples = [1], timeDeltas = [10], nodes, }) {
+            const events = [];
+            events.push(makeProfileEvent(id, source));
+            events.push(makeProfileChunkEvent(id, source, samples, timeDeltas, nodes ?? [
+                { id: 0, children: [1] },
+                { id: 1, children: [] },
+            ]));
+            return events;
+        }
+        async function runSelectionScenario(events, isCPUProfile = false) {
+            Trace.Handlers.ModelHandlers.Samples.reset();
+            Trace.Handlers.ModelHandlers.Meta.reset();
+            for (const event of events) {
+                Trace.Handlers.ModelHandlers.Samples.handleEvent(event);
+            }
+            await Trace.Handlers.ModelHandlers.Meta.finalize();
+            await Trace.Handlers.ModelHandlers.Samples.finalize({ isCPUProfile });
+            const profileByThread = Trace.Handlers.ModelHandlers.Samples.data().profilesInProcess.get(pid);
+            assert.exists(profileByThread);
+            const selected = profileByThread?.get(tid);
+            assert.exists(selected);
+            return selected;
+        }
+        it('selects Internal stream over SelfProfiling in performance trace', async () => {
+            const internalId = Trace.Types.Events.ProfileID('0xE');
+            const selfProfilingId = Trace.Types.Events.ProfileID('0xJ');
+            const selected = await runSelectionScenario([
+                ...makeProfileStream({
+                    id: internalId,
+                    source: 'Internal',
+                }),
+                ...makeProfileStream({
+                    id: selfProfilingId,
+                    source: 'SelfProfiling',
+                }),
+            ]);
+            assert.strictEqual(selected.profileId, internalId);
+        });
+        it('prefers Inspector stream over Internal in CPU profile mode', async () => {
+            const inspectorId = Trace.Types.Events.ProfileID('0xD');
+            const internalId = Trace.Types.Events.ProfileID('0xE');
+            const selected = await runSelectionScenario([
+                ...makeProfileStream({
+                    id: inspectorId,
+                    source: 'Inspector',
+                }),
+                ...makeProfileStream({
+                    id: internalId,
+                    source: 'Internal',
+                }),
+            ], true);
+            assert.strictEqual(selected.profileId, inspectorId);
+        });
+        it('prefers Internal stream over Inspector in performance trace mode', async () => {
+            const internalId = Trace.Types.Events.ProfileID('0xI');
+            const inspectorId = Trace.Types.Events.ProfileID('0xD');
+            const selected = await runSelectionScenario([
+                ...makeProfileStream({
+                    id: internalId,
+                    source: 'Internal',
+                }),
+                ...makeProfileStream({
+                    id: inspectorId,
+                    source: 'Inspector',
+                }),
+            ]);
+            assert.strictEqual(selected.profileId, internalId);
+        });
+        it('selects complete priority order in CPU profile mode', async () => {
+            const inspectorId = Trace.Types.Events.ProfileID('0xD');
+            const internalId = Trace.Types.Events.ProfileID('0xE');
+            const selfProfilingId = Trace.Types.Events.ProfileID('0xJ');
+            const selected = await runSelectionScenario([
+                ...makeProfileStream({
+                    id: selfProfilingId,
+                    source: 'SelfProfiling',
+                }),
+                ...makeProfileStream({
+                    id: internalId,
+                    source: 'Internal',
+                }),
+                ...makeProfileStream({
+                    id: inspectorId,
+                    source: 'Inspector',
+                }),
+            ], true);
+            assert.strictEqual(selected.profileId, inspectorId);
+        });
+        it('selects complete priority order in performance trace mode', async () => {
+            const inspectorId = Trace.Types.Events.ProfileID('0xD');
+            const internalId = Trace.Types.Events.ProfileID('0xE');
+            const selfProfilingId = Trace.Types.Events.ProfileID('0xJ');
+            const selected = await runSelectionScenario([
+                ...makeProfileStream({
+                    id: selfProfilingId,
+                    source: 'SelfProfiling',
+                }),
+                ...makeProfileStream({
+                    id: inspectorId,
+                    source: 'Inspector',
+                }),
+                ...makeProfileStream({
+                    id: internalId,
+                    source: 'Internal',
+                }),
+            ]);
+            assert.strictEqual(selected.profileId, internalId);
+        });
+        it('falls back to first candidate when no recognized sources exist', async () => {
+            const firstUnknownId = Trace.Types.Events.ProfileID('0xU1');
+            const secondUnknownId = Trace.Types.Events.ProfileID('0xU2');
+            const events = [
+                ...makeProfileStream({
+                    id: firstUnknownId,
+                    source: 'Unspecified',
+                }),
+                ...makeProfileStream({
+                    id: secondUnknownId,
+                    source: 'CustomSource',
+                }),
+            ];
+            const selected = await runSelectionScenario(events);
+            // Falls back to candidates[0] when no priority matches
+            assert.strictEqual(selected.profileId, firstUnknownId);
+        });
+        it('ignores profiles with unknown sources in priority matching', async () => {
+            const inspectorId = Trace.Types.Events.ProfileID('0xD');
+            const unknownId = Trace.Types.Events.ProfileID('0xU');
+            const events = [
+                ...makeProfileStream({
+                    id: unknownId,
+                    source: 'Unspecified',
+                }),
+                ...makeProfileStream({
+                    id: inspectorId,
+                    source: 'Inspector',
+                }),
+            ];
+            const selected = await runSelectionScenario(events, true);
+            assert.strictEqual(selected.profileId, inspectorId);
+        });
+        it('falls back to SelfProfiling when higher priority sources absent', async () => {
+            const selfProfilingId = Trace.Types.Events.ProfileID('0xJ');
+            const selected = await runSelectionScenario([
+                ...makeProfileStream({
+                    id: selfProfilingId,
+                    source: 'SelfProfiling',
+                }),
+            ], true);
+            assert.strictEqual(selected.profileId, selfProfilingId);
+        });
+        it('selects available source even when not in priority list for CPU profile mode', async () => {
+            const internalId = Trace.Types.Events.ProfileID('0xE');
+            const selected = await runSelectionScenario([
+                ...makeProfileStream({
+                    id: internalId,
+                    source: 'Internal',
+                }),
+            ], true);
+            assert.strictEqual(selected.profileId, internalId);
+        });
+    });
+    describe('getProfileCallFunctionName', () => {
+        /**
+         * Find an event from the trace that represents some work. The use of
+         * this specific call frame event is not for any real reason.
+         **/
+        function getProfileEventAndNode(data) {
+            const mainThread = getMainThread(data.Renderer);
+            let foundNode = null;
+            let foundEntry = null;
+            for (const entry of mainThread.entries) {
+                if (Trace.Types.Events.isProfileCall(entry) && entry.callFrame.functionName === 'performConcurrentWorkOnRoot') {
+                    const profile = data.Samples.profilesInProcess.get(entry.pid)?.get(entry.tid);
+                    const node = profile?.parsedProfile.nodeById(entry.nodeId);
+                    if (node) {
+                        foundNode = node;
+                    }
+                    foundEntry = entry;
+                    break;
+                }
+            }
+            if (!foundNode) {
+                throw new Error('Could not find CPU Profile node.');
+            }
+            if (!foundEntry) {
+                throw new Error('Could not find expected entry.');
+            }
+            return {
+                entry: foundEntry,
+                profileNode: foundNode,
+            };
+        }
+        it('falls back to the call frame name if the ProfileNode originalFunctionName is empty', async function () {
+            const { data } = await TraceLoader.traceEngine(this, 'react-hello-world.json.gz');
+            const { entry, profileNode } = getProfileEventAndNode(data);
+            assert.isNull(profileNode.originalFunctionName);
+            assert.strictEqual(Trace.Handlers.ModelHandlers.Samples.getProfileCallFunctionName(data.Samples, entry), 'performConcurrentWorkOnRoot');
+        });
+        it('uses the profile originalFunctionName if it has been set', async function () {
+            const { data } = await TraceLoader.traceEngine(this, 'react-hello-world.json.gz');
+            const { entry, profileNode } = getProfileEventAndNode(data);
+            assert.isNull(profileNode.originalFunctionName);
+            profileNode.setOriginalFunctionName('testing-profile-name');
+            assert.strictEqual(Trace.Handlers.ModelHandlers.Samples.getProfileCallFunctionName(data.Samples, entry), 'testing-profile-name');
+            // Don't impact other tests.
+            profileNode.setOriginalFunctionName(null);
+        });
+    });
+});
+//# sourceMappingURL=SamplesHandler.test.js.map

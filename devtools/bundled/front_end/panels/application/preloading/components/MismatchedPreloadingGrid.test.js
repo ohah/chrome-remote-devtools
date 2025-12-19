@@ -1,0 +1,141 @@
+// Copyright 2023 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import * as Platform from '../../../../core/platform/platform.js';
+import * as SDK from '../../../../core/sdk/sdk.js';
+import { assertGridContents, getCellByIndexes, } from '../../../../testing/DataGridHelpers.js';
+import { raf, renderElementIntoDOM, } from '../../../../testing/DOMHelpers.js';
+import { describeWithEnvironment } from '../../../../testing/EnvironmentHelpers.js';
+import * as PreloadingComponents from './components.js';
+const { urlString } = Platform.DevToolsPath;
+const zip2 = (xs, ys) => {
+    assert.strictEqual(xs.length, ys.length);
+    return Array.from(xs.map((_, i) => [xs[i], ys[i]]));
+};
+async function renderMismatchedPreloadingGrid(data) {
+    const component = new PreloadingComponents.MismatchedPreloadingGrid.MismatchedPreloadingGrid();
+    component.data = data;
+    component.markAsRoot();
+    renderElementIntoDOM(component);
+    assert.isNotNull(component.element.shadowRoot);
+    // wait for Widget render
+    await component.updateComplete;
+    // and for its data grid component to render
+    await raf();
+    return component.element;
+}
+function assertDiff(gridComponent, cellIndex, spansExpected) {
+    const grid = gridComponent.shadowRoot.querySelector('devtools-data-grid');
+    assert.isNotNull(grid.shadowRoot);
+    const cell = getCellByIndexes(grid.shadowRoot, cellIndex);
+    const spans = cell.querySelectorAll('div span');
+    for (const [got, expected] of zip2(Array.from(spans), spansExpected)) {
+        assert.strictEqual(got.textContent, expected.textContent);
+        assert.include(got.getAttribute('style') || '', expected.partOfStyle);
+    }
+}
+const FG_GREEN = 'color:var(--sys-color-green);text-decoration:line-through';
+const FG_RED = 'color:var(--sys-color-error);';
+describeWithEnvironment('MismatchedPreloadingGrid', () => {
+    it('renderes no diff in URL', async function () {
+        const data = {
+            pageURL: urlString `https://example.com/prefetched.html`,
+            rows: [{
+                    url: 'https://example.com/prefetched.html',
+                    action: "Prefetch" /* Protocol.Preload.SpeculationAction.Prefetch */,
+                    status: "Failure" /* SDK.PreloadingModel.PreloadingStatus.FAILURE */,
+                }],
+        };
+        const component = await renderMismatchedPreloadingGrid(data);
+        assert.isNotNull(component.shadowRoot);
+        assertGridContents(component, ['URL', 'Action', 'Status'], [
+            ['https://example.com/prefetched.html', 'Prefetch', 'Failure'],
+        ]);
+    });
+    it('renderes edit diff', async () => {
+        const data = {
+            pageURL: urlString `https://example.com/prefetched.html?q=1`,
+            rows: [{
+                    url: 'https://example.com/prefetched.html?q=2',
+                    action: "Prefetch" /* Protocol.Preload.SpeculationAction.Prefetch */,
+                    status: "Ready" /* SDK.PreloadingModel.PreloadingStatus.READY */,
+                }],
+        };
+        const component = await renderMismatchedPreloadingGrid(data);
+        assert.isNotNull(component.shadowRoot);
+        assertGridContents(component, ['URL', 'Action', 'Status'], [
+            ['https://example.com/prefetched.html?q=21', 'Prefetch', 'Ready'],
+        ]);
+        assertDiff(component, { row: 1, column: 0 }, [
+            { textContent: 'https://example.com/prefetched.html?q=', partOfStyle: '' },
+            { textContent: '2', partOfStyle: FG_RED },
+            { textContent: '1', partOfStyle: FG_GREEN },
+        ]);
+    });
+    it('renderes add diff', async () => {
+        const data = {
+            pageURL: urlString `https://example.com/prefetched.html?q=1`,
+            rows: [{
+                    url: 'https://example.com/prefetched.html',
+                    action: "Prefetch" /* Protocol.Preload.SpeculationAction.Prefetch */,
+                    status: "Ready" /* SDK.PreloadingModel.PreloadingStatus.READY */,
+                }],
+        };
+        const component = await renderMismatchedPreloadingGrid(data);
+        assert.isNotNull(component.shadowRoot);
+        assertGridContents(component, ['URL', 'Action', 'Status'], [
+            ['https://example.com/prefetched.html?q=1', 'Prefetch', 'Ready'],
+        ]);
+        assertDiff(component, { row: 1, column: 0 }, [
+            { textContent: 'https://example.com/prefetched.html', partOfStyle: '' },
+            { textContent: '?q=1', partOfStyle: FG_GREEN },
+        ]);
+    });
+    it('renderes delete diff', async () => {
+        const data = {
+            pageURL: urlString `https://example.com/prefetched.html`,
+            rows: [{
+                    url: 'https://example.com/prefetched.html?q=1',
+                    action: "Prefetch" /* Protocol.Preload.SpeculationAction.Prefetch */,
+                    status: "Ready" /* SDK.PreloadingModel.PreloadingStatus.READY */,
+                }],
+        };
+        const component = await renderMismatchedPreloadingGrid(data);
+        assert.isNotNull(component.shadowRoot);
+        assertGridContents(component, ['URL', 'Action', 'Status'], [
+            ['https://example.com/prefetched.html?q=1', 'Prefetch', 'Ready'],
+        ]);
+        assertDiff(component, { row: 1, column: 0 }, [
+            { textContent: 'https://example.com/prefetched.html', partOfStyle: '' },
+            { textContent: '?q=1', partOfStyle: FG_RED },
+        ]);
+    });
+    it('renderes complex diff', async () => {
+        const data = {
+            pageURL: urlString `https://example.com/prefetched.html?q=1`,
+            rows: [{
+                    url: 'https://example.com/prerendered.html?x=1',
+                    action: "Prerender" /* Protocol.Preload.SpeculationAction.Prerender */,
+                    status: "Ready" /* SDK.PreloadingModel.PreloadingStatus.READY */,
+                }],
+        };
+        const component = await renderMismatchedPreloadingGrid(data);
+        assert.isNotNull(component.shadowRoot);
+        assertGridContents(component, ['URL', 'Action', 'Status'], [
+            ['https://example.com/prerfendertched.html?xq=1', 'Prerender', 'Ready'],
+        ]);
+        assertDiff(component, { row: 1, column: 0 }, [
+            { textContent: 'https://example.com/pre', partOfStyle: '' },
+            { textContent: 'r', partOfStyle: FG_RED },
+            { textContent: 'f', partOfStyle: FG_GREEN },
+            { textContent: 'e', partOfStyle: '' },
+            { textContent: 'nder', partOfStyle: FG_RED },
+            { textContent: 'tch', partOfStyle: FG_GREEN },
+            { textContent: 'ed.html?', partOfStyle: '' },
+            { textContent: 'x', partOfStyle: FG_RED },
+            { textContent: 'q', partOfStyle: FG_GREEN },
+            { textContent: '=1', partOfStyle: '' },
+        ]);
+    });
+});
+//# sourceMappingURL=MismatchedPreloadingGrid.test.js.map

@@ -1,0 +1,170 @@
+// Copyright 2013 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+/* eslint-disable @devtools/no-imperative-dom-api */
+import * as Common from '../../core/common/common.js';
+import * as i18n from '../../core/i18n/i18n.js';
+import * as SDK from '../../core/sdk/sdk.js';
+import * as UI from '../../ui/legacy/legacy.js';
+import * as LayerViewer from '../layer_viewer/layer_viewer.js';
+import { LayerPaintProfilerView } from './LayerPaintProfilerView.js';
+import { Events, LayerTreeModel } from './LayerTreeModel.js';
+const UIStrings = {
+    /**
+     * @description Text for the details of something
+     */
+    details: 'Details',
+    /**
+     * @description Title of the Profiler tool
+     */
+    profiler: 'Profiler',
+};
+const str_ = i18n.i18n.registerUIStrings('panels/layers/LayersPanel.ts', UIStrings);
+const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
+let layersPanelInstance;
+export class LayersPanel extends UI.Panel.PanelWithSidebar {
+    model;
+    layerViewHost;
+    layerTreeOutline;
+    rightSplitWidget;
+    layers3DView;
+    tabbedPane;
+    layerDetailsView;
+    paintProfilerView;
+    updateThrottler;
+    layerBeingProfiled;
+    constructor() {
+        super('layers', 225);
+        this.model = null;
+        SDK.TargetManager.TargetManager.instance().observeTargets(this, { scoped: true });
+        this.layerViewHost = new LayerViewer.LayerViewHost.LayerViewHost();
+        this.layerTreeOutline = new LayerViewer.LayerTreeOutline.LayerTreeOutline(this.layerViewHost);
+        this.layerTreeOutline.addEventListener("PaintProfilerRequested" /* LayerViewer.LayerTreeOutline.Events.PAINT_PROFILER_REQUESTED */, this.onPaintProfileRequested, this);
+        this.panelSidebarElement().appendChild(this.layerTreeOutline.element);
+        this.setDefaultFocusedElement(this.layerTreeOutline.element);
+        this.rightSplitWidget = new UI.SplitWidget.SplitWidget(false, true, 'layer-details-split-view-state');
+        this.splitWidget().setMainWidget(this.rightSplitWidget);
+        this.splitWidget().hideSidebar();
+        this.layers3DView = new LayerViewer.Layers3DView.Layers3DView(this.layerViewHost);
+        this.rightSplitWidget.setMainWidget(this.layers3DView);
+        this.rightSplitWidget.hideSidebar();
+        this.layers3DView.addEventListener("PaintProfilerRequested" /* LayerViewer.Layers3DView.Events.PAINT_PROFILER_REQUESTED */, this.onPaintProfileRequested, this);
+        this.layers3DView.addEventListener("ScaleChanged" /* LayerViewer.Layers3DView.Events.SCALE_CHANGED */, this.onScaleChanged, this);
+        this.tabbedPane = new UI.TabbedPane.TabbedPane();
+        this.rightSplitWidget.setSidebarWidget(this.tabbedPane);
+        this.layerDetailsView = new LayerViewer.LayerDetailsView.LayerDetailsView(this.layerViewHost);
+        this.layerDetailsView.addEventListener("PaintProfilerRequested" /* LayerViewer.LayerDetailsView.Events.PAINT_PROFILER_REQUESTED */, this.onPaintProfileRequested, this);
+        this.tabbedPane.appendTab(DetailsViewTabs.Details, i18nString(UIStrings.details), this.layerDetailsView);
+        this.paintProfilerView = new LayerPaintProfilerView(this.showImage.bind(this));
+        this.tabbedPane.addEventListener(UI.TabbedPane.Events.TabClosed, this.onTabClosed, this);
+        this.updateThrottler = new Common.Throttler.Throttler(100);
+    }
+    static instance(opts) {
+        if (!layersPanelInstance || opts?.forceNew) {
+            layersPanelInstance = new LayersPanel();
+        }
+        return layersPanelInstance;
+    }
+    focus() {
+        this.layerTreeOutline.focus();
+    }
+    wasShown() {
+        super.wasShown();
+        if (this.model) {
+            this.model.enable();
+        }
+    }
+    willHide() {
+        if (this.model) {
+            void this.model.disable();
+        }
+        super.willHide();
+    }
+    targetAdded(target) {
+        if (target !== target.outermostTarget()) {
+            return;
+        }
+        this.model = target.model(LayerTreeModel);
+        if (!this.model) {
+            return;
+        }
+        this.model.addEventListener(Events.LayerTreeChanged, this.onLayerTreeUpdated, this);
+        this.model.addEventListener(Events.LayerPainted, this.onLayerPainted, this);
+        if (this.isShowing()) {
+            this.model.enable();
+            void this.update();
+        }
+    }
+    targetRemoved(target) {
+        if (!this.model || this.model.target() !== target) {
+            return;
+        }
+        this.model.removeEventListener(Events.LayerTreeChanged, this.onLayerTreeUpdated, this);
+        this.model.removeEventListener(Events.LayerPainted, this.onLayerPainted, this);
+        void this.model.disable();
+        this.model = null;
+    }
+    onLayerTreeUpdated() {
+        void this.updateThrottler.schedule(this.update.bind(this));
+    }
+    update() {
+        if (this.model) {
+            this.splitWidget().showBoth();
+            this.rightSplitWidget.showBoth();
+            this.layerViewHost.setLayerTree(this.model.layerTree());
+            const resourceModel = this.model.target().model(SDK.ResourceTreeModel.ResourceTreeModel);
+            if (resourceModel) {
+                const mainFrame = resourceModel.mainFrame;
+                if (mainFrame) {
+                    const url = mainFrame.url;
+                    // Add the currently visualized url as an attribute to make it accessible to e2e tests
+                    this.element.setAttribute('test-current-url', url);
+                }
+            }
+        }
+    }
+    onLayerPainted({ data: layer }) {
+        if (!this.model) {
+            return;
+        }
+        const selection = this.layerViewHost.selection();
+        if (selection && selection.layer() === layer) {
+            this.layerDetailsView.update();
+        }
+        this.layers3DView.updateLayerSnapshot(layer);
+    }
+    onPaintProfileRequested({ data: selection }) {
+        void this.layers3DView.snapshotForSelection(selection).then(snapshotWithRect => {
+            if (!snapshotWithRect) {
+                return;
+            }
+            this.layerBeingProfiled = selection.layer();
+            if (!this.tabbedPane.hasTab(DetailsViewTabs.Profiler)) {
+                this.tabbedPane.appendTab(DetailsViewTabs.Profiler, i18nString(UIStrings.profiler), this.paintProfilerView, undefined, true, true);
+            }
+            this.tabbedPane.selectTab(DetailsViewTabs.Profiler);
+            this.paintProfilerView.profile(snapshotWithRect.snapshot);
+        });
+    }
+    onTabClosed(event) {
+        if (event.data.tabId !== DetailsViewTabs.Profiler || !this.layerBeingProfiled) {
+            return;
+        }
+        this.paintProfilerView.reset();
+        this.layers3DView.showImageForLayer(this.layerBeingProfiled, undefined);
+        this.layerBeingProfiled = null;
+    }
+    showImage(imageURL) {
+        if (this.layerBeingProfiled) {
+            this.layers3DView.showImageForLayer(this.layerBeingProfiled, imageURL);
+        }
+    }
+    onScaleChanged(event) {
+        this.paintProfilerView.setScale(event.data);
+    }
+}
+export const DetailsViewTabs = {
+    Details: 'details',
+    Profiler: 'profiler',
+};
+//# sourceMappingURL=LayersPanel.js.map

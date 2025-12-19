@@ -1,0 +1,265 @@
+// Copyright 2020 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import { assertScreenshot, renderElementIntoDOM, } from '../../../testing/DOMHelpers.js';
+import { setupLocaleHooks } from '../../../testing/LocaleHelpers.js';
+import { createViewFunctionStub, } from '../../../testing/ViewFunctionHelpers.js';
+import * as LinearMemoryInspectorComponents from './components.js';
+const LinearMemoryInspector = LinearMemoryInspectorComponents.LinearMemoryInspector.LinearMemoryInspector;
+describe('LinearMemoryInspector', () => {
+    setupLocaleHooks();
+    it('renders the inspector', async () => {
+        const target = document.createElement('div');
+        target.style.width = 'var(--sys-size-40)';
+        target.style.height = 'var(--sys-size-30)';
+        renderElementIntoDOM(target);
+        const array = [];
+        const string = 'Hello this is a string from the memory buffer!';
+        for (let i = 0; i < string.length; ++i) {
+            array.push(string.charCodeAt(i));
+        }
+        for (let i = -1000; i < 1000; ++i) {
+            array.push(i);
+        }
+        const memory = new Uint8Array(array);
+        const valueTypes = new Set([
+            "Float 32-bit" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.ValueType.FLOAT32 */,
+            "Integer 32-bit" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.ValueType.INT32 */,
+            "Pointer 32-bit" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.ValueType.POINTER32 */
+        ]);
+        const valueTypeModes = new Map();
+        LinearMemoryInspectorComponents.LinearMemoryInspector.DEFAULT_VIEW({
+            memory: new Uint8Array(memory),
+            address: 0,
+            memoryOffset: 0,
+            valueTypes,
+            outerMemoryLength: memory.length,
+            valueTypeModes,
+            endianness: "Little Endian" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.Endianness.LITTLE */,
+            highlightInfo: undefined,
+            hideValueInspector: false,
+            currentNavigatorMode: "Submitted" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Mode.SUBMITTED */,
+            currentNavigatorAddressLine: '0',
+            canGoBackInHistory: false,
+            canGoForwardInHistory: false,
+            onRefreshRequest: () => { },
+            onAddressChange: () => { },
+            onNavigatePage: () => { },
+            onNavigateHistory: () => false,
+            onJumpToAddress: () => { },
+            onDeleteMemoryHighlight: () => { },
+            onByteSelected: () => { },
+            onResize: () => { },
+            onValueTypeToggled: () => { },
+            onValueTypeModeChanged: () => { },
+            onEndiannessChanged: () => { },
+            memorySlice: new Uint8Array(memory),
+            viewerStart: 0,
+        }, {}, target);
+        await assertScreenshot('linear_memory_inspector/lmi.png');
+    });
+});
+describe('LinearMemoryInspector', () => {
+    setupLocaleHooks();
+    let component;
+    let view;
+    beforeEach(async () => {
+        view = createViewFunctionStub(LinearMemoryInspector);
+        component = new LinearMemoryInspector(undefined, view);
+        const size = 1000;
+        const memory = [];
+        for (let i = 0; i < size; ++i) {
+            memory[i] = i;
+        }
+        component.memory = new Uint8Array(memory);
+        component.address = 20;
+        component.memoryOffset = 0;
+        component.outerMemoryLength = memory.length;
+        component.endianness = "Little Endian" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.Endianness.LITTLE */;
+        component.valueTypes = new Set(LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.getDefaultValueTypeMapping().keys());
+        component.markAsRoot();
+        renderElementIntoDOM(component);
+        await view.nextInput;
+    });
+    it('only saves history entries if addresses differ', async () => {
+        // Set the address to zero to avoid the LMI to jump around in terms of addresses
+        // before the LMI is completely rendered (it requires two rendering processes,
+        // meanwhile our test might have already started).
+        component.address = 0;
+        await view.nextInput;
+        const byteIndices = [2, 1, 1, 2];
+        const expectedHistory = [2, 1, 2];
+        for (const index of byteIndices) {
+            view.input.onByteSelected(new LinearMemoryInspectorComponents.LinearMemoryViewer.ByteSelectedEvent(index));
+            await view.nextInput;
+        }
+        for (const index of expectedHistory) {
+            assert.strictEqual(view.input.address, index);
+            view.input.onNavigateHistory(new LinearMemoryInspectorComponents.LinearMemoryNavigator.HistoryNavigationEvent("Backward" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Navigation.BACKWARD */));
+            await view.nextInput;
+        }
+    });
+    it('can navigate addresses back and forth in history', async () => {
+        const visitedByteValue = [view.input.address];
+        const historyLength = 10;
+        for (let i = 1; i < historyLength; ++i) {
+            view.input.onByteSelected(new LinearMemoryInspectorComponents.LinearMemoryViewer.ByteSelectedEvent(i));
+            const newAddress = (await view.nextInput).address;
+            visitedByteValue.push(newAddress);
+        }
+        for (let i = historyLength - 1; i > 0; --i) {
+            assert.strictEqual(view.input.address, visitedByteValue[i]);
+            view.input.onNavigateHistory(new LinearMemoryInspectorComponents.LinearMemoryNavigator.HistoryNavigationEvent("Backward" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Navigation.BACKWARD */));
+            await view.nextInput;
+        }
+        assert.strictEqual(view.input.address, visitedByteValue[0]);
+        for (let i = 0; i < historyLength - 1; ++i) {
+            assert.strictEqual(view.input.address, visitedByteValue[i]);
+            view.input.onNavigateHistory(new LinearMemoryInspectorComponents.LinearMemoryNavigator.HistoryNavigationEvent("Forward" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Navigation.FORWARD */));
+            await view.nextInput;
+        }
+        assert.strictEqual(view.input.address, visitedByteValue[historyLength - 1]);
+    });
+    it('can turn the page back and forth', async () => {
+        const addressBefore = view.input.address;
+        const numBytesPerPage = view.input.memorySlice.length;
+        view.input.onNavigatePage(new LinearMemoryInspectorComponents.LinearMemoryNavigator.PageNavigationEvent("Forward" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Navigation.FORWARD */));
+        let addressAfter = (await view.nextInput).address;
+        let expectedAddressAfter = addressBefore + numBytesPerPage;
+        assert.strictEqual(addressAfter, expectedAddressAfter);
+        view.input.onNavigatePage(new LinearMemoryInspectorComponents.LinearMemoryNavigator.PageNavigationEvent("Backward" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Navigation.BACKWARD */));
+        addressAfter = (await view.nextInput).address;
+        expectedAddressAfter -= numBytesPerPage;
+        assert.strictEqual(addressAfter, Math.max(0, expectedAddressAfter));
+    });
+    it('synchronizes selected addresses in navigator and viewer', async () => {
+        const expectedByteValue = view.input.memory[view.input.address];
+        assert.strictEqual(view.input.address, expectedByteValue);
+    });
+    it('can change endianness settings on event', async () => {
+        assert.deepEqual(view.input.endianness, "Little Endian" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.Endianness.LITTLE */);
+        const endianSetting = "Big Endian" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.Endianness.BIG */;
+        view.input.onEndiannessChanged(endianSetting);
+        const newViewInput = await view.nextInput;
+        assert.deepEqual(newViewInput.endianness, endianSetting);
+    });
+    it('updates current address if user triggers a jumptopointeraddress event', async () => {
+        const memory = new Uint8Array([2, 0, 0, 0]);
+        component.valueTypes = new Set(["Pointer 32-bit" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.ValueType.POINTER32 */]);
+        component.memory = memory;
+        component.outerMemoryLength = memory.length;
+        component.address = 0;
+        component.endianness = "Little Endian" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.Endianness.LITTLE */;
+        await view.nextInput;
+        view.input.onJumpToAddress(2);
+        const newViewInput = await view.nextInput;
+        const expectedSelectedByte = new DataView(memory.buffer).getUint32(0, true);
+        assert.strictEqual(newViewInput.address, expectedSelectedByte);
+    });
+    it('leaves the navigator address as inputted by user on edit event', async () => {
+        const event = new LinearMemoryInspectorComponents.LinearMemoryNavigator.AddressInputChangedEvent('2', "Edit" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Mode.EDIT */);
+        view.input.onAddressChange(event);
+        const newViewInput = await view.nextInput;
+        assert.strictEqual(newViewInput.currentNavigatorAddressLine, '2');
+        assert.strictEqual(newViewInput.currentNavigatorMode, "Edit" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Mode.EDIT */);
+    });
+    it('leaves the navigator address as inputted by user on invalid edit event', async () => {
+        const event = new LinearMemoryInspectorComponents.LinearMemoryNavigator.AddressInputChangedEvent('-2', "Edit" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Mode.EDIT */);
+        view.input.onAddressChange(event);
+        const newViewInput = await view.nextInput;
+        assert.strictEqual(newViewInput.currentNavigatorAddressLine, '-2');
+        assert.strictEqual(newViewInput.currentNavigatorMode, "Edit" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Mode.EDIT */);
+    });
+    it('leaves the navigator address as inputted by user on invalid submit event', async () => {
+        const event = new LinearMemoryInspectorComponents.LinearMemoryNavigator.AddressInputChangedEvent('-2', "Submitted" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Mode.SUBMITTED */);
+        view.input.onAddressChange(event);
+        const newViewInput = await view.nextInput;
+        assert.strictEqual(newViewInput.currentNavigatorAddressLine, '-2');
+        assert.strictEqual(newViewInput.currentNavigatorMode, "InvalidSubmit" /* LinearMemoryInspectorComponents.LinearMemoryNavigator.Mode.INVALID_SUBMIT */);
+    });
+    it('triggers MemoryRequestEvent on refresh', async () => {
+        const memoryRequestPromise = component.once("MemoryRequest" /* LinearMemoryInspectorComponents.LinearMemoryInspector.Events.MEMORY_REQUEST */);
+        view.input.onRefreshRequest();
+        const { start, end, address } = await memoryRequestPromise;
+        assert.strictEqual(address, view.input.address);
+        assert.isAbove(end, start);
+        assert.strictEqual(view.input.memorySlice.length, end - start);
+    });
+    it('triggers event on address change when byte is selected', async () => {
+        const addressPromise = component.once("AddressChanged" /* LinearMemoryInspectorComponents.LinearMemoryInspector.Events.ADDRESS_CHANGED */);
+        const numBytesPerPage = view.input.memorySlice.length;
+        const pageNumber = view.input.address / numBytesPerPage;
+        const addressOfFirstByte = pageNumber * numBytesPerPage + 1;
+        view.input.onByteSelected(new LinearMemoryInspectorComponents.LinearMemoryViewer.ByteSelectedEvent(addressOfFirstByte));
+        const address = await addressPromise;
+        assert.strictEqual(address, addressOfFirstByte);
+    });
+    it('triggers event on address change when data is set', async () => {
+        const addressPromise = component.once("AddressChanged" /* LinearMemoryInspectorComponents.LinearMemoryInspector.Events.ADDRESS_CHANGED */);
+        component.address = 10;
+        const address = await addressPromise;
+        assert.strictEqual(address, 10);
+    });
+    it('triggers event on settings changed when value type is changed', async () => {
+        const settingsPromise = component.once("SettingsChanged" /* LinearMemoryInspectorComponents.LinearMemoryInspector.Events.SETTINGS_CHANGED */);
+        const valueType = "Integer 16-bit" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.ValueType.INT16 */;
+        view.input.onValueTypeToggled(valueType, false);
+        const { valueTypes } = await settingsPromise;
+        assert.isTrue(valueTypes.size > 1);
+        assert.isFalse(valueTypes.has(valueType));
+    });
+    it('triggers event on settings changed when value type mode is changed', async () => {
+        const settingsPromise = component.once("SettingsChanged" /* LinearMemoryInspectorComponents.LinearMemoryInspector.Events.SETTINGS_CHANGED */);
+        const valueType = "Integer 16-bit" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.ValueType.INT16 */;
+        const valueTypeMode = "hex" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.ValueTypeMode.HEXADECIMAL */;
+        view.input.onValueTypeModeChanged(valueType, valueTypeMode);
+        const { valueTypes, modes } = await settingsPromise;
+        assert.isTrue(valueTypes.has(valueType));
+        assert.strictEqual(modes.get(valueType), valueTypeMode);
+    });
+    it('triggers event on settings changed when endianness is changed', async () => {
+        const settingsPromise = component.once("SettingsChanged" /* LinearMemoryInspectorComponents.LinearMemoryInspector.Events.SETTINGS_CHANGED */);
+        const endianness = "Big Endian" /* LinearMemoryInspectorComponents.ValueInterpreterDisplayUtils.Endianness.BIG */;
+        view.input.onEndiannessChanged(endianness);
+        const { endianness: newEndianness } = await settingsPromise;
+        assert.strictEqual(newEndianness, endianness);
+    });
+    it('formats a hexadecimal number', () => {
+        const number = 23;
+        assert.strictEqual(LinearMemoryInspectorComponents.LinearMemoryInspectorUtils.toHexString({ number, pad: 0, prefix: false }), '17');
+    });
+    it('formats a hexadecimal number and adds padding', () => {
+        const number = 23;
+        assert.strictEqual(LinearMemoryInspectorComponents.LinearMemoryInspectorUtils.toHexString({ number, pad: 5, prefix: false }), '00017');
+    });
+    it('formats a hexadecimal number and adds prefix', () => {
+        const number = 23;
+        assert.strictEqual(LinearMemoryInspectorComponents.LinearMemoryInspectorUtils.toHexString({ number, pad: 5, prefix: true }), '0x00017');
+    });
+    it('can parse a valid hexadecimal address', () => {
+        const address = '0xa';
+        const parsedAddress = LinearMemoryInspectorComponents.LinearMemoryInspectorUtils.parseAddress(address);
+        assert.strictEqual(parsedAddress, 10);
+    });
+    it('can parse a valid decimal address', () => {
+        const address = '20';
+        const parsedAddress = LinearMemoryInspectorComponents.LinearMemoryInspectorUtils.parseAddress(address);
+        assert.strictEqual(parsedAddress, 20);
+    });
+    it('returns undefined on parsing invalid address', () => {
+        const address = '20a';
+        const parsedAddress = LinearMemoryInspectorComponents.LinearMemoryInspectorUtils.parseAddress(address);
+        assert.isUndefined(parsedAddress);
+    });
+    it('returns undefined on parsing negative address', () => {
+        const address = '-20';
+        const parsedAddress = LinearMemoryInspectorComponents.LinearMemoryInspectorUtils.parseAddress(address);
+        assert.isUndefined(parsedAddress);
+    });
+    it('can hide the value inspector', async () => {
+        component.hideValueInspector = true;
+        const newInput = await view.nextInput;
+        assert.isTrue(newInput.hideValueInspector);
+    });
+});
+//# sourceMappingURL=LinearMemoryInspector.test.js.map

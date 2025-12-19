@@ -1,0 +1,162 @@
+// Copyright 2022 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import * as FormatterWorker from './formatter_worker.js';
+describe('ScopeParser', () => {
+    describe('parseScopes', () => {
+        const { parseScopes } = FormatterWorker.ScopeParser;
+        it('parses simple function', () => {
+            const scopes = parseScopes('function foo(a){}');
+            const innerScope = scopes?.children[0];
+            assert.strictEqual(innerScope?.start, 12);
+            assert.strictEqual(innerScope?.end, 17);
+            assert.strictEqual(innerScope?.kind, 2 /* FormatterAction.ScopeKind.FUNCTION */);
+            assert.strictEqual(innerScope?.name, 'foo');
+            assert.deepEqual(innerScope?.nameMappingLocations, [9, 12]);
+            assert.deepEqual(innerScope?.variables?.get('a')?.uses.map(u => u.offset), [13]);
+        });
+        it('parses function expression', () => {
+            const scopes = parseScopes('const foo = function(a) {}; const bar = function b() {}');
+            const scopeFoo = scopes?.children[0];
+            assert.strictEqual(scopeFoo?.kind, 2 /* FormatterAction.ScopeKind.FUNCTION */);
+            assert.isUndefined(scopeFoo?.name);
+            assert.deepEqual(scopeFoo?.nameMappingLocations, [20]);
+            const scopeBar = scopes?.children[1];
+            assert.strictEqual(scopeBar?.kind, 2 /* FormatterAction.ScopeKind.FUNCTION */);
+            assert.strictEqual(scopeBar?.name, 'b');
+            assert.deepEqual(scopeBar?.nameMappingLocations, [49, 50]);
+        });
+        it('parses arrow function', () => {
+            const scopes = parseScopes('let f = (a) => {}');
+            assert.strictEqual(scopes?.children.length, 1);
+            const innerScope = scopes?.children[0];
+            assert.strictEqual(innerScope?.start, 8);
+            assert.strictEqual(innerScope?.end, 17);
+            assert.strictEqual(innerScope?.kind, 4 /* FormatterAction.ScopeKind.ARROW_FUNCTION */);
+            assert.deepEqual(innerScope?.variables?.size, 1);
+            assert.deepEqual(innerScope?.variables?.get('a')?.uses.map(u => u.offset), [9]);
+            assert.deepEqual(innerScope?.nameMappingLocations, [8, 12]);
+        });
+        it('parses for loop', () => {
+            const scopes = parseScopes('for (let i = 0; i < 3; i++) console.log(i);');
+            const innerScope = scopes?.children[0];
+            assert.strictEqual(innerScope?.start, 0);
+            assert.strictEqual(innerScope?.end, 43);
+            assert.deepEqual(innerScope?.variables?.size, 1);
+            assert.deepEqual(innerScope?.variables?.get('i')?.uses.map(u => u.offset), [9, 16, 23, 40]);
+        });
+        it('parses block scope', () => {
+            const scopes = parseScopes('let x; { let y; }');
+            assert.strictEqual(scopes?.start, 0);
+            assert.strictEqual(scopes?.end, 17);
+            assert.deepEqual(scopes?.variables?.size, 1);
+            assert.deepEqual(scopes?.variables?.get('x')?.uses.map(u => u.offset), [4]);
+            const blockScope = scopes?.children[0];
+            assert.strictEqual(blockScope?.start, 7);
+            assert.strictEqual(blockScope?.end, 17);
+            assert.deepEqual(blockScope?.variables?.size, 1);
+            assert.deepEqual(blockScope?.variables?.get('y')?.uses.map(u => u.offset), [13]);
+        });
+        it('parses object destructuring', () => {
+            const source = 'let {x: y} = {}';
+            const scopes = parseScopes(source);
+            assert.exists(scopes);
+            assert.isEmpty(scopes.children);
+            assert.strictEqual(scopes.variables.size, 1);
+            const [[name, { uses }]] = scopes.variables;
+            assert.strictEqual(name, 'y');
+            assert.lengthOf(uses, 1);
+            assert.strictEqual(uses[0].offset, source.indexOf('y'));
+        });
+        it('parses object destructuring with default values', () => {
+            const source = 'let {x: y = 42} = {}';
+            const scopes = parseScopes(source);
+            assert.exists(scopes);
+            assert.isEmpty(scopes.children);
+            assert.strictEqual(scopes.variables.size, 1);
+            const [[name, { uses }]] = scopes.variables;
+            assert.strictEqual(name, 'y');
+            assert.lengthOf(uses, 1);
+            assert.strictEqual(uses[0].offset, source.indexOf('y'));
+        });
+        it('parses object destructuring with short-hand syntax', () => {
+            const source = 'let {x} = {}';
+            const scopes = parseScopes(source);
+            assert.exists(scopes);
+            assert.isEmpty(scopes.children);
+            assert.strictEqual(scopes.variables.size, 1);
+            const [[name, { uses }]] = scopes.variables;
+            assert.strictEqual(name, 'x');
+            assert.lengthOf(uses, 1);
+            assert.strictEqual(uses[0].offset, source.indexOf('x'));
+        });
+        it('parses object destructuring with short-hand syntax and default values', () => {
+            const source = 'let {x = 42} = {}';
+            const scopes = parseScopes(source);
+            assert.exists(scopes);
+            assert.isEmpty(scopes.children);
+            assert.strictEqual(scopes.variables.size, 1);
+            const [[name, { uses }]] = scopes.variables;
+            assert.strictEqual(name, 'x');
+            assert.lengthOf(uses, 1);
+            assert.strictEqual(uses[0].offset, source.indexOf('x'));
+        });
+        it('parses ES modules', () => {
+            const source = 'import * as Foo from "./foo.js"; Foo.foo();';
+            const scopes = parseScopes(source, 'module');
+            assert.exists(scopes);
+            assert.isEmpty(scopes.children);
+            assert.strictEqual(scopes.variables.size, 1);
+            const [[name, { uses }]] = scopes.variables;
+            assert.strictEqual(name, 'Foo');
+            assert.lengthOf(uses, 1);
+            const firstOccurence = source.indexOf('Foo');
+            assert.strictEqual(uses[0].offset, source.indexOf('Foo', firstOccurence + 1));
+        });
+        it('parses methods', () => {
+            const scopes = parseScopes(`class C { someMethod() {} }`);
+            const scopeMethod = scopes?.children[0];
+            assert.strictEqual(scopeMethod?.kind, 2 /* FormatterAction.ScopeKind.FUNCTION */);
+            assert.strictEqual(scopeMethod?.name, 'someMethod');
+            assert.deepEqual(scopeMethod?.nameMappingLocations, [10, 20]);
+        });
+        it('parses private methods', () => {
+            const scopes = parseScopes(`class C { #someMethod() {} }`);
+            const scopeMethod = scopes?.children[0];
+            assert.strictEqual(scopeMethod?.kind, 2 /* FormatterAction.ScopeKind.FUNCTION */);
+            assert.strictEqual(scopeMethod?.name, '#someMethod');
+            assert.deepEqual(scopeMethod?.nameMappingLocations, [10, 21]);
+        });
+        it('parses getters and setters', () => {
+            const scopes = parseScopes(`class C { get foo() {} set foo(value) {} }`);
+            const scopeGet = scopes?.children[0];
+            assert.strictEqual(scopeGet?.kind, 2 /* FormatterAction.ScopeKind.FUNCTION */);
+            assert.strictEqual(scopeGet?.name, 'foo');
+            assert.deepEqual(scopeGet?.nameMappingLocations, [14, 17]);
+            const scopeSet = scopes?.children[1];
+            assert.strictEqual(scopeSet?.kind, 2 /* FormatterAction.ScopeKind.FUNCTION */);
+            assert.strictEqual(scopeGet?.name, 'foo');
+            assert.deepEqual(scopeSet?.nameMappingLocations, [27, 30]);
+        });
+        it('parses method syntax in object literals', () => {
+            const scopes = parseScopes('const obj = { someMethod() {} };');
+            const scopeMethod = scopes?.children[0];
+            assert.strictEqual(scopeMethod?.kind, 2 /* FormatterAction.ScopeKind.FUNCTION */);
+            assert.strictEqual(scopeMethod?.name, 'someMethod');
+            assert.deepEqual(scopeMethod?.nameMappingLocations, [14, 24]);
+        });
+        it('parses async arrow functions', () => {
+            const scopes = parseScopes('const x = async y => await y;');
+            const scopeFn = scopes?.children[0];
+            assert.strictEqual(scopeFn?.kind, 4 /* FormatterAction.ScopeKind.ARROW_FUNCTION */);
+            assert.deepEqual(scopeFn?.nameMappingLocations, [18]);
+        });
+        it('doesn\'t get confused by default values in arrow functions', () => {
+            const scopes = parseScopes('const x = (a = 42) => console.log(a);');
+            const scopeFn = scopes?.children[0];
+            assert.strictEqual(scopeFn?.kind, 4 /* FormatterAction.ScopeKind.ARROW_FUNCTION */);
+            assert.deepEqual(scopeFn?.nameMappingLocations, [10, 19]);
+        });
+    });
+});
+//# sourceMappingURL=ScopeParser.test.js.map

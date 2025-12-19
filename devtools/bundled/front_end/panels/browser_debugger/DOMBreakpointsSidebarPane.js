@@ -1,0 +1,357 @@
+// Copyright 2011 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+/* eslint-disable @devtools/no-imperative-dom-api */
+import * as Common from '../../core/common/common.js';
+import * as i18n from '../../core/i18n/i18n.js';
+import * as SDK from '../../core/sdk/sdk.js';
+import * as UI from '../../ui/legacy/legacy.js';
+import * as VisualLogging from '../../ui/visual_logging/visual_logging.js';
+import * as PanelsCommon from '../common/common.js';
+import * as Sources from '../sources/sources.js';
+import domBreakpointsSidebarPaneStyles from './domBreakpointsSidebarPane.css.js';
+const UIStrings = {
+    /**
+     * @description Header text to indicate there are no breakpoints
+     */
+    noBreakpoints: 'No DOM breakpoints',
+    /**
+     * @description DOM breakpoints description that shows if no DOM breakpoints are set
+     */
+    domBreakpointsDescription: 'DOM breakpoints pause on the code that changes a DOM node or its children.',
+    /**
+     * @description Accessibility label for the DOM breakpoints list in the Sources panel
+     */
+    domBreakpointsList: 'DOM Breakpoints list',
+    /**
+     * @description Text with two placeholders separated by a colon
+     * @example {Node removed} PH1
+     * @example {div#id1} PH2
+     */
+    sS: '{PH1}: {PH2}',
+    /**
+     * @description Text with three placeholders separated by a colon and a comma
+     * @example {Node removed} PH1
+     * @example {div#id1} PH2
+     * @example {checked} PH3
+     */
+    sSS: '{PH1}: {PH2}, {PH3}',
+    /**
+     * @description Text exposed to screen readers on checked items.
+     */
+    checked: 'checked',
+    /**
+     * @description Accessible text exposed to screen readers when the screen reader encounters an unchecked checkbox.
+     */
+    unchecked: 'unchecked',
+    /**
+     * @description Accessibility label for hit breakpoints in the Sources panel.
+     * @example {checked} PH1
+     */
+    sBreakpointHit: '{PH1} breakpoint hit',
+    /**
+     * @description Screen reader description of a hit breakpoint in the Sources panel
+     */
+    breakpointHit: 'breakpoint hit',
+    /**
+     * @description A context menu item in the DOM Breakpoints sidebar that reveals the node on which the current breakpoint is set.
+     */
+    revealDomNodeInElementsPanel: 'Reveal DOM node in Elements panel',
+    /**
+     * @description Text to remove a breakpoint
+     */
+    removeBreakpoint: 'Remove breakpoint',
+    /**
+     * @description A context menu item in the DOMBreakpoints Sidebar Pane of the JavaScript Debugging pane in the Sources panel or the DOM Breakpoints pane in the Elements panel
+     */
+    removeAllDomBreakpoints: 'Remove all DOM breakpoints',
+    /**
+     * @description Text in DOMBreakpoints Sidebar Pane of the JavaScript Debugging pane in the Sources panel or the DOM Breakpoints pane in the Elements panel
+     */
+    subtreeModified: 'Subtree modified',
+    /**
+     * @description Text in DOMBreakpoints Sidebar Pane of the JavaScript Debugging pane in the Sources panel or the DOM Breakpoints pane in the Elements panel
+     */
+    attributeModified: 'Attribute modified',
+    /**
+     * @description Text in DOMBreakpoints Sidebar Pane of the JavaScript Debugging pane in the Sources panel or the DOM Breakpoints pane in the Elements panel
+     */
+    nodeRemoved: 'Node removed',
+    /**
+     * @description Entry in context menu of the elements pane, allowing developers to select a DOM
+     * breakpoint for the element that they have right-clicked on. Short for the action 'set a
+     * breakpoint on this DOM Element'. A breakpoint pauses the website when the code reaches a
+     * specified line, or when a specific action happen (in this case, when the DOM Element is
+     * modified).
+     */
+    breakOn: 'Break on',
+    /**
+     * @description Screen reader description for removing a DOM breakpoint.
+     */
+    breakpointRemoved: 'Breakpoint removed',
+    /**
+     * @description Screen reader description for setting a DOM breakpoint.
+     */
+    breakpointSet: 'Breakpoint set',
+};
+const str_ = i18n.i18n.registerUIStrings('panels/browser_debugger/DOMBreakpointsSidebarPane.ts', UIStrings);
+const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
+const i18nLazyString = i18n.i18n.getLazilyComputedLocalizedString.bind(undefined, str_);
+const DOM_BREAKPOINT_DOCUMENTATION_URL = 'https://developer.chrome.com/docs/devtools/javascript/breakpoints#dom';
+let domBreakpointsSidebarPaneInstance;
+export class DOMBreakpointsSidebarPane extends UI.Widget.VBox {
+    elementToCheckboxes;
+    #emptyElement;
+    #breakpoints;
+    #list;
+    #highlightedBreakpoint;
+    constructor() {
+        super({ useShadowDom: true });
+        this.registerRequiredCSS(domBreakpointsSidebarPaneStyles);
+        this.elementToCheckboxes = new WeakMap();
+        this.contentElement.setAttribute('jslog', `${VisualLogging.section('sources.dom-breakpoints').track({ resize: true })}`);
+        this.contentElement.classList.add('dom-breakpoints-container');
+        this.#emptyElement = this.contentElement.createChild('div', 'placeholder');
+        this.#emptyElement.createChild('div', 'gray-info-message').textContent = i18nString(UIStrings.noBreakpoints);
+        const emptyWidget = new UI.EmptyWidget.EmptyWidget(UIStrings.noBreakpoints, i18nString(UIStrings.domBreakpointsDescription));
+        emptyWidget.link = DOM_BREAKPOINT_DOCUMENTATION_URL;
+        emptyWidget.show(this.#emptyElement);
+        this.#breakpoints = new UI.ListModel.ListModel();
+        this.#list = new UI.ListControl.ListControl(this.#breakpoints, this, UI.ListControl.ListMode.NonViewport);
+        this.contentElement.appendChild(this.#list.element);
+        this.#list.element.classList.add('breakpoint-list', 'hidden');
+        UI.ARIAUtils.markAsList(this.#list.element);
+        UI.ARIAUtils.setLabel(this.#list.element, i18nString(UIStrings.domBreakpointsList));
+        SDK.TargetManager.TargetManager.instance().addModelListener(SDK.DOMDebuggerModel.DOMDebuggerModel, "DOMBreakpointAdded" /* SDK.DOMDebuggerModel.Events.DOM_BREAKPOINT_ADDED */, this.breakpointAdded, this);
+        SDK.TargetManager.TargetManager.instance().addModelListener(SDK.DOMDebuggerModel.DOMDebuggerModel, "DOMBreakpointToggled" /* SDK.DOMDebuggerModel.Events.DOM_BREAKPOINT_TOGGLED */, this.breakpointToggled, this);
+        SDK.TargetManager.TargetManager.instance().addModelListener(SDK.DOMDebuggerModel.DOMDebuggerModel, "DOMBreakpointsRemoved" /* SDK.DOMDebuggerModel.Events.DOM_BREAKPOINTS_REMOVED */, this.breakpointsRemoved, this);
+        for (const domDebuggerModel of SDK.TargetManager.TargetManager.instance().models(SDK.DOMDebuggerModel.DOMDebuggerModel)) {
+            domDebuggerModel.retrieveDOMBreakpoints();
+            for (const breakpoint of domDebuggerModel.domBreakpoints()) {
+                this.addBreakpoint(breakpoint);
+            }
+        }
+        this.#highlightedBreakpoint = null;
+        this.update();
+    }
+    static instance() {
+        if (!domBreakpointsSidebarPaneInstance) {
+            domBreakpointsSidebarPaneInstance = new DOMBreakpointsSidebarPane();
+        }
+        return domBreakpointsSidebarPaneInstance;
+    }
+    createElementForItem(item) {
+        const element = document.createElement('div');
+        element.classList.add('breakpoint-entry');
+        element.setAttribute('jslog', `${VisualLogging.domBreakpoint().context(item.type).track({ keydown: 'ArrowUp|ArrowDown|PageUp|PageDown' })}`);
+        element.addEventListener('contextmenu', this.contextMenu.bind(this, item), true);
+        UI.ARIAUtils.markAsListitem(element);
+        element.tabIndex = -1;
+        const checkbox = UI.UIUtils.CheckboxLabel.create(/* title */ undefined, item.enabled);
+        checkbox.addEventListener('click', this.checkboxClicked.bind(this, item), false);
+        checkbox.tabIndex = -1;
+        this.elementToCheckboxes.set(element, checkbox);
+        element.appendChild(checkbox);
+        element.addEventListener('keydown', event => {
+            if (event.key === ' ') {
+                checkbox.click();
+                event.consume(true);
+            }
+        });
+        const labelElement = document.createElement('div');
+        labelElement.classList.add('dom-breakpoint');
+        element.appendChild(labelElement);
+        const description = document.createElement('div');
+        const breakpointTypeLabel = BreakpointTypeLabels.get(item.type);
+        description.textContent = breakpointTypeLabel ? breakpointTypeLabel() : null;
+        const breakpointTypeText = breakpointTypeLabel ? breakpointTypeLabel() : '';
+        UI.ARIAUtils.setLabel(checkbox, breakpointTypeText);
+        checkbox.setAttribute('jslog', `${VisualLogging.toggle().track({ click: true })}`);
+        const checkedStateText = item.enabled ? i18nString(UIStrings.checked) : i18nString(UIStrings.unchecked);
+        const linkifiedNode = document.createElement('monospace');
+        linkifiedNode.style.display = 'block';
+        labelElement.appendChild(linkifiedNode);
+        const linkified = PanelsCommon.DOMLinkifier.Linkifier.instance().linkify(item.node, { preventKeyboardFocus: true, tooltip: undefined });
+        linkifiedNode.appendChild(linkified);
+        // Give the checkbox an aria-label as it is required for all form element
+        UI.ARIAUtils.setLabel(checkbox, i18nString(UIStrings.sS, { PH1: breakpointTypeText, PH2: linkified.deepTextContent() }));
+        // The parent list element is the one that actually gets focused.
+        // Assign it an aria-label with complete information for the screen reader to read out properly
+        UI.ARIAUtils.setLabel(element, i18nString(UIStrings.sSS, { PH1: breakpointTypeText, PH2: linkified.deepTextContent(), PH3: checkedStateText }));
+        labelElement.appendChild(description);
+        if (item === this.#highlightedBreakpoint) {
+            element.classList.add('breakpoint-hit');
+            UI.ARIAUtils.setDescription(element, i18nString(UIStrings.sBreakpointHit, { PH1: checkedStateText }));
+            UI.ARIAUtils.setDescription(checkbox, i18nString(UIStrings.breakpointHit));
+        }
+        else {
+            UI.ARIAUtils.setDescription(element, checkedStateText);
+        }
+        this.#emptyElement.classList.add('hidden');
+        this.#list.element.classList.remove('hidden');
+        return element;
+    }
+    heightForItem(_item) {
+        return 0;
+    }
+    isItemSelectable(_item) {
+        return true;
+    }
+    updateSelectedItemARIA(_fromElement, _toElement) {
+        return true;
+    }
+    selectedItemChanged(_from, _to, fromElement, toElement) {
+        if (fromElement) {
+            fromElement.tabIndex = -1;
+        }
+        if (toElement) {
+            this.setDefaultFocusedElement(toElement);
+            toElement.tabIndex = 0;
+            if (this.hasFocus()) {
+                toElement.focus();
+            }
+        }
+    }
+    breakpointAdded(event) {
+        this.addBreakpoint(event.data);
+    }
+    breakpointToggled(event) {
+        const hadFocus = this.hasFocus();
+        const breakpoint = event.data;
+        this.#list.refreshItem(breakpoint);
+        if (hadFocus) {
+            this.focus();
+        }
+    }
+    breakpointsRemoved(event) {
+        const hadFocus = this.hasFocus();
+        const breakpoints = event.data;
+        let lastIndex = -1;
+        for (const breakpoint of breakpoints) {
+            const index = this.#breakpoints.indexOf(breakpoint);
+            if (index >= 0) {
+                this.#breakpoints.remove(index);
+                lastIndex = index;
+            }
+        }
+        if (this.#breakpoints.length === 0) {
+            this.#emptyElement.classList.remove('hidden');
+            this.setDefaultFocusedElement(this.#emptyElement);
+            this.#list.element.classList.add('hidden');
+        }
+        else if (lastIndex >= 0) {
+            const breakpointToSelect = this.#breakpoints.at(lastIndex);
+            if (breakpointToSelect) {
+                this.#list.selectItem(breakpointToSelect);
+            }
+        }
+        if (hadFocus) {
+            this.focus();
+        }
+    }
+    addBreakpoint(breakpoint) {
+        this.#breakpoints.insertWithComparator(breakpoint, (breakpointA, breakpointB) => {
+            if (breakpointA.type > breakpointB.type) {
+                return -1;
+            }
+            if (breakpointA.type < breakpointB.type) {
+                return 1;
+            }
+            return 0;
+        });
+        if (!this.#list.selectedItem() || !this.hasFocus()) {
+            this.#list.selectItem(this.#breakpoints.at(0));
+        }
+    }
+    contextMenu(breakpoint, event) {
+        const contextMenu = new UI.ContextMenu.ContextMenu(event);
+        contextMenu.defaultSection().appendItem(i18nString(UIStrings.revealDomNodeInElementsPanel), () => Common.Revealer.reveal(breakpoint.node), { jslogContext: 'reveal-in-elements' });
+        contextMenu.defaultSection().appendItem(i18nString(UIStrings.removeBreakpoint), () => {
+            breakpoint.domDebuggerModel.removeDOMBreakpoint(breakpoint.node, breakpoint.type);
+        }, { jslogContext: 'remove-breakpoint' });
+        contextMenu.defaultSection().appendItem(i18nString(UIStrings.removeAllDomBreakpoints), () => {
+            breakpoint.domDebuggerModel.removeAllDOMBreakpoints();
+        }, { jslogContext: 'remove-all-dom-breakpoints' });
+        void contextMenu.show();
+    }
+    checkboxClicked(breakpoint, event) {
+        breakpoint.domDebuggerModel.toggleDOMBreakpoint(breakpoint, event.target ? event.target.checked : false);
+    }
+    flavorChanged(_object) {
+        this.update();
+    }
+    update() {
+        const details = UI.Context.Context.instance().flavor(SDK.DebuggerModel.DebuggerPausedDetails);
+        if (this.#highlightedBreakpoint) {
+            const oldHighlightedBreakpoint = this.#highlightedBreakpoint;
+            this.#highlightedBreakpoint = null;
+            this.#list.refreshItem(oldHighlightedBreakpoint);
+        }
+        if (!details?.auxData || details.reason !== "DOM" /* Protocol.Debugger.PausedEventReason.DOM */) {
+            return;
+        }
+        const domDebuggerModel = details.debuggerModel.target().model(SDK.DOMDebuggerModel.DOMDebuggerModel);
+        if (!domDebuggerModel) {
+            return;
+        }
+        // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = domDebuggerModel.resolveDOMBreakpointData(details.auxData);
+        if (!data) {
+            return;
+        }
+        for (const breakpoint of this.#breakpoints) {
+            if (breakpoint.node === data.node && breakpoint.type === data.type) {
+                this.#highlightedBreakpoint = breakpoint;
+            }
+        }
+        if (this.#highlightedBreakpoint) {
+            this.#list.refreshItem(this.#highlightedBreakpoint);
+        }
+        void UI.ViewManager.ViewManager.instance().showView('sources.dom-breakpoints');
+    }
+}
+const BreakpointTypeLabels = new Map([
+    ["subtree-modified" /* Protocol.DOMDebugger.DOMBreakpointType.SubtreeModified */, i18nLazyString(UIStrings.subtreeModified)],
+    ["attribute-modified" /* Protocol.DOMDebugger.DOMBreakpointType.AttributeModified */, i18nLazyString(UIStrings.attributeModified)],
+    ["node-removed" /* Protocol.DOMDebugger.DOMBreakpointType.NodeRemoved */, i18nLazyString(UIStrings.nodeRemoved)],
+]);
+export class ContextMenuProvider {
+    appendApplicableItems(_event, contextMenu, node) {
+        if (node.pseudoType()) {
+            return;
+        }
+        const domDebuggerModel = node.domModel().target().model(SDK.DOMDebuggerModel.DOMDebuggerModel);
+        if (!domDebuggerModel) {
+            return;
+        }
+        function toggleBreakpoint(type) {
+            if (!domDebuggerModel) {
+                return;
+            }
+            const label = Sources.DebuggerPausedMessage.BreakpointTypeNouns.get(type);
+            const labelString = label ? label() : '';
+            if (domDebuggerModel.hasDOMBreakpoint(node, type)) {
+                domDebuggerModel.removeDOMBreakpoint(node, type);
+                UI.ARIAUtils.LiveAnnouncer.alert(`${i18nString(UIStrings.breakpointRemoved)}: ${labelString}`);
+            }
+            else {
+                domDebuggerModel.setDOMBreakpoint(node, type);
+                UI.ARIAUtils.LiveAnnouncer.alert(`${i18nString(UIStrings.breakpointSet)}: ${labelString}`);
+            }
+        }
+        const breakpointsMenu = contextMenu.debugSection().appendSubMenuItem(i18nString(UIStrings.breakOn), false, 'break-on');
+        const allBreakpointTypes = {
+            SubtreeModified: "subtree-modified" /* Protocol.DOMDebugger.DOMBreakpointType.SubtreeModified */,
+            AttributeModified: "attribute-modified" /* Protocol.DOMDebugger.DOMBreakpointType.AttributeModified */,
+            NodeRemoved: "node-removed" /* Protocol.DOMDebugger.DOMBreakpointType.NodeRemoved */,
+        };
+        for (const type of Object.values(allBreakpointTypes)) {
+            const label = Sources.DebuggerPausedMessage.BreakpointTypeNouns.get(type);
+            if (label) {
+                breakpointsMenu.defaultSection().appendCheckboxItem(label(), toggleBreakpoint.bind(null, type), { checked: domDebuggerModel.hasDOMBreakpoint(node, type), jslogContext: type });
+            }
+        }
+    }
+}
+//# sourceMappingURL=DOMBreakpointsSidebarPane.js.map

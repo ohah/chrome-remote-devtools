@@ -1,0 +1,458 @@
+// Copyright 2023 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import * as Timeline from '../../../panels/timeline/timeline.js';
+import { describeWithEnvironment } from '../../../testing/EnvironmentHelpers.js';
+import { getMainThread, makeCompleteEvent, makeProfileCall, } from '../../../testing/TraceHelpers.js';
+import { TraceLoader } from '../../../testing/TraceLoader.js';
+import * as Trace from '../trace.js';
+describeWithEnvironment('TraceTree', () => {
+    describe('TopDownRootNode', () => {
+        it('builds the root node and its children properly from an event tree', () => {
+            // This builds the following tree:
+            // |------------------ROOT---------------------------|
+            // |-----A----| |-----B-----| |----------C---------|
+            const eventA = makeCompleteEvent('Event A', 0, 40_000);
+            const eventB = makeCompleteEvent('Event B', 50_000, 50_000);
+            const eventC = makeCompleteEvent('Event C', 150_000, 100_000);
+            const events = [
+                eventA,
+                eventB,
+                eventC,
+            ];
+            const root = new Trace.Extras.TraceTree.TopDownRootNode(events, {
+                filters: [],
+                startTime: Trace.Types.Timing.Milli(0),
+                endTime: Trace.Types.Timing.Milli(200_000),
+            });
+            const children = root.children();
+            assert.strictEqual(children.size, 3);
+            const nodesIterator = children.values();
+            assert.strictEqual(nodesIterator.next().value.event, eventA);
+            assert.strictEqual(nodesIterator.next().value.event, eventB);
+            assert.strictEqual(nodesIterator.next().value.event, eventC);
+        });
+        it('builds a top-down tree from an event tree with multiple levels 1', () => {
+            // This builds the following tree:
+            // |------------ROOT-----------|
+            // |-----A----| |-----B-----|
+            // |-C-| |-D-|
+            const eventA = makeCompleteEvent('Event A', 0, 40_000);
+            const eventC = makeCompleteEvent('Event C', 0, 10_000);
+            const eventD = makeCompleteEvent('Event D', 10_000, 10_000);
+            const eventB = makeCompleteEvent('Event B', 50_000, 50_000);
+            // Events must be in order.
+            const events = [
+                eventA,
+                eventC,
+                eventD,
+                eventB,
+            ];
+            const root = new Trace.Extras.TraceTree.TopDownRootNode(events, {
+                filters: [],
+                startTime: Trace.Types.Timing.Milli(0),
+                endTime: Trace.Types.Timing.Milli(200_000),
+            });
+            const rootChildren = root.children();
+            assert.strictEqual(rootChildren.size, 2);
+            const rootChildIterator = rootChildren.values();
+            const nodeA = rootChildIterator.next().value;
+            assert.strictEqual(nodeA.event, eventA);
+            assert.strictEqual(rootChildIterator.next().value.event, eventB);
+            const nodeAChildren = nodeA.children();
+            assert.strictEqual(nodeAChildren.size, 2);
+            const nodeAChildIterator = nodeAChildren.values();
+            assert.strictEqual(nodeAChildIterator.next().value.event, eventC);
+            assert.strictEqual(nodeAChildIterator.next().value.event, eventD);
+        });
+        it('builds a top-down tree from an event tree with multiple levels 2', () => {
+            // This builds the following tree:
+            // |------------ROOT-----------|
+            // |-----A----| |-----B-----|
+            //               |-C-| |-D-|
+            const eventA = makeCompleteEvent('Event A', 0, 40_000);
+            const eventB = makeCompleteEvent('Event B', 50_000, 50_000);
+            const eventC = makeCompleteEvent('Event C', 50_000, 10_000);
+            const eventD = makeCompleteEvent('Event D', 60_000, 10_000);
+            // Events must be in order.
+            const events = [
+                eventA,
+                eventB,
+                eventC,
+                eventD,
+            ];
+            const root = new Trace.Extras.TraceTree.TopDownRootNode(events, {
+                filters: [],
+                startTime: Trace.Types.Timing.Milli(0),
+                endTime: Trace.Types.Timing.Milli(200_000),
+            });
+            const rootChildren = root.children();
+            assert.strictEqual(rootChildren.size, 2);
+            const rootChildIterator = rootChildren.values();
+            assert.strictEqual(rootChildIterator.next().value.event, eventA);
+            const nodeB = rootChildIterator.next().value;
+            assert.strictEqual(nodeB.event, eventB);
+            const nodeBChildren = nodeB.children();
+            assert.strictEqual(nodeBChildren.size, 2);
+            const nodeBChildIterator = nodeBChildren.values();
+            assert.strictEqual(nodeBChildIterator.next().value.event, eventC);
+            assert.strictEqual(nodeBChildIterator.next().value.event, eventD);
+        });
+        it('calculates the self time for each node in an event tree correctly', () => {
+            // This builds the following tree:
+            // |------------ROOT-----------|
+            // |-----A----| |-------B------|
+            //               |-C-| |--D--|
+            //                     |-E-|
+            const eventA = makeCompleteEvent('Event A', 0, 40_000);
+            const eventB = makeCompleteEvent('Event B', 50_000, 50_000);
+            const eventC = makeCompleteEvent('Event C', 50_000, 10_000);
+            const eventD = makeCompleteEvent('Event D', 60_000, 10_000);
+            const eventE = makeCompleteEvent('Event E', 60_000, 5_000);
+            // Events must be in order.
+            const events = [
+                eventA,
+                eventB,
+                eventC,
+                eventD,
+                eventE,
+            ];
+            const root = new Trace.Extras.TraceTree.TopDownRootNode(events, {
+                filters: [],
+                startTime: Trace.Types.Timing.Milli(0),
+                endTime: Trace.Types.Timing.Milli(200_000),
+            });
+            const rootChildren = root.children();
+            assert.strictEqual(rootChildren.size, 2);
+            const rootChildIterator = rootChildren.values();
+            assert.strictEqual(rootChildIterator.next().value.selfTime, Trace.Helpers.Timing.microToMilli(eventA.dur));
+            const nodeB = rootChildIterator.next().value;
+            const nodeBSelfTime = Trace.Types.Timing.Micro(eventB.dur - eventC.dur - eventD.dur);
+            assert.strictEqual(nodeB.selfTime, Trace.Helpers.Timing.microToMilli(nodeBSelfTime));
+            const nodeBChildren = nodeB.children();
+            assert.strictEqual(nodeBChildren.size, 2);
+            const nodeBChildIterator = nodeBChildren.values();
+            assert.strictEqual(nodeBChildIterator.next().value.selfTime, Trace.Helpers.Timing.microToMilli(eventC.dur));
+            const nodeD = nodeBChildIterator.next().value;
+            const nodeDSelfTime = Trace.Types.Timing.Micro(eventD.dur - eventE.dur);
+            assert.strictEqual(nodeD.selfTime, Trace.Helpers.Timing.microToMilli(nodeDSelfTime));
+            const nodeDChildren = nodeD.children();
+            assert.strictEqual(nodeDChildren.size, 1);
+            const nodeDChildIterator = nodeDChildren.values();
+            const nodeE = nodeDChildIterator.next().value;
+            assert.strictEqual(nodeE.selfTime, Trace.Helpers.Timing.microToMilli(eventE.dur));
+        });
+    });
+    describe('BottomUpRootNode', () => {
+        it('builds the root node and its children properly from an event tree', () => {
+            // This builds the following tree:
+            // |------------------ROOT---------------------------|
+            // |-----A----| |-----B-----| |----------C---------|
+            const eventA = makeCompleteEvent('Event A', 0, 40_000);
+            const eventB = makeCompleteEvent('Event B', 50_000, 50_000);
+            const eventC = makeCompleteEvent('Event C', 150_000, 100_000);
+            const events = [
+                eventA,
+                eventB,
+                eventC,
+            ];
+            const root = new Trace.Extras.TraceTree.TopDownRootNode(events, {
+                filters: [],
+                startTime: Trace.Types.Timing.Milli(0),
+                endTime: Trace.Types.Timing.Milli(200_000),
+            });
+            const children = root.children();
+            assert.strictEqual(children.size, 3);
+            const nodesIterator = children.values();
+            assert.strictEqual(nodesIterator.next().value.event, eventA);
+            assert.strictEqual(nodesIterator.next().value.event, eventB);
+            assert.strictEqual(nodesIterator.next().value.event, eventC);
+        });
+        it('builds a bottom up tree from an event tree with multiple levels 1', () => {
+            // This builds the following tree:
+            // |------------ROOT-----------|
+            // |-C-||-D-|
+            // |-----A----| |-----B-----|
+            const eventA = makeCompleteEvent('Event A', 0, 40_000);
+            const eventC = makeCompleteEvent('Event C', 0, 10_000);
+            const eventD = makeCompleteEvent('Event D', 10_000, 10_000);
+            const eventB = makeCompleteEvent('Event B', 50_000, 50_000);
+            // Events must be in order.
+            const events = [
+                eventA,
+                eventC,
+                eventD,
+                eventB,
+            ];
+            const root = new Trace.Extras.TraceTree.BottomUpRootNode(events, {
+                textFilter: new Trace.Extras.TraceFilter.InvisibleEventsFilter([]),
+                filters: [],
+                startTime: Trace.Types.Timing.Milli(0),
+                endTime: Trace.Types.Timing.Milli(200_000),
+            });
+            const rootChildren = root.children();
+            assert.strictEqual(rootChildren.size, 4);
+            const rootChildIterator = rootChildren.values();
+            const nodeC = rootChildIterator.next().value;
+            assert.strictEqual(nodeC.event, eventC);
+            const nodeD = rootChildIterator.next().value;
+            assert.strictEqual(nodeD.event, eventD);
+            const nodeA = rootChildIterator.next().value;
+            assert.strictEqual(nodeA.event, eventA);
+            const nodeB = rootChildIterator.next().value;
+            assert.strictEqual(nodeB.event, eventB);
+            const nodeCChildren = nodeC.children();
+            assert.strictEqual(nodeCChildren.size, 1);
+            const nodeCChildIterator = nodeCChildren.values();
+            assert.strictEqual(nodeCChildIterator.next().value.event, eventA);
+            const nodeDChildren = nodeC.children();
+            assert.strictEqual(nodeDChildren.size, 1);
+            const nodeDChildIterator = nodeDChildren.values();
+            assert.strictEqual(nodeDChildIterator.next().value.event, eventA);
+            const nodeAChildren = nodeA.children();
+            assert.strictEqual(nodeAChildren.size, 0);
+            const nodeBChildren = nodeB.children();
+            assert.strictEqual(nodeBChildren.size, 0);
+        });
+        it('builds a tree from an event tree with multiple levels 2', () => {
+            // This builds the following tree:
+            // |------------ROOT-----------|
+            //              |-C-||-D-|
+            // |-----A----| |-----B-----|
+            const eventA = makeCompleteEvent('Event A', 0, 40_000);
+            const eventB = makeCompleteEvent('Event B', 50_000, 50_000);
+            const eventC = makeCompleteEvent('Event C', 50_000, 10_000);
+            const eventD = makeCompleteEvent('Event D', 60_000, 10_000);
+            // Events must be in order.
+            const events = [
+                eventA,
+                eventB,
+                eventC,
+                eventD,
+            ];
+            const root = new Trace.Extras.TraceTree.BottomUpRootNode(events, {
+                textFilter: new Trace.Extras.TraceFilter.InvisibleEventsFilter([]),
+                filters: [],
+                startTime: Trace.Types.Timing.Milli(0),
+                endTime: Trace.Types.Timing.Milli(200_000),
+            });
+            const rootChildren = root.children();
+            assert.strictEqual(rootChildren.size, 4);
+            const rootChildIterator = rootChildren.values();
+            const nodeA = rootChildIterator.next().value;
+            assert.strictEqual(nodeA.event, eventA);
+            const nodeC = rootChildIterator.next().value;
+            assert.strictEqual(nodeC.event, eventC);
+            const nodeD = rootChildIterator.next().value;
+            assert.strictEqual(nodeD.event, eventD);
+            const nodeB = rootChildIterator.next().value;
+            assert.strictEqual(nodeB.event, eventB);
+            const nodeCChildren = nodeC.children();
+            assert.strictEqual(nodeCChildren.size, 1);
+            const nodeCChildIterator = nodeCChildren.values();
+            assert.strictEqual(nodeCChildIterator.next().value.event, eventB);
+            const nodeDChildren = nodeC.children();
+            assert.strictEqual(nodeDChildren.size, 1);
+            const nodeDChildIterator = nodeDChildren.values();
+            assert.strictEqual(nodeDChildIterator.next().value.event, eventB);
+            const nodeAChildren = nodeA.children();
+            assert.strictEqual(nodeAChildren.size, 0);
+            const nodeBChildren = nodeB.children();
+            assert.strictEqual(nodeBChildren.size, 0);
+        });
+        it('calculates the self time for each node in an event tree correctly', () => {
+            // This builds the following tree:
+            // |------------ROOT-----------|
+            //                   |-E-|
+            //              |-C-||--D--|
+            // |-----A----| |-------B------|
+            const eventA = makeCompleteEvent('Event A', 0, 40_000);
+            const eventB = makeCompleteEvent('Event B', 50_000, 50_000);
+            const eventC = makeCompleteEvent('Event C', 50_000, 10_000);
+            const eventD = makeCompleteEvent('Event D', 60_000, 10_000);
+            const eventE = makeCompleteEvent('Event E', 60_000, 5_000);
+            // Events must be in order.
+            const events = [
+                eventA,
+                eventB,
+                eventC,
+                eventD,
+                eventE,
+            ];
+            const root = new Trace.Extras.TraceTree.BottomUpRootNode(events, {
+                textFilter: new Trace.Extras.TraceFilter.InvisibleEventsFilter([]),
+                filters: [],
+                startTime: Trace.Types.Timing.Milli(0),
+                endTime: Trace.Types.Timing.Milli(200_000),
+            });
+            const rootChildren = root.children();
+            assert.strictEqual(rootChildren.size, 5);
+            const rootChildIterator = rootChildren.values();
+            assert.strictEqual(rootChildIterator.next().value.selfTime, Trace.Helpers.Timing.microToMilli(eventA.dur));
+            const nodeC = rootChildIterator.next().value;
+            assert.strictEqual(nodeC.selfTime, Trace.Helpers.Timing.microToMilli(eventC.dur));
+            const nodeE = rootChildIterator.next().value;
+            assert.strictEqual(nodeE.selfTime, Trace.Helpers.Timing.microToMilli(eventE.dur));
+            const nodeD = rootChildIterator.next().value;
+            const nodeDSelfTime = Trace.Types.Timing.Micro(eventD.dur - eventE.dur);
+            assert.strictEqual(nodeD.selfTime, Trace.Helpers.Timing.microToMilli(nodeDSelfTime));
+            const nodeB = rootChildIterator.next().value;
+            const nodeBSelfTime = Trace.Types.Timing.Micro(eventB.dur - eventC.dur - eventD.dur);
+            assert.strictEqual(nodeB.selfTime, Trace.Helpers.Timing.microToMilli(nodeBSelfTime));
+        });
+        it('correctly keeps ProfileCall nodes and uses them to build up the tree', async function () {
+            const { data } = await TraceLoader.traceEngine(this, 'mainWasm_profile.json.gz');
+            const mainThread = getMainThread(data.Renderer);
+            const bounds = Trace.Helpers.Timing.traceWindowMilliSeconds(data.Meta.traceBounds);
+            // Replicate the filters as they would be when rendering in the actual panel.
+            const textFilter = new Timeline.TimelineFilters.TimelineRegExp();
+            const modelFilters = [
+                Timeline.TimelineUIUtils.TimelineUIUtils.visibleEventsFilter(),
+                new Trace.Extras.TraceFilter.ExclusiveNameFilter([
+                    "RunTask" /* Trace.Types.Events.Name.RUN_TASK */,
+                ]),
+            ];
+            const root = new Trace.Extras.TraceTree.BottomUpRootNode(mainThread.entries, {
+                textFilter,
+                filters: modelFilters,
+                startTime: bounds.min,
+                endTime: bounds.max,
+            });
+            const rootChildren = root.children();
+            const values = Array.from(rootChildren.values());
+            // Find the list of profile calls that have been calculated as the top level rows in the Bottom Up table.
+            const profileCalls = values
+                .filter(node => node.event && Trace.Types.Events.isProfileCall(node.event) &&
+                node.event.callFrame.functionName.length > 0)
+                .map(n => n.event);
+            const functionNames = profileCalls.map(entry => entry.callFrame.functionName);
+            assert.deepEqual(functionNames, ['fetch', 'getTime', 'wasm-to-js::l-imports.getTime', 'mainWasm', 'js-to-wasm::i']);
+        });
+    });
+    describe('generateEventID', () => {
+        it('generates the right ID for new engine profile call events', async function () {
+            const { data } = await TraceLoader.traceEngine(this, 'react-hello-world.json.gz');
+            const mainThread = getMainThread(data.Renderer);
+            const profileCallEntry = mainThread.entries.find(entry => {
+                return Trace.Types.Events.isProfileCall(entry) &&
+                    entry.callFrame.functionName === 'performConcurrentWorkOnRoot';
+            });
+            if (!profileCallEntry) {
+                throw new Error('Could not find a profile call');
+            }
+            const eventId = Trace.Extras.TraceTree.generateEventID(profileCallEntry);
+            assert.strictEqual(eventId, 'f:performConcurrentWorkOnRoot@7:25701:38');
+        });
+        it('generates the right ID for new engine native profile call events', async function () {
+            const { data } = await TraceLoader.traceEngine(this, 'invalid-animation-events.json.gz', {
+                ...Trace.Types.Configuration.defaults(),
+                includeRuntimeCallStats: true,
+            });
+            const mainThread = getMainThread(data.Renderer);
+            const profileCallEntry = mainThread.entries.find(entry => {
+                return Trace.Types.Events.isProfileCall(entry) && entry.callFrame.url === 'native V8Runtime';
+            });
+            if (!profileCallEntry) {
+                throw new Error('Could not find a profile call');
+            }
+            const eventId = Trace.Extras.TraceTree.generateEventID(profileCallEntry);
+            assert.strictEqual(eventId, 'f:Compile@0:-1:-1');
+        });
+        it('differentiates between anonymous functions based on their location', () => {
+            const event1 = makeProfileCall('(anonymous)', 0, 1000);
+            event1.callFrame.url = 'https://example.com/script.js';
+            event1.callFrame.scriptId = '1';
+            event1.callFrame.lineNumber = 10;
+            event1.callFrame.columnNumber = 5;
+            const event2 = makeProfileCall('(anonymous)', 0, 1000);
+            event2.callFrame.url = 'https://example.com/script.js';
+            event2.callFrame.scriptId = '1';
+            event2.callFrame.lineNumber = 15;
+            event2.callFrame.columnNumber = 10;
+            const eventId1 = Trace.Extras.TraceTree.generateEventID(event1);
+            const eventId2 = Trace.Extras.TraceTree.generateEventID(event2);
+            assert.strictEqual(eventId1, 'f:(anonymous)@1:10:5');
+            assert.strictEqual(eventId2, 'f:(anonymous)@1:15:10');
+            assert.notStrictEqual(eventId1, eventId2);
+        });
+        it('correctly groups events with eventGroupIdCallback when using forceGroupIdCallback', () => {
+            // This builds the following tree:
+            // |------------ROOT-----------|
+            // |-----A----| |-----B-----|
+            // |-C-| |-D-|  |-E-|
+            // Third party 1
+            const eventC = makeProfileCall('func', 0, 10_000);
+            const eventD = makeCompleteEvent('event D', 10_000, 10_000);
+            // Third party 2
+            const eventA = makeProfileCall('func', 0, 40_000);
+            const eventB = makeCompleteEvent('event D', 50_000, 40_000);
+            const eventE = makeCompleteEvent('event D', 50_000, 5_000);
+            // Events must be in order.
+            const events = [
+                eventA,
+                eventC,
+                eventD,
+                eventB,
+                eventE,
+            ];
+            const root = new Trace.Extras.TraceTree.BottomUpRootNode(events, {
+                textFilter: new Trace.Extras.TraceFilter.InvisibleEventsFilter([]),
+                filters: [],
+                startTime: Trace.Types.Timing.Milli(0),
+                endTime: Trace.Types.Timing.Milli(200_000),
+                eventGroupIdCallback: event => {
+                    if (event === eventC || event === eventD) {
+                        return 'thirdParty1';
+                    }
+                    return 'thirdParty2';
+                },
+                forceGroupIdCallback: true,
+            });
+            const rootChildren = root.children();
+            // 2 top nodes for each third party
+            assert.strictEqual(rootChildren.size, 2);
+            const children = Array.from(rootChildren.values());
+            const first = children[0];
+            const second = children[1];
+            assert.strictEqual(first.id, 'thirdParty1');
+            assert.lengthOf(first.events, 2);
+            assert.strictEqual(second.id, 'thirdParty2');
+            assert.lengthOf(second.events, 3);
+        });
+        it('correctly identifies which nodes have children in a nested structure', () => {
+            // This builds the following simple tree:
+            // |----Parent Task----|
+            //   |--Child Task--|
+            const parentEvent = makeCompleteEvent('Parent Task', 0, 100_000);
+            const childEvent = makeCompleteEvent('Child Task', 20_000, 50_000);
+            const events = [parentEvent, childEvent];
+            const root = new Trace.Extras.TraceTree.BottomUpRootNode(events, {
+                textFilter: new Trace.Extras.TraceFilter.InvisibleEventsFilter([]),
+                filters: [],
+                startTime: Trace.Types.Timing.Milli(0),
+                endTime: Trace.Types.Timing.Milli(200_000),
+            });
+            const rootChildren = root.children();
+            // One node for the parent, and one for the child.
+            assert.strictEqual(rootChildren.size, 2);
+            const parentNode = rootChildren.get('Parent Task');
+            const childNode = rootChildren.get('Child Task');
+            // Ensure we found the nodes before testing them.
+            assert.exists(parentNode, 'Parent node was not found');
+            assert.exists(childNode, 'Child node was not found');
+            // Since this is bottom-up, a node with callers should have children.
+            // A node with no callers (a top-level node) has no children.
+            assert.isFalse(parentNode.hasChildren(), 'Parent node (the root) should NOT have children in bottom-up');
+            assert.isTrue(childNode.hasChildren(), 'Child node (the nested event) SHOULD have children in bottom-up');
+        });
+    });
+    describe('eventStackFrame', () => {
+        it('extracts the stackFrame for ProfileCalls', async function () {
+            const event = makeProfileCall('somefunc', 100, 10, undefined, undefined, undefined, 'https://x.com/file.mjs');
+            const stackFrame = Trace.Extras.TraceTree.eventStackFrame(event);
+            assert.strictEqual(stackFrame.functionName, 'somefunc');
+            assert.strictEqual(stackFrame.url, 'https://x.com/file.mjs');
+        });
+    });
+});
+//# sourceMappingURL=TraceTree.test.js.map

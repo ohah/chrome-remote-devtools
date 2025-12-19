@@ -1,0 +1,31 @@
+// Copyright 2020 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+import { renderElementIntoDOM, } from '../../../../testing/DOMHelpers.js';
+import { setupLocaleHooks } from '../../../../testing/LocaleHelpers.js';
+import * as InlineEditor from './inline_editor.js';
+function createSwatch(text, firstColor, secondColor) {
+    const swatch = new InlineEditor.ColorMixSwatch.ColorMixSwatch();
+    renderElementIntoDOM(swatch);
+    swatch.setColorMixText(text);
+    swatch.setFirstColor(firstColor);
+    swatch.setSecondColor(secondColor);
+    return swatch;
+}
+describe('ColorMixSwatch', () => {
+    setupLocaleHooks();
+    it('should render color-mix swatch icon when the syntax is correct', () => {
+        const swatch = createSwatch('color-mix(in srgb, red, blue)', 'red', 'blue');
+        const swatchIcon = swatch.shadowRoot?.querySelector('.swatch-icon');
+        assert.strictEqual(swatch?.getText(), 'color-mix(in srgb, red, blue)');
+        assert.isNotNull(swatchIcon);
+    });
+    it('should changing the second color work correctly when the colors are the same', () => {
+        const swatch = createSwatch('color-mix(in srgb, red, red)', 'red', 'red');
+        swatch.setSecondColor('blue');
+        assert.strictEqual(swatch?.getText(), 'color-mix(in srgb, red, blue)');
+        const swatchIcon = swatch.shadowRoot?.querySelector('.swatch-icon');
+        assert.isNotNull(swatchIcon);
+    });
+});
+//# sourceMappingURL=ColorMixSwatch.test.js.map
