@@ -1,0 +1,53 @@
+name: Test Inspector TypeScript
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'packages/inspector/**/*.ts'
+      - 'packages/inspector/**/*.tsx'
+      - 'packages/inspector/**/*.js'
+      - 'packages/inspector/**/*.jsx'
+      - 'packages/inspector/package.json'
+      - 'packages/inspector/vite.config.ts'
+      - 'packages/inspector/tsconfig.json'
+      - '.github/workflows/test-inspector-ts.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'packages/inspector/**/*.ts'
+      - 'packages/inspector/**/*.tsx'
+      - 'packages/inspector/**/*.js'
+      - 'packages/inspector/**/*.jsx'
+      - 'packages/inspector/package.json'
+      - 'packages/inspector/vite.config.ts'
+      - 'packages/inspector/tsconfig.json'
+      - '.github/workflows/test-inspector-ts.yml'
+
+jobs:
+  test:
+    name: Test Inspector TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run linter
+        run: bunx oxlint packages/inspector
+
+      - name: Check formatting
+        run: bunx oxfmt packages/inspector --check
+
+      - name: Run tests
+        run: bun test packages/inspector
+
+      - name: Build package
+        run: cd packages/inspector && bun run build

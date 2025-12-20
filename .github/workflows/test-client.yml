@@ -1,0 +1,41 @@
+name: Test Client
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'packages/client/**'
+      - '.github/workflows/test-client.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'packages/client/**'
+      - '.github/workflows/test-client.yml'
+
+jobs:
+  test:
+    name: Test Client Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run linter
+        run: bunx oxlint packages/client
+
+      - name: Check formatting
+        run: bunx oxfmt packages/client --check
+
+      - name: Run tests
+        run: bun test packages/client
+
+      - name: Build package
+        run: cd packages/client && bun run build
