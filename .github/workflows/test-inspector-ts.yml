@@ -31,31 +31,30 @@ jobs:
   test:
     name: Test Inspector TypeScript
     needs: check
-    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Skip if no changes
+        if: needs.check.outputs.should-run != 'true'
+        run: echo "No inspector TypeScript changes, skipping tests"
+        continue-on-error: false
+
       - name: Setup Bun
+        if: needs.check.outputs.should-run == 'true'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Install dependencies
+        if: needs.check.outputs.should-run == 'true'
         run: bun install
 
       - name: Run tests
+        if: needs.check.outputs.should-run == 'true'
         run: bun test packages/inspector
 
       - name: Build package
+        if: needs.check.outputs.should-run == 'true'
         run: cd packages/inspector && bun run build
-
-  skip:
-    name: Skip (no changes)
-    needs: check
-    if: needs.check.outputs.should-run != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip test
-        run: echo "No inspector TypeScript changes, skipping tests"

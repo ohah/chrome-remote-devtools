@@ -4,15 +4,15 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'packages/**'
-      - 'tests/**'
-      - '.github/workflows/test-integration.yml'
+      - "packages/**"
+      - "tests/**"
+      - ".github/workflows/test-integration.yml"
   pull_request:
     branches: [main, develop]
     paths:
-      - 'packages/**'
-      - 'tests/**'
-      - '.github/workflows/test-integration.yml'
+      - "packages/**"
+      - "tests/**"
+      - ".github/workflows/test-integration.yml"
 
 jobs:
   check:
@@ -34,43 +34,43 @@ jobs:
   integration-test:
     name: Integration Tests
     needs: check
-    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Skip if no changes
+        if: needs.check.outputs.should-run != 'true'
+        run: echo "No integration test changes, skipping tests"
+        continue-on-error: false
+
       - name: Setup Bun
+        if: needs.check.outputs.should-run == 'true'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Install dependencies
+        if: needs.check.outputs.should-run == 'true'
         run: bun install
 
       - name: Install Playwright browsers
+        if: needs.check.outputs.should-run == 'true'
         run: bunx playwright install --with-deps chromium
 
       - name: Build client package
+        if: needs.check.outputs.should-run == 'true'
         run: cd packages/client && bun run build
 
       - name: Run integration tests
+        if: needs.check.outputs.should-run == 'true'
         run: bun run test:integration
 
       - name: Upload test results
-        if: always()
+        if: always() && needs.check.outputs.should-run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
-
-  skip:
-    name: Skip (no changes)
-    needs: check
-    if: needs.check.outputs.should-run != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip test
-        run: echo "No integration test changes, skipping tests"
