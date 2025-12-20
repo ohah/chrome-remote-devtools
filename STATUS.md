@@ -19,9 +19,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ## Client CDP Domains / 클라이언트 CDP 도메인
 
 ### ✅ Runtime Domain
+
 **Status**: Complete / 완료
 
 **Methods / 메서드**:
+
 - ✅ `enable()` - Enable Runtime domain
 - ✅ `evaluate()` - Evaluate JavaScript expression
 - ✅ `getProperties()` - Get object properties
@@ -29,6 +31,7 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 - ✅ `callFunctionOn()` - Call function on object
 
 **Events / 이벤트**:
+
 - ✅ `executionContextCreated` - Execution context created
 - ✅ `consoleAPICalled` - Console API called
 - ✅ `exceptionThrown` - Exception thrown
@@ -36,9 +39,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ✅ Page Domain
+
 **Status**: Complete / 완료
 
 **Methods / 메서드**:
+
 - ✅ `enable()` - Enable Page domain
 - ✅ `startScreencast()` - Start screencast
 - ✅ `stopScreencast()` - Stop screencast
@@ -46,6 +51,7 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 - ✅ `getResourceContent()` - Get resource content
 
 **Events / 이벤트**:
+
 - ✅ `screencastFrame` - Screencast frame captured
 - ✅ `loadEventFired` - Load event fired
 - ✅ `domContentEventFired` - DOM content event fired
@@ -53,9 +59,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ✅ DOM Domain
+
 **Status**: Complete / 완료
 
 **Methods / 메서드**:
+
 - ✅ `enable()` - Enable DOM domain
 - ✅ `getDocument()` - Get document
 - ✅ `removeNode()` - Remove node
@@ -74,6 +82,7 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 - ✅ `getBoxModel()` - Get box model
 
 **Events / 이벤트**:
+
 - ✅ `setChildNodes` - Child nodes set
 - ✅ `childNodeCountUpdated` - Child node count updated
 - ✅ `childNodeInserted` - Child node inserted
@@ -86,9 +95,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ✅ Network Domain
+
 **Status**: Complete / 완료
 
 **Methods / 메서드**:
+
 - ✅ `enable()` - Enable Network domain
 - ✅ `getCookies()` - Get cookies
 - ✅ `setCookie()` - Set cookie
@@ -96,6 +107,7 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 - ✅ `getResponseBody()` - Get response body
 
 **Events / 이벤트**:
+
 - ✅ `requestWillBeSent` - Request will be sent
 - ✅ `responseReceivedExtraInfo` - Response received extra info
 - ✅ `responseReceived` - Response received
@@ -105,25 +117,31 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### 🟡 Console Domain
+
 **Status**: Partial / 부분 구현
 
 **Methods / 메서드**:
+
 - ✅ `enable()` - Enable Console domain
 - ✅ `clearMessages()` - Clear messages
 
 **Events / 이벤트**:
+
 - ❌ `messageAdded` - Not implemented (needs Runtime domain integration)
 
-**Notes / 참고사항**: 
+**Notes / 참고사항**:
+
 - Basic implementation exists, but `messageAdded` event sending logic needs to be completed.
 - 기본 구현은 있으나, `messageAdded` 이벤트 전송 로직이 완성되어야 합니다.
 
 ---
 
 ### ❌ CSS Domain
+
 **Status**: Not Started / 미구현
 
 **Planned Methods / 계획된 메서드**:
+
 - `enable()` - Enable CSS domain
 - `getStyleSheetText()` - Get style sheet text
 - `getMatchedStylesForNode()` - Get matched styles for node
@@ -135,6 +153,7 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 - `setStyleTexts()` - Set style texts
 
 **Planned Events / 계획된 이벤트**:
+
 - `styleSheetAdded` - Style sheet added
 
 **Priority / 우선순위**: High / 높음
@@ -142,9 +161,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ❌ DOMStorage Domain
+
 **Status**: Not Started / 미구현
 
 **Planned Methods / 계획된 메서드**:
+
 - `enable()` - Enable DOMStorage domain
 - `getDOMStorageItems()` - Get DOM storage items
 - `removeDOMStorageItem()` - Remove DOM storage item
@@ -152,6 +173,7 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 - `setDOMStorageItem()` - Set DOM storage item
 
 **Planned Events / 계획된 이벤트**:
+
 - `domStorageItemAdded` - DOM storage item added
 - `domStorageItemRemoved` - DOM storage item removed
 - `domStorageItemsCleared` - DOM storage items cleared
@@ -162,9 +184,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ❌ Storage Domain
+
 **Status**: Not Started / 미구현
 
 **Planned Methods / 계획된 메서드**:
+
 - `getStorageKeyForFrame()` - Get storage key for frame
 
 **Priority / 우선순위**: Medium / 중간
@@ -172,9 +196,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ❌ DOMDebugger Domain
+
 **Status**: Not Started / 미구현
 
 **Planned Methods / 계획된 메서드**:
+
 - `getEventListeners()` - Get event listeners
 
 **Priority / 우선순위**: Medium / 중간
@@ -182,15 +208,18 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ❌ Overlay Domain
+
 **Status**: Not Started / 미구현
 
 **Planned Methods / 계획된 메서드**:
+
 - `enable()` - Enable Overlay domain
 - `highlightNode()` - Highlight node
 - `hideHighlight()` - Hide highlight
 - `setInspectMode()` - Set inspect mode
 
 **Planned Events / 계획된 이벤트**:
+
 - `nodeHighlightRequested` - Node highlight requested
 - `inspectNodeRequested` - Inspect node requested
 
@@ -199,15 +228,18 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ❌ ScreenPreview Domain
+
 **Status**: Not Started / 미구현
 
 **Note / 참고사항**: Custom protocol / 커스텀 프로토콜
 
 **Planned Methods / 계획된 메서드**:
+
 - `startPreview()` - Start preview
 - `stopPreview()` - Stop preview
 
 **Planned Events / 계획된 이벤트**:
+
 - `captured` - Captured
 - `syncScroll` - Sync scroll
 - `syncMouse` - Sync mouse
@@ -219,9 +251,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ## Server / 서버
 
 ### ✅ WebSocket Relay Server
+
 **Status**: Complete / 완료
 
 **Features / 기능**:
+
 - ✅ WebSocket connection handling
 - ✅ Client connection management
 - ✅ Inspector connection management
@@ -233,9 +267,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ✅ HTTP Endpoints
+
 **Status**: Complete / 완료
 
 **Endpoints / 엔드포인트**:
+
 - ✅ `GET /json` - Get all clients (legacy format)
 - ✅ `GET /json/clients` - Get all clients with details
 - ✅ `GET /json/inspectors` - Get all inspectors
@@ -248,9 +284,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ## Inspector / 인스펙터
 
 ### ✅ Basic UI
+
 **Status**: Complete / 완료
 
 **Features / 기능**:
+
 - ✅ Client list display
 - ✅ Client selection
 - ✅ DevTools iframe integration
@@ -260,9 +298,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ❌ Enhanced Features
+
 **Status**: Not Started / 미구현
 
 **Planned Features / 계획된 기능**:
+
 - Connection status display
 - Message monitoring UI
 - Multiple client simultaneous monitoring
@@ -276,9 +316,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ## Testing / 테스트
 
 ### 🟡 Integration Tests
+
 **Status**: Partial / 부분 구현
 
 **Current Status / 현재 상태**:
+
 - ✅ Test infrastructure setup (Playwright)
 - ✅ Test fixtures (server, browser, websocket)
 - ✅ Test helpers (CDP messages, test page)
@@ -292,9 +334,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ✅ Unit Tests
+
 **Status**: Complete / 완료
 
 **Coverage / 커버리지**:
+
 - ✅ Server unit tests
 - ✅ Client unit tests
 - ✅ Inspector unit tests
@@ -304,9 +348,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ## Error Handling & Reliability / 에러 처리 및 안정성
 
 ### 🟡 Reconnection Logic
+
 **Status**: Partial / 부분 구현
 
 **Current Status / 현재 상태**:
+
 - ✅ Client-side reconnection (ReconnectingWebSocket)
 - ❌ Server-side reconnection handling
 - ❌ Inspector reconnection handling
@@ -317,9 +363,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### 🟡 Error Handling
+
 **Status**: Partial / 부분 구현
 
 **Current Status / 현재 상태**:
+
 - ✅ Basic error handling in server
 - ✅ Basic error handling in client
 - ❌ Comprehensive error messages
@@ -333,9 +381,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ## Documentation / 문서화
 
 ### ❌ API Documentation
+
 **Status**: Not Started / 미구현
 
 **Planned / 계획**:
+
 - CDP domain API documentation
 - Server API documentation
 - Client API documentation
@@ -346,9 +396,11 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ---
 
 ### ❌ Usage Guide
+
 **Status**: Not Started / 미구현
 
 **Planned / 계획**:
+
 - Getting started guide
 - Configuration guide
 - Troubleshooting guide
@@ -362,13 +414,13 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 
 ### Implementation Progress / 구현 진행률
 
-| Category | Complete | Partial | Not Started | Total |
-|----------|----------|---------|-------------|-------|
-| CDP Domains | 4 | 1 | 5 | 10 |
-| Server | 2 | 0 | 0 | 2 |
-| Inspector | 1 | 0 | 1 | 2 |
-| Testing | 1 | 1 | 0 | 2 |
-| Documentation | 0 | 0 | 2 | 2 |
+| Category      | Complete | Partial | Not Started | Total |
+| ------------- | -------- | ------- | ----------- | ----- |
+| CDP Domains   | 4        | 1       | 5           | 10    |
+| Server        | 2        | 0       | 0           | 2     |
+| Inspector     | 1        | 0       | 1           | 2     |
+| Testing       | 1        | 1       | 0           | 2     |
+| Documentation | 0        | 0       | 2           | 2     |
 
 ### Overall Progress / 전체 진행률
 
@@ -381,12 +433,14 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 ## Next Steps / 다음 단계
 
 ### High Priority / 높은 우선순위
+
 1. Improve Console domain (`messageAdded` event)
 2. Implement integration tests
 3. Add CSS domain
 4. Improve reconnection logic
 
 ### Medium Priority / 중간 우선순위
+
 1. Add DOMStorage domain
 2. Add DOMDebugger domain
 3. Add Overlay domain
@@ -394,8 +448,8 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 5. Improve error handling
 
 ### Low Priority / 낮은 우선순위
+
 1. Add ScreenPreview domain
 2. Add Storage domain
 3. API documentation
 4. Usage guide and examples
-

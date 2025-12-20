@@ -167,27 +167,33 @@ bun run dev:docs
 For a complete development setup, you need to run multiple servers in separate terminals:
 
 **Terminal 1 - WebSocket Server**:
+
 ```bash
 bun run dev:server
 ```
+
 - Server runs on `http://localhost:8080`
 - Provides WebSocket endpoints: `/remote/debug/client/:id` and `/remote/debug/devtools/:id`
 - Serves client script at `/client.js`
 - Provides HTTP API at `/json`, `/json/clients`, `/json/inspectors`
 
 **Terminal 2 - Inspector**:
+
 ```bash
 bun run dev:inspector
 ```
+
 - Inspector runs on `http://localhost:1420`
 - Opens in your browser automatically
 - Connects to the WebSocket server at `localhost:8080`
 
 **Terminal 3 - Example App (optional)**:
+
 ```bash
 cd examples/basic
 bun run dev
 ```
+
 - Example app runs on `http://localhost:5173` (or another port if 5173 is busy)
 - Automatically loads the client script from `http://localhost:8080/client.js`
 - The client script connects to the WebSocket server automatically
@@ -203,11 +209,11 @@ bun run dev
 
 ### Ports and Endpoints
 
-| Service | Port | Endpoints |
-|---------|------|-----------|
+| Service          | Port | Endpoints                                                                                                                                                                                                     |
+| ---------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | WebSocket Server | 8080 | `ws://localhost:8080/remote/debug/client/:id`<br>`ws://localhost:8080/remote/debug/devtools/:id`<br>`http://localhost:8080/json`<br>`http://localhost:8080/json/clients`<br>`http://localhost:8080/client.js` |
-| Inspector | 1420 | `http://localhost:1420` |
-| Example App | 5173 | `http://localhost:5173` (default Vite port) |
+| Inspector        | 1420 | `http://localhost:1420`                                                                                                                                                                                       |
+| Example App      | 5173 | `http://localhost:5173` (default Vite port)                                                                                                                                                                   |
 
 ### Troubleshooting
 
@@ -216,12 +222,14 @@ bun run dev
 If you see errors about `/client.js` not found:
 
 1. **Build the client package**:
+
    ```bash
    cd packages/client
    bun run build
    ```
 
 2. **Verify the file exists**:
+
    ```bash
    ls packages/client/dist/index.js
    ```
@@ -305,6 +313,7 @@ bun run test:integration:debug
 **Prerequisites for integration tests**:
 
 - **Build client package**: The server needs the built client script:
+
   ```bash
   cd packages/client
   bun run build
