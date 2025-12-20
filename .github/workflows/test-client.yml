@@ -25,31 +25,30 @@ jobs:
   test:
     name: Test Client Package
     needs: check
-    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Skip if no changes
+        if: needs.check.outputs.should-run != 'true'
+        run: echo "No client changes, skipping tests"
+        continue-on-error: false
+
       - name: Setup Bun
+        if: needs.check.outputs.should-run == 'true'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Install dependencies
+        if: needs.check.outputs.should-run == 'true'
         run: bun install
 
       - name: Run tests
+        if: needs.check.outputs.should-run == 'true'
         run: bun test packages/client
 
       - name: Build package
+        if: needs.check.outputs.should-run == 'true'
         run: cd packages/client && bun run build
-
-  skip:
-    name: Skip (no changes)
-    needs: check
-    if: needs.check.outputs.should-run != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip test
-        run: echo "No client changes, skipping tests"

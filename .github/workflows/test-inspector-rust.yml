@@ -27,13 +27,18 @@ jobs:
   test:
     name: Test Inspector Rust
     needs: check
-    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Skip if no changes
+        if: needs.check.outputs.should-run != 'true'
+        run: echo "No inspector Rust changes, skipping tests"
+        continue-on-error: false
+
       - name: Install system dependencies
+        if: needs.check.outputs.should-run == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -46,11 +51,13 @@ jobs:
             libwebkit2gtk-4.1-dev
 
       - name: Setup Rust
+        if: needs.check.outputs.should-run == 'true'
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
 
       - name: Cache Cargo registry
+        if: needs.check.outputs.should-run == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -64,13 +71,5 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Run Rust tests
+        if: needs.check.outputs.should-run == 'true'
         run: cargo test --package inspector --all-features
-
-  skip:
-    name: Skip (no changes)
-    needs: check
-    if: needs.check.outputs.should-run != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip test
-        run: echo "No inspector Rust changes, skipping tests"

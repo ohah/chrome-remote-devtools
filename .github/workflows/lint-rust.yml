@@ -28,13 +28,18 @@ jobs:
   lint:
     name: Lint Rust
     needs: check
-    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Skip if no changes
+        if: needs.check.outputs.should-run != 'true'
+        run: echo "No Rust changes, skipping lint"
+        continue-on-error: false
+
       - name: Install system dependencies
+        if: needs.check.outputs.should-run == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -47,11 +52,13 @@ jobs:
             libwebkit2gtk-4.1-dev
 
       - name: Setup Rust
+        if: needs.check.outputs.should-run == 'true'
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
 
       - name: Cache Cargo registry
+        if: needs.check.outputs.should-run == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -65,19 +72,12 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Check Rust formatting
+        if: needs.check.outputs.should-run == 'true'
         run: cargo fmt --all -- --check
 
       - name: Run clippy
+        if: needs.check.outputs.should-run == 'true'
         uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-targets --all-features -- -D warnings
-
-  skip:
-    name: Skip (no changes)
-    needs: check
-    if: needs.check.outputs.should-run != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip lint
-        run: echo "No Rust changes, skipping lint"
