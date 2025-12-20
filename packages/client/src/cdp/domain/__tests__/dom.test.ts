@@ -56,7 +56,7 @@ describe('DOM Domain', () => {
       throw new Error('Server port not available');
     }
     socket = new WebSocket(`ws://localhost:${serverPort}`);
-    
+
     // Wait for open event / open 이벤트 대기
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
