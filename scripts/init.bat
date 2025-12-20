@@ -44,7 +44,6 @@ if not exist "%REFERENCE_DIR%" mkdir "%REFERENCE_DIR%"
 call :clone_repo chii https://github.com/liriliri/chii.git
 call :clone_repo chobitsu https://github.com/liriliri/chobitsu.git
 call :clone_repo devtools-remote-debugger https://github.com/Nice-PLQ/devtools-remote-debugger.git
-call :clone_repo devtools-protocol https://github.com/ChromeDevTools/devtools-protocol.git
 call :clone_repo rrweb https://github.com/rrweb-io/rrweb.git
 
 goto :end_clone

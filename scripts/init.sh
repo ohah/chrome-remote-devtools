@@ -35,7 +35,6 @@ REFERENCE_REPOS=(
   "chii:https://github.com/liriliri/chii.git"
   "chobitsu:https://github.com/liriliri/chobitsu.git"
   "devtools-remote-debugger:https://github.com/Nice-PLQ/devtools-remote-debugger.git"
-  "devtools-protocol:https://github.com/ChromeDevTools/devtools-protocol.git"
   "rrweb:https://github.com/rrweb-io/rrweb.git"
 )
 
