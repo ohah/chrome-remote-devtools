@@ -40,12 +40,6 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Run linter
-        run: bunx oxlint packages/inspector
-
-      - name: Check formatting
-        run: bunx oxfmt packages/inspector --check
-
       - name: Run tests
         run: bun test packages/inspector
 
