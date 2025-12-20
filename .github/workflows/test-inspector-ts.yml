@@ -53,7 +53,7 @@ jobs:
 
       - name: Run tests
         if: needs.check.outputs.should-run == 'true'
-        run: bun test packages/inspector
+        run: bun test packages/inspector/src
 
       - name: Build package
         if: needs.check.outputs.should-run == 'true'

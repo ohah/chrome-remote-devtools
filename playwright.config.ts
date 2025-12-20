@@ -2,7 +2,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests/integration',
+  testDir: './tests',
   testMatch: /.*\.test\.(ts|js)/,
   testIgnore: ['**/node_modules/**', '**/devtools/**', '**/dist/**', '**/build/**'],
   fullyParallel: true,
