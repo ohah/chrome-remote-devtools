@@ -123,7 +123,7 @@ chrome-remote-devtools/
 # 개발 서버 시작
 bun run dev:server          # 서버만
 bun run dev:inspector       # Inspector 웹만
-bun run dev:inspector:desktop  # Inspector 데스크탑
+bun run dev:inspector:tauri  # Inspector 데스크탑
 bun run dev:docs            # 문서 페이지 (document 패키지)
 
 # 코드 품질
@@ -171,6 +171,29 @@ bun run build
 - 짧은 주석은 한 줄로 작성
 - 긴 설명이 필요한 경우 여러 줄로 나누어 작성 가능
 - 코드 자체로 명확한 경우 주석 생략 가능
+
+### 코드 규칙
+
+**주석을 제외한 모든 코드는 영어만 사용합니다.**
+
+- 변수명, 함수명, 클래스명 등 모든 식별자는 영어로 작성
+- 문자열 리터럴은 영어로 작성 (사용자에게 표시되는 메시지 제외)
+- 에러 메시지, 로그 메시지 등은 영어로 작성
+
+**예시**:
+```typescript
+// Good / 좋은 예
+function updateConnectionState() {
+  const clientId = 'client-123';
+  console.log('Connection established');
+}
+
+// Bad / 나쁜 예
+function 연결상태업데이트() {
+  const 클라이언트ID = 'client-123';
+  console.log('연결이 설정되었습니다');
+}
+```
 
 ## 주요 파일 위치
 
