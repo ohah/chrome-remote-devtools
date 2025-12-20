@@ -8,6 +8,9 @@
     "**/target/**",
     "**/*.pdb",
     "reference/**",
+    "devtools/**",
+    "packages/inspector/dist/**",
+    "packages/inspector/devtools/bundled/**",
     "packages/inspector/src-tauri/**",
     "devtools/devtools-frontend/**"
   ]
