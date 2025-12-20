@@ -3,30 +3,35 @@ name: Test Inspector TypeScript
 on:
   push:
     branches: [main, develop]
-    paths:
-      - 'packages/inspector/**/*.ts'
-      - 'packages/inspector/**/*.tsx'
-      - 'packages/inspector/**/*.js'
-      - 'packages/inspector/**/*.jsx'
-      - 'packages/inspector/package.json'
-      - 'packages/inspector/vite.config.ts'
-      - 'packages/inspector/tsconfig.json'
-      - '.github/workflows/test-inspector-ts.yml'
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'packages/inspector/**/*.ts'
-      - 'packages/inspector/**/*.tsx'
-      - 'packages/inspector/**/*.js'
-      - 'packages/inspector/**/*.jsx'
-      - 'packages/inspector/package.json'
-      - 'packages/inspector/vite.config.ts'
-      - 'packages/inspector/tsconfig.json'
-      - '.github/workflows/test-inspector-ts.yml'
 
 jobs:
+  check:
+    name: Check if should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.inspector-ts }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            inspector-ts:
+              - 'packages/inspector/**/*.ts'
+              - 'packages/inspector/**/*.tsx'
+              - 'packages/inspector/**/*.js'
+              - 'packages/inspector/**/*.jsx'
+              - 'packages/inspector/package.json'
+              - 'packages/inspector/vite.config.ts'
+              - 'packages/inspector/tsconfig.json'
+              - '.github/workflows/test-inspector-ts.yml'
+
   test:
     name: Test Inspector TypeScript
+    needs: check
+    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -45,3 +50,12 @@ jobs:
 
       - name: Build package
         run: cd packages/inspector && bun run build
+
+  skip:
+    name: Skip (no changes)
+    needs: check
+    if: needs.check.outputs.should-run != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip test
+        run: echo "No inspector TypeScript changes, skipping tests"

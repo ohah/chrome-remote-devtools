@@ -3,18 +3,29 @@ name: Test Client
 on:
   push:
     branches: [main, develop]
-    paths:
-      - 'packages/client/**'
-      - '.github/workflows/test-client.yml'
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'packages/client/**'
-      - '.github/workflows/test-client.yml'
 
 jobs:
+  check:
+    name: Check if should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.client }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            client:
+              - 'packages/client/**'
+              - '.github/workflows/test-client.yml'
+
   test:
     name: Test Client Package
+    needs: check
+    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -33,3 +44,12 @@ jobs:
 
       - name: Build package
         run: cd packages/client && bun run build
+
+  skip:
+    name: Skip (no changes)
+    needs: check
+    if: needs.check.outputs.should-run != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip test
+        run: echo "No client changes, skipping tests"

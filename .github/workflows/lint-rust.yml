@@ -3,24 +3,32 @@ name: Lint Rust
 on:
   push:
     branches: [main, develop]
-    paths:
-      - '**/*.rs'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - 'packages/inspector/src-tauri/**'
-      - '.github/workflows/lint-rust.yml'
   pull_request:
     branches: [main, develop]
-    paths:
-      - '**/*.rs'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - 'packages/inspector/src-tauri/**'
-      - '.github/workflows/lint-rust.yml'
 
 jobs:
+  check:
+    name: Check if should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.rust }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            rust:
+              - '**/*.rs'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'packages/inspector/src-tauri/**'
+              - '.github/workflows/lint-rust.yml'
+
   lint:
     name: Lint Rust
+    needs: check
+    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -64,3 +72,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-targets --all-features -- -D warnings
+
+  skip:
+    name: Skip (no changes)
+    needs: check
+    if: needs.check.outputs.should-run != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip lint
+        run: echo "No Rust changes, skipping lint"

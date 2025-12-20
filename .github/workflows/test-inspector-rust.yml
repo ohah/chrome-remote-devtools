@@ -3,22 +3,31 @@ name: Test Inspector Rust
 on:
   push:
     branches: [main, develop]
-    paths:
-      - 'packages/inspector/src-tauri/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - '.github/workflows/test-inspector-rust.yml'
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'packages/inspector/src-tauri/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - '.github/workflows/test-inspector-rust.yml'
 
 jobs:
+  check:
+    name: Check if should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.inspector-rust }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            inspector-rust:
+              - 'packages/inspector/src-tauri/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - '.github/workflows/test-inspector-rust.yml'
+
   test:
     name: Test Inspector Rust
+    needs: check
+    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -56,3 +65,12 @@ jobs:
 
       - name: Run Rust tests
         run: cargo test --package inspector --all-features
+
+  skip:
+    name: Skip (no changes)
+    needs: check
+    if: needs.check.outputs.should-run != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip test
+        run: echo "No inspector Rust changes, skipping tests"

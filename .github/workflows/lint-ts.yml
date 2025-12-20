@@ -3,36 +3,38 @@ name: Lint TypeScript
 on:
   push:
     branches: [main, develop]
-    paths:
-      - 'packages/**/*.ts'
-      - 'packages/**/*.tsx'
-      - 'packages/**/*.js'
-      - 'packages/**/*.jsx'
-      - 'document/**/*.ts'
-      - 'document/**/*.tsx'
-      - '*.ts'
-      - '*.js'
-      - 'oxlint.json'
-      - '.oxfmtrc.json'
-      - '.github/workflows/lint-ts.yml'
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'packages/**/*.ts'
-      - 'packages/**/*.tsx'
-      - 'packages/**/*.js'
-      - 'packages/**/*.jsx'
-      - 'document/**/*.ts'
-      - 'document/**/*.tsx'
-      - '*.ts'
-      - '*.js'
-      - 'oxlint.json'
-      - '.oxfmtrc.json'
-      - '.github/workflows/lint-ts.yml'
 
 jobs:
+  check:
+    name: Check if should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.ts }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            ts:
+              - 'packages/**/*.ts'
+              - 'packages/**/*.tsx'
+              - 'packages/**/*.js'
+              - 'packages/**/*.jsx'
+              - 'document/**/*.ts'
+              - 'document/**/*.tsx'
+              - '*.ts'
+              - '*.js'
+              - 'oxlint.json'
+              - '.oxfmtrc.json'
+              - '.github/workflows/lint-ts.yml'
+
   lint:
     name: Lint TypeScript/JavaScript
+    needs: check
+    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -51,3 +53,12 @@ jobs:
 
       - name: Check formatting
         run: bun run format:check
+
+  skip:
+    name: Skip (no changes)
+    needs: check
+    if: needs.check.outputs.should-run != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip lint
+        run: echo "No TypeScript/JavaScript changes, skipping lint"

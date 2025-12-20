@@ -3,18 +3,29 @@ name: Test Server
 on:
   push:
     branches: [main, develop]
-    paths:
-      - 'packages/server/**'
-      - '.github/workflows/test-server.yml'
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'packages/server/**'
-      - '.github/workflows/test-server.yml'
 
 jobs:
+  check:
+    name: Check if should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.server }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            server:
+              - 'packages/server/**'
+              - '.github/workflows/test-server.yml'
+
   test:
     name: Test Server Package
+    needs: check
+    if: needs.check.outputs.should-run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -33,3 +44,12 @@ jobs:
 
       - name: Build package
         run: cd packages/server && bun run build
+
+  skip:
+    name: Skip (no changes)
+    needs: check
+    if: needs.check.outputs.should-run != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip test
+        run: echo "No server changes, skipping tests"
