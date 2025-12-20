@@ -9,5 +9,16 @@
   "trailingComma": "es5",
   "bracketSpacing": true,
   "arrowParens": "always",
-  "endOfLine": "lf"
+  "endOfLine": "lf",
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/*.lock",
+    "**/target/**",
+    "**/*.pdb",
+    "reference/**",
+    "devtools/**",
+    "devtools/devtools-frontend/**"
+  ]
 }

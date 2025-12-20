@@ -1,0 +1,28 @@
+# Dependencies / 의존성
+node_modules/
+**/node_modules/**
+
+# Build outputs / 빌드 산출물
+dist/
+build/
+**/dist/**
+**/build/**
+
+# Lock files / 락 파일
+*.lock
+**/*.lock
+
+# Rust / Rust
+target/
+**/target/**
+*.pdb
+**/*.pdb
+
+# Reference code / 참조 코드
+reference/
+
+# DevTools / DevTools
+devtools/
+devtools/devtools-frontend/
+devtools/bundled/
+
