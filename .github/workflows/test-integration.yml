@@ -65,7 +65,7 @@ jobs:
 
       - name: Run integration tests
         if: needs.check.outputs.should-run == 'true'
-        run: bun run test:integration
+        run: bun run test:e2e:integration
 
       - name: Upload test results
         if: always() && needs.check.outputs.should-run == 'true'
