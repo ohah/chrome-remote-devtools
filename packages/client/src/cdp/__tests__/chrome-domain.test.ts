@@ -1,12 +1,11 @@
 // ChromeDomain class tests / ChromeDomain 클래스 테스트
 // happy-dom is registered via bunfig.toml preload / happy-dom은 bunfig.toml preload를 통해 등록됨
-import { describe, test, expect, beforeEach, beforeAll, afterAll, afterEach, mock } from 'bun:test';
+import { describe, test, expect, beforeEach, beforeAll, afterAll, afterEach } from 'bun:test';
 import ChromeDomain from '../index';
 
 describe('ChromeDomain', () => {
   let socket: WebSocket;
   let domain: ChromeDomain;
-  let originalConsole: typeof globalThis.console;
   let server: ReturnType<typeof Bun.serve> | null = null;
   let serverPort: number = 0;
 
@@ -71,47 +70,11 @@ describe('ChromeDomain', () => {
       });
     });
 
-    // Mock console for Runtime domain / Runtime 도메인을 위한 console 모킹
-    // Runtime 클래스가 console 메서드를 수정하므로 모킹 필요
-    // Runtime class modifies console methods, so mocking is needed
-    originalConsole = globalThis.console;
-    const mockConsole = {
-      log: mock(() => {}),
-      debug: mock(() => {}),
-      info: mock(() => {}),
-      error: mock(() => {}),
-      warn: mock(() => {}),
-      dir: mock(() => {}),
-      dirxml: mock(() => {}),
-      table: mock(() => {}),
-      trace: mock(() => {}),
-      clear: mock(() => {}),
-      group: mock(() => {}),
-      groupCollapsed: mock(() => {}),
-      groupEnd: mock(() => {}),
-    };
-    globalThis.console = mockConsole as any;
-
-    // Override window.eval for Runtime.evaluate / Runtime.evaluate를 위한 window.eval 오버라이드
-    // happy-dom의 window를 사용하되 eval만 커스텀
-    // Use happy-dom's window but customize eval
-    if (globalThis.window) {
-      (globalThis.window as any).eval = mock((expression: string) => {
-        // Simple eval mock / 간단한 eval 모킹
-        try {
-          return Function(`"use strict"; return (${expression})`)();
-        } catch {
-          return Function(`"use strict"; return ${expression}`)();
-        }
-      });
-    }
-
-    // Override window.fetch for Network domain / Network 도메인을 위한 window.fetch 오버라이드
-    // Network 클래스가 window.fetch를 수정하므로 모킹
-    // Network class modifies window.fetch, so mock it
-    if (globalThis.window) {
-      (globalThis.window as any).fetch = mock(() => Promise.resolve({} as Response));
-    }
+    // happy-dom provides window, document, location, navigator, XMLHttpRequest, MutationObserver
+    // Runtime 클래스가 console을 수정하지만 nativeConsoleFunc를 호출하므로 실제 console 사용 가능
+    // Network 클래스가 fetch를 수정하지만 originalFetch를 호출하므로 실제 fetch 사용 가능
+    // Runtime class modifies console but calls nativeConsoleFunc, so actual console works
+    // Network class modifies fetch but calls originalFetch, so actual fetch works
 
     domain = new ChromeDomain({ socket });
   });
