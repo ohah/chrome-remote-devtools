@@ -131,6 +131,21 @@ npm run build -- -t fast-build
 
 ## Running Development Servers
 
+### Prerequisites
+
+Before running the development servers, you must build the client package:
+
+```bash
+# Build client package
+cd packages/client
+bun run build
+cd ../..
+```
+
+This is required because the server serves the built client script at `/client.js`.
+
+### Running Individual Servers
+
 During development, you can run each package individually:
 
 ```bash
@@ -147,14 +162,95 @@ bun run dev:inspector:tauri
 bun run dev:docs
 ```
 
+### Complete Development Workflow
+
+For a complete development setup, you need to run multiple servers in separate terminals:
+
+**Terminal 1 - WebSocket Server**:
+```bash
+bun run dev:server
+```
+- Server runs on `http://localhost:8080`
+- Provides WebSocket endpoints: `/remote/debug/client/:id` and `/remote/debug/devtools/:id`
+- Serves client script at `/client.js`
+- Provides HTTP API at `/json`, `/json/clients`, `/json/inspectors`
+
+**Terminal 2 - Inspector**:
+```bash
+bun run dev:inspector
+```
+- Inspector runs on `http://localhost:1420`
+- Opens in your browser automatically
+- Connects to the WebSocket server at `localhost:8080`
+
+**Terminal 3 - Example App (optional)**:
+```bash
+cd examples/basic
+bun run dev
+```
+- Example app runs on `http://localhost:5173` (or another port if 5173 is busy)
+- Automatically loads the client script from `http://localhost:8080/client.js`
+- The client script connects to the WebSocket server automatically
+
+### Testing Your Setup
+
+1. **Open Inspector**: Navigate to `http://localhost:1420` in your browser
+2. **Open example app**: Navigate to `http://localhost:5173` (or the port shown in terminal)
+3. **Verify connection**:
+   - The example app automatically loads the client script
+   - Check the Inspector UI - you should see the connected client in the dropdown
+   - The DevTools iframe should load and connect to the client
+
+### Ports and Endpoints
+
+| Service | Port | Endpoints |
+|---------|------|-----------|
+| WebSocket Server | 8080 | `ws://localhost:8080/remote/debug/client/:id`<br>`ws://localhost:8080/remote/debug/devtools/:id`<br>`http://localhost:8080/json`<br>`http://localhost:8080/json/clients`<br>`http://localhost:8080/client.js` |
+| Inspector | 1420 | `http://localhost:1420` |
+| Example App | 5173 | `http://localhost:5173` (default Vite port) |
+
+### Troubleshooting
+
+#### Client script not found
+
+If you see errors about `/client.js` not found:
+
+1. **Build the client package**:
+   ```bash
+   cd packages/client
+   bun run build
+   ```
+
+2. **Verify the file exists**:
+   ```bash
+   ls packages/client/dist/index.js
+   ```
+
+3. **Restart the server** after building:
+   ```bash
+   bun run dev:server
+   ```
+
+#### WebSocket connection fails
+
+If the client cannot connect to the server:
+
+1. **Verify server is running**: Check that `bun run dev:server` is running
+2. **Check server URL**: Ensure the client script uses the correct server URL
+3. **Check browser console**: Look for WebSocket connection errors
+4. **Verify CORS**: The server should allow connections from your client origin
+
 ### Development Workflow
 
 Typical development workflow:
 
-1. **Start server**: Run `bun run dev:server` to start the WebSocket server
-2. **Run Inspector**: Run `bun run dev:inspector` to start the web Inspector
-3. **Prepare test page**: Load the client script in the web page you want to debug
-4. **Verify connection**: Check client connection and CDP message relay in the Inspector
+1. **Build client**: `cd packages/client && bun run build && cd ../..`
+2. **Start server**: `bun run dev:server` (Terminal 1)
+3. **Start Inspector**: `bun run dev:inspector` (Terminal 2)
+4. **Start example app** (optional): `cd examples/basic && bun run dev` (Terminal 3)
+5. **Make changes**: Edit code in any package
+6. **Test changes**: Refresh browser and verify functionality
+7. **Verify connection**: Check Inspector to see connected clients and CDP messages
 
 ## Testing
 
@@ -186,12 +282,60 @@ cargo test --package inspector
 
 ### Integration Tests
 
-Verify the entire system works correctly:
+Integration tests use Playwright to test the entire system end-to-end:
 
-1. Start server: `bun run dev:server`
-2. Run Inspector: `bun run dev:inspector`
-3. Load client script in test web page
-4. Verify connection and CDP message relay in Inspector
+```bash
+# Run integration tests
+bun run test:integration
+
+# Run with UI mode (interactive)
+bun run test:integration:ui
+
+# Run in debug mode
+bun run test:integration:debug
+```
+
+**How integration tests work**:
+
+1. **Automatic server startup**: The Playwright configuration automatically starts the WebSocket server before tests
+2. **Browser automation**: Tests use Playwright to open a browser and load test pages
+3. **WebSocket connections**: Tests simulate client and Inspector connections
+4. **CDP message verification**: Tests verify that CDP messages are properly relayed
+
+**Prerequisites for integration tests**:
+
+- **Build client package**: The server needs the built client script:
+  ```bash
+  cd packages/client
+  bun run build
+  ```
+
+- **Install Playwright browsers** (if not already installed):
+  ```bash
+  npx playwright install
+  ```
+
+**Note**: Integration tests are currently minimal (hello world tests). More comprehensive tests are planned.
+
+### Manual Integration Testing
+
+For manual testing of the entire system:
+
+1. **Build client**: `cd packages/client && bun run build && cd ../..`
+2. **Start server**: `bun run dev:server`
+3. **Start Inspector**: `bun run dev:inspector`
+4. **Load client script in test web page**:
+   - Open a web page in your browser
+   - Add this script tag to the HTML:
+     ```html
+     <script src="http://localhost:8080/client.js" data-server-url="http://localhost:8080"></script>
+     ```
+5. **Verify connection**:
+   - Check Inspector at `http://localhost:1420`
+   - You should see the connected client in the dropdown
+   - The DevTools iframe should load and connect
+   - Try executing JavaScript in the Console panel
+   - Check Network requests in the Network panel
 
 ## Code Style Guidelines
 
@@ -227,7 +371,7 @@ bun run build
 
 **Principles**:
 
-- Write English first, then separate with slash (`/`), then write Korean
+- Write English first, then separate with slash (`/`), then write Korean (for code comments only)
 - Short comments should be written in one line
 - Long explanations can be split into multiple lines if needed
 - Comments can be omitted if the code itself is clear
