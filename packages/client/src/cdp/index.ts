@@ -4,6 +4,7 @@ import Page from './domain/page';
 import Dom from './domain/dom';
 import Network from './domain/network';
 import Console from './domain/console';
+import DOMStorage from './domain/storage';
 import protocol from './domain/protocol';
 
 interface CDPMessage {
@@ -55,6 +56,7 @@ export default class ChromeDomain {
       new Dom(options),
       new Network(options),
       new Console(options),
+      new DOMStorage(options),
     ];
 
     domains.forEach((domain) => {

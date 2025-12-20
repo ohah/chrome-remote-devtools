@@ -22,6 +22,14 @@ const protocolMethods = {
   ],
   Network: ['enable', 'getCookies', 'setCookie', 'deleteCookies', 'getResponseBody'],
   Console: ['enable', 'clearMessages'],
+  DOMStorage: [
+    'enable',
+    'disable',
+    'getDOMStorageItems',
+    'setDOMStorageItem',
+    'removeDOMStorageItem',
+    'clear',
+  ],
 } as const;
 
 export type ProtocolDomain = keyof typeof protocolMethods;
@@ -60,4 +68,10 @@ export const Event = {
 
   // Console events / Console 이벤트
   messageAdded: 'Console.messageAdded',
+
+  // DOMStorage events / DOMStorage 이벤트
+  domStorageItemAdded: 'DOMStorage.domStorageItemAdded',
+  domStorageItemRemoved: 'DOMStorage.domStorageItemRemoved',
+  domStorageItemUpdated: 'DOMStorage.domStorageItemUpdated',
+  domStorageItemsCleared: 'DOMStorage.domStorageItemsCleared',
 } as const;
