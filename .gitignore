@@ -48,3 +48,8 @@ packages/inspector/dist/
 node_modules
 dist/
 doc_build/
+
+# Playwright test results / Playwright 테스트 결과
+test-results/
+playwright-report/
+.playwright/
