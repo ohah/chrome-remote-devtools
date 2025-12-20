@@ -8,5 +8,8 @@
     "build": "bun build src/index.ts --outdir dist --target browser --format iife --minify",
     "clean": "rm -rf dist",
     "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
   }
 }
