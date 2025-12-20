@@ -21,13 +21,11 @@
     "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "@types/node": "^20.0.0",
     "oxfmt": "latest",
-    "oxlint": "latest",
-    "@types/bun": "latest"
+    "oxlint": "latest"
   },
-  "module": "index.ts",
-  "type": "module",
   "peerDependencies": {
     "typescript": "^5"
   }
