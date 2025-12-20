@@ -36,6 +36,7 @@ REFERENCE_REPOS=(
   "chobitsu:https://github.com/liriliri/chobitsu.git"
   "devtools-remote-debugger:https://github.com/Nice-PLQ/devtools-remote-debugger.git"
   "rrweb:https://github.com/rrweb-io/rrweb.git"
+  "licia:https://github.com/liriliri/licia.git"
 )
 
 mkdir -p "$REFERENCE_DIR"
