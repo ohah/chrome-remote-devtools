@@ -1,11 +1,5 @@
 import { useEffect } from 'react';
-import {
-  assertEqual,
-  assertTrue,
-  assertFalse,
-  assertThrows,
-  assertManager,
-} from '../utils/assert';
+import { assertEqual, assertTrue, assertFalse, assertThrows, assertManager } from '../utils/assert';
 import './AssertPage.css';
 
 // Assert test page / Assert 테스트 페이지
@@ -31,22 +25,14 @@ function AssertPage() {
     assertManager.clearResults();
 
     // Deep equality tests / 깊은 동등성 테스트
-    assertEqual(
-      { a: 1, b: 2 },
-      { a: 1, b: 2 },
-      'Objects are deeply equal / 객체가 깊게 동일함'
-    );
+    assertEqual({ a: 1, b: 2 }, { a: 1, b: 2 }, 'Objects are deeply equal / 객체가 깊게 동일함');
     assertEqual(
       { a: 1, b: 2 },
       { a: 1, b: 3 },
       'Objects are not deeply equal / 객체가 깊게 동일하지 않음'
     );
     assertEqual([1, 2, 3], [1, 2, 3], 'Arrays are deeply equal / 배열이 깊게 동일함');
-    assertEqual(
-      [1, 2, 3],
-      [1, 2, 4],
-      'Arrays are not deeply equal / 배열이 깊게 동일하지 않음'
-    );
+    assertEqual([1, 2, 3], [1, 2, 4], 'Arrays are not deeply equal / 배열이 깊게 동일하지 않음');
     assertEqual(
       { a: { b: { c: 1 } } },
       { a: { b: { c: 1 } } },
