@@ -19,6 +19,7 @@
     "**/*.pdb",
     "reference/**",
     "devtools/**",
+    "packages/inspector/src-tauri/**",
     "devtools/devtools-frontend/**"
   ]
 }

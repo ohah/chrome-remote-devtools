@@ -1,6 +1,7 @@
 [tools]
 rust = "stable"
 bun = "latest"
+node = "24.11.1"
 
 [env]
 RUST_BACKTRACE = "1"
