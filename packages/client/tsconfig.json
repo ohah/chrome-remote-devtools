@@ -1,10 +1,10 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "types": [],
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
