@@ -20,6 +20,7 @@
     "format:rust": "cargo fmt --all",
     "format:rust:check": "cargo fmt --all -- --check",
     "build:devtools": "cd devtools/devtools-frontend && gclient sync && gn gen out/Default && autoninja -C out/Default && cd ../.. && bun run copy:devtools-bundled",
+    "build:client": "bun run --filter='@ohah/chrome-remote-devtools-client' build",
     "test:server": "bun test packages/server",
     "test:client": "bun test packages/client",
     "test:inspector": "bun test packages/inspector",
