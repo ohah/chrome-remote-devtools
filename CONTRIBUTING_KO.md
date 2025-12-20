@@ -167,27 +167,33 @@ bun run dev:docs
 완전한 개발 환경을 위해서는 여러 터미널에서 여러 서버를 실행해야 합니다:
 
 **터미널 1 - WebSocket 서버**:
+
 ```bash
 bun run dev:server
 ```
+
 - 서버는 `http://localhost:8080`에서 실행됩니다
 - WebSocket 엔드포인트 제공: `/remote/debug/client/:id` 및 `/remote/debug/devtools/:id`
 - `/client.js`에서 클라이언트 스크립트 제공
 - HTTP API 제공: `/json`, `/json/clients`, `/json/inspectors`
 
 **터미널 2 - Inspector**:
+
 ```bash
 bun run dev:inspector
 ```
+
 - Inspector는 `http://localhost:1420`에서 실행됩니다
 - 브라우저에서 자동으로 열립니다
 - `localhost:8080`의 WebSocket 서버에 연결됩니다
 
 **터미널 3 - 예제 앱 (선택사항)**:
+
 ```bash
 cd examples/basic
 bun run dev
 ```
+
 - 예제 앱은 `http://localhost:5173`에서 실행됩니다 (5173이 사용 중이면 다른 포트)
 - `http://localhost:8080/client.js`에서 클라이언트 스크립트를 자동으로 로드합니다
 - 클라이언트 스크립트가 WebSocket 서버에 자동으로 연결됩니다
@@ -203,11 +209,11 @@ bun run dev
 
 ### 포트 및 엔드포인트
 
-| 서비스 | 포트 | 엔드포인트 |
-|--------|------|-----------|
+| 서비스         | 포트 | 엔드포인트                                                                                                                                                                                                    |
+| -------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | WebSocket 서버 | 8080 | `ws://localhost:8080/remote/debug/client/:id`<br>`ws://localhost:8080/remote/debug/devtools/:id`<br>`http://localhost:8080/json`<br>`http://localhost:8080/json/clients`<br>`http://localhost:8080/client.js` |
-| Inspector | 1420 | `http://localhost:1420` |
-| 예제 앱 | 5173 | `http://localhost:5173` (기본 Vite 포트) |
+| Inspector      | 1420 | `http://localhost:1420`                                                                                                                                                                                       |
+| 예제 앱        | 5173 | `http://localhost:5173` (기본 Vite 포트)                                                                                                                                                                      |
 
 ### 문제 해결
 
@@ -216,12 +222,14 @@ bun run dev
 `/client.js`를 찾을 수 없다는 오류가 발생하면:
 
 1. **클라이언트 패키지 빌드**:
+
    ```bash
    cd packages/client
    bun run build
    ```
 
 2. **파일 존재 확인**:
+
    ```bash
    ls packages/client/dist/index.js
    ```
@@ -236,6 +244,7 @@ bun run dev
 포트 8080 또는 1420이 이미 사용 중이면:
 
 - **서버 포트 변경**: `PORT` 환경 변수 설정:
+
   ```bash
   PORT=8081 bun run dev:server
   ```
@@ -316,6 +325,7 @@ bun run test:integration:debug
 **통합 테스트 사전 준비**:
 
 - **클라이언트 패키지 빌드**: 서버에 빌드된 클라이언트 스크립트가 필요합니다:
+
   ```bash
   cd packages/client
   bun run build
