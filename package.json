@@ -28,7 +28,7 @@
     "test:unit:inspector": "bun test packages/inspector/src",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
-    "test:e2e": "test tests/e2e",
+    "test:e2e": "playwright test tests/e2e",
     "test:e2e:integration": "playwright test tests/integration",
     "test:e2e:integration:ui": "playwright test --ui",
     "test:e2e:integration:debug": "playwright test --debug",

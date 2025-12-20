@@ -49,15 +49,11 @@ describe('ChromeDomain', () => {
   });
 
   beforeEach(async () => {
-    // happy-dom이 window, document, location, navigator, XMLHttpRequest, MutationObserver를 자동으로 제공
-    // happy-dom automatically provides window, document, location, navigator, XMLHttpRequest, MutationObserver
-
-    // Use Bun's WebSocket with actual connection / 실제 연결을 사용하는 Bun의 WebSocket
     if (!serverPort) {
       throw new Error('Server port not available');
     }
     socket = new WebSocket(`ws://localhost:${serverPort}`);
-    
+
     // Wait for open event / open 이벤트 대기
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
