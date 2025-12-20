@@ -6,5 +6,4 @@ describe('initCDPClient', () => {
   test('should be a function', () => {
     expect(typeof initCDPClient).toBe('function');
   });
-  
 });
