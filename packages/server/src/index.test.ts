@@ -14,4 +14,3 @@ describe('SocketServer', () => {
     expect(clients).toEqual([]);
   });
 });
-

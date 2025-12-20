@@ -13,4 +13,3 @@ describe('App', () => {
     expect(App).toBeTruthy();
   });
 });
-
