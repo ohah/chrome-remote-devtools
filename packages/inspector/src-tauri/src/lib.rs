@@ -12,3 +12,23 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Test greet function / greet 함수 테스트
+    #[test]
+    fn test_greet() {
+        let result = greet("World");
+        assert!(result.contains("Hello"));
+        assert!(result.contains("World"));
+    }
+
+    // Test greet with empty string / 빈 문자열로 greet 테스트
+    #[test]
+    fn test_greet_empty() {
+        let result = greet("");
+        assert!(result.contains("Hello"));
+    }
+}
