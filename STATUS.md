@@ -453,3 +453,28 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 2. Add Storage domain
 3. API documentation
 4. Usage guide and examples
+
+---
+
+## Future Enhancements / 향후 개선사항
+
+### Event Caching and Flushing / 이벤트 캐싱 및 플러시
+
+**Status**: Not Started / 미구현
+
+**Description / 설명**:
+
+향후 CDP 호환 방식으로 모든 이벤트를 캐싱하고, 원격에서 요청 시 시간 순서대로 전송하는 기능을 구현할 예정입니다.
+
+Future implementation will support caching all events, and sending them in chronological order when requested remotely, in a CDP-compliant way.
+
+**Planned Features / 계획된 기능**:
+
+- [ ] Implement event caching mechanism for all events / 모든 이벤트 캐싱 메커니즘 구현
+- [ ] Add CDP-compliant way to retrieve cached events / CDP 호환 방식으로 캐시된 이벤트 조회 구현
+- [ ] Add method to flush cached events in chronological order / 시간 순서대로 캐시된 이벤트를 플러시하는 메서드 추가
+- [ ] Support per-domain cache flushing / 도메인별 캐시 플러시 지원
+- [ ] Support global cache flushing across all domains / 모든 도메인에 걸친 전역 캐시 플러시 지원
+- [ ] Add cache size limits and management / 캐시 크기 제한 및 관리 추가
+
+**Priority / 우선순위**: Medium / 중간
