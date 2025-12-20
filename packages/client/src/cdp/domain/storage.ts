@@ -183,11 +183,6 @@ export default class DOMStorage extends BaseDomain {
         });
       }
     };
-
-    window.addEventListener('storage', storageHandler);
-    this.storageListeners.push(() => {
-      window.removeEventListener('storage', storageHandler);
-    });
   }
 
   // Remove storage event listeners / storage 이벤트 리스너 제거

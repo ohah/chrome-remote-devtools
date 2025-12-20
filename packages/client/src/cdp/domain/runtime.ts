@@ -211,9 +211,6 @@ export default class Runtime extends BaseDomain {
       };
       this.socketSend('error', data);
     };
-
-    window.addEventListener('error', (e) => exceptionThrown(e.error));
-    window.addEventListener('unhandledrejection', (e) => exceptionThrown(e.reason));
   }
 
   // Get call frames from error / 에러에서 호출 프레임 가져오기
