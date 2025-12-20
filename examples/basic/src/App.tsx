@@ -1,34 +1,64 @@
-import { useEffect, useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import ConsolePage from './pages/ConsolePage';
+import NetworkPage from './pages/NetworkPage';
+import StoragePage from './pages/StoragePage';
+import AssertPage from './pages/AssertPage';
+import AssertPanel from './components/AssertPanel';
 import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0);
+// Navigation component / 네비게이션 컴포넌트
+function Navigation() {
+  const location = useLocation();
 
-  useEffect(() => {
-    console.log('count', count);
-  }, [count]);
+  const navLinks = [
+    { path: '/', label: 'Home / 홈' },
+    { path: '/console', label: 'Console' },
+    { path: '/network', label: 'Network' },
+    { path: '/storage', label: 'Storage' },
+    { path: '/assert', label: 'Assert' },
+  ];
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <nav className="navigation">
+      <div className="nav-container">
+        <Link to="/" className="nav-logo">
+          Chrome Remote DevTools
+        </Link>
+        <div className="nav-links">
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={location.pathname === link.path ? 'nav-link active' : 'nav-link'}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+    </nav>
+  );
+}
+
+// Main App component / 메인 App 컴포넌트
+function App() {
+  return (
+    <BrowserRouter>
+      <div className="app">
+        <Navigation />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/console" element={<ConsolePage />} />
+            <Route path="/network" element={<NetworkPage />} />
+            <Route path="/storage" element={<StoragePage />} />
+            <Route path="/assert" element={<AssertPage />} />
+          </Routes>
+        </main>
+        <AssertPanel />
       </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-    </>
+    </BrowserRouter>
   );
 }
 
