@@ -141,7 +141,7 @@ bun run dev:server
 bun run dev:inspector
 
 # Inspector 데스크탑 버전 실행 (Tauri)
-bun run dev:inspector:desktop
+bun run dev:inspector:tauri
 
 # 문서 페이지 실행
 bun run dev:docs

@@ -99,7 +99,7 @@ bun run dev:server
 bun run dev:inspector
 
 # Start Inspector (desktop version with Tauri)
-bun run dev:inspector:desktop
+bun run dev:inspector:tauri
 
 # Start documentation site
 bun run dev:docs
@@ -127,7 +127,7 @@ bash scripts/build.sh
 # Development servers
 bun run dev:server          # WebSocket server only
 bun run dev:inspector       # Inspector web only
-bun run dev:inspector:desktop  # Inspector desktop
+bun run dev:inspector:tauri  # Inspector desktop
 bun run dev:docs            # Documentation site
 
 # Code quality

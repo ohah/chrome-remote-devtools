@@ -99,7 +99,7 @@ bun run dev:server
 bun run dev:inspector
 
 # Inspector 데스크탑 버전 시작 (Tauri)
-bun run dev:inspector:desktop
+bun run dev:inspector:tauri
 
 # 문서 사이트 시작
 bun run dev:docs
@@ -127,7 +127,7 @@ bash scripts/build.sh
 # 개발 서버
 bun run dev:server          # 서버만
 bun run dev:inspector       # Inspector 웹만
-bun run dev:inspector:desktop  # Inspector 데스크탑
+bun run dev:inspector:tauri  # Inspector 데스크탑
 bun run dev:docs            # 문서 페이지
 
 # 코드 품질
