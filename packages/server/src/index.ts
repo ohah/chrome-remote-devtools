@@ -314,6 +314,9 @@ const server = createServer((req, res) => {
 const socketServer = new SocketServer();
 socketServer.initSocketServer(server);
 
-server.listen(PORT, HOST, () => {
-  console.log(`Server started at http://${HOST}:${PORT}`);
-});
+// Only start server when run directly / 직접 실행될 때만 서버 시작
+if (import.meta.main) {
+  server.listen(PORT, HOST, () => {
+    console.log(`Server started at http://${HOST}:${PORT}`);
+  });
+}
