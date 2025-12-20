@@ -21,13 +21,19 @@
     "test:server": "bun test packages/server",
     "test:client": "bun test packages/client",
     "test:inspector": "bun test packages/inspector",
+    "test:integration": "playwright test",
+    "test:integration:ui": "playwright test --ui",
+    "test:integration:debug": "playwright test --debug",
     "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts"
   },
   "devDependencies": {
+    "@playwright/test": "^1.40.0",
     "@types/bun": "latest",
     "@types/node": "^20.0.0",
+    "@types/ws": "^8.5.10",
     "oxfmt": "latest",
-    "oxlint": "latest"
+    "oxlint": "latest",
+    "ws": "^8.18.0"
   },
   "peerDependencies": {
     "typescript": "^5"
