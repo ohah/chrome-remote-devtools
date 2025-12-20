@@ -306,13 +306,13 @@ cargo test --package inspector
 
 ```bash
 # 통합 테스트 실행
-bun run test:integration
+bun run test:e2e:integration
 
 # UI 모드로 실행 (대화형)
-bun run test:integration:ui
+bun run test:e2e:integration:ui
 
 # 디버그 모드로 실행
-bun run test:integration:debug
+bun run test:e2e:integration:debug
 ```
 
 **통합 테스트 작동 방식**:

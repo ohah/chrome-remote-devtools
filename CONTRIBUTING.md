@@ -294,13 +294,13 @@ Integration tests use Playwright to test the entire system end-to-end:
 
 ```bash
 # Run integration tests
-bun run test:integration
+bun run test:e2e:integration
 
 # Run with UI mode (interactive)
-bun run test:integration:ui
+bun run test:e2e:integration:ui
 
 # Run in debug mode
-bun run test:integration:debug
+bun run test:e2e:integration:debug
 ```
 
 **How integration tests work**:
