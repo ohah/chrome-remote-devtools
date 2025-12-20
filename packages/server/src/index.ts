@@ -17,7 +17,7 @@ interface DevTools {
   clientId?: string;
 }
 
-class SocketServer {
+export class SocketServer {
   private clients: Map<string, Client> = new Map();
   private devtools: Map<string, DevTools> = new Map();
   private wss: WebSocketServer;
