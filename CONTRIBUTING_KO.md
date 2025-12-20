@@ -131,6 +131,21 @@ npm run build -- -t fast-build
 
 ## 개발 서버 실행
 
+### 사전 준비
+
+개발 서버를 실행하기 전에 클라이언트 패키지를 빌드해야 합니다:
+
+```bash
+# 클라이언트 패키지 빌드
+cd packages/client
+bun run build
+cd ../..
+```
+
+서버가 `/client.js`에서 빌드된 클라이언트 스크립트를 제공하기 때문에 필수입니다.
+
+### 개별 서버 실행
+
 개발 중에는 각 패키지를 개별적으로 실행할 수 있습니다:
 
 ```bash
@@ -147,14 +162,106 @@ bun run dev:inspector:tauri
 bun run dev:docs
 ```
 
+### 전체 개발 워크플로우
+
+완전한 개발 환경을 위해서는 여러 터미널에서 여러 서버를 실행해야 합니다:
+
+**터미널 1 - WebSocket 서버**:
+```bash
+bun run dev:server
+```
+- 서버는 `http://localhost:8080`에서 실행됩니다
+- WebSocket 엔드포인트 제공: `/remote/debug/client/:id` 및 `/remote/debug/devtools/:id`
+- `/client.js`에서 클라이언트 스크립트 제공
+- HTTP API 제공: `/json`, `/json/clients`, `/json/inspectors`
+
+**터미널 2 - Inspector**:
+```bash
+bun run dev:inspector
+```
+- Inspector는 `http://localhost:1420`에서 실행됩니다
+- 브라우저에서 자동으로 열립니다
+- `localhost:8080`의 WebSocket 서버에 연결됩니다
+
+**터미널 3 - 예제 앱 (선택사항)**:
+```bash
+cd examples/basic
+bun run dev
+```
+- 예제 앱은 `http://localhost:5173`에서 실행됩니다 (5173이 사용 중이면 다른 포트)
+- `http://localhost:8080/client.js`에서 클라이언트 스크립트를 자동으로 로드합니다
+- 클라이언트 스크립트가 WebSocket 서버에 자동으로 연결됩니다
+
+### 설정 테스트
+
+1. **Inspector 열기**: 브라우저에서 `http://localhost:1420`으로 이동
+2. **예제 앱 열기**: `http://localhost:5173`으로 이동 (또는 터미널에 표시된 포트)
+3. **연결 확인**:
+   - 예제 앱이 자동으로 클라이언트 스크립트를 로드합니다
+   - Inspector UI를 확인하세요 - 드롭다운에서 연결된 클라이언트를 볼 수 있어야 합니다
+   - DevTools iframe이 로드되고 클라이언트에 연결되어야 합니다
+
+### 포트 및 엔드포인트
+
+| 서비스 | 포트 | 엔드포인트 |
+|--------|------|-----------|
+| WebSocket 서버 | 8080 | `ws://localhost:8080/remote/debug/client/:id`<br>`ws://localhost:8080/remote/debug/devtools/:id`<br>`http://localhost:8080/json`<br>`http://localhost:8080/json/clients`<br>`http://localhost:8080/client.js` |
+| Inspector | 1420 | `http://localhost:1420` |
+| 예제 앱 | 5173 | `http://localhost:5173` (기본 Vite 포트) |
+
+### 문제 해결
+
+#### 클라이언트 스크립트를 찾을 수 없음
+
+`/client.js`를 찾을 수 없다는 오류가 발생하면:
+
+1. **클라이언트 패키지 빌드**:
+   ```bash
+   cd packages/client
+   bun run build
+   ```
+
+2. **파일 존재 확인**:
+   ```bash
+   ls packages/client/dist/index.js
+   ```
+
+3. **빌드 후 서버 재시작**:
+   ```bash
+   bun run dev:server
+   ```
+
+#### 포트 충돌
+
+포트 8080 또는 1420이 이미 사용 중이면:
+
+- **서버 포트 변경**: `PORT` 환경 변수 설정:
+  ```bash
+  PORT=8081 bun run dev:server
+  ```
+
+- **Inspector 포트 변경**: `packages/inspector/vite.config.ts`에서 포트 수정
+
+#### WebSocket 연결 실패
+
+클라이언트가 서버에 연결할 수 없으면:
+
+1. **서버 실행 확인**: `bun run dev:server`가 실행 중인지 확인
+2. **서버 URL 확인**: 클라이언트 스크립트가 올바른 서버 URL을 사용하는지 확인
+3. **브라우저 콘솔 확인**: WebSocket 연결 오류를 찾아보세요
+4. **CORS 확인**: 서버가 클라이언트 출처에서 연결을 허용해야 합니다
+
 ### 개발 워크플로우
 
 일반적인 개발 워크플로우:
 
-1. **서버 실행**: `bun run dev:server`로 WebSocket 서버 시작
-2. **Inspector 실행**: `bun run dev:inspector`로 웹 Inspector 실행
-3. **테스트 페이지 준비**: 디버깅할 웹페이지에 클라이언트 스크립트 로드
-4. **연결 확인**: Inspector에서 클라이언트 연결 및 CDP 메시지 전달 확인
+1. **클라이언트 빌드**: `cd packages/client && bun run build && cd ../..`
+2. **서버 시작**: `bun run dev:server` (터미널 1)
+3. **Inspector 시작**: `bun run dev:inspector` (터미널 2)
+4. **예제 앱 시작** (선택사항): `cd examples/basic && bun run dev` (터미널 3)
+5. **변경사항 적용**: 모든 패키지에서 코드 편집
+6. **변경사항 테스트**: 브라우저를 새로고침하고 기능 확인
+7. **연결 확인**: Inspector에서 연결된 클라이언트와 CDP 메시지 확인
 
 ## 테스트
 
@@ -186,12 +293,60 @@ cargo test --package inspector
 
 ### 통합 테스트
 
-전체 시스템이 올바르게 작동하는지 확인:
+통합 테스트는 Playwright를 사용하여 전체 시스템을 엔드투엔드로 테스트합니다:
 
-1. 서버 실행: `bun run dev:server`
-2. Inspector 실행: `bun run dev:inspector`
-3. 테스트 웹페이지에서 클라이언트 스크립트 로드
-4. Inspector에서 연결 및 CDP 메시지 전달 확인
+```bash
+# 통합 테스트 실행
+bun run test:integration
+
+# UI 모드로 실행 (대화형)
+bun run test:integration:ui
+
+# 디버그 모드로 실행
+bun run test:integration:debug
+```
+
+**통합 테스트 작동 방식**:
+
+1. **자동 서버 시작**: Playwright 설정이 테스트 전에 WebSocket 서버를 자동으로 시작합니다
+2. **브라우저 자동화**: 테스트는 Playwright를 사용하여 브라우저를 열고 테스트 페이지를 로드합니다
+3. **WebSocket 연결**: 테스트는 클라이언트 및 Inspector 연결을 시뮬레이션합니다
+4. **CDP 메시지 검증**: 테스트는 CDP 메시지가 올바르게 중계되는지 확인합니다
+
+**통합 테스트 사전 준비**:
+
+- **클라이언트 패키지 빌드**: 서버에 빌드된 클라이언트 스크립트가 필요합니다:
+  ```bash
+  cd packages/client
+  bun run build
+  ```
+
+- **Playwright 브라우저 설치** (아직 설치하지 않은 경우):
+  ```bash
+  npx playwright install
+  ```
+
+**참고**: 통합 테스트는 현재 최소한(헬로우월드 테스트)입니다. 더 포괄적인 테스트가 계획되어 있습니다.
+
+### 수동 통합 테스트
+
+전체 시스템의 수동 테스트를 위해:
+
+1. **클라이언트 빌드**: `cd packages/client && bun run build && cd ../..`
+2. **서버 시작**: `bun run dev:server`
+3. **Inspector 시작**: `bun run dev:inspector`
+4. **테스트 웹페이지에 클라이언트 스크립트 로드**:
+   - 브라우저에서 웹페이지를 엽니다
+   - HTML에 다음 스크립트 태그를 추가합니다:
+     ```html
+     <script src="http://localhost:8080/client.js" data-server-url="http://localhost:8080"></script>
+     ```
+5. **연결 확인**:
+   - `http://localhost:1420`에서 Inspector 확인
+   - 드롭다운에서 연결된 클라이언트를 볼 수 있어야 합니다
+   - DevTools iframe이 로드되고 연결되어야 합니다
+   - Console 패널에서 JavaScript 실행 시도
+   - Network 패널에서 네트워크 요청 확인
 
 ## 코딩 스타일 가이드라인
 
