@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import "./App.css";
+import { useRef } from 'react';
+import './App.css';
 
 function App() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -34,9 +34,9 @@ function App() {
 </html>`;
 
   return (
-    <div style={{ width: "100%", height: "100vh", display: "flex", flexDirection: "column" }}>
+    <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Your React UI / React UI */}
-      <div style={{ padding: "10px", background: "#f0f0f0", borderBottom: "1px solid #ccc" }}>
+      <div style={{ padding: '10px', background: '#f0f0f0', borderBottom: '1px solid #ccc' }}>
         <h1>Chrome Remote DevTools</h1>
         {/* Add your controls here / 여기에 컨트롤 추가 */}
       </div>
@@ -47,8 +47,8 @@ function App() {
         srcDoc={inspectorHTML}
         style={{
           flex: 1,
-          width: "100%",
-          border: "none",
+          width: '100%',
+          border: 'none',
         }}
         title="DevTools"
       />
