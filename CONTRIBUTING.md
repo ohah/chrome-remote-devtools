@@ -72,28 +72,34 @@ The DevTools UI is based on a fork of Chrome DevTools frontend. To build it, you
 ### Build Steps
 
 1. **Navigate to devtools directory**:
+
    ```bash
    cd devtools
    ```
 
 2. **Sync dependencies**:
+
    ```bash
    gclient sync
    ```
+
    This will download all required dependencies for devtools-frontend.
 
 3. **Generate build configuration**:
+
    ```bash
    cd devtools-frontend
    gn gen out/Default
    ```
 
 4. **Build DevTools**:
+
    ```bash
    autoninja -C out/Default
    ```
 
    Alternatively, you can use npm:
+
    ```bash
    npm run build
    ```
@@ -111,6 +117,7 @@ autoninja -C out/fast-build
 ```
 
 Or use npm with the fast-build target:
+
 ```bash
 npm run build -- -t fast-build
 ```
@@ -195,6 +202,7 @@ All comments should use **both English and Korean** together.
 **Format**: `English description / 한글 설명`
 
 **Examples**:
+
 ```typescript
 // Update connection state / 연결 상태 업데이트
 function updateConnection() {
@@ -208,6 +216,7 @@ async function handleMessage(msg: string) {
 ```
 
 **Script file examples**:
+
 ```bash
 # Install dependencies / 의존성 설치
 bun install
@@ -217,6 +226,7 @@ bun run build
 ```
 
 **Principles**:
+
 - Write English first, then separate with slash (`/`), then write Korean
 - Short comments should be written in one line
 - Long explanations can be split into multiple lines if needed
@@ -229,11 +239,13 @@ Before submitting a pull request, ensure your code passes all quality checks. Ru
 ### TypeScript/JavaScript
 
 - **Lint check**:
+
   ```bash
   bun run lint
   ```
 
 - **Formatting check and apply**:
+
   ```bash
   # Apply formatting
   bun run format
@@ -251,11 +263,13 @@ Before submitting a pull request, ensure your code passes all quality checks. Ru
 ### Rust
 
 - **Clippy (linter)**:
+
   ```bash
   cargo clippy --all -- --deny warnings
   ```
 
 - **Formatting**:
+
   ```bash
   # Apply formatting
   bun run format:rust

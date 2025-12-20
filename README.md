@@ -70,6 +70,7 @@ bash scripts/init.sh
 ```
 
 This will:
+
 - Install Bun dependencies
 - Install Rust dependencies
 - Clone reference repositories (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb)

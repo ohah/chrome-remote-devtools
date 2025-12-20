@@ -72,28 +72,34 @@ DevTools UI는 Chrome DevTools frontend의 포크를 기반으로 합니다. 빌
 ### 빌드 단계
 
 1. **devtools 디렉토리로 이동**:
+
    ```bash
    cd devtools
    ```
 
 2. **의존성 동기화**:
+
    ```bash
    gclient sync
    ```
+
    이 명령은 devtools-frontend에 필요한 모든 의존성을 다운로드합니다.
 
 3. **빌드 설정 생성**:
+
    ```bash
    cd devtools-frontend
    gn gen out/Default
    ```
 
 4. **DevTools 빌드**:
+
    ```bash
    autoninja -C out/Default
    ```
 
    또는 npm을 사용할 수도 있습니다:
+
    ```bash
    npm run build
    ```
@@ -111,6 +117,7 @@ autoninja -C out/fast-build
 ```
 
 또는 npm으로 fast-build 타겟 사용:
+
 ```bash
 npm run build -- -t fast-build
 ```
@@ -195,6 +202,7 @@ cargo test --package inspector
 **형식**: `English description / 한글 설명`
 
 **예시**:
+
 ```typescript
 // Update connection state / 연결 상태 업데이트
 function updateConnection() {
@@ -208,6 +216,7 @@ async function handleMessage(msg: string) {
 ```
 
 **스크립트 파일 예시**:
+
 ```bash
 # Install dependencies / 의존성 설치
 bun install
@@ -217,6 +226,7 @@ bun run build
 ```
 
 **원칙**:
+
 - 영어를 먼저 작성하고, 슬래시(`/`)로 구분한 후 한글을 작성
 - 짧은 주석은 한 줄로 작성
 - 긴 설명이 필요한 경우 여러 줄로 나누어 작성 가능
@@ -229,11 +239,13 @@ Pull Request를 제출하기 전에 모든 코드 품질 검사를 통과했는�
 ### TypeScript/JavaScript
 
 - **Lint 검사**:
+
   ```bash
   bun run lint
   ```
 
 - **포맷팅 검사 및 적용**:
+
   ```bash
   # 포맷팅 적용
   bun run format
@@ -251,11 +263,13 @@ Pull Request를 제출하기 전에 모든 코드 품질 검사를 통과했는�
 ### Rust
 
 - **Clippy (린터)**:
+
   ```bash
   cargo clippy --all -- --deny warnings
   ```
 
 - **포맷팅**:
+
   ```bash
   # 포맷팅 적용
   bun run format:rust
@@ -394,5 +408,3 @@ refactor(inspector): reorganize component structure
 ---
 
 Chrome Remote DevTools에 기여해주셔서 감사합니다! 여러분의 노력이 이 프로젝트를 더 나은 도구로 만들어줍니다.
-
-
