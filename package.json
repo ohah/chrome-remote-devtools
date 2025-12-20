@@ -18,6 +18,9 @@
     "format:rust": "cargo fmt --all",
     "format:rust:check": "cargo fmt --all -- --check",
     "build:devtools": "cd devtools/devtools-frontend && gclient sync && gn gen out/Default && autoninja -C out/Default && cd ../.. && bun run copy:devtools-bundled",
+    "test:server": "bun test packages/server",
+    "test:client": "bun test packages/client",
+    "test:inspector": "bun test packages/inspector",
     "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts"
   },
   "devDependencies": {
