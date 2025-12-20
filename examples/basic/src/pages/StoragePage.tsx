@@ -37,18 +37,6 @@ function StoragePage() {
     setSessionStorageItems(session);
   };
 
-  useEffect(() => {
-    loadStorage();
-    // Listen to storage events / storage 이벤트 수신
-    const handleStorage = () => {
-      loadStorage();
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-    };
-  }, []);
-
   const handleSetLocalStorage = () => {
     if (key) {
       localStorage.setItem(key, value);
