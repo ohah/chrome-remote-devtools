@@ -159,7 +159,7 @@ bun run dev
 - 클라이언트 패키지를 watch 모드로 빌드 (파일 변경 시 자동 재빌드)
 - WebSocket 서버를 `http://localhost:8080`에서 시작
 - Inspector를 `http://localhost:1420`에서 시작
-- 예제 앱을 `http://localhost:5173`에서 시작
+- 예제 앱을 `http://localhost:5173`에서 시작 (선택사항)
 
 모든 서비스는 하나의 터미널에서 색상으로 구분된 로그와 함께 실행됩니다:
 
@@ -171,6 +171,31 @@ bun run dev
 `Ctrl+C`를 눌러 모든 서비스를 한 번에 종료할 수 있습니다.
 
 **참고**: 클라이언트 패키지는 자동으로 watch 모드로 빌드되므로, 클라이언트 코드를 변경할 때 수동으로 다시 빌드할 필요가 없습니다.
+
+#### 설정 옵션
+
+환경 변수를 사용하여 통합 개발 환경을 설정할 수 있습니다:
+
+```bash
+# 커스텀 포트
+PORT=8081 INSPECTOR_PORT=3000 EXAMPLE_PORT=5174 bun run dev
+
+# 예제 앱 제외
+INCLUDE_EXAMPLE=false bun run dev
+
+# 커스텀 헬스 체크 타임아웃
+HEALTH_CHECK_TIMEOUT=15000 bun run dev
+```
+
+**환경 변수**:
+
+- `PORT` - 서버 포트 (기본값: 8080)
+- `INSPECTOR_PORT` - Inspector 포트 (기본값: 1420)
+- `EXAMPLE_PORT` - 예제 앱 포트 (기본값: 5173)
+- `INCLUDE_EXAMPLE` - 예제 앱 포함 여부 (기본값: true, `false`로 설정하면 제외)
+- `HEALTH_CHECK_TIMEOUT` - 헬스 체크 타임아웃 (밀리초, 기본값: 10000)
+
+스크립트는 서비스가 준비되었는지 확인하기 위해 헬스 체크를 수행합니다.
 
 ### 개별 서버 실행
 

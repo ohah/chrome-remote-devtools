@@ -159,7 +159,7 @@ This command automatically:
 - Builds the client package in watch mode (auto-rebuilds on file changes)
 - Starts the WebSocket server on `http://localhost:8080`
 - Starts the Inspector on `http://localhost:1420`
-- Starts the example app on `http://localhost:5173`
+- Starts the example app on `http://localhost:5173` (optional)
 
 All services run in a single terminal with color-coded logs:
 
@@ -171,6 +171,31 @@ All services run in a single terminal with color-coded logs:
 Press `Ctrl+C` to stop all services at once.
 
 **Note**: The client package is automatically built in watch mode, so you don't need to manually rebuild it when making changes to the client code.
+
+#### Configuration Options / 설정 옵션
+
+You can configure the unified development environment using environment variables:
+
+```bash
+# Custom ports / 커스텀 포트
+PORT=8081 INSPECTOR_PORT=3000 EXAMPLE_PORT=5174 bun run dev
+
+# Exclude example app / 예제 앱 제외
+INCLUDE_EXAMPLE=false bun run dev
+
+# Custom health check timeout / 커스텀 헬스 체크 타임아웃
+HEALTH_CHECK_TIMEOUT=15000 bun run dev
+```
+
+**Environment Variables / 환경 변수**:
+
+- `PORT` - Server port (default: 8080)
+- `INSPECTOR_PORT` - Inspector port (default: 1420)
+- `EXAMPLE_PORT` - Example app port (default: 5173)
+- `INCLUDE_EXAMPLE` - Include example app (default: true, set to `false` to exclude)
+- `HEALTH_CHECK_TIMEOUT` - Health check timeout in milliseconds (default: 10000)
+
+The script performs health checks on services to ensure they're ready before reporting success.
 
 ### Running Individual Servers
 
