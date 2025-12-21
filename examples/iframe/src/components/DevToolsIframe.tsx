@@ -1,14 +1,12 @@
 // DevTools iframe component / DevTools iframe 컴포넌트
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { buildDevToolsUrl, getServerUrl } from '../utils/devtools';
-import './DevToolsIframe.css';
 
 interface DevToolsIframeProps {
   clientId: string | null;
 }
 
 export default function DevToolsIframe({ clientId }: DevToolsIframeProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const draggableRef = useRef<HTMLDivElement>(null);
   const previousClientIdRef = useRef<string | null>(null);
@@ -127,10 +125,10 @@ export default function DevToolsIframe({ clientId }: DevToolsIframeProps) {
   if (!clientId) {
     return (
       <div
-        className="devtools-iframe-container devtools-iframe-loading"
+        className="fixed left-0 bottom-0 w-full z-[200000] border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center"
         style={{ height: `${height}px` }}
       >
-        <div className="devtools-iframe-loading-message">
+        <div className="text-gray-600 dark:text-gray-400 text-sm text-center">
           Waiting for client connection... / 클라이언트 연결 대기 중...
         </div>
       </div>
@@ -138,13 +136,16 @@ export default function DevToolsIframe({ clientId }: DevToolsIframeProps) {
   }
 
   return (
-    <div ref={containerRef} className="devtools-iframe-container" style={{ height: `${height}px` }}>
+    <div
+      className="fixed left-0 bottom-0 w-full z-[200000] border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col"
+      style={{ height: `${height}px` }}
+    >
       <div
         ref={draggableRef}
-        className="devtools-iframe-draggable"
+        className="absolute w-full h-[18px] left-0 -top-2 cursor-row-resize z-10 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 py-1 -my-1"
         onMouseDown={handleResizeStart}
       />
-      <iframe ref={iframeRef} className="devtools-iframe" title="DevTools" />
+      <iframe ref={iframeRef} className="border-none w-full h-full flex-1" title="DevTools" />
     </div>
   );
 }
