@@ -245,9 +245,7 @@ async function startServices() {
       await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
       failedServices.push(service.name);
-      console.error(
-        `${colors.error}[${service.name}] Failed to start: ${error}${colors.reset}`
-      );
+      console.error(`${colors.error}[${service.name}] Failed to start: ${error}${colors.reset}`);
     }
   }
 
@@ -289,9 +287,7 @@ async function startServices() {
   console.log(`${colors.success}✅ Started: ${startedServices.join(', ')}${colors.reset}`);
 
   if (failedServices.length > 0) {
-    console.log(
-      `${colors.error}❌ Failed: ${failedServices.join(', ')}${colors.reset}`
-    );
+    console.log(`${colors.error}❌ Failed: ${failedServices.join(', ')}${colors.reset}`);
   }
 
   // Print service URLs / 서비스 URL 출력
