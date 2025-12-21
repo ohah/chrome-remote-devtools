@@ -24,10 +24,19 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'bun run --filter="@ohah/chrome-remote-devtools-server" dev',
-    url: 'http://localhost:8080/json',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  webServer: [
+    {
+      // Build client first, then start server / 클라이언트를 먼저 빌드한 후 서버 시작
+      command: 'bun scripts/start-server-with-client.ts',
+      url: 'http://localhost:8080/json',
+      reuseExistingServer: !process.env.CI,
+      timeout: 180000, // Increase timeout for client build / 클라이언트 빌드를 위해 타임아웃 증가
+    },
+    {
+      command: 'bun run --filter="iframe" dev',
+      url: 'http://localhost:5174',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+    },
+  ],
 });
