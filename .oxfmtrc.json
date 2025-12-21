@@ -22,6 +22,7 @@
     "packages/inspector/dist/**",
     "packages/inspector/devtools/bundled/**",
     "packages/inspector/src-tauri/**",
+    "packages/inspector/src/routeTree.gen.ts",
     "devtools/devtools-frontend/**"
   ]
 }
