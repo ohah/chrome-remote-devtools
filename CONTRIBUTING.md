@@ -133,7 +133,9 @@ npm run build -- -t fast-build
 
 ### Prerequisites
 
-Before running the development servers, you must build the client package:
+**For unified development environment (`bun run dev`)**: No manual build required. The client package is automatically built in watch mode.
+
+**For individual servers**: Before running the development servers, you must build the client package:
 
 ```bash
 # Build client package
@@ -143,6 +145,30 @@ cd ../..
 ```
 
 This is required because the server serves the built client script at `/client.js`.
+
+### Unified Development Environment
+
+For a simplified development experience, you can run all services with a single command:
+
+```bash
+bun run dev
+```
+
+This command automatically:
+- Builds the client package in watch mode (auto-rebuilds on file changes)
+- Starts the WebSocket server on `http://localhost:8080`
+- Starts the Inspector on `http://localhost:1420`
+- Starts the example app on `http://localhost:5173`
+
+All services run in a single terminal with color-coded logs:
+- `[CLIENT]` - Client build output (cyan)
+- `[SERVER]` - Server logs (green)
+- `[INSPECTOR]` - Inspector logs (yellow)
+- `[EXAMPLE]` - Example app logs (magenta)
+
+Press `Ctrl+C` to stop all services at once.
+
+**Note**: The client package is automatically built in watch mode, so you don't need to manually rebuild it when making changes to the client code.
 
 ### Running Individual Servers
 
@@ -162,9 +188,9 @@ bun run dev:inspector:tauri
 bun run dev:docs
 ```
 
-### Complete Development Workflow
+### Complete Development Workflow (Multiple Terminals)
 
-For a complete development setup, you need to run multiple servers in separate terminals:
+If you prefer to run services in separate terminals for better log separation, you can use the individual commands:
 
 **Terminal 1 - WebSocket Server**:
 
@@ -250,7 +276,14 @@ If the client cannot connect to the server:
 
 ### Development Workflow
 
-Typical development workflow:
+**Recommended workflow (unified)**:
+
+1. **Start all services**: `bun run dev` (single terminal)
+2. **Make changes**: Edit code in any package
+3. **Test changes**: Refresh browser and verify functionality
+4. **Verify connection**: Check Inspector to see connected clients and CDP messages
+
+**Alternative workflow (separate terminals)**:
 
 1. **Build client**: `cd packages/client && bun run build && cd ../..`
 2. **Start server**: `bun run dev:server` (Terminal 1)
