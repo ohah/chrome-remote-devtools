@@ -144,7 +144,32 @@ bun run build:docs          # 문서 빌드 (document 패키지)
 
 **형식**: `영어 설명 / 한글 설명`
 
-**예시**:
+#### JavaScript/TypeScript 주석
+
+**JavaScript와 TypeScript 코드에서는 JSDoc 스타일 주석을 사용합니다.**
+
+**JSDoc 예시**:
+```typescript
+/**
+ * Client entity types / 클라이언트 엔티티 타입
+ */
+export interface Client {
+  /** Client unique identifier / 클라이언트 고유 식별자 */
+  id: string;
+  /** Page URL / 페이지 URL */
+  url?: string;
+}
+
+/**
+ * Get clients from server / 서버에서 클라이언트 목록 가져오기
+ * @returns Promise resolving to array of clients / 클라이언트 배열로 resolve되는 Promise
+ */
+export async function getClients(): Promise<Client[]> {
+  // ...
+}
+```
+
+**일반 주석 예시**:
 ```typescript
 // Update connection state / 연결 상태 업데이트
 function updateConnection() {
@@ -154,6 +179,31 @@ function updateConnection() {
 // Handle WebSocket message / WebSocket 메시지 처리
 async function handleMessage(msg: string) {
   // ...
+}
+```
+
+**Rust 주석 예시**:
+```rust
+/// Client connection handler / 클라이언트 연결 핸들러
+pub struct ClientHandler {
+    /// Client unique identifier / 클라이언트 고유 식별자
+    pub id: String,
+    /// WebSocket connection / WebSocket 연결
+    pub ws: WebSocket,
+}
+
+/// Initialize client handler / 클라이언트 핸들러 초기화
+/// 
+/// # Arguments
+/// 
+/// * `id` - Client identifier / 클라이언트 식별자
+/// * `ws` - WebSocket connection / WebSocket 연결
+/// 
+/// # Returns
+/// 
+/// Initialized client handler / 초기화된 클라이언트 핸들러
+pub fn new(id: String, ws: WebSocket) -> ClientHandler {
+    // ...
 }
 ```
 
@@ -167,6 +217,10 @@ bun run build
 ```
 
 **원칙**:
+- **JSDoc 스타일 (JavaScript/TypeScript)**: 인터페이스, 타입, 함수, 클래스 등은 `/** */` 형식의 JSDoc 주석 사용
+- **일반 주석 (JavaScript/TypeScript)**: 간단한 설명이나 인라인 주석은 `//` 형식 사용
+- **Rust 문서 주석**: 구조체, 함수, 모듈 등은 `///` 형식의 문서 주석 사용
+- **Rust 일반 주석**: 간단한 설명이나 인라인 주석은 `//` 형식 사용
 - 영어를 먼저 작성하고, 슬래시(`/`)로 구분한 후 한글을 작성
 - 짧은 주석은 한 줄로 작성
 - 긴 설명이 필요한 경우 여러 줄로 나누어 작성 가능
