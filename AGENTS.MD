@@ -193,14 +193,14 @@ pub struct ClientHandler {
 }
 
 /// Initialize client handler / 클라이언트 핸들러 초기화
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `id` - Client identifier / 클라이언트 식별자
 /// * `ws` - WebSocket connection / WebSocket 연결
-/// 
+///
 /// # Returns
-/// 
+///
 /// Initialized client handler / 초기화된 클라이언트 핸들러
 pub fn new(id: String, ws: WebSocket) -> ClientHandler {
     // ...
