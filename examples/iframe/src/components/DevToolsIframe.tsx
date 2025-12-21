@@ -1,6 +1,6 @@
 // DevTools iframe component / DevTools iframe 컴포넌트
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { buildDevToolsUrl, getClientId, getServerUrl } from '../utils/devtools';
+import { buildDevToolsUrl, getServerUrl } from '../utils/devtools';
 import './DevToolsIframe.css';
 
 interface DevToolsIframeProps {
@@ -126,7 +126,10 @@ export default function DevToolsIframe({ clientId }: DevToolsIframeProps) {
   // Show loading state if no clientId / clientId가 없으면 로딩 상태 표시
   if (!clientId) {
     return (
-      <div className="devtools-iframe-container devtools-iframe-loading" style={{ height: `${height}px` }}>
+      <div
+        className="devtools-iframe-container devtools-iframe-loading"
+        style={{ height: `${height}px` }}
+      >
         <div className="devtools-iframe-loading-message">
           Waiting for client connection... / 클라이언트 연결 대기 중...
         </div>

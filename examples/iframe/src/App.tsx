@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import DevToolsIframe from './components/DevToolsIframe';
 import { getClientId } from './utils/devtools';
-import './App.css';
 
 function App() {
   const [clientId, setClientId] = useState<string | null>(null);
@@ -64,47 +63,57 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <div className="app-content">
-        <header className="app-header">
-          <h1>Chrome Remote DevTools - iframe Example</h1>
-          <p>DevTools iframe example similar to chii / chii와 유사한 DevTools iframe 예제</p>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1 pb-0 mb-0">
+        <header className="p-8 text-center bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+          <h1 className="m-0 mb-2 text-3xl">Chrome Remote DevTools - iframe Example</h1>
+          <p className="m-0 opacity-90">DevTools iframe example similar to chii / chii와 유사한 DevTools iframe 예제</p>
         </header>
 
-        <main className="app-main">
-          <div className="test-section">
-            <h2>Test Functions / 테스트 함수</h2>
-            <p>
+        <main className="max-w-5xl mx-auto p-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-md dark:shadow-lg">
+            <h2 className="m-0 mb-4 text-gray-900 dark:text-gray-100">Test Functions / 테스트 함수</h2>
+            <p className="mb-4 text-gray-700 dark:text-gray-300">
               Use these buttons to test DevTools functionality / DevTools 기능을 테스트하려면 이
               버튼들을 사용하세요
             </p>
 
-            <div className="test-buttons">
-              <button onClick={handleConsoleTest} className="test-button">
+            <div className="flex gap-4 flex-wrap">
+              <button
+                onClick={handleConsoleTest}
+                className="px-6 py-3 text-base border-none rounded bg-indigo-500 text-white cursor-pointer transition-colors hover:bg-indigo-600 active:bg-indigo-700"
+              >
                 Console Test / 콘솔 테스트
               </button>
-              <button onClick={handleNetworkTest} className="test-button">
+              <button
+                onClick={handleNetworkTest}
+                className="px-6 py-3 text-base border-none rounded bg-indigo-500 text-white cursor-pointer transition-colors hover:bg-indigo-600 active:bg-indigo-700"
+              >
                 Network Test / 네트워크 테스트
               </button>
-              <button onClick={handleStorageTest} className="test-button">
+              <button
+                onClick={handleStorageTest}
+                className="px-6 py-3 text-base border-none rounded bg-indigo-500 text-white cursor-pointer transition-colors hover:bg-indigo-600 active:bg-indigo-700"
+              >
                 Storage Test / 스토리지 테스트
               </button>
             </div>
           </div>
 
-          <div className="info-section">
-            <h2>About / 정보</h2>
-            <ul>
-              <li>
-                <strong>Client ID:</strong> {clientId || 'Not connected / 연결되지 않음'}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-md dark:shadow-lg">
+            <h2 className="m-0 mb-4 text-gray-900 dark:text-gray-100">About / 정보</h2>
+            <ul className="list-none p-0 m-0">
+              <li className="py-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                <strong className="text-indigo-500">Client ID:</strong>{' '}
+                {clientId || 'Not connected / 연결되지 않음'}
               </li>
-              <li>
-                <strong>DevTools:</strong> Displayed in iframe at the bottom / 하단의 iframe에
-                표시됨
+              <li className="py-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                <strong className="text-indigo-500">DevTools:</strong> Displayed in iframe at the
+                bottom / 하단의 iframe에 표시됨
               </li>
-              <li>
-                <strong>Resize:</strong> Drag the handle at the top of DevTools panel / DevTools
-                패널 상단의 핸들을 드래그하여 크기 조절
+              <li className="py-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                <strong className="text-indigo-500">Resize:</strong> Drag the handle at the top of
+                DevTools panel / DevTools 패널 상단의 핸들을 드래그하여 크기 조절
               </li>
             </ul>
           </div>
