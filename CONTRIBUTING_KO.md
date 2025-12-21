@@ -155,12 +155,14 @@ bun run dev
 ```
 
 이 명령어는 자동으로:
+
 - 클라이언트 패키지를 watch 모드로 빌드 (파일 변경 시 자동 재빌드)
 - WebSocket 서버를 `http://localhost:8080`에서 시작
 - Inspector를 `http://localhost:1420`에서 시작
 - 예제 앱을 `http://localhost:5173`에서 시작
 
 모든 서비스는 하나의 터미널에서 색상으로 구분된 로그와 함께 실행됩니다:
+
 - `[CLIENT]` - 클라이언트 빌드 출력 (cyan)
 - `[SERVER]` - 서버 로그 (green)
 - `[INSPECTOR]` - Inspector 로그 (yellow)

@@ -155,12 +155,14 @@ bun run dev
 ```
 
 This command automatically:
+
 - Builds the client package in watch mode (auto-rebuilds on file changes)
 - Starts the WebSocket server on `http://localhost:8080`
 - Starts the Inspector on `http://localhost:1420`
 - Starts the example app on `http://localhost:5173`
 
 All services run in a single terminal with color-coded logs:
+
 - `[CLIENT]` - Client build output (cyan)
 - `[SERVER]` - Server logs (green)
 - `[INSPECTOR]` - Inspector logs (yellow)
