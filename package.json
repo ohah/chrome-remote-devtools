@@ -8,7 +8,8 @@
     "examples/*"
   ],
   "scripts": {
-    "dev": "bun run --filter='*' dev",
+    "dev": "bun scripts/dev.ts",
+    "dev:all": "bun run --filter='*' dev",
     "dev:example:basic": "bun run --filter='basic' dev",
     "dev:server": "bun run --filter='@ohah/chrome-remote-devtools-server' dev",
     "dev:inspector": "bun run --filter='@ohah/chrome-remote-devtools-inspector' dev",
