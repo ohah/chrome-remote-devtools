@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import { readFileSync, existsSync, copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
+import tailwindcss from '@tailwindcss/vite';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const host = process.env.TAURI_DEV_HOST;
@@ -131,7 +133,15 @@ function serveDevtoolsFrontend() {
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
-  plugins: [react(), serveDevtoolsFrontend()],
+  plugins: [
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+    }),
+    react(),
+    serveDevtoolsFrontend(),
+    tailwindcss(),
+  ],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
@@ -172,6 +182,7 @@ export default defineConfig(async () => ({
   resolve: {
     alias: {
       '/devtools-frontend': devtoolsPath,
+      '@': path.resolve(__dirname, './src'),
     },
     // Allow accessing files outside of project root / 프로젝트 루트 외부 파일 접근 허용
     preserveSymlinks: false,
