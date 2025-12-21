@@ -28,7 +28,7 @@ This example demonstrates how to display DevTools in an iframe within the same p
    ```
 
 3. Open the example in your browser / 브라우저에서 예제 열기:
-   - The example will be available at `http://localhost:5173` (or another port if 5173 is in use) / 예제는 `http://localhost:5173`에서 사용 가능 (5173이 사용 중이면 다른 포트)
+   - The example will be available at `http://localhost:5174` (or another port if 5174 is in use) / 예제는 `http://localhost:5174`에서 사용 가능 (5174가 사용 중이면 다른 포트)
    - The client script will automatically connect to the WebSocket server / 클라이언트 스크립트가 자동으로 WebSocket 서버에 연결됨
    - DevTools iframe will appear at the bottom of the page / DevTools iframe이 페이지 하단에 나타남
 
