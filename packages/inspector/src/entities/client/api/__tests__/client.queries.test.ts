@@ -11,7 +11,8 @@ describe('clientQueries', () => {
 
     expect(allKey).toEqual(['clients']);
     expect(listsKey).toEqual(['clients', 'list']);
-    expect(listOptions.queryKey).toEqual(['clients', 'list']);
+    // Compare queryKey as array / queryKey를 배열로 비교
+    expect([...listOptions.queryKey]).toEqual(['clients', 'list']);
   });
 
   test('should have query function / 쿼리 함수를 가져야 함', () => {
@@ -42,4 +43,3 @@ describe('clientQueries', () => {
     expect(listOptions).toHaveProperty('staleTime');
   });
 });
-
