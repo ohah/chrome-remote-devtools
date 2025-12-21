@@ -10,6 +10,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = resolve(__dirname, '..');
 
+// Configuration from environment variables / 환경 변수에서 설정 읽기
+const config = {
+  serverPort: process.env.PORT ? parseInt(process.env.PORT) : 8080,
+  inspectorPort: process.env.INSPECTOR_PORT ? parseInt(process.env.INSPECTOR_PORT) : 1420,
+  examplePort: process.env.EXAMPLE_PORT ? parseInt(process.env.EXAMPLE_PORT) : 5173,
+  includeExample: process.env.INCLUDE_EXAMPLE !== 'false', // Default: true
+  healthCheckTimeout: process.env.HEALTH_CHECK_TIMEOUT
+    ? parseInt(process.env.HEALTH_CHECK_TIMEOUT)
+    : 10000, // 10 seconds
+};
+
 // Color codes for log prefixes / 로그 접두사용 색상 코드
 const colors = {
   reset: '\x1b[0m',
@@ -19,6 +30,8 @@ const colors = {
   example: '\x1b[35m', // Magenta
   info: '\x1b[34m', // Blue
   error: '\x1b[31m', // Red
+  success: '\x1b[32m', // Green
+  warning: '\x1b[33m', // Yellow
 };
 
 interface Service {
@@ -27,6 +40,9 @@ interface Service {
   cwd: string;
   command: string[];
   env?: Record<string, string>;
+  port?: number;
+  healthCheckUrl?: string;
+  optional?: boolean;
 }
 
 // Define services to run / 실행할 서비스 정의
@@ -42,23 +58,72 @@ const services: Service[] = [
     color: colors.server,
     cwd: join(rootDir, 'packages/server'),
     command: ['bun', 'run', 'dev'],
+    port: config.serverPort,
+    healthCheckUrl: `http://localhost:${config.serverPort}/json`,
   },
   {
     name: 'INSPECTOR',
     color: colors.inspector,
     cwd: join(rootDir, 'packages/inspector'),
     command: ['bun', 'run', 'dev'],
+    port: config.inspectorPort,
+    healthCheckUrl: `http://localhost:${config.inspectorPort}`,
   },
   {
     name: 'EXAMPLE',
     color: colors.example,
     cwd: join(rootDir, 'examples/basic'),
     command: ['bun', 'run', 'dev'],
+    port: config.examplePort,
+    healthCheckUrl: `http://localhost:${config.examplePort}`,
+    optional: true,
   },
-];
+].filter((service) => {
+  // Filter out example if not included / 예제가 포함되지 않으면 제외
+  if (service.name === 'EXAMPLE' && !config.includeExample) {
+    return false;
+  }
+  return true;
+});
 
 // Store spawned processes / 실행된 프로세스 저장
-const processes: Array<{ service: Service; proc: ReturnType<typeof spawn> }> = [];
+const processes: Array<{ service: Service; proc: ReturnType<typeof spawn>; started: boolean }> = [];
+
+// Check if port is available / 포트 사용 가능 여부 확인
+async function checkPort(port: number): Promise<boolean> {
+  try {
+    const response = await fetch(`http://localhost:${port}`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(1000),
+    }).catch(() => null);
+    // If we get any response (even 404), port is in use / 응답이 오면 포트가 사용 중
+    return response !== null;
+  } catch {
+    // Connection refused means port is available / 연결 거부는 포트가 사용 가능함을 의미
+    return false;
+  }
+}
+
+// Health check for service / 서비스 헬스 체크
+async function healthCheck(url: string, timeout: number): Promise<boolean> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        signal: AbortSignal.timeout(2000),
+      });
+      if (response.ok || response.status === 404) {
+        // 404 is OK for some services / 일부 서비스는 404도 정상
+        return true;
+      }
+    } catch {
+      // Service not ready yet, wait and retry / 서비스가 아직 준비되지 않음, 대기 후 재시도
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  return false;
+}
 
 // Handle process output / 프로세스 출력 처리
 async function setupProcessOutput(service: Service, proc: ReturnType<typeof spawn>) {
@@ -128,8 +193,21 @@ process.on('SIGTERM', cleanup);
 async function startServices() {
   console.log(`${colors.info}Starting development environment...${colors.reset}\n`);
 
+  const failedServices: string[] = [];
+  const startedServices: string[] = [];
+
   for (const service of services) {
     try {
+      // Check if port is already in use / 포트가 이미 사용 중인지 확인
+      if (service.port) {
+        const portInUse = await checkPort(service.port);
+        if (portInUse) {
+          console.warn(
+            `${colors.warning}⚠ Port ${service.port} is already in use. ${service.name} may fail to start.${colors.reset}`
+          );
+        }
+      }
+
       const proc = spawn(service.command, {
         cwd: service.cwd,
         env: {
@@ -140,7 +218,7 @@ async function startServices() {
         stderr: 'pipe',
       });
 
-      processes.push({ service, proc });
+      processes.push({ service, proc, started: false });
 
       // Setup output handling / 출력 처리 설정
       setupProcessOutput(service, proc).catch((error) => {
@@ -152,27 +230,88 @@ async function startServices() {
       // Handle process exit / 프로세스 종료 처리
       proc.exited.then((code) => {
         if (code !== 0 && code !== null) {
-          console.error(
-            `${colors.error}[${service.name}] Process exited with code ${code}${colors.reset}`
-          );
+          const processInfo = processes.find((p) => p.proc === proc);
+          if (processInfo) {
+            processInfo.started = false;
+            failedServices.push(service.name);
+            console.error(
+              `${colors.error}[${service.name}] Process exited with code ${code}${colors.reset}`
+            );
+          }
         }
       });
 
       // Small delay between starts to avoid port conflicts / 포트 충돌 방지를 위한 시작 간 지연
       await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
-      console.error(`${colors.error}[${service.name}] Failed to start: ${error}${colors.reset}`);
+      failedServices.push(service.name);
+      console.error(
+        `${colors.error}[${service.name}] Failed to start: ${error}${colors.reset}`
+      );
     }
   }
 
-  // Wait a bit for services to start / 서비스 시작 대기
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  // Wait for services to start and perform health checks / 서비스 시작 대기 및 헬스 체크 수행
+  console.log(`${colors.info}Waiting for services to start...${colors.reset}\n`);
 
-  console.log(`\n${colors.info}✅ Development environment ready!${colors.reset}`);
-  console.log(`${colors.info}  - Server: http://localhost:8080${colors.reset}`);
-  console.log(`${colors.info}  - Inspector: http://localhost:1420${colors.reset}`);
-  console.log(`${colors.info}  - Example: http://localhost:5173${colors.reset}`);
-  console.log(`\n${colors.info}Press Ctrl+C to stop all services${colors.reset}\n`);
+  const healthCheckPromises = processes.map(async ({ service, proc }) => {
+    if (service.healthCheckUrl) {
+      const isHealthy = await healthCheck(service.healthCheckUrl, config.healthCheckTimeout);
+      const processInfo = processes.find((p) => p.proc === proc);
+      if (processInfo) {
+        processInfo.started = isHealthy;
+      }
+      if (isHealthy) {
+        startedServices.push(service.name);
+        return true;
+      } else {
+        // For optional services, don't count as failure / 선택적 서비스는 실패로 간주하지 않음
+        if (!service.optional) {
+          failedServices.push(service.name);
+        }
+        return false;
+      }
+    } else {
+      // Services without health check (like CLIENT) are considered started / 헬스 체크가 없는 서비스는 시작된 것으로 간주
+      const processInfo = processes.find((p) => p.proc === proc);
+      if (processInfo) {
+        processInfo.started = true;
+      }
+      startedServices.push(service.name);
+      return true;
+    }
+  });
+
+  await Promise.all(healthCheckPromises);
+
+  // Print status summary / 상태 요약 출력
+  console.log(`\n${colors.info}Development environment status:${colors.reset}`);
+  console.log(`${colors.success}✅ Started: ${startedServices.join(', ')}${colors.reset}`);
+
+  if (failedServices.length > 0) {
+    console.log(
+      `${colors.error}❌ Failed: ${failedServices.join(', ')}${colors.reset}`
+    );
+  }
+
+  // Print service URLs / 서비스 URL 출력
+  console.log(`\n${colors.info}Service URLs:${colors.reset}`);
+  for (const service of services) {
+    if (service.port && startedServices.includes(service.name)) {
+      const url = service.healthCheckUrl || `http://localhost:${service.port}`;
+      console.log(`${colors.info}  - ${service.name}: ${url}${colors.reset}`);
+    }
+  }
+
+  if (failedServices.some((name) => !services.find((s) => s.name === name)?.optional)) {
+    console.log(
+      `\n${colors.warning}⚠ Some required services failed to start. Please check the logs above.${colors.reset}`
+    );
+    console.log(`${colors.info}Press Ctrl+C to stop all services${colors.reset}\n`);
+  } else {
+    console.log(`\n${colors.success}✅ Development environment ready!${colors.reset}`);
+    console.log(`${colors.info}Press Ctrl+C to stop all services${colors.reset}\n`);
+  }
 }
 
 // Start services / 서비스 시작
