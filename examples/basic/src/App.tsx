@@ -5,7 +5,6 @@ import NetworkPage from './pages/NetworkPage';
 import StoragePage from './pages/StoragePage';
 import AssertPage from './pages/AssertPage';
 import AssertPanel from './components/AssertPanel';
-import './App.css';
 
 // Navigation component / 네비게이션 컴포넌트
 function Navigation() {
@@ -20,17 +19,21 @@ function Navigation() {
   ];
 
   return (
-    <nav className="navigation">
-      <div className="nav-container">
-        <Link to="/" className="nav-logo">
+    <nav className="bg-gray-900 border-b border-gray-700 shadow-lg sticky top-0 z-[100]">
+      <div className="w-full max-w-none mx-0 px-8 flex items-center justify-between h-15 box-border">
+        <Link to="/" className="text-xl font-semibold text-blue-400 no-underline">
           Chrome Remote DevTools
         </Link>
-        <div className="nav-links">
+        <div className="flex gap-4">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
-              className={location.pathname === link.path ? 'nav-link active' : 'nav-link'}
+              className={`px-4 py-2 no-underline rounded transition-all text-sm ${
+                location.pathname === link.path
+                  ? 'bg-blue-500 text-white'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-blue-400'
+              }`}
             >
               {link.label}
             </Link>
@@ -45,9 +48,9 @@ function Navigation() {
 function App() {
   return (
     <BrowserRouter>
-      <div className="app">
+      <div className="min-h-screen flex flex-col overflow-x-hidden w-screen m-0 p-0">
         <Navigation />
-        <main className="main-content">
+        <main className="flex-1 bg-gray-900 w-full max-w-none m-0 p-0 flex flex-col overflow-x-hidden relative">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/console" element={<ConsolePage />} />
