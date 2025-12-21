@@ -1,5 +1,6 @@
 // Client table component / 클라이언트 테이블 컴포넌트 (Chii style / Chii 스타일)
 import type { Client } from '@/entities/client';
+import { sanitizeUrl } from '@/shared/lib';
 
 interface ClientTableProps {
   clients: Client[];
@@ -52,15 +53,24 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
                 </div>
               </td>
               <td className="px-4 py-3">
-                <a
-                  href={client.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-sm text-blue-400 hover:text-blue-300 underline"
-                >
-                  {client.url ? truncate(client.url, 50) : '-'}
-                </a>
+                {(() => {
+                  const safeUrl = sanitizeUrl(client.url);
+                  if (safeUrl) {
+                    return (
+                      <a
+                        href={safeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-sm text-blue-400 hover:text-blue-300 underline"
+                        aria-label={`Open ${truncate(safeUrl, 50)} in new tab`}
+                      >
+                        {truncate(safeUrl, 50)}
+                      </a>
+                    );
+                  }
+                  return <span className="text-sm text-gray-400">-</span>;
+                })()}
               </td>
               <td className="px-4 py-3 whitespace-nowrap">
                 <span className="text-sm text-gray-400 font-mono">{client.ip || '-'}</span>
@@ -79,6 +89,7 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
                     onSelect(client.id);
                   }}
                   className="text-sm text-blue-400 hover:text-blue-300 underline"
+                  aria-label={`Inspect client ${client.id}`}
                 >
                   inspect
                 </button>
