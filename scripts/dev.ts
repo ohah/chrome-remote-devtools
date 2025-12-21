@@ -15,7 +15,11 @@ const config = {
   serverPort: process.env.PORT ? parseInt(process.env.PORT) : 8080,
   inspectorPort: process.env.INSPECTOR_PORT ? parseInt(process.env.INSPECTOR_PORT) : 1420,
   examplePort: process.env.EXAMPLE_PORT ? parseInt(process.env.EXAMPLE_PORT) : 5173,
+  iframeExamplePort: process.env.IFRAME_EXAMPLE_PORT
+    ? parseInt(process.env.IFRAME_EXAMPLE_PORT)
+    : 5174,
   includeExample: process.env.INCLUDE_EXAMPLE !== 'false', // Default: true
+  includeIframeExample: process.env.INCLUDE_IFRAME_EXAMPLE !== 'false', // Default: true
   healthCheckTimeout: process.env.HEALTH_CHECK_TIMEOUT
     ? parseInt(process.env.HEALTH_CHECK_TIMEOUT)
     : 10000, // 10 seconds
@@ -78,9 +82,21 @@ const services: Service[] = [
     healthCheckUrl: `http://localhost:${config.examplePort}`,
     optional: true,
   },
+  {
+    name: 'IFRAME_EXAMPLE',
+    color: colors.example,
+    cwd: join(rootDir, 'examples/iframe'),
+    command: ['bun', 'run', 'dev'],
+    port: config.iframeExamplePort,
+    healthCheckUrl: `http://localhost:${config.iframeExamplePort}`,
+    optional: true,
+  },
 ].filter((service) => {
   // Filter out example if not included / 예제가 포함되지 않으면 제외
   if (service.name === 'EXAMPLE' && !config.includeExample) {
+    return false;
+  }
+  if (service.name === 'IFRAME_EXAMPLE' && !config.includeIframeExample) {
     return false;
   }
   return true;
