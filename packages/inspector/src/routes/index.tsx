@@ -1,10 +1,11 @@
 // Index route / 인덱스 라우트 (Connection page / 연결 페이지)
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { router } from '@/app/router';
 import { ClientTable, ClientFilter, filterClients } from '@/features/client-list';
 import { clientQueries } from '@/entities/client';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui';
+import { GITHUB_REPO_URL } from '@/shared/lib';
 
 // File-based routing: routes/index.tsx automatically maps to `/` / 파일 기반 라우팅: routes/index.tsx가 자동으로 `/`에 매핑됨
 export const Route = createFileRoute('/')({
@@ -13,6 +14,7 @@ export const Route = createFileRoute('/')({
 
 function ConnectionPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
   const {
     data: clients = [],
     isLoading,
@@ -28,42 +30,23 @@ function ConnectionPage() {
 
   // Navigate to devtools when client row is clicked / 클라이언트 행 클릭 시 데브툴로 이동
   const handleSelect = (clientId: string) => {
-    router.navigate({ to: '/devtools/$clientId', params: { clientId } } as never);
+    navigate({
+      to: '/devtools/$clientId',
+      params: { clientId },
+    });
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-lg">Loading clients...</div>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (error && clients.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4 text-red-400">Failed to load clients</h1>
-          <p className="text-gray-400 mb-4">{error.message}</p>
-          <button
-            onClick={() => refetch()}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
+    return <ErrorState error={error} onRetry={() => refetch()} isRetrying={isRefetching} />;
   }
 
   if (clients.length === 0 && !error) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">No clients available</h1>
-          <p className="text-gray-600">Waiting for clients to connect...</p>
-        </div>
-      </div>
+      <EmptyState message="No clients available" description="Waiting for clients to connect..." />
     );
   }
 
@@ -89,10 +72,11 @@ function ConnectionPage() {
             </div>
           </div>
           <a
-            href="https://github.com/ohah/chrome-remote-devtools"
+            href={GITHUB_REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-gray-400 hover:text-gray-200"
+            aria-label="Open GitHub repository in new tab"
           >
             Help
           </a>
@@ -107,9 +91,11 @@ function ConnectionPage() {
             </div>
             <button
               onClick={() => refetch()}
-              className="text-xs text-red-300 hover:text-red-200 underline"
+              disabled={isRefetching}
+              aria-label="Retry loading clients"
+              className="text-xs text-red-300 hover:text-red-200 underline disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Retry
+              {isRefetching ? 'Retrying...' : 'Retry'}
             </button>
           </div>
         )}
