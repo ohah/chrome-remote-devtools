@@ -67,12 +67,16 @@ function App() {
       <div className="flex-1 pb-0 mb-0">
         <header className="p-8 text-center bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
           <h1 className="m-0 mb-2 text-3xl">Chrome Remote DevTools - iframe Example</h1>
-          <p className="m-0 opacity-90">DevTools iframe example similar to chii / chii와 유사한 DevTools iframe 예제</p>
+          <p className="m-0 opacity-90">
+            DevTools iframe example similar to chii / chii와 유사한 DevTools iframe 예제
+          </p>
         </header>
 
         <main className="max-w-5xl mx-auto p-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-md dark:shadow-lg">
-            <h2 className="m-0 mb-4 text-gray-900 dark:text-gray-100">Test Functions / 테스트 함수</h2>
+            <h2 className="m-0 mb-4 text-gray-900 dark:text-gray-100">
+              Test Functions / 테스트 함수
+            </h2>
             <p className="mb-4 text-gray-700 dark:text-gray-300">
               Use these buttons to test DevTools functionality / DevTools 기능을 테스트하려면 이
               버튼들을 사용하세요
