@@ -140,11 +140,18 @@ function AssertPage() {
         </h2>
         <p className="mb-4 leading-relaxed text-gray-300">
           This page demonstrates the use of es-toolkit for assertions. The assert functions use
-          es-toolkit's <code className="bg-gray-700 px-1 py-0.5 rounded font-mono text-sm text-white">isEqual</code> function to compare values (deep comparison).
+          es-toolkit's{' '}
+          <code className="bg-gray-700 px-1 py-0.5 rounded font-mono text-sm text-white">
+            isEqual
+          </code>{' '}
+          function to compare values (deep comparison).
         </p>
         <p className="mb-4 leading-relaxed text-gray-300">
           이 페이지는 es-toolkit을 사용한 assertion을 보여줍니다. assert 함수는 es-toolkit의{' '}
-          <code className="bg-gray-700 px-1 py-0.5 rounded font-mono text-sm text-white">isEqual</code> 함수를 사용하여 값을 비교합니다 (깊은 비교).
+          <code className="bg-gray-700 px-1 py-0.5 rounded font-mono text-sm text-white">
+            isEqual
+          </code>{' '}
+          함수를 사용하여 값을 비교합니다 (깊은 비교).
         </p>
         <p className="mb-4 leading-relaxed text-gray-300">
           All test results are displayed in the assert panel at the bottom of the page. You can use
