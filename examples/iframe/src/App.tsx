@@ -54,12 +54,8 @@ function App() {
   };
 
   const handleStorageTest = () => {
-    localStorage.setItem('test-key', 'test-value');
-    sessionStorage.setItem('test-session', 'test-session-value');
-    console.log('Storage test / 스토리지 테스트:', {
-      localStorage: localStorage.getItem('test-key'),
-      sessionStorage: sessionStorage.getItem('test-session'),
-    });
+    localStorage.setItem('test-key', `test-value-${Date.now()}`);
+    sessionStorage.setItem('test-session', `test-session-value-${Date.now()}`);
   };
 
   return (

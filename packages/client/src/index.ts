@@ -1,6 +1,6 @@
 // CDP Client - WebSocket connection and CDP initialization / CDP 클라이언트 - WebSocket 연결 및 CDP 초기화
 import { getAbsolutePath } from './cdp/common/utils';
-import ChromeDomain from './cdp/index';
+import ChromeDomain from './cdp';
 
 function getDocumentFavicon(): string {
   const links = document.head.querySelectorAll('link');

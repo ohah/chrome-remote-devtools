@@ -43,7 +43,7 @@ export default class Runtime extends BaseDomain {
         },
       },
     });
-    Runtime.setCommandLineApi();
+    // Runtime.setCommandLineApi();
   }
 
   // Evaluate JavaScript expression / JavaScript 표현식 실행

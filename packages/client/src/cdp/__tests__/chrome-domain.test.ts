@@ -121,6 +121,33 @@ describe('ChromeDomain', () => {
     expect(result).toHaveProperty('id', 1);
   });
 
+  test('should handle Storage.getStorageKey method / Storage.getStorageKey 메서드 처리', () => {
+    const result = domain.execute({
+      id: 1,
+      method: 'Storage.getStorageKey',
+      params: {},
+    });
+    expect(result).toHaveProperty('id', 1);
+    expect(result).toHaveProperty('result');
+    if (result.result && typeof result.result === 'object' && 'storageKey' in result.result) {
+      expect(result.result.storageKey).toBeDefined();
+      expect(typeof result.result.storageKey).toBe('string');
+    }
+  });
+
+  test('should handle Storage.getStorageKey with undefined params / Storage.getStorageKey undefined params 처리', () => {
+    const result = domain.execute({
+      id: 1,
+      method: 'Storage.getStorageKey',
+    });
+    expect(result).toHaveProperty('id', 1);
+    expect(result).toHaveProperty('result');
+    if (result.result && typeof result.result === 'object' && 'storageKey' in result.result) {
+      expect(result.result.storageKey).toBeDefined();
+      expect(typeof result.result.storageKey).toBe('string');
+    }
+  });
+
   test('should handle error in method execution / 메서드 실행 중 에러 처리', () => {
     // This test verifies error handling
     // 에러 처리를 검증하는 테스트
