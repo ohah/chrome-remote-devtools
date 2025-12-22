@@ -1,10 +1,13 @@
 // iframe example E2E tests / iframe example E2E 테스트
-import { test, expect, FrameLocator, Locator } from '@playwright/test';
+import { test, expect, FrameLocator, Locator, Page } from '@playwright/test';
 
 const IFRAME_EXAMPLE_URL = 'http://localhost:5174';
 
+// Timeout constants / 타임아웃 상수
+const PANEL_LOAD_TIMEOUT = 2000; // Timeout for panel loading fallback / 패널 로드 대기 타임아웃
+
 // Wait for client connection / 클라이언트 연결 대기
-async function waitForClientConnection(page: any): Promise<string> {
+async function waitForClientConnection(page: Page): Promise<string> {
   // Wait for client ID to appear in sessionStorage / sessionStorage에 클라이언트 ID가 나타날 때까지 대기
   await page.waitForFunction(
     () => {
@@ -19,7 +22,7 @@ async function waitForClientConnection(page: any): Promise<string> {
 }
 
 // Wait for DevTools iframe to load / DevTools iframe 로드 대기
-async function waitForDevToolsIframe(page: any): Promise<FrameLocator> {
+async function waitForDevToolsIframe(page: Page): Promise<FrameLocator> {
   // Wait for iframe to appear / iframe이 나타날 때까지 대기
   const iframe = page.frameLocator('iframe[title="DevTools"]');
   await iframe.locator('body').waitFor({ timeout: 30000 });
@@ -77,7 +80,7 @@ async function openConsolePanel(devtoolsFrame: FrameLocator): Promise<void> {
 
   if (!panelFound) {
     // Wait a bit more for panel to load / 패널 로드를 위해 조금 더 대기
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, PANEL_LOAD_TIMEOUT));
   }
 }
 
@@ -131,7 +134,7 @@ async function openNetworkPanel(devtoolsFrame: FrameLocator): Promise<void> {
 
   if (!panelFound) {
     // Wait a bit more for panel to load / 패널 로드를 위해 조금 더 대기
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, PANEL_LOAD_TIMEOUT));
   }
 }
 
@@ -179,6 +182,8 @@ async function checkConsoleMessage(devtoolsFrame: FrameLocator, message: string)
 }
 
 // Check network request in DevTools / DevTools에서 네트워크 요청 확인
+// NOTE: `_url` is currently unused but kept for future URL-specific validation/filtering.
+// `_url`은 현재 사용되지 않지만 향후 URL별 검증/필터링을 위해 유지됨
 async function checkNetworkRequest(devtoolsFrame: FrameLocator, _url: string): Promise<void> {
   // Check if network table row exists / 네트워크 테이블 행이 존재하는지 확인
   // Network panel uses data-grid structure with table rows / Network 패널은 테이블 행이 있는 data-grid 구조 사용
@@ -283,17 +288,30 @@ test.describe('iframe Example E2E Tests', () => {
     // Open console panel first to ensure it's ready / 콘솔 패널을 먼저 열어 준비 상태 확인
     await openConsolePanel(devtoolsFrame);
 
-    // Wait a bit for panel to be fully loaded / 패널이 완전히 로드될 때까지 조금 대기
-    await page.waitForTimeout(1000);
+    // Ensure Console Test button is visible before clicking / Console Test 버튼이 보일 때까지 대기
+    const consoleButton = page.locator('button:has-text("Console Test")');
+    await expect(consoleButton).toBeVisible();
 
     // Click Console Test button / Console Test 버튼 클릭
-    const consoleButton = page.locator('button:has-text("Console Test")');
     await consoleButton.click();
 
-    // Wait a bit for console messages to appear / 콘솔 메시지가 나타날 때까지 조금 대기
-    await page.waitForTimeout(1000);
+    // Wait for console messages to appear in DevTools / DevTools에 콘솔 메시지가 나타날 때까지 대기
+    await expect
+      .poll(
+        async () => {
+          try {
+            await checkConsoleMessage(devtoolsFrame, 'Console test message');
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        { timeout: 10000 }
+      )
+      .toBe(true);
 
     // Check for console messages / 콘솔 메시지 확인
+    // Final verification (poll above already waits and checks) / 최종 확인 (위의 poll에서 이미 대기 후 확인을 수행함)
     await checkConsoleMessage(devtoolsFrame, 'Console test message');
     await checkConsoleMessage(devtoolsFrame, 'Console warning');
     await checkConsoleMessage(devtoolsFrame, 'Console error');
@@ -315,17 +333,33 @@ test.describe('iframe Example E2E Tests', () => {
     // Open network panel first to ensure it's ready / 네트워크 패널을 먼저 열어 준비 상태 확인
     await openNetworkPanel(devtoolsFrame);
 
-    // Wait a bit for panel to be fully loaded / 패널이 완전히 로드될 때까지 조금 대기
-    await page.waitForTimeout(1000);
+    // Ensure Network Test button is visible before clicking / Network Test 버튼이 보일 때까지 대기
+    const networkButton = page.locator('button:has-text("Network Test")');
+    await expect(networkButton).toBeVisible();
 
     // Click Network Test button / Network Test 버튼 클릭
-    const networkButton = page.locator('button:has-text("Network Test")');
     await networkButton.click();
 
     // Wait for network request to complete / 네트워크 요청이 완료될 때까지 대기
-    await page.waitForTimeout(3000);
+    await page.waitForResponse(
+      (response) =>
+        response.url().includes('jsonplaceholder.typicode.com') && response.ok(),
+      { timeout: 10000 }
+    );
 
-    // Check for network request / 네트워크 요청 확인
-    await checkNetworkRequest(devtoolsFrame, 'jsonplaceholder.typicode.com');
+    // Wait for network request to appear in DevTools / DevTools에 네트워크 요청이 나타날 때까지 대기
+    await expect
+      .poll(
+        async () => {
+          try {
+            await checkNetworkRequest(devtoolsFrame, 'jsonplaceholder.typicode.com');
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        { timeout: 10000 }
+      )
+      .toBe(true);
   });
 });
