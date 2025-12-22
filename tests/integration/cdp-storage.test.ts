@@ -12,6 +12,8 @@ import {
   createPageGetResourceTreeMessage,
   isCDPResponse,
   isCDPEvent,
+  waitForCDPResponse,
+  waitForCDPResponseAndEvent,
 } from './helpers/cdp-messages';
 import { createTestPageHTML } from './helpers/test-page';
 
@@ -28,8 +30,23 @@ test.describe('Storage Domain Integration', () => {
       serverUrl
     );
 
-    await page.setContent(testPageHTML);
-    await page.waitForTimeout(500); // Wait for client script to load / 클라이언트 스크립트 로드 대기
+    // Use route to provide HTML with proper origin / 적절한 origin으로 HTML 제공하기 위해 route 사용
+    // Only intercept the specific HTML page, not other resources / 특정 HTML 페이지만 가로채고 다른 리소스는 실제 서버에서 로드
+    const testUrl = `${serverUrl}/test-storage.html`;
+    await page.route(testUrl, (route) => {
+      if (route.request().resourceType() === 'document') {
+        route.fulfill({
+          status: 200,
+          contentType: 'text/html',
+          body: testPageHTML,
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    await page.goto(testUrl, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000); // Wait for client script to load / 클라이언트 스크립트 로드 대기
 
     // Get client ID from page / 페이지에서 클라이언트 ID 가져오기
     const clientId = await page.evaluate(() => {
@@ -80,8 +97,23 @@ test.describe('Storage Domain Integration', () => {
       serverUrl
     );
 
-    await page.setContent(testPageHTML);
-    await page.waitForTimeout(500);
+    // Use route to provide HTML with proper origin / 적절한 origin으로 HTML 제공하기 위해 route 사용
+    // Only intercept the specific HTML page, not other resources / 특정 HTML 페이지만 가로채고 다른 리소스는 실제 서버에서 로드
+    const testUrl = `${serverUrl}/test-storage-get-items.html`;
+    await page.route(testUrl, (route) => {
+      if (route.request().resourceType() === 'document') {
+        route.fulfill({
+          status: 200,
+          contentType: 'text/html',
+          body: testPageHTML,
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    await page.goto(testUrl, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000); // Wait for client script to load / 클라이언트 스크립트 로드 대기
 
     const clientId = await page.evaluate(() => {
       return sessionStorage.getItem('debug_id');
@@ -123,10 +155,14 @@ test.describe('Storage Domain Integration', () => {
     const getItemsMessage = createDOMStorageGetItemsMessage(localStorageId);
     inspector.send(getItemsMessage);
 
-    const response = await inspector.receive();
-    expect(isCDPResponse(response)).toBe(true);
+    // Wait for response, skipping events / 이벤트를 건너뛰고 응답 대기
+    const response = await waitForCDPResponse(
+      inspector.receive.bind(inspector),
+      getItemsMessage.id
+    );
+    expect(response).toBeTruthy();
 
-    if (isCDPResponse(response) && response.id === getItemsMessage.id) {
+    if (response) {
       const result = response.result as { entries?: Array<[string, string]> };
       expect(result).toHaveProperty('entries');
       expect(Array.isArray(result.entries)).toBe(true);
@@ -157,8 +193,23 @@ test.describe('Storage Domain Integration', () => {
       serverUrl
     );
 
-    await page.setContent(testPageHTML);
-    await page.waitForTimeout(500);
+    // Use route to provide HTML with proper origin / 적절한 origin으로 HTML 제공하기 위해 route 사용
+    // Only intercept the specific HTML page, not other resources / 특정 HTML 페이지만 가로채고 다른 리소스는 실제 서버에서 로드
+    const testUrl = `${serverUrl}/test-storage-set-remove.html`;
+    await page.route(testUrl, (route) => {
+      if (route.request().resourceType() === 'document') {
+        route.fulfill({
+          status: 200,
+          contentType: 'text/html',
+          body: testPageHTML,
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    await page.goto(testUrl, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000); // Wait for client script to load / 클라이언트 스크립트 로드 대기
 
     const clientId = await page.evaluate(() => {
       return sessionStorage.getItem('debug_id');
@@ -200,15 +251,22 @@ test.describe('Storage Domain Integration', () => {
     const setItemMessage = createDOMStorageSetItemMessage(localStorageId, 'new-key', 'new-value');
     inspector.send(setItemMessage);
 
-    const setResponse = await inspector.receive();
-    expect(isCDPResponse(setResponse)).toBe(true);
+    // Wait for response, skipping events / 이벤트를 건너뛰고 응답 대기
+    const setResponse = await waitForCDPResponse(
+      inspector.receive.bind(inspector),
+      setItemMessage.id
+    );
+    expect(setResponse).toBeTruthy();
 
     // Verify item was set / 항목이 설정되었는지 확인
     const getItemsMessage = createDOMStorageGetItemsMessage(localStorageId);
     inspector.send(getItemsMessage);
 
-    const getResponse = await inspector.receive();
-    if (isCDPResponse(getResponse) && getResponse.id === getItemsMessage.id) {
+    const getResponse = await waitForCDPResponse(
+      inspector.receive.bind(inspector),
+      getItemsMessage.id
+    );
+    if (getResponse) {
       const result = getResponse.result as { entries?: Array<[string, string]> };
       const entries = result.entries || [];
       const newItem = entries.find(([key]) => key === 'new-key');
@@ -220,18 +278,22 @@ test.describe('Storage Domain Integration', () => {
     const removeItemMessage = createDOMStorageRemoveItemMessage(localStorageId, 'new-key');
     inspector.send(removeItemMessage);
 
-    const removeResponse = await inspector.receive();
-    expect(isCDPResponse(removeResponse)).toBe(true);
+    // Wait for response, skipping events / 이벤트를 건너뛰고 응답 대기
+    const removeResponse = await waitForCDPResponse(
+      inspector.receive.bind(inspector),
+      removeItemMessage.id
+    );
+    expect(removeResponse).toBeTruthy();
 
     // Verify item was removed / 항목이 제거되었는지 확인
     const getItemsAfterRemove = createDOMStorageGetItemsMessage(localStorageId);
     inspector.send(getItemsAfterRemove);
 
-    const getAfterRemoveResponse = await inspector.receive();
-    if (
-      isCDPResponse(getAfterRemoveResponse) &&
-      getAfterRemoveResponse.id === getItemsAfterRemove.id
-    ) {
+    const getAfterRemoveResponse = await waitForCDPResponse(
+      inspector.receive.bind(inspector),
+      getItemsAfterRemove.id
+    );
+    if (getAfterRemoveResponse) {
       const result = getAfterRemoveResponse.result as { entries?: Array<[string, string]> };
       const entries = result.entries || [];
       const removedItem = entries.find(([key]) => key === 'new-key');
@@ -253,8 +315,23 @@ test.describe('Storage Domain Integration', () => {
       serverUrl
     );
 
-    await page.setContent(testPageHTML);
-    await page.waitForTimeout(500);
+    // Use route to provide HTML with proper origin / 적절한 origin으로 HTML 제공하기 위해 route 사용
+    // Only intercept the specific HTML page, not other resources / 특정 HTML 페이지만 가로채고 다른 리소스는 실제 서버에서 로드
+    const testUrl = `${serverUrl}/test-storage-clear.html`;
+    await page.route(testUrl, (route) => {
+      if (route.request().resourceType() === 'document') {
+        route.fulfill({
+          status: 200,
+          contentType: 'text/html',
+          body: testPageHTML,
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    await page.goto(testUrl, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000); // Wait for client script to load / 클라이언트 스크립트 로드 대기
 
     const clientId = await page.evaluate(() => {
       return sessionStorage.getItem('debug_id');
@@ -296,8 +373,11 @@ test.describe('Storage Domain Integration', () => {
     const getItemsBeforeClear = createDOMStorageGetItemsMessage(localStorageId);
     inspector.send(getItemsBeforeClear);
 
-    const beforeClearResponse = await inspector.receive();
-    if (isCDPResponse(beforeClearResponse) && beforeClearResponse.id === getItemsBeforeClear.id) {
+    const beforeClearResponse = await waitForCDPResponse(
+      inspector.receive.bind(inspector),
+      getItemsBeforeClear.id
+    );
+    if (beforeClearResponse) {
       const result = beforeClearResponse.result as { entries?: Array<[string, string]> };
       expect((result.entries || []).length).toBeGreaterThan(0);
     }
@@ -306,15 +386,22 @@ test.describe('Storage Domain Integration', () => {
     const clearMessage = createDOMStorageClearMessage(localStorageId);
     inspector.send(clearMessage);
 
-    const clearResponse = await inspector.receive();
-    expect(isCDPResponse(clearResponse)).toBe(true);
+    // Wait for response, skipping events / 이벤트를 건너뛰고 응답 대기
+    const clearResponse = await waitForCDPResponse(
+      inspector.receive.bind(inspector),
+      clearMessage.id
+    );
+    expect(clearResponse).toBeTruthy();
 
     // Verify storage is cleared / storage가 삭제되었는지 확인
     const getItemsAfterClear = createDOMStorageGetItemsMessage(localStorageId);
     inspector.send(getItemsAfterClear);
 
-    const afterClearResponse = await inspector.receive();
-    if (isCDPResponse(afterClearResponse) && afterClearResponse.id === getItemsAfterClear.id) {
+    const afterClearResponse = await waitForCDPResponse(
+      inspector.receive.bind(inspector),
+      getItemsAfterClear.id
+    );
+    if (afterClearResponse) {
       const result = afterClearResponse.result as { entries?: Array<[string, string]> };
       expect((result.entries || []).length).toBe(0);
     }
@@ -334,8 +421,23 @@ test.describe('Storage Domain Integration', () => {
       serverUrl
     );
 
-    await page.setContent(testPageHTML);
-    await page.waitForTimeout(500);
+    // Use route to provide HTML with proper origin / 적절한 origin으로 HTML 제공하기 위해 route 사용
+    // Only intercept the specific HTML page, not other resources / 특정 HTML 페이지만 가로채고 다른 리소스는 실제 서버에서 로드
+    const testUrl = `${serverUrl}/test-storage-events.html`;
+    await page.route(testUrl, (route) => {
+      if (route.request().resourceType() === 'document') {
+        route.fulfill({
+          status: 200,
+          contentType: 'text/html',
+          body: testPageHTML,
+        });
+      } else {
+        route.continue();
+      }
+    });
+
+    await page.goto(testUrl, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000); // Wait for client script to load / 클라이언트 스크립트 로드 대기
 
     const clientId = await page.evaluate(() => {
       return sessionStorage.getItem('debug_id');
@@ -364,7 +466,18 @@ test.describe('Storage Domain Integration', () => {
     }
 
     // Enable DOMStorage / DOMStorage 활성화
-    inspector.send(createDOMStorageEnableMessage());
+    const enableMessage = createDOMStorageEnableMessage();
+    inspector.send(enableMessage);
+
+    // Wait for enable response to ensure setupStorageListeners is complete / enable 응답을 기다려 setupStorageListeners가 완료되도록 보장
+    const enableResponse = await waitForCDPResponse(
+      inspector.receive.bind(inspector),
+      enableMessage.id
+    );
+    expect(enableResponse).toBeTruthy();
+
+    // Wait for all initial storage events to be sent / 모든 초기 storage 이벤트가 전송될 때까지 대기
+    // enable() sends events for existing storage items synchronously / enable()은 기존 storage 항목에 대한 이벤트를 동기적으로 전송
     await page.waitForTimeout(200);
 
     const localStorageId = {
@@ -373,7 +486,7 @@ test.describe('Storage Domain Integration', () => {
       securityOrigin: storageKey,
     };
 
-    // Set item and wait for event / 항목 설정하고 이벤트 대기
+    // Set item and wait for both response and event / 항목 설정하고 응답과 이벤트 모두 대기
     const setItemMessage = createDOMStorageSetItemMessage(
       localStorageId,
       'event-test-key',
@@ -381,24 +494,20 @@ test.describe('Storage Domain Integration', () => {
     );
     inspector.send(setItemMessage);
 
-    // Wait for both response and event / 응답과 이벤트 모두 대기
-    const messages: unknown[] = [];
-    for (let i = 0; i < 2; i++) {
-      const message = await inspector.receive();
-      messages.push(message);
-    }
-
-    // Check for setItem response / setItem 응답 확인
-    const setResponse = messages.find(
-      (msg) => isCDPResponse(msg) && (msg as { id: number }).id === setItemMessage.id
+    // Wait for both response and event simultaneously / 응답과 이벤트를 동시에 대기
+    // Filter events by key to avoid matching initial events / 초기 이벤트와 매칭되지 않도록 key로 필터링
+    const { response: setResponse, event: addedEvent } = await waitForCDPResponseAndEvent(
+      inspector.receive.bind(inspector),
+      setItemMessage.id,
+      'DOMStorage.domStorageItemAdded',
+      5000,
+      (event) => {
+        // Only match events with our test key / 테스트 키를 가진 이벤트만 매칭
+        const params = event.params as { key?: string } | undefined;
+        return params?.key === 'event-test-key';
+      }
     );
     expect(setResponse).toBeTruthy();
-
-    // Check for domStorageItemAdded event / domStorageItemAdded 이벤트 확인
-    const addedEvent = messages.find(
-      (msg) =>
-        isCDPEvent(msg) && (msg as { method: string }).method === 'DOMStorage.domStorageItemAdded'
-    );
     expect(addedEvent).toBeTruthy();
 
     if (addedEvent && isCDPEvent(addedEvent)) {

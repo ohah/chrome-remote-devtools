@@ -205,3 +205,83 @@ export function isCDPEvent(message: unknown): message is {
     typeof (message as { method: unknown }).method === 'string'
   );
 }
+
+// Wait for specific CDP response by message ID / 특정 메시지 ID의 CDP 응답 대기
+// Skips events and only returns responses with matching ID / 이벤트를 건너뛰고 일치하는 ID의 응답만 반환
+export async function waitForCDPResponse(
+  receive: () => Promise<unknown>,
+  expectedId: number,
+  timeout: number = 5000
+): Promise<{ id: number; result?: unknown; error?: unknown } | null> {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeout) {
+    const message = await receive();
+
+    // If it's a response with matching ID, return it / 일치하는 ID의 응답이면 반환
+    if (isCDPResponse(message) && message.id === expectedId) {
+      return message;
+    }
+    // If it's an event or different response, continue waiting / 이벤트나 다른 응답이면 계속 대기
+  }
+
+  // If timeout, return null / 타임아웃 시 null 반환
+  return null;
+}
+
+// Wait for specific CDP event by method name / 특정 메서드 이름의 CDP 이벤트 대기
+export async function waitForCDPEvent(
+  receive: () => Promise<unknown>,
+  expectedMethod: string,
+  timeout: number = 5000
+): Promise<{ method: string; params?: unknown } | null> {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeout) {
+    const message = await receive();
+
+    // If it's an event with matching method, return it / 일치하는 메서드의 이벤트이면 반환
+    if (isCDPEvent(message) && message.method === expectedMethod) {
+      return message;
+    }
+    // If it's a response or different event, continue waiting / 응답이나 다른 이벤트이면 계속 대기
+  }
+
+  // If timeout, return null / 타임아웃 시 null 반환
+  return null;
+}
+
+// Wait for both CDP response and event simultaneously / CDP 응답과 이벤트를 동시에 대기
+export async function waitForCDPResponseAndEvent(
+  receive: () => Promise<unknown>,
+  expectedResponseId: number,
+  expectedEventMethod: string,
+  timeout: number = 5000,
+  eventFilter?: (event: { method: string; params?: unknown }) => boolean
+): Promise<{
+  response: { id: number; result?: unknown; error?: unknown } | null;
+  event: { method: string; params?: unknown } | null;
+}> {
+  const startTime = Date.now();
+  let response: { id: number; result?: unknown; error?: unknown } | null = null;
+  let event: { method: string; params?: unknown } | null = null;
+
+  while (Date.now() - startTime < timeout && (!response || !event)) {
+    const message = await receive();
+
+    // Check if it's the expected response / 예상한 응답인지 확인
+    if (!response && isCDPResponse(message) && message.id === expectedResponseId) {
+      response = message;
+    }
+
+    // Check if it's the expected event / 예상한 이벤트인지 확인
+    if (!event && isCDPEvent(message) && message.method === expectedEventMethod) {
+      // Apply filter if provided / 필터가 제공되면 적용
+      if (!eventFilter || eventFilter(message)) {
+        event = message;
+      }
+    }
+  }
+
+  return { response, event };
+}
