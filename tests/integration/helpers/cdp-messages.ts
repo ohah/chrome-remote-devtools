@@ -83,6 +83,103 @@ export function createConsoleEnableMessage(): {
   return createCDPMessage('Console.enable');
 }
 
+export function createStorageGetStorageKeyMessage(frameId?: string): {
+  id: number;
+  method: string;
+  params?: { frameId?: string };
+} {
+  return createCDPMessage('Storage.getStorageKey', frameId ? { frameId } : undefined) as {
+    id: number;
+    method: string;
+    params?: { frameId?: string };
+  };
+}
+
+export function createDOMStorageEnableMessage(): {
+  id: number;
+  method: string;
+} {
+  return createCDPMessage('DOMStorage.enable');
+}
+
+export function createDOMStorageGetItemsMessage(storageId: {
+  isLocalStorage: boolean;
+  storageKey?: string;
+  securityOrigin?: string;
+}): {
+  id: number;
+  method: string;
+  params: { storageId: typeof storageId };
+} {
+  return createCDPMessage('DOMStorage.getDOMStorageItems', { storageId }) as {
+    id: number;
+    method: string;
+    params: { storageId: typeof storageId };
+  };
+}
+
+export function createDOMStorageSetItemMessage(
+  storageId: {
+    isLocalStorage: boolean;
+    storageKey?: string;
+    securityOrigin?: string;
+  },
+  key: string,
+  value: string
+): {
+  id: number;
+  method: string;
+  params: { storageId: typeof storageId; key: string; value: string };
+} {
+  return createCDPMessage('DOMStorage.setDOMStorageItem', {
+    storageId,
+    key,
+    value,
+  }) as {
+    id: number;
+    method: string;
+    params: { storageId: typeof storageId; key: string; value: string };
+  };
+}
+
+export function createDOMStorageRemoveItemMessage(
+  storageId: {
+    isLocalStorage: boolean;
+    storageKey?: string;
+    securityOrigin?: string;
+  },
+  key: string
+): {
+  id: number;
+  method: string;
+  params: { storageId: typeof storageId; key: string };
+} {
+  return createCDPMessage('DOMStorage.removeDOMStorageItem', {
+    storageId,
+    key,
+  }) as {
+    id: number;
+    method: string;
+    params: { storageId: typeof storageId; key: string };
+  };
+}
+
+export function createDOMStorageClearMessage(storageId: {
+  isLocalStorage: boolean;
+  storageKey?: string;
+  securityOrigin?: string;
+}): {
+  id: number;
+  method: string;
+  params: { storageId: typeof storageId };
+} {
+  return createCDPMessage('DOMStorage.clear', { storageId }) as {
+    id: number;
+    method: string;
+    params: { storageId: typeof storageId };
+  };
+}
+
 export function isCDPResponse(message: unknown): message is {
   id: number;
   result?: unknown;
