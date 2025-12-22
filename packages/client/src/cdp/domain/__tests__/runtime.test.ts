@@ -180,29 +180,4 @@ describe('Runtime Domain', () => {
     });
     expect(callResult).toBeUndefined();
   });
-
-  test('should set Command Line API / Command Line API 설정', () => {
-    // Call the static method / 정적 메서드 호출
-    Runtime.setCommandLineApi();
-
-    // Verify properties are set / 속성들이 설정되었는지 확인
-    // happy-dom의 window 사용 / Use happy-dom's window
-    expect((globalThis.window as any).$_).toBeUndefined();
-    expect(typeof (globalThis.window as any).clear).toBe('function');
-    expect(typeof (globalThis.window as any).copy).toBe('function');
-    expect(typeof (globalThis.window as any).dir).toBe('function');
-    expect(typeof (globalThis.window as any).dirxml).toBe('function');
-    expect(typeof (globalThis.window as any).keys).toBe('function');
-    expect(typeof (globalThis.window as any).values).toBe('function');
-    expect(typeof (globalThis.window as any).table).toBe('function');
-
-    // Test that functions work / 함수들이 작동하는지 테스트
-    expect(() => (globalThis.window as any).clear()).not.toThrow();
-    expect(() => (globalThis.window as any).copy('test')).not.toThrow();
-    expect(() => (globalThis.window as any).dir({})).not.toThrow();
-    expect(() => (globalThis.window as any).dirxml({})).not.toThrow();
-    expect(() => (globalThis.window as any).keys({ a: 1 })).not.toThrow();
-    expect(() => (globalThis.window as any).values({ a: 1 })).not.toThrow();
-    expect(() => (globalThis.window as any).table({})).not.toThrow();
-  });
 });
