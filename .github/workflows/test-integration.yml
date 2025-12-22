@@ -4,15 +4,15 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - "packages/**"
-      - "tests/**"
-      - ".github/workflows/test-integration.yml"
+      - 'packages/**'
+      - 'tests/**'
+      - '.github/workflows/test-integration.yml'
   pull_request:
     branches: [main, develop]
     paths:
-      - "packages/**"
-      - "tests/**"
-      - ".github/workflows/test-integration.yml"
+      - 'packages/**'
+      - 'tests/**'
+      - '.github/workflows/test-integration.yml'
 
 jobs:
   check:
@@ -78,6 +78,8 @@ jobs:
           check_name: Integration Tests
           comment_mode: always
           check_run: false
+          report_individual_runs: true
+          report_suite_logs: true
 
       - name: Upload test results
         if: always() && needs.check.outputs.should-run == 'true'
