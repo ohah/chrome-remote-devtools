@@ -5,7 +5,6 @@ import {
   getObjectProperties,
   getObjectById,
 } from '../common/remoteObject';
-import { isSafari } from '../common/utils';
 import BaseDomain from './base';
 import { Event } from './protocol';
 
@@ -24,7 +23,6 @@ export default class Runtime extends BaseDomain {
   constructor(options: { socket: WebSocket }) {
     super(options);
     this.hookConsole();
-    this.listenError();
   }
 
   // Enable Runtime domain / Runtime 도메인 활성화
@@ -43,7 +41,6 @@ export default class Runtime extends BaseDomain {
         },
       },
     });
-    // Runtime.setCommandLineApi();
   }
 
   // Evaluate JavaScript expression / JavaScript 표현식 실행
@@ -51,10 +48,8 @@ export default class Runtime extends BaseDomain {
     result: unknown;
   } {
     try {
-      // eslint-disable-next-line no-eval
       const res = window.eval(expression);
       // chrome-api: store last result
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).$_ = res;
       return {
         result: objectFormat(res, { preview: generatePreview }),
@@ -96,7 +91,6 @@ export default class Runtime extends BaseDomain {
     silent?: boolean;
   }): { result: unknown } | void {
     try {
-      // eslint-disable-next-line no-eval
       const fun = eval(`(() => ${functionDeclaration})()`);
       const resolvedArgs = (args || []).map((v) => {
         if ('value' in v) return v.value;
@@ -159,7 +153,6 @@ export default class Runtime extends BaseDomain {
 
     Object.keys(methods).forEach((key) => {
       const nativeConsoleFunc = consoleObj[key];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (console as any)[key] = (...args: unknown[]) => {
         nativeConsoleFunc?.(...args);
         const data: ConsoleCache = {
@@ -177,40 +170,6 @@ export default class Runtime extends BaseDomain {
         this.socketSend('console', data);
       };
     });
-  }
-
-  // Listen for global errors / 전역 에러 리스닝
-  private listenError(): void {
-    const exceptionThrown = (error: Error | unknown): void => {
-      let desc = 'Script error.';
-      if (error instanceof Error) {
-        desc = error.stack || error.message;
-        if (isSafari()) {
-          const err = error as Error & { sourceURL?: string; line?: number; column?: number };
-          desc = `${error.name}: ${error.message}\n    at (${err.sourceURL || ''}:${err.line || ''}:${err.column || ''})`;
-        }
-      }
-
-      const data: ConsoleCache = {
-        method: Event.exceptionThrown,
-        params: {
-          timestamp: Date.now(),
-          exceptionDetails: {
-            text: 'Uncaught',
-            exception: {
-              type: 'object',
-              subtype: 'error',
-              className: error instanceof Error ? error.name : 'Error',
-              description: desc,
-            },
-            stackTrace: {
-              callFrames: error instanceof Error ? this.getCallFrames(error) : [],
-            },
-          },
-        },
-      };
-      this.socketSend('error', data);
-    };
   }
 
   // Get call frames from error / 에러에서 호출 프레임 가져오기
@@ -236,54 +195,5 @@ export default class Runtime extends BaseDomain {
       });
     }
     return [];
-  }
-
-  // Set Chrome Command Line API / Chrome Command Line API 설정
-  static setCommandLineApi(): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).$_ = undefined;
-
-    if (typeof (window as any).clear !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).clear = () => console.clear();
-    }
-
-    if (typeof (window as any).copy !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).copy = (object: unknown) => {
-        const str = String(object);
-        if ('clipboard' in navigator) {
-          navigator.clipboard.writeText(str).catch(() => {
-            // Fallback
-          });
-        }
-      };
-    }
-
-    if (typeof (window as any).dir !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).dir = (object: unknown) => console.dir(object);
-    }
-
-    if (typeof (window as any).dirxml !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).dirxml = (object: unknown) => console.dirxml(object);
-    }
-
-    if (typeof (window as any).keys !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).keys = (object: unknown) => Object.keys(object as Record<string, unknown>);
-    }
-
-    if (typeof (window as any).values !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).values = (object: unknown) =>
-        Object.values(object as Record<string, unknown>);
-    }
-
-    if (typeof (window as any).table !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).table = (object: unknown) => console.table(object);
-    }
   }
 }
