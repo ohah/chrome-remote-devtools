@@ -74,6 +74,7 @@ jobs:
           files: junit-results.xml
           check_name: Integration Tests
           comment_mode: always
+          check_run: false
 
       - name: Upload test results
         if: always() && needs.check.outputs.should-run == 'true'
