@@ -2,12 +2,9 @@
 // Start server with client build / 클라이언트 빌드와 함께 서버 시작
 import { $ } from 'bun';
 import { resolve, join } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const rootDir = resolve(__dirname, '..');
+// Use Bun's built-in import.meta.dir instead of fileURLToPath/dirname / fileURLToPath/dirname 대신 Bun의 내장 import.meta.dir 사용
+const rootDir = resolve(import.meta.dir, '..');
 
 // Build client first / 클라이언트를 먼저 빌드
 console.log('Building client... / 클라이언트 빌드 중...');
