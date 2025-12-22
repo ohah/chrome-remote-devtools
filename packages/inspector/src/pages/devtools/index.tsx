@@ -20,11 +20,9 @@ function DevToolsPage() {
     // WebSocket URL parameter / WebSocket URL 파라미터
     const wsUrl = `localhost:8080/remote/debug/devtools/${Date.now()}?clientId=${clientId}`;
     params.append('ws', wsUrl);
-    console.log('Using WebSocket URL:', wsUrl);
 
     // DevTools configuration parameters / DevTools 설정 파라미터
     params.append('experiments', 'true');
-    params.append('v8only', 'true');
     params.append('improvedChromeReloads', 'true');
     params.append('experimental', 'true');
 

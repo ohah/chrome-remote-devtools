@@ -46,7 +46,6 @@ export function buildDevToolsUrl(
 
   // DevTools configuration parameters / DevTools 설정 파라미터
   params.append('experiments', 'true');
-  params.append('v8only', 'true');
   params.append('improvedChromeReloads', 'true');
   params.append('experimental', 'true');
 
