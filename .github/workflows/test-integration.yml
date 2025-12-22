@@ -4,15 +4,15 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'packages/**'
-      - 'tests/**'
-      - '.github/workflows/test-integration.yml'
+      - "packages/**"
+      - "tests/**"
+      - ".github/workflows/test-integration.yml"
   pull_request:
     branches: [main, develop]
     paths:
-      - 'packages/**'
-      - 'tests/**'
-      - '.github/workflows/test-integration.yml'
+      - "packages/**"
+      - "tests/**"
+      - ".github/workflows/test-integration.yml"
 
 jobs:
   check:
@@ -35,6 +35,9 @@ jobs:
     name: Integration Tests
     needs: check
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      checks: write
 
     steps:
       - name: Checkout code
