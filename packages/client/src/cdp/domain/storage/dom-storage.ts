@@ -240,76 +240,25 @@ export class DOMStorage extends BaseDomain {
     value: string;
   }): void {
     const storage = storageId.isLocalStorage ? localStorage : sessionStorage;
-    const oldValue = storage.getItem(key);
 
+    // StorageObserver will automatically send event when setItem is called / setItem 호출 시 StorageObserver가 자동으로 이벤트 전송
     storage.setItem(key, value);
-
-    // Send event if enabled / 활성화된 경우 이벤트 전송
-    // Note: StorageObserver will also send event, but we send it here for consistency / 참고: StorageObserver도 이벤트를 전송하지만, 일관성을 위해 여기서도 전송
-    if (this.isEnable) {
-      if (oldValue === null) {
-        // Item added / 항목 추가됨
-        this.send({
-          method: Event.domStorageItemAdded,
-          params: {
-            storageId,
-            key,
-            newValue: value,
-          },
-        });
-      } else {
-        // Item updated / 항목 업데이트됨
-        this.send({
-          method: Event.domStorageItemUpdated,
-          params: {
-            storageId,
-            key,
-            oldValue,
-            newValue: value,
-          },
-        });
-      }
-    }
   }
 
   // Remove DOM storage item / DOM storage 항목 제거
   removeDOMStorageItem({ storageId, key }: { storageId: StorageId; key: string }): void {
     const storage = storageId.isLocalStorage ? localStorage : sessionStorage;
-    const oldValue = storage.getItem(key);
 
-    if (oldValue !== null) {
-      storage.removeItem(key);
-
-      // Send event if enabled / 활성화된 경우 이벤트 전송
-      // Note: StorageObserver will also send event, but we send it here for consistency / 참고: StorageObserver도 이벤트를 전송하지만, 일관성을 위해 여기서도 전송
-      if (this.isEnable) {
-        this.send({
-          method: Event.domStorageItemRemoved,
-          params: {
-            storageId,
-            key,
-          },
-        });
-      }
-    }
+    // StorageObserver will automatically send event when removeItem is called / removeItem 호출 시 StorageObserver가 자동으로 이벤트 전송
+    storage.removeItem(key);
   }
 
   // Clear DOM storage / DOM storage 전체 삭제
   clear({ storageId }: { storageId: StorageId }): void {
     const storage = storageId.isLocalStorage ? localStorage : sessionStorage;
 
+    // StorageObserver will automatically send event when clear is called / clear 호출 시 StorageObserver가 자동으로 이벤트 전송
     storage.clear();
-
-    // Send event if enabled / 활성화된 경우 이벤트 전송
-    // Note: StorageObserver will also send event, but we send it here for consistency / 참고: StorageObserver도 이벤트를 전송하지만, 일관성을 위해 여기서도 전송
-    if (this.isEnable) {
-      this.send({
-        method: Event.domStorageItemsCleared,
-        params: {
-          storageId,
-        },
-      });
-    }
   }
 
   // Setup storage event listeners using observer pattern / 옵저버 패턴을 사용한 storage 이벤트 리스너 설정
@@ -353,39 +302,52 @@ export class DOMStorage extends BaseDomain {
       return;
     }
 
-    let message: { method: string; params: unknown };
+    let message: { method: string; params: unknown } | null = null;
     switch (event.type) {
       case 'added':
+        // Validate required fields for added event / added 이벤트에 필요한 필드 검증
+        if (event.key === null || event.newValue === null) {
+          return;
+        }
         message = {
           method: Event.domStorageItemAdded,
           params: {
             storageId,
-            key: event.key!,
-            newValue: event.newValue!,
+            key: event.key,
+            newValue: event.newValue,
           },
         };
         break;
       case 'updated':
+        // Validate required fields for updated event / updated 이벤트에 필요한 필드 검증
+        if (event.key === null || event.oldValue === null || event.newValue === null) {
+          return;
+        }
         message = {
           method: Event.domStorageItemUpdated,
           params: {
             storageId,
-            key: event.key!,
-            oldValue: event.oldValue!,
-            newValue: event.newValue!,
+            key: event.key,
+            oldValue: event.oldValue,
+            newValue: event.newValue,
           },
         };
         break;
       case 'removed':
+        // Validate required fields for removed event / removed 이벤트에 필요한 필드 검증
+        if (event.key === null) {
+          return;
+        }
         message = {
           method: Event.domStorageItemRemoved,
           params: {
             storageId,
-            key: event.key!,
+            key: event.key,
           },
         };
         break;
       case 'cleared':
+        // Cleared event doesn't require key / cleared 이벤트는 key가 필요 없음
         message = {
           method: Event.domStorageItemsCleared,
           params: {
@@ -397,7 +359,9 @@ export class DOMStorage extends BaseDomain {
         return;
     }
 
-    this.send(message);
+    if (message) {
+      this.send(message);
+    }
   }
 
   // Remove storage event listeners / storage 이벤트 리스너 제거
