@@ -342,8 +342,7 @@ test.describe('iframe Example E2E Tests', () => {
 
     // Wait for network request to complete / 네트워크 요청이 완료될 때까지 대기
     await page.waitForResponse(
-      (response) =>
-        response.url().includes('jsonplaceholder.typicode.com') && response.ok(),
+      (response) => response.url().includes('jsonplaceholder.typicode.com') && response.ok(),
       { timeout: 10000 }
     );
 
