@@ -79,7 +79,7 @@ jobs:
           comment_mode: always
           check_run: false
           report_individual_runs: true
-          report_suite_logs: true
+          report_suite_logs: any
 
       - name: Upload test results
         if: always() && needs.check.outputs.should-run == 'true'
