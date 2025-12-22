@@ -67,6 +67,14 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         run: bun run test:e2e:integration
 
+      - name: Publish Test Results
+        if: always() && github.event_name == 'pull_request' && needs.check.outputs.should-run == 'true'
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: junit-results.xml
+          check_name: Integration Tests
+          comment_mode: create new
+
       - name: Upload test results
         if: always() && needs.check.outputs.should-run == 'true'
         uses: actions/upload-artifact@v4
