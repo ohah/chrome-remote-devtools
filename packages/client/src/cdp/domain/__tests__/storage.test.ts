@@ -1,6 +1,6 @@
 // Storage domain tests / Storage 도메인 테스트
 import { describe, test, expect, beforeEach, beforeAll, afterAll, afterEach } from 'bun:test';
-import DOMStorage from '../storage';
+import { DOMStorage } from '../storage/dom-storage';
 import {
   createWebSocketTestServer,
   createWebSocketConnection,

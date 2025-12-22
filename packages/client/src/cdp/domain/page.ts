@@ -28,7 +28,7 @@ export default class Page extends BaseDomain {
   getResourceTree(): {
     frameTree: {
       frame: {
-        id: number;
+        id: string;
         mimeType: string;
         securityOrigin: string;
         url: string;
@@ -36,10 +36,11 @@ export default class Page extends BaseDomain {
       resources: unknown[];
     };
   } {
+    // Frame ID should be a string according to CDP spec / CDP 스펙에 따르면 Frame ID는 문자열이어야 함
     return {
       frameTree: {
         frame: {
-          id: 1,
+          id: '1',
           mimeType: 'text/html',
           securityOrigin: location.origin,
           url: location.href,

@@ -30,6 +30,7 @@ const protocolMethods = {
     'removeDOMStorageItem',
     'clear',
   ],
+  Storage: ['getStorageKey'],
 } as const;
 
 export type ProtocolDomain = keyof typeof protocolMethods;

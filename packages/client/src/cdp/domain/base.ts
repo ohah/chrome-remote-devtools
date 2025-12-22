@@ -18,7 +18,8 @@ export default class BaseDomain {
   // Send CDP message / CDP 메시지 전송
   protected send(data: unknown): void {
     if (this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(data));
+      const message = JSON.stringify(data);
+      this.socket.send(message);
     }
   }
 }

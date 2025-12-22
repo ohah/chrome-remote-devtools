@@ -1,11 +1,5 @@
 // ChromeDomain - CDP domain registration and message routing / CDP 도메인 등록 및 메시지 라우팅
-import Runtime from './domain/runtime';
-import Page from './domain/page';
-import Dom from './domain/dom';
-import Network from './domain/network';
-import Console from './domain/console';
-import DOMStorage from './domain/storage';
-import protocol from './domain/protocol';
+import { Runtime, Page, Dom, Network, Console, DOMStorage, Storage, protocol } from './domain';
 
 interface CDPMessage {
   id?: number;
@@ -57,6 +51,7 @@ export default class ChromeDomain {
       new Network(options),
       new Console(options),
       new DOMStorage(options),
+      new Storage(options),
     ];
 
     domains.forEach((domain) => {

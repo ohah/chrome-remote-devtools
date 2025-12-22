@@ -152,6 +152,25 @@ export class SocketServer {
         return;
       }
 
+      let data: Buffer | string;
+      if (Buffer.isBuffer(message)) {
+        data = message.toString('utf-8');
+      } else if (typeof message === 'string') {
+        data = message;
+      } else if (message instanceof ArrayBuffer) {
+        data = Buffer.from(new Uint8Array(message)).toString('utf-8');
+      } else {
+        data = Buffer.from(message as unknown as ArrayLike<number>).toString('utf-8');
+      }
+
+      // Log received message from Inspector / Inspector로부터 수신된 메시지 로깅
+      try {
+        const parsed = JSON.parse(data);
+        console.log(`[devtools] ${id} received:`, JSON.stringify(parsed, null, 2));
+      } catch {
+        console.log(`[devtools] ${id} received (raw):`, data);
+      }
+
       const currentClient = this.clients.get(currentDevtool.clientId);
       if (!currentClient) {
         return;
