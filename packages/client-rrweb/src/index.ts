@@ -37,7 +37,7 @@ export function initRrwebRecorder(options: RrwebPluginOptions): RecorderHandle {
 
   let stopRecord: (() => void) | null = null;
   const buffer = createEventBuffer(maxBatchSize);
-  let flushTimer: ReturnType<typeof setInterval> | null = null;
+  let flushTimer: ReturnType<typeof setTimeout> | null = null;
   let recording = false;
   let isFlushing = false; // Prevent concurrent flushes / 동시 flush 방지
 
@@ -83,7 +83,7 @@ export function initRrwebRecorder(options: RrwebPluginOptions): RecorderHandle {
             scheduleFlush();
           }
         });
-      }, flushIntervalMs) as unknown as ReturnType<typeof setInterval>;
+      }, flushIntervalMs);
     };
     scheduleFlush();
   };
@@ -94,7 +94,7 @@ export function initRrwebRecorder(options: RrwebPluginOptions): RecorderHandle {
     stopRecord = null;
     recording = false;
     if (flushTimer) {
-      clearTimeout(flushTimer as unknown as ReturnType<typeof setTimeout>);
+      clearTimeout(flushTimer);
       flushTimer = null;
     }
     buffer.clear();
@@ -107,7 +107,7 @@ export function initRrwebRecorder(options: RrwebPluginOptions): RecorderHandle {
     stopRecord = null;
     recording = false;
     if (flushTimer) {
-      clearTimeout(flushTimer as unknown as ReturnType<typeof setTimeout>);
+      clearTimeout(flushTimer);
       flushTimer = null;
     }
     // Flush remaining events before pausing / 일시 중지 전 남은 이벤트 전송
