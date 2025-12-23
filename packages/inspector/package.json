@@ -23,6 +23,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@rrweb/types": "^2.0.0-alpha.18",
     "@tanstack/router-plugin": "^1.142.0",
     "@tauri-apps/cli": "^2",
     "@testing-library/react": "^16.3.1",
