@@ -407,9 +407,70 @@ test.describe('iframe Example E2E Tests', () => {
     await waitForDOMTree(devtoolsFrame);
 
     // Check that empty text nodes are not displayed / 빈 텍스트 노드가 표시되지 않는지 확인
-    const emptyTextNodes = devtoolsFrame.locator('text=/^"" == \$0$/');
+    const emptyTextNodes = devtoolsFrame.locator('text=/^"" == $0$/');
     const count = await emptyTextNodes.count();
     expect(count).toBe(0);
+  });
+
+  test('should display non-whitespace text nodes / 공백이 아닌 텍스트 노드 표시', async ({
+    page,
+  }) => {
+    // Navigate to iframe example / iframe example로 이동
+    await page.goto(IFRAME_EXAMPLE_URL);
+    await page.waitForLoadState('networkidle');
+
+    // Wait for client connection / 클라이언트 연결 대기
+    await waitForClientConnection(page);
+
+    // Add a text node with actual content to the page / 페이지에 실제 내용이 있는 텍스트 노드 추가
+    await page.evaluate(() => {
+      const div = document.createElement('div');
+      div.id = 'test-text-node';
+      div.textContent = 'Test text content';
+      document.body.appendChild(div);
+    });
+
+    // Wait for DevTools iframe / DevTools iframe 대기
+    const devtoolsFrame = await waitForDevToolsIframe(page);
+
+    // Open Elements panel / Elements 패널 열기
+    await openElementsPanel(devtoolsFrame);
+
+    // Wait for DOM tree to load / DOM 트리 로드 대기
+    await waitForDOMTree(devtoolsFrame);
+
+    // Wait a bit for DOM update to propagate / DOM 업데이트가 전파될 때까지 대기
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Check that the div element is visible / div 요소가 보이는지 확인
+    await checkDOMElement(devtoolsFrame, 'div#test-text-node');
+
+    // Check that text nodes with content are displayed / 내용이 있는 텍스트 노드가 표시되는지 확인
+    // Text nodes in DevTools are displayed as quoted strings / DevTools에서 텍스트 노드는 따옴표로 감싼 문자열로 표시됨
+    const textNodeSelectors = [
+      'text=/Test text content/',
+      '.webkit-html-text-node:has-text("Test text content")',
+      '[class*="text-node"]:has-text("Test text content")',
+    ];
+
+    let textNodeFound = false;
+    for (const selector of textNodeSelectors) {
+      try {
+        const textNode = devtoolsFrame.locator(selector).first();
+        await textNode.waitFor({ timeout: 5000, state: 'visible' });
+        await expect(textNode).toBeVisible();
+        textNodeFound = true;
+        break;
+      } catch {
+        continue;
+      }
+    }
+
+    // If text node is not found directly, check if the parent element contains the text / 텍스트 노드를 직접 찾을 수 없으면 부모 요소에 텍스트가 포함되어 있는지 확인
+    if (!textNodeFound) {
+      const divElement = devtoolsFrame.locator('text=/Test text content/').first();
+      await expect(divElement).toBeVisible({ timeout: 5000 });
+    }
   });
 
   test('should expand and collapse DOM nodes / DOM 노드 확장 및 축소', async ({ page }) => {
