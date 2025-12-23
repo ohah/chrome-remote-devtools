@@ -57,13 +57,20 @@ export function RrwebReplayPanel({ clientId }: RrwebReplayPanelProps) {
       }
     };
 
-    socket.addEventListener('open', () => setState({ status: 'open' }));
+    const handleOpen = () => setState({ status: 'open' });
+    const handleClose = () => setState({ status: 'closed' });
+    const handleError = () => setState({ status: 'error', lastError: 'socket error' });
+
+    socket.addEventListener('open', handleOpen);
     socket.addEventListener('message', handleMessage);
-    socket.addEventListener('close', () => setState({ status: 'closed' }));
-    socket.addEventListener('error', () => setState({ status: 'error', lastError: 'socket error' }));
+    socket.addEventListener('close', handleClose);
+    socket.addEventListener('error', handleError);
 
     return () => {
+      socket.removeEventListener('open', handleOpen);
       socket.removeEventListener('message', handleMessage);
+      socket.removeEventListener('close', handleClose);
+      socket.removeEventListener('error', handleError);
       socket.close();
     };
   }, [clientId]);
