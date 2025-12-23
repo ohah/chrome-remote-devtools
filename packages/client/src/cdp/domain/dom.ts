@@ -19,7 +19,20 @@ function getNodeId(node: Node): number {
 }
 
 function getNodeById(nodeId: number): Node | null {
-  return nodeMap.get(nodeId) || null;
+  const node = nodeMap.get(nodeId);
+  if (!node) {
+    return null;
+  }
+  return node;
+}
+
+// Find previous valid sibling node (skip whitespace nodes) / 이전 유효한 형제 노드 찾기 (공백 노드 제외)
+function findPreviousValidSibling(node: Node): Node | null {
+  let previousSibling = node.previousSibling;
+  while (previousSibling && !isValidNode(previousSibling)) {
+    previousSibling = previousSibling.previousSibling;
+  }
+  return previousSibling;
 }
 
 // Check if node is valid (not whitespace-only text node) / 노드가 유효한지 확인 (공백만 있는 텍스트 노드 제외)
@@ -182,7 +195,16 @@ export default class Dom extends BaseDomain {
   // Request child nodes / 자식 노드 요청
   requestChildNodes({ nodeId }: { nodeId: number }): void {
     const node = getNodeById(nodeId);
-    if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+    if (!node) {
+      console.warn(`[CDP DOM] requestChildNodes: Node not found for nodeId: ${nodeId}`);
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      console.warn(
+        `[CDP DOM] requestChildNodes: Node ${nodeId} is not an element node (nodeType: ${node.nodeType})`
+      );
+      return;
+    }
 
     // Mark this node and its children as registered / 이 노드와 자식을 등록된 것으로 표시
     this.registeredNodes.add(node);
@@ -209,7 +231,14 @@ export default class Dom extends BaseDomain {
   // Get outer HTML / 외부 HTML 가져오기
   getOuterHTML({ nodeId }: { nodeId: number }): { outerHTML: string } {
     const node = getNodeById(nodeId);
-    if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+    if (!node) {
+      console.warn(`[CDP DOM] getOuterHTML: Node not found for nodeId: ${nodeId}`);
+      return { outerHTML: '' };
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      console.warn(
+        `[CDP DOM] getOuterHTML: Node ${nodeId} is not an element node (nodeType: ${node.nodeType})`
+      );
       return { outerHTML: '' };
     }
     return {
@@ -220,14 +249,32 @@ export default class Dom extends BaseDomain {
   // Set outer HTML / 외부 HTML 설정
   setOuterHTML({ nodeId, outerHTML }: { nodeId: number; outerHTML: string }): void {
     const node = getNodeById(nodeId);
-    if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+    if (!node) {
+      console.warn(`[CDP DOM] setOuterHTML: Node not found for nodeId: ${nodeId}`);
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      console.warn(
+        `[CDP DOM] setOuterHTML: Node ${nodeId} is not an element node (nodeType: ${node.nodeType})`
+      );
+      return;
+    }
     (node as Element).outerHTML = outerHTML;
   }
 
   // Set attributes as text / 텍스트로 속성 설정
   setAttributesAsText({ nodeId, text }: { nodeId: number; text: string }): void {
     const node = getNodeById(nodeId);
-    if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+    if (!node) {
+      console.warn(`[CDP DOM] setAttributesAsText: Node not found for nodeId: ${nodeId}`);
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      console.warn(
+        `[CDP DOM] setAttributesAsText: Node ${nodeId} is not an element node (nodeType: ${node.nodeType})`
+      );
+      return;
+    }
 
     const element = node as Element;
     if (text) {
@@ -249,7 +296,7 @@ export default class Dom extends BaseDomain {
   requestNode({ objectId }: { objectId: string }): { nodeId: number } {
     const node = getObjectById(objectId) as Node;
     if (!node) {
-      throw new Error('Node not found');
+      throw new Error(`Node not found for objectId: ${objectId}`);
     }
     return { nodeId: getNodeId(node) };
   }
@@ -257,6 +304,12 @@ export default class Dom extends BaseDomain {
   // Set inspected node / 검사할 노드 설정
   setInspectedNode({ nodeId }: { nodeId: number }): void {
     const node = getNodeById(nodeId);
+    if (!node) {
+      console.warn(`[CDP DOM] setInspectedNode: Node not found for nodeId: ${nodeId}`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).$0 = null;
+      return;
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).$0 = node;
   }
@@ -306,7 +359,7 @@ export default class Dom extends BaseDomain {
   getNodeForLocation({ x, y }: { x: number; y: number }): { nodeId: number } {
     const node = document.elementFromPoint(x, y);
     if (!node) {
-      throw new Error('Node not found at location');
+      throw new Error(`Node not found at location (${x}, ${y})`);
     }
     return { nodeId: getNodeId(node) };
   }
@@ -314,9 +367,11 @@ export default class Dom extends BaseDomain {
   // Set node value / 노드 값 설정
   setNodeValue({ nodeId, value }: { nodeId: number; value: string }): void {
     const node = getNodeById(nodeId);
-    if (node) {
-      node.nodeValue = value;
+    if (!node) {
+      console.warn(`[CDP DOM] setNodeValue: Node not found for nodeId: ${nodeId}`);
+      return;
     }
+    node.nodeValue = value;
   }
 
   // Get box model / 박스 모델 가져오기
@@ -331,8 +386,11 @@ export default class Dom extends BaseDomain {
     };
   } {
     const node = getNodeById(nodeId);
-    if (!node || node.nodeType !== Node.ELEMENT_NODE) {
-      throw new Error('Element not found');
+    if (!node) {
+      throw new Error(`Node not found for nodeId: ${nodeId}`);
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      throw new Error(`Node ${nodeId} is not an element node (nodeType: ${node.nodeType})`);
     }
 
     const element = node as Element;
@@ -384,7 +442,11 @@ export default class Dom extends BaseDomain {
   // Remove node / 노드 제거
   removeNode({ nodeId }: { nodeId: number }): void {
     const node = getNodeById(nodeId);
-    if (node && node.parentNode) {
+    if (!node) {
+      console.warn(`[CDP DOM] removeNode: Node not found for nodeId: ${nodeId}`);
+      return;
+    }
+    if (node.parentNode) {
       node.parentNode.removeChild(node);
     }
   }
@@ -420,14 +482,8 @@ export default class Dom extends BaseDomain {
               // Only send if parent node is registered / 부모 노드가 등록된 경우에만 전송
               if (parentNodeId > 0 && this.registeredNodes.has(parentNode)) {
                 // Find previous sibling node ID (skip whitespace nodes) / 이전 형제 노드 ID 찾기 (공백 노드 제외)
-                let previousNodeId = 0;
-                let previousSibling = node.previousSibling;
-                while (previousSibling && !isValidNode(previousSibling)) {
-                  previousSibling = previousSibling.previousSibling;
-                }
-                if (previousSibling) {
-                  previousNodeId = getNodeId(previousSibling);
-                }
+                const previousSibling = findPreviousValidSibling(node);
+                const previousNodeId = previousSibling ? getNodeId(previousSibling) : 0;
 
                 this.send({
                   method: Event.childNodeInserted,
@@ -451,14 +507,8 @@ export default class Dom extends BaseDomain {
               // Only send if parent node is registered / 부모 노드가 등록된 경우에만 전송
               if (parentNodeId > 0 && this.registeredNodes.has(parentNode)) {
                 // Find previous sibling node ID (skip whitespace nodes) / 이전 형제 노드 ID 찾기 (공백 노드 제외)
-                let previousNodeId = 0;
-                let previousSibling = node.previousSibling;
-                while (previousSibling && !isValidNode(previousSibling)) {
-                  previousSibling = previousSibling.previousSibling;
-                }
-                if (previousSibling) {
-                  previousNodeId = getNodeId(previousSibling);
-                }
+                const previousSibling = findPreviousValidSibling(node);
+                const previousNodeId = previousSibling ? getNodeId(previousSibling) : 0;
 
                 this.send({
                   method: Event.childNodeInserted,
