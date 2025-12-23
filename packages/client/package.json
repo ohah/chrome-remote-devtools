@@ -10,6 +10,9 @@
     "clean": "rm -rf dist",
     "test": "bun test"
   },
+  "dependencies": {
+    "@ohah/chrome-remote-devtools-client-rrweb": "workspace:*"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   }

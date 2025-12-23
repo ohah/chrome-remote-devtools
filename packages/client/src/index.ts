@@ -2,6 +2,14 @@
 import { getAbsolutePath } from './cdp/common/utils';
 import ChromeDomain from './cdp';
 
+interface RrwebConfig {
+  enable: boolean;
+  flushIntervalMs?: number;
+  maxBatchSize?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  recordOptions?: Record<string, any>;
+}
+
 function getDocumentFavicon(): string {
   const links = document.head.querySelectorAll('link');
   const icon = Array.from(links).find((link) => {
@@ -38,7 +46,78 @@ function getQuery(): string {
   return search.toString();
 }
 
-function initSocket(serverUrl: string): void {
+function getRrwebConfig(script: HTMLScriptElement | null): RrwebConfig {
+  if (!script) {
+    return { enable: false };
+  }
+
+  const enableAttr = script.dataset.enableRrweb || script.getAttribute('data-enable-rrweb');
+  const flushMsAttr = script.dataset.rrwebFlushMs || script.getAttribute('data-rrweb-flush-ms');
+  const maxBatchAttr = script.dataset.rrwebMaxBatch || script.getAttribute('data-rrweb-max-batch');
+
+  return {
+    // Default ON; set data-enable-rrweb="false" to disable / 기본 ON; 끄려면 data-enable-rrweb="false"
+    enable: enableAttr === 'true',
+    flushIntervalMs: flushMsAttr ? Number(flushMsAttr) : undefined,
+    maxBatchSize: maxBatchAttr ? Number(maxBatchAttr) : undefined,
+  };
+}
+
+// Global recorder handle for pause/resume control / 일시 중지/재개 제어를 위한 전역 레코더 핸들
+let globalRrwebRecorder: { pause: () => void; resume: () => Promise<void> } | null = null;
+
+// Expose global API for controlling rrweb recording / rrweb 기록 제어를 위한 전역 API 노출
+if (typeof window !== 'undefined') {
+  (window as any).__rrwebRecorder = {
+    pause: () => {
+      globalRrwebRecorder?.pause();
+    },
+    resume: async () => {
+      await globalRrwebRecorder?.resume();
+    },
+  };
+}
+
+async function initRrwebRecording(socket: WebSocket, config: RrwebConfig): Promise<void> {
+  console.log('config', config);
+  if (!config.enable) return;
+
+  try {
+    const { createDefaultWsTransport, initRrwebRecorder } =
+      await import('@ohah/chrome-remote-devtools-client-rrweb');
+
+    const baseRecordOptions = config.recordOptions ?? {};
+    const transport = createDefaultWsTransport({ socket, kind: 'rrweb' });
+    const recorder = initRrwebRecorder({
+      transport,
+      flushIntervalMs: config.flushIntervalMs,
+      maxBatchSize: config.maxBatchSize,
+      recordOptions: {
+        // Force full snapshot generation / 풀 스냅샷 강제 생성
+        recordAfter: 'load',
+        checkoutEveryNth: 1,
+        ...baseRecordOptions,
+      },
+      kind: 'rrweb',
+      onError: (error) => {
+        console.warn('rrweb recorder error / rrweb 레코더 오류:', error);
+      },
+    });
+
+    // Store recorder handle globally / 레코더 핸들을 전역으로 저장
+    globalRrwebRecorder = recorder;
+
+    await recorder.start();
+    socket.addEventListener('close', () => {
+      recorder.stop();
+      globalRrwebRecorder = null;
+    });
+  } catch (error) {
+    console.error('Failed to start rrweb recorder / rrweb 레코더 시작 실패:', error);
+  }
+}
+
+function initSocket(serverUrl: string, rrwebConfig: RrwebConfig): void {
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
   const host = serverUrl.replace(/^(http|https|ws|wss):\/\//i, '');
   const socket = new WebSocket(`${protocol}//${host}/remote/debug/client/${getId()}?${getQuery()}`);
@@ -68,6 +147,8 @@ function initSocket(serverUrl: string): void {
       console.error('CDP message error:', e);
     }
   });
+
+  void initRrwebRecording(socket, rrwebConfig);
 }
 
 function keepScreenDisplay(): void {
@@ -89,8 +170,11 @@ function keepScreenDisplay(): void {
 }
 
 // Initialize CDP client / CDP 클라이언트 초기화
-export function initCDPClient(serverUrl: string): void {
-  initSocket(serverUrl);
+export function initCDPClient(
+  serverUrl: string,
+  rrwebConfig: RrwebConfig = { enable: false }
+): void {
+  initSocket(serverUrl, rrwebConfig);
   keepScreenDisplay();
 }
 
@@ -99,6 +183,7 @@ if (typeof document !== 'undefined') {
   const script = document.currentScript as HTMLScriptElement | null;
   const serverUrl = script?.dataset.serverUrl || script?.getAttribute('data-server-url');
   if (serverUrl) {
-    initCDPClient(serverUrl);
+    const rrwebConfig = getRrwebConfig(script);
+    initCDPClient(serverUrl, rrwebConfig);
   }
 }
