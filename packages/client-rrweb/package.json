@@ -1,0 +1,21 @@
+{
+  "name": "@ohah/chrome-remote-devtools-client-rrweb",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target browser --format esm --minify",
+    "build:watch": "bun build src/index.ts --outdir dist --target browser --format esm --minify --watch",
+    "clean": "rm -rf dist",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@rrweb/types": "^2.0.0-alpha.18",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "@ohah/chrome-remote-devtools-client": "workspace:*",
+    "@rrweb/record": "^2.0.0-alpha.18"
+  }
+}
