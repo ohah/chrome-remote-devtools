@@ -79,7 +79,6 @@ if (typeof window !== 'undefined') {
 }
 
 async function initRrwebRecording(socket: WebSocket, config: RrwebConfig): Promise<void> {
-  console.log('config', config);
   if (!config.enable) return;
 
   try {
