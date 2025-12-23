@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as i18n from '../../core/i18n/i18n.js';
-import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
      * @description Title of the WebAudio tool
@@ -26,17 +25,18 @@ async function loadWebAudioModule() {
     }
     return loadedWebAudioModule;
 }
-UI.ViewManager.registerViewExtension({
-    location: "drawer-view" /* UI.ViewManager.ViewLocationValues.DRAWER_VIEW */,
-    id: 'web-audio',
-    title: i18nLazyString(UIStrings.webaudio),
-    commandPrompt: i18nLazyString(UIStrings.showWebaudio),
-    persistence: "closeable" /* UI.ViewManager.ViewPersistence.CLOSEABLE */,
-    order: 100,
-    async loadView() {
-        const WebAudio = await loadWebAudioModule();
-        return new WebAudio.WebAudioView.WebAudioView();
-    },
-    tags: [i18nLazyString(UIStrings.audio)],
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'web-audio',
+//   title: i18nLazyString(UIStrings.webaudio),
+//   commandPrompt: i18nLazyString(UIStrings.showWebaudio),
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   order: 100,
+//   async loadView() {
+//     const WebAudio = await loadWebAudioModule();
+//     return new WebAudio.WebAudioView.WebAudioView();
+//   },
+//   tags: [i18nLazyString(UIStrings.audio)],
+// });
 //# sourceMappingURL=web_audio-meta.prebundle.js.map

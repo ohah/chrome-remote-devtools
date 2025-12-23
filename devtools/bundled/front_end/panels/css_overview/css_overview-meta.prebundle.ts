@@ -30,16 +30,17 @@ async function loadCSSOverviewModule(): Promise<typeof CSSOverview> {
   return loadedCSSOverviewModule;
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.PANEL,
-  id: 'cssoverview',
-  commandPrompt: i18nLazyString(UIStrings.showCssOverview),
-  title: i18nLazyString(UIStrings.cssOverview),
-  order: 95,
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  async loadView() {
-    const CSSOverview = await loadCSSOverviewModule();
-    return new CSSOverview.CSSOverviewPanel.CSSOverviewPanel();
-  },
-  isPreviewFeature: true,
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.PANEL,
+//   id: 'cssoverview',
+//   commandPrompt: i18nLazyString(UIStrings.showCssOverview),
+//   title: i18nLazyString(UIStrings.cssOverview),
+//   order: 95,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const CSSOverview = await loadCSSOverviewModule();
+//     return new CSSOverview.CSSOverviewPanel.CSSOverviewPanel();
+//   },
+//   isPreviewFeature: true,
+// });

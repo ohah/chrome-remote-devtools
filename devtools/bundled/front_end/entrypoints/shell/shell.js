@@ -2036,17 +2036,6 @@ function maybeRetrieveContextTypes2(getClassCallBack) {
   return getClassCallBack(loadedProfilerModule);
 }
 UI2.ViewManager.registerViewExtension({
-  location: "panel",
-  id: "heap-profiler",
-  commandPrompt: i18nLazyString2(UIStrings2.showMemory),
-  title: i18nLazyString2(UIStrings2.memory),
-  order: 60,
-  async loadView() {
-    const Profiler = await loadProfilerModule();
-    return Profiler.HeapProfilerPanel.HeapProfilerPanel.instance();
-  }
-});
-UI2.ViewManager.registerViewExtension({
   location: "drawer-view",
   id: "live-heap-profile",
   commandPrompt: i18nLazyString2(UIStrings2.showLiveHeapProfile),

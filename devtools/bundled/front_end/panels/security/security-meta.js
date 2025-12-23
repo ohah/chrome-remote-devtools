@@ -1,8 +1,6 @@
 // gen/front_end/panels/security/security-meta.prebundle.js
 import * as Common from "./..\\..\\core\\common\\common.js";
 import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
 import * as Security from "./security.js";
 var UIStrings = {
   /**
@@ -31,18 +29,6 @@ async function loadSecurityModule() {
   }
   return loadedSecurityModule;
 }
-UI.ViewManager.registerViewExtension({
-  location: "panel",
-  id: "security",
-  title: () => Root.Runtime.hostConfig.devToolsPrivacyUI?.enabled ? i18nLazyString(UIStrings.PrivacyAndSecurity)() : i18nLazyString(UIStrings.security)(),
-  commandPrompt: () => Root.Runtime.hostConfig.devToolsPrivacyUI?.enabled ? i18nLazyString(UIStrings.showPrivacyAndSecurity)() : i18nLazyString(UIStrings.showSecurity)(),
-  order: 80,
-  persistence: "closeable",
-  async loadView() {
-    const Security2 = await loadSecurityModule();
-    return Security2.SecurityPanel.SecurityPanel.instance();
-  }
-});
 Common.Revealer.registerRevealer({
   contextTypes() {
     return [

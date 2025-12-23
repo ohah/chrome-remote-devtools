@@ -4,7 +4,6 @@
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as IssuesManager from '../../models/issues_manager/issues_manager.js';
-import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
      * @description Label for the issues pane
@@ -24,18 +23,19 @@ async function loadIssuesModule() {
     }
     return loadedIssuesModule;
 }
-UI.ViewManager.registerViewExtension({
-    location: "drawer-view" /* UI.ViewManager.ViewLocationValues.DRAWER_VIEW */,
-    id: 'issues-pane',
-    title: i18nLazyString(UIStrings.issues),
-    commandPrompt: i18nLazyString(UIStrings.showIssues),
-    order: 100,
-    persistence: "closeable" /* UI.ViewManager.ViewPersistence.CLOSEABLE */,
-    async loadView() {
-        const Issues = await loadIssuesModule();
-        return new Issues.IssuesPane.IssuesPane();
-    },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'issues-pane',
+//   title: i18nLazyString(UIStrings.issues),
+//   commandPrompt: i18nLazyString(UIStrings.showIssues),
+//   order: 100,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const Issues = await loadIssuesModule();
+//     return new Issues.IssuesPane.IssuesPane();
+//   },
+// });
 Common.Revealer.registerRevealer({
     contextTypes() {
         return [

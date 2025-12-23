@@ -29,15 +29,16 @@ async function loadWebauthnModule(): Promise<typeof Webauthn> {
   return loadedWebauthnModule;
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
-  id: 'webauthn-pane',
-  title: i18nLazyString(UIStrings.webauthn),
-  commandPrompt: i18nLazyString(UIStrings.showWebauthn),
-  order: 100,
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  async loadView() {
-    const Webauthn = await loadWebauthnModule();
-    return new Webauthn.WebauthnPane.WebauthnPaneImpl();
-  },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'webauthn-pane',
+//   title: i18nLazyString(UIStrings.webauthn),
+//   commandPrompt: i18nLazyString(UIStrings.showWebauthn),
+//   order: 100,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const Webauthn = await loadWebauthnModule();
+//     return new Webauthn.WebauthnPane.WebauthnPaneImpl();
+//   },
+// });

@@ -260,7 +260,6 @@ UI.Context.registerListener({
 import * as Common from "./..\\..\\core\\common\\common.js";
 import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
 import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings2 = {
   /**
    * @description Title for developer resources panel
@@ -280,18 +279,6 @@ async function loadDeveloperResourcesModule() {
   }
   return loadedDeveloperResourcesModule;
 }
-UI2.ViewManager.registerViewExtension({
-  location: "drawer-view",
-  id: "developer-resources",
-  title: i18nLazyString2(UIStrings2.developerResources),
-  commandPrompt: i18nLazyString2(UIStrings2.showDeveloperResources),
-  order: 100,
-  persistence: "closeable",
-  async loadView() {
-    const DeveloperResources = await loadDeveloperResourcesModule();
-    return new DeveloperResources.DeveloperResourcesView.DeveloperResourcesView();
-  }
-});
 Common.Revealer.registerRevealer({
   contextTypes() {
     return [SDK2.PageResourceLoader.ResourceKey];
@@ -307,7 +294,6 @@ Common.Revealer.registerRevealer({
 import * as Common2 from "./..\\..\\core\\common\\common.js";
 import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
 import * as IssuesManager from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings3 = {
   /**
    * @description Label for the issues pane
@@ -327,18 +313,6 @@ async function loadIssuesModule() {
   }
   return loadedIssuesModule;
 }
-UI3.ViewManager.registerViewExtension({
-  location: "drawer-view",
-  id: "issues-pane",
-  title: i18nLazyString3(UIStrings3.issues),
-  commandPrompt: i18nLazyString3(UIStrings3.showIssues),
-  order: 100,
-  persistence: "closeable",
-  async loadView() {
-    const Issues = await loadIssuesModule();
-    return new Issues.IssuesPane.IssuesPane();
-  }
-});
 Common2.Revealer.registerRevealer({
   contextTypes() {
     return [
@@ -354,7 +328,7 @@ Common2.Revealer.registerRevealer({
 
 // gen/front_end/panels/layer_viewer/layer_viewer-meta.js
 import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings4 = {
   /**
    * @description Text in the Shortcuts page to explain a keyboard shortcut (reset view in Layers Panel)
@@ -395,7 +369,7 @@ var UIStrings4 = {
 };
 var str_4 = i18n7.i18n.registerUIStrings("panels/layer_viewer/layer_viewer-meta.ts", UIStrings4);
 var i18nLazyString4 = i18n7.i18n.getLazilyComputedLocalizedString.bind(void 0, str_4);
-UI4.ActionRegistration.registerActionExtension({
+UI2.ActionRegistration.registerActionExtension({
   actionId: "layers.reset-view",
   category: "LAYERS",
   title: i18nLazyString4(UIStrings4.resetView),
@@ -405,7 +379,7 @@ UI4.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI4.ActionRegistration.registerActionExtension({
+UI2.ActionRegistration.registerActionExtension({
   actionId: "layers.pan-mode",
   category: "LAYERS",
   title: i18nLazyString4(UIStrings4.switchToPanMode),
@@ -415,7 +389,7 @@ UI4.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI4.ActionRegistration.registerActionExtension({
+UI2.ActionRegistration.registerActionExtension({
   actionId: "layers.rotate-mode",
   category: "LAYERS",
   title: i18nLazyString4(UIStrings4.switchToRotateMode),
@@ -425,7 +399,7 @@ UI4.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI4.ActionRegistration.registerActionExtension({
+UI2.ActionRegistration.registerActionExtension({
   actionId: "layers.zoom-in",
   category: "LAYERS",
   title: i18nLazyString4(UIStrings4.zoomIn),
@@ -438,7 +412,7 @@ UI4.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI4.ActionRegistration.registerActionExtension({
+UI2.ActionRegistration.registerActionExtension({
   actionId: "layers.zoom-out",
   category: "LAYERS",
   title: i18nLazyString4(UIStrings4.zoomOut),
@@ -451,7 +425,7 @@ UI4.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI4.ActionRegistration.registerActionExtension({
+UI2.ActionRegistration.registerActionExtension({
   actionId: "layers.up",
   category: "LAYERS",
   title: i18nLazyString4(UIStrings4.panOrRotateUp),
@@ -464,7 +438,7 @@ UI4.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI4.ActionRegistration.registerActionExtension({
+UI2.ActionRegistration.registerActionExtension({
   actionId: "layers.down",
   category: "LAYERS",
   title: i18nLazyString4(UIStrings4.panOrRotateDown),
@@ -477,7 +451,7 @@ UI4.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI4.ActionRegistration.registerActionExtension({
+UI2.ActionRegistration.registerActionExtension({
   actionId: "layers.left",
   category: "LAYERS",
   title: i18nLazyString4(UIStrings4.panOrRotateLeft),
@@ -490,7 +464,7 @@ UI4.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI4.ActionRegistration.registerActionExtension({
+UI2.ActionRegistration.registerActionExtension({
   actionId: "layers.right",
   category: "LAYERS",
   title: i18nLazyString4(UIStrings4.panOrRotateRight),
@@ -507,7 +481,7 @@ UI4.ActionRegistration.registerActionExtension({
 // gen/front_end/panels/mobile_throttling/mobile_throttling-meta.js
 import * as Common3 from "./..\\..\\core\\common\\common.js";
 import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings5 = {
   /**
    * @description Text for throttling the network
@@ -553,7 +527,7 @@ async function loadMobileThrottlingModule() {
   }
   return loadedMobileThrottlingModule;
 }
-UI5.ViewManager.registerViewExtension({
+UI3.ViewManager.registerViewExtension({
   location: "settings-view",
   id: "throttling-conditions",
   title: i18nLazyString5(UIStrings5.throttling),
@@ -569,7 +543,7 @@ UI5.ViewManager.registerViewExtension({
   ],
   iconName: "performance"
 });
-UI5.ActionRegistration.registerActionExtension({
+UI3.ActionRegistration.registerActionExtension({
   actionId: "network-conditions.network-offline",
   category: "NETWORK",
   title: i18nLazyString5(UIStrings5.goOffline),
@@ -582,7 +556,7 @@ UI5.ActionRegistration.registerActionExtension({
     i18nLazyString5(UIStrings5.throttlingTag)
   ]
 });
-UI5.ActionRegistration.registerActionExtension({
+UI3.ActionRegistration.registerActionExtension({
   actionId: "network-conditions.network-low-end-mobile",
   category: "NETWORK",
   title: i18nLazyString5(UIStrings5.enableSlowGThrottling),
@@ -595,7 +569,7 @@ UI5.ActionRegistration.registerActionExtension({
     i18nLazyString5(UIStrings5.throttlingTag)
   ]
 });
-UI5.ActionRegistration.registerActionExtension({
+UI3.ActionRegistration.registerActionExtension({
   actionId: "network-conditions.network-mid-tier-mobile",
   category: "NETWORK",
   title: i18nLazyString5(UIStrings5.enableFastGThrottling),
@@ -608,7 +582,7 @@ UI5.ActionRegistration.registerActionExtension({
     i18nLazyString5(UIStrings5.throttlingTag)
   ]
 });
-UI5.ActionRegistration.registerActionExtension({
+UI3.ActionRegistration.registerActionExtension({
   actionId: "network-conditions.network-online",
   category: "NETWORK",
   title: i18nLazyString5(UIStrings5.goOnline),
@@ -635,7 +609,7 @@ import * as Root2 from "./..\\..\\core\\root\\root.js";
 import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
 import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
 import * as PanelCommon from "./..\\..\\panels\\common\\common.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
 import * as NetworkForward from "./..\\..\\panels\\network\\forward\\forward.js";
 var UIStrings6 = {
   /**
@@ -795,7 +769,7 @@ function maybeRetrieveContextTypes2(getClassCallBack) {
   }
   return getClassCallBack(loadedNetworkModule);
 }
-UI6.ViewManager.registerViewExtension({
+UI4.ViewManager.registerViewExtension({
   location: "panel",
   id: "network",
   commandPrompt: i18nLazyString6(UIStrings6.showNetwork),
@@ -808,7 +782,7 @@ UI6.ViewManager.registerViewExtension({
   }
 });
 var individualThrottlingEnabled = () => Boolean(Root2.Runtime.hostConfig.devToolsIndividualRequestThrottling?.enabled);
-UI6.ViewManager.registerViewExtension({
+UI4.ViewManager.registerViewExtension({
   location: "drawer-view",
   id: "network.blocked-urls",
   commandPrompt: () => individualThrottlingEnabled() ? i18nString(UIStrings6.showRequestConditions) : i18nString(UIStrings6.showNetworkRequestBlocking),
@@ -820,7 +794,7 @@ UI6.ViewManager.registerViewExtension({
     return new Network.RequestConditionsDrawer.RequestConditionsDrawer();
   }
 });
-UI6.ViewManager.registerViewExtension({
+UI4.ViewManager.registerViewExtension({
   location: "drawer-view",
   id: "network.config",
   commandPrompt: i18nLazyString6(UIStrings6.showNetworkConditions),
@@ -839,7 +813,7 @@ UI6.ViewManager.registerViewExtension({
     return Network.NetworkConfigView.NetworkConfigView.instance();
   }
 });
-UI6.ViewManager.registerViewExtension({
+UI4.ViewManager.registerViewExtension({
   location: "network-sidebar",
   id: "network.search-network-tab",
   commandPrompt: i18nLazyString6(UIStrings6.showSearch),
@@ -850,7 +824,7 @@ UI6.ViewManager.registerViewExtension({
     return Network.NetworkPanel.SearchNetworkView.instance();
   }
 });
-UI6.ActionRegistration.registerActionExtension({
+UI4.ActionRegistration.registerActionExtension({
   actionId: "network.toggle-recording",
   category: "NETWORK",
   iconClass: "record-start",
@@ -885,7 +859,7 @@ UI6.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI6.ActionRegistration.registerActionExtension({
+UI4.ActionRegistration.registerActionExtension({
   actionId: "network.clear",
   category: "NETWORK",
   title: i18nLazyString6(UIStrings6.clear),
@@ -907,7 +881,7 @@ UI6.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI6.ActionRegistration.registerActionExtension({
+UI4.ActionRegistration.registerActionExtension({
   actionId: "network.hide-request-details",
   category: "NETWORK",
   title: i18nLazyString6(UIStrings6.hideRequestDetails),
@@ -924,7 +898,7 @@ UI6.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI6.ActionRegistration.registerActionExtension({
+UI4.ActionRegistration.registerActionExtension({
   actionId: "network.search",
   category: "NETWORK",
   title: i18nLazyString6(UIStrings6.search),
@@ -954,7 +928,7 @@ UI6.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI6.ActionRegistration.registerActionExtension({
+UI4.ActionRegistration.registerActionExtension({
   actionId: "network.add-network-request-blocking-pattern",
   category: "NETWORK",
   title: () => individualThrottlingEnabled() ? i18nString(UIStrings6.addNetworkRequestBlockingOrThrottlingPattern) : i18nString(UIStrings6.addNetworkRequestBlockingPattern),
@@ -967,7 +941,7 @@ UI6.ActionRegistration.registerActionExtension({
     return new Network.RequestConditionsDrawer.ActionDelegate();
   }
 });
-UI6.ActionRegistration.registerActionExtension({
+UI4.ActionRegistration.registerActionExtension({
   actionId: "network.remove-all-network-request-blocking-patterns",
   category: "NETWORK",
   title: () => individualThrottlingEnabled() ? i18nString(UIStrings6.removeAllNetworkRequestBlockingOrThrottlingPatterns) : i18nString(UIStrings6.removeAllNetworkRequestBlockingPatterns),
@@ -1050,7 +1024,7 @@ Common4.Settings.registerSettingExtension({
     }
   ]
 });
-UI6.ViewManager.registerLocationResolver({
+UI4.ViewManager.registerLocationResolver({
   name: "network-sidebar",
   category: "NETWORK",
   async loadResolver() {
@@ -1058,7 +1032,7 @@ UI6.ViewManager.registerLocationResolver({
     return Network.NetworkPanel.NetworkPanel.instance();
   }
 });
-UI6.ContextMenu.registerProvider({
+UI4.ContextMenu.registerProvider({
   contextTypes() {
     return [
       SDK3.NetworkRequest.NetworkRequest,
@@ -1130,7 +1104,7 @@ Common4.Revealer.registerRevealer({
 import * as Common5 from "./..\\..\\core\\common\\common.js";
 import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
 import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
 import * as PreloadingHelper from "./..\\..\\panels\\application\\preloading\\helper\\helper.js";
 var UIStrings7 = {
   /**
@@ -1177,7 +1151,7 @@ function maybeRetrieveContextTypes3(getClassCallBack) {
   }
   return getClassCallBack(loadedResourcesModule);
 }
-UI7.ViewManager.registerViewExtension({
+UI5.ViewManager.registerViewExtension({
   location: "panel",
   id: "resources",
   title: i18nLazyString7(UIStrings7.application),
@@ -1189,7 +1163,7 @@ UI7.ViewManager.registerViewExtension({
   },
   tags: [i18nLazyString7(UIStrings7.pwa)]
 });
-UI7.ActionRegistration.registerActionExtension({
+UI5.ActionRegistration.registerActionExtension({
   category: "RESOURCES",
   actionId: "resources.clear",
   title: i18nLazyString7(UIStrings7.clearSiteData),
@@ -1198,7 +1172,7 @@ UI7.ActionRegistration.registerActionExtension({
     return new Resources.StorageView.ActionDelegate();
   }
 });
-UI7.ActionRegistration.registerActionExtension({
+UI5.ActionRegistration.registerActionExtension({
   category: "RESOURCES",
   actionId: "resources.clear-incl-third-party-cookies",
   title: i18nLazyString7(UIStrings7.clearSiteDataIncludingThirdparty),
@@ -1207,7 +1181,7 @@ UI7.ActionRegistration.registerActionExtension({
     return new Resources.StorageView.ActionDelegate();
   }
 });
-UI7.ActionRegistration.registerActionExtension({
+UI5.ActionRegistration.registerActionExtension({
   actionId: "background-service.toggle-recording",
   iconClass: "record-start",
   toggleable: true,
@@ -1291,7 +1265,7 @@ Common5.Revealer.registerRevealer({
 import * as Common6 from "./..\\..\\core\\common\\common.js";
 import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
 import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings8 = {
   /**
    * @description Text for the performance of something
@@ -1361,19 +1335,7 @@ function maybeRetrieveContextTypes4(getClassCallBack) {
   }
   return getClassCallBack(loadedTimelineModule);
 }
-UI8.ViewManager.registerViewExtension({
-  location: "panel",
-  id: "timeline",
-  title: i18nLazyString8(UIStrings8.performance),
-  commandPrompt: i18nLazyString8(UIStrings8.showPerformance),
-  order: 50,
-  async loadView(universe) {
-    const Timeline = await loadTimelineModule();
-    const resourceLoader = universe.context.get(SDK5.PageResourceLoader.PageResourceLoader);
-    return Timeline.TimelinePanel.TimelinePanel.instance({ forceNew: true, resourceLoader });
-  }
-});
-UI8.ActionRegistration.registerActionExtension({
+UI6.ActionRegistration.registerActionExtension({
   actionId: "timeline.toggle-recording",
   category: "PERFORMANCE",
   iconClass: "record-start",
@@ -1408,7 +1370,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI6.ActionRegistration.registerActionExtension({
   actionId: "timeline.record-reload",
   iconClass: "refresh",
   contextTypes() {
@@ -1431,7 +1393,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI6.ActionRegistration.registerActionExtension({
   category: "PERFORMANCE",
   actionId: "timeline.save-to-file",
   contextTypes() {
@@ -1453,7 +1415,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI6.ActionRegistration.registerActionExtension({
   category: "PERFORMANCE",
   actionId: "timeline.load-from-file",
   contextTypes() {
@@ -1475,7 +1437,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI6.ActionRegistration.registerActionExtension({
   actionId: "timeline.jump-to-previous-frame",
   category: "PERFORMANCE",
   title: i18nLazyString8(UIStrings8.previousFrame),
@@ -1492,7 +1454,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI6.ActionRegistration.registerActionExtension({
   actionId: "timeline.jump-to-next-frame",
   category: "PERFORMANCE",
   title: i18nLazyString8(UIStrings8.nextFrame),
@@ -1509,7 +1471,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI6.ActionRegistration.registerActionExtension({
   actionId: "timeline.show-history",
   async loadActionDelegate() {
     const Timeline = await loadTimelineModule();
@@ -1531,7 +1493,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI6.ActionRegistration.registerActionExtension({
   actionId: "timeline.previous-recording",
   category: "PERFORMANCE",
   async loadActionDelegate() {
@@ -1553,7 +1515,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI6.ActionRegistration.registerActionExtension({
   actionId: "timeline.next-recording",
   category: "PERFORMANCE",
   async loadActionDelegate() {
@@ -1590,12 +1552,12 @@ Common6.Settings.registerSettingExtension({
   settingType: "boolean",
   defaultValue: false
 });
-UI8.ContextMenu.registerItem({
+UI6.ContextMenu.registerItem({
   location: "timelineMenu/open",
   actionId: "timeline.load-from-file",
   order: 10
 });
-UI8.ContextMenu.registerItem({
+UI6.ContextMenu.registerItem({
   location: "timelineMenu/open",
   actionId: "timeline.save-to-file",
   order: 15

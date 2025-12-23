@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"..\\..\\..\\..\\..\\..\\front_end\\panels\\session_replay"},"files":["..\\..\\..\\..\\..\\..\\front_end\\panels\\session_replay\\session_replay.ts"],"references":[{"path":"./session_replay-tsconfig.json"}]}

@@ -740,6 +740,8 @@
       <include file="panels/screencast/screencast-meta.js" name="PANELS_SCREENCAST_SCREENCAST_META_JS" resource_path="panels/screencast/screencast-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/screencast/screencast.js" name="PANELS_SCREENCAST_SCREENCAST_JS" resource_path="panels/screencast/screencast.js" type="BINDATA" compress="false"/>
       <include file="panels/search/search.js" name="PANELS_SEARCH_SEARCH_JS" resource_path="panels/search/search.js" type="BINDATA" compress="false"/>
+      <include file="panels/session_replay/session_replay-meta.js" name="PANELS_SESSION_REPLAY_SESSION_REPLAY_META_JS" resource_path="panels/session_replay/session_replay-meta.js" type="BINDATA" compress="false"/>
+      <include file="panels/session_replay/session_replay.js" name="PANELS_SESSION_REPLAY_SESSION_REPLAY_JS" resource_path="panels/session_replay/session_replay.js" type="BINDATA" compress="false"/>
       <include file="panels/security/security-meta.js" name="PANELS_SECURITY_SECURITY_META_JS" resource_path="panels/security/security-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/security/security.js" name="PANELS_SECURITY_SECURITY_JS" resource_path="panels/security/security.js" type="BINDATA" compress="false"/>
       <include file="panels/sensors/sensors-meta.js" name="PANELS_SENSORS_SENSORS_META_JS" resource_path="panels/sensors/sensors-meta.js" type="BINDATA" compress="false"/>
@@ -768,6 +770,8 @@
       <include file="panels/web_audio/web_audio.js" name="PANELS_WEB_AUDIO_WEB_AUDIO_JS" resource_path="panels/web_audio/web_audio.js" type="BINDATA" compress="false"/>
       <include file="panels/webauthn/webauthn-meta.js" name="PANELS_WEBAUTHN_WEBAUTHN_META_JS" resource_path="panels/webauthn/webauthn-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/webauthn/webauthn.js" name="PANELS_WEBAUTHN_WEBAUTHN_JS" resource_path="panels/webauthn/webauthn.js" type="BINDATA" compress="false"/>
+      <include file="panels/welcome/welcome-meta.js" name="PANELS_WELCOME_WELCOME_META_JS" resource_path="panels/welcome/welcome-meta.js" type="BINDATA" compress="false"/>
+      <include file="panels/welcome/welcome.js" name="PANELS_WELCOME_WELCOME_JS" resource_path="panels/welcome/welcome.js" type="BINDATA" compress="false"/>
       <include file="panels/whats_new/resources/WNDT.md" name="PANELS_WHATS_NEW_RESOURCES_WNDT_MD" resource_path="panels/whats_new/resources/WNDT.md" type="BINDATA" compress="false"/>
       <include file="panels/whats_new/whats_new-meta.js" name="PANELS_WHATS_NEW_WHATS_NEW_META_JS" resource_path="panels/whats_new/whats_new-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/whats_new/whats_new.js" name="PANELS_WHATS_NEW_WHATS_NEW_JS" resource_path="panels/whats_new/whats_new.js" type="BINDATA" compress="false"/>

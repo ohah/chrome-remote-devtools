@@ -78,17 +78,18 @@ function maybeRetrieveContextTypes<T = unknown>(getClassCallBack: (profilerModul
   return getClassCallBack(loadedProfilerModule);
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.PANEL,
-  id: 'heap-profiler',
-  commandPrompt: i18nLazyString(UIStrings.showMemory),
-  title: i18nLazyString(UIStrings.memory),
-  order: 60,
-  async loadView() {
-    const Profiler = await loadProfilerModule();
-    return Profiler.HeapProfilerPanel.HeapProfilerPanel.instance();
-  },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.PANEL,
+//   id: 'heap-profiler',
+//   commandPrompt: i18nLazyString(UIStrings.showMemory),
+//   title: i18nLazyString(UIStrings.memory),
+//   order: 60,
+//   async loadView() {
+//     const Profiler = await loadProfilerModule();
+//     return Profiler.HeapProfilerPanel.HeapProfilerPanel.instance();
+//   },
+// });
 
 UI.ViewManager.registerViewExtension({
   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,

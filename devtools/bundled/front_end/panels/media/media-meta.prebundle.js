@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as i18n from '../../core/i18n/i18n.js';
-import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
      * @description Text that appears on a button for the media resource type filter.
@@ -26,20 +25,21 @@ async function loadMediaModule() {
     }
     return loadedMediaModule;
 }
-UI.ViewManager.registerViewExtension({
-    location: "panel" /* UI.ViewManager.ViewLocationValues.PANEL */,
-    id: 'medias',
-    title: i18nLazyString(UIStrings.media),
-    commandPrompt: i18nLazyString(UIStrings.showMedia),
-    persistence: "closeable" /* UI.ViewManager.ViewPersistence.CLOSEABLE */,
-    order: 100,
-    async loadView() {
-        const Media = await loadMediaModule();
-        return new Media.MainView.MainView();
-    },
-    tags: [
-        i18nLazyString(UIStrings.media),
-        i18nLazyString(UIStrings.video),
-    ],
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.PANEL,
+//   id: 'medias',
+//   title: i18nLazyString(UIStrings.media),
+//   commandPrompt: i18nLazyString(UIStrings.showMedia),
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   order: 100,
+//   async loadView() {
+//     const Media = await loadMediaModule();
+//     return new Media.MainView.MainView();
+//   },
+//   tags: [
+//     i18nLazyString(UIStrings.media),
+//     i18nLazyString(UIStrings.video),
+//   ],
+// });
 //# sourceMappingURL=media-meta.prebundle.js.map

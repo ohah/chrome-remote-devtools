@@ -33,19 +33,20 @@ async function loadMediaModule(): Promise<typeof Media> {
   return loadedMediaModule;
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.PANEL,
-  id: 'medias',
-  title: i18nLazyString(UIStrings.media),
-  commandPrompt: i18nLazyString(UIStrings.showMedia),
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  order: 100,
-  async loadView() {
-    const Media = await loadMediaModule();
-    return new Media.MainView.MainView();
-  },
-  tags: [
-    i18nLazyString(UIStrings.media),
-    i18nLazyString(UIStrings.video),
-  ],
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.PANEL,
+//   id: 'medias',
+//   title: i18nLazyString(UIStrings.media),
+//   commandPrompt: i18nLazyString(UIStrings.showMedia),
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   order: 100,
+//   async loadView() {
+//     const Media = await loadMediaModule();
+//     return new Media.MainView.MainView();
+//   },
+//   tags: [
+//     i18nLazyString(UIStrings.media),
+//     i18nLazyString(UIStrings.video),
+//   ],
+// });

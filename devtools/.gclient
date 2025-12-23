@@ -5,10 +5,9 @@ solutions = [
   {
     "name": "devtools-frontend",
     # Use devtools-frontend fork URL / devtools-frontend 포크 URL 사용
-    "url": "https://github.com/ohah/devtools-frontend.git",
-    # managed: False allows using local fork / managed: False는 로컬 포크 사용 허용
+    "url": "https://github.com/ohah/devtools-frontend.git@develop",
     "deps_file": "DEPS",
-    "managed": False,
+    "managed": True,
     "custom_deps": {},
   }
 ]

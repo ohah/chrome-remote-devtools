@@ -56,18 +56,6 @@ UI.ContextMenu.maybeRemoveItem({
   order: void 0
 });
 Common.Runnable.maybeRemoveLateInitializationRunnable("whats-new");
-UI.ViewManager.registerViewExtension({
-  location: "drawer-view",
-  id: "release-note",
-  title: i18nLazyString(UIStrings.whatsNew),
-  commandPrompt: i18nLazyString(UIStrings.showWhatsNew),
-  persistence: "closeable",
-  order: 1,
-  async loadView() {
-    const WhatsNew = await loadWhatsNewModule();
-    return new WhatsNew.ReleaseNoteView.ReleaseNoteView();
-  }
-});
 UI.ActionRegistration.registerActionExtension({
   category: "HELP",
   actionId: "help.release-notes",

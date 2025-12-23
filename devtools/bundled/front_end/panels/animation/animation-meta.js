@@ -2,7 +2,6 @@
 import * as Common from "./..\\..\\core\\common\\common.js";
 import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
 import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
 var loadedAnimationModule;
 var UIStrings = {
   /**
@@ -22,18 +21,6 @@ async function loadAnimationModule() {
   }
   return loadedAnimationModule;
 }
-UI.ViewManager.registerViewExtension({
-  location: "drawer-view",
-  id: "animations",
-  title: i18nLazyString(UIStrings.animations),
-  commandPrompt: i18nLazyString(UIStrings.showAnimations),
-  persistence: "closeable",
-  order: 0,
-  async loadView() {
-    const Animation = await loadAnimationModule();
-    return Animation.AnimationTimeline.AnimationTimeline.instance();
-  }
-});
 Common.Revealer.registerRevealer({
   contextTypes() {
     return [

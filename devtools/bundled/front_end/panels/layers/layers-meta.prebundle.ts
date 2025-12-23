@@ -29,15 +29,16 @@ async function loadLayersModule(): Promise<typeof Layers> {
   return loadedLayersModule;
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.PANEL,
-  id: 'layers',
-  title: i18nLazyString(UIStrings.layers),
-  commandPrompt: i18nLazyString(UIStrings.showLayers),
-  order: 100,
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  async loadView() {
-    const Layers = await loadLayersModule();
-    return Layers.LayersPanel.LayersPanel.instance();
-  },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.PANEL,
+//   id: 'layers',
+//   title: i18nLazyString(UIStrings.layers),
+//   commandPrompt: i18nLazyString(UIStrings.showLayers),
+//   order: 100,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const Layers = await loadLayersModule();
+//     return Layers.LayersPanel.LayersPanel.instance();
+//   },
+// });

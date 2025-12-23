@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as i18n from '../../core/i18n/i18n.js';
-import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
      * @description Title of the CSS overview panel
@@ -22,17 +21,18 @@ async function loadCSSOverviewModule() {
     }
     return loadedCSSOverviewModule;
 }
-UI.ViewManager.registerViewExtension({
-    location: "panel" /* UI.ViewManager.ViewLocationValues.PANEL */,
-    id: 'cssoverview',
-    commandPrompt: i18nLazyString(UIStrings.showCssOverview),
-    title: i18nLazyString(UIStrings.cssOverview),
-    order: 95,
-    persistence: "closeable" /* UI.ViewManager.ViewPersistence.CLOSEABLE */,
-    async loadView() {
-        const CSSOverview = await loadCSSOverviewModule();
-        return new CSSOverview.CSSOverviewPanel.CSSOverviewPanel();
-    },
-    isPreviewFeature: true,
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.PANEL,
+//   id: 'cssoverview',
+//   commandPrompt: i18nLazyString(UIStrings.showCssOverview),
+//   title: i18nLazyString(UIStrings.cssOverview),
+//   order: 95,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const CSSOverview = await loadCSSOverviewModule();
+//     return new CSSOverview.CSSOverviewPanel.CSSOverviewPanel();
+//   },
+//   isPreviewFeature: true,
+// });
 //# sourceMappingURL=css_overview-meta.prebundle.js.map

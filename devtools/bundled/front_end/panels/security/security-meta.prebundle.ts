@@ -40,21 +40,22 @@ async function loadSecurityModule(): Promise<typeof Security> {
   return loadedSecurityModule;
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.PANEL,
-  id: 'security',
-  title: () => Root.Runtime.hostConfig.devToolsPrivacyUI?.enabled ? i18nLazyString(UIStrings.PrivacyAndSecurity)() :
-                                                                    i18nLazyString(UIStrings.security)(),
-  commandPrompt: () => Root.Runtime.hostConfig.devToolsPrivacyUI?.enabled ?
-      i18nLazyString(UIStrings.showPrivacyAndSecurity)() :
-      i18nLazyString(UIStrings.showSecurity)(),
-  order: 80,
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  async loadView() {
-    const Security = await loadSecurityModule();
-    return Security.SecurityPanel.SecurityPanel.instance();
-  },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.PANEL,
+//   id: 'security',
+//   title: () => Root.Runtime.hostConfig.devToolsPrivacyUI?.enabled ? i18nLazyString(UIStrings.PrivacyAndSecurity)() :
+//                                                                     i18nLazyString(UIStrings.security)(),
+//   commandPrompt: () => Root.Runtime.hostConfig.devToolsPrivacyUI?.enabled ?
+//       i18nLazyString(UIStrings.showPrivacyAndSecurity)() :
+//       i18nLazyString(UIStrings.showSecurity)(),
+//   order: 80,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const Security = await loadSecurityModule();
+//     return Security.SecurityPanel.SecurityPanel.instance();
+//   },
+// });
 
 Common.Revealer.registerRevealer({
   contextTypes() {
