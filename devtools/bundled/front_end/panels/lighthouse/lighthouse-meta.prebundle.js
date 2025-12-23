@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as i18n from '../../core/i18n/i18n.js';
-import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
      * @description Command for showing the 'Lighthouse' tool
@@ -18,19 +17,20 @@ async function loadLighthouseModule() {
     }
     return loadedLighthouseModule;
 }
-UI.ViewManager.registerViewExtension({
-    location: "panel" /* UI.ViewManager.ViewLocationValues.PANEL */,
-    id: 'lighthouse',
-    title: i18n.i18n.lockedLazyString('Lighthouse'),
-    commandPrompt: i18nLazyString(UIStrings.showLighthouse),
-    order: 90,
-    async loadView() {
-        const Lighthouse = await loadLighthouseModule();
-        return Lighthouse.LighthousePanel.LighthousePanel.instance();
-    },
-    tags: [
-        i18n.i18n.lockedLazyString('lighthouse'),
-        i18n.i18n.lockedLazyString('pwa'),
-    ],
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.PANEL,
+//   id: 'lighthouse',
+//   title: i18n.i18n.lockedLazyString('Lighthouse'),
+//   commandPrompt: i18nLazyString(UIStrings.showLighthouse),
+//   order: 90,
+//   async loadView() {
+//     const Lighthouse = await loadLighthouseModule();
+//     return Lighthouse.LighthousePanel.LighthousePanel.instance();
+//   },
+//   tags: [
+//     i18n.i18n.lockedLazyString('lighthouse'),
+//     i18n.i18n.lockedLazyString('pwa'),
+//   ],
+// });
 //# sourceMappingURL=lighthouse-meta.prebundle.js.map

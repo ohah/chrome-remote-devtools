@@ -58,18 +58,19 @@ UI.ContextMenu.maybeRemoveItem({
     order: undefined,
 });
 Common.Runnable.maybeRemoveLateInitializationRunnable('whats-new');
-UI.ViewManager.registerViewExtension({
-    location: "drawer-view" /* UI.ViewManager.ViewLocationValues.DRAWER_VIEW */,
-    id: 'release-note',
-    title: i18nLazyString(UIStrings.whatsNew),
-    commandPrompt: i18nLazyString(UIStrings.showWhatsNew),
-    persistence: "closeable" /* UI.ViewManager.ViewPersistence.CLOSEABLE */,
-    order: 1,
-    async loadView() {
-        const WhatsNew = await loadWhatsNewModule();
-        return new WhatsNew.ReleaseNoteView.ReleaseNoteView();
-    },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'release-note',
+//   title: i18nLazyString(UIStrings.whatsNew),
+//   commandPrompt: i18nLazyString(UIStrings.showWhatsNew),
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   order: 1,
+//   async loadView() {
+//     const WhatsNew = await loadWhatsNewModule();
+//     return new WhatsNew.ReleaseNoteView.ReleaseNoteView();
+//   },
+// });
 UI.ActionRegistration.registerActionExtension({
     category: "HELP" /* UI.ActionRegistration.ActionCategory.HELP */,
     actionId: 'help.release-notes',

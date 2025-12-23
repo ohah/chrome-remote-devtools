@@ -30,18 +30,19 @@ async function loadIssuesModule(): Promise<typeof Issues> {
   return loadedIssuesModule;
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
-  id: 'issues-pane',
-  title: i18nLazyString(UIStrings.issues),
-  commandPrompt: i18nLazyString(UIStrings.showIssues),
-  order: 100,
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  async loadView() {
-    const Issues = await loadIssuesModule();
-    return new Issues.IssuesPane.IssuesPane();
-  },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'issues-pane',
+//   title: i18nLazyString(UIStrings.issues),
+//   commandPrompt: i18nLazyString(UIStrings.showIssues),
+//   order: 100,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const Issues = await loadIssuesModule();
+//     return new Issues.IssuesPane.IssuesPane();
+//   },
+// });
 
 Common.Revealer.registerRevealer({
   contextTypes() {

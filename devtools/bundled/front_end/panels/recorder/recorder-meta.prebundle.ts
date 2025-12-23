@@ -69,20 +69,21 @@ function maybeRetrieveContextTypes<T = unknown>(
   return [];
 }
 
-const viewId = 'chrome-recorder';
-(UI.ViewManager.defaultOptionsForTabs as Record<string, boolean>)[viewId] = true;
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.PANEL,
-  id: viewId,
-  commandPrompt: i18nLazyString(UIStrings.showRecorder),
-  title: i18nLazyString(UIStrings.recorder),
-  order: 90,
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  async loadView() {
-    const Recorder = await loadRecorderModule();
-    return Recorder.RecorderPanel.RecorderPanel.instance();
-  },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// const viewId = 'chrome-recorder';
+// (UI.ViewManager.defaultOptionsForTabs as Record<string, boolean>)[viewId] = true;
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.PANEL,
+//   id: viewId,
+//   commandPrompt: i18nLazyString(UIStrings.showRecorder),
+//   title: i18nLazyString(UIStrings.recorder),
+//   order: 90,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const Recorder = await loadRecorderModule();
+//     return Recorder.RecorderPanel.RecorderPanel.instance();
+//   },
+// });
 
 UI.ActionRegistration.registerActionExtension({
   category: UI.ActionRegistration.ActionCategory.RECORDER,

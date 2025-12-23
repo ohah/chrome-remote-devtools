@@ -29,15 +29,16 @@ async function loadAutofillModule(): Promise<typeof Autofill> {
   return loadedAutofillModule;
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
-  id: 'autofill-view',
-  title: i18nLazyString(UIStrings.autofill),
-  commandPrompt: i18nLazyString(UIStrings.showAutofill),
-  order: 100,
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  async loadView() {
-    const Autofill = await loadAutofillModule();
-    return new Autofill.AutofillView.AutofillView();
-  },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'autofill-view',
+//   title: i18nLazyString(UIStrings.autofill),
+//   commandPrompt: i18nLazyString(UIStrings.showAutofill),
+//   order: 100,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const Autofill = await loadAutofillModule();
+//     return new Autofill.AutofillView.AutofillView();
+//   },
+// });

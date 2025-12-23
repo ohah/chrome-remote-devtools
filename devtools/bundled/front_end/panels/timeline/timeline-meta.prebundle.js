@@ -74,18 +74,19 @@ function maybeRetrieveContextTypes(getClassCallBack) {
     }
     return getClassCallBack(loadedTimelineModule);
 }
-UI.ViewManager.registerViewExtension({
-    location: "panel" /* UI.ViewManager.ViewLocationValues.PANEL */,
-    id: 'timeline',
-    title: i18nLazyString(UIStrings.performance),
-    commandPrompt: i18nLazyString(UIStrings.showPerformance),
-    order: 50,
-    async loadView(universe) {
-        const Timeline = await loadTimelineModule();
-        const resourceLoader = universe.context.get(SDK.PageResourceLoader.PageResourceLoader);
-        return Timeline.TimelinePanel.TimelinePanel.instance({ forceNew: true, resourceLoader });
-    },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.PANEL,
+//   id: 'timeline',
+//   title: i18nLazyString(UIStrings.performance),
+//   commandPrompt: i18nLazyString(UIStrings.showPerformance),
+//   order: 50,
+//   async loadView(universe) {
+//     const Timeline = await loadTimelineModule();
+//     const resourceLoader = universe.context.get(SDK.PageResourceLoader.PageResourceLoader);
+//     return Timeline.TimelinePanel.TimelinePanel.instance({forceNew: true, resourceLoader});
+//   },
+// });
 UI.ActionRegistration.registerActionExtension({
     actionId: 'timeline.toggle-recording',
     category: "PERFORMANCE" /* UI.ActionRegistration.ActionCategory.PERFORMANCE */,

@@ -117,6 +117,12 @@
       "path": "../../panels/whats_new/meta-tsconfig.json"
     },
     {
+      "path": "../../panels/welcome/meta-tsconfig.json"
+    },
+    {
+      "path": "../../panels/session_replay/meta-tsconfig.json"
+    },
+    {
       "path": "../main/bundle-tsconfig.json"
     },
     {

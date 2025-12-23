@@ -50,22 +50,23 @@ async function loadPerformanceMonitorModule(): Promise<typeof PerformanceMonitor
   return loadedPerformanceMonitorModule;
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
-  id: 'performance.monitor',
-  title: i18nLazyString(UIStrings.performanceMonitor),
-  commandPrompt: i18nLazyString(UIStrings.showPerformanceMonitor),
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  order: 100,
-  async loadView() {
-    const PerformanceMonitor = await loadPerformanceMonitorModule();
-    return new PerformanceMonitor.PerformanceMonitor.PerformanceMonitorImpl();
-  },
-  tags: [
-    i18nLazyString(UIStrings.performance),
-    i18nLazyString(UIStrings.systemMonitor),
-    i18nLazyString(UIStrings.monitor),
-    i18nLazyString(UIStrings.activity),
-    i18nLazyString(UIStrings.metrics),
-  ],
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'performance.monitor',
+//   title: i18nLazyString(UIStrings.performanceMonitor),
+//   commandPrompt: i18nLazyString(UIStrings.showPerformanceMonitor),
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   order: 100,
+//   async loadView() {
+//     const PerformanceMonitor = await loadPerformanceMonitorModule();
+//     return new PerformanceMonitor.PerformanceMonitor.PerformanceMonitorImpl();
+//   },
+//   tags: [
+//     i18nLazyString(UIStrings.performance),
+//     i18nLazyString(UIStrings.systemMonitor),
+//     i18nLazyString(UIStrings.monitor),
+//     i18nLazyString(UIStrings.activity),
+//     i18nLazyString(UIStrings.metrics),
+//   ],
+// });

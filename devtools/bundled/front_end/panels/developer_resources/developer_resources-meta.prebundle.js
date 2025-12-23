@@ -4,7 +4,6 @@
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as SDK from '../../core/sdk/sdk.js';
-import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
      * @description Title for developer resources panel
@@ -24,18 +23,19 @@ async function loadDeveloperResourcesModule() {
     }
     return loadedDeveloperResourcesModule;
 }
-UI.ViewManager.registerViewExtension({
-    location: "drawer-view" /* UI.ViewManager.ViewLocationValues.DRAWER_VIEW */,
-    id: 'developer-resources',
-    title: i18nLazyString(UIStrings.developerResources),
-    commandPrompt: i18nLazyString(UIStrings.showDeveloperResources),
-    order: 100,
-    persistence: "closeable" /* UI.ViewManager.ViewPersistence.CLOSEABLE */,
-    async loadView() {
-        const DeveloperResources = await loadDeveloperResourcesModule();
-        return new DeveloperResources.DeveloperResourcesView.DeveloperResourcesView();
-    },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'developer-resources',
+//   title: i18nLazyString(UIStrings.developerResources),
+//   commandPrompt: i18nLazyString(UIStrings.showDeveloperResources),
+//   order: 100,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const DeveloperResources = await loadDeveloperResourcesModule();
+//     return new DeveloperResources.DeveloperResourcesView.DeveloperResourcesView();
+//   },
+// });
 Common.Revealer.registerRevealer({
     contextTypes() {
         return [SDK.PageResourceLoader.ResourceKey];

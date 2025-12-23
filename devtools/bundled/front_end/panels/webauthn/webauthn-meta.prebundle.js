@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as i18n from '../../core/i18n/i18n.js';
-import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
      * @description Title of WebAuthn tab in bottom drawer.
@@ -22,16 +21,17 @@ async function loadWebauthnModule() {
     }
     return loadedWebauthnModule;
 }
-UI.ViewManager.registerViewExtension({
-    location: "drawer-view" /* UI.ViewManager.ViewLocationValues.DRAWER_VIEW */,
-    id: 'webauthn-pane',
-    title: i18nLazyString(UIStrings.webauthn),
-    commandPrompt: i18nLazyString(UIStrings.showWebauthn),
-    order: 100,
-    persistence: "closeable" /* UI.ViewManager.ViewPersistence.CLOSEABLE */,
-    async loadView() {
-        const Webauthn = await loadWebauthnModule();
-        return new Webauthn.WebauthnPane.WebauthnPaneImpl();
-    },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'webauthn-pane',
+//   title: i18nLazyString(UIStrings.webauthn),
+//   commandPrompt: i18nLazyString(UIStrings.showWebauthn),
+//   order: 100,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const Webauthn = await loadWebauthnModule();
+//     return new Webauthn.WebauthnPane.WebauthnPaneImpl();
+//   },
+// });
 //# sourceMappingURL=webauthn-meta.prebundle.js.map

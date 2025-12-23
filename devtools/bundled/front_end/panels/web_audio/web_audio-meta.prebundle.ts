@@ -33,16 +33,17 @@ async function loadWebAudioModule(): Promise<typeof WebAudio> {
   return loadedWebAudioModule;
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
-  id: 'web-audio',
-  title: i18nLazyString(UIStrings.webaudio),
-  commandPrompt: i18nLazyString(UIStrings.showWebaudio),
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  order: 100,
-  async loadView() {
-    const WebAudio = await loadWebAudioModule();
-    return new WebAudio.WebAudioView.WebAudioView();
-  },
-  tags: [i18nLazyString(UIStrings.audio)],
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'web-audio',
+//   title: i18nLazyString(UIStrings.webaudio),
+//   commandPrompt: i18nLazyString(UIStrings.showWebaudio),
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   order: 100,
+//   async loadView() {
+//     const WebAudio = await loadWebAudioModule();
+//     return new WebAudio.WebAudioView.WebAudioView();
+//   },
+//   tags: [i18nLazyString(UIStrings.audio)],
+// });

@@ -2753,7 +2753,6 @@ UI3.Context.registerListener({
 import * as Common7 from "./..\\..\\core\\common\\common.js";
 import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
 import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings7 = {
   /**
    * @description Title for developer resources panel
@@ -2773,18 +2772,6 @@ async function loadDeveloperResourcesModule() {
   }
   return loadedDeveloperResourcesModule;
 }
-UI4.ViewManager.registerViewExtension({
-  location: "drawer-view",
-  id: "developer-resources",
-  title: i18nLazyString7(UIStrings7.developerResources),
-  commandPrompt: i18nLazyString7(UIStrings7.showDeveloperResources),
-  order: 100,
-  persistence: "closeable",
-  async loadView() {
-    const DeveloperResources = await loadDeveloperResourcesModule();
-    return new DeveloperResources.DeveloperResourcesView.DeveloperResourcesView();
-  }
-});
 Common7.Revealer.registerRevealer({
   contextTypes() {
     return [SDK3.PageResourceLoader.ResourceKey];
@@ -2799,7 +2786,7 @@ Common7.Revealer.registerRevealer({
 // gen/front_end/panels/mobile_throttling/mobile_throttling-meta.js
 import * as Common8 from "./..\\..\\core\\common\\common.js";
 import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings8 = {
   /**
    * @description Text for throttling the network
@@ -2845,7 +2832,7 @@ async function loadMobileThrottlingModule() {
   }
   return loadedMobileThrottlingModule;
 }
-UI5.ViewManager.registerViewExtension({
+UI4.ViewManager.registerViewExtension({
   location: "settings-view",
   id: "throttling-conditions",
   title: i18nLazyString8(UIStrings8.throttling),
@@ -2861,7 +2848,7 @@ UI5.ViewManager.registerViewExtension({
   ],
   iconName: "performance"
 });
-UI5.ActionRegistration.registerActionExtension({
+UI4.ActionRegistration.registerActionExtension({
   actionId: "network-conditions.network-offline",
   category: "NETWORK",
   title: i18nLazyString8(UIStrings8.goOffline),
@@ -2874,7 +2861,7 @@ UI5.ActionRegistration.registerActionExtension({
     i18nLazyString8(UIStrings8.throttlingTag)
   ]
 });
-UI5.ActionRegistration.registerActionExtension({
+UI4.ActionRegistration.registerActionExtension({
   actionId: "network-conditions.network-low-end-mobile",
   category: "NETWORK",
   title: i18nLazyString8(UIStrings8.enableSlowGThrottling),
@@ -2887,7 +2874,7 @@ UI5.ActionRegistration.registerActionExtension({
     i18nLazyString8(UIStrings8.throttlingTag)
   ]
 });
-UI5.ActionRegistration.registerActionExtension({
+UI4.ActionRegistration.registerActionExtension({
   actionId: "network-conditions.network-mid-tier-mobile",
   category: "NETWORK",
   title: i18nLazyString8(UIStrings8.enableFastGThrottling),
@@ -2900,7 +2887,7 @@ UI5.ActionRegistration.registerActionExtension({
     i18nLazyString8(UIStrings8.throttlingTag)
   ]
 });
-UI5.ActionRegistration.registerActionExtension({
+UI4.ActionRegistration.registerActionExtension({
   actionId: "network-conditions.network-online",
   category: "NETWORK",
   title: i18nLazyString8(UIStrings8.goOnline),
@@ -2923,7 +2910,7 @@ Common8.Settings.registerSettingExtension({
 // gen/front_end/panels/protocol_monitor/protocol_monitor-meta.js
 import * as i18n17 from "./..\\..\\core\\i18n\\i18n.js";
 import * as Root3 from "./..\\..\\core\\root\\root.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings9 = {
   /**
    * @description Title of the 'Protocol monitor' tool in the bottom drawer. This is a tool for
@@ -2946,7 +2933,7 @@ async function loadProtocolMonitorModule() {
   }
   return loadedProtocolMonitorModule;
 }
-UI6.ViewManager.registerViewExtension({
+UI5.ViewManager.registerViewExtension({
   location: "drawer-view",
   id: "protocol-monitor",
   title: i18nLazyString9(UIStrings9.protocolMonitor),
@@ -2962,7 +2949,7 @@ UI6.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/settings/settings-meta.js
 import * as i18n19 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
 import * as Common9 from "./..\\..\\core\\common\\common.js";
 import * as i18n32 from "./..\\..\\core\\i18n\\i18n.js";
 import * as Root4 from "./..\\..\\core\\root\\root.js";
@@ -2986,7 +2973,7 @@ async function loadEmulationModule() {
   }
   return loadedEmulationModule;
 }
-UI7.ViewManager.registerViewExtension({
+UI6.ViewManager.registerViewExtension({
   location: "settings-view",
   commandPrompt: i18nLazyString10(UIStrings10.showDevices),
   title: i18nLazyString10(UIStrings10.devices),
@@ -3280,7 +3267,7 @@ import * as Breakpoints from "./..\\..\\models\\breakpoints\\breakpoints.js";
 import * as Workspace2 from "./..\\..\\models\\workspace\\workspace.js";
 import * as ObjectUI from "./..\\..\\ui\\legacy\\components\\object_ui\\object_ui.js";
 import * as QuickOpen from "./..\\..\\ui\\legacy\\components\\quick_open\\quick_open.js";
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings11 = {
   /**
    * @description Command for showing the 'Sources' tool
@@ -3739,7 +3726,7 @@ function maybeRetrieveContextTypes2(getClassCallBack) {
   }
   return getClassCallBack(loadedSourcesModule2);
 }
-UI8.ViewManager.registerViewExtension({
+UI7.ViewManager.registerViewExtension({
   location: "panel",
   id: "sources",
   commandPrompt: i18nLazyString11(UIStrings11.showSources),
@@ -3750,7 +3737,7 @@ UI8.ViewManager.registerViewExtension({
     return Sources.SourcesPanel.SourcesPanel.instance();
   }
 });
-UI8.ViewManager.registerViewExtension({
+UI7.ViewManager.registerViewExtension({
   location: "navigator-view",
   id: "navigator-files",
   commandPrompt: i18nLazyString11(UIStrings11.showWorkspace),
@@ -3763,7 +3750,7 @@ UI8.ViewManager.registerViewExtension({
     return new Sources.SourcesNavigator.FilesNavigatorView();
   }
 });
-UI8.ViewManager.registerViewExtension({
+UI7.ViewManager.registerViewExtension({
   location: "navigator-view",
   id: "navigator-snippets",
   commandPrompt: i18nLazyString11(UIStrings11.showSnippets),
@@ -3776,7 +3763,7 @@ UI8.ViewManager.registerViewExtension({
     return new Sources.SourcesNavigator.SnippetsNavigatorView();
   }
 });
-UI8.ViewManager.registerViewExtension({
+UI7.ViewManager.registerViewExtension({
   location: "drawer-view",
   id: "sources.search-sources-tab",
   commandPrompt: i18nLazyString11(UIStrings11.showSearch),
@@ -3788,7 +3775,7 @@ UI8.ViewManager.registerViewExtension({
     return new Sources.SearchSourcesView.SearchSourcesView();
   }
 });
-UI8.ViewManager.registerViewExtension({
+UI7.ViewManager.registerViewExtension({
   location: "drawer-view",
   id: "sources.quick",
   commandPrompt: i18nLazyString11(UIStrings11.showQuickSource),
@@ -3800,7 +3787,7 @@ UI8.ViewManager.registerViewExtension({
     return new Sources.SourcesPanel.QuickSourceView();
   }
 });
-UI8.ViewManager.registerViewExtension({
+UI7.ViewManager.registerViewExtension({
   id: "sources.threads",
   commandPrompt: i18nLazyString11(UIStrings11.showThreads),
   title: i18nLazyString11(UIStrings11.threads),
@@ -3810,7 +3797,7 @@ UI8.ViewManager.registerViewExtension({
     return new Sources.ThreadsSidebarPane.ThreadsSidebarPane();
   }
 });
-UI8.ViewManager.registerViewExtension({
+UI7.ViewManager.registerViewExtension({
   id: "sources.scope-chain",
   commandPrompt: i18nLazyString11(UIStrings11.showScope),
   title: i18nLazyString11(UIStrings11.scope),
@@ -3820,7 +3807,7 @@ UI8.ViewManager.registerViewExtension({
     return Sources.ScopeChainSidebarPane.ScopeChainSidebarPane.instance();
   }
 });
-UI8.ViewManager.registerViewExtension({
+UI7.ViewManager.registerViewExtension({
   id: "sources.watch",
   commandPrompt: i18nLazyString11(UIStrings11.showWatch),
   title: i18nLazyString11(UIStrings11.watch),
@@ -3831,7 +3818,7 @@ UI8.ViewManager.registerViewExtension({
   },
   hasToolbar: true
 });
-UI8.ViewManager.registerViewExtension({
+UI7.ViewManager.registerViewExtension({
   id: "sources.js-breakpoints",
   commandPrompt: i18nLazyString11(UIStrings11.showBreakpoints),
   title: i18nLazyString11(UIStrings11.breakpoints),
@@ -3841,7 +3828,7 @@ UI8.ViewManager.registerViewExtension({
     return Sources.BreakpointsView.BreakpointsView.instance();
   }
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "DEBUGGER",
   actionId: "debugger.toggle-pause",
   iconClass: "pause",
@@ -3852,7 +3839,7 @@ UI8.ActionRegistration.registerActionExtension({
     return new Sources.SourcesPanel.RevealingActionDelegate();
   },
   contextTypes() {
-    return maybeRetrieveContextTypes2((Sources) => [Sources.SourcesView.SourcesView, UI8.ShortcutRegistry.ForwardedShortcut]);
+    return maybeRetrieveContextTypes2((Sources) => [Sources.SourcesView.SourcesView, UI7.ShortcutRegistry.ForwardedShortcut]);
   },
   options: [
     {
@@ -3893,7 +3880,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "DEBUGGER",
   actionId: "debugger.step-over",
   async loadActionDelegate() {
@@ -3923,7 +3910,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "DEBUGGER",
   actionId: "debugger.step-into",
   async loadActionDelegate() {
@@ -3953,7 +3940,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "DEBUGGER",
   actionId: "debugger.step",
   async loadActionDelegate() {
@@ -3974,7 +3961,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "DEBUGGER",
   actionId: "debugger.step-out",
   async loadActionDelegate() {
@@ -4004,7 +3991,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "debugger.run-snippet",
   category: "DEBUGGER",
   async loadActionDelegate() {
@@ -4027,7 +4014,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "DEBUGGER",
   actionId: "debugger.toggle-breakpoints-active",
   iconClass: "breakpoint-crossed",
@@ -4061,7 +4048,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.add-to-watch",
   async loadActionDelegate() {
     const Sources = await loadSourcesModule2();
@@ -4083,7 +4070,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "debugger.evaluate-selection",
   category: "DEBUGGER",
   async loadActionDelegate() {
@@ -4105,7 +4092,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.switch-file",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.switchFile),
@@ -4122,7 +4109,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.rename",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.rename),
@@ -4137,7 +4124,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "SOURCES",
   actionId: "sources.close-all",
   async loadActionDelegate() {
@@ -4162,7 +4149,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.jump-to-previous-location",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.jumpToPreviousEditingLocation),
@@ -4179,7 +4166,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.jump-to-next-location",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.jumpToNextEditingLocation),
@@ -4196,7 +4183,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.close-editor-tab",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.closeTheActiveTab),
@@ -4226,7 +4213,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.next-editor-tab",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.nextEditorTab),
@@ -4256,7 +4243,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.previous-editor-tab",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.previousEditorTab),
@@ -4286,7 +4273,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.go-to-line",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.goToLine),
@@ -4307,7 +4294,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.go-to-member",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.goToAFunctionDeclarationruleSet),
@@ -4357,7 +4344,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "debugger.toggle-breakpoint",
   category: "DEBUGGER",
   title: i18nLazyString11(UIStrings11.toggleBreakpoint),
@@ -4384,7 +4371,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "debugger.toggle-breakpoint-enabled",
   category: "DEBUGGER",
   title: i18nLazyString11(UIStrings11.toggleBreakpointEnabled),
@@ -4399,7 +4386,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "debugger.breakpoint-input-window",
   category: "DEBUGGER",
   title: i18nLazyString11(UIStrings11.toggleBreakpointInputWindow),
@@ -4414,7 +4401,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.save",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.save),
@@ -4444,7 +4431,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.save-all",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.saveAll),
@@ -4480,7 +4467,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "SOURCES",
   actionId: "sources.create-snippet",
   async loadActionDelegate() {
@@ -4489,7 +4476,7 @@ UI8.ActionRegistration.registerActionExtension({
   },
   title: i18nLazyString11(UIStrings11.createNewSnippet)
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "SOURCES",
   actionId: "sources.add-folder-to-workspace",
   condition: () => !Host2.InspectorFrontendHost.InspectorFrontendHostInstance.isHostedMode(),
@@ -4500,7 +4487,7 @@ UI8.ActionRegistration.registerActionExtension({
   iconClass: "plus",
   title: i18nLazyString11(UIStrings11.addFolderToWorkspace)
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "DEBUGGER",
   actionId: "debugger.previous-call-frame",
   async loadActionDelegate() {
@@ -4517,7 +4504,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "DEBUGGER",
   actionId: "debugger.next-call-frame",
   async loadActionDelegate() {
@@ -4534,7 +4521,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.search",
   title: i18nLazyString11(UIStrings11.search),
   async loadActionDelegate() {
@@ -4581,7 +4568,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.increment-css",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.incrementCssUnitBy, { PH1: 1 }),
@@ -4591,7 +4578,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.increment-css-by-ten",
   title: i18nLazyString11(UIStrings11.incrementCssUnitBy, { PH1: 10 }),
   category: "SOURCES",
@@ -4601,7 +4588,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.decrement-css",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.decrementCssUnitBy, { PH1: 1 }),
@@ -4611,7 +4598,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.decrement-css-by-ten",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.decrementCssUnitBy, { PH1: 10 }),
@@ -4621,7 +4608,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.reveal-in-navigator-sidebar",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.revealActiveFileInSidebar),
@@ -4633,7 +4620,7 @@ UI8.ActionRegistration.registerActionExtension({
     return maybeRetrieveContextTypes2((Sources) => [Sources.SourcesView.SourcesView]);
   }
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.toggle-navigator-sidebar",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.toggleNavigatorSidebar),
@@ -4675,7 +4662,7 @@ UI8.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   actionId: "sources.toggle-debugger-sidebar",
   category: "SOURCES",
   title: i18nLazyString11(UIStrings11.toggleDebuggerSidebar),
@@ -4883,7 +4870,7 @@ Common10.Settings.registerSettingExtension({
   settingType: "boolean",
   defaultValue: false
 });
-UI8.ActionRegistration.registerActionExtension({
+UI7.ActionRegistration.registerActionExtension({
   category: "SOURCES",
   actionId: "sources.toggle-word-wrap",
   async loadActionDelegate() {
@@ -4997,7 +4984,7 @@ Common10.Settings.registerSettingExtension({
     tooltip: i18nLazyString11(UIStrings11.wasmAutoSteppingInfo)
   }
 });
-UI8.ViewManager.registerLocationResolver({
+UI7.ViewManager.registerLocationResolver({
   name: "navigator-view",
   category: "SOURCES",
   async loadResolver() {
@@ -5005,7 +4992,7 @@ UI8.ViewManager.registerLocationResolver({
     return Sources.SourcesPanel.SourcesPanel.instance();
   }
 });
-UI8.ViewManager.registerLocationResolver({
+UI7.ViewManager.registerLocationResolver({
   name: "sources.sidebar-top",
   category: "SOURCES",
   async loadResolver() {
@@ -5013,7 +5000,7 @@ UI8.ViewManager.registerLocationResolver({
     return Sources.SourcesPanel.SourcesPanel.instance();
   }
 });
-UI8.ViewManager.registerLocationResolver({
+UI7.ViewManager.registerLocationResolver({
   name: "sources.sidebar-bottom",
   category: "SOURCES",
   async loadResolver() {
@@ -5021,7 +5008,7 @@ UI8.ViewManager.registerLocationResolver({
     return Sources.SourcesPanel.SourcesPanel.instance();
   }
 });
-UI8.ViewManager.registerLocationResolver({
+UI7.ViewManager.registerLocationResolver({
   name: "sources.sidebar-tabs",
   category: "SOURCES",
   async loadResolver() {
@@ -5029,7 +5016,7 @@ UI8.ViewManager.registerLocationResolver({
     return Sources.SourcesPanel.SourcesPanel.instance();
   }
 });
-UI8.ContextMenu.registerProvider({
+UI7.ContextMenu.registerProvider({
   contextTypes() {
     return [
       Workspace2.UISourceCode.UISourceCode,
@@ -5045,7 +5032,7 @@ UI8.ContextMenu.registerProvider({
   },
   experiment: void 0
 });
-UI8.ContextMenu.registerProvider({
+UI7.ContextMenu.registerProvider({
   async loadProvider() {
     const Sources = await loadSourcesModule2();
     return Sources.WatchExpressionsSidebarPane.WatchExpressionsSidebarPane.instance();
@@ -5140,7 +5127,7 @@ Common10.Revealer.registerRevealer({
     return new Sources.SearchSourcesView.Revealer();
   }
 });
-UI8.Toolbar.registerToolbarItem({
+UI7.Toolbar.registerToolbarItem({
   actionId: "sources.add-folder-to-workspace",
   location: "files-navigator-toolbar",
   label: i18nLazyString11(UIStrings11.addFolderManually),
@@ -5148,7 +5135,7 @@ UI8.Toolbar.registerToolbarItem({
   order: void 0,
   separator: void 0
 });
-UI8.Context.registerListener({
+UI7.Context.registerListener({
   contextTypes() {
     return [SDK4.DebuggerModel.DebuggerPausedDetails];
   },
@@ -5157,7 +5144,7 @@ UI8.Context.registerListener({
     return Sources.BreakpointsView.BreakpointsSidebarController.instance();
   }
 });
-UI8.Context.registerListener({
+UI7.Context.registerListener({
   contextTypes() {
     return [SDK4.DebuggerModel.DebuggerPausedDetails];
   },
@@ -5166,7 +5153,7 @@ UI8.Context.registerListener({
     return Sources.CallStackSidebarPane.CallStackSidebarPane.instance();
   }
 });
-UI8.Context.registerListener({
+UI7.Context.registerListener({
   contextTypes() {
     return [SDK4.DebuggerModel.CallFrame];
   },
@@ -5175,12 +5162,12 @@ UI8.Context.registerListener({
     return Sources.ScopeChainSidebarPane.ScopeChainSidebarPane.instance();
   }
 });
-UI8.ContextMenu.registerItem({
+UI7.ContextMenu.registerItem({
   location: "navigatorMenu/default",
   actionId: "quick-open.show",
   order: void 0
 });
-UI8.ContextMenu.registerItem({
+UI7.ContextMenu.registerItem({
   location: "mainMenu/default",
   actionId: "sources.search",
   order: void 0
@@ -5218,7 +5205,7 @@ QuickOpen.FilteredListWidget.registerProvider({
   titlePrefix: i18nLazyString11(UIStrings11.open),
   titleSuggestion: i18nLazyString11(UIStrings11.file)
 });
-UI8.ContextMenu.registerProvider({
+UI7.ContextMenu.registerProvider({
   contextTypes() {
     return [
       Workspace2.UISourceCode.UISourceCode,
@@ -5236,7 +5223,7 @@ UI8.ContextMenu.registerProvider({
 // gen/front_end/panels/sensors/sensors-meta.js
 import * as Common11 from "./..\\..\\core\\common\\common.js";
 import * as i18n24 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI9 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings12 = {
   /**
    * @description Title of the Sensors tool. The sensors tool contains GPS, orientation sensors, touch
@@ -5356,27 +5343,7 @@ async function loadEmulationModule2() {
   }
   return loadedSensorsModule;
 }
-UI9.ViewManager.registerViewExtension({
-  location: "drawer-view",
-  commandPrompt: i18nLazyString12(UIStrings12.showSensors),
-  title: i18nLazyString12(UIStrings12.sensors),
-  id: "sensors",
-  persistence: "closeable",
-  order: 100,
-  async loadView() {
-    const Sensors = await loadEmulationModule2();
-    return new Sensors.SensorsView.SensorsView();
-  },
-  tags: [
-    i18nLazyString12(UIStrings12.geolocation),
-    i18nLazyString12(UIStrings12.timezones),
-    i18nLazyString12(UIStrings12.locale),
-    i18nLazyString12(UIStrings12.locales),
-    i18nLazyString12(UIStrings12.accelerometer),
-    i18nLazyString12(UIStrings12.deviceOrientation)
-  ]
-});
-UI9.ViewManager.registerViewExtension({
+UI8.ViewManager.registerViewExtension({
   location: "settings-view",
   id: "emulation-locations",
   commandPrompt: i18nLazyString12(UIStrings12.showLocations),
@@ -5563,7 +5530,7 @@ Common11.Settings.registerSettingExtension({
 import * as Common12 from "./..\\..\\core\\common\\common.js";
 import * as i18n26 from "./..\\..\\core\\i18n\\i18n.js";
 import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI10 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI9 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings13 = {
   /**
    * @description Text for the performance of something
@@ -5633,19 +5600,7 @@ function maybeRetrieveContextTypes3(getClassCallBack) {
   }
   return getClassCallBack(loadedTimelineModule);
 }
-UI10.ViewManager.registerViewExtension({
-  location: "panel",
-  id: "timeline",
-  title: i18nLazyString13(UIStrings13.performance),
-  commandPrompt: i18nLazyString13(UIStrings13.showPerformance),
-  order: 50,
-  async loadView(universe) {
-    const Timeline = await loadTimelineModule();
-    const resourceLoader = universe.context.get(SDK5.PageResourceLoader.PageResourceLoader);
-    return Timeline.TimelinePanel.TimelinePanel.instance({ forceNew: true, resourceLoader });
-  }
-});
-UI10.ActionRegistration.registerActionExtension({
+UI9.ActionRegistration.registerActionExtension({
   actionId: "timeline.toggle-recording",
   category: "PERFORMANCE",
   iconClass: "record-start",
@@ -5680,7 +5635,7 @@ UI10.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI10.ActionRegistration.registerActionExtension({
+UI9.ActionRegistration.registerActionExtension({
   actionId: "timeline.record-reload",
   iconClass: "refresh",
   contextTypes() {
@@ -5703,7 +5658,7 @@ UI10.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI10.ActionRegistration.registerActionExtension({
+UI9.ActionRegistration.registerActionExtension({
   category: "PERFORMANCE",
   actionId: "timeline.save-to-file",
   contextTypes() {
@@ -5725,7 +5680,7 @@ UI10.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI10.ActionRegistration.registerActionExtension({
+UI9.ActionRegistration.registerActionExtension({
   category: "PERFORMANCE",
   actionId: "timeline.load-from-file",
   contextTypes() {
@@ -5747,7 +5702,7 @@ UI10.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI10.ActionRegistration.registerActionExtension({
+UI9.ActionRegistration.registerActionExtension({
   actionId: "timeline.jump-to-previous-frame",
   category: "PERFORMANCE",
   title: i18nLazyString13(UIStrings13.previousFrame),
@@ -5764,7 +5719,7 @@ UI10.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI10.ActionRegistration.registerActionExtension({
+UI9.ActionRegistration.registerActionExtension({
   actionId: "timeline.jump-to-next-frame",
   category: "PERFORMANCE",
   title: i18nLazyString13(UIStrings13.nextFrame),
@@ -5781,7 +5736,7 @@ UI10.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI10.ActionRegistration.registerActionExtension({
+UI9.ActionRegistration.registerActionExtension({
   actionId: "timeline.show-history",
   async loadActionDelegate() {
     const Timeline = await loadTimelineModule();
@@ -5803,7 +5758,7 @@ UI10.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI10.ActionRegistration.registerActionExtension({
+UI9.ActionRegistration.registerActionExtension({
   actionId: "timeline.previous-recording",
   category: "PERFORMANCE",
   async loadActionDelegate() {
@@ -5825,7 +5780,7 @@ UI10.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI10.ActionRegistration.registerActionExtension({
+UI9.ActionRegistration.registerActionExtension({
   actionId: "timeline.next-recording",
   category: "PERFORMANCE",
   async loadActionDelegate() {
@@ -5862,12 +5817,12 @@ Common12.Settings.registerSettingExtension({
   settingType: "boolean",
   defaultValue: false
 });
-UI10.ContextMenu.registerItem({
+UI9.ContextMenu.registerItem({
   location: "timelineMenu/open",
   actionId: "timeline.load-from-file",
   order: 10
 });
-UI10.ContextMenu.registerItem({
+UI9.ContextMenu.registerItem({
   location: "timelineMenu/open",
   actionId: "timeline.save-to-file",
   order: 15
@@ -5906,7 +5861,7 @@ Common12.Revealer.registerRevealer({
 // gen/front_end/panels/ai_assistance/ai_assistance-meta.js
 import * as Common13 from "./..\\..\\core\\common\\common.js";
 import * as i18n28 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI11 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI10 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings14 = {
   /**
    * @description The title of the AI assistance panel.
@@ -5978,7 +5933,7 @@ function isFileAgentFeatureAvailable(config) {
 function isAnyFeatureAvailable(config) {
   return isStylingAgentFeatureAvailable(config) || isNetworkAgentFeatureAvailable(config) || isPerformanceAgentFeatureAvailable(config) || isFileAgentFeatureAvailable(config);
 }
-UI11.ViewManager.registerViewExtension({
+UI10.ViewManager.registerViewExtension({
   location: "drawer-view",
   id: "freestyler",
   commandPrompt: i18nLazyString14(UIStrings14.showAiAssistance),
@@ -6017,7 +5972,7 @@ Common13.Settings.registerSettingExtension({
     return { disabled: false };
   }
 });
-UI11.ActionRegistration.registerActionExtension({
+UI10.ActionRegistration.registerActionExtension({
   actionId: "freestyler.main-menu",
   contextTypes() {
     return [];
@@ -6032,7 +5987,7 @@ UI11.ActionRegistration.registerActionExtension({
   },
   condition: (config) => isAnyFeatureAvailable(config) && !isPolicyRestricted(config) && !isGeoRestricted(config)
 });
-UI11.ActionRegistration.registerActionExtension({
+UI10.ActionRegistration.registerActionExtension({
   actionId: "freestyler.elements-floating-button",
   contextTypes() {
     return [];
@@ -6046,7 +6001,7 @@ UI11.ActionRegistration.registerActionExtension({
   },
   condition: (config) => isStylingAgentFeatureAvailable(config) && !isPolicyRestricted(config) && !isGeoRestricted(config)
 });
-UI11.ActionRegistration.registerActionExtension({
+UI10.ActionRegistration.registerActionExtension({
   actionId: "freestyler.element-panel-context",
   contextTypes() {
     return [];
@@ -6060,7 +6015,7 @@ UI11.ActionRegistration.registerActionExtension({
   },
   condition: (config) => isStylingAgentFeatureAvailable(config) && !isPolicyRestricted(config) && !isGeoRestricted(config)
 });
-UI11.ActionRegistration.registerActionExtension({
+UI10.ActionRegistration.registerActionExtension({
   actionId: "drjones.network-floating-button",
   contextTypes() {
     return [];
@@ -6074,7 +6029,7 @@ UI11.ActionRegistration.registerActionExtension({
   },
   condition: (config) => isNetworkAgentFeatureAvailable(config) && !isPolicyRestricted(config) && !isGeoRestricted(config)
 });
-UI11.ActionRegistration.registerActionExtension({
+UI10.ActionRegistration.registerActionExtension({
   actionId: "drjones.network-panel-context",
   contextTypes() {
     return [];
@@ -6088,7 +6043,7 @@ UI11.ActionRegistration.registerActionExtension({
   },
   condition: (config) => isNetworkAgentFeatureAvailable(config) && !isPolicyRestricted(config) && !isGeoRestricted(config)
 });
-UI11.ActionRegistration.registerActionExtension({
+UI10.ActionRegistration.registerActionExtension({
   actionId: "drjones.performance-panel-context",
   contextTypes() {
     return [];
@@ -6102,7 +6057,7 @@ UI11.ActionRegistration.registerActionExtension({
   },
   condition: (config) => isPerformanceAgentFeatureAvailable(config) && !isPolicyRestricted(config) && !isGeoRestricted(config)
 });
-UI11.ActionRegistration.registerActionExtension({
+UI10.ActionRegistration.registerActionExtension({
   actionId: "drjones.sources-floating-button",
   contextTypes() {
     return [];
@@ -6116,7 +6071,7 @@ UI11.ActionRegistration.registerActionExtension({
   },
   condition: (config) => isFileAgentFeatureAvailable(config) && !isPolicyRestricted(config) && !isGeoRestricted(config)
 });
-UI11.ActionRegistration.registerActionExtension({
+UI10.ActionRegistration.registerActionExtension({
   actionId: "drjones.sources-panel-context",
   contextTypes() {
     return [];
@@ -6135,7 +6090,7 @@ UI11.ActionRegistration.registerActionExtension({
 import * as Common14 from "./..\\..\\core\\common\\common.js";
 import * as i18n30 from "./..\\..\\core\\i18n\\i18n.js";
 import * as Root6 from "./..\\..\\core\\root\\root.js";
-import * as UI12 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI11 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings15 = {
   /**
    * @description Title of a setting under the Performance category in Settings.
@@ -6180,7 +6135,7 @@ async function loadPerfUIModule() {
   }
   return loadedPerfUIModule;
 }
-UI12.ActionRegistration.registerActionExtension({
+UI11.ActionRegistration.registerActionExtension({
   actionId: "components.collect-garbage",
   category: "PERFORMANCE",
   title: i18nLazyString15(UIStrings15.collectGarbage),
@@ -6231,7 +6186,7 @@ Common14.Settings.registerSettingExtension({
 
 // gen/front_end/ui/legacy/components/quick_open/quick_open-meta.js
 import * as i18n33 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI13 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI12 from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings16 = {
   /**
    * @description Title of action that opens a file
@@ -6251,7 +6206,7 @@ async function loadQuickOpenModule() {
   }
   return loadedQuickOpenModule;
 }
-UI13.ActionRegistration.registerActionExtension({
+UI12.ActionRegistration.registerActionExtension({
   actionId: "quick-open.show-command-menu",
   category: "GLOBAL",
   title: i18nLazyString16(UIStrings16.runCommand),
@@ -6284,7 +6239,7 @@ UI13.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI13.ActionRegistration.registerActionExtension({
+UI12.ActionRegistration.registerActionExtension({
   actionId: "quick-open.show",
   category: "GLOBAL",
   title: i18nLazyString16(UIStrings16.openFile),
@@ -6328,12 +6283,12 @@ UI13.ActionRegistration.registerActionExtension({
     }
   ]
 });
-UI13.ContextMenu.registerItem({
+UI12.ContextMenu.registerItem({
   location: "mainMenu/default",
   actionId: "quick-open.show-command-menu",
   order: void 0
 });
-UI13.ContextMenu.registerItem({
+UI12.ContextMenu.registerItem({
   location: "mainMenu/default",
   actionId: "quick-open.show",
   order: void 0

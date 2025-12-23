@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../front_end/panels/session_replay/SessionReplayPanel.ts"],
+  "sourcesContent": ["// Copyright 2025 The Chromium Authors\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\nimport * as UI from '../../ui/legacy/legacy.js';\n\nlet sessionReplayPanelInstance: SessionReplayPanel;\n\nexport class SessionReplayPanel extends UI.Panel.Panel {\n  constructor() {\n    super('session-replay');\n    this.render();\n  }\n\n  private render(): void {\n    const container = document.createElement('div');\n    container.className = 'session-replay-panel';\n    this.contentElement.appendChild(container);\n  }\n\n  static instance(opts: {forceNew: boolean|null} = {forceNew: null}): SessionReplayPanel {\n    const {forceNew} = opts;\n    if (!sessionReplayPanelInstance || forceNew) {\n      sessionReplayPanelInstance = new SessionReplayPanel();\n    }\n    return sessionReplayPanelInstance;\n  }\n}\n\n"],
+  "mappings": ";;;;;;;AAAA;;;;AAIA,YAAY,QAAQ;AAEpB,IAAI;AAEE,IAAO,qBAAP,MAAO,4BAA8B,SAAM,MAAK;EACpD,cAAA;AACE,UAAM,gBAAgB;AACtB,SAAK,OAAM;EACb;EAEQ,SAAM;AACZ,UAAM,YAAY,SAAS,cAAc,KAAK;AAC9C,cAAU,YAAY;AACtB,SAAK,eAAe,YAAY,SAAS;EAC3C;EAEA,OAAO,SAAS,OAAiC,EAAC,UAAU,KAAI,GAAC;AAC/D,UAAM,EAAC,SAAQ,IAAI;AACnB,QAAI,CAAC,8BAA8B,UAAU;AAC3C,mCAA6B,IAAI,oBAAkB;IACrD;AACA,WAAO;EACT;;",
+  "names": []
+}

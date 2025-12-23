@@ -31,18 +31,19 @@ async function loadDeveloperResourcesModule(): Promise<typeof DeveloperResources
   return loadedDeveloperResourcesModule;
 }
 
-UI.ViewManager.registerViewExtension({
-  location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
-  id: 'developer-resources',
-  title: i18nLazyString(UIStrings.developerResources),
-  commandPrompt: i18nLazyString(UIStrings.showDeveloperResources),
-  order: 100,
-  persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
-  async loadView() {
-    const DeveloperResources = await loadDeveloperResourcesModule();
-    return new DeveloperResources.DeveloperResourcesView.DeveloperResourcesView();
-  },
-});
+// Chrome Remote DevTools: 지원하지 않는 패널이므로 등록하지 않음
+// UI.ViewManager.registerViewExtension({
+//   location: UI.ViewManager.ViewLocationValues.DRAWER_VIEW,
+//   id: 'developer-resources',
+//   title: i18nLazyString(UIStrings.developerResources),
+//   commandPrompt: i18nLazyString(UIStrings.showDeveloperResources),
+//   order: 100,
+//   persistence: UI.ViewManager.ViewPersistence.CLOSEABLE,
+//   async loadView() {
+//     const DeveloperResources = await loadDeveloperResourcesModule();
+//     return new DeveloperResources.DeveloperResourcesView.DeveloperResourcesView();
+//   },
+// });
 
 Common.Revealer.registerRevealer({
   contextTypes() {

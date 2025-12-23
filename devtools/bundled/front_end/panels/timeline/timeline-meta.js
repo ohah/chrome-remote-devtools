@@ -72,18 +72,6 @@ function maybeRetrieveContextTypes(getClassCallBack) {
   }
   return getClassCallBack(loadedTimelineModule);
 }
-UI.ViewManager.registerViewExtension({
-  location: "panel",
-  id: "timeline",
-  title: i18nLazyString(UIStrings.performance),
-  commandPrompt: i18nLazyString(UIStrings.showPerformance),
-  order: 50,
-  async loadView(universe) {
-    const Timeline = await loadTimelineModule();
-    const resourceLoader = universe.context.get(SDK.PageResourceLoader.PageResourceLoader);
-    return Timeline.TimelinePanel.TimelinePanel.instance({ forceNew: true, resourceLoader });
-  }
-});
 UI.ActionRegistration.registerActionExtension({
   actionId: "timeline.toggle-recording",
   category: "PERFORMANCE",

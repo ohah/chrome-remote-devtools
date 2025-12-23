@@ -12941,6 +12941,12 @@
   "panels/sensors/SensorsView.ts | timezoneId": {
     "message": "Timezone ID"
   },
+  "panels/session_replay/session_replay-meta.ts | sessionReplay": {
+    "message": "Session Replay"
+  },
+  "panels/session_replay/session_replay-meta.ts | showSessionReplay": {
+    "message": "Show Session Replay"
+  },
   "panels/settings/AISettingsTab.ts | aIAnnotationsFeatureDescription": {
     "message": "Automatically generate titles for performance trace annotations"
   },
@@ -16561,6 +16567,12 @@
   },
   "panels/webauthn/WebauthnPane.ts | yes": {
     "message": "Yes"
+  },
+  "panels/welcome/welcome-meta.ts | showWelcome": {
+    "message": "Show Welcome"
+  },
+  "panels/welcome/welcome-meta.ts | welcome": {
+    "message": "Welcome"
   },
   "panels/whats_new/ReleaseNoteView.ts | seeFeatures": {
     "message": "See all new features"

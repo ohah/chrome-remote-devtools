@@ -1,6 +1,5 @@
 // gen/front_end/panels/performance_monitor/performance_monitor-meta.prebundle.js
 import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
 var UIStrings = {
   /**
    * @description Title of the 'Performance monitor' tool in the bottom drawer
@@ -33,30 +32,4 @@ var UIStrings = {
 };
 var str_ = i18n.i18n.registerUIStrings("panels/performance_monitor/performance_monitor-meta.ts", UIStrings);
 var i18nLazyString = i18n.i18n.getLazilyComputedLocalizedString.bind(void 0, str_);
-var loadedPerformanceMonitorModule;
-async function loadPerformanceMonitorModule() {
-  if (!loadedPerformanceMonitorModule) {
-    loadedPerformanceMonitorModule = await import("./performance_monitor.js");
-  }
-  return loadedPerformanceMonitorModule;
-}
-UI.ViewManager.registerViewExtension({
-  location: "drawer-view",
-  id: "performance.monitor",
-  title: i18nLazyString(UIStrings.performanceMonitor),
-  commandPrompt: i18nLazyString(UIStrings.showPerformanceMonitor),
-  persistence: "closeable",
-  order: 100,
-  async loadView() {
-    const PerformanceMonitor = await loadPerformanceMonitorModule();
-    return new PerformanceMonitor.PerformanceMonitor.PerformanceMonitorImpl();
-  },
-  tags: [
-    i18nLazyString(UIStrings.performance),
-    i18nLazyString(UIStrings.systemMonitor),
-    i18nLazyString(UIStrings.monitor),
-    i18nLazyString(UIStrings.activity),
-    i18nLazyString(UIStrings.metrics)
-  ]
-});
 //# sourceMappingURL=performance_monitor-meta.js.map
