@@ -19,6 +19,7 @@
     "@tauri-apps/plugin-opener": "^2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "rrweb-player": "^1.0.0-alpha.4",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
