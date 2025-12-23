@@ -6,8 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>basic</title>
     <!-- 서버에서 빌드된 클라이언트 스크립트 로드 / Load built client script from server -->
-    <script src="http://localhost:8080/client.js" data-server-url="http://localhost:8080"></script>
+    <script
+      src="http://localhost:8080/client.js"
+      data-server-url="http://localhost:8080"
+      data-enable-rrweb="true"
+    ></script>
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
