@@ -97,7 +97,12 @@ export class SocketServer {
       // Log received message / 수신된 메시지 로깅
       try {
         const parsed = JSON.parse(data);
-        console.log(`[client] ${id} received:`, JSON.stringify(parsed, null, 2));
+        if (parsed?.kind === 'rrweb') {
+          const count = Array.isArray(parsed.events) ? parsed.events.length : 0;
+          console.log(`[client] ${id} rrweb events / rrweb 이벤트: ${count}`);
+        } else {
+          console.log(`[client] ${id} received:`, JSON.stringify(parsed, null, 2));
+        }
       } catch {
         console.log(`[client] ${id} received (raw):`, data);
       }
