@@ -58,6 +58,12 @@ const services: Service[] = [
     command: ['bun', 'run', 'build:watch'],
   },
   {
+    name: 'CLIENT_RRWEB',
+    color: colors.client,
+    cwd: join(rootDir, 'packages/client-rrweb'),
+    command: ['bun', 'run', 'build:watch'],
+  },
+  {
     name: 'SERVER',
     color: colors.server,
     cwd: join(rootDir, 'packages/server'),
