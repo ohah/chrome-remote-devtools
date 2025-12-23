@@ -22,31 +22,51 @@ function getNodeById(nodeId: number): Node | null {
   return nodeMap.get(nodeId) || null;
 }
 
+// Check if node is valid (not whitespace-only text node) / 노드가 유효한지 확인 (공백만 있는 텍스트 노드 제외)
+function isValidNode(node: Node): boolean {
+  // Filter out whitespace-only text nodes / 공백만 있는 텍스트 노드 제외
+  if (node.nodeType === Node.TEXT_NODE) {
+    const trimmed = (node.nodeValue || '').trim();
+    return trimmed !== '';
+  }
+  return true;
+}
+
+// Filter nodes to exclude whitespace-only text nodes / 공백만 있는 텍스트 노드를 제외하여 노드 필터링
+function filterNodes(nodes: NodeList | Node[]): Node[] {
+  return Array.from(nodes).filter((node) => isValidNode(node));
+}
+
 function collectNode(
   node: Node,
   depth = 0
 ): {
   nodeId: number;
+  backendNodeId: number;
   nodeType: number;
   nodeName: string;
   localName?: string;
   nodeValue?: string;
-  attributes?: Array<{ name: string; value: string }>;
+  attributes?: string[]; // CDP protocol: flat array [name1, value1, name2, value2, ...] / CDP 프로토콜: 평면 배열 [name1, value1, name2, value2, ...]
   childNodeCount?: number;
   children?: unknown[];
 } {
   const nodeId = getNodeId(node);
+  // backendNodeId is same as nodeId in our implementation / backendNodeId는 우리 구현에서 nodeId와 동일
+  const backendNodeId = nodeId;
   const result: {
     nodeId: number;
+    backendNodeId: number;
     nodeType: number;
     nodeName: string;
     localName?: string;
     nodeValue?: string;
-    attributes?: Array<{ name: string; value: string }>;
+    attributes?: string[]; // CDP protocol: flat array [name1, value1, name2, value2, ...] / CDP 프로토콜: 평면 배열 [name1, value1, name2, value2, ...]
     childNodeCount?: number;
     children?: unknown[];
   } = {
     nodeId,
+    backendNodeId,
     nodeType: node.nodeType,
     nodeName: node.nodeName,
   };
@@ -54,18 +74,40 @@ function collectNode(
   if (node.nodeType === Node.ELEMENT_NODE) {
     const element = node as Element;
     result.localName = element.localName;
-    result.attributes = Array.from(element.attributes).map((attr: Attr) => ({
-      name: attr.name,
-      value: attr.value,
-    }));
-    result.childNodeCount = element.childNodes.length;
-    if (depth > 0 && element.childNodes.length > 0) {
-      result.children = Array.from(element.childNodes)
-        .slice(0, 100) // Limit children
-        .map((child) => collectNode(child, depth - 1));
+    // CDP protocol expects attributes as flat array [name1, value1, name2, value2, ...] / CDP 프로토콜은 attributes를 평면 배열 [name1, value1, name2, value2, ...] 형식으로 기대함
+    const attributesArray: string[] = [];
+    Array.from(element.attributes).forEach((attr: Attr) => {
+      attributesArray.push(attr.name, attr.value);
+    });
+    result.attributes = attributesArray;
+    // Filter out whitespace-only text nodes before counting / 공백만 있는 텍스트 노드를 제외한 후 개수 계산
+    const filteredChildNodes = filterNodes(element.childNodes);
+    result.childNodeCount = filteredChildNodes.length;
+    // depth === -1 means collect entire subtree, depth > 0 means collect up to that depth / depth === -1은 전체 서브트리 수집, depth > 0은 해당 깊이까지 수집
+    if ((depth === -1 || depth > 0) && filteredChildNodes.length > 0) {
+      const nextDepth = depth === -1 ? -1 : depth - 1;
+      // Include filtered child nodes (ELEMENT, TEXT, COMMENT) / 필터링된 자식 노드 포함 (ELEMENT, TEXT, COMMENT)
+      result.children = filteredChildNodes.map((child) => collectNode(child, nextDepth));
     }
   } else if (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.COMMENT_NODE) {
     result.nodeValue = node.nodeValue || '';
+  } else if (node.nodeType === Node.DOCUMENT_TYPE_NODE) {
+    // DocumentType node (DOCTYPE) / DocumentType 노드 (DOCTYPE)
+    const docType = node as DocumentType;
+    result.nodeValue = docType.name || '';
+    // Always include publicId and systemId (even if empty) for DOMModel compatibility / DOMModel 호환성을 위해 publicId와 systemId 항상 포함 (비어있어도)
+    (result as { publicId?: string }).publicId = docType.publicId || '';
+    (result as { systemId?: string }).systemId = docType.systemId || '';
+  } else if (node.nodeType === Node.DOCUMENT_NODE) {
+    // Document node / 문서 노드
+    // Filter out whitespace-only text nodes before counting / 공백만 있는 텍스트 노드를 제외한 후 개수 계산
+    const filteredChildNodes = filterNodes(node.childNodes);
+    result.childNodeCount = filteredChildNodes.length;
+    if ((depth === -1 || depth > 0) && filteredChildNodes.length > 0) {
+      const nextDepth = depth === -1 ? -1 : depth - 1;
+      // Include filtered child nodes (ELEMENT, TEXT, COMMENT, DOCUMENT_TYPE) / 필터링된 자식 노드 포함 (ELEMENT, TEXT, COMMENT, DOCUMENT_TYPE)
+      result.children = filteredChildNodes.map((child) => collectNode(child, nextDepth));
+    }
   }
 
   return result;
@@ -77,18 +119,64 @@ export default class Dom extends BaseDomain {
   private searchId = 0;
   private searchRet = new Map<number, Node[]>();
   private currentSearchKey = '';
+  // Track which nodes have been registered in DOMModel / DOMModel에 등록된 노드 추적
+  private registeredNodes = new Set<Node>();
 
   // Enable DOM domain / DOM 도메인 활성화
   override enable(): void {
+    // Mark all existing nodes as registered / 기존의 모든 노드를 등록된 것으로 표시
+    const markNodeRegistered = (node: Node): void => {
+      this.registeredNodes.add(node);
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        node.childNodes.forEach((child) => {
+          if (
+            child.nodeType === Node.ELEMENT_NODE ||
+            child.nodeType === Node.TEXT_NODE ||
+            child.nodeType === Node.COMMENT_NODE
+          ) {
+            markNodeRegistered(child);
+          }
+        });
+      }
+    };
+    markNodeRegistered(document);
     this.nodeObserver();
     Dom.set$Function();
   }
 
   // Get document / 문서 가져오기
-  getDocument(): { root: unknown } {
-    return {
-      root: collectNode(document, 1),
+  getDocument(params?: { depth?: number; pierce?: boolean }): { root: unknown } {
+    // Extract depth parameter, default to -1 for full tree / depth 파라미터 추출, 기본값은 -1 (전체 트리)
+    const depth = params?.depth ?? -1;
+
+    // Mark all nodes in document as registered / 문서의 모든 노드를 등록된 것으로 표시
+    const markNodeRegistered = (node: Node): void => {
+      this.registeredNodes.add(node);
+      if (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.DOCUMENT_NODE) {
+        node.childNodes.forEach((child) => {
+          if (
+            child.nodeType === Node.ELEMENT_NODE ||
+            child.nodeType === Node.TEXT_NODE ||
+            child.nodeType === Node.COMMENT_NODE ||
+            child.nodeType === Node.DOCUMENT_TYPE_NODE
+          ) {
+            markNodeRegistered(child);
+          }
+        });
+      }
     };
+    markNodeRegistered(document);
+
+    // Use depth -1 for full tree, or use provided depth / 전체 트리를 위해 depth -1 사용, 또는 제공된 depth 사용
+    const root = collectNode(document, depth);
+
+    // Add documentURL and baseURL for DOMDocument compatibility / DOMDocument 호환성을 위해 documentURL과 baseURL 추가
+    if (root.nodeType === Node.DOCUMENT_NODE) {
+      (root as { documentURL?: string }).documentURL = document.URL || location.href;
+      (root as { baseURL?: string }).baseURL = document.baseURI || location.href;
+    }
+
+    return { root };
   }
 
   // Request child nodes / 자식 노드 요청
@@ -96,8 +184,18 @@ export default class Dom extends BaseDomain {
     const node = getNodeById(nodeId);
     if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
 
+    // Mark this node and its children as registered / 이 노드와 자식을 등록된 것으로 표시
+    this.registeredNodes.add(node);
     const element = node as Element;
-    const children = Array.from(element.childNodes).map((child) => collectNode(child, 0));
+    element.childNodes.forEach((child) => {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        this.registeredNodes.add(child);
+      }
+    });
+
+    // Filter out whitespace-only text nodes / 공백만 있는 텍스트 노드 제외
+    const filteredChildren = filterNodes(element.childNodes);
+    const children = filteredChildren.map((child) => collectNode(child, 0));
 
     this.send({
       method: Event.setChildNodes,
@@ -310,26 +408,101 @@ export default class Dom extends BaseDomain {
       mutations.forEach((mutation: MutationRecord) => {
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node: Node) => {
+            // Skip whitespace-only text nodes / 공백만 있는 텍스트 노드 건너뛰기
+            if (!isValidNode(node)) {
+              return;
+            }
+
             if (node.nodeType === Node.ELEMENT_NODE) {
-              this.send({
-                method: Event.childNodeInserted,
-                params: {
-                  parentNodeId: mutation.target ? getNodeId(mutation.target) : 0,
-                  node: collectNode(node, 0),
-                },
-              });
+              const parentNode = mutation.target as Node;
+              const parentNodeId = parentNode ? getNodeId(parentNode) : 0;
+
+              // Only send if parent node is registered / 부모 노드가 등록된 경우에만 전송
+              if (parentNodeId > 0 && this.registeredNodes.has(parentNode)) {
+                // Find previous sibling node ID (skip whitespace nodes) / 이전 형제 노드 ID 찾기 (공백 노드 제외)
+                let previousNodeId = 0;
+                let previousSibling = node.previousSibling;
+                while (previousSibling && !isValidNode(previousSibling)) {
+                  previousSibling = previousSibling.previousSibling;
+                }
+                if (previousSibling) {
+                  previousNodeId = getNodeId(previousSibling);
+                }
+
+                this.send({
+                  method: Event.childNodeInserted,
+                  params: {
+                    parentNodeId: parentNodeId,
+                    previousNodeId: previousNodeId,
+                    node: collectNode(node, 0),
+                  },
+                });
+
+                // Mark this node as registered / 이 노드를 등록된 것으로 표시
+                this.registeredNodes.add(node);
+              }
+              // If parent is not registered, skip the event / 부모가 등록되지 않았으면 이벤트 건너뛰기
+              // The node will be registered when requestChildNodes is called / requestChildNodes가 호출될 때 노드가 등록됨
+            } else if (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.COMMENT_NODE) {
+              // Handle TEXT_NODE and COMMENT_NODE insertions / TEXT_NODE와 COMMENT_NODE 삽입 처리
+              const parentNode = mutation.target as Node;
+              const parentNodeId = parentNode ? getNodeId(parentNode) : 0;
+
+              // Only send if parent node is registered / 부모 노드가 등록된 경우에만 전송
+              if (parentNodeId > 0 && this.registeredNodes.has(parentNode)) {
+                // Find previous sibling node ID (skip whitespace nodes) / 이전 형제 노드 ID 찾기 (공백 노드 제외)
+                let previousNodeId = 0;
+                let previousSibling = node.previousSibling;
+                while (previousSibling && !isValidNode(previousSibling)) {
+                  previousSibling = previousSibling.previousSibling;
+                }
+                if (previousSibling) {
+                  previousNodeId = getNodeId(previousSibling);
+                }
+
+                this.send({
+                  method: Event.childNodeInserted,
+                  params: {
+                    parentNodeId: parentNodeId,
+                    previousNodeId: previousNodeId,
+                    node: collectNode(node, 0),
+                  },
+                });
+
+                // Mark this node as registered / 이 노드를 등록된 것으로 표시
+                this.registeredNodes.add(node);
+              }
             }
           });
 
           mutation.removedNodes.forEach((node: Node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              this.send({
-                method: Event.childNodeRemoved,
-                params: {
-                  parentNodeId: mutation.target ? getNodeId(mutation.target) : 0,
-                  nodeId: getNodeId(node),
-                },
-              });
+            // Skip whitespace-only text nodes / 공백만 있는 텍스트 노드 건너뛰기
+            if (!isValidNode(node)) {
+              return;
+            }
+
+            if (
+              node.nodeType === Node.ELEMENT_NODE ||
+              node.nodeType === Node.TEXT_NODE ||
+              node.nodeType === Node.COMMENT_NODE
+            ) {
+              const parentNode = mutation.target as Node;
+              const parentNodeId = parentNode ? getNodeId(parentNode) : 0;
+              const nodeId = getNodeId(node);
+
+              // Only send if parent node is registered / 부모 노드가 등록된 경우에만 전송
+              if (parentNodeId > 0 && nodeId > 0 && this.registeredNodes.has(parentNode)) {
+                this.send({
+                  method: Event.childNodeRemoved,
+                  params: {
+                    parentNodeId: parentNodeId,
+                    nodeId: nodeId,
+                  },
+                });
+              }
+
+              // Remove from registered set / 등록된 집합에서 제거
+              this.registeredNodes.delete(node);
             }
           });
         } else if (mutation.type === 'attributes') {
