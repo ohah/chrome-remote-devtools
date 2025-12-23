@@ -22,6 +22,7 @@ export default class ChromeDomain {
     if (!method) {
       return { id };
     }
+
     const methodCall = this.protocol[method];
     if (typeof methodCall !== 'function') {
       return { id };

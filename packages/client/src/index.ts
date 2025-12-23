@@ -68,30 +68,6 @@ function initSocket(serverUrl: string): void {
       console.error('CDP message error:', e);
     }
   });
-
-  let heartbeat: ReturnType<typeof setInterval> | null = null;
-  socket.addEventListener('open', () => {
-    // Heartbeat keep alive / 하트비트 유지
-    heartbeat = setInterval(() => {
-      if (socket.readyState === WebSocket.OPEN) {
-        socket.send('{}');
-      }
-    }, 10000);
-  });
-
-  socket.addEventListener('close', () => {
-    if (heartbeat) {
-      clearInterval(heartbeat);
-      heartbeat = null;
-    }
-  });
-
-  socket.addEventListener('error', () => {
-    if (heartbeat) {
-      clearInterval(heartbeat);
-      heartbeat = null;
-    }
-  });
 }
 
 function keepScreenDisplay(): void {
