@@ -1,7 +1,9 @@
+import type { eventWithTime } from '@rrweb/types';
+
 /**
  * rrweb event type alias / rrweb 이벤트 타입 별칭
  */
-export type RrwebEvent = unknown;
+export type RrwebEvent = eventWithTime;
 
 /**
  * rrweb record options shape (partial) / rrweb record 옵션 형태(부분 정의)
