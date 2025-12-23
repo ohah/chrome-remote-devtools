@@ -17,7 +17,8 @@ export function createWebSocketTransport(params: {
         return;
       }
 
-      // Drop silently if closed to avoid throwing in recorder / 레코더 중 예외 방지를 위해 닫힌 경우 무시
+      // WebSocket is not open, reject promise to trigger error handling / WebSocket이 열려있지 않으면 Promise를 reject하여 에러 처리 트리거
+      throw new Error(`WebSocket is not open (readyState: ${socket.readyState})`);
     },
   };
 }
