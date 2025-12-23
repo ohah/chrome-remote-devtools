@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SERVER_URL } from '@/shared/lib';
+import type { eventWithTime } from '@rrweb/types';
+import type rrwebPlayer from 'rrweb-player';
+import type { RRwebPlayerOptions } from 'rrweb-player';
 
 interface RrwebReplayPanelProps {
   clientId: string;
@@ -10,11 +13,9 @@ interface StreamState {
   lastError?: string;
 }
 
-type RrwebEvent = unknown;
-
-function hasFullSnapshot(list: RrwebEvent[]): boolean {
+function hasFullSnapshot(list: eventWithTime[]): boolean {
   // rrweb FullSnapshot = type === 2 / rrweb FullSnapshot은 type === 2
-  return list.some((event) => (event as { type?: number }).type === 2);
+  return list.some((event) => event.type === 2);
 }
 
 function toWebSocketUrl(httpUrl: string): string {
@@ -31,7 +32,7 @@ async function readMessage(data: Blob | ArrayBuffer | string): Promise<string> {
  * rrweb replay panel / rrweb 리플레이 패널
  */
 export function RrwebReplayPanel({ clientId }: RrwebReplayPanelProps) {
-  const [events, setEvents] = useState<RrwebEvent[]>([]);
+  const [events, setEvents] = useState<eventWithTime[]>([]);
   const [state, setState] = useState<StreamState>({ status: 'idle' });
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +50,7 @@ export function RrwebReplayPanel({ clientId }: RrwebReplayPanelProps) {
         const text = await readMessage(event.data);
         const parsed = JSON.parse(text);
         if (parsed?.kind === 'rrweb' && Array.isArray(parsed.events)) {
-          setEvents((prev) => [...prev, ...parsed.events]);
+          setEvents((prev) => [...prev, ...(parsed.events as eventWithTime[])]);
         }
       } catch (error) {
         setState({ status: 'error', lastError: (error as Error).message });
@@ -69,7 +70,7 @@ export function RrwebReplayPanel({ clientId }: RrwebReplayPanelProps) {
 
   useEffect(() => {
     let disposed = false;
-    let playerInstance: { destroy?: () => void } | null = null;
+    let playerInstance: rrwebPlayer | null = null;
 
     async function mountPlayer() {
       if (!containerRef.current) return;
@@ -94,15 +95,14 @@ export function RrwebReplayPanel({ clientId }: RrwebReplayPanelProps) {
 
       if (disposed || !containerRef.current) return;
 
-      // Destroy existing player before creating new one / 새 플레이어 생성 전 기존 플레이어 제거
+      // Clear existing player before creating new one / 새 플레이어 생성 전 기존 플레이어 제거
       if (playerInstance) {
-        playerInstance.destroy?.();
         playerInstance = null;
       }
 
       // Create new player / 새 플레이어 생성
       containerRef.current.innerHTML = '';
-      playerInstance = new RrwebPlayer({
+      const options: RRwebPlayerOptions = {
         target: containerRef.current,
         props: {
           events,
@@ -111,14 +111,14 @@ export function RrwebReplayPanel({ clientId }: RrwebReplayPanelProps) {
           // Enable liveMode to handle streaming updates / 스트리밍 업데이트 처리를 위해 liveMode 활성화
           liveMode: true,
         },
-      });
+      };
+      playerInstance = new RrwebPlayer(options);
     }
 
     void mountPlayer();
 
     return () => {
       disposed = true;
-      playerInstance?.destroy?.();
       playerInstance = null;
     };
   }, [events]);
