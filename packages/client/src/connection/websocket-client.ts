@@ -123,19 +123,13 @@ export class WebSocketClient {
       if (isReload) {
         // Clear current tab's events on reload / 새로고침 시 현재 탭의 이벤트 삭제
         await this.eventStorage?.clearEvents();
-        console.log('Cleared events on page reload / 페이지 새로고침 시 이벤트 삭제');
       }
 
       // Update last active time / 마지막 활성 시간 업데이트
       await this.eventStorage?.updateLastActiveTime();
 
       // Cleanup orphaned events / orphaned 이벤트 정리
-      const deletedCount = await this.eventStorage?.cleanupOrphanedEvents();
-      if (deletedCount && deletedCount > 0) {
-        console.log(
-          `Cleaned up ${deletedCount} orphaned events / ${deletedCount}개의 orphaned 이벤트 정리`
-        );
-      }
+      await this.eventStorage?.cleanupOrphanedEvents();
     });
   }
 
@@ -159,10 +153,6 @@ export class WebSocketClient {
     try {
       const storedEvents = await this.eventStorage.getEvents();
       if (storedEvents.length > 0) {
-        console.log(
-          `Sending ${storedEvents.length} stored events / 저장된 ${storedEvents.length}개 이벤트 전송`
-        );
-
         // Send all events in batches / 모든 이벤트를 배치로 전송
         const batchSize = 100;
         for (let i = 0; i < storedEvents.length; i += batchSize) {
@@ -184,7 +174,6 @@ export class WebSocketClient {
         // Clear events after sending if configured / 설정된 경우 전송 후 이벤트 삭제
         if (this.rrwebConfig.clearOnSend !== false) {
           await this.eventStorage.clearEvents();
-          console.log('Cleared stored events after sending / 전송 후 저장된 이벤트 삭제');
         }
       }
     } catch (error) {
@@ -251,12 +240,7 @@ export class WebSocketClient {
       // Cleanup orphaned events every hour / 1시간마다 orphaned 이벤트 정리
       this.cleanupInterval = setInterval(
         async () => {
-          const deletedCount = await this.eventStorage?.cleanupOrphanedEvents();
-          if (deletedCount && deletedCount > 0) {
-            console.log(
-              `Cleaned up ${deletedCount} orphaned events / ${deletedCount}개의 orphaned 이벤트 정리`
-            );
-          }
+          await this.eventStorage?.cleanupOrphanedEvents();
         },
         60 * 60 * 1000
       );

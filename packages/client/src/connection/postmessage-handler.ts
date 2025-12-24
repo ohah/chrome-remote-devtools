@@ -67,22 +67,12 @@ export class PostMessageHandler {
       // Use isWindow() helper instead of instanceof for cross-origin compatibility / 크로스 오리진 호환성을 위해 instanceof 대신 isWindow() 헬퍼 사용
       if (this.isWindow(event.source)) {
         this.devtoolsWindow = event.source;
-        console.log(
-          'DevTools ready, window stored from DEVTOOLS_READY / DevTools 준비 완료, DEVTOOLS_READY에서 window 저장됨'
-        );
         // Update domain with DevTools window / 도메인에 DevTools window 업데이트
         if (this.domain) {
           this.domain.setDevToolsWindow(this.devtoolsWindow);
         }
       } else {
         // event.source is not available, will try to get it from CDP_MESSAGE / event.source를 사용할 수 없음, CDP_MESSAGE에서 시도할 예정
-        console.log(
-          'DEVTOOLS_READY received, will store window from next CDP_MESSAGE / DEVTOOLS_READY 수신, 다음 CDP_MESSAGE에서 window 저장 예정',
-          {
-            source: event.source,
-            sourceType: typeof event.source,
-          }
-        );
       }
       // Notify that DevTools is ready / DevTools 준비 완료 알림
       window.dispatchEvent(new CustomEvent('devtools-ready', { detail: { ready: true } }));
@@ -94,9 +84,6 @@ export class PostMessageHandler {
       // Store DevTools window if not already stored / 아직 저장되지 않았으면 DevTools window 저장
       if (!this.devtoolsWindow && this.isWindow(event.source)) {
         this.devtoolsWindow = event.source;
-        console.log(
-          'DevTools window stored from CDP_MESSAGE / CDP_MESSAGE에서 DevTools window 저장됨'
-        );
         // Update domain with DevTools window / 도메인에 DevTools window 업데이트
         if (this.domain) {
           this.domain.setDevToolsWindow(this.devtoolsWindow);
@@ -104,12 +91,6 @@ export class PostMessageHandler {
       }
       this.handleCDPMessage(event, true);
       return;
-    }
-
-    // Legacy: Check if this is a direct CDP message (has method or id) / 레거시: 직접 CDP 메시지인지 확인 (method 또는 id가 있음)
-    const message = event.data as { id?: number; method?: string; params?: unknown };
-    if (message.method || message.id !== undefined) {
-      this.handleCDPMessage(event, false, true);
     }
   }
 
