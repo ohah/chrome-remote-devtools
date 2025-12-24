@@ -4,9 +4,75 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { gunzipSync } from 'zlib';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Log configuration / 로그 설정
+// Default: disabled in both development and production / 기본값: 개발 및 프로덕션 모두에서 비활성화
+const logEnabled = process.env.LOG_ENABLED === 'true';
+const logMethodsEnv = process.env.LOG_METHODS || '';
+const allowedMethods = logMethodsEnv
+  ? new Set(
+      logMethodsEnv
+        .split(',')
+        .map((m) => m.trim())
+        .filter(Boolean)
+    )
+  : null; // null means all methods are allowed / null이면 모든 메소드 허용
+
+/**
+ * Log helper with method filtering / 메소드 필터링이 있는 로그 헬퍼
+ * @param type - Log type (client, devtools, etc.) / 로그 타입 (client, devtools 등)
+ * @param id - Client or DevTools ID / 클라이언트 또는 DevTools ID
+ * @param message - Log message / 로그 메시지
+ * @param data - Optional data to log / 선택적 로그 데이터
+ * @param method - Optional CDP method name for filtering / 필터링을 위한 선택적 CDP 메소드 이름
+ */
+function log(
+  type: 'client' | 'devtools' | 'server',
+  id: string,
+  message: string,
+  data?: unknown,
+  method?: string
+): void {
+  if (!logEnabled) {
+    return;
+  }
+
+  // Filter by method if configured / 설정된 경우 메소드로 필터링
+  if (method && allowedMethods && !allowedMethods.has(method)) {
+    return;
+  }
+
+  const prefix = `[${type}] ${id}`;
+  if (data !== undefined) {
+    console.log(`${prefix} ${message}`, data);
+  } else {
+    console.log(`${prefix} ${message}`);
+  }
+}
+
+/**
+ * Log error / 에러 로그
+ */
+function logError(
+  type: 'client' | 'devtools' | 'server',
+  id: string,
+  message: string,
+  error?: unknown
+): void {
+  if (!logEnabled) {
+    return;
+  }
+  const prefix = `[${type}] ${id}`;
+  if (error !== undefined) {
+    console.error(`${prefix} ${message}:`, error);
+  } else {
+    console.error(`${prefix} ${message}`);
+  }
+}
 
 interface Client {
   id: string;
@@ -68,7 +134,7 @@ export class SocketServer {
 
   private createClientSocketConnect(ws: WebSocket, connectInfo: Omit<Client, 'ws'>) {
     const { id } = connectInfo;
-    console.log(`[client] ${id} connected`);
+    log('client', id, 'connected');
 
     const client: Client = { ws, ...connectInfo };
     this.clients.set(id, client);
@@ -94,24 +160,43 @@ export class SocketServer {
         data = Buffer.from(message as unknown as ArrayLike<number>).toString('utf-8');
       }
 
-      // Log received message / 수신된 메시지 로깅
+      // Check if message contains compressed data / 메시지에 압축된 데이터가 포함되어 있는지 확인
       try {
         const parsed = JSON.parse(data);
-        if (parsed?.kind === 'rrweb') {
-          const count = Array.isArray(parsed.events) ? parsed.events.length : 0;
-          console.log(`[client] ${id} rrweb events / rrweb 이벤트: ${count}`);
-        } else {
-          console.log(`[client] ${id} received:`, JSON.stringify(parsed, null, 2));
+
+        // Check if message contains compressed data / 메시지에 압축된 데이터가 포함되어 있는지 확인
+        // Compressed data is stored in params with compressed marker / 압축된 데이터는 compressed 마커와 함께 params에 저장됨
+        if (parsed.params && typeof parsed.params === 'object' && 'compressed' in parsed.params) {
+          // Check for compressed marker / 압축 마커 확인
+          if (parsed.params.compressed === true && Array.isArray(parsed.params.data)) {
+            try {
+              // Decompress the data / 데이터 압축 해제
+              const compressedBuffer = Buffer.from(parsed.params.data as number[]);
+              const decompressed = gunzipSync(compressedBuffer);
+              const decompressedData = JSON.parse(decompressed.toString('utf-8'));
+              // Replace entire message with decompressed data / 전체 메시지를 압축 해제된 데이터로 교체
+              // decompressedData contains { method, params, timestamp } / decompressedData는 { method, params, timestamp } 포함
+              parsed.method = decompressedData.method;
+              parsed.params = decompressedData.params;
+              data = JSON.stringify(parsed);
+            } catch (error) {
+              logError('client', id, 'decompression failed / 압축 해제 실패', error);
+              // Continue with original data if decompression fails / 압축 해제 실패 시 원본 데이터 사용
+            }
+          }
         }
+
+        const method = parsed?.method as string | undefined;
+        log('client', id, 'received:', JSON.stringify(parsed, null, 2), method);
       } catch {
-        console.log(`[client] ${id} received (raw):`, data);
+        log('client', id, 'received (raw):', data);
       }
 
       sendToDevtools(data);
     });
 
     ws.on('close', () => {
-      console.log(`[client] ${id} disconnected`);
+      log('client', id, 'disconnected');
       this.clients.delete(id);
       // 클라이언트가 연결 해제되면 해당 DevTools 연결도 종료
       this.devtools.forEach((devtool) => {
@@ -119,7 +204,7 @@ export class SocketServer {
           try {
             devtool.ws.close();
           } catch (error) {
-            console.error(`[client] ${id} failed to close devtools ${devtool.id}:`, error);
+            logError('client', id, `failed to close devtools ${devtool.id}`, error);
           }
           this.devtools.delete(devtool.id);
         }
@@ -127,26 +212,52 @@ export class SocketServer {
     });
 
     ws.on('error', (error) => {
-      console.error(`[client] ${id} error:`, error);
+      logError('client', id, 'error', error);
     });
   }
 
   private createDevtoolsSocketConnect(ws: WebSocket, connectInfo: Omit<DevTools, 'ws'>) {
     const { id, clientId } = connectInfo;
-    console.log(`[devtools] ${id} connected${clientId ? ` to client ${clientId}` : ''}`);
+    log('devtools', id, `connected${clientId ? ` to client ${clientId}` : ''}`);
 
     const devtool: DevTools = { ws, ...connectInfo };
     this.devtools.set(id, devtool);
 
-    const client = clientId ? this.clients.get(clientId) : undefined;
+    // Request stored events from client when DevTools connects / DevTools 연결 시 클라이언트에 저장된 이벤트 요청
+    if (clientId) {
+      const client = this.clients.get(clientId);
+      if (client && client.ws.readyState === WebSocket.OPEN) {
+        // Send request to client to replay stored events / 클라이언트에 저장된 이벤트 재생 요청 전송
+        try {
+          client.ws.send(
+            JSON.stringify({
+              method: 'SessionReplay.replayStoredEvents',
+              params: {},
+            })
+          );
+          log(
+            'devtools',
+            id,
+            `requested stored events from client ${clientId} / ${id}가 클라이언트 ${clientId}에 저장된 이벤트 요청`
+          );
+        } catch (error) {
+          logError(
+            'devtools',
+            id,
+            'failed to request stored events / 저장된 이벤트 요청 실패',
+            error
+          );
+        }
+      }
+    }
 
     ws.on('close', () => {
-      console.log(`[devtools] ${id} disconnected`);
+      log('devtools', id, 'disconnected');
       this.devtools.delete(id);
     });
 
     ws.on('error', (error) => {
-      console.error(`[devtools] ${id} error:`, error);
+      logError('devtools', id, 'error', error);
     });
 
     // Forward messages from Inspector to Client / Inspector에서 Client로 메시지 전달
@@ -171,9 +282,10 @@ export class SocketServer {
       // Log received message from Inspector / Inspector로부터 수신된 메시지 로깅
       try {
         const parsed = JSON.parse(data);
-        console.log(`[devtools] ${id} received:`, JSON.stringify(parsed, null, 2));
+        const method = parsed?.method as string | undefined;
+        log('devtools', id, 'received:', JSON.stringify(parsed, null, 2), method);
       } catch {
-        console.log(`[devtools] ${id} received (raw):`, data);
+        log('devtools', id, 'received (raw):', data);
       }
 
       const currentClient = this.clients.get(currentDevtool.clientId);
@@ -185,8 +297,10 @@ export class SocketServer {
         try {
           currentClient.ws.send(message);
         } catch (error) {
-          console.error(
-            `[devtools] ${id} failed to send message to client ${currentDevtool.clientId}:`,
+          logError(
+            'devtools',
+            id,
+            `failed to send message to client ${currentDevtool.clientId}`,
             error
           );
         }
@@ -223,13 +337,13 @@ export class SocketServer {
     if (!client) {
       return undefined;
     }
-    const { ws, ...data } = client;
+    const { ws: _ws, ...data } = client;
     return data;
   }
 
   // Get all clients / 모든 클라이언트 가져오기
   getAllClients(): Array<Omit<Client, 'ws'>> {
-    return Array.from(this.clients.values()).map(({ ws, ...data }) => data);
+    return Array.from(this.clients.values()).map(({ ws: _ws, ...data }) => data);
   }
 
   // Get Inspector by ID / ID로 Inspector 가져오기
@@ -238,17 +352,17 @@ export class SocketServer {
     if (!devtool) {
       return undefined;
     }
-    const { ws, ...data } = devtool;
+    const { ws: _ws, ...data } = devtool;
     return data;
   }
 
   // Get all Inspectors / 모든 Inspector 가져오기
   getAllInspectors(): Array<Omit<DevTools, 'ws'>> {
-    return Array.from(this.devtools.values()).map(({ ws, ...data }) => data);
+    return Array.from(this.devtools.values()).map(({ ws: _ws, ...data }) => data);
   }
 
   getClients(): Array<Omit<Client, 'ws'>> {
-    return Array.from(this.clients.values()).map(({ ws, ...data }) => data);
+    return Array.from(this.clients.values()).map(({ ws: _ws, ...data }) => data);
   }
 }
 
@@ -318,7 +432,7 @@ const server = createServer((req, res) => {
         ...headers,
       });
       res.end(clientScript);
-    } catch (error) {
+    } catch {
       // Fallback: 빌드되지 않은 경우 경고 메시지 / Fallback: warning if not built
       res.writeHead(200, {
         'Content-Type': 'application/javascript',
@@ -341,6 +455,17 @@ socketServer.initSocketServer(server);
 // Only start server when run directly / 직접 실행될 때만 서버 시작
 if (import.meta.main) {
   server.listen(PORT, HOST, () => {
+    // Server startup message is always shown / 서버 시작 메시지는 항상 표시
     console.log(`Server started at http://${HOST}:${PORT}`);
+    if (logEnabled) {
+      if (allowedMethods) {
+        console.log(
+          `Log filtering enabled / 로그 필터링 활성화: ${Array.from(allowedMethods).join(', ')}`
+        );
+      } else {
+        console.log('All logs enabled / 모든 로그 활성화');
+      }
+    }
+    // Logging is disabled by default / 로깅은 기본적으로 비활성화됨
   });
 }

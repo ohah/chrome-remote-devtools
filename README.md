@@ -105,6 +105,20 @@ bun run dev:inspector:tauri
 bun run dev:docs
 ```
 
+### Server Log Configuration
+
+Server logs are **disabled by default** to reduce console noise. Enable them using environment variables:
+
+```bash
+# Enable all logs
+LOG_ENABLED=true bun run dev:server
+
+# Enable and filter logs by specific CDP methods
+LOG_ENABLED=true LOG_METHODS=Runtime.consoleAPICalled,Network.requestWillBeSent bun run dev:server
+```
+
+**Note**: Logs are automatically disabled in production builds. See [CONTRIBUTING.md](CONTRIBUTING.md#server-log-configuration--서버-로그-설정) for details.
+
 ### Build
 
 Build all packages:

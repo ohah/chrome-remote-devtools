@@ -230,6 +230,47 @@ bun run dev:server
 - Serves client script at `/client.js`
 - Provides HTTP API at `/json`, `/json/clients`, `/json/inspectors`
 
+#### Server Log Configuration / 서버 로그 설정
+
+Server logs are **disabled by default** to reduce console noise. You can enable and control which CDP method logs are displayed using environment variables:
+
+**Logs disabled by default**:
+
+```bash
+bun run dev:server
+```
+
+**Enable all logs**:
+
+```bash
+LOG_ENABLED=true bun run dev:server
+```
+
+**Enable and filter logs by specific methods**:
+
+```bash
+# Show only console and network methods
+LOG_ENABLED=true LOG_METHODS=Runtime.consoleAPICalled,Network.requestWillBeSent bun run dev:server
+
+# Show only SessionReplay events
+LOG_ENABLED=true LOG_METHODS=SessionReplay.eventRecorded bun run dev:server
+
+# Multiple methods (comma-separated)
+LOG_ENABLED=true LOG_METHODS=Runtime.consoleAPICalled,Network.requestWillBeSent,Network.responseReceived bun run dev:server
+```
+
+**Note**: In production builds (`NODE_ENV=production`), all logs are automatically disabled except for server startup messages.
+
+**Environment Variables**:
+
+- `LOG_ENABLED` - Enable/disable all logs (default: `false` - disabled)
+  - Set to `true` to enable logs
+  - Must be set to `true` for `LOG_METHODS` filtering to work
+- `LOG_METHODS` - Comma-separated list of CDP method names to filter logs (e.g., `Runtime.consoleAPICalled,Network.requestWillBeSent`)
+  - Only works when `LOG_ENABLED=true`
+  - If not set, all methods are logged
+  - If set, only the specified methods are logged
+
 **Terminal 2 - Inspector**:
 
 ```bash
