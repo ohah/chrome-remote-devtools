@@ -131,42 +131,88 @@ if (typeof window !== 'undefined') {
       return;
     }
 
-    // Check if this is a CDP message (has method or id) / CDP 메시지인지 확인 (method 또는 id가 있음)
-    const message = event.data as { id?: number; method?: string; params?: unknown };
-    if (!message.method && message.id === undefined) {
+    // Handle DEVTOOLS_READY message / DEVTOOLS_READY 메시지 처리
+    if (event.data.type === 'DEVTOOLS_READY') {
+      // Notify that DevTools is ready / DevTools 준비 완료 알림
+      if (typeof window !== 'undefined' && (window as any).__cdpClient) {
+        (window as any).__cdpClient.setDevToolsReady(true);
+      }
       return;
     }
 
-    // Execute CDP method and send response back via postMessage / CDP 메서드 실행하고 postMessage로 응답 전송
-    if (globalDomain) {
-      const result = globalDomain.execute(message);
-      // Handle async methods / async 메서드 처리
-      const sendResponse = (response: { id?: number; result?: unknown; error?: unknown }) => {
-        if (response.id !== undefined && event.source) {
-          // Send response back to sender / 응답을 보낸 곳으로 다시 전송
-          // Use '*' for targetOrigin to allow cross-origin communication / cross-origin 통신을 위해 '*' 사용
-          // In production, you may want to validate event.origin / 프로덕션에서는 event.origin 검증 고려
-          try {
-            (event.source as Window).postMessage(response, '*');
-          } catch (e) {
-            // Ignore postMessage errors / postMessage 오류 무시
-            console.warn('Failed to send postMessage response:', e);
+    // Handle CDP_MESSAGE type (from PostMessageTransport) / CDP_MESSAGE 타입 처리 (PostMessageTransport에서)
+    if (event.data.type === 'CDP_MESSAGE' && event.data.message) {
+      try {
+        const message = JSON.parse(event.data.message);
+        // Execute CDP method and send response back via postMessage / CDP 메서드 실행하고 postMessage로 응답 전송
+        if (globalDomain) {
+          const result = globalDomain.execute(message);
+          // Handle async methods / async 메서드 처리
+          const sendResponse = (response: { id?: number; result?: unknown; error?: unknown }) => {
+            if (response.id !== undefined && event.source) {
+              // Send response in CDP_MESSAGE format / CDP_MESSAGE 형식으로 응답 전송
+              try {
+                const cdpMessage = { type: 'CDP_MESSAGE', message: JSON.stringify(response) };
+                (event.source as Window).postMessage(cdpMessage, '*');
+              } catch (e) {
+                // Ignore postMessage errors / postMessage 오류 무시
+                console.warn('Failed to send postMessage response:', e);
+              }
+            }
+          };
+
+          if (result instanceof Promise) {
+            result.then(sendResponse).catch((error) => {
+              sendResponse({
+                id: message.id,
+                error: {
+                  code: -32000,
+                  message: error instanceof Error ? error.message : String(error),
+                },
+              });
+            });
+          } else {
+            sendResponse(result);
           }
         }
-      };
+      } catch (e) {
+        console.warn('Failed to parse CDP message:', e);
+      }
+      return;
+    }
 
-      if (result instanceof Promise) {
-        result.then(sendResponse).catch((error) => {
-          sendResponse({
-            id: message.id,
-            error: {
-              code: -32000,
-              message: error instanceof Error ? error.message : String(error),
-            },
+    // Legacy: Check if this is a direct CDP message (has method or id) / 레거시: 직접 CDP 메시지인지 확인 (method 또는 id가 있음)
+    const message = event.data as { id?: number; method?: string; params?: unknown };
+    if (message.method || message.id !== undefined) {
+      // Execute CDP method and send response back via postMessage / CDP 메서드 실행하고 postMessage로 응답 전송
+      if (globalDomain) {
+        const result = globalDomain.execute(message);
+        // Handle async methods / async 메서드 처리
+        const sendResponse = (response: { id?: number; result?: unknown; error?: unknown }) => {
+          if (response.id !== undefined && event.source) {
+            // Send response back to sender / 응답을 보낸 곳으로 다시 전송
+            try {
+              (event.source as Window).postMessage(response, '*');
+            } catch (e) {
+              // Ignore postMessage errors / postMessage 오류 무시
+              console.warn('Failed to send postMessage response:', e);
+            }
+          }
+        };
+
+        if (result instanceof Promise) {
+          result.then(sendResponse).catch((error) => {
+            sendResponse({
+              id: message.id,
+              error: {
+                code: -32000,
+                message: error instanceof Error ? error.message : String(error),
+              },
+            });
           });
-        });
-      } else {
-        sendResponse(result);
+        } else {
+          sendResponse(result);
+        }
       }
     }
   });
