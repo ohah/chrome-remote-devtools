@@ -278,6 +278,11 @@ export class WebSocketClient {
       clearInterval(this.cleanupInterval);
       this.cleanupInterval = null;
     }
+    // Close WebSocket connection if still open / WebSocket 연결이 열려있으면 종료
+    if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
+      this.socket.close();
+    }
+    this.socket = null;
     this.domain = null;
   }
 }

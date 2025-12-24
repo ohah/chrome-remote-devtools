@@ -18,6 +18,12 @@ export function getHostOrigin(): string {
 }
 
 // Build DevTools popup URL / DevTools 팝업 URL 구성
+// Note: _clientId is currently unused because popup mode uses postMessage transport
+// instead of client-specific WebSocket URLs. It is kept in the signature for potential
+// future use (e.g., client-scoped URLs) and to avoid breaking existing callers.
+// 참고: _clientId는 현재 사용되지 않습니다. 팝업 모드는 클라이언트별 WebSocket URL 대신
+// postMessage transport를 사용하기 때문입니다. 향후 사용 가능성(예: 클라이언트 범위 URL)과
+// 기존 호출자와의 호환성을 위해 시그니처에 유지됩니다.
 export function buildDevToolsUrl(_clientId: string): string {
   const baseUrl = new URL('/devtools-frontend/devtools_app.html', window.location.origin);
   const params = baseUrl.searchParams;

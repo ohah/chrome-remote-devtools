@@ -125,7 +125,7 @@ export default class BaseDomain {
       data !== null &&
       'method' in data &&
       typeof (data as any).method === 'string' &&
-      !('id' in data)
+      (data as any).id === undefined
     );
   }
 

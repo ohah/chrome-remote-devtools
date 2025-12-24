@@ -18,6 +18,12 @@ export function getHostOrigin(): string {
 }
 
 // Build DevTools iframe URL / DevTools iframe URL 구성
+// Note: _clientId is currently unused because DevTools communicates via postMessage
+// instead of a client-specific WebSocket URL. The parameter is kept for API compatibility
+// and potential future use if client-specific configuration is reintroduced.
+// 참고: _clientId는 현재 사용되지 않습니다. DevTools가 클라이언트별 WebSocket URL 대신
+// postMessage를 통해 통신하기 때문입니다. API 호환성과 향후 클라이언트별 설정이 재도입될 경우를
+// 위해 파라미터가 유지됩니다.
 export function buildDevToolsUrl(_clientId: string): string {
   const baseUrl = new URL('/devtools-frontend/devtools_app.html', window.location.origin);
   const params = baseUrl.searchParams;
