@@ -1,6 +1,6 @@
 // DevTools iframe component / DevTools iframe 컴포넌트
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { buildDevToolsUrl, getServerUrl } from '../utils/devtools';
+import { buildDevToolsUrl } from '../utils/devtools';
 
 interface DevToolsIframeProps {
   clientId: string | null;
@@ -112,8 +112,7 @@ export default function DevToolsIframe({ clientId }: DevToolsIframeProps) {
     }
 
     previousClientIdRef.current = clientId;
-    const serverUrl = getServerUrl();
-    const devToolsUrl = buildDevToolsUrl(clientId, serverUrl);
+    const devToolsUrl = buildDevToolsUrl(clientId);
 
     // Only set src if it's different to avoid unnecessary reloads / 불필요한 리로드를 방지하기 위해 다른 경우에만 src 설정
     if (iframeRef.current.src !== devToolsUrl) {

@@ -16,10 +16,6 @@ interface ConsoleCache {
 export default class Runtime extends BaseDomain {
   override namespace = 'Runtime';
 
-  private cacheConsole: ConsoleCache[] = [];
-  private cacheError: ConsoleCache[] = [];
-  private isEnable = false;
-
   constructor(options: { socket: WebSocket | null }) {
     super(options);
     this.hookConsole();
@@ -27,10 +23,6 @@ export default class Runtime extends BaseDomain {
 
   // Enable Runtime domain / Runtime 도메인 활성화
   override enable(): void {
-    this.isEnable = true;
-    this.cacheConsole.forEach((data) => this.send(data));
-    this.cacheError.forEach((data) => this.send(data));
-
     this.send({
       method: Event.executionContextCreated,
       params: {
@@ -120,14 +112,8 @@ export default class Runtime extends BaseDomain {
 
   // Send console/error message / 콘솔/에러 메시지 전송
   private socketSend(type: 'console' | 'error', data: ConsoleCache): void {
-    if (type === 'console') {
-      this.cacheConsole.push(data);
-    } else if (type === 'error') {
-      this.cacheError.push(data);
-    }
-    if (this.isEnable) {
-      this.send(data);
-    }
+    // Always send event (will be stored in IndexedDB if WebSocket is not connected) / 항상 이벤트 전송 (WebSocket이 연결되지 않았으면 IndexedDB에 저장됨)
+    this.send(data);
   }
 
   // Hook console methods / 콘솔 메서드 훅

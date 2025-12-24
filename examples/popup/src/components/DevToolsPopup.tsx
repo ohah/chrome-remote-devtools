@@ -1,6 +1,6 @@
 // DevTools popup component / DevTools 팝업 컴포넌트
-import { useState, useEffect, useRef } from 'react';
-import { buildDevToolsUrl, getServerUrl } from '../utils/devtools';
+import { useEffect, useRef } from 'react';
+import { buildDevToolsUrl } from '../utils/devtools';
 
 interface DevToolsPopupProps {
   clientId: string | null;
@@ -28,8 +28,7 @@ export default function DevToolsPopup({ clientId }: DevToolsPopupProps) {
     }
 
     previousClientIdRef.current = clientId;
-    const serverUrl = getServerUrl();
-    const devToolsUrl = buildDevToolsUrl(clientId, serverUrl);
+    const devToolsUrl = buildDevToolsUrl(clientId);
 
     // Open or update popup / 팝업 열기 또는 업데이트
     if (popupRef.current && !popupRef.current.closed) {
@@ -62,8 +61,7 @@ export default function DevToolsPopup({ clientId }: DevToolsPopupProps) {
       return;
     }
 
-    const serverUrl = getServerUrl();
-    const devToolsUrl = buildDevToolsUrl(clientId, serverUrl);
+    const devToolsUrl = buildDevToolsUrl(clientId);
 
     if (popupRef.current && !popupRef.current.closed) {
       // Focus existing popup / 기존 팝업 포커스
