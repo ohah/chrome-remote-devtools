@@ -24,6 +24,8 @@ export default class BaseDomain {
     this.devtoolsWindow = devtoolsWindow;
     // Send queued events now that DevTools is ready / DevTools가 준비되었으므로 큐에 저장된 이벤트 전송
     this.flushEventQueue();
+    // Send stored events from IndexedDB / IndexedDB에 저장된 이벤트 전송
+    void this.sendStoredEventsFromIndexedDB();
   }
 
   /**
@@ -43,6 +45,55 @@ export default class BaseDomain {
           console.warn('Failed to send queued postMessage event:', e);
         }
       }
+    }
+  }
+
+  /**
+   * Send stored events from IndexedDB to DevTools / IndexedDB에 저장된 이벤트를 DevTools로 전송
+   */
+  private async sendStoredEventsFromIndexedDB(): Promise<void> {
+    if (!this.devtoolsWindow || !this.eventStorage) {
+      return;
+    }
+
+    try {
+      const storedEvents = await this.eventStorage.getEvents();
+      if (storedEvents.length > 0) {
+        console.log(
+          `Sending ${storedEvents.length} stored events to DevTools / 저장된 ${storedEvents.length}개 이벤트를 DevTools로 전송`
+        );
+
+        // Send all events in batches / 모든 이벤트를 배치로 전송
+        const batchSize = 100;
+        for (let i = 0; i < storedEvents.length; i += batchSize) {
+          const batch = storedEvents.slice(i, i + batchSize);
+          for (const event of batch) {
+            const cdpMessage = {
+              type: 'CDP_MESSAGE',
+              message: JSON.stringify({
+                method: event.method,
+                params: event.params,
+              }),
+            };
+            try {
+              this.devtoolsWindow.postMessage(cdpMessage, '*');
+            } catch (e) {
+              console.warn('Failed to send stored event to DevTools:', e);
+            }
+          }
+          // Small delay between batches / 배치 간 작은 지연
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+
+        // Clear events after sending / 전송 후 이벤트 삭제
+        await this.eventStorage.clearEvents();
+        console.log('Cleared stored events after sending / 전송 후 저장된 이벤트 삭제');
+      }
+    } catch (error) {
+      console.error(
+        'Failed to send stored events to DevTools / 저장된 이벤트를 DevTools로 전송 실패:',
+        error
+      );
     }
   }
 
