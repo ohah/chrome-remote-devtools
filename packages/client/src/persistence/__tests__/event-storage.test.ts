@@ -111,18 +111,27 @@ describe('EventStorage', () => {
   });
 
   test('should get events after timestamp / 타임스탬프 이후 이벤트 조회', async () => {
+    // Save first event / 첫 번째 이벤트 저장
     await storage1.saveEvent('Runtime.consoleAPICalled', { type: 'log', args: ['First'] });
-    await new Promise((resolve) => setTimeout(resolve, 20)); // Small delay / 작은 지연
+    // Wait to ensure timestamp difference / 타임스탬프 차이를 보장하기 위해 대기
+    await new Promise((resolve) => setTimeout(resolve, 20));
 
+    // Capture timestamp after first event / 첫 번째 이벤트 이후 타임스탬프 캡처
     const afterTime = Date.now();
-    await new Promise((resolve) => setTimeout(resolve, 10)); // Ensure timestamp difference / 타임스탬프 차이 보장
+    // Wait to ensure subsequent events have later timestamps / 이후 이벤트가 더 늦은 타임스탬프를 갖도록 대기
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    // Save events after the captured timestamp / 캡처된 타임스탬프 이후 이벤트 저장
     await storage1.saveEvent('Runtime.consoleAPICalled', { type: 'log', args: ['Second'] });
     await storage1.saveEvent('Network.requestWillBeSent', { requestId: '123' });
 
     const eventsAfter = await storage1.getEventsAfter(afterTime);
-    // Should have at least 2 events (may have more if timestamps are same) / 최소 2개 이벤트 (타임스탬프가 같으면 더 많을 수 있음)
-    expect(eventsAfter.length).toBeGreaterThanOrEqual(2);
+    // Should have exactly 2 events saved after afterTime / afterTime 이후에 저장된 정확히 2개 이벤트
+    expect(eventsAfter.length).toBe(2);
     expect(eventsAfter.every((e) => e.timestamp >= afterTime)).toBe(true);
+    // Verify event order / 이벤트 순서 확인
+    expect(eventsAfter[0]?.method).toBe('Runtime.consoleAPICalled');
+    expect(eventsAfter[1]?.method).toBe('Network.requestWillBeSent');
   });
 
   test('should clear all events / 모든 이벤트 삭제', async () => {
@@ -156,10 +165,6 @@ describe('EventStorage', () => {
       );
       return;
     }
-
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout')), 3000)
-    );
 
     const compressedStorage = new EventStorage({
       clientId: 'compressed-client',

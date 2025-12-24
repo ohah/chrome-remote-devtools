@@ -105,11 +105,13 @@ describe('Compression', () => {
       setTimeout(() => reject(new Error('Timeout')), 3000)
     );
 
-    // Invalid data should still compress (gzip can compress anything) / 잘못된 데이터도 압축 가능 (gzip은 모든 것을 압축 가능)
-    // But we test error handling / 하지만 에러 처리 테스트
+    // Empty string is valid and will compress successfully / 빈 문자열은 유효하며 성공적으로 압축됨
+    // This test verifies that compress handles valid input correctly / 이 테스트는 compress가 유효한 입력을 올바르게 처리하는지 확인
     const result = await Promise.race([compress(''), timeout]);
-    // Empty string might compress to small buffer / 빈 문자열은 작은 버퍼로 압축될 수 있음
-    expect(result === null || result instanceof ArrayBuffer).toBe(true);
+    // Empty string compresses to a small buffer / 빈 문자열은 작은 버퍼로 압축됨
+    expect(result).not.toBeNull();
+    expect(result).toBeInstanceOf(ArrayBuffer);
+    // Note: Testing actual compression failure would require mocking CompressionStream / 참고: 실제 압축 실패 테스트는 CompressionStream 모킹이 필요함
   });
 
   test('should return null when decompression fails / 압축 해제 실패 시 null 반환', async () => {
