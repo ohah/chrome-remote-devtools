@@ -1,6 +1,6 @@
 // Create router instance / 라우터 인스턴스 생성
 import { createRouter } from '@tanstack/react-router';
-import { routeTree } from '@/routeTree.gen';
+import { routeTree } from '../routeTree.gen';
 
 // Create router / 라우터 생성
 export const router = createRouter({
@@ -14,4 +14,3 @@ declare module '@tanstack/react-router' {
     router: typeof router;
   }
 }
-

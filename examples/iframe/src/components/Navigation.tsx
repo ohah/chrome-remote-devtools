@@ -1,80 +1,38 @@
-// Navigation component / 네비게이션 컴포넌트
 import { Link, useLocation } from '@tanstack/react-router';
 
-interface NavigationProps {
-  clientId: string | null;
-  showIframe: boolean;
-  showPopup: boolean;
-  onToggleIframe: () => void;
-  onTogglePopup: () => void;
-}
-
-export default function Navigation({
-  clientId,
-  showIframe,
-  showPopup,
-  onToggleIframe,
-  onTogglePopup,
-}: NavigationProps) {
+// Navigation component / 네비게이션 컴포넌트
+export default function Navigation() {
   const location = useLocation();
 
+  const navLinks = [
+    { path: '/', label: 'Home / 홈' },
+    { path: '/console', label: 'Console' },
+    { path: '/network', label: 'Network' },
+    { path: '/storage', label: 'Storage' },
+  ];
+
   return (
-    <nav className="bg-indigo-600 text-white p-4">
-      <div className="max-w-5xl mx-auto flex items-center justify-between">
+    <nav className="bg-gray-900 border-b border-gray-700 shadow-lg sticky top-0 z-[100]">
+      <div className="w-full max-w-none mx-0 px-8 flex items-center justify-between h-15 box-border">
+        <Link to="/" className="text-xl font-semibold text-blue-400 no-underline">
+          Chrome Remote DevTools
+        </Link>
         <div className="flex gap-4">
-          <Link
-            to="/"
-            className={`px-4 py-2 rounded transition-colors no-underline ${
-              location.pathname === '/' ? 'bg-indigo-700' : 'hover:bg-indigo-500'
-            }`}
-          >
-            Home / 홈
-          </Link>
-          <Link
-            to="/test"
-            className={`px-4 py-2 rounded transition-colors no-underline ${
-              location.pathname === '/test' ? 'bg-indigo-700' : 'hover:bg-indigo-500'
-            }`}
-          >
-            Test / 테스트
-          </Link>
-          <Link
-            to="/about"
-            className={`px-4 py-2 rounded transition-colors no-underline ${
-              location.pathname === '/about' ? 'bg-indigo-700' : 'hover:bg-indigo-500'
-            }`}
-          >
-            About / 정보
-          </Link>
-        </div>
-        <div className="flex gap-2 items-center">
-          <div className="text-sm mr-4">
-            <strong>Client ID:</strong> {clientId || 'Not connected / 연결되지 않음'}
-          </div>
-          <button
-            onClick={onToggleIframe}
-            className={`px-4 py-2 text-sm border-none rounded transition-colors ${
-              showIframe
-                ? 'bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700'
-                : 'bg-gray-500 hover:bg-gray-600 active:bg-gray-700'
-            }`}
-          >
-            {showIframe ? 'Hide' : 'Show'} iframe
-          </button>
-          <button
-            onClick={onTogglePopup}
-            disabled={!clientId}
-            className={`px-4 py-2 text-sm border-none rounded transition-colors ${
-              showPopup
-                ? 'bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700'
-                : 'bg-gray-500 hover:bg-gray-600 active:bg-gray-700'
-            } ${!clientId ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {showPopup ? 'Close' : 'Open'} Popup
-          </button>
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`px-4 py-2 no-underline rounded transition-all text-sm ${
+                location.pathname === link.path
+                  ? 'bg-blue-500 text-white'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-blue-400'
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
       </div>
     </nav>
   );
 }
-
