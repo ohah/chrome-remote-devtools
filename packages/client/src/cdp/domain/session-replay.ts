@@ -14,6 +14,42 @@ export default class SessionReplay extends BaseDomain {
   // Enable SessionReplay domain / SessionReplay 도메인 활성화
   override enable(): void {
     this.isEnabled = true;
+
+    // Automatically replay stored events when enabled (same as WebSocket mode) / 활성화 시 저장된 이벤트 자동 재생 (웹소켓 모드와 동일)
+    void this.replayStoredEvents().catch((error) => {
+      console.error(
+        'Failed to replay stored SessionReplay events / 저장된 SessionReplay 이벤트 재생 실패:',
+        error
+      );
+    });
+  }
+
+  // Override setDevToolsWindow to replay stored events when DevTools is ready (postMessage mode) / DevTools 준비 시 저장된 이벤트를 재생하도록 setDevToolsWindow 오버라이드 (postMessage 모드)
+  override setDevToolsWindow(devtoolsWindow: Window): void {
+    // Set devtoolsWindow first so replayStoredEvents() can use it / replayStoredEvents()가 사용할 수 있도록 먼저 devtoolsWindow 설정
+    this.devtoolsWindow = devtoolsWindow;
+
+    // Replay stored events if enabled (postMessage mode) / 활성화된 경우 저장된 이벤트 재생 (postMessage 모드)
+    // Wait for replayStoredEvents() to complete before calling super.setDevToolsWindow() / super.setDevToolsWindow() 호출 전에 replayStoredEvents() 완료 대기
+    if (this.isEnabled) {
+      void this.replayStoredEvents()
+        .then(() => {
+          // Call super.setDevToolsWindow() after replaying SessionReplay events / SessionReplay 이벤트 재생 후 super.setDevToolsWindow() 호출
+          // This will send other events (console, network) and clear all events / 다른 이벤트(console, network)를 전송하고 모든 이벤트를 삭제함
+          super.setDevToolsWindow(devtoolsWindow);
+        })
+        .catch((error) => {
+          console.error(
+            'Failed to replay stored SessionReplay events after DevTools ready / DevTools 준비 후 저장된 SessionReplay 이벤트 재생 실패:',
+            error
+          );
+          // Still call super.setDevToolsWindow() even if replay failed / 재생 실패해도 super.setDevToolsWindow() 호출
+          super.setDevToolsWindow(devtoolsWindow);
+        });
+    } else {
+      // If not enabled, just call super.setDevToolsWindow() / 활성화되지 않았으면 super.setDevToolsWindow()만 호출
+      super.setDevToolsWindow(devtoolsWindow);
+    }
   }
 
   // Disable SessionReplay domain / SessionReplay 도메인 비활성화
@@ -45,10 +81,7 @@ export default class SessionReplay extends BaseDomain {
 
   // Replay stored events / 저장된 이벤트 재생
   async replayStoredEvents(): Promise<{ success: boolean; count?: number }> {
-    if (!this.eventStorage || !this.socket) {
-      console.warn(
-        'Cannot replay SessionReplay events: eventStorage or socket not available / SessionReplay 이벤트 재생 불가: eventStorage 또는 socket이 사용 불가'
-      );
+    if (!this.eventStorage) {
       return { success: false };
     }
 
@@ -62,13 +95,12 @@ export default class SessionReplay extends BaseDomain {
         return { success: true, count: 0 };
       }
 
-      // Send stored SessionReplay events directly via WebSocket / 저장된 SessionReplay 이벤트를 WebSocket으로 직접 전송
-      // Use direct socket.send() instead of this.send() to avoid re-storing events / 이벤트를 다시 저장하지 않도록 this.send() 대신 직접 socket.send() 사용
       let sentCount = 0;
       for (const event of sessionReplayEvents) {
         const params = event.params as { events?: unknown[] };
         if (params && Array.isArray(params.events) && params.events.length > 0) {
-          if (this.socket.readyState === WebSocket.OPEN) {
+          // For WebSocket mode: send directly / WebSocket 모드: 직접 전송
+          if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(
               JSON.stringify({
                 method: Event.sessionReplayEventRecorded,
@@ -78,14 +110,46 @@ export default class SessionReplay extends BaseDomain {
               })
             );
             sentCount++;
-          } else {
-            console.warn(
-              `WebSocket not open, cannot send SessionReplay event / WebSocket이 열려있지 않아 SessionReplay 이벤트 전송 불가`
-            );
+          } else if (!this.socket) {
+            // For postMessage mode: send directly via postMessage (like BaseDomain.sendStoredEventsFromIndexedDB) / postMessage 모드: postMessage로 직접 전송 (BaseDomain.sendStoredEventsFromIndexedDB처럼)
+            if (this.devtoolsWindow) {
+              const cdpMessage = {
+                type: 'CDP_MESSAGE',
+                message: JSON.stringify({
+                  method: Event.sessionReplayEventRecorded,
+                  params: {
+                    events: params.events,
+                  },
+                }),
+              };
+              try {
+                this.devtoolsWindow.postMessage(cdpMessage, '*');
+                sentCount++;
+              } catch (error) {
+                console.warn(
+                  '[SessionReplay] Failed to send event via postMessage / [SessionReplay] postMessage로 이벤트 전송 실패:',
+                  error
+                );
+              }
+            } else {
+              // DevTools window not ready yet, will retry when setDevToolsWindow is called / DevTools window가 아직 준비되지 않음, setDevToolsWindow 호출 시 재시도
+              return { success: false };
+            }
           }
           // Small delay between events / 이벤트 간 작은 지연
           await new Promise((resolve) => setTimeout(resolve, 10));
+        } else {
+          console.warn(
+            `[SessionReplay] Event params invalid or empty events array / [SessionReplay] 이벤트 params가 유효하지 않거나 events 배열이 비어있음:`,
+            params
+          );
         }
+      }
+
+      // Clear SessionReplay events after sending / 전송 후 SessionReplay 이벤트 삭제
+      if (sentCount > 0 && this.eventStorage) {
+        // Clear only SessionReplay events / SessionReplay 이벤트만 삭제
+        await this.eventStorage.clearEvents(['SessionReplay.']);
       }
 
       return { success: true, count: sentCount };
