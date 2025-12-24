@@ -27,6 +27,9 @@ export class WebSocketClient {
    * Initialize WebSocket connection / WebSocket 연결 초기화
    */
   async initialize(): Promise<void> {
+    // Initialize event storage first (for both WebSocket and postMessage modes) / 먼저 이벤트 저장소 초기화 (WebSocket 및 postMessage 모드 모두)
+    await this.initializeEventStorage();
+
     // Skip WebSocket and use postMessage only / WebSocket 건너뛰고 postMessage만 사용
     if (this.skipWebSocket) {
       await this.initializePostMessageMode();
@@ -41,9 +44,10 @@ export class WebSocketClient {
    */
   private async initializePostMessageMode(): Promise<void> {
     // Initialize domain without WebSocket for postMessage mode / postMessage 모드를 위해 WebSocket 없이 도메인 초기화
+    // Use eventStorage so events are saved to IndexedDB / 이벤트가 IndexedDB에 저장되도록 eventStorage 사용
     const domain = new ChromeDomain({
       socket: null,
-      eventStorage: undefined,
+      eventStorage: this.eventStorage,
     });
     this.domain = domain;
     this.onDomainCreated?.(domain);
@@ -70,10 +74,8 @@ export class WebSocketClient {
     );
     this.socket = socket;
 
-    // Initialize event storage / 이벤트 저장소 초기화
-    await this.initializeEventStorage();
-
     // Create domain with socket and event storage / 소켓과 이벤트 저장소로 도메인 생성
+    // Event storage is already initialized in initialize() / 이벤트 저장소는 이미 initialize()에서 초기화됨
     const domain = new ChromeDomain({ socket, eventStorage: this.eventStorage });
     this.domain = domain;
     this.onDomainCreated?.(domain);

@@ -14,6 +14,7 @@ export type CDPResponse =
  */
 export class PostMessageHandler {
   private handler: ((event: MessageEvent) => void) | null = null;
+  private devtoolsWindow: Window | null = null;
 
   constructor(private domain: ChromeDomain | null) {
     this.setup();
@@ -24,6 +25,10 @@ export class PostMessageHandler {
    */
   setDomain(domain: ChromeDomain | null): void {
     this.domain = domain;
+    // Update DevTools window in domain if available / 도메인에 DevTools window가 있으면 업데이트
+    if (this.devtoolsWindow && domain) {
+      domain.setDevToolsWindow(this.devtoolsWindow);
+    }
   }
 
   /**
@@ -32,6 +37,19 @@ export class PostMessageHandler {
   private setup(): void {
     this.handler = this.handleMessage.bind(this);
     window.addEventListener('message', this.handler);
+  }
+
+  /**
+   * Check if source is a valid Window object / source가 유효한 Window 객체인지 확인
+   * Uses postMessage method check instead of instanceof for cross-origin compatibility / 크로스 오리진 호환성을 위해 instanceof 대신 postMessage 메서드 확인 사용
+   */
+  private isWindow(source: MessageEventSource | null): source is Window {
+    return (
+      source !== null &&
+      typeof source === 'object' &&
+      'postMessage' in source &&
+      typeof (source as any).postMessage === 'function'
+    );
   }
 
   /**
@@ -45,6 +63,27 @@ export class PostMessageHandler {
 
     // Handle DEVTOOLS_READY message / DEVTOOLS_READY 메시지 처리
     if (event.data.type === 'DEVTOOLS_READY') {
+      // Try to store DevTools window reference / DevTools window 참조 저장 시도
+      // Use isWindow() helper instead of instanceof for cross-origin compatibility / 크로스 오리진 호환성을 위해 instanceof 대신 isWindow() 헬퍼 사용
+      if (this.isWindow(event.source)) {
+        this.devtoolsWindow = event.source;
+        console.log(
+          'DevTools ready, window stored from DEVTOOLS_READY / DevTools 준비 완료, DEVTOOLS_READY에서 window 저장됨'
+        );
+        // Update domain with DevTools window / 도메인에 DevTools window 업데이트
+        if (this.domain) {
+          this.domain.setDevToolsWindow(this.devtoolsWindow);
+        }
+      } else {
+        // event.source is not available, will try to get it from CDP_MESSAGE / event.source를 사용할 수 없음, CDP_MESSAGE에서 시도할 예정
+        console.log(
+          'DEVTOOLS_READY received, will store window from next CDP_MESSAGE / DEVTOOLS_READY 수신, 다음 CDP_MESSAGE에서 window 저장 예정',
+          {
+            source: event.source,
+            sourceType: typeof event.source,
+          }
+        );
+      }
       // Notify that DevTools is ready / DevTools 준비 완료 알림
       window.dispatchEvent(new CustomEvent('devtools-ready', { detail: { ready: true } }));
       return;
@@ -52,6 +91,17 @@ export class PostMessageHandler {
 
     // Handle CDP_MESSAGE type (from PostMessageTransport) / CDP_MESSAGE 타입 처리 (PostMessageTransport에서)
     if (event.data.type === 'CDP_MESSAGE' && event.data.message) {
+      // Store DevTools window if not already stored / 아직 저장되지 않았으면 DevTools window 저장
+      if (!this.devtoolsWindow && this.isWindow(event.source)) {
+        this.devtoolsWindow = event.source;
+        console.log(
+          'DevTools window stored from CDP_MESSAGE / CDP_MESSAGE에서 DevTools window 저장됨'
+        );
+        // Update domain with DevTools window / 도메인에 DevTools window 업데이트
+        if (this.domain) {
+          this.domain.setDevToolsWindow(this.devtoolsWindow);
+        }
+      }
       this.handleCDPMessage(event, true);
       return;
     }
@@ -94,7 +144,7 @@ export class PostMessageHandler {
     useLegacyFormat: boolean = false
   ): void {
     const send = (response: { id?: number; result?: unknown; error?: unknown }) => {
-      if (response.id !== undefined && source instanceof Window) {
+      if (response.id !== undefined && this.isWindow(source)) {
         try {
           if (useLegacyFormat) {
             // Legacy format / 레거시 형식
