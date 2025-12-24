@@ -69,10 +69,14 @@ test.describe('Storage Domain Integration', () => {
     const getStorageKeyMessage = createStorageGetStorageKeyMessage();
     inspector.send(getStorageKeyMessage);
 
-    const response = await inspector.receive();
-    expect(isCDPResponse(response)).toBe(true);
+    // Wait for specific response, skipping other messages / 다른 메시지를 건너뛰고 특정 응답 대기
+    const response = await waitForCDPResponse(
+      inspector.receive.bind(inspector),
+      getStorageKeyMessage.id
+    );
+    expect(response).toBeTruthy();
 
-    if (isCDPResponse(response) && response.id === getStorageKeyMessage.id) {
+    if (response && response.id === getStorageKeyMessage.id) {
       expect(response.result).toHaveProperty('storageKey');
       expect(typeof (response.result as { storageKey?: string })?.storageKey).toBe('string');
     }
