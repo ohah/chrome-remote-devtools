@@ -11,19 +11,13 @@ import {
   protocol,
 } from './domain';
 import type BaseDomain from './domain/base';
-import type { EventStorage } from '../persistence/event-storage';
-
-interface CDPMessage {
-  id?: number;
-  method?: string;
-  params?: unknown;
-}
+import type { CDPMessage, CDPResponse, DomainOptions } from './types';
 
 export default class ChromeDomain {
   private protocol: Record<string, (...args: unknown[]) => unknown> = {};
   private domains: BaseDomain[] = [];
 
-  constructor(options: { socket: WebSocket | null; eventStorage?: EventStorage }) {
+  constructor(options: DomainOptions) {
     this.registerProtocol(options);
   }
 
@@ -41,11 +35,7 @@ export default class ChromeDomain {
   /**
    * Execute CDP method / CDP 메서드 실행
    */
-  execute(
-    message: CDPMessage = {}
-  ):
-    | { id?: number; result?: unknown; error?: unknown }
-    | Promise<{ id?: number; result?: unknown; error?: unknown }> {
+  execute(message: CDPMessage = {}): CDPResponse | Promise<CDPResponse> {
     const { id, method, params } = message;
     if (!method) {
       return { id };
@@ -85,10 +75,7 @@ export default class ChromeDomain {
   /**
    * Register all CDP domains / 모든 CDP 도메인 등록
    */
-  private registerProtocol(options: {
-    socket: WebSocket | null;
-    eventStorage?: EventStorage;
-  }): void {
+  private registerProtocol(options: DomainOptions): void {
     const domains = [
       new Runtime(options),
       new Page(options),
@@ -97,7 +84,7 @@ export default class ChromeDomain {
       new Console(options),
       new DOMStorage(options),
       new Storage(options),
-      new SessionReplay({ socket: options.socket, eventStorage: options.eventStorage }),
+      new SessionReplay(options),
     ];
 
     // Store domains for later DevTools window updates / 나중에 DevTools window 업데이트를 위해 도메인 저장

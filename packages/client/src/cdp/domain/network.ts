@@ -2,6 +2,7 @@
 import { key2UpperCase } from '../common/utils';
 import BaseDomain from './base';
 import { Event } from './protocol';
+import type { DomainOptions } from '../types';
 
 const getTimestamp = () => Date.now() / 1000;
 
@@ -31,7 +32,7 @@ export default class Network extends BaseDomain {
   // Use WeakMap for XHR metadata to avoid memory leaks / 메모리 누수 방지를 위해 XHR 메타데이터에 WeakMap 사용
   private xhrMetadata = new WeakMap<XMLHttpRequest, { method: string; url: string }>();
 
-  constructor(options: { socket: WebSocket | null }) {
+  constructor(options: DomainOptions) {
     super(options);
     this.hookXhr();
     this.hookFetch();
