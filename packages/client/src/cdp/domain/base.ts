@@ -131,6 +131,7 @@ export default class BaseDomain {
 
   /**
    * Send stored events from IndexedDB to DevTools / IndexedDB에 저장된 이벤트를 DevTools로 전송
+   * Note: SessionReplay events are excluded and handled separately by SessionReplay domain / 참고: SessionReplay 이벤트는 제외되고 SessionReplay 도메인에서 별도로 처리됨
    */
   private async sendStoredEventsFromIndexedDB(): Promise<void> {
     if (!this.devtoolsWindow || !this.eventStorage) {
@@ -140,28 +141,29 @@ export default class BaseDomain {
     try {
       const storedEvents = await this.eventStorage.getEvents();
       if (storedEvents.length > 0) {
-        console.log(
-          `Sending ${storedEvents.length} stored events to DevTools / 저장된 ${storedEvents.length}개 이벤트를 DevTools로 전송`
-        );
+        // Filter out SessionReplay events (handled separately by SessionReplay domain) / SessionReplay 이벤트 제외 (SessionReplay 도메인에서 별도 처리)
+        const eventsToSend = storedEvents.filter((e) => !e.method.startsWith('SessionReplay.'));
 
-        // Send all events in batches / 모든 이벤트를 배치로 전송
-        const batchSize = 100;
-        for (let i = 0; i < storedEvents.length; i += batchSize) {
-          const batch = storedEvents.slice(i, i + batchSize);
-          for (const event of batch) {
-            const cdpMessage = this.createCDPMessage({
-              method: event.method,
-              params: event.params,
-            });
-            this.sendViaPostMessage(cdpMessage, this.devtoolsWindow!);
+        if (eventsToSend.length > 0) {
+          // Send all events in batches / 모든 이벤트를 배치로 전송
+          const batchSize = 100;
+          for (let i = 0; i < eventsToSend.length; i += batchSize) {
+            const batch = eventsToSend.slice(i, i + batchSize);
+            for (const event of batch) {
+              const cdpMessage = this.createCDPMessage({
+                method: event.method,
+                params: event.params,
+              });
+              this.sendViaPostMessage(cdpMessage, this.devtoolsWindow!);
+            }
+            // Small delay between batches / 배치 간 작은 지연
+            await new Promise((resolve) => setTimeout(resolve, 10));
           }
-          // Small delay between batches / 배치 간 작은 지연
-          await new Promise((resolve) => setTimeout(resolve, 10));
         }
 
-        // Clear events after sending / 전송 후 이벤트 삭제
-        await this.eventStorage.clearEvents();
-        console.log('Cleared stored events after sending / 전송 후 저장된 이벤트 삭제');
+        // Clear non-SessionReplay events after sending / 전송 후 SessionReplay가 아닌 이벤트 삭제
+        // SessionReplay events will be sent separately by SessionReplay.replayStoredEvents() / SessionReplay 이벤트는 SessionReplay.replayStoredEvents()에서 별도로 전송됨
+        await this.eventStorage.clearEvents(['SessionReplay.']);
       }
     } catch (error) {
       console.error(

@@ -492,8 +492,9 @@ export class EventStorage {
 
   /**
    * Clear all events for this client / 현재 클라이언트의 모든 이벤트 삭제
+   * @param excludeMethods - Methods to exclude from clearing (e.g., 'SessionReplay.eventRecorded') / 삭제에서 제외할 메서드 (예: 'SessionReplay.eventRecorded')
    */
-  async clearEvents(): Promise<void> {
+  async clearEvents(excludeMethods?: string[]): Promise<void> {
     if (!this.db) {
       return;
     }
@@ -507,8 +508,17 @@ export class EventStorage {
       request.onsuccess = (event) => {
         const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
         if (cursor) {
-          cursor.delete();
-          cursor.continue();
+          const storedEvent = cursor.value as StoredEvent;
+          // Skip events that should be excluded / 제외해야 할 이벤트 건너뛰기
+          if (
+            excludeMethods &&
+            excludeMethods.some((method) => storedEvent.method.startsWith(method))
+          ) {
+            cursor.continue();
+          } else {
+            cursor.delete();
+            cursor.continue();
+          }
         } else {
           resolve();
         }
