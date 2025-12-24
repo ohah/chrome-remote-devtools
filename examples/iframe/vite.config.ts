@@ -151,7 +151,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '/devtools-frontend': devtoolsPath,
-      '@': path.resolve(__dirname, './src'),
     },
     // Allow accessing files outside of project root / 프로젝트 루트 외부 파일 접근 허용
     preserveSymlinks: false,

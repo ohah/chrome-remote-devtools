@@ -1,11 +1,7 @@
-// Index route / 인덱스 라우트 (Home page / 홈 페이지)
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { Link } from 'react-router-dom';
 
-export const Route = createFileRoute('/')({
-  component: HomePage,
-});
-
-function HomePage() {
+// Home page / 홈 페이지
+export default function HomePage() {
   return (
     <div className="p-8 text-center w-full box-border bg-gray-900 min-h-screen">
       <h1 className="mb-4 text-white text-4xl font-semibold">Chrome Remote DevTools Test</h1>
