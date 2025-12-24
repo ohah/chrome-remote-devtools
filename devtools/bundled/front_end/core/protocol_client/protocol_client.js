@@ -1272,6 +1272,10 @@ function registerCommands(inspectorBackend2) {
   inspectorBackend2.registerType("Storage.AttributionReportingNamedBudgetCandidate", [{ "name": "name", "type": "string", "optional": true, "description": "", "typeRef": null }, { "name": "filters", "type": "object", "optional": false, "description": "", "typeRef": "Storage.AttributionReportingFilterPair" }]);
   inspectorBackend2.registerType("Storage.AttributionReportingTriggerRegistration", [{ "name": "filters", "type": "object", "optional": false, "description": "", "typeRef": "Storage.AttributionReportingFilterPair" }, { "name": "debugKey", "type": "string", "optional": true, "description": "", "typeRef": "Storage.UnsignedInt64AsBase10" }, { "name": "aggregatableDedupKeys", "type": "array", "optional": false, "description": "", "typeRef": "Storage.AttributionReportingAggregatableDedupKey" }, { "name": "eventTriggerData", "type": "array", "optional": false, "description": "", "typeRef": "Storage.AttributionReportingEventTriggerData" }, { "name": "aggregatableTriggerData", "type": "array", "optional": false, "description": "", "typeRef": "Storage.AttributionReportingAggregatableTriggerData" }, { "name": "aggregatableValues", "type": "array", "optional": false, "description": "", "typeRef": "Storage.AttributionReportingAggregatableValueEntry" }, { "name": "aggregatableFilteringIdMaxBytes", "type": "number", "optional": false, "description": "", "typeRef": null }, { "name": "debugReporting", "type": "boolean", "optional": false, "description": "", "typeRef": null }, { "name": "aggregationCoordinatorOrigin", "type": "string", "optional": true, "description": "", "typeRef": null }, { "name": "sourceRegistrationTimeConfig", "type": "string", "optional": false, "description": "", "typeRef": "Storage.AttributionReportingSourceRegistrationTimeConfig" }, { "name": "triggerContextId", "type": "string", "optional": true, "description": "", "typeRef": null }, { "name": "aggregatableDebugReportingConfig", "type": "object", "optional": false, "description": "", "typeRef": "Storage.AttributionReportingAggregatableDebugReportingConfig" }, { "name": "scopes", "type": "array", "optional": false, "description": "", "typeRef": "string" }, { "name": "namedBudgets", "type": "array", "optional": false, "description": "", "typeRef": "Storage.AttributionReportingNamedBudgetCandidate" }]);
   inspectorBackend2.registerType("Storage.RelatedWebsiteSet", [{ "name": "primarySites", "type": "array", "optional": false, "description": "The primary site of this set, along with the ccTLDs if there is any.", "typeRef": "string" }, { "name": "associatedSites", "type": "array", "optional": false, "description": "The associated sites of this set, along with the ccTLDs if there is any.", "typeRef": "string" }, { "name": "serviceSites", "type": "array", "optional": false, "description": "The service sites of this set, along with the ccTLDs if there is any.", "typeRef": "string" }]);
+  inspectorBackend2.registerEvent("SessionReplay.eventRecorded", ["events"]);
+  inspectorBackend2.registerCommand("SessionReplay.enable", [], [], "Enables the SessionReplay domain.");
+  inspectorBackend2.registerCommand("SessionReplay.disable", [], [], "Disables the SessionReplay domain.");
+  inspectorBackend2.registerCommand("SessionReplay.sendEvent", [{ "name": "events", "type": "array", "optional": false, "description": "Array of rrweb events.", "typeRef": null }], [], "Sends rrweb events to the SessionReplay domain.");
   inspectorBackend2.registerEnum("SystemInfo.SubsamplingFormat", { Yuv420: "yuv420", Yuv422: "yuv422", Yuv444: "yuv444" });
   inspectorBackend2.registerEnum("SystemInfo.ImageType", { Jpeg: "jpeg", Webp: "webp", Unknown: "unknown" });
   inspectorBackend2.registerCommand("SystemInfo.getInfo", [], ["gpu", "modelName", "modelVersion", "commandLine"], "Returns information about the system.");
@@ -1840,6 +1844,9 @@ var TargetBase = class {
   storageAgent() {
     return this.getAgent("Storage");
   }
+  sessionReplayAgent() {
+    return this.getAgent("SessionReplay");
+  }
   systemInfo() {
     return this.getAgent("SystemInfo");
   }
@@ -1952,6 +1959,9 @@ var TargetBase = class {
   }
   registerStorageDispatcher(dispatcher) {
     this.registerDispatcher("Storage", dispatcher);
+  }
+  registerSessionReplayDispatcher(dispatcher) {
+    this.registerDispatcher("SessionReplay", dispatcher);
   }
   registerTargetDispatcher(dispatcher) {
     this.registerDispatcher("Target", dispatcher);

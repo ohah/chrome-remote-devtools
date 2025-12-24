@@ -100,6 +100,8 @@ declare namespace ProtocolProxyApi {
 
     Storage: StorageApi;
 
+    SessionReplay: SessionReplayApi;
+
     SystemInfo: SystemInfoApi;
 
     Target: TargetApi;
@@ -206,6 +208,8 @@ declare namespace ProtocolProxyApi {
     ServiceWorker: ServiceWorkerDispatcher;
 
     Storage: StorageDispatcher;
+
+    SessionReplay: SessionReplayDispatcher;
 
     SystemInfo: SystemInfoDispatcher;
 
@@ -4082,6 +4086,31 @@ declare namespace ProtocolProxyApi {
     attributionReportingReportSent(params: Protocol.Storage.AttributionReportingReportSentEvent): void;
 
     attributionReportingVerboseDebugReportSent(params: Protocol.Storage.AttributionReportingVerboseDebugReportSentEvent): void;
+
+  }
+
+  export interface SessionReplayApi {
+    /**
+     * Enables the SessionReplay domain.
+     */
+    invoke_enable(): Promise<Protocol.ProtocolResponseWithError>;
+
+    /**
+     * Disables the SessionReplay domain.
+     */
+    invoke_disable(): Promise<Protocol.ProtocolResponseWithError>;
+
+    /**
+     * Sends rrweb events to the SessionReplay domain.
+     */
+    invoke_sendEvent(params: Protocol.SessionReplay.SendEventRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+  }
+  export interface SessionReplayDispatcher {
+    /**
+     * Issued when rrweb events are recorded.
+     */
+    eventRecorded(params: Protocol.SessionReplay.EventRecordedEvent): void;
 
   }
 

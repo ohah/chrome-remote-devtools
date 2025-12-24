@@ -316,6 +316,9 @@ export class TargetBase {
     storageAgent() {
         return this.getAgent('Storage');
     }
+    sessionReplayAgent() {
+        return this.getAgent('SessionReplay');
+    }
     systemInfo() {
         return this.getAgent('SystemInfo');
     }
@@ -428,6 +431,9 @@ export class TargetBase {
     }
     registerStorageDispatcher(dispatcher) {
         this.registerDispatcher('Storage', dispatcher);
+    }
+    registerSessionReplayDispatcher(dispatcher) {
+        this.registerDispatcher('SessionReplay', dispatcher);
     }
     registerTargetDispatcher(dispatcher) {
         this.registerDispatcher('Target', dispatcher);

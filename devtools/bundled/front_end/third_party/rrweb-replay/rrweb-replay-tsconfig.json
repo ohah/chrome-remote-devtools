@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "allowJs": true,
+    "checkJs": false
+  },
+  "files": [
+    "package/dist/replay.js"
+  ]
+}
