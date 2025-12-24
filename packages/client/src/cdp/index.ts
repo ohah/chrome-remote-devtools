@@ -21,7 +21,7 @@ interface CDPMessage {
 export default class ChromeDomain {
   private protocol: Record<string, (...args: unknown[]) => unknown> = {};
 
-  constructor(options: { socket: WebSocket; eventStorage?: EventStorage }) {
+  constructor(options: { socket: WebSocket | null; eventStorage?: EventStorage }) {
     this.registerProtocol(options);
   }
 
@@ -72,7 +72,10 @@ export default class ChromeDomain {
   /**
    * Register all CDP domains / 모든 CDP 도메인 등록
    */
-  private registerProtocol(options: { socket: WebSocket; eventStorage?: EventStorage }): void {
+  private registerProtocol(options: {
+    socket: WebSocket | null;
+    eventStorage?: EventStorage;
+  }): void {
     const domains = [
       new Runtime(options),
       new Page(options),

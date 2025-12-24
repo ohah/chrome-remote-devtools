@@ -6,6 +6,18 @@ interface DevToolsIframeProps {
   clientId: string | null;
 }
 
+// Message types for postMessage communication / postMessage 통신을 위한 메시지 타입
+interface CDPMessage {
+  type: 'CDP_MESSAGE';
+  message: string;
+}
+
+interface DevToolsReadyMessage {
+  type: 'DEVTOOLS_READY';
+}
+
+type PostMessageData = CDPMessage | DevToolsReadyMessage;
+
 export default function DevToolsIframe({ clientId }: DevToolsIframeProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const draggableRef = useRef<HTMLDivElement>(null);
@@ -120,6 +132,75 @@ export default function DevToolsIframe({ clientId }: DevToolsIframeProps) {
       iframeRef.current.src = devToolsUrl;
     }
   }, [clientId]);
+
+  // Setup postMessage listener for client script / 클라이언트 스크립트를 위한 postMessage 리스너 설정
+  useEffect(() => {
+    if (!clientId) return;
+
+    // Listen for CDP messages from client script (via postMessage) / 클라이언트 스크립트로부터 CDP 메시지 수신 (postMessage를 통해)
+    const handleClientMessage = (event: MessageEvent<PostMessageData>) => {
+      // Only accept messages from same origin / 같은 origin으로부터의 메시지만 수락
+      if (event.origin !== window.location.origin) {
+        return;
+      }
+
+      // Only accept CDP_MESSAGE type (ignore SET_DEBUG_ID and others) / CDP_MESSAGE 타입만 수락 (SET_DEBUG_ID 등은 무시)
+      if (event.data?.type === 'CDP_MESSAGE') {
+        // Forward CDP message from client to DevTools iframe / 클라이언트로부터 받은 CDP 메시지를 DevTools iframe에 전달
+        if (iframeRef.current?.contentWindow) {
+          iframeRef.current.contentWindow.postMessage(event.data, '*');
+        }
+      }
+    };
+
+    window.addEventListener('message', handleClientMessage);
+
+    return () => {
+      window.removeEventListener('message', handleClientMessage);
+    };
+  }, [clientId]);
+
+  // Setup postMessage listener for DevTools iframe / DevTools iframe을 위한 postMessage 리스너 설정
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent<PostMessageData>) => {
+      // Only accept messages from DevTools iframe / DevTools iframe으로부터의 메시지만 수락
+      if (event.source !== iframeRef.current?.contentWindow) {
+        return;
+      }
+
+      if (event.data?.type === 'CDP_MESSAGE') {
+        // Forward CDP message from DevTools to client script / DevTools로부터 받은 CDP 메시지를 클라이언트 스크립트에 전달
+        const cdpClient = (window as any).__cdpClient;
+        if (cdpClient && typeof cdpClient.execute === 'function') {
+          try {
+            const message = JSON.parse(event.data.message);
+            const result = cdpClient.execute(message);
+
+            // If result has id, send response back to DevTools / result에 id가 있으면 DevTools에 응답 전송
+            if (result && typeof result === 'object' && 'id' in result) {
+              if (iframeRef.current?.contentWindow) {
+                const responseMessage: CDPMessage = {
+                  type: 'CDP_MESSAGE',
+                  message: JSON.stringify(result),
+                };
+                iframeRef.current.contentWindow.postMessage(responseMessage, '*');
+              }
+            }
+          } catch (error) {
+            console.error('Failed to execute CDP message / CDP 메시지 실행 실패:', error);
+          }
+        }
+      } else if (event.data?.type === 'DEVTOOLS_READY') {
+        console.log('DevTools ready / DevTools 준비 완료');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
 
   // Show loading state if no clientId / clientId가 없으면 로딩 상태 표시
   if (!clientId) {

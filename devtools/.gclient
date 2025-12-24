@@ -7,7 +7,7 @@ solutions = [
     # Use devtools-frontend fork URL / devtools-frontend 포크 URL 사용
     "url": "https://github.com/ohah/devtools-frontend.git@develop",
     "deps_file": "DEPS",
-    "managed": True,
+    "managed": False,
     "custom_deps": {},
   }
 ]

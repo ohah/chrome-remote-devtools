@@ -2,14 +2,14 @@
 import type { EventStorage } from '../../persistence/event-storage';
 
 export default class BaseDomain {
-  protected socket: WebSocket;
+  protected socket: WebSocket | null;
   namespace: string = '';
   protected eventStorage: EventStorage | null = null;
 
   // Index signature for dynamic method access / 동적 메서드 접근을 위한 인덱스 시그니처
-  [key: string]: WebSocket | string | unknown;
+  [key: string]: WebSocket | string | unknown | null;
 
-  constructor(options: { socket: WebSocket; eventStorage?: EventStorage }) {
+  constructor(options: { socket: WebSocket | null; eventStorage?: EventStorage }) {
     this.socket = options.socket;
     this.eventStorage = options.eventStorage || null;
   }
@@ -30,9 +30,20 @@ export default class BaseDomain {
       }
     }
 
-    if (this.socket.readyState === WebSocket.OPEN) {
+    // Send via WebSocket if socket exists and is connected / 소켓이 있고 연결되어 있으면 WebSocket으로 전송
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       const message = JSON.stringify(data);
       this.socket.send(message);
+    } else if (eventData.method && eventData.id === undefined) {
+      // If no WebSocket or not open and this is an event, send via postMessage (custom event) / WebSocket이 없거나 열려있지 않고 이벤트인 경우 postMessage로 전송 (커스텀 이벤트)
+      // This happens when skipWebSocket is true (postMessage mode) / skipWebSocket이 true일 때 발생 (postMessage 모드)
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('cdp-message', {
+            detail: data,
+          })
+        );
+      }
     }
   }
 }

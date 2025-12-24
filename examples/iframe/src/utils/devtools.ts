@@ -1,9 +1,10 @@
 // DevTools URL utility functions / DevTools URL 유틸리티 함수
 
-// Get client ID from sessionStorage / sessionStorage에서 클라이언트 ID 가져오기
+// Get client ID from sessionStorage or localStorage / sessionStorage 또는 localStorage에서 클라이언트 ID 가져오기
 export function getClientId(): string | null {
-  // Client script stores debug_id in sessionStorage / 클라이언트 스크립트가 sessionStorage에 debug_id 저장
-  return sessionStorage.getItem('debug_id');
+  // Client script stores debug_id in sessionStorage or localStorage / 클라이언트 스크립트가 sessionStorage 또는 localStorage에 debug_id 저장
+  // In iframe mode, localStorage is used (shared with iframe) / iframe 모드에서는 localStorage 사용 (iframe과 공유)
+  return sessionStorage.getItem('debug_id') || localStorage.getItem('debug_id');
 }
 
 // Get server URL from script tag or default / 스크립트 태그에서 서버 URL 가져오기 또는 기본값
@@ -27,22 +28,14 @@ export function getHostOrigin(): string {
 
 // Build DevTools iframe URL / DevTools iframe URL 구성
 export function buildDevToolsUrl(
-  clientId: string,
-  serverUrl: string = 'http://localhost:8080'
+  _clientId: string,
+  _serverUrl: string = 'http://localhost:8080'
 ): string {
   const baseUrl = new URL('/devtools-frontend/devtools_app.html', window.location.origin);
   const params = baseUrl.searchParams;
 
-  // WebSocket URL parameter / WebSocket URL 파라미터
-  // Use a stable ID instead of Date.now() to avoid iframe reloads / iframe 리로드를 방지하기 위해 Date.now() 대신 안정적인 ID 사용
-  const devtoolsId = `devtools-${clientId}`;
-  // Extract host from serverUrl (DevTools frontend will add protocol automatically) / serverUrl에서 host 추출 (DevTools frontend가 프로토콜을 자동으로 추가함)
-  const serverHost = serverUrl
-    .replace(/^https?:\/\//, '')
-    .replace(/^ws:\/\//, '')
-    .replace(/^wss:\/\//, '');
-  const wsUrl = `${serverHost}/remote/debug/devtools/${devtoolsId}?clientId=${clientId}`;
-  params.append('ws', wsUrl);
+  // Use postMessage instead of WebSocket / WebSocket 대신 postMessage 사용
+  params.append('postMessage', 'true');
 
   // DevTools configuration parameters / DevTools 설정 파라미터
   params.append('experiments', 'true');

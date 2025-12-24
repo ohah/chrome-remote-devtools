@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import path from 'path';
 import { readFileSync, existsSync, copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
 
@@ -134,6 +135,10 @@ function serveDevtoolsFrontend() {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+    }),
     react({
       babel: {
         plugins: [['babel-plugin-react-compiler']],
@@ -146,6 +151,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '/devtools-frontend': devtoolsPath,
+      '@': path.resolve(__dirname, './src'),
     },
     // Allow accessing files outside of project root / 프로젝트 루트 외부 파일 접근 허용
     preserveSymlinks: false,

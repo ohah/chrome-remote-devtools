@@ -75,7 +75,8 @@ function getRrwebConfig(script: HTMLScriptElement | null): RrwebConfig {
   const maxBatchAttr = script.dataset.rrwebMaxBatch || script.getAttribute('data-rrweb-max-batch');
 
   return {
-    // Default ON; set data-enable-rrweb="false" to disable / 기본 ON; 끄려면 data-enable-rrweb="false"
+    // Only enable if explicitly set to "true" / 명시적으로 "true"로 설정된 경우에만 활성화
+    // In iframe mode, default is false (session replay is disabled) / iframe 모드에서는 기본값이 false (세션 리플레이 비활성화)
     enable: enableAttr === 'true',
     flushIntervalMs: flushMsAttr ? Number(flushMsAttr) : undefined,
     maxBatchSize: maxBatchAttr ? Number(maxBatchAttr) : undefined,
@@ -85,7 +86,11 @@ function getRrwebConfig(script: HTMLScriptElement | null): RrwebConfig {
 // Global recorder handle for pause/resume control / 일시 중지/재개 제어를 위한 전역 레코더 핸들
 let globalRrwebRecorder: { pause: () => void; resume: () => Promise<void> } | null = null;
 
+// Global domain handle for CDP communication / CDP 통신을 위한 전역 도메인 핸들
+let globalDomain: ChromeDomain | null = null;
+
 // Expose global API for controlling rrweb recording / rrweb 기록 제어를 위한 전역 API 노출
+// Expose global API for CDP communication via postMessage / postMessage를 통한 CDP 통신을 위한 전역 API 노출
 if (typeof window !== 'undefined') {
   (window as any).__rrwebRecorder = {
     pause: () => {
@@ -95,10 +100,80 @@ if (typeof window !== 'undefined') {
       await globalRrwebRecorder?.resume();
     },
   };
+
+  // Expose CDP domain API for postMessage communication / postMessage 통신을 위한 CDP 도메인 API 노출
+  (window as any).__cdpClient = {
+    execute: (message: { id?: number; method?: string; params?: unknown }) => {
+      if (!globalDomain) {
+        return { id: message.id, error: { code: -32000, message: 'CDP client not initialized' } };
+      }
+      return globalDomain.execute(message);
+    },
+    sendEvent: (method: string, params?: unknown) => {
+      if (!globalDomain) {
+        return;
+      }
+      // Send CDP event / CDP 이벤트 전송
+      const eventMessage = { method, params };
+      // Trigger event listeners / 이벤트 리스너 트리거
+      window.dispatchEvent(new CustomEvent('cdp-event', { detail: eventMessage }));
+    },
+    setDevToolsReady: (ready: boolean) => {
+      // Notify all domains that DevTools is ready / 모든 도메인에 DevTools 준비 완료 알림
+      window.dispatchEvent(new CustomEvent('devtools-ready', { detail: { ready } }));
+    },
+  };
+
+  // Listen for postMessage from iframe/popup (DevTools) / iframe/popup(DevTools)에서 오는 postMessage 수신
+  window.addEventListener('message', (event) => {
+    // Only process CDP messages / CDP 메시지만 처리
+    if (!event.data || typeof event.data !== 'object') {
+      return;
+    }
+
+    // Check if this is a CDP message (has method or id) / CDP 메시지인지 확인 (method 또는 id가 있음)
+    const message = event.data as { id?: number; method?: string; params?: unknown };
+    if (!message.method && message.id === undefined) {
+      return;
+    }
+
+    // Execute CDP method and send response back via postMessage / CDP 메서드 실행하고 postMessage로 응답 전송
+    if (globalDomain) {
+      const result = globalDomain.execute(message);
+      // Handle async methods / async 메서드 처리
+      const sendResponse = (response: { id?: number; result?: unknown; error?: unknown }) => {
+        if (response.id !== undefined && event.source) {
+          // Send response back to sender / 응답을 보낸 곳으로 다시 전송
+          // Use '*' for targetOrigin to allow cross-origin communication / cross-origin 통신을 위해 '*' 사용
+          // In production, you may want to validate event.origin / 프로덕션에서는 event.origin 검증 고려
+          try {
+            (event.source as Window).postMessage(response, '*');
+          } catch (e) {
+            // Ignore postMessage errors / postMessage 오류 무시
+            console.warn('Failed to send postMessage response:', e);
+          }
+        }
+      };
+
+      if (result instanceof Promise) {
+        result.then(sendResponse).catch((error) => {
+          sendResponse({
+            id: message.id,
+            error: {
+              code: -32000,
+              message: error instanceof Error ? error.message : String(error),
+            },
+          });
+        });
+      } else {
+        sendResponse(result);
+      }
+    }
+  });
 }
 
 async function initRrwebRecording(
-  socket: WebSocket,
+  socket: WebSocket | null,
   config: RrwebConfig,
   domain: ChromeDomain
 ): Promise<void> {
@@ -129,9 +204,21 @@ async function initRrwebRecording(
       flushIntervalMs: config.flushIntervalMs,
       maxBatchSize: config.maxBatchSize,
       recordOptions: {
+        // Start recording immediately without waiting for load / 로드를 기다리지 않고 즉시 녹화 시작
+        // recordAfter: 'load' removed to prevent infinite reload loops / 무한 리로드 루프 방지를 위해 recordAfter: 'load' 제거
+
         // Force full snapshot generation / 풀 스냅샷 강제 생성
-        recordAfter: 'load',
         checkoutEveryNth: 1,
+
+        // Use rr-block class to block elements from recording / rr-block 클래스를 사용하여 요소를 기록에서 제외
+        // DevTools iframe should have 'rr-block' class / DevTools iframe은 'rr-block' 클래스를 가져야 함
+        blockClass: 'rr-block',
+        // Block script tags, meta refresh tags, and iframes to prevent reload issues / 리로드 문제 방지를 위해 script 태그, meta refresh 태그, iframe 제외
+        blockSelector: 'script, meta[http-equiv="refresh"], iframe',
+        // Add ignoreClass for dynamic elements / 동적 요소를 위한 ignoreClass 추가
+        ignoreClass: 'rr-ignore',
+        // Mask all inputs to prevent sensitive data recording / 민감한 데이터 기록 방지를 위해 모든 입력 마스킹
+        maskAllInputs: true,
         ...baseRecordOptions,
       },
       kind: 'rrweb',
@@ -144,16 +231,41 @@ async function initRrwebRecording(
     globalRrwebRecorder = recorder;
 
     await recorder.start();
-    socket.addEventListener('close', () => {
-      recorder.stop();
-      globalRrwebRecorder = null;
-    });
+
+    // Only add socket close listener if socket exists / socket이 존재하는 경우에만 close 리스너 추가
+    if (socket) {
+      socket.addEventListener('close', () => {
+        recorder.stop();
+        globalRrwebRecorder = null;
+      });
+    }
   } catch (error) {
     console.error('Failed to start rrweb recorder / rrweb 레코더 시작 실패:', error);
   }
 }
 
-function initSocket(serverUrl: string, rrwebConfig: RrwebConfig): void {
+function initSocket(
+  serverUrl: string,
+  rrwebConfig: RrwebConfig,
+  skipWebSocket: boolean = false
+): void {
+  // Skip WebSocket and use postMessage only / WebSocket 건너뛰고 postMessage만 사용
+  if (skipWebSocket) {
+    // Initialize domain without WebSocket for postMessage mode / postMessage 모드를 위해 WebSocket 없이 도메인 초기화
+    const domain = new ChromeDomain({
+      socket: null,
+      eventStorage: undefined,
+    });
+    globalDomain = domain;
+    // Enable all domains immediately in postMessage mode / postMessage 모드에서는 모든 도메인을 즉시 활성화
+    domain.execute({ method: 'Runtime.enable' });
+    domain.execute({ method: 'Network.enable' });
+    domain.execute({ method: 'Console.enable' });
+    // Initialize rrweb recording even without WebSocket / WebSocket 없이도 rrweb 녹화 초기화
+    void initRrwebRecording(null, rrwebConfig, domain);
+    return;
+  }
+
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
   const host = serverUrl.replace(/^(http|https|ws|wss):\/\//i, '');
   const socket = new WebSocket(`${protocol}//${host}/remote/debug/client/${getId()}?${getQuery()}`);
@@ -269,9 +381,13 @@ function initSocket(serverUrl: string, rrwebConfig: RrwebConfig): void {
         const result = await ret;
         if (result.id !== undefined) {
           socket.send(JSON.stringify(result));
+          // Don't send server responses via postMessage to avoid loops / 무한루프 방지를 위해 서버 응답은 postMessage로 전송하지 않음
+          // Only events (from BaseDomain.send) are sent via postMessage / 이벤트만(BaseDomain.send에서) postMessage로 전송됨
         }
       } else if (ret.id !== undefined) {
         socket.send(JSON.stringify(ret));
+        // Don't send server responses via postMessage to avoid loops / 무한루프 방지를 위해 서버 응답은 postMessage로 전송하지 않음
+        // Only events (from BaseDomain.send) are sent via postMessage / 이벤트만(BaseDomain.send에서) postMessage로 전송됨
       }
     } catch (e) {
       console.error('CDP message error:', e);
@@ -305,6 +421,7 @@ function initSocket(serverUrl: string, rrwebConfig: RrwebConfig): void {
     socket.addEventListener('close', () => {
       clearInterval(updateInterval);
       clearInterval(cleanupInterval);
+      globalDomain = null;
     });
   }
 
@@ -332,18 +449,44 @@ function keepScreenDisplay(): void {
 // Initialize CDP client / CDP 클라이언트 초기화
 export function initCDPClient(
   serverUrl: string,
-  rrwebConfig: RrwebConfig = { enable: false }
+  rrwebConfig: RrwebConfig = { enable: false },
+  skipWebSocket: boolean = false
 ): void {
-  initSocket(serverUrl, rrwebConfig);
+  // Always initialize socket (or skip if iframe mode) / 항상 소켓 초기화 (또는 iframe 모드이면 건너뛰기)
+  initSocket(serverUrl, rrwebConfig, skipWebSocket);
   keepScreenDisplay();
 }
 
-// Auto-initialize if server URL is provided via data attribute / data 속성으로 서버 URL이 제공되면 자동 초기화
+// Auto-initialize CDP client / CDP 클라이언트 자동 초기화
 if (typeof document !== 'undefined') {
   const script = document.currentScript as HTMLScriptElement | null;
   const serverUrl = script?.dataset.serverUrl || script?.getAttribute('data-server-url');
-  if (serverUrl) {
-    const rrwebConfig = getRrwebConfig(script);
-    initCDPClient(serverUrl, rrwebConfig);
+  const debugId = getId(); // Create debug_id / debug_id 생성
+
+  // Skip WebSocket if no serverUrl (use postMessage only) / serverUrl이 없으면 WebSocket 건너뛰기 (postMessage만 사용)
+  const skipWebSocket = !serverUrl;
+
+  // If no serverUrl, use empty string (will be ignored in initSocket) / serverUrl이 없으면 빈 문자열 사용 (initSocket에서 무시됨)
+  const effectiveServerUrl = serverUrl || '';
+
+  // If in iframe and no serverUrl, notify parent about debug_id / iframe이고 serverUrl이 없으면 부모에 debug_id 알림
+  if (skipWebSocket && window.parent !== window) {
+    // Try to store in parent's sessionStorage via postMessage / postMessage로 부모의 sessionStorage에 저장 시도
+    try {
+      window.parent.postMessage({ type: 'SET_DEBUG_ID', debugId }, '*');
+    } catch {
+      // Ignore cross-origin errors / cross-origin 오류 무시
+    }
+
+    // Also try localStorage (shared in same origin) / localStorage도 시도 (같은 origin에서 공유)
+    try {
+      localStorage.setItem('debug_id', debugId);
+    } catch {
+      // Ignore if localStorage is not available / localStorage를 사용할 수 없으면 무시
+    }
   }
+
+  const rrwebConfig = getRrwebConfig(script);
+  // Initialize CDP client with skipWebSocket flag / skipWebSocket 플래그로 CDP 클라이언트 초기화
+  initCDPClient(effectiveServerUrl, rrwebConfig, skipWebSocket);
 }
