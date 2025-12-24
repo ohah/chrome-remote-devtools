@@ -1,16 +1,18 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>iframe DevTools Example</title>
-    <!-- 서버에서 빌드된 클라이언트 스크립트 로드 / Load built client script from server -->
-    <script src="http://localhost:8080/client.js" data-server-url="http://localhost:8080"></script>
-  </head>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iframe DevTools Example</title>
+  <!-- 서버에서 빌드된 클라이언트 스크립트 로드 / Load built client script from server -->
+  <script src="http://localhost:8080/client.js" data-iframe-mode="true" data-enable-rrweb="true"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

@@ -485,6 +485,9 @@
   "core/sdk/PageResourceLoader.ts | loadCanceledDueToReloadOf": {
     "message": "Load canceled due to reload of inspected page"
   },
+  "core/sdk/PostMessageTransport.ts | noHostWindow": {
+    "message": "Can not find host window"
+  },
   "core/sdk/RehydratingConnection.ts | errorLoadingLog": {
     "message": "Error loading log"
   },

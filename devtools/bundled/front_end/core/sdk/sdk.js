@@ -31340,7 +31340,7 @@ __export(Connections_exports, {
   WebSocketTransport: () => WebSocketTransport,
   initMainConnection: () => initMainConnection
 });
-import * as i18n29 from "./..\\i18n\\i18n.js";
+import * as i18n31 from "./..\\i18n\\i18n.js";
 import * as Common34 from "./..\\common\\common.js";
 import * as Host7 from "./..\\host\\host.js";
 import * as ProtocolClient3 from "./..\\protocol_client\\protocol_client.js";
@@ -32111,15 +32111,87 @@ var RehydratingSession = class extends RehydratingSessionBase {
   }
 };
 
-// gen/front_end/core/sdk/Connections.js
+// gen/front_end/core/sdk/PostMessageTransport.js
+import * as i18n29 from "./..\\i18n\\i18n.js";
 var UIStrings13 = {
+  /**
+   * @description Text to indicate postMessage connection cannot find host window / postMessage 연결이 호스트 창을 찾을 수 없음을 나타내는 텍스트
+   */
+  noHostWindow: "Can not find host window"
+};
+var str_13 = i18n29.i18n.registerUIStrings("core/sdk/PostMessageTransport.ts", UIStrings13);
+var i18nString13 = i18n29.i18n.getLocalizedString.bind(void 0, str_13);
+var PostMessageTransport = class {
+  onMessage = null;
+  #onDisconnect = null;
+  #targetWindow = null;
+  #messageHandler = this.#onMessageReceived.bind(this);
+  #ready = false;
+  constructor(onConnectionLost) {
+    if (window.opener) {
+      this.#targetWindow = window.opener;
+    } else if (window !== window.top) {
+      this.#targetWindow = window.parent;
+    } else {
+      onConnectionLost(i18nString13(UIStrings13.noHostWindow));
+      return;
+    }
+    window.addEventListener("message", this.#messageHandler);
+    if (this.#targetWindow) {
+      const readyMessage = { type: "DEVTOOLS_READY" };
+      this.#targetWindow.postMessage(readyMessage, "*");
+      this.#ready = true;
+    }
+  }
+  /**
+   * Handle incoming postMessage events / 들어오는 postMessage 이벤트 처리
+   */
+  #onMessageReceived(event) {
+    if (event.source !== this.#targetWindow) {
+      return;
+    }
+    if (event.data && typeof event.data === "object" && event.data.type === "CDP_MESSAGE") {
+      if (this.onMessage) {
+        this.onMessage.call(null, event.data.message);
+      }
+    }
+  }
+  setOnMessage(onMessage) {
+    this.onMessage = onMessage;
+  }
+  setOnDisconnect(onDisconnect) {
+    this.#onDisconnect = onDisconnect;
+  }
+  /**
+   * Send CDP message to parent/opener window / 부모/열린 창에 CDP 메시지 전송
+   */
+  sendRawMessage(message) {
+    if (this.#targetWindow && this.#ready) {
+      const cdpMessage = { type: "CDP_MESSAGE", message };
+      this.#targetWindow.postMessage(cdpMessage, "*");
+    }
+  }
+  async disconnect() {
+    window.removeEventListener("message", this.#messageHandler);
+    if (this.#onDisconnect) {
+      this.#onDisconnect.call(null, "force disconnect");
+    }
+    this.#onDisconnect = null;
+    this.onMessage = null;
+    this.#targetWindow = null;
+    this.#ready = false;
+  }
+};
+
+// gen/front_end/core/sdk/Connections.js
+var UIStrings14 = {
   /**
    * @description Text on the remote debugging window to indicate the connection is lost
    */
   websocketDisconnected: "WebSocket disconnected"
 };
-var str_13 = i18n29.i18n.registerUIStrings("core/sdk/Connections.ts", UIStrings13);
-var i18nString13 = i18n29.i18n.getLocalizedString.bind(void 0, str_13);
+var str_14 = i18n31.i18n.registerUIStrings("core/sdk/Connections.ts", UIStrings14);
+var i18nString14 = i18n31.i18n.getLocalizedString.bind(void 0, str_14);
 var MainConnection = class {
   onMessage = null;
   #onDisconnect = null;
@@ -32198,7 +32270,7 @@ var WebSocketTransport = class {
   }
   onError() {
     if (this.#onWebSocketDisconnect) {
-      this.#onWebSocketDisconnect.call(null, i18nString13(UIStrings13.websocketDisconnected));
+      this.#onWebSocketDisconnect.call(null, i18nString14(UIStrings14.websocketDisconnected));
     }
     if (this.#onDisconnect) {
       this.#onDisconnect.call(null, "connection failed");
@@ -32217,7 +32289,7 @@ var WebSocketTransport = class {
   }
   onClose() {
     if (this.#onWebSocketDisconnect) {
-      this.#onWebSocketDisconnect.call(null, i18nString13(UIStrings13.websocketDisconnected));
+      this.#onWebSocketDisconnect.call(null, i18nString14(UIStrings14.websocketDisconnected));
     }
     if (this.#onDisconnect) {
       this.#onDisconnect.call(null, "websocket closed");
@@ -32293,6 +32365,10 @@ function createMainTransport(onConnectionLost) {
   if (Root12.Runtime.Runtime.isTraceApp()) {
     return new RehydratingConnectionTransport(onConnectionLost);
   }
+  const postMessageParam = Root12.Runtime.Runtime.queryParam("postMessage");
+  if (postMessageParam === "true") {
+    return new PostMessageTransport(onConnectionLost);
+  }
   const wsParam = Root12.Runtime.Runtime.queryParam("ws");
   const wssParam = Root12.Runtime.Runtime.queryParam("wss");
   if (wsParam || wssParam) {
@@ -32317,7 +32393,7 @@ __export(ConsoleModel_exports, {
 });
 import * as Common35 from "./..\\common\\common.js";
 import * as Host9 from "./..\\host\\host.js";
-import * as i18n33 from "./..\\i18n\\i18n.js";
+import * as i18n35 from "./..\\i18n\\i18n.js";
 import * as Platform18 from "./..\\platform\\platform.js";
 
 // gen/front_end/core/sdk/ConsoleModelTypes.js
@@ -32334,16 +32410,16 @@ var CPUProfilerModel_exports = {};
 __export(CPUProfilerModel_exports, {
   CPUProfilerModel: () => CPUProfilerModel
 });
-import * as i18n31 from "./..\\i18n\\i18n.js";
-var UIStrings14 = {
+import * as i18n33 from "./..\\i18n\\i18n.js";
+var UIStrings15 = {
   /**
    * @description Name of a profile. Placeholder is either a user-supplied name or a number automatically assigned to the profile.
    * @example {2} PH1
    */
   profileD: "Profile {PH1}"
 };
-var str_14 = i18n31.i18n.registerUIStrings("core/sdk/CPUProfilerModel.ts", UIStrings14);
-var i18nString14 = i18n31.i18n.getLocalizedString.bind(void 0, str_14);
+var str_15 = i18n33.i18n.registerUIStrings("core/sdk/CPUProfilerModel.ts", UIStrings15);
+var i18nString15 = i18n33.i18n.getLocalizedString.bind(void 0, str_15);
 var CPUProfilerModel = class extends SDKModel {
   #nextAnonymousConsoleProfileNumber;
   #anonymousConsoleProfileIdToTitle;
@@ -32369,7 +32445,7 @@ var CPUProfilerModel = class extends SDKModel {
   }
   consoleProfileStarted({ id, location, title }) {
     if (!title) {
-      title = i18nString14(UIStrings14.profileD, { PH1: this.#nextAnonymousConsoleProfileNumber++ });
+      title = i18nString15(UIStrings15.profileD, { PH1: this.#nextAnonymousConsoleProfileNumber++ });
       this.#anonymousConsoleProfileIdToTitle.set(id, title);
     }
     const eventData = this.createEventDataFrom(id, location, title);
@@ -32466,7 +32542,7 @@ var LogModel = class extends SDKModel {
 SDKModel.register(LogModel, { capabilities: 8, autostart: true });
 
 // gen/front_end/core/sdk/ConsoleModel.js
-var UIStrings15 = {
+var UIStrings16 = {
   /**
    * @description Text shown when the main frame (page) of the website was navigated to a different URL.
    * @example {https://example.com} PH1
@@ -32493,8 +32569,8 @@ var UIStrings15 = {
    */
   failedToSaveToTempVariable: "Failed to save to temp variable."
 };
-var str_15 = i18n33.i18n.registerUIStrings("core/sdk/ConsoleModel.ts", UIStrings15);
-var i18nString15 = i18n33.i18n.getLocalizedString.bind(void 0, str_15);
+var str_16 = i18n35.i18n.registerUIStrings("core/sdk/ConsoleModel.ts", UIStrings16);
+var i18nString16 = i18n35.i18n.getLocalizedString.bind(void 0, str_16);
 var ConsoleModel = class _ConsoleModel extends SDKModel {
   #messages = [];
   #messagesByTimestamp = new Platform18.MapUtilities.Multimap();
@@ -32673,19 +32749,19 @@ var ConsoleModel = class _ConsoleModel extends SDKModel {
     if (Common35.Settings.Settings.instance().moduleSetting("preserve-console-log").get()) {
       const { frame } = event.data;
       if (frame.backForwardCacheDetails.restoredFromCache) {
-        Common35.Console.Console.instance().log(i18nString15(UIStrings15.bfcacheNavigation, { PH1: frame.url }));
+        Common35.Console.Console.instance().log(i18nString16(UIStrings16.bfcacheNavigation, { PH1: frame.url }));
       } else {
-        Common35.Console.Console.instance().log(i18nString15(UIStrings15.navigatedToS, { PH1: frame.url }));
+        Common35.Console.Console.instance().log(i18nString16(UIStrings16.navigatedToS, { PH1: frame.url }));
       }
     }
   }
   consoleProfileStarted(cpuProfilerModel, event) {
     const { data } = event;
-    this.addConsoleProfileMessage(cpuProfilerModel, "profile", data.scriptLocation, i18nString15(UIStrings15.profileSStarted, { PH1: data.title }));
+    this.addConsoleProfileMessage(cpuProfilerModel, "profile", data.scriptLocation, i18nString16(UIStrings16.profileSStarted, { PH1: data.title }));
   }
   consoleProfileFinished(cpuProfilerModel, event) {
     const { data } = event;
-    this.addConsoleProfileMessage(cpuProfilerModel, "profileEnd", data.scriptLocation, i18nString15(UIStrings15.profileSFinished, { PH1: data.title }));
+    this.addConsoleProfileMessage(cpuProfilerModel, "profileEnd", data.scriptLocation, i18nString16(UIStrings16.profileSFinished, { PH1: data.title }));
   }
   addConsoleProfileMessage(cpuProfilerModel, type, scriptLocation, messageText) {
     const script = scriptLocation.script();
@@ -32814,7 +32890,7 @@ var ConsoleModel = class _ConsoleModel extends SDKModel {
       return name;
     }
     function failedToSave(result2) {
-      let message = i18nString15(UIStrings15.failedToSaveToTempVariable);
+      let message = i18nString16(UIStrings16.failedToSaveToTempVariable);
       if (result2) {
         message = message + " " + result2.description;
       }
@@ -33063,7 +33139,7 @@ __export(CPUThrottlingManager_exports, {
   calibrationErrorToString: () => calibrationErrorToString
 });
 import * as Common37 from "./..\\common\\common.js";
-import * as i18n35 from "./..\\i18n\\i18n.js";
+import * as i18n37 from "./..\\i18n\\i18n.js";
 
 // gen/front_end/core/sdk/EmulationModel.js
 var EmulationModel_exports = {};
@@ -33561,7 +33637,7 @@ var DeviceOrientation = class _DeviceOrientation {
 SDKModel.register(EmulationModel, { capabilities: 256, autostart: true });
 
 // gen/front_end/core/sdk/CPUThrottlingManager.js
-var UIStrings16 = {
+var UIStrings17 = {
   /**
    * @description Text label for a menu item indicating that no throttling is applied.
    */
@@ -33584,9 +33660,9 @@ var UIStrings16 = {
    */
   calibrationErrorDeviceTooWeak: "Device is not powerful enough"
 };
-var str_16 = i18n35.i18n.registerUIStrings("core/sdk/CPUThrottlingManager.ts", UIStrings16);
-var i18nString16 = i18n35.i18n.getLocalizedString.bind(void 0, str_16);
-var i18nLazyString2 = i18n35.i18n.getLazilyComputedLocalizedString.bind(void 0, str_16);
+var str_17 = i18n37.i18n.registerUIStrings("core/sdk/CPUThrottlingManager.ts", UIStrings17);
+var i18nString17 = i18n37.i18n.getLocalizedString.bind(void 0, str_17);
+var i18nLazyString2 = i18n37.i18n.getLazilyComputedLocalizedString.bind(void 0, str_17);
 var throttlingManagerInstance;
 var CPUThrottlingManager = class _CPUThrottlingManager extends Common37.ObjectWrapper.ObjectWrapper {
   #cpuThrottlingOption;
@@ -33711,7 +33787,7 @@ var CPUThrottlingRates;
 })(CPUThrottlingRates || (CPUThrottlingRates = {}));
 function makeFixedPresetThrottlingOption(rate) {
   return {
-    title: rate === 1 ? i18nLazyString2(UIStrings16.noThrottling) : i18nLazyString2(UIStrings16.dSlowdown, { PH1: rate }),
+    title: rate === 1 ? i18nLazyString2(UIStrings17.noThrottling) : i18nLazyString2(UIStrings17.dSlowdown, { PH1: rate }),
     rate: () => rate,
     jslogContext: rate === 1 ? "cpu-no-throttling" : `cpu-throttled-${rate}`
   };
@@ -33739,7 +33815,7 @@ function makeCalibratedThrottlingOption(calibratedDeviceType) {
   };
   return {
     title() {
-      const typeString = calibratedDeviceType === "low-tier-mobile" ? i18nString16(UIStrings16.calibratedLowTierMobile) : i18nString16(UIStrings16.calibratedMidTierMobile);
+      const typeString = calibratedDeviceType === "low-tier-mobile" ? i18nString17(UIStrings17.calibratedLowTierMobile) : i18nString17(UIStrings17.calibratedMidTierMobile);
       const value = getSettingValue();
       if (typeof value === "number") {
         return `${typeString} \u2013 ${value.toFixed(1)}\xD7`;
@@ -33765,7 +33841,7 @@ var CalibrationError;
 })(CalibrationError || (CalibrationError = {}));
 function calibrationErrorToString(error) {
   if (error === CalibrationError.DEVICE_TOO_WEAK) {
-    return i18nString16(UIStrings16.calibrationErrorDeviceTooWeak);
+    return i18nString17(UIStrings17.calibrationErrorDeviceTooWeak);
   }
   return error;
 }
@@ -35816,7 +35892,7 @@ __export(ServiceWorkerCacheModel_exports, {
   ServiceWorkerCacheModel: () => ServiceWorkerCacheModel
 });
 import * as Common40 from "./..\\common\\common.js";
-import * as i18n37 from "./..\\i18n\\i18n.js";
+import * as i18n39 from "./..\\i18n\\i18n.js";
 
 // gen/front_end/core/sdk/StorageBucketsModel.js
 var StorageBucketsModel_exports = {};
@@ -35958,7 +36034,7 @@ var StorageBucketsModel = class extends SDKModel {
 SDKModel.register(StorageBucketsModel, { capabilities: 8192, autostart: false });
 
 // gen/front_end/core/sdk/ServiceWorkerCacheModel.js
-var UIStrings17 = {
+var UIStrings18 = {
   /**
    * @description Text in Service Worker Cache Model
    * @example {https://cache} PH1
@@ -35966,8 +36042,8 @@ var UIStrings17 = {
    */
   serviceworkercacheagentError: "`ServiceWorkerCacheAgent` error deleting cache entry {PH1} in cache: {PH2}"
 };
-var str_17 = i18n37.i18n.registerUIStrings("core/sdk/ServiceWorkerCacheModel.ts", UIStrings17);
-var i18nString17 = i18n37.i18n.getLocalizedString.bind(void 0, str_17);
+var str_18 = i18n39.i18n.registerUIStrings("core/sdk/ServiceWorkerCacheModel.ts", UIStrings18);
+var i18nString18 = i18n39.i18n.getLocalizedString.bind(void 0, str_18);
 var ServiceWorkerCacheModel = class extends SDKModel {
   cacheAgent;
   #storageAgent;
@@ -36033,7 +36109,7 @@ var ServiceWorkerCacheModel = class extends SDKModel {
   async deleteCacheEntry(cache, request) {
     const response = await this.cacheAgent.invoke_deleteEntry({ cacheId: cache.cacheId, request });
     if (response.getError()) {
-      Common40.Console.Console.instance().error(i18nString17(UIStrings17.serviceworkercacheagentError, { PH1: cache.toString(), PH2: String(response.getError()) }));
+      Common40.Console.Console.instance().error(i18nString18(UIStrings18.serviceworkercacheagentError, { PH1: cache.toString(), PH2: String(response.getError()) }));
       return;
     }
   }
@@ -36235,8 +36311,8 @@ __export(ServiceWorkerManager_exports, {
   ServiceWorkerVersionState: () => ServiceWorkerVersionState
 });
 import * as Common41 from "./..\\common\\common.js";
-import * as i18n39 from "./..\\i18n\\i18n.js";
-var UIStrings18 = {
+import * as i18n41 from "./..\\i18n\\i18n.js";
+var UIStrings19 = {
   /**
    * @description Service worker running status displayed in the Service Workers view in the Application panel
    */
@@ -36285,9 +36361,9 @@ var UIStrings18 = {
    */
   sSS: "{PH1} #{PH2} ({PH3})"
 };
-var str_18 = i18n39.i18n.registerUIStrings("core/sdk/ServiceWorkerManager.ts", UIStrings18);
-var i18nString18 = i18n39.i18n.getLocalizedString.bind(void 0, str_18);
-var i18nLazyString3 = i18n39.i18n.getLazilyComputedLocalizedString.bind(void 0, str_18);
+var str_19 = i18n41.i18n.registerUIStrings("core/sdk/ServiceWorkerManager.ts", UIStrings19);
+var i18nString19 = i18n41.i18n.getLocalizedString.bind(void 0, str_19);
+var i18nLazyString3 = i18n41.i18n.getLazilyComputedLocalizedString.bind(void 0, str_19);
 var ServiceWorkerManager = class extends SDKModel {
   #agent;
   #registrations = /* @__PURE__ */ new Map();
@@ -36595,45 +36671,45 @@ var ServiceWorkerVersion = class {
     [
       "running"
       /* Protocol.ServiceWorker.ServiceWorkerVersionRunningStatus.Running */
-    ]: i18nLazyString3(UIStrings18.running),
+    ]: i18nLazyString3(UIStrings19.running),
     [
       "starting"
       /* Protocol.ServiceWorker.ServiceWorkerVersionRunningStatus.Starting */
-    ]: i18nLazyString3(UIStrings18.starting),
+    ]: i18nLazyString3(UIStrings19.starting),
     [
       "stopped"
       /* Protocol.ServiceWorker.ServiceWorkerVersionRunningStatus.Stopped */
-    ]: i18nLazyString3(UIStrings18.stopped),
+    ]: i18nLazyString3(UIStrings19.stopped),
     [
       "stopping"
       /* Protocol.ServiceWorker.ServiceWorkerVersionRunningStatus.Stopping */
-    ]: i18nLazyString3(UIStrings18.stopping)
+    ]: i18nLazyString3(UIStrings19.stopping)
   };
   ServiceWorkerVersion2.Status = {
     [
       "activated"
       /* Protocol.ServiceWorker.ServiceWorkerVersionStatus.Activated */
-    ]: i18nLazyString3(UIStrings18.activated),
+    ]: i18nLazyString3(UIStrings19.activated),
     [
       "activating"
       /* Protocol.ServiceWorker.ServiceWorkerVersionStatus.Activating */
-    ]: i18nLazyString3(UIStrings18.activating),
+    ]: i18nLazyString3(UIStrings19.activating),
     [
       "installed"
       /* Protocol.ServiceWorker.ServiceWorkerVersionStatus.Installed */
-    ]: i18nLazyString3(UIStrings18.installed),
+    ]: i18nLazyString3(UIStrings19.installed),
     [
       "installing"
       /* Protocol.ServiceWorker.ServiceWorkerVersionStatus.Installing */
-    ]: i18nLazyString3(UIStrings18.installing),
+    ]: i18nLazyString3(UIStrings19.installing),
     [
       "new"
       /* Protocol.ServiceWorker.ServiceWorkerVersionStatus.New */
-    ]: i18nLazyString3(UIStrings18.new),
+    ]: i18nLazyString3(UIStrings19.new),
     [
       "redundant"
       /* Protocol.ServiceWorker.ServiceWorkerVersionStatus.Redundant */
-    ]: i18nLazyString3(UIStrings18.redundant)
+    ]: i18nLazyString3(UIStrings19.redundant)
   };
 })(ServiceWorkerVersion || (ServiceWorkerVersion = {}));
 var ServiceWorkerRegistration = class {
@@ -36751,7 +36827,7 @@ var ServiceWorkerContextNamer = class {
     const parsedUrl = Common41.ParsedURL.ParsedURL.fromString(context.origin);
     const label = parsedUrl ? parsedUrl.lastPathComponentWithFragment() : context.name;
     const localizedStatus = ServiceWorkerVersion.Status[version.status];
-    context.setLabel(i18nString18(UIStrings18.sSS, { PH1: label, PH2: version.id, PH3: localizedStatus() }));
+    context.setLabel(i18nString19(UIStrings19.sSS, { PH1: label, PH2: version.id, PH3: localizedStatus() }));
   }
 };
 SDKModel.register(ServiceWorkerManager, { capabilities: 16384, autostart: true });

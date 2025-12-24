@@ -7,7 +7,7 @@ export default class SessionReplay extends BaseDomain {
   override namespace = 'SessionReplay';
   private isEnabled = false;
 
-  constructor(options: { socket: WebSocket; eventStorage?: EventStorage }) {
+  constructor(options: { socket: WebSocket | null; eventStorage?: EventStorage }) {
     super(options);
   }
 

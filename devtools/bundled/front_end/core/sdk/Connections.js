@@ -7,6 +7,7 @@ import * as Host from '../host/host.js';
 import * as ProtocolClient from '../protocol_client/protocol_client.js';
 import * as Root from '../root/root.js';
 import { RehydratingConnectionTransport } from './RehydratingConnection.js';
+import { PostMessageTransport } from './PostMessageTransport.js';
 const UIStrings = {
     /**
      * @description Text on the remote debugging window to indicate the connection is lost
@@ -189,6 +190,11 @@ export async function initMainConnection(createRootTarget, onConnectionLost) {
 function createMainTransport(onConnectionLost) {
     if (Root.Runtime.Runtime.isTraceApp()) {
         return new RehydratingConnectionTransport(onConnectionLost);
+    }
+    // Check for postMessage mode / postMessage 모드 확인
+    const postMessageParam = Root.Runtime.Runtime.queryParam('postMessage');
+    if (postMessageParam === 'true') {
+        return new PostMessageTransport(onConnectionLost);
     }
     const wsParam = Root.Runtime.Runtime.queryParam('ws');
     const wssParam = Root.Runtime.Runtime.queryParam('wss');

@@ -31,7 +31,7 @@ export default class Network extends BaseDomain {
   private cacheRequest: Array<{ method: string; params: unknown }> = [];
   private isEnable = false;
 
-  constructor(options: { socket: WebSocket }) {
+  constructor(options: { socket: WebSocket | null }) {
     super(options);
     this.hookXhr();
     this.hookFetch();

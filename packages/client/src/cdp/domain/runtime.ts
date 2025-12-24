@@ -20,7 +20,7 @@ export default class Runtime extends BaseDomain {
   private cacheError: ConsoleCache[] = [];
   private isEnable = false;
 
-  constructor(options: { socket: WebSocket }) {
+  constructor(options: { socket: WebSocket | null }) {
     super(options);
     this.hookConsole();
   }
