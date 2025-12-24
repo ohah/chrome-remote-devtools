@@ -7,6 +7,7 @@ import {
 } from '../common/remoteObject';
 import BaseDomain from './base';
 import { Event } from './protocol';
+import type { DomainOptions } from '../types';
 
 interface ConsoleCache {
   method: string;
@@ -16,7 +17,7 @@ interface ConsoleCache {
 export default class Runtime extends BaseDomain {
   override namespace = 'Runtime';
 
-  constructor(options: { socket: WebSocket | null }) {
+  constructor(options: DomainOptions) {
     super(options);
     this.hookConsole();
   }

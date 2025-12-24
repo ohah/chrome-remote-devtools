@@ -1,13 +1,13 @@
 // SessionReplay domain implementation / SessionReplay 도메인 구현
 import BaseDomain from './base';
 import { Event } from './protocol';
-import type { EventStorage } from '../../persistence/event-storage';
+import type { DomainOptions } from '../types';
 
 export default class SessionReplay extends BaseDomain {
   override namespace = 'SessionReplay';
   private isEnabled = false;
 
-  constructor(options: { socket: WebSocket | null; eventStorage?: EventStorage }) {
+  constructor(options: DomainOptions) {
     super(options);
   }
 
