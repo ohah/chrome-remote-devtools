@@ -806,6 +806,7 @@
       <include file="third_party/lit/lit.js" name="THIRD_PARTY_LIT_LIT_JS" resource_path="third_party/lit/lit.js" type="BINDATA" compress="false"/>
       <include file="third_party/marked/marked.js" name="THIRD_PARTY_MARKED_MARKED_JS" resource_path="third_party/marked/marked.js" type="BINDATA" compress="false"/>
       <include file="third_party/puppeteer-replay/puppeteer-replay.js" name="THIRD_PARTY_PUPPETEER_REPLAY_PUPPETEER_REPLAY_JS" resource_path="third_party/puppeteer-replay/puppeteer-replay.js" type="BINDATA" compress="false"/>
+      <include file="third_party/rrweb-replay/rrweb-replay.js" name="THIRD_PARTY_RRWEB_REPLAY_RRWEB_REPLAY_JS" resource_path="third_party/rrweb-replay/rrweb-replay.js" type="BINDATA" compress="false"/>
       <include file="third_party/puppeteer/puppeteer.js" name="THIRD_PARTY_PUPPETEER_PUPPETEER_JS" resource_path="third_party/puppeteer/puppeteer.js" type="BINDATA" compress="false"/>
       <include file="third_party/source-map-scopes-codec/source-map-scopes-codec.js" name="THIRD_PARTY_SOURCE_MAP_SCOPES_CODEC_SOURCE_MAP_SCOPES_CODEC_JS" resource_path="third_party/source-map-scopes-codec/source-map-scopes-codec.js" type="BINDATA" compress="false"/>
       <include file="third_party/third-party-web/third-party-web.js" name="THIRD_PARTY_THIRD_PARTY_WEB_THIRD_PARTY_WEB_JS" resource_path="third_party/third-party-web/third-party-web.js" type="BINDATA" compress="false"/>

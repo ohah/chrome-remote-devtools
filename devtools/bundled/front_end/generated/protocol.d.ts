@@ -20482,6 +20482,26 @@ export declare namespace Runtime {
         executionContextId?: ExecutionContextId;
     }
 }
+export declare namespace SessionReplay {
+    /**
+     * Request for sending rrweb events.
+     */
+    interface SendEventRequest {
+        /**
+         * Array of rrweb events.
+         */
+        events: unknown[];
+    }
+    /**
+     * Fired when rrweb events are recorded.
+     */
+    interface EventRecordedEvent {
+        /**
+         * Array of rrweb events.
+         */
+        events: unknown[];
+    }
+}
 /**
  * This domain is deprecated.
  * @deprecated

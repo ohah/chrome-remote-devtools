@@ -147,6 +147,7 @@ export declare class TargetBase {
     securityAgent(): ProtocolProxyApi.SecurityApi;
     serviceWorkerAgent(): ProtocolProxyApi.ServiceWorkerApi;
     storageAgent(): ProtocolProxyApi.StorageApi;
+    sessionReplayAgent(): ProtocolProxyApi.SessionReplayApi;
     systemInfo(): ProtocolProxyApi.SystemInfoApi;
     targetAgent(): ProtocolProxyApi.TargetApi;
     tracingAgent(): ProtocolProxyApi.TracingApi;
@@ -187,6 +188,7 @@ export declare class TargetBase {
     registerSecurityDispatcher(dispatcher: ProtocolProxyApi.SecurityDispatcher): void;
     registerServiceWorkerDispatcher(dispatcher: ProtocolProxyApi.ServiceWorkerDispatcher): void;
     registerStorageDispatcher(dispatcher: ProtocolProxyApi.StorageDispatcher): void;
+    registerSessionReplayDispatcher(dispatcher: ProtocolProxyApi.SessionReplayDispatcher): void;
     registerTargetDispatcher(dispatcher: ProtocolProxyApi.TargetDispatcher): void;
     registerTracingDispatcher(dispatcher: ProtocolProxyApi.TracingDispatcher): void;
     registerWebAudioDispatcher(dispatcher: ProtocolProxyApi.WebAudioDispatcher): void;

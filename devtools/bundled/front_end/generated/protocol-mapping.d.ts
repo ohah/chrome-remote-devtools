@@ -677,6 +677,10 @@ export namespace ProtocolMapping {
     'Storage.attributionReportingReportSent': [Protocol.Storage.AttributionReportingReportSentEvent];
     'Storage.attributionReportingVerboseDebugReportSent': [Protocol.Storage.AttributionReportingVerboseDebugReportSentEvent];
     /**
+     * Fired when rrweb events are recorded.
+     */
+    'SessionReplay.eventRecorded': [Protocol.SessionReplay.EventRecordedEvent];
+    /**
      * Issued when attached to target because of auto-attach or `attachToTarget` command.
      */
     'Target.attachedToTarget': [Protocol.Target.AttachedToTargetEvent];
