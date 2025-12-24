@@ -18,8 +18,12 @@ const config = {
   iframeExamplePort: process.env.IFRAME_EXAMPLE_PORT
     ? parseInt(process.env.IFRAME_EXAMPLE_PORT)
     : 5174,
+  popupExamplePort: process.env.POPUP_EXAMPLE_PORT
+    ? parseInt(process.env.POPUP_EXAMPLE_PORT)
+    : 5175,
   includeExample: process.env.INCLUDE_EXAMPLE !== 'false', // Default: true
   includeIframeExample: process.env.INCLUDE_IFRAME_EXAMPLE !== 'false', // Default: true
+  includePopupExample: process.env.INCLUDE_POPUP_EXAMPLE !== 'false', // Default: true
   healthCheckTimeout: process.env.HEALTH_CHECK_TIMEOUT
     ? parseInt(process.env.HEALTH_CHECK_TIMEOUT)
     : 10000, // 10 seconds
@@ -97,12 +101,24 @@ const services: Service[] = [
     healthCheckUrl: `http://localhost:${config.iframeExamplePort}`,
     optional: true,
   },
+  {
+    name: 'POPUP_EXAMPLE',
+    color: colors.example,
+    cwd: join(rootDir, 'examples/popup'),
+    command: ['bun', 'run', 'dev'],
+    port: config.popupExamplePort,
+    healthCheckUrl: `http://localhost:${config.popupExamplePort}`,
+    optional: true,
+  },
 ].filter((service) => {
   // Filter out example if not included / 예제가 포함되지 않으면 제외
   if (service.name === 'EXAMPLE' && !config.includeExample) {
     return false;
   }
   if (service.name === 'IFRAME_EXAMPLE' && !config.includeIframeExample) {
+    return false;
+  }
+  if (service.name === 'POPUP_EXAMPLE' && !config.includePopupExample) {
     return false;
   }
   return true;
