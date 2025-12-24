@@ -230,11 +230,11 @@ export class SocketServer {
     if (clientId) {
       const client = this.clients.get(clientId);
       if (client && client.ws.readyState === WebSocket.OPEN) {
-        // Send request to client to replay stored events / 클라이언트에 저장된 이벤트 재생 요청 전송
+        // Send request to client to replay all stored events (console, network, etc.) / 클라이언트에 모든 저장된 이벤트 재생 요청 전송 (console, network 등)
         try {
           client.ws.send(
             JSON.stringify({
-              method: 'SessionReplay.replayStoredEvents',
+              method: 'Storage.replayStoredEvents',
               params: {},
             })
           );
@@ -248,6 +248,23 @@ export class SocketServer {
             'devtools',
             id,
             'failed to request stored events / 저장된 이벤트 요청 실패',
+            error
+          );
+        }
+
+        // Also request SessionReplay events separately / SessionReplay 이벤트도 별도로 요청
+        try {
+          client.ws.send(
+            JSON.stringify({
+              method: 'SessionReplay.replayStoredEvents',
+              params: {},
+            })
+          );
+        } catch (error) {
+          logError(
+            'devtools',
+            id,
+            'failed to request SessionReplay stored events / SessionReplay 저장된 이벤트 요청 실패',
             error
           );
         }

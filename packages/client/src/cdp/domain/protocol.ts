@@ -30,7 +30,7 @@ const protocolMethods = {
     'removeDOMStorageItem',
     'clear',
   ],
-  Storage: ['getStorageKey'],
+  Storage: ['getStorageKey', 'replayStoredEvents'],
   SessionReplay: ['enable', 'disable', 'sendEvent', 'replayStoredEvents'],
 } as const;
 

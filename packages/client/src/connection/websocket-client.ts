@@ -143,11 +143,6 @@ export class WebSocketClient {
    * Setup socket event handlers / 소켓 이벤트 핸들러 설정
    */
   private setupSocketHandlers(socket: WebSocket, domain: ChromeDomain): void {
-    // Send stored events when connection opens / 연결 열릴 때 저장된 이벤트 전송
-    socket.addEventListener('open', async () => {
-      await this.sendStoredEvents(socket);
-    });
-
     socket.addEventListener('message', async ({ data }) => {
       await this.handleSocketMessage(data, domain, socket);
     });
