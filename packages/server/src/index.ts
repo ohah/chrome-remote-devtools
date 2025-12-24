@@ -178,10 +178,11 @@ export class SocketServer {
               // decompressedData contains { method, params, timestamp } / decompressedData는 { method, params, timestamp } 포함
               parsed.method = decompressedData.method;
               parsed.params = decompressedData.params;
+              // Update data string with decompressed content / 압축 해제된 내용으로 data 문자열 업데이트
               data = JSON.stringify(parsed);
             } catch (error) {
               logError('client', id, 'decompression failed / 압축 해제 실패', error);
-              // Continue with original data if decompression fails / 압축 해제 실패 시 원본 데이터 사용
+              // Continue with original compressed data if decompression fails / 압축 해제 실패 시 원본 압축 데이터 사용
             }
           }
         }
@@ -189,9 +190,11 @@ export class SocketServer {
         const method = parsed?.method as string | undefined;
         log('client', id, 'received:', JSON.stringify(parsed, null, 2), method);
       } catch {
+        // If parsing fails, log and send raw data / 파싱 실패 시 원본 데이터 로그 및 전송
         log('client', id, 'received (raw):', data);
       }
 
+      // Send data to DevTools (decompressed if compression was successful, original otherwise) / DevTools로 데이터 전송 (압축 해제 성공 시 압축 해제된 데이터, 실패 시 원본)
       sendToDevtools(data);
     });
 
