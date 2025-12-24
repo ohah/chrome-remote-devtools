@@ -1,13 +1,13 @@
 // PostMessage handler for CDP communication / CDP 통신을 위한 PostMessage 핸들러
 import type ChromeDomain from '../cdp';
+import type { CDPResponse } from '../cdp/types';
 
 /**
- * CDP response type / CDP 응답 타입
+ * CDP execute result type / CDP execute 결과 타입
  * Matches ChromeDomain.execute() return type / ChromeDomain.execute() 반환 타입과 일치
+ * Can be a CDPResponse or a Promise that resolves to CDPResponse / CDPResponse 또는 CDPResponse로 resolve되는 Promise일 수 있음
  */
-export type CDPResponse =
-  | { id?: number; result?: unknown; error?: unknown }
-  | Promise<{ id?: number; result?: unknown; error?: unknown }>;
+export type CDPExecuteResult = CDPResponse | Promise<CDPResponse>;
 
 /**
  * PostMessage handler class / PostMessage 핸들러 클래스
@@ -121,7 +121,7 @@ export class PostMessageHandler {
   private sendResponse(
     source: MessageEventSource | null,
     messageId: number | undefined,
-    result: CDPResponse,
+    result: CDPExecuteResult,
     useLegacyFormat: boolean = false
   ): void {
     const send = (response: { id?: number; result?: unknown; error?: unknown }) => {
