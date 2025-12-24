@@ -553,8 +553,8 @@ export default class Dom extends BaseDomain {
                 });
               }
 
-              // WeakSet automatically removes nodes when they are garbage collected / WeakSet은 가비지 컬렉션 시 자동으로 노드 제거
-              // No need to manually delete / 수동 삭제 불필요
+              // Node is no longer in the DOM, so remove it from tracking immediately / 노드가 DOM에서 제거되었으므로 즉시 추적 대상에서 제거
+              this.registeredNodes.delete(node);
             }
           });
         } else if (mutation.type === 'attributes') {
