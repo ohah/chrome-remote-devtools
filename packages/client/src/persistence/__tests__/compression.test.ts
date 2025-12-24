@@ -2,6 +2,9 @@
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { isCompressionSupported, compress, decompress, isCompressed } from '../compression';
 
+// Check compression support once / 압축 지원 여부 한 번만 확인
+const compressionSupported = isCompressionSupported();
+
 describe('Compression', () => {
   beforeEach(() => {
     // Reset any state if needed / 필요 시 상태 초기화
@@ -14,13 +17,18 @@ describe('Compression', () => {
   });
 
   test('should compress and decompress data when supported / 지원되는 경우 데이터 압축 및 해제', async () => {
-    if (!isCompressionSupported()) {
+    if (!compressionSupported) {
       // Skip test if CompressionStream not supported / CompressionStream 미지원 시 테스트 건너뛰기
       console.log(
         'CompressionStream not supported, skipping test / CompressionStream 미지원, 테스트 건너뛰기'
       );
       return;
     }
+
+    // Add timeout to prevent hanging / 무한 대기 방지를 위한 타임아웃 추가
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 3000)
+    );
 
     const originalData = JSON.stringify({
       method: 'Runtime.consoleAPICalled',
@@ -33,7 +41,7 @@ describe('Compression', () => {
     });
 
     // Compress / 압축
-    const compressed = await compress(originalData);
+    const compressed = await Promise.race([compress(originalData), timeout]);
     expect(compressed).not.toBeNull();
     expect(compressed).toBeInstanceOf(ArrayBuffer);
     expect(compressed!.byteLength).toBeLessThan(new Blob([originalData]).size);
@@ -42,18 +50,22 @@ describe('Compression', () => {
     expect(isCompressed(compressed!)).toBe(true);
 
     // Decompress / 압축 해제
-    const decompressed = await decompress(compressed!);
+    const decompressed = await Promise.race([decompress(compressed!), timeout]);
     expect(decompressed).not.toBeNull();
     expect(decompressed).toBe(originalData);
   });
 
   test('should handle large data compression / 큰 데이터 압축 처리', async () => {
-    if (!isCompressionSupported()) {
+    if (!compressionSupported) {
       console.log(
         'CompressionStream not supported, skipping test / CompressionStream 미지원, 테스트 건너뛰기'
       );
       return;
     }
+
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 3000)
+    );
 
     // Create large data / 큰 데이터 생성
     const largeData = JSON.stringify({
@@ -73,46 +85,54 @@ describe('Compression', () => {
       },
     });
 
-    const compressed = await compress(largeData);
+    const compressed = await Promise.race([compress(largeData), timeout]);
     expect(compressed).not.toBeNull();
     expect(compressed!.byteLength).toBeLessThan(new Blob([largeData]).size);
 
-    const decompressed = await decompress(compressed!);
+    const decompressed = await Promise.race([decompress(compressed!), timeout]);
     expect(decompressed).toBe(largeData);
   });
 
   test('should return null when compression fails / 압축 실패 시 null 반환', async () => {
-    if (!isCompressionSupported()) {
+    if (!compressionSupported) {
       console.log(
         'CompressionStream not supported, skipping test / CompressionStream 미지원, 테스트 건너뛰기'
       );
       return;
     }
 
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 3000)
+    );
+
     // Invalid data should still compress (gzip can compress anything) / 잘못된 데이터도 압축 가능 (gzip은 모든 것을 압축 가능)
     // But we test error handling / 하지만 에러 처리 테스트
-    const result = await compress('');
+    const result = await Promise.race([compress(''), timeout]);
     // Empty string might compress to small buffer / 빈 문자열은 작은 버퍼로 압축될 수 있음
     expect(result === null || result instanceof ArrayBuffer).toBe(true);
   });
 
   test('should return null when decompression fails / 압축 해제 실패 시 null 반환', async () => {
-    if (!isCompressionSupported()) {
+    if (!compressionSupported) {
       console.log(
         'CompressionStream not supported, skipping test / CompressionStream 미지원, 테스트 건너뛰기'
       );
       return;
     }
 
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 3000)
+    );
+
     // Try to decompress invalid data / 잘못된 데이터 압축 해제 시도
     const invalidData = new ArrayBuffer(10);
-    const result = await decompress(invalidData);
+    const result = await Promise.race([decompress(invalidData), timeout]);
     // Should return null or throw / null 반환 또는 에러 발생
     expect(result === null || typeof result === 'string').toBe(true);
   });
 
   test('should detect compressed data / 압축된 데이터 감지', () => {
-    if (!isCompressionSupported()) {
+    if (!compressionSupported) {
       console.log(
         'CompressionStream not supported, skipping test / CompressionStream 미지원, 테스트 건너뛰기'
       );
@@ -134,12 +154,16 @@ describe('Compression', () => {
   });
 
   test('should compress CDP event data / CDP 이벤트 데이터 압축', async () => {
-    if (!isCompressionSupported()) {
+    if (!compressionSupported) {
       console.log(
         'CompressionStream not supported, skipping test / CompressionStream 미지원, 테스트 건너뛰기'
       );
       return;
     }
+
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 3000)
+    );
 
     const cdpEvent = {
       method: 'Network.requestWillBeSent',
@@ -165,10 +189,10 @@ describe('Compression', () => {
     };
 
     const eventData = JSON.stringify(cdpEvent);
-    const compressed = await compress(eventData);
+    const compressed = await Promise.race([compress(eventData), timeout]);
     expect(compressed).not.toBeNull();
 
-    const decompressed = await decompress(compressed!);
+    const decompressed = await Promise.race([decompress(compressed!), timeout]);
     expect(decompressed).toBe(eventData);
 
     const parsed = JSON.parse(decompressed!);
