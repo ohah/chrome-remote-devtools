@@ -230,6 +230,47 @@ bun run dev:server
 - `/client.js`에서 클라이언트 스크립트 제공
 - HTTP API 제공: `/json`, `/json/clients`, `/json/inspectors`
 
+#### 서버 로그 설정
+
+서버 로그는 **기본적으로 비활성화**되어 있어 콘솔 노이즈를 줄입니다. 환경 변수를 사용하여 로그를 활성화하고 제어할 수 있습니다:
+
+**기본적으로 로그 비활성화**:
+
+```bash
+bun run dev:server
+```
+
+**모든 로그 활성화**:
+
+```bash
+LOG_ENABLED=true bun run dev:server
+```
+
+**활성화 후 특정 메소드만 필터링**:
+
+```bash
+# 콘솔 및 네트워크 메소드만 표시
+LOG_ENABLED=true LOG_METHODS=Runtime.consoleAPICalled,Network.requestWillBeSent bun run dev:server
+
+# SessionReplay 이벤트만 표시
+LOG_ENABLED=true LOG_METHODS=SessionReplay.eventRecorded bun run dev:server
+
+# 여러 메소드 (쉼표로 구분)
+LOG_ENABLED=true LOG_METHODS=Runtime.consoleAPICalled,Network.requestWillBeSent,Network.responseReceived bun run dev:server
+```
+
+**참고**: 프로덕션 빌드(`NODE_ENV=production`)에서는 서버 시작 메시지를 제외한 모든 로그가 자동으로 비활성화됩니다.
+
+**환경 변수**:
+
+- `LOG_ENABLED` - 모든 로그 활성화/비활성화 (기본값: `false` - 비활성화)
+  - `true`로 설정하면 로그 활성화
+  - `LOG_METHODS` 필터링을 사용하려면 반드시 `true`로 설정해야 함
+- `LOG_METHODS` - 로그를 필터링할 CDP 메소드 이름 목록 (쉼표로 구분, 예: `Runtime.consoleAPICalled,Network.requestWillBeSent`)
+  - `LOG_ENABLED=true`일 때만 작동
+  - 설정하지 않으면 모든 메소드가 로그됨
+  - 설정하면 지정된 메소드만 로그됨
+
 **터미널 2 - Inspector**:
 
 ```bash
