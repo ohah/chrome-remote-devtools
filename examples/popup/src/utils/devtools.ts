@@ -6,14 +6,6 @@ export function getClientId(): string | null {
   return sessionStorage.getItem('debug_id');
 }
 
-// Get server URL from script tag or default / 스크립트 태그에서 서버 URL 가져오기 또는 기본값
-export function getServerUrl(): string {
-  const script = document.querySelector('script[data-server-url]') as HTMLScriptElement | null;
-  return (
-    script?.dataset.serverUrl || script?.getAttribute('data-server-url') || 'http://localhost:8080'
-  );
-}
-
 // Get origin for embedded mode / embedded 모드를 위한 origin 가져오기
 export function getHostOrigin(): string {
   let protocol = location.protocol;
@@ -26,23 +18,13 @@ export function getHostOrigin(): string {
 }
 
 // Build DevTools popup URL / DevTools 팝업 URL 구성
-export function buildDevToolsUrl(
-  clientId: string,
-  serverUrl: string = 'http://localhost:8080'
-): string {
+export function buildDevToolsUrl(_clientId: string): string {
   const baseUrl = new URL('/devtools-frontend/devtools_app.html', window.location.origin);
   const params = baseUrl.searchParams;
 
-  // WebSocket URL parameter / WebSocket URL 파라미터
-  // Use a stable ID instead of Date.now() to avoid popup reloads / 팝업 리로드를 방지하기 위해 Date.now() 대신 안정적인 ID 사용
-  const devtoolsId = `devtools-${clientId}`;
-  // Extract host from serverUrl (DevTools frontend will add protocol automatically) / serverUrl에서 host 추출 (DevTools frontend가 프로토콜을 자동으로 추가함)
-  const serverHost = serverUrl
-    .replace(/^https?:\/\//, '')
-    .replace(/^ws:\/\//, '')
-    .replace(/^wss:\/\//, '');
-  const wsUrl = `${serverHost}/remote/debug/devtools/${devtoolsId}?clientId=${clientId}`;
-  params.append('ws', wsUrl);
+  // Use postMessage transport for popup mode / 팝업 모드에서는 postMessage transport 사용
+  // No WebSocket URL needed / WebSocket URL 불필요
+  params.append('postMessage', 'true');
 
   // DevTools configuration parameters / DevTools 설정 파라미터
   params.append('experiments', 'true');

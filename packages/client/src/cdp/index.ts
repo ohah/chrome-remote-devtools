@@ -10,6 +10,7 @@ import {
   SessionReplay,
   protocol,
 } from './domain';
+import type BaseDomain from './domain/base';
 import type { EventStorage } from '../persistence/event-storage';
 
 interface CDPMessage {
@@ -20,9 +21,21 @@ interface CDPMessage {
 
 export default class ChromeDomain {
   private protocol: Record<string, (...args: unknown[]) => unknown> = {};
+  private domains: BaseDomain[] = [];
 
   constructor(options: { socket: WebSocket | null; eventStorage?: EventStorage }) {
     this.registerProtocol(options);
+  }
+
+  /**
+   * Set DevTools window for postMessage communication / postMessage 통신을 위한 DevTools window 설정
+   * @param devtoolsWindow - DevTools window reference / DevTools window 참조
+   */
+  setDevToolsWindow(devtoolsWindow: Window): void {
+    // Update all domains with DevTools window / 모든 도메인에 DevTools window 업데이트
+    this.domains.forEach((domain) => {
+      domain.setDevToolsWindow(devtoolsWindow);
+    });
   }
 
   /**
@@ -86,6 +99,9 @@ export default class ChromeDomain {
       new Storage(options),
       new SessionReplay({ socket: options.socket, eventStorage: options.eventStorage }),
     ];
+
+    // Store domains for later DevTools window updates / 나중에 DevTools window 업데이트를 위해 도메인 저장
+    this.domains = domains;
 
     domains.forEach((domain) => {
       const { namespace } = domain;
