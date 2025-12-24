@@ -10,6 +10,7 @@ import {
   SessionReplay,
   protocol,
 } from './domain';
+import type { EventStorage } from '../persistence/event-storage';
 
 interface CDPMessage {
   id?: number;
@@ -20,14 +21,18 @@ interface CDPMessage {
 export default class ChromeDomain {
   private protocol: Record<string, (...args: unknown[]) => unknown> = {};
 
-  constructor(options: { socket: WebSocket }) {
+  constructor(options: { socket: WebSocket; eventStorage?: EventStorage }) {
     this.registerProtocol(options);
   }
 
   /**
    * Execute CDP method / CDP 메서드 실행
    */
-  execute(message: CDPMessage = {}): { id?: number; result?: unknown; error?: unknown } {
+  execute(
+    message: CDPMessage = {}
+  ):
+    | { id?: number; result?: unknown; error?: unknown }
+    | Promise<{ id?: number; result?: unknown; error?: unknown }> {
     const { id, method, params } = message;
     if (!method) {
       return { id };
@@ -39,7 +44,20 @@ export default class ChromeDomain {
     }
 
     try {
-      return { id, result: methodCall(params) };
+      const result = methodCall(params);
+      // Handle async methods / async 메서드 처리
+      if (result instanceof Promise) {
+        return result
+          .then((res) => ({ id, result: res }))
+          .catch((error) => ({
+            id,
+            error: {
+              code: -32000,
+              message: error instanceof Error ? error.message : String(error),
+            },
+          }));
+      }
+      return { id, result };
     } catch (error) {
       return {
         id,
@@ -54,7 +72,7 @@ export default class ChromeDomain {
   /**
    * Register all CDP domains / 모든 CDP 도메인 등록
    */
-  private registerProtocol(options: { socket: WebSocket }): void {
+  private registerProtocol(options: { socket: WebSocket; eventStorage?: EventStorage }): void {
     const domains = [
       new Runtime(options),
       new Page(options),
@@ -63,7 +81,7 @@ export default class ChromeDomain {
       new Console(options),
       new DOMStorage(options),
       new Storage(options),
-      new SessionReplay(options),
+      new SessionReplay({ socket: options.socket, eventStorage: options.eventStorage }),
     ];
 
     domains.forEach((domain) => {

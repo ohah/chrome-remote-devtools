@@ -4,7 +4,8 @@ import BaseDomain from './base';
 import { Event } from './protocol';
 
 // Simple node ID management / 간단한 노드 ID 관리
-const nodeIdMap = new Map<Node, number>();
+// Use WeakMap to avoid memory leaks when nodes are removed / 노드가 제거될 때 메모리 누수를 방지하기 위해 WeakMap 사용
+const nodeIdMap = new WeakMap<Node, number>();
 const nodeMap = new Map<number, Node>();
 let nodeIdCounter = 1;
 
@@ -133,7 +134,8 @@ export default class Dom extends BaseDomain {
   private searchRet = new Map<number, Node[]>();
   private currentSearchKey = '';
   // Track which nodes have been registered in DOMModel / DOMModel에 등록된 노드 추적
-  private registeredNodes = new Set<Node>();
+  // Use WeakSet to avoid memory leaks when nodes are removed / 노드가 제거될 때 메모리 누수를 방지하기 위해 WeakSet 사용
+  private registeredNodes = new WeakSet<Node>();
 
   // Enable DOM domain / DOM 도메인 활성화
   override enable(): void {
@@ -551,8 +553,8 @@ export default class Dom extends BaseDomain {
                 });
               }
 
-              // Remove from registered set / 등록된 집합에서 제거
-              this.registeredNodes.delete(node);
+              // WeakSet automatically removes nodes when they are garbage collected / WeakSet은 가비지 컬렉션 시 자동으로 노드 제거
+              // No need to manually delete / 수동 삭제 불필요
             }
           });
         } else if (mutation.type === 'attributes') {

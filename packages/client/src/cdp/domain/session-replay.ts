@@ -1,12 +1,13 @@
 // SessionReplay domain implementation / SessionReplay 도메인 구현
 import BaseDomain from './base';
 import { Event } from './protocol';
+import type { EventStorage } from '../../persistence/event-storage';
 
 export default class SessionReplay extends BaseDomain {
   override namespace = 'SessionReplay';
   private isEnabled = false;
 
-  constructor(options: { socket: WebSocket }) {
+  constructor(options: { socket: WebSocket; eventStorage?: EventStorage }) {
     super(options);
   }
 
@@ -40,5 +41,43 @@ export default class SessionReplay extends BaseDomain {
     });
 
     return { success: true };
+  }
+
+  // Replay stored events / 저장된 이벤트 재생
+  async replayStoredEvents(): Promise<{ success: boolean; count?: number }> {
+    if (!this.eventStorage) {
+      return { success: false };
+    }
+
+    try {
+      const storedEvents = await this.eventStorage.getEvents();
+      const sessionReplayEvents = storedEvents.filter(
+        (e) => e.method === 'SessionReplay.eventRecorded'
+      );
+
+      if (sessionReplayEvents.length === 0) {
+        return { success: true, count: 0 };
+      }
+
+      // Send stored SessionReplay events / 저장된 SessionReplay 이벤트 전송
+      for (const event of sessionReplayEvents) {
+        const params = event.params as { events?: unknown[] };
+        if (params && Array.isArray(params.events) && params.events.length > 0) {
+          this.send({
+            method: Event.sessionReplayEventRecorded,
+            params: {
+              events: params.events,
+            },
+          });
+          // Small delay between events / 이벤트 간 작은 지연
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+      }
+
+      return { success: true, count: sessionReplayEvents.length };
+    } catch (error) {
+      console.error('Failed to replay stored events / 저장된 이벤트 재생 실패:', error);
+      return { success: false };
+    }
   }
 }

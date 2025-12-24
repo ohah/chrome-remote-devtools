@@ -31,7 +31,7 @@ const protocolMethods = {
     'clear',
   ],
   Storage: ['getStorageKey'],
-  SessionReplay: ['enable', 'disable', 'sendEvent'],
+  SessionReplay: ['enable', 'disable', 'sendEvent', 'replayStoredEvents'],
 } as const;
 
 export type ProtocolDomain = keyof typeof protocolMethods;
