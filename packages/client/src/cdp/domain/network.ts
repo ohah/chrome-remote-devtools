@@ -30,6 +30,8 @@ export default class Network extends BaseDomain {
   private responseData = new Map<string, NetworkResponse>();
   private cacheRequest: Array<{ method: string; params: unknown }> = [];
   private isEnable = false;
+  // Use WeakMap for XHR metadata to avoid memory leaks / 메모리 누수 방지를 위해 XHR 메타데이터에 WeakMap 사용
+  private xhrMetadata = new WeakMap<XMLHttpRequest, { method: string; url: string }>();
 
   constructor(options: { socket: WebSocket | null }) {
     super(options);
@@ -136,18 +138,21 @@ export default class Network extends BaseDomain {
       url: string | URL,
       ...args: unknown[]
     ) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this as any).__method = method;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this as any).__url = typeof url === 'string' ? url : url.toString();
+      // Store metadata in WeakMap / WeakMap에 메타데이터 저장
+      self.xhrMetadata.set(this, {
+        method,
+        url: typeof url === 'string' ? url : url.toString(),
+      });
       return originalOpen.apply(this, [method, url, ...args] as Parameters<typeof originalOpen>);
     };
 
     XMLHttpRequest.prototype.send = function (body?: Document | XMLHttpRequestBodyInit | null) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const method = (this as any).__method as string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const url = (this as any).__url as string;
+      // Get metadata from WeakMap / WeakMap에서 메타데이터 가져오기
+      const metadata = self.xhrMetadata.get(this);
+      if (!metadata) {
+        return originalSend.apply(this, [body]);
+      }
+      const { method, url } = metadata;
       const requestId = `${self.requestId++}`;
 
       const request: NetworkRequest = {
