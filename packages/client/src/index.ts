@@ -165,6 +165,7 @@ function initSocket(serverUrl: string, rrwebConfig: RrwebConfig): void {
   const enableCompression = rrwebConfig.enableCompression !== false; // Default: true / 기본값: true
 
   let eventStorage: EventStorage | undefined = undefined;
+  let storageInitPromise: Promise<void> | undefined = undefined;
   if (enableEventStorage) {
     eventStorage = new EventStorage({
       clientId,
@@ -172,7 +173,8 @@ function initSocket(serverUrl: string, rrwebConfig: RrwebConfig): void {
       maxStoredEvents: rrwebConfig.maxStoredEvents,
       maxStorageSize: rrwebConfig.maxStorageSize,
     });
-    void eventStorage.init().then(async () => {
+    // Initialize storage and perform setup tasks / 저장소 초기화 및 설정 작업 수행
+    storageInitPromise = eventStorage.init().then(async () => {
       // Detect page reload / 페이지 새로고침 감지
       const navigationTiming = performance.getEntriesByType(
         'navigation'
@@ -203,6 +205,10 @@ function initSocket(serverUrl: string, rrwebConfig: RrwebConfig): void {
   // Send stored events when connection opens / 연결 열릴 때 저장된 이벤트 전송
   socket.addEventListener('open', async () => {
     if (eventStorage && enableEventStorage) {
+      // Wait for storage initialization to complete / 저장소 초기화 완료 대기
+      if (storageInitPromise) {
+        await storageInitPromise;
+      }
       try {
         const storedEvents = await eventStorage.getEvents();
         if (storedEvents.length > 0) {
