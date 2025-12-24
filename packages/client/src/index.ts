@@ -1,6 +1,7 @@
 // CDP Client - WebSocket connection and CDP initialization / CDP 클라이언트 - WebSocket 연결 및 CDP 초기화
 import { getAbsolutePath } from './cdp/common/utils';
 import ChromeDomain from './cdp';
+import { EventStorage } from './persistence/event-storage';
 
 interface RrwebConfig {
   enable: boolean;
@@ -8,6 +9,13 @@ interface RrwebConfig {
   maxBatchSize?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recordOptions?: Record<string, any>;
+  // Event storage options / 이벤트 저장 옵션
+  enableEventStorage?: boolean;
+  enableCompression?: boolean;
+  maxStoredEvents?: number;
+  maxStorageSize?: number;
+  storageSizeCheckInterval?: number;
+  clearOnSend?: boolean;
 }
 
 function getDocumentFavicon(): string {
@@ -29,8 +37,19 @@ function getDocumentFavicon(): string {
 function getId(): string {
   let id = sessionStorage.getItem('debug_id');
   if (!id) {
-    // Simple UUID-like ID generation / 간단한 UUID 스타일 ID 생성
-    id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Use crypto.randomUUID() if available (UUID v4) / 사용 가능한 경우 crypto.randomUUID() 사용 (UUID v4)
+    // Fallback to enhanced timestamp + random for older browsers / 구형 브라우저를 위한 타임스탬프 + 랜덤 폴백
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      id = crypto.randomUUID();
+    } else {
+      // Enhanced fallback: timestamp + multiple random values / 향상된 폴백: 타임스탬프 + 여러 랜덤 값
+      // Add performance.now() for sub-millisecond precision / 밀리초 이하 정밀도를 위해 performance.now() 추가
+      const timestamp = `${Date.now()}-${performance.now()}`;
+      const random1 = Math.random().toString(36).substring(2, 11);
+      const random2 = Math.random().toString(36).substring(2, 11);
+      const random3 = Math.random().toString(36).substring(2, 11);
+      id = `${timestamp}-${random1}-${random2}-${random3}`;
+    }
     sessionStorage.setItem('debug_id', id);
   }
   return id;
@@ -95,7 +114,14 @@ async function initRrwebRecording(
     const baseRecordOptions = config.recordOptions ?? {};
     const transport = createDefaultCDPTransport({
       executeCDP: (method: string, params?: unknown) => {
-        return domain.execute({ method, params });
+        const result = domain.execute({ method, params });
+        // executeCDP is synchronous, but we handle async internally / executeCDP는 동기이지만 내부적으로 async 처리
+        if (result instanceof Promise) {
+          // For async methods, return immediately with error / async 메서드의 경우 즉시 에러 반환
+          // This shouldn't happen for sendEvent which is synchronous / sendEvent는 동기이므로 발생하지 않아야 함
+          return { error: { message: 'Async method not supported in executeCDP' } };
+        }
+        return { result: result.result, error: result.error };
       },
     });
     const recorder = initRrwebRecorder({
@@ -131,7 +157,88 @@ function initSocket(serverUrl: string, rrwebConfig: RrwebConfig): void {
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
   const host = serverUrl.replace(/^(http|https|ws|wss):\/\//i, '');
   const socket = new WebSocket(`${protocol}//${host}/remote/debug/client/${getId()}?${getQuery()}`);
-  const domain = new ChromeDomain({ socket });
+
+  // Initialize event storage / 이벤트 저장소 초기화
+  // Default: enabled / 기본값: 활성화
+  const clientId = getId(); // Get tab-specific client ID / 탭별 고유 클라이언트 ID 가져오기
+  const enableEventStorage = rrwebConfig.enableEventStorage !== false; // Default: true / 기본값: true
+  const enableCompression = rrwebConfig.enableCompression !== false; // Default: true / 기본값: true
+
+  let eventStorage: EventStorage | undefined = undefined;
+  if (enableEventStorage) {
+    eventStorage = new EventStorage({
+      clientId,
+      enableCompression,
+      maxStoredEvents: rrwebConfig.maxStoredEvents,
+      maxStorageSize: rrwebConfig.maxStorageSize,
+    });
+    void eventStorage.init().then(async () => {
+      // Detect page reload / 페이지 새로고침 감지
+      const navigationTiming = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
+      const isReload = navigationTiming?.type === 'reload';
+
+      if (isReload) {
+        // Clear current tab's events on reload / 새로고침 시 현재 탭의 이벤트 삭제
+        await eventStorage?.clearEvents();
+        console.log('Cleared events on page reload / 페이지 새로고침 시 이벤트 삭제');
+      }
+
+      // Update last active time / 마지막 활성 시간 업데이트
+      await eventStorage?.updateLastActiveTime();
+
+      // Cleanup orphaned events / orphaned 이벤트 정리
+      const deletedCount = await eventStorage?.cleanupOrphanedEvents();
+      if (deletedCount && deletedCount > 0) {
+        console.log(
+          `Cleaned up ${deletedCount} orphaned events / ${deletedCount}개의 orphaned 이벤트 정리`
+        );
+      }
+    });
+  }
+
+  const domain = new ChromeDomain({ socket, eventStorage });
+
+  // Send stored events when connection opens / 연결 열릴 때 저장된 이벤트 전송
+  socket.addEventListener('open', async () => {
+    if (eventStorage && enableEventStorage) {
+      try {
+        const storedEvents = await eventStorage.getEvents();
+        if (storedEvents.length > 0) {
+          console.log(
+            `Sending ${storedEvents.length} stored events / 저장된 ${storedEvents.length}개 이벤트 전송`
+          );
+
+          // Send all events in batches / 모든 이벤트를 배치로 전송
+          const batchSize = 100;
+          for (let i = 0; i < storedEvents.length; i += batchSize) {
+            const batch = storedEvents.slice(i, i + batchSize);
+            for (const event of batch) {
+              if (socket.readyState === WebSocket.OPEN) {
+                socket.send(
+                  JSON.stringify({
+                    method: event.method,
+                    params: event.params,
+                  })
+                );
+              }
+            }
+            // Small delay between batches / 배치 간 작은 지연
+            await new Promise((resolve) => setTimeout(resolve, 10));
+          }
+
+          // Clear events after sending if configured / 설정된 경우 전송 후 이벤트 삭제
+          if (rrwebConfig.clearOnSend !== false) {
+            await eventStorage.clearEvents();
+            console.log('Cleared stored events after sending / 전송 후 저장된 이벤트 삭제');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to send stored events / 저장된 이벤트 전송 실패:', error);
+      }
+    }
+  });
 
   socket.addEventListener('message', async ({ data }) => {
     try {
@@ -150,13 +257,50 @@ function initSocket(serverUrl: string, rrwebConfig: RrwebConfig): void {
 
       const message = JSON.parse(messageText);
       const ret = domain.execute(message);
-      if (ret.id !== undefined) {
+
+      // Handle async methods / async 메서드 처리
+      if (ret instanceof Promise) {
+        const result = await ret;
+        if (result.id !== undefined) {
+          socket.send(JSON.stringify(result));
+        }
+      } else if (ret.id !== undefined) {
         socket.send(JSON.stringify(ret));
       }
     } catch (e) {
       console.error('CDP message error:', e);
     }
   });
+
+  // Periodically update last active time and cleanup orphaned events / 주기적으로 마지막 활성 시간 업데이트 및 orphaned 이벤트 정리
+  if (enableEventStorage && eventStorage) {
+    // Update last active time every 5 minutes / 5분마다 마지막 활성 시간 업데이트
+    const updateInterval = setInterval(
+      async () => {
+        await eventStorage?.updateLastActiveTime();
+      },
+      5 * 60 * 1000
+    );
+
+    // Cleanup orphaned events every hour / 1시간마다 orphaned 이벤트 정리
+    const cleanupInterval = setInterval(
+      async () => {
+        const deletedCount = await eventStorage?.cleanupOrphanedEvents();
+        if (deletedCount && deletedCount > 0) {
+          console.log(
+            `Cleaned up ${deletedCount} orphaned events / ${deletedCount}개의 orphaned 이벤트 정리`
+          );
+        }
+      },
+      60 * 60 * 1000
+    );
+
+    // Cleanup intervals on socket close / 소켓 종료 시 인터벌 정리
+    socket.addEventListener('close', () => {
+      clearInterval(updateInterval);
+      clearInterval(cleanupInterval);
+    });
+  }
 
   void initRrwebRecording(socket, rrwebConfig, domain);
 }
