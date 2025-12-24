@@ -150,12 +150,16 @@ describe('EventStorage', () => {
   });
 
   test('should handle compression when enabled / 압축 활성화 시 처리', async () => {
-    if (typeof CompressionStream === 'undefined') {
+    if (typeof CompressionStream === 'undefined' || typeof DecompressionStream === 'undefined') {
       console.log(
         'CompressionStream not supported, skipping test / CompressionStream 미지원, 테스트 건너뛰기'
       );
       return;
     }
+
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 3000)
+    );
 
     const compressedStorage = new EventStorage({
       clientId: 'compressed-client',
@@ -174,8 +178,17 @@ describe('EventStorage', () => {
       },
     };
 
-    await compressedStorage.saveEvent(method, params);
-    const events = await compressedStorage.getEvents();
+    const savePromise = compressedStorage.saveEvent(method, params);
+    const saveTimeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Save timeout')), 3000)
+    );
+    await Promise.race([savePromise, saveTimeout]);
+
+    const getPromise = compressedStorage.getEvents();
+    const getTimeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Get timeout')), 3000)
+    );
+    const events = await Promise.race([getPromise, getTimeout]);
 
     expect(events.length).toBe(1);
     const event = events[0];
