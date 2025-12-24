@@ -1,4 +1,5 @@
 // CDP Client initialization tests / CDP 클라이언트 초기화 테스트
+import 'fake-indexeddb/auto'; // Import fake-indexeddb for testing / 테스트를 위한 fake-indexeddb import
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { initCDPClient } from './index';
 

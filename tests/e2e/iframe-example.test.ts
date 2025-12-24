@@ -228,6 +228,116 @@ async function checkNetworkRequest(devtoolsFrame: FrameLocator, _url: string): P
   }
 }
 
+// Open Elements panel in DevTools / DevTools에서 Elements 패널 열기
+async function openElementsPanel(devtoolsFrame: FrameLocator): Promise<void> {
+  // Try multiple selectors for Elements tab / Elements 탭을 위한 여러 셀렉터 시도
+  const elementsTabSelectors = [
+    'button[aria-label*="Elements" i]',
+    'button[data-key="elements"]',
+    'button:has-text("Elements")',
+    '[role="tab"]:has-text("Elements")',
+    '.tabbed-pane-header-tab:has-text("Elements")',
+  ];
+
+  let elementsTab: Locator | null = null;
+  for (const selector of elementsTabSelectors) {
+    try {
+      const tab = devtoolsFrame.locator(selector).first();
+      await tab.waitFor({ timeout: 2000, state: 'visible' });
+      elementsTab = tab;
+      break;
+    } catch {
+      // Try next selector / 다음 셀렉터 시도
+      continue;
+    }
+  }
+
+  if (!elementsTab) {
+    throw new Error('Could not find Elements tab / Elements 탭을 찾을 수 없습니다');
+  }
+
+  await elementsTab.click();
+
+  // Wait for Elements panel to be visible / Elements 패널이 보일 때까지 대기
+  const elementsPanelSelectors = [
+    '.elements-tree-outline',
+    '[aria-label*="Elements panel" i]',
+    '.tree-outline',
+    '.elements-tree',
+  ];
+
+  let panelFound = false;
+  for (const selector of elementsPanelSelectors) {
+    try {
+      await devtoolsFrame.locator(selector).first().waitFor({ timeout: 5000, state: 'visible' });
+      panelFound = true;
+      break;
+    } catch {
+      continue;
+    }
+  }
+
+  if (!panelFound) {
+    // Wait a bit more for panel to load / 패널 로드를 위해 조금 더 대기
+    await new Promise((resolve) => setTimeout(resolve, PANEL_LOAD_TIMEOUT));
+  }
+}
+
+// Wait for DOM tree to load / DOM 트리 로드 대기
+async function waitForDOMTree(devtoolsFrame: FrameLocator): Promise<void> {
+  // Wait for DOM tree elements to appear / DOM 트리 요소가 나타날 때까지 대기
+  const treeSelectors = [
+    '.tree-outline li',
+    '.elements-tree-outline li',
+    '[class*="tree-element"]',
+  ];
+
+  let treeFound = false;
+  for (const selector of treeSelectors) {
+    try {
+      await devtoolsFrame.locator(selector).first().waitFor({ timeout: 10000, state: 'visible' });
+      treeFound = true;
+      break;
+    } catch {
+      continue;
+    }
+  }
+
+  if (!treeFound) {
+    throw new Error('DOM tree not found / DOM 트리를 찾을 수 없습니다');
+  }
+}
+
+// Check if DOM element exists in tree / DOM 트리에 요소가 존재하는지 확인
+async function checkDOMElement(devtoolsFrame: FrameLocator, tagName: string): Promise<void> {
+  // Try multiple selectors to find element / 요소를 찾기 위한 여러 셀렉터 시도
+  const elementSelectors = [
+    `.tree-outline li:has-text("${tagName}")`,
+    `.elements-tree-outline li:has-text("${tagName}")`,
+    `[class*="tree-element"]:has-text("${tagName}")`,
+    `text=/${tagName}/i`,
+  ];
+
+  let elementFound = false;
+  for (const selector of elementSelectors) {
+    try {
+      const element = devtoolsFrame.locator(selector).first();
+      await element.waitFor({ timeout: 5000, state: 'visible' });
+      await expect(element).toBeVisible();
+      elementFound = true;
+      break;
+    } catch {
+      continue;
+    }
+  }
+
+  if (!elementFound) {
+    throw new Error(
+      `DOM element "${tagName}" not found / DOM 요소 "${tagName}"을 찾을 수 없습니다`
+    );
+  }
+}
+
 test.describe('iframe Example E2E Tests', () => {
   test('should load page and connect client / 페이지 로드 및 클라이언트 연결', async ({ page }) => {
     // Navigate to iframe example / iframe example로 이동
@@ -505,113 +615,3 @@ test.describe('iframe Example E2E Tests', () => {
     }
   });
 });
-
-// Open Elements panel in DevTools / DevTools에서 Elements 패널 열기
-async function openElementsPanel(devtoolsFrame: FrameLocator): Promise<void> {
-  // Try multiple selectors for Elements tab / Elements 탭을 위한 여러 셀렉터 시도
-  const elementsTabSelectors = [
-    'button[aria-label*="Elements" i]',
-    'button[data-key="elements"]',
-    'button:has-text("Elements")',
-    '[role="tab"]:has-text("Elements")',
-    '.tabbed-pane-header-tab:has-text("Elements")',
-  ];
-
-  let elementsTab: Locator | null = null;
-  for (const selector of elementsTabSelectors) {
-    try {
-      const tab = devtoolsFrame.locator(selector).first();
-      await tab.waitFor({ timeout: 2000, state: 'visible' });
-      elementsTab = tab;
-      break;
-    } catch {
-      // Try next selector / 다음 셀렉터 시도
-      continue;
-    }
-  }
-
-  if (!elementsTab) {
-    throw new Error('Could not find Elements tab / Elements 탭을 찾을 수 없습니다');
-  }
-
-  await elementsTab.click();
-
-  // Wait for Elements panel to be visible / Elements 패널이 보일 때까지 대기
-  const elementsPanelSelectors = [
-    '.elements-tree-outline',
-    '[aria-label*="Elements panel" i]',
-    '.tree-outline',
-    '.elements-tree',
-  ];
-
-  let panelFound = false;
-  for (const selector of elementsPanelSelectors) {
-    try {
-      await devtoolsFrame.locator(selector).first().waitFor({ timeout: 5000, state: 'visible' });
-      panelFound = true;
-      break;
-    } catch {
-      continue;
-    }
-  }
-
-  if (!panelFound) {
-    // Wait a bit more for panel to load / 패널 로드를 위해 조금 더 대기
-    await new Promise((resolve) => setTimeout(resolve, PANEL_LOAD_TIMEOUT));
-  }
-}
-
-// Wait for DOM tree to load / DOM 트리 로드 대기
-async function waitForDOMTree(devtoolsFrame: FrameLocator): Promise<void> {
-  // Wait for DOM tree elements to appear / DOM 트리 요소가 나타날 때까지 대기
-  const treeSelectors = [
-    '.tree-outline li',
-    '.elements-tree-outline li',
-    '[class*="tree-element"]',
-  ];
-
-  let treeFound = false;
-  for (const selector of treeSelectors) {
-    try {
-      await devtoolsFrame.locator(selector).first().waitFor({ timeout: 10000, state: 'visible' });
-      treeFound = true;
-      break;
-    } catch {
-      continue;
-    }
-  }
-
-  if (!treeFound) {
-    throw new Error('DOM tree not found / DOM 트리를 찾을 수 없습니다');
-  }
-}
-
-// Check if DOM element exists in tree / DOM 트리에 요소가 존재하는지 확인
-async function checkDOMElement(devtoolsFrame: FrameLocator, tagName: string): Promise<void> {
-  // Try multiple selectors to find element / 요소를 찾기 위한 여러 셀렉터 시도
-  const elementSelectors = [
-    `.tree-outline li:has-text("${tagName}")`,
-    `.elements-tree-outline li:has-text("${tagName}")`,
-    `[class*="tree-element"]:has-text("${tagName}")`,
-    `text=/${tagName}/i`,
-  ];
-
-  let elementFound = false;
-  for (const selector of elementSelectors) {
-    try {
-      const element = devtoolsFrame.locator(selector).first();
-      await element.waitFor({ timeout: 5000, state: 'visible' });
-      await expect(element).toBeVisible();
-      elementFound = true;
-      break;
-    } catch {
-      continue;
-    }
-  }
-
-  if (!elementFound) {
-    throw new Error(
-      `DOM element "${tagName}" not found / DOM 요소 "${tagName}"을 찾을 수 없습니다`
-    );
-  }
-}

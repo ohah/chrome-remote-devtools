@@ -80,13 +80,16 @@ describe('App', () => {
     const originalConsoleError = console.error;
     console.error = () => {}; // Suppress expected network error / 예상된 네트워크 에러 억제
 
+    let container: HTMLElement;
     await act(async () => {
-      renderApp();
+      const result = renderApp();
+      container = result.container;
     });
 
     // Component should render even if fetch fails / fetch가 실패해도 컴포넌트는 렌더링되어야 함
     await waitFor(
       () => {
+        expect(container).toBeTruthy();
         expect(document.body).toBeTruthy();
       },
       { timeout: 3000 }
@@ -102,13 +105,16 @@ describe('App', () => {
     const originalConsoleError = console.error;
     console.error = () => {}; // Suppress expected network error / 예상된 네트워크 에러 억제
 
+    let container: HTMLElement;
     await act(async () => {
-      renderApp();
+      const result = renderApp();
+      container = result.container;
     });
 
     // Component should still render even if fetch fails / fetch가 실패해도 컴포넌트는 렌더링되어야 함
     await waitFor(
       () => {
+        expect(container).toBeTruthy();
         expect(document.body).toBeTruthy();
       },
       { timeout: 3000 }
