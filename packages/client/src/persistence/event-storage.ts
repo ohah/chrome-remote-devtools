@@ -2,7 +2,7 @@
 import { compress } from './compression';
 
 const DB_NAME = 'CDPEventStorage';
-const DB_VERSION = 1; // Incremented to add clientActivity store / clientActivity 스토어 추가를 위해 버전 증가
+const DB_VERSION = 1;
 const STORE_NAME = 'events';
 const ACTIVITY_STORE_NAME = 'clientActivity';
 const ORPHANED_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours / 24시간
@@ -206,8 +206,8 @@ export class EventStorage {
       request.onsuccess = (event) => {
         const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
         if (cursor && deletedSize < targetSize) {
-          const event = cursor.value as StoredEvent;
-          deletedSize += event.size || 0;
+          const storedEvent = cursor.value as StoredEvent;
+          deletedSize += storedEvent.size || 0;
           cursor.delete();
           cursor.continue();
         } else {
@@ -279,8 +279,11 @@ export class EventStorage {
 
   /**
    * Save event to IndexedDB / IndexedDB에 이벤트 저장
+   * @param method - CDP method name / CDP 메소드 이름
+   * @param params - Event parameters / 이벤트 파라미터
+   * @param retryCount - Internal retry counter to prevent infinite recursion / 무한 재귀 방지를 위한 내부 재시도 카운터
    */
-  async saveEvent(method: string, params: unknown): Promise<void> {
+  async saveEvent(method: string, params: unknown, retryCount = 0): Promise<void> {
     if (!this.shouldStore(method)) {
       return;
     }
@@ -348,10 +351,10 @@ export class EventStorage {
 
         request.onerror = () => {
           // Handle QuotaExceededError / QuotaExceededError 처리
-          if (request.error?.name === 'QuotaExceededError') {
-            // Try deleting old events and retry / 오래된 이벤트 삭제 후 재시도
+          if (request.error?.name === 'QuotaExceededError' && retryCount < 1) {
+            // Try deleting old events and retry once / 오래된 이벤트 삭제 후 한 번만 재시도
             void this.deleteOldEvents(size).then(() => {
-              void this.saveEvent(method, params)
+              void this.saveEvent(method, params, retryCount + 1)
                 .then(resolve)
                 .catch(() => {
                   // Ignore retry errors / 재시도 에러 무시
