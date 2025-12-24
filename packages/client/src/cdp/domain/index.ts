@@ -5,4 +5,5 @@ export { default as Dom } from './dom';
 export { default as Network } from './network';
 export { default as Console } from './console';
 export { DOMStorage, Storage } from './storage';
+export { default as SessionReplay } from './session-replay';
 export { default as protocol, Event, type ProtocolDomain, type ProtocolMethods } from './protocol';

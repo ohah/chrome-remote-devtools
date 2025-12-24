@@ -31,6 +31,7 @@ const protocolMethods = {
     'clear',
   ],
   Storage: ['getStorageKey'],
+  SessionReplay: ['enable', 'disable', 'sendEvent'],
 } as const;
 
 export type ProtocolDomain = keyof typeof protocolMethods;
@@ -75,4 +76,7 @@ export const Event = {
   domStorageItemRemoved: 'DOMStorage.domStorageItemRemoved',
   domStorageItemUpdated: 'DOMStorage.domStorageItemUpdated',
   domStorageItemsCleared: 'DOMStorage.domStorageItemsCleared',
+
+  // SessionReplay events / SessionReplay 이벤트
+  sessionReplayEventRecorded: 'SessionReplay.eventRecorded',
 } as const;
