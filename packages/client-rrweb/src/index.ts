@@ -8,6 +8,7 @@ import type {
   RrwebTransport,
 } from './types';
 import { createWebSocketTransport } from './transport/ws';
+import { createCDPTransport } from './transport/cdp';
 
 /**
  * Load rrweb record lazily / rrweb record를 지연 로드
@@ -142,4 +143,13 @@ export function createDefaultWsTransport(params: {
   kind?: string;
 }): RrwebTransport {
   return createWebSocketTransport(params);
+}
+
+/**
+ * Helper to build CDP transport / CDP 전송 생성 헬퍼
+ */
+export function createDefaultCDPTransport(params: {
+  executeCDP: (method: string, params?: unknown) => { result?: unknown; error?: unknown };
+}): RrwebTransport {
+  return createCDPTransport(params);
 }

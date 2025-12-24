@@ -1,7 +1,6 @@
 // DevTools page / 데브툴 페이지
 import { useEffect, useRef } from 'react';
 import { useParams } from '@tanstack/react-router';
-import { RrwebReplayPanel } from './rrweb-replay';
 
 // Export component for route / 라우트용 컴포넌트 export
 export { DevToolsPage as component };
@@ -39,18 +38,13 @@ function DevToolsPage() {
   }, [clientId]);
 
   return (
-    <div className="w-full h-screen grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 bg-gray-900">
-      <div className="lg:col-span-2 h-full bg-black rounded-lg overflow-hidden border border-gray-800">
+    <div className="w-full h-screen">
         {/* DevTools iframe / DevTools iframe */}
         <iframe
           ref={iframeRef}
           className="w-full h-full border-none"
           title="DevTools"
         />
-      </div>
-      <div className="h-full">
-        {clientId ? <RrwebReplayPanel clientId={clientId} /> : null}
-      </div>
     </div>
   );
 }

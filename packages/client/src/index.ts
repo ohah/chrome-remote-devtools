@@ -78,15 +78,26 @@ if (typeof window !== 'undefined') {
   };
 }
 
-async function initRrwebRecording(socket: WebSocket, config: RrwebConfig): Promise<void> {
+async function initRrwebRecording(
+  socket: WebSocket,
+  config: RrwebConfig,
+  domain: ChromeDomain
+): Promise<void> {
   if (!config.enable) return;
 
   try {
-    const { createDefaultWsTransport, initRrwebRecorder } =
+    const { createDefaultCDPTransport, initRrwebRecorder } =
       await import('@ohah/chrome-remote-devtools-client-rrweb');
 
+    // Enable SessionReplay domain via CDP method / CDP 메서드로 SessionReplay 도메인 활성화
+    domain.execute({ method: 'SessionReplay.enable' });
+
     const baseRecordOptions = config.recordOptions ?? {};
-    const transport = createDefaultWsTransport({ socket, kind: 'rrweb' });
+    const transport = createDefaultCDPTransport({
+      executeCDP: (method: string, params?: unknown) => {
+        return domain.execute({ method, params });
+      },
+    });
     const recorder = initRrwebRecorder({
       transport,
       flushIntervalMs: config.flushIntervalMs,
@@ -147,7 +158,7 @@ function initSocket(serverUrl: string, rrwebConfig: RrwebConfig): void {
     }
   });
 
-  void initRrwebRecording(socket, rrwebConfig);
+  void initRrwebRecording(socket, rrwebConfig, domain);
 }
 
 function keepScreenDisplay(): void {
