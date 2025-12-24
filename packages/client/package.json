@@ -14,6 +14,7 @@
     "@ohah/chrome-remote-devtools-client-rrweb": "workspace:*"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "fake-indexeddb": "^6.2.5"
   }
 }
