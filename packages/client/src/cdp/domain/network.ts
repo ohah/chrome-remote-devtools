@@ -28,8 +28,6 @@ export default class Network extends BaseDomain {
 
   private requestId = 0;
   private responseData = new Map<string, NetworkResponse>();
-  private cacheRequest: Array<{ method: string; params: unknown }> = [];
-  private isEnable = false;
   // Use WeakMap for XHR metadata to avoid memory leaks / 메모리 누수 방지를 위해 XHR 메타데이터에 WeakMap 사용
   private xhrMetadata = new WeakMap<XMLHttpRequest, { method: string; url: string }>();
 
@@ -41,8 +39,6 @@ export default class Network extends BaseDomain {
 
   // Enable Network domain / Network 도메인 활성화
   override enable(): void {
-    this.isEnable = true;
-    this.cacheRequest.forEach((data) => this.send(data));
     this.reportImageNetwork();
   }
 
@@ -413,10 +409,8 @@ export default class Network extends BaseDomain {
 
   // Send network event / 네트워크 이벤트 전송
   private socketSend(data: { method: string; params: unknown }): void {
-    this.cacheRequest.push(data);
-    if (this.isEnable) {
-      this.send(data);
-    }
+    // Always send event (will be stored in IndexedDB if WebSocket is not connected) / 항상 이벤트 전송 (WebSocket이 연결되지 않았으면 IndexedDB에 저장됨)
+    this.send(data);
   }
 
   // Format response header / 응답 헤더 포맷팅
