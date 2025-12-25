@@ -69,6 +69,7 @@ graph TB
 ## Implementation
 
 The Inspector is implemented using:
+
 - **React**: UI framework
 - **Vite**: Build tool
 - **TanStack Router**: Routing
@@ -85,4 +86,3 @@ const devtoolsUrl = buildDevToolsUrl(clientId, serverUrl);
 ```
 
 The iframe loads this URL, which initializes devtools-frontend with the WebSocket connection to the server.
-

@@ -27,6 +27,7 @@ Get the resource tree of the page.
 Get the content of a resource.
 
 **Parameters:**
+
 - `frameId`: Frame ID
 - `url`: Resource URL
 
@@ -45,4 +46,3 @@ Emitted when the page load event fires.
 ### `Page.domContentEventFired`
 
 Emitted when the DOM content loaded event fires.
-

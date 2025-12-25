@@ -35,6 +35,7 @@ bash scripts/init.sh
 ```
 
 이 작업은 다음을 수행합니다:
+
 - Bun 의존성 설치
 - Rust 의존성 설치
 - 참조 저장소 클론 (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb)

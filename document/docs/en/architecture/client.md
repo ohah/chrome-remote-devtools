@@ -93,4 +93,3 @@ The client can be initialized in two ways:
   data-enable-rrweb="true"
 ></script>
 ```
-

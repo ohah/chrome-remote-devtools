@@ -17,6 +17,7 @@
 페이지 리소스 트리를 가져옵니다.
 
 **Returns:**
+
 - `frameTree`: 프레임 트리 구조
 
 ## Events
@@ -26,6 +27,7 @@
 페이지 로드 이벤트가 발생했을 때 발생합니다.
 
 **Parameters:**
+
 - `timestamp`: 타임스탬프
 
 ### Page.domContentEventFired
@@ -33,6 +35,7 @@
 DOM 콘텐츠 이벤트가 발생했을 때 발생합니다.
 
 **Parameters:**
+
 - `timestamp`: 타임스탬프
 
 ### Page.frameNavigated
@@ -40,4 +43,5 @@ DOM 콘텐츠 이벤트가 발생했을 때 발생합니다.
 프레임이 네비게이션되었을 때 발생합니다.
 
 **Parameters:**
+
 - `frame`: 프레임 정보

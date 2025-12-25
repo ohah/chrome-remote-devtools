@@ -13,6 +13,7 @@ Enable the Runtime domain.
 Evaluate a JavaScript expression in the page context.
 
 **Parameters:**
+
 - `expression`: JavaScript expression to evaluate
 
 **Returns:** Evaluation result
@@ -22,6 +23,7 @@ Evaluate a JavaScript expression in the page context.
 Get properties of a JavaScript object.
 
 **Parameters:**
+
 - `objectId`: Object ID
 
 **Returns:** Object properties
@@ -31,6 +33,7 @@ Get properties of a JavaScript object.
 Release an object reference.
 
 **Parameters:**
+
 - `objectId`: Object ID to release
 
 ### `Runtime.callFunctionOn(functionDeclaration: string, objectId?: string)`
@@ -38,6 +41,7 @@ Release an object reference.
 Call a function on a JavaScript object.
 
 **Parameters:**
+
 - `functionDeclaration`: Function declaration string
 - `objectId`: Optional object ID
 
@@ -56,4 +60,3 @@ Emitted when a console API is called.
 ### `Runtime.exceptionThrown`
 
 Emitted when a JavaScript exception is thrown.
-

@@ -6,7 +6,8 @@ export default defineConfig({
   root: path.join(__dirname, 'docs'),
   base: process.env.NODE_ENV === 'production' ? '/chrome-remote-devtools/' : '/',
   title: 'Chrome Remote DevTools',
-  description: 'A remote debugging tool that uses Chrome DevTools Protocol (CDP) to control and debug remote Chrome browsers.',
+  description:
+    'A remote debugging tool that uses Chrome DevTools Protocol (CDP) to control and debug remote Chrome browsers.',
   lang: 'en',
   icon: '/rspress-icon.png',
   logo: {

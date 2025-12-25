@@ -69,6 +69,7 @@ graph TB
 ## 구현
 
 Inspector는 다음을 사용하여 구현됩니다:
+
 - **React**: UI 프레임워크
 - **Vite**: 빌드 도구
 - **TanStack Router**: 라우팅

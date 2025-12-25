@@ -69,4 +69,3 @@ The Inspector provides the DevTools UI for debugging. It can run as a web applic
 - Learn about the [Server Architecture](/architecture/server)
 - Understand the [Client Implementation](/architecture/client)
 - Explore the [Inspector UI](/architecture/inspector)
-

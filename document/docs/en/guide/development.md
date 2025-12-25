@@ -106,4 +106,3 @@ LOG_ENABLED=true LOG_METHODS=Runtime.consoleAPICalled,Network.requestWillBeSent 
 ```
 
 **Note**: Logs are automatically disabled in production builds.
-

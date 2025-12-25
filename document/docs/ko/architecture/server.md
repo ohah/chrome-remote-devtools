@@ -71,6 +71,7 @@ sequenceDiagram
 ## 구현
 
 서버는 다음을 사용하여 구현됩니다:
+
 - **Bun**: TypeScript 런타임
 - **ws**: WebSocket 라이브러리
 - **HTTP Server**: 정적 파일 및 API 엔드포인트 제공용

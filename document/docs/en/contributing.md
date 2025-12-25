@@ -98,4 +98,3 @@ feat(server): add client connection timeout
 
 - [GitHub Discussions](https://github.com/ohah/chrome-remote-devtools/discussions)
 - [GitHub Issues](https://github.com/ohah/chrome-remote-devtools/issues)
-
