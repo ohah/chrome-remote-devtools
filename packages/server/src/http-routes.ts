@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { SocketServer } from './index';
+import { SocketServer } from './socket-server';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
