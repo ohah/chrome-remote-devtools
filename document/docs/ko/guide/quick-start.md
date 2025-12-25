@@ -51,5 +51,5 @@ Inspector가 페이지에 연결되고 모든 DevTools 기능을 사용할 수 �
 ## 다음 단계
 
 - [아키텍처](/ko/architecture/overview) 알아보기
-- [예제](/ko/examples/installation) 확인하기
+- [플레이그라운드](/ko/examples/) 체험하기
 - [API 문서](/ko/api/server) 읽기

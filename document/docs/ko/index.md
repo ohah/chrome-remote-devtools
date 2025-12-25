@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: 시작하기
-      link: /ko/guide/installation
+      link: /ko/guide/quick-start
     - theme: alt
       text: GitHub
       link: https://github.com/ohah/chrome-remote-devtools

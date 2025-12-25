@@ -51,5 +51,5 @@ The Inspector will connect to your page and you can use all DevTools features:
 ## Next Steps
 
 - Learn about the [Architecture](/architecture/overview)
-- Check out [Examples](/examples/installation)
+- Try the [Playground](/examples/)
 - Read the [API Documentation](/api/server)
