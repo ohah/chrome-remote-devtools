@@ -1,0 +1,10 @@
+[
+  "index",
+  "server",
+  "client",
+  {
+    "type": "dir",
+    "name": "domains",
+    "label": "CDP Domains"
+  }
+]
