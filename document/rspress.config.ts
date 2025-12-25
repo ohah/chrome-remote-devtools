@@ -1,6 +1,12 @@
 import * as path from 'node:path';
 import { defineConfig } from '@rspress/core';
 import pluginMermaid from 'rspress-plugin-mermaid';
+import { existsSync, statSync, readFileSync } from 'fs';
+
+// DevTools frontend path - use bundled only / DevTools frontend 경로 - bundled만 사용
+const devtoolsPath = path.resolve(__dirname, '../devtools/bundled/front_end');
+// Client script path / 클라이언트 스크립트 경로
+const clientPath = path.resolve(__dirname, '../packages/client/dist/index.js');
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -31,6 +37,96 @@ export default defineConfig({
     output: {
       distPath: {
         root: 'doc_build',
+      },
+      // Use RSPack's CopyRspackPlugin to copy devtools-frontend and client.js / devtools-frontend와 client.js 복사를 위해 RSPack의 CopyRspackPlugin 사용
+      copy: {
+        patterns: [
+          {
+            from: devtoolsPath,
+            to: 'devtools-frontend',
+            // Skip if file already exists / 파일이 이미 존재하면 건너뛰기
+            force: false,
+          },
+          {
+            from: clientPath,
+            to: 'client.js',
+            // Skip if file already exists / 파일이 이미 존재하면 건너뛰기
+            force: false,
+          },
+        ],
+      },
+    },
+    // Configure dev server / 개발 서버 설정
+    dev: {
+      setupMiddlewares: (middlewares, _server) => {
+        // Add custom middleware to serve devtools-frontend and client.js / devtools-frontend와 client.js 서빙을 위한 커스텀 미들웨어 추가
+        middlewares.push((req, res, next) => {
+          const urlPath = req.url || '';
+
+          // Handle client.js request / client.js 요청 처리
+          if (urlPath === '/client.js') {
+            if (existsSync(clientPath) && statSync(clientPath).isFile()) {
+              try {
+                const content = readFileSync(clientPath);
+                res.setHeader('Content-Type', 'application/javascript');
+                res.end(content);
+                return;
+              } catch (error) {
+                console.error(`Error serving client.js:`, error);
+                res.statusCode = 500;
+                res.end('Internal server error');
+                return;
+              }
+            }
+            res.statusCode = 404;
+            res.end('File not found');
+            return;
+          }
+
+          // Handle devtools-frontend requests / devtools-frontend 요청 처리
+          if (!urlPath.startsWith('/devtools-frontend')) {
+            next();
+            return;
+          }
+
+          // Remove query string / 쿼리 문자열 제거
+          const cleanPath = urlPath.replace('/devtools-frontend', '') || '/';
+          const filePath = path.join(devtoolsPath, cleanPath);
+          const ext = path.extname(filePath);
+
+          // Serve all bundled files as static (already built, no transformation needed) / 모든 bundled 파일을 정적으로 서빙 (이미 빌드됨, 변환 불필요)
+          if (existsSync(filePath) && statSync(filePath).isFile()) {
+            try {
+              const content = readFileSync(filePath);
+              // Set appropriate content type / 적절한 Content-Type 설정
+              if (ext === '.css') {
+                res.setHeader('Content-Type', 'text/css');
+              } else if (ext === '.js' || ext === '.mjs') {
+                res.setHeader('Content-Type', 'application/javascript');
+              } else if (ext === '.json') {
+                res.setHeader('Content-Type', 'application/json');
+              } else if (ext === '.html') {
+                res.setHeader('Content-Type', 'text/html');
+              } else if (ext === '.svg') {
+                res.setHeader('Content-Type', 'image/svg+xml');
+              } else if (ext === '.png') {
+                res.setHeader('Content-Type', 'image/png');
+              } else if (ext === '.avif') {
+                res.setHeader('Content-Type', 'image/avif');
+              }
+              res.end(content);
+              return;
+            } catch (error) {
+              console.error(`Error serving file ${filePath}:`, error);
+              res.statusCode = 500;
+              res.end('Internal server error');
+              return;
+            }
+          }
+
+          res.statusCode = 404;
+          res.end('File not found');
+        });
       },
     },
   },
