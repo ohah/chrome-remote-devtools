@@ -24,6 +24,8 @@ export default defineConfig({
       label: '한국어',
     },
   ],
+  // Type assertion needed because rspress-plugin-mermaid may not export proper types
+  // 타입 단언이 필요합니다. rspress-plugin-mermaid가 적절한 타입을 내보내지 않을 수 있기 때문입니다
   plugins: [pluginMermaid() as any],
   builderConfig: {
     output: {

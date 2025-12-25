@@ -1,72 +1,53 @@
 # DOM Domain
 
-The DOM domain provides DOM inspection and page structure viewing capabilities.
+The DOM domain handles DOM inspection and page structure viewing.
 
 ## Methods
 
-### `DOM.enable()`
+### DOM.getDocument
 
-Enable the DOM domain.
+Gets the root node of the document.
 
-### `DOM.getDocument()`
+**Returns:**
 
-Get the document node.
+- `root`: Root node
 
-**Returns:** Document node structure
+### DOM.querySelector
 
-### `DOM.removeNode(nodeId: number)`
-
-Remove a node from the DOM.
+Finds an element using a CSS selector.
 
 **Parameters:**
 
-- `nodeId`: Node ID to remove
+- `nodeId` (number): Node ID to start the search from
+- `selector` (string): CSS selector
 
-### `DOM.requestChildNodes(nodeId: number)`
+**Returns:**
 
-Request child nodes of a node.
+- `nodeId`: Found node ID
 
-**Parameters:**
+### DOM.getAttributes
 
-- `nodeId`: Node ID
-
-### `DOM.getOuterHTML(nodeId: number)`
-
-Get the outer HTML of a node.
+Gets the attributes of a node.
 
 **Parameters:**
 
-- `nodeId`: Node ID
+- `nodeId` (number): Node ID
 
-**Returns:** Outer HTML string
+**Returns:**
 
-### `DOM.setOuterHTML(nodeId: number, outerHTML: string)`
-
-Set the outer HTML of a node.
-
-**Parameters:**
-
-- `nodeId`: Node ID
-- `outerHTML`: New outer HTML
+- `attributes`: Array of attributes
 
 ## Events
 
-### `DOM.setChildNodes`
+### DOM.documentUpdated
+
+Emitted when the document is updated.
+
+### DOM.setChildNodes
 
 Emitted when child nodes are set.
 
-### `DOM.childNodeInserted`
+**Parameters:**
 
-Emitted when a child node is inserted.
-
-### `DOM.childNodeRemoved`
-
-Emitted when a child node is removed.
-
-### `DOM.attributeModified`
-
-Emitted when a node attribute is modified.
-
-### `DOM.documentUpdated`
-
-Emitted when the document is updated.
+- `parentId` (number): Parent node ID
+- `nodes`: Array of child nodes

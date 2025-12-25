@@ -1,62 +1,43 @@
 # Runtime Domain
 
-The Runtime domain provides JavaScript execution and evaluation capabilities.
+The Runtime domain handles JavaScript execution and evaluation.
 
 ## Methods
 
-### `Runtime.enable()`
+### Runtime.evaluate
 
-Enable the Runtime domain.
-
-### `Runtime.evaluate(expression: string)`
-
-Evaluate a JavaScript expression in the page context.
+Evaluates a JavaScript expression.
 
 **Parameters:**
 
-- `expression`: JavaScript expression to evaluate
+- `expression` (string): JavaScript expression to evaluate
+- `returnByValue` (boolean, optional): Whether to return the value
 
-**Returns:** Evaluation result
+**Returns:**
 
-### `Runtime.getProperties(objectId: string)`
+- `result`: Evaluation result
 
-Get properties of a JavaScript object.
+### Runtime.callFunctionOn
 
-**Parameters:**
-
-- `objectId`: Object ID
-
-**Returns:** Object properties
-
-### `Runtime.releaseObject(objectId: string)`
-
-Release an object reference.
+Calls a function.
 
 **Parameters:**
 
-- `objectId`: Object ID to release
+- `functionDeclaration` (string): Function declaration to call
+- `objectId` (string, optional): Object ID to call the function on
 
-### `Runtime.callFunctionOn(functionDeclaration: string, objectId?: string)`
+**Returns:**
 
-Call a function on a JavaScript object.
-
-**Parameters:**
-
-- `functionDeclaration`: Function declaration string
-- `objectId`: Optional object ID
-
-**Returns:** Function call result
+- `result`: Call result
 
 ## Events
 
-### `Runtime.executionContextCreated`
-
-Emitted when a new execution context is created.
-
-### `Runtime.consoleAPICalled`
+### Runtime.consoleAPICalled
 
 Emitted when a console API is called.
 
-### `Runtime.exceptionThrown`
+**Parameters:**
 
-Emitted when a JavaScript exception is thrown.
+- `type`: Console message type (log, error, warn, info, debug)
+- `args`: Console arguments
+- `timestamp`: Timestamp

@@ -1,48 +1,47 @@
 # Page Domain
 
-The Page domain provides page navigation and information capabilities.
+The Page domain handles page navigation and lifecycle.
 
 ## Methods
 
-### `Page.enable()`
+### Page.enable
 
-Enable the Page domain.
+Enables the Page domain.
 
-### `Page.startScreencast()`
+### Page.disable
 
-Start capturing screenshots of the page.
+Disables the Page domain.
 
-### `Page.stopScreencast()`
+### Page.getResourceTree
 
-Stop capturing screenshots.
+Gets the page resource tree.
 
-### `Page.getResourceTree()`
+**Returns:**
 
-Get the resource tree of the page.
-
-**Returns:** Resource tree structure
-
-### `Page.getResourceContent(frameId: string, url: string)`
-
-Get the content of a resource.
-
-**Parameters:**
-
-- `frameId`: Frame ID
-- `url`: Resource URL
-
-**Returns:** Resource content
+- `frameTree`: Frame tree structure
 
 ## Events
 
-### `Page.screencastFrame`
-
-Emitted when a screenshot frame is captured.
-
-### `Page.loadEventFired`
+### Page.loadEventFired
 
 Emitted when the page load event fires.
 
-### `Page.domContentEventFired`
+**Parameters:**
 
-Emitted when the DOM content loaded event fires.
+- `timestamp`: Timestamp
+
+### Page.domContentEventFired
+
+Emitted when the DOM content event fires.
+
+**Parameters:**
+
+- `timestamp`: Timestamp
+
+### Page.frameNavigated
+
+Emitted when a frame is navigated.
+
+**Parameters:**
+
+- `frame`: Frame information
