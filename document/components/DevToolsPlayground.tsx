@@ -7,8 +7,18 @@ function getHostOrigin(): string {
   let protocol = location.protocol;
   let host = location.host;
   if (protocol === 'about:' || protocol === 'blob:') {
-    protocol = window.parent.location.protocol;
-    host = window.parent.location.host;
+    try {
+      if (window.parent && window.parent !== window) {
+        const parentLocation = window.parent.location;
+        protocol = parentLocation.protocol;
+        host = parentLocation.host;
+      }
+    } catch {
+      // If accessing window.parent.location fails (e.g., cross-origin),
+      // fall back to the current window's origin.
+      // window.parent.location 접근 실패 시 (예: cross-origin),
+      // 현재 창의 origin으로 폴백
+    }
   }
   return `${protocol}//${host}`;
 }
@@ -69,6 +79,7 @@ function loadClientScript(): void {
  */
 export function DevToolsPlayground({ buttonText = 'Open DevTools' }: { buttonText?: string }) {
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Load client script on mount / 마운트 시 클라이언트 스크립트 로드
   useEffect(() => {
@@ -86,28 +97,27 @@ export function DevToolsPlayground({ buttonText = 'Open DevTools' }: { buttonTex
         'devtools',
         'width=1200,height=800,resizable=yes,scrollbars=yes'
       );
-      setPopupWindow(newWindow);
+      if (newWindow) {
+        setPopupWindow(newWindow);
+      }
     }
   };
 
   return (
     <button
       onClick={handleOpenDevTools}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         padding: '12px 24px',
-        background: '#3b82f6',
+        background: isHovered ? '#2563eb' : '#3b82f6',
         color: 'white',
         border: 'none',
         borderRadius: '6px',
         cursor: 'pointer',
         fontSize: '16px',
         fontWeight: 500,
-      }}
-      onMouseOver={(e) => {
-        e.currentTarget.style.background = '#2563eb';
-      }}
-      onMouseOut={(e) => {
-        e.currentTarget.style.background = '#3b82f6';
+        transition: 'background-color 0.2s',
       }}
     >
       {buttonText}
