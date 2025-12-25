@@ -72,10 +72,7 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
               </td>
               <td className="px-4 py-3">
                 <div className="flex items-center">
-                  <span
-                    className="text-sm text-gray-400 truncate max-w-md block"
-                    title={client.ua || undefined}
-                  >
+                  <span className="text-sm text-gray-400 truncate max-w-md block" title={client.ua}>
                     {client.ua || '-'}
                   </span>
                 </div>
