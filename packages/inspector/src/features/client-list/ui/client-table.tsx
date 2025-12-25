@@ -7,12 +7,6 @@ interface ClientTableProps {
   onSelect: (clientId: string) => void;
 }
 
-// Truncate text with ellipsis / 텍스트 말줄임표로 자르기
-function truncate(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return `${text.substring(0, maxLength)}...`;
-}
-
 export function ClientTable({ clients, onSelect }: ClientTableProps) {
   if (clients.length === 0) {
     return <div className="text-center py-8 text-gray-400">No clients available</div>;
@@ -62,10 +56,11 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="text-sm text-blue-400 hover:text-blue-300 underline"
-                        aria-label={`Open ${truncate(safeUrl, 50)} in new tab`}
+                        className="text-sm text-blue-400 hover:text-blue-300 underline truncate max-w-xs block"
+                        title={safeUrl}
+                        aria-label={`Open ${safeUrl} in new tab`}
                       >
-                        {truncate(safeUrl, 50)}
+                        {safeUrl}
                       </a>
                     );
                   }
@@ -77,8 +72,11 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
               </td>
               <td className="px-4 py-3">
                 <div className="flex items-center">
-                  <span className="text-sm text-gray-400">
-                    {client.ua ? truncate(client.ua, 60) : '-'}
+                  <span
+                    className="text-sm text-gray-400 truncate max-w-md block"
+                    title={client.ua || undefined}
+                  >
+                    {client.ua || '-'}
                   </span>
                 </div>
               </td>

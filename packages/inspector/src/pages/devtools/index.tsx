@@ -1,6 +1,8 @@
 // DevTools page / 데브툴 페이지
 import { useEffect, useRef } from 'react';
 import { useParams } from '@tanstack/react-router';
+import { buildDevToolsUrl } from '@/shared/lib/devtools-url';
+import { SERVER_URL } from '@/shared/lib';
 
 // Export component for route / 라우트용 컴포넌트 export
 export { DevToolsPage as component };
@@ -14,27 +16,8 @@ function DevToolsPage() {
   useEffect(() => {
     if (!iframeRef.current || !clientId) return;
 
-    const url = new URL('/devtools-frontend/devtools_app.html', window.location.origin);
-    const params = url.searchParams;
-
-    // WebSocket URL parameter / WebSocket URL 파라미터
-    // Use a stable ID instead of Date.now() to avoid iframe reloads / iframe 리로드를 방지하기 위해 Date.now() 대신 안정적인 ID 사용
-    const devtoolsId = `devtools-${clientId}`;
-    const wsUrl = `localhost:8080/remote/debug/devtools/${devtoolsId}?clientId=${clientId}`;
-    params.append('ws', wsUrl);
-
-    // DevTools configuration parameters / DevTools 설정 파라미터
-    params.append('experiments', 'true');
-    params.append('improvedChromeReloads', 'true');
-    params.append('experimental', 'true');
-
-    // Enable panels / 패널 활성화
-    params.append('enableConsole', 'true');
-    params.append('enableRuntime', 'true');
-    params.append('enableNetwork', 'true');
-    params.append('enableDebugger', 'true');
-
-    iframeRef.current.src = url.toString();
+    const devtoolsUrl = buildDevToolsUrl(clientId, SERVER_URL);
+    iframeRef.current.src = devtoolsUrl;
   }, [clientId]);
 
   return (
