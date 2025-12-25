@@ -13,8 +13,11 @@
   "devDependencies": {
     "@rspack/core": "^1.6.8",
     "@types/node": "^22.8.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "@types/webpack": "^5.28.5",
-    "rspress-plugin-mermaid": "^0.3.0",
-    "webpack": "^5.104.1"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "rspress-plugin-mermaid": "^0.3.0"
   }
 }
