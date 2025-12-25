@@ -105,9 +105,23 @@ export default defineConfig({
             return;
           }
 
-          // Remove query string / 쿼리 문자열 제거
-          const cleanPath = urlPath.replace('/devtools-frontend', '') || '/';
-          const filePath = path.join(devtoolsPath, cleanPath);
+          // Remove query string and devtools prefix / 쿼리 문자열 및 devtools 프리픽스 제거
+          const pathWithoutQuery = (urlPath.split('?')[0] || '').split('#')[0];
+          const relativePath = pathWithoutQuery.startsWith('/devtools-frontend')
+            ? pathWithoutQuery.slice('/devtools-frontend'.length)
+            : pathWithoutQuery;
+          const cleanPath = relativePath || '/';
+
+          // Resolve the requested path safely under devtoolsPath / devtoolsPath 하위로 안전하게 경로 해석
+          const filePath = path.resolve(devtoolsPath, '.' + cleanPath);
+
+          // Prevent path traversal: ensure resolved path stays within devtoolsPath / 경로 역참조 방지: 해석된 경로가 devtoolsPath 내부인지 확인
+          if (filePath !== devtoolsPath && !filePath.startsWith(devtoolsPath + path.sep)) {
+            res.statusCode = 403;
+            res.end('Forbidden');
+            return;
+          }
+
           const ext = path.extname(filePath);
 
           // Serve all bundled files as static (already built, no transformation needed) / 모든 bundled 파일을 정적으로 서빙 (이미 빌드됨, 변환 불필요)
@@ -143,6 +157,7 @@ export default defineConfig({
           res.statusCode = 404;
           res.end('File not found');
         });
+        return middlewares;
       },
     },
   },
