@@ -196,7 +196,12 @@ export class SocketServer {
           `requested ${method} from client ${client.id} / ${devtoolsId}가 클라이언트 ${client.id}에 ${method} 요청`
         );
       } catch (error) {
-        logError('devtools', devtoolsId, `failed to request ${method} / ${method} 요청 실패`, error);
+        logError(
+          'devtools',
+          devtoolsId,
+          `failed to request ${method} / ${method} 요청 실패`,
+          error
+        );
       }
     }
   }
@@ -415,4 +420,3 @@ export class SocketServer {
     return this.getAllClients();
   }
 }
-
