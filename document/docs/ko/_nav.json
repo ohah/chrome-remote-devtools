@@ -1,0 +1,33 @@
+[
+  {
+    "text": "홈",
+    "link": "/",
+    "activeMatch": "^/ko/$"
+  },
+  {
+    "text": "가이드",
+    "link": "/guide/",
+    "activeMatch": "^/ko/guide/"
+  },
+  {
+    "text": "아키텍처",
+    "link": "/architecture/",
+    "activeMatch": "^/ko/architecture/"
+  },
+  {
+    "text": "API",
+    "link": "/api/",
+    "activeMatch": "^/ko/api/"
+  },
+  {
+    "text": "플레이그라운드",
+    "link": "/examples/",
+    "activeMatch": "^/ko/examples/"
+  },
+  {
+    "text": "기여하기",
+    "link": "/contributing",
+    "activeMatch": "^/ko/contributing"
+  }
+]
+

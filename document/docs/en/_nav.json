@@ -1,0 +1,33 @@
+[
+  {
+    "text": "Home",
+    "link": "/",
+    "activeMatch": "^/en/$"
+  },
+  {
+    "text": "Guide",
+    "link": "/guide/",
+    "activeMatch": "^/en/guide/"
+  },
+  {
+    "text": "Architecture",
+    "link": "/architecture/",
+    "activeMatch": "^/en/architecture/"
+  },
+  {
+    "text": "API",
+    "link": "/api/",
+    "activeMatch": "^/en/api/"
+  },
+  {
+    "text": "Playground",
+    "link": "/examples/",
+    "activeMatch": "^/en/examples/"
+  },
+  {
+    "text": "Contributing",
+    "link": "/contributing",
+    "activeMatch": "^/en/contributing"
+  }
+]
+
