@@ -11,5 +11,5 @@ Chrome Remote DevTools 가이드에 오신 것을 환영합니다!
 ## 다음 단계
 
 - [아키텍처](/ko/architecture/overview) 알아보기
-- [예제](/ko/examples/installation) 탐색하기
+- [플레이그라운드](/ko/examples/) 체험하기
 - [API 문서](/ko/api/server) 읽기

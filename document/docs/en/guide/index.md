@@ -11,5 +11,5 @@ Welcome to the Chrome Remote DevTools guide!
 ## Next Steps
 
 - Learn about the [Architecture](/architecture/overview)
-- Explore [Examples](/examples/installation)
+- Try the [Playground](/examples/)
 - Read the [API Documentation](/api/server)
