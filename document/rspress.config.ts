@@ -11,7 +11,7 @@ const clientPath = path.resolve(__dirname, '../packages/client/dist/index.js');
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
-  base: process.env.NODE_ENV === 'production' ? '/chrome-remote-devtools/' : '/',
+  base: '/chrome-remote-devtools/',
   title: 'Chrome Remote DevTools',
   description:
     'A remote debugging tool that uses Chrome DevTools Protocol (CDP) to control and debug remote Chrome browsers.',
@@ -79,8 +79,8 @@ export default defineConfig({
         middlewares.push((req, res, next) => {
           const urlPath = req.url || '';
 
-          // Handle client.js request / client.js 요청 처리
-          if (urlPath === '/client.js') {
+          // Handle client.js request (with base path) / client.js 요청 처리 (base 경로 포함)
+          if (urlPath === '/chrome-remote-devtools/client.js' || urlPath === '/client.js') {
             if (existsSync(clientPath) && statSync(clientPath).isFile()) {
               try {
                 const content = readFileSync(clientPath);
@@ -99,17 +99,23 @@ export default defineConfig({
             return;
           }
 
-          // Handle devtools-frontend requests / devtools-frontend 요청 처리
-          if (!urlPath.startsWith('/devtools-frontend')) {
+          // Handle devtools-frontend requests (with base path) / devtools-frontend 요청 처리 (base 경로 포함)
+          const devtoolsPrefix = '/chrome-remote-devtools/devtools-frontend';
+          if (!urlPath.startsWith(devtoolsPrefix) && !urlPath.startsWith('/devtools-frontend')) {
             next();
             return;
           }
 
           // Remove query string and devtools prefix / 쿼리 문자열 및 devtools 프리픽스 제거
           const pathWithoutQuery = (urlPath.split('?')[0] || '').split('#')[0];
-          const relativePath = pathWithoutQuery.startsWith('/devtools-frontend')
-            ? pathWithoutQuery.slice('/devtools-frontend'.length)
-            : pathWithoutQuery;
+          let relativePath = '';
+          if (pathWithoutQuery.startsWith(devtoolsPrefix)) {
+            relativePath = pathWithoutQuery.slice(devtoolsPrefix.length);
+          } else if (pathWithoutQuery.startsWith('/devtools-frontend')) {
+            relativePath = pathWithoutQuery.slice('/devtools-frontend'.length);
+          } else {
+            relativePath = pathWithoutQuery;
+          }
           const cleanPath = relativePath || '/';
 
           // Resolve the requested path safely under devtoolsPath / devtoolsPath 하위로 안전하게 경로 해석

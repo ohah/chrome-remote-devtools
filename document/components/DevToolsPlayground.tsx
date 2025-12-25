@@ -28,7 +28,10 @@ function getHostOrigin(): string {
  * Same as popup example / 팝업 예제와 동일
  */
 function buildDevToolsUrl(): string {
-  const baseUrl = new URL('/devtools-frontend/devtools_app.html', window.location.origin);
+  const baseUrl = new URL(
+    '/chrome-remote-devtools/devtools-frontend/devtools_app.html',
+    window.location.origin
+  );
   const params = baseUrl.searchParams;
 
   // Use postMessage transport for popup mode / 팝업 모드에서는 postMessage transport 사용
@@ -66,7 +69,7 @@ function loadClientScript(): void {
 
   // Use built client.js from document build / 문서 빌드의 빌드된 client.js 사용
   const script = document.createElement('script');
-  script.src = '/client.js';
+  script.src = '/chrome-remote-devtools/client.js';
   script.setAttribute('data-enable-rrweb', 'true');
   script.setAttribute('data-chrome-remote-devtools-client', 'true');
   // Popup mode uses postMessage (no data-server-url needed) / 팝업 모드는 postMessage 사용 (data-server-url 불필요)
