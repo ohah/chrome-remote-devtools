@@ -94,4 +94,3 @@ export function createHttpRouter(socketServer: SocketServer) {
     res.end(JSON.stringify({ error: 'Not Found' }));
   };
 }
-

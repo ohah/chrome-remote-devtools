@@ -131,7 +131,10 @@ export class SocketServer {
    * @param clientId - Client ID for logging / 로깅용 클라이언트 ID
    * @returns Decompressed message as JSON string / 압축 해제된 메시지 (JSON 문자열)
    */
-  private decompressMessage(parsed: CDPMessage & { params?: CompressedParams | unknown }, clientId: string): string {
+  private decompressMessage(
+    parsed: CDPMessage & { params?: CompressedParams | unknown },
+    clientId: string
+  ): string {
     // Check if message contains compressed data / 메시지에 압축된 데이터가 포함되어 있는지 확인
     if (!parsed.params || typeof parsed.params !== 'object' || !('compressed' in parsed.params)) {
       return JSON.stringify(parsed);
@@ -185,9 +188,18 @@ export class SocketServer {
             params: {},
           })
         );
-        log('devtools', devtoolsId, `requested ${method} from client ${client.id} / ${devtoolsId}가 클라이언트 ${client.id}에 ${method} 요청`);
+        log(
+          'devtools',
+          devtoolsId,
+          `requested ${method} from client ${client.id} / ${devtoolsId}가 클라이언트 ${client.id}에 ${method} 요청`
+        );
       } catch (error) {
-        logError('devtools', devtoolsId, `failed to request ${method} / ${method} 요청 실패`, error);
+        logError(
+          'devtools',
+          devtoolsId,
+          `failed to request ${method} / ${method} 요청 실패`,
+          error
+        );
       }
     }
   }
