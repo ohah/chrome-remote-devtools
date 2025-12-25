@@ -2,6 +2,7 @@ import * as path from 'node:path';
 import { defineConfig } from '@rspress/core';
 import pluginMermaid from 'rspress-plugin-mermaid';
 import { existsSync, statSync, readFileSync } from 'fs';
+import { rspack } from '@rspack/core';
 
 // DevTools frontend path - use bundled only / DevTools frontend 경로 - bundled만 사용
 const devtoolsPath = path.resolve(__dirname, '../devtools/bundled/front_end');
@@ -38,22 +39,37 @@ export default defineConfig({
       distPath: {
         root: 'doc_build',
       },
-      // Use RSPack's CopyRspackPlugin to copy devtools-frontend and client.js / devtools-frontend와 client.js 복사를 위해 RSPack의 CopyRspackPlugin 사용
-      copy: {
-        patterns: [
-          {
+    },
+    // Use RSPack plugin instead of copy config / copy 설정 대신 RSPack 플러그인 사용
+    tools: {
+      rspack: (config) => {
+        // Add CopyRspackPlugin / CopyRspackPlugin 추가
+        const copyPatterns = [];
+
+        if (existsSync(devtoolsPath)) {
+          copyPatterns.push({
             from: devtoolsPath,
             to: 'devtools-frontend',
-            // Skip if file already exists / 파일이 이미 존재하면 건너뛰기
-            force: false,
-          },
-          {
+          });
+        }
+
+        if (existsSync(clientPath)) {
+          copyPatterns.push({
             from: clientPath,
             to: 'client.js',
-            // Skip if file already exists / 파일이 이미 존재하면 건너뛰기
-            force: false,
-          },
-        ],
+          });
+        }
+
+        if (copyPatterns.length > 0) {
+          config.plugins = config.plugins || [];
+          config.plugins.push(
+            new rspack.CopyRspackPlugin({
+              patterns: copyPatterns,
+            })
+          );
+        }
+
+        return config;
       },
     },
     // Configure dev server / 개발 서버 설정
