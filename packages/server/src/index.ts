@@ -1,13 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import { gunzipSync } from 'zlib';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { createHttpRouter } from './http-routes';
 
 // Log configuration / 로그 설정
 // Default: disabled in both development and production / 기본값: 개발 및 프로덕션 모두에서 비활성화
@@ -74,6 +68,20 @@ function logError(
   }
 }
 
+// CDP message types / CDP 메시지 타입
+interface CDPMessage {
+  method?: string;
+  params?: unknown;
+  id?: number;
+  result?: unknown;
+  error?: unknown;
+}
+
+interface CompressedParams {
+  compressed: true;
+  data: number[];
+}
+
 interface Client {
   id: string;
   ws: WebSocket;
@@ -97,6 +105,91 @@ export class SocketServer {
 
   constructor() {
     this.wss = new WebSocketServer({ noServer: true });
+  }
+
+  /**
+   * Convert WebSocket message to string / WebSocket 메시지를 문자열로 변환
+   * @param message - WebSocket message data / WebSocket 메시지 데이터
+   * @returns String representation of the message / 메시지의 문자열 표현
+   */
+  private convertMessageToString(message: WebSocket.Data): string {
+    if (Buffer.isBuffer(message)) {
+      return message.toString('utf-8');
+    }
+    if (typeof message === 'string') {
+      return message;
+    }
+    if (message instanceof ArrayBuffer) {
+      return Buffer.from(new Uint8Array(message)).toString('utf-8');
+    }
+    return Buffer.from(message as unknown as ArrayLike<number>).toString('utf-8');
+  }
+
+  /**
+   * Decompress message if it contains compressed data / 압축된 데이터가 포함된 경우 메시지 압축 해제
+   * @param parsed - Parsed JSON message / 파싱된 JSON 메시지
+   * @param clientId - Client ID for logging / 로깅용 클라이언트 ID
+   * @returns Decompressed message as JSON string / 압축 해제된 메시지 (JSON 문자열)
+   */
+  private decompressMessage(parsed: CDPMessage & { params?: CompressedParams | unknown }, clientId: string): string {
+    // Check if message contains compressed data / 메시지에 압축된 데이터가 포함되어 있는지 확인
+    if (!parsed.params || typeof parsed.params !== 'object' || !('compressed' in parsed.params)) {
+      return JSON.stringify(parsed);
+    }
+
+    const params = parsed.params as CompressedParams;
+    // Check for compressed marker / 압축 마커 확인
+    if (params.compressed === true && Array.isArray(params.data)) {
+      try {
+        // Decompress the data / 데이터 압축 해제
+        const compressedBuffer = Buffer.from(params.data);
+        const decompressed = gunzipSync(compressedBuffer);
+        const decompressedData = JSON.parse(decompressed.toString('utf-8')) as {
+          method: string;
+          params: unknown;
+          timestamp?: unknown;
+        };
+        // Replace entire message with decompressed data / 전체 메시지를 압축 해제된 데이터로 교체
+        // decompressedData contains { method, params, timestamp } / decompressedData는 { method, params, timestamp } 포함
+        parsed.method = decompressedData.method;
+        parsed.params = decompressedData.params;
+        return JSON.stringify(parsed);
+      } catch (error) {
+        logError('client', clientId, 'decompression failed / 압축 해제 실패', error);
+        // Continue with original compressed data if decompression fails / 압축 해제 실패 시 원본 압축 데이터 사용
+        return JSON.stringify(parsed);
+      }
+    }
+
+    return JSON.stringify(parsed);
+  }
+
+  /**
+   * Request stored events from client / 클라이언트에 저장된 이벤트 요청
+   * @param client - Client instance / 클라이언트 인스턴스
+   * @param devtoolsId - DevTools ID for logging / 로깅용 DevTools ID
+   */
+  private requestStoredEvents(client: Client, devtoolsId: string): void {
+    if (client.ws.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    // Methods to request stored events / 저장된 이벤트를 요청할 메서드들
+    const methods = ['Storage.replayStoredEvents', 'SessionReplay.replayStoredEvents'];
+
+    for (const method of methods) {
+      try {
+        client.ws.send(
+          JSON.stringify({
+            method,
+            params: {},
+          })
+        );
+        log('devtools', devtoolsId, `requested ${method} from client ${client.id} / ${devtoolsId}가 클라이언트 ${client.id}에 ${method} 요청`);
+      } catch (error) {
+        logError('devtools', devtoolsId, `failed to request ${method} / ${method} 요청 실패`, error);
+      }
+    }
   }
 
   initSocketServer(server: ReturnType<typeof createServer>) {
@@ -148,47 +241,19 @@ export class SocketServer {
     };
 
     ws.on('message', (message) => {
-      // Convert and log message / 메시지 변환 및 로깅
-      let data: Buffer | string;
-      if (Buffer.isBuffer(message)) {
-        data = message.toString('utf-8');
-      } else if (typeof message === 'string') {
-        data = message;
-      } else if (message instanceof ArrayBuffer) {
-        data = Buffer.from(new Uint8Array(message)).toString('utf-8');
-      } else {
-        data = Buffer.from(message as unknown as ArrayLike<number>).toString('utf-8');
-      }
+      // Convert message to string / 메시지를 문자열로 변환
+      let data = this.convertMessageToString(message);
 
       // Check if message contains compressed data / 메시지에 압축된 데이터가 포함되어 있는지 확인
       try {
-        const parsed = JSON.parse(data);
+        const parsed = JSON.parse(data) as CDPMessage & { params?: CompressedParams | unknown };
+        // Decompress if needed / 필요시 압축 해제
+        data = this.decompressMessage(parsed, id);
 
-        // Check if message contains compressed data / 메시지에 압축된 데이터가 포함되어 있는지 확인
-        // Compressed data is stored in params with compressed marker / 압축된 데이터는 compressed 마커와 함께 params에 저장됨
-        if (parsed.params && typeof parsed.params === 'object' && 'compressed' in parsed.params) {
-          // Check for compressed marker / 압축 마커 확인
-          if (parsed.params.compressed === true && Array.isArray(parsed.params.data)) {
-            try {
-              // Decompress the data / 데이터 압축 해제
-              const compressedBuffer = Buffer.from(parsed.params.data as number[]);
-              const decompressed = gunzipSync(compressedBuffer);
-              const decompressedData = JSON.parse(decompressed.toString('utf-8'));
-              // Replace entire message with decompressed data / 전체 메시지를 압축 해제된 데이터로 교체
-              // decompressedData contains { method, params, timestamp } / decompressedData는 { method, params, timestamp } 포함
-              parsed.method = decompressedData.method;
-              parsed.params = decompressedData.params;
-              // Update data string with decompressed content / 압축 해제된 내용으로 data 문자열 업데이트
-              data = JSON.stringify(parsed);
-            } catch (error) {
-              logError('client', id, 'decompression failed / 압축 해제 실패', error);
-              // Continue with original compressed data if decompression fails / 압축 해제 실패 시 원본 압축 데이터 사용
-            }
-          }
-        }
-
-        const method = parsed?.method as string | undefined;
-        log('client', id, 'received:', JSON.stringify(parsed, null, 2), method);
+        // Re-parse after decompression for logging / 로깅을 위해 압축 해제 후 재파싱
+        const parsedForLog = JSON.parse(data) as CDPMessage;
+        const method = parsedForLog?.method;
+        log('client', id, 'received:', JSON.stringify(parsedForLog, null, 2), method);
       } catch {
         // If parsing fails, log and send raw data / 파싱 실패 시 원본 데이터 로그 및 전송
         log('client', id, 'received (raw):', data);
@@ -229,45 +294,8 @@ export class SocketServer {
     // Request stored events from client when DevTools connects / DevTools 연결 시 클라이언트에 저장된 이벤트 요청
     if (clientId) {
       const client = this.clients.get(clientId);
-      if (client && client.ws.readyState === WebSocket.OPEN) {
-        // Send request to client to replay all stored events (console, network, etc.) / 클라이언트에 모든 저장된 이벤트 재생 요청 전송 (console, network 등)
-        try {
-          client.ws.send(
-            JSON.stringify({
-              method: 'Storage.replayStoredEvents',
-              params: {},
-            })
-          );
-          log(
-            'devtools',
-            id,
-            `requested stored events from client ${clientId} / ${id}가 클라이언트 ${clientId}에 저장된 이벤트 요청`
-          );
-        } catch (error) {
-          logError(
-            'devtools',
-            id,
-            'failed to request stored events / 저장된 이벤트 요청 실패',
-            error
-          );
-        }
-
-        // Also request SessionReplay events separately / SessionReplay 이벤트도 별도로 요청
-        try {
-          client.ws.send(
-            JSON.stringify({
-              method: 'SessionReplay.replayStoredEvents',
-              params: {},
-            })
-          );
-        } catch (error) {
-          logError(
-            'devtools',
-            id,
-            'failed to request SessionReplay stored events / SessionReplay 저장된 이벤트 요청 실패',
-            error
-          );
-        }
+      if (client) {
+        this.requestStoredEvents(client, id);
       }
     }
 
@@ -288,21 +316,13 @@ export class SocketServer {
         return;
       }
 
-      let data: Buffer | string;
-      if (Buffer.isBuffer(message)) {
-        data = message.toString('utf-8');
-      } else if (typeof message === 'string') {
-        data = message;
-      } else if (message instanceof ArrayBuffer) {
-        data = Buffer.from(new Uint8Array(message)).toString('utf-8');
-      } else {
-        data = Buffer.from(message as unknown as ArrayLike<number>).toString('utf-8');
-      }
+      // Convert message to string for logging / 로깅을 위해 메시지를 문자열로 변환
+      const data = this.convertMessageToString(message);
 
       // Log received message from Inspector / Inspector로부터 수신된 메시지 로깅
       try {
-        const parsed = JSON.parse(data);
-        const method = parsed?.method as string | undefined;
+        const parsed = JSON.parse(data) as CDPMessage;
+        const method = parsed?.method;
         log('devtools', id, 'received:', JSON.stringify(parsed, null, 2), method);
       } catch {
         log('devtools', id, 'received (raw):', data);
@@ -381,95 +401,17 @@ export class SocketServer {
     return Array.from(this.devtools.values()).map(({ ws: _ws, ...data }) => data);
   }
 
+  // Alias for getAllClients for backward compatibility / 하위 호환성을 위한 getAllClients 별칭
   getClients(): Array<Omit<Client, 'ws'>> {
-    return Array.from(this.clients.values()).map(({ ws: _ws, ...data }) => data);
+    return this.getAllClients();
   }
 }
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8080;
 const HOST = process.env.HOST || '0.0.0.0';
 
-const server = createServer((req, res) => {
-  const url = new URL(req.url || '/', `http://${req.headers.host}`);
-
-  // CORS headers / CORS 헤더
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  };
-
-  // Handle OPTIONS request / OPTIONS 요청 처리
-  if (req.method === 'OPTIONS') {
-    res.writeHead(200, headers);
-    res.end();
-    return;
-  }
-
-  if (url.pathname === '/json') {
-    // Get all clients / 모든 클라이언트 가져오기
-    res.writeHead(200, headers);
-    res.end(JSON.stringify({ targets: socketServer.getClients() }));
-    return;
-  }
-
-  if (url.pathname === '/json/clients') {
-    // Get all clients with details / 상세 정보와 함께 모든 클라이언트 가져오기
-    res.writeHead(200, headers);
-    res.end(JSON.stringify({ clients: socketServer.getAllClients() }));
-    return;
-  }
-
-  if (url.pathname === '/json/inspectors') {
-    // Get all inspectors / 모든 Inspector 가져오기
-    res.writeHead(200, headers);
-    res.end(JSON.stringify({ inspectors: socketServer.getAllInspectors() }));
-    return;
-  }
-
-  if (url.pathname.startsWith('/json/client/')) {
-    // Get specific client / 특정 클라이언트 가져오기
-    const clientId = url.pathname.replace('/json/client/', '');
-    const client = socketServer.getClient(clientId);
-    if (client) {
-      res.writeHead(200, headers);
-      res.end(JSON.stringify({ client }));
-    } else {
-      res.writeHead(404, headers);
-      res.end(JSON.stringify({ error: 'Client not found' }));
-    }
-    return;
-  }
-
-  if (url.pathname === '/client.js') {
-    // Serve built client script / 빌드된 클라이언트 스크립트 서빙
-    try {
-      const clientScriptPath = join(__dirname, '../../client/dist/index.js');
-      const clientScript = readFileSync(clientScriptPath, 'utf-8');
-      res.writeHead(200, {
-        'Content-Type': 'application/javascript',
-        ...headers,
-      });
-      res.end(clientScript);
-    } catch {
-      // Fallback: 빌드되지 않은 경우 경고 메시지 / Fallback: warning if not built
-      res.writeHead(200, {
-        'Content-Type': 'application/javascript',
-        ...headers,
-      });
-      res.end(`
-        console.error('Client script not found. Please build: cd packages/client && bun run build');
-      `);
-    }
-    return;
-  }
-
-  res.writeHead(404, headers);
-  res.end(JSON.stringify({ error: 'Not Found' }));
-});
-
 const socketServer = new SocketServer();
+const server = createServer(createHttpRouter(socketServer));
 socketServer.initSocketServer(server);
 
 // Only start server when run directly / 직접 실행될 때만 서버 시작
