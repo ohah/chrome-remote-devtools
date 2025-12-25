@@ -5,6 +5,7 @@ This demonstrates how to use Chrome Remote DevTools in a popup window scenario, 
 ## Overview
 
 In popup mode, the client communicates with the Inspector via postMessage instead of WebSocket. This is useful when:
+
 - WebSocket connections are restricted
 - You need cross-origin communication
 
@@ -29,6 +30,7 @@ In popup mode, the client communicates with the Inspector via postMessage instea
 ```
 
 **Key Points:**
+
 - No `data-server-url` attribute (uses postMessage mode)
 - `data-enable-rrweb="true"` enables session replay
 
@@ -100,4 +102,3 @@ sequenceDiagram
 
 - [Installation Guide](/examples/installation)
 - [Client API](/api/client)
-

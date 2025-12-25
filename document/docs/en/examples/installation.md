@@ -73,4 +73,3 @@ Enable or disable session replay:
 
 - See the [Popup Console](/examples/popup) for a complete playground
 - Learn about the [Client API](/api/client)
-

@@ -5,6 +5,7 @@
 ## 개요
 
 팝업 모드에서 클라이언트는 WebSocket 대신 postMessage를 통해 Inspector와 통신합니다. 이는 다음과 같은 경우에 유용합니다:
+
 - WebSocket 연결이 제한된 경우
 - 크로스 오리진 통신이 필요한 경우
 
@@ -29,6 +30,7 @@
 ```
 
 **핵심 포인트:**
+
 - `data-server-url` 속성 없음 (postMessage 모드 사용)
 - `data-enable-rrweb="true"`는 세션 재생을 활성화합니다
 

@@ -41,6 +41,7 @@ Add the client script to your HTML page:
 4. Start debugging!
 
 The Inspector will connect to your page and you can use all DevTools features:
+
 - View and interact with the console
 - Inspect the DOM
 - Monitor network requests
@@ -52,4 +53,3 @@ The Inspector will connect to your page and you can use all DevTools features:
 - Learn about the [Architecture](/architecture/overview)
 - Check out [Examples](/examples/installation)
 - Read the [API Documentation](/api/server)
-

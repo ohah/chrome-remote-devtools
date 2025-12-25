@@ -35,6 +35,7 @@ bash scripts/init.sh
 ```
 
 This will:
+
 - Install Bun dependencies
 - Install Rust dependencies
 - Clone reference repositories (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb)
@@ -52,4 +53,3 @@ rustc --version
 ## Next Steps
 
 Once installation is complete, proceed to the [Quick Start Guide](/guide/quick-start) to begin using Chrome Remote DevTools.
-

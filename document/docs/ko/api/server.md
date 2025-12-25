@@ -13,6 +13,7 @@ GET /json
 레거시 형식으로 연결된 모든 클라이언트 목록을 반환합니다.
 
 **응답:**
+
 ```json
 {
   "targets": [
@@ -35,6 +36,7 @@ GET /json/clients
 연결된 모든 클라이언트에 대한 상세 정보를 반환합니다.
 
 **응답:**
+
 ```json
 {
   "clients": [
@@ -59,6 +61,7 @@ GET /json/inspectors
 연결된 모든 Inspector 목록을 반환합니다.
 
 **응답:**
+
 ```json
 {
   "inspectors": [

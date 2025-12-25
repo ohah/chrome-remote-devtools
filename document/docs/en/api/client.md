@@ -17,6 +17,7 @@ Load the client script with data attributes:
 ```
 
 **Attributes:**
+
 - `data-server-url`: Server WebSocket URL
 - `data-enable-rrweb`: Enable rrweb session recording (optional)
 
@@ -46,10 +47,10 @@ The client implements the following CDP domains:
 ## Usage
 
 Once initialized, the client automatically:
+
 - Connects to the server via WebSocket
 - Registers all CDP domains
 - Handles CDP commands from inspectors
 - Emits CDP events to inspectors
 
 No additional code is required for basic usage.
-

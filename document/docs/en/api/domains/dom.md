@@ -19,6 +19,7 @@ Get the document node.
 Remove a node from the DOM.
 
 **Parameters:**
+
 - `nodeId`: Node ID to remove
 
 ### `DOM.requestChildNodes(nodeId: number)`
@@ -26,6 +27,7 @@ Remove a node from the DOM.
 Request child nodes of a node.
 
 **Parameters:**
+
 - `nodeId`: Node ID
 
 ### `DOM.getOuterHTML(nodeId: number)`
@@ -33,6 +35,7 @@ Request child nodes of a node.
 Get the outer HTML of a node.
 
 **Parameters:**
+
 - `nodeId`: Node ID
 
 **Returns:** Outer HTML string
@@ -42,6 +45,7 @@ Get the outer HTML of a node.
 Set the outer HTML of a node.
 
 **Parameters:**
+
 - `nodeId`: Node ID
 - `outerHTML`: New outer HTML
 
@@ -66,4 +70,3 @@ Emitted when a node attribute is modified.
 ### `DOM.documentUpdated`
 
 Emitted when the document is updated.
-

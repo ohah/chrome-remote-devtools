@@ -13,6 +13,7 @@ GET /json
 Returns a list of all connected clients in legacy format.
 
 **Response:**
+
 ```json
 {
   "targets": [
@@ -35,6 +36,7 @@ GET /json/clients
 Returns detailed information about all connected clients.
 
 **Response:**
+
 ```json
 {
   "clients": [
@@ -59,6 +61,7 @@ GET /json/inspectors
 Returns a list of all connected inspectors.
 
 **Response:**
+
 ```json
 {
   "inspectors": [
@@ -125,4 +128,3 @@ All messages use the Chrome DevTools Protocol (CDP) format:
   }
 }
 ```
-

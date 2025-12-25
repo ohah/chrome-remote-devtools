@@ -71,7 +71,7 @@ The server provides HTTP endpoints for client discovery:
 ## Implementation
 
 The server is implemented using:
+
 - **Bun**: TypeScript runtime
 - **ws**: WebSocket library
 - **HTTP Server**: For serving static files and API endpoints
-

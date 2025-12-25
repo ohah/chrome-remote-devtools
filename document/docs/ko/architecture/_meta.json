@@ -1,7 +1,1 @@
-[
-  "index",
-  "overview",
-  "server",
-  "client",
-  "inspector"
-]
+["index", "overview", "server", "client", "inspector"]

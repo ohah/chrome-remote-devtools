@@ -17,6 +17,7 @@
 ```
 
 **속성:**
+
 - `data-server-url`: 서버 WebSocket URL
 - `data-enable-rrweb`: rrweb 세션 기록 활성화 (선택 사항)
 
@@ -46,6 +47,7 @@ await initCDPClient('http://localhost:8080', {
 ## 사용법
 
 초기화되면 클라이언트는 자동으로:
+
 - WebSocket을 통해 서버에 연결
 - 모든 CDP 도메인 등록
 - Inspector의 CDP 명령 처리

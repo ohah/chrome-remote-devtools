@@ -19,6 +19,7 @@ Get all cookies.
 Set a cookie.
 
 **Parameters:**
+
 - `name`: Cookie name
 - `value`: Cookie value
 - `options`: Optional cookie options
@@ -28,6 +29,7 @@ Set a cookie.
 Delete cookies.
 
 **Parameters:**
+
 - `name`: Cookie name
 - `url`: Optional URL
 
@@ -36,6 +38,7 @@ Delete cookies.
 Get the response body of a request.
 
 **Parameters:**
+
 - `requestId`: Request ID
 
 **Returns:** Response body
@@ -57,4 +60,3 @@ Emitted when loading is finished.
 ### `Network.loadingFailed`
 
 Emitted when loading fails.
-
