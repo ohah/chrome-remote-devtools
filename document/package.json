@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "build": "rspress build",
-    "dev": "rspress dev",
+    "dev": "rspress dev --port 2000",
     "preview": "rspress preview"
   },
   "dependencies": {
     "@rspress/core": "^2.0.0-rc.1"
   },
   "devDependencies": {
-    "@types/node": "^22.8.1"
+    "@types/node": "^22.8.1",
+    "rspress-plugin-mermaid": "^0.3.0"
   }
 }
