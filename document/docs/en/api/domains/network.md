@@ -1,62 +1,44 @@
 # Network Domain
 
-The Network domain provides network request monitoring capabilities.
+The Network domain handles network request monitoring.
 
 ## Methods
 
-### `Network.enable()`
+### Network.enable
 
-Enable the Network domain.
+Enables the Network domain.
 
-### `Network.getCookies()`
+### Network.disable
 
-Get all cookies.
+Disables the Network domain.
 
-**Returns:** Array of cookies
+## Events
 
-### `Network.setCookie(name: string, value: string, options?: object)`
+### Network.requestWillBeSent
 
-Set a cookie.
-
-**Parameters:**
-
-- `name`: Cookie name
-- `value`: Cookie value
-- `options`: Optional cookie options
-
-### `Network.deleteCookies(name: string, url?: string)`
-
-Delete cookies.
-
-**Parameters:**
-
-- `name`: Cookie name
-- `url`: Optional URL
-
-### `Network.getResponseBody(requestId: string)`
-
-Get the response body of a request.
+Emitted before a network request is sent.
 
 **Parameters:**
 
 - `requestId`: Request ID
+- `request`: Request information
+- `timestamp`: Timestamp
 
-**Returns:** Response body
+### Network.responseReceived
 
-## Events
+Emitted when a network response is received.
 
-### `Network.requestWillBeSent`
+**Parameters:**
 
-Emitted when a request is about to be sent.
+- `requestId`: Request ID
+- `response`: Response information
+- `timestamp`: Timestamp
 
-### `Network.responseReceived`
+### Network.loadingFinished
 
-Emitted when a response is received.
+Emitted when network loading is finished.
 
-### `Network.loadingFinished`
+**Parameters:**
 
-Emitted when loading is finished.
-
-### `Network.loadingFailed`
-
-Emitted when loading fails.
+- `requestId`: Request ID
+- `timestamp`: Timestamp

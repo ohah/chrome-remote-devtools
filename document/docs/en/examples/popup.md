@@ -36,9 +36,11 @@ In popup mode, the client communicates with the Inspector via postMessage instea
 
 ### 2. React Component
 
+> **Note**: The `buildDevToolsUrl` utility function is planned but not yet implemented. The following code example shows the intended usage.
+
 ```tsx
 import { useEffect, useRef } from 'react';
-import { buildDevToolsUrl } from '../utils/devtools';
+// import { buildDevToolsUrl } from '../utils/devtools'; // Planned for future implementation
 
 export default function DevToolsPopup({ clientId }: { clientId: string | null }) {
   const popupRef = useRef<Window | null>(null);
@@ -46,7 +48,9 @@ export default function DevToolsPopup({ clientId }: { clientId: string | null })
   useEffect(() => {
     if (!clientId) return;
 
-    const devToolsUrl = buildDevToolsUrl(clientId);
+    // const devToolsUrl = buildDevToolsUrl(clientId); // Planned for future implementation
+    // For now, construct the URL manually or use a placeholder
+    const devToolsUrl = `/devtools-frontend/devtools_app.html?postMessage=true&embedded=${encodeURIComponent(window.location.origin)}`;
 
     if (popupRef.current && !popupRef.current.closed) {
       popupRef.current.location.href = devToolsUrl;

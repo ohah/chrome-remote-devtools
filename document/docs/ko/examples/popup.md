@@ -36,9 +36,11 @@
 
 ### 2. React 컴포넌트
 
+> **참고**: `buildDevToolsUrl` 유틸리티 함수는 계획되었지만 아직 구현되지 않았습니다. 아래 코드 예제는 의도된 사용법을 보여줍니다.
+
 ```tsx
 import { useEffect, useRef } from 'react';
-import { buildDevToolsUrl } from '../utils/devtools';
+// import { buildDevToolsUrl } from '../utils/devtools'; // 향후 구현 예정
 
 export default function DevToolsPopup({ clientId }: { clientId: string | null }) {
   const popupRef = useRef<Window | null>(null);
@@ -46,7 +48,9 @@ export default function DevToolsPopup({ clientId }: { clientId: string | null })
   useEffect(() => {
     if (!clientId) return;
 
-    const devToolsUrl = buildDevToolsUrl(clientId);
+    // const devToolsUrl = buildDevToolsUrl(clientId); // 향후 구현 예정
+    // 현재는 URL을 수동으로 구성하거나 플레이스홀더를 사용하세요
+    const devToolsUrl = `/devtools-frontend/devtools_app.html?postMessage=true&embedded=${encodeURIComponent(window.location.origin)}`;
 
     if (popupRef.current && !popupRef.current.closed) {
       popupRef.current.location.href = devToolsUrl;
