@@ -16,11 +16,7 @@ export default defineConfig({
   description:
     'A remote debugging tool that uses Chrome DevTools Protocol (CDP) to control and debug remote Chrome browsers.',
   lang: 'en',
-  icon: '/rspress-icon.png',
-  logo: {
-    light: '/rspress-light-logo.png',
-    dark: '/rspress-dark-logo.png',
-  },
+  icon: '/logo.png',
   locales: [
     {
       lang: 'en',
