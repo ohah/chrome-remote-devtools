@@ -1,0 +1,173 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'chrome-remote-devtools-client-v*'
+      - 'chrome-remote-devtools-server-v*'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to publish (client or server)'
+        required: true
+        type: choice
+        options:
+          - client
+          - server
+      version:
+        description: 'Version to publish (e.g., 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  detect-package:
+    name: Detect Package
+    runs-on: ubuntu-latest
+    outputs:
+      package-name: ${{ steps.detect.outputs.package-name }}
+      version: ${{ steps.detect.outputs.version }}
+      should-publish: ${{ steps.detect.outputs.should-publish }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect package and version
+        id: detect
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            PACKAGE_INPUT="${{ github.event.inputs.package }}"
+            VERSION_INPUT="${{ github.event.inputs.version }}"
+
+            if [ "$PACKAGE_INPUT" = "client" ]; then
+              PACKAGE_NAME="chrome-remote-devtools-client"
+            elif [ "$PACKAGE_INPUT" = "server" ]; then
+              PACKAGE_NAME="chrome-remote-devtools-server"
+            else
+              echo "Unknown package: $PACKAGE_INPUT"
+              exit 1
+            fi
+
+            echo "package-name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+            echo "version=$VERSION_INPUT" >> $GITHUB_OUTPUT
+            echo "should-publish=true" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "release" ]; then
+            TAG_NAME="${{ github.event.release.tag_name }}"
+
+            if [[ "$TAG_NAME" == chrome-remote-devtools-client-v* ]]; then
+              PACKAGE_NAME="chrome-remote-devtools-client"
+              VERSION="${TAG_NAME#chrome-remote-devtools-client-v}"
+            elif [[ "$TAG_NAME" == chrome-remote-devtools-server-v* ]]; then
+              PACKAGE_NAME="chrome-remote-devtools-server"
+              VERSION="${TAG_NAME#chrome-remote-devtools-server-v}"
+            else
+              echo "Unknown tag format: $TAG_NAME"
+              exit 1
+            fi
+
+            echo "package-name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "should-publish=true" >> $GITHUB_OUTPUT
+          else
+            TAG_NAME="${{ github.ref_name }}"
+
+            if [[ "$TAG_NAME" == chrome-remote-devtools-client-v* ]]; then
+              PACKAGE_NAME="chrome-remote-devtools-client"
+              VERSION="${TAG_NAME#chrome-remote-devtools-client-v}"
+            elif [[ "$TAG_NAME" == chrome-remote-devtools-server-v* ]]; then
+              PACKAGE_NAME="chrome-remote-devtools-server"
+              VERSION="${TAG_NAME#chrome-remote-devtools-server-v}"
+            else
+              echo "Unknown tag format: $TAG_NAME"
+              exit 1
+            fi
+
+            echo "package-name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "should-publish=true" >> $GITHUB_OUTPUT
+          fi
+
+  publish-client:
+    name: Publish Client
+    needs: detect-package
+    if: |
+      needs.detect-package.outputs.should-publish == 'true' &&
+      needs.detect-package.outputs.package-name == 'chrome-remote-devtools-client'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build client package
+        run: cd packages/client && bun run build
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npm
+        working-directory: packages/client
+        run: |
+          npm version ${{ needs.detect-package.outputs.version }} --no-git-tag-version
+          npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-server:
+    name: Publish Server
+    needs: detect-package
+    if: |
+      needs.detect-package.outputs.should-publish == 'true' &&
+      needs.detect-package.outputs.package-name == 'chrome-remote-devtools-server'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build server package
+        run: cd packages/server && bun run build
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npm
+        working-directory: packages/server
+        run: |
+          npm version ${{ needs.detect-package.outputs.version }} --no-git-tag-version
+          npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
