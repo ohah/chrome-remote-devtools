@@ -1,8 +1,8 @@
-// Empty state components / 빈 상태 컴포넌트
+// Empty state components
 import { GetClientsError } from '@/entities/client';
 
 /**
- * Loading state component / 로딩 상태 컴포넌트
+ * Loading state component
  */
 export function LoadingState() {
   return (
@@ -15,19 +15,19 @@ export function LoadingState() {
 }
 
 /**
- * Error state component props / 에러 상태 컴포넌트 props
+ * Error state component props
  */
 export interface ErrorStateProps {
-  /** Error object / 에러 객체 */
+  /** Error object */
   error: Error;
-  /** Retry callback / 재시도 콜백 */
+  /** Retry callback */
   onRetry: () => void;
-  /** Whether retry is in progress / 재시도 진행 중 여부 */
+  /** Whether retry is in progress */
   isRetrying?: boolean;
 }
 
 export function ErrorState({ error, onRetry, isRetrying = false }: ErrorStateProps) {
-  // Get specific error message / 구체적인 에러 메시지 가져오기
+  // Get specific error message
   const errorMessage =
     error instanceof GetClientsError
       ? error.message
@@ -46,27 +46,6 @@ export function ErrorState({ error, onRetry, isRetrying = false }: ErrorStatePro
         >
           {isRetrying ? 'Retrying...' : 'Retry'}
         </button>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Empty state component props / 빈 상태 컴포넌트 props
- */
-export interface EmptyStateProps {
-  /** Empty state message / 빈 상태 메시지 */
-  message: string;
-  /** Optional description / 선택적 설명 */
-  description?: string;
-}
-
-export function EmptyState({ message, description }: EmptyStateProps) {
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold mb-4">{message}</h1>
-        {description && <p className="text-gray-600">{description}</p>}
       </div>
     </div>
   );
