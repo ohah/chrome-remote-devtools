@@ -1,2 +1,15 @@
-/* Global styles / 전역 스타일 */
+/* Global styles */
 @import 'tailwindcss';
+
+/* Title bar drag region - webkit-app-region must be in CSS */
+.titlebar-drag-region {
+  -webkit-app-region: drag;
+}
+
+.titlebar-nav-button {
+  -webkit-app-region: no-drag;
+}
+
+.titlebar-controls {
+  -webkit-app-region: no-drag;
+}

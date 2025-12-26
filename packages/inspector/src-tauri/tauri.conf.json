@@ -4,7 +4,6 @@
   "version": "0.1.0",
   "identifier": "com.ohah.chrome-remote-devtools",
   "build": {
-    "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "bun run build",
     "frontendDist": "../dist"
@@ -13,8 +12,9 @@
     "windows": [
       {
         "title": "inspector",
-        "width": 800,
-        "height": 600
+        "width": 1024,
+        "height": 768,
+        "decorations": false
       }
     ],
     "security": {
