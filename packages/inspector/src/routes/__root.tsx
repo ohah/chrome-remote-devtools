@@ -17,7 +17,7 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
         setAppWindow(getCurrentWindow());
       });
     }
-  }, [isTauri]);
+  }, []);
 
   const handleBack = () => {
     navigate({ to: '/' });
@@ -126,7 +126,8 @@ export const Route = createRootRoute({
     const location = useLocation();
     const currentPath = location.pathname;
     const showTitleBar = isTauri;
-    const showBack = currentPath === '/replay';
+    const routesWithBackButton = ['/replay'];
+    const showBack = routesWithBackButton.includes(currentPath);
     return (
       <div className="h-screen flex flex-col bg-gray-900">
         {showTitleBar && <TitleBar showBack={showBack} />}

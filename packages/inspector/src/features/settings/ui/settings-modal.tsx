@@ -1,5 +1,4 @@
 // Settings modal component
-import { useState } from 'react';
 import { ServerSettings } from './server-settings';
 
 interface SettingsModalProps {
@@ -10,17 +9,14 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const [key, setKey] = useState(0);
-
   if (!isOpen) {
     return null;
   }
 
   const handleSave = () => {
-    // Force refresh by updating key
-    setKey((prev) => prev + 1);
-    // Reload page to apply new server URL
-    window.location.reload();
+    // Settings are saved to Zustand store with persistence
+    // Components using useServerUrl will automatically re-render
+    onClose();
   };
 
   return (
@@ -45,7 +41,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             className="text-gray-400 hover:text-gray-200 transition-colors"
             aria-label="Close settings"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -58,7 +60,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
         {/* Content */}
         <div className="px-6 py-4">
-          <ServerSettings key={key} onSave={handleSave} />
+          <ServerSettings onSave={handleSave} />
         </div>
       </div>
     </div>
