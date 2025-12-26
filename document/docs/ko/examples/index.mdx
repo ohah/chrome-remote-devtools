@@ -2,4 +2,142 @@ import { DevToolsPlayground } from '../../../components/DevToolsPlayground';
 
 # 플레이그라운드
 
-<DevToolsPlayground buttonText="DevTools 열기" />
+플레이그라운드에서 Chrome Remote DevTools의 다양한 기능을 테스트하고 체험해볼 수 있습니다.
+
+<DevToolsPlayground buttonText="DevTools 열기" lang="ko" />
+
+## 기능 설명
+
+### DevTools 열기
+
+**DevTools 열기** 버튼을 클릭하면 팝업 창에서 Chrome DevTools가 열립니다. 이 DevTools는 현재 페이지와 연결되어 있어 실시간으로 콘솔 메시지, 네트워크 요청, DOM 구조 등을 확인할 수 있습니다.
+
+### 콘솔 테스트
+
+**콘솔 테스트** 버튼을 클릭하면 다양한 레벨의 콘솔 메시지가 출력됩니다:
+
+- `console.log()` - 일반 로그 메시지
+- `console.error()` - 에러 메시지
+- `console.warn()` - 경고 메시지
+- `console.info()` - 정보 메시지
+
+DevTools를 연 상태에서 이 버튼을 클릭하면 Console 패널에서 각 메시지가 다른 색상과 아이콘으로 표시되는 것을 확인할 수 있습니다.
+
+### 네트워크 테스트
+
+**네트워크 테스트** 버튼을 클릭하면 GitHub API에 네트워크 요청을 보냅니다. DevTools를 연 상태에서 이 버튼을 클릭하면:
+
+- Network 패널에서 HTTP 요청과 응답을 확인할 수 있습니다
+- 요청 헤더, 응답 헤더, 응답 본문 등을 상세히 볼 수 있습니다
+- 네트워크 타이밍 정보도 확인할 수 있습니다
+
+### 로컬스토리지 테스트
+
+**로컬스토리지 테스트** 버튼을 클릭하면 localStorage에 테스트 데이터를 저장합니다. DevTools를 연 상태에서 이 버튼을 클릭하면:
+
+- Application 패널의 Local Storage 섹션에서 저장된 데이터를 확인할 수 있습니다
+- 저장된 키-값 쌍을 직접 확인하고 수정할 수 있습니다
+
+### 파일 다운로드 (Export)
+
+**파일 다운로드** 버튼을 클릭하면 현재 페이지에서 발생한 모든 이벤트를 JSON 파일로 내보낼 수 있습니다.
+
+#### 사용 방법
+
+1. **이벤트 수집**: 먼저 DevTools를 열고 페이지에서 다양한 이벤트를 발생시킵니다. 클라이언트 스크립트가 자동으로 콘솔 메시지, 네트워크 요청, SessionReplay 이벤트 등을 저장합니다.
+
+2. **파일 내보내기**: 플레이그라운드의 **파일 다운로드** 버튼을 클릭하면 JSON 파일이 자동으로 다운로드됩니다. 또는 페이지에서 `window.chromeRemoteDevTools.exportEvents()`를 호출할 수도 있습니다.
+
+3. **파일 저장**: 다운로드된 파일은 나중에 재생하거나 다른 사람과 공유할 수 있습니다.
+
+### 파일 재생 (Replay)
+
+**파일 재생** 버튼을 클릭하면 이전에 내보낸 이벤트 파일(.json)을 선택하여 재생할 수 있습니다.
+
+#### 사용 방법
+
+1. **파일 선택**: 플레이그라운드의 **파일 재생** 버튼을 클릭하고, 내보낸 JSON 파일을 선택합니다.
+
+2. **재생 확인**: 파일이 로드되면 자동으로 DevTools가 replay 모드로 열리고, 저장된 모든 이벤트가 재생됩니다:
+   - 콘솔 메시지가 Console 패널에 표시됩니다
+   - 네트워크 요청이 Network 패널에 표시됩니다
+   - SessionReplay 이벤트가 SessionReplay 패널에 표시됩니다
+   - DOMStorage 이벤트가 Application 패널에 표시됩니다
+
+#### 파일 형식
+
+내보낸 JSON 파일은 다음과 같은 구조를 가집니다:
+
+```json
+{
+  "version": "1.0.0",
+  "exportDate": "2024-01-01T00:00:00.000Z",
+  "clientId": "client-123",
+  "events": [
+    {
+      "type": "CDP_MESSAGE",
+      "message": "{\"method\":\"Console.messageAdded\",\"params\":{...}}"
+    }
+  ],
+  "cookies": [...],
+  "localStorage": [...],
+  "sessionStorage": [...],
+  "domTree": {...}
+}
+```
+
+#### 재생 모드의 특징
+
+- **오프라인 재생**: 원본 페이지나 서버 없이도 저장된 이벤트를 재생할 수 있습니다
+- **시간 여행**: 과거의 이벤트를 다시 확인하고 분석할 수 있습니다
+- **디버깅**: 문제가 발생한 시점의 상태를 정확히 재현할 수 있습니다
+- **공유**: 팀원들과 이벤트 파일을 공유하여 동일한 상황을 재현할 수 있습니다
+
+## 예제 코드
+
+### 콘솔 메시지 출력
+
+```javascript
+console.log('일반 로그 메시지');
+console.error('에러 메시지');
+console.warn('경고 메시지');
+console.info('정보 메시지');
+```
+
+### 네트워크 요청 보내기
+
+```javascript
+fetch('https://api.github.com/repos/octocat/Hello-World')
+  .then(response => response.json())
+  .then(data => console.log('응답 데이터:', data))
+  .catch(error => console.error('요청 실패:', error));
+```
+
+### LocalStorage 사용
+
+```javascript
+// 데이터 저장
+localStorage.setItem('key', 'value');
+
+// 데이터 조회
+const value = localStorage.getItem('key');
+
+// 데이터 삭제
+localStorage.removeItem('key');
+```
+
+### 이벤트 내보내기
+
+```javascript
+// 클라이언트 스크립트가 로드된 후
+if (window.chromeRemoteDevTools) {
+  await window.chromeRemoteDevTools.exportEvents();
+}
+```
+
+## 참고 사항
+
+- DevTools를 열기 전에 페이지가 완전히 로드되었는지 확인하세요
+- 네트워크 테스트는 실제 네트워크 요청을 보내므로 인터넷 연결이 필요합니다
+- 파일 재생 기능은 팝업 차단기가 활성화되어 있으면 작동하지 않을 수 있습니다
+- 대용량 이벤트 파일을 재생할 때는 시간이 걸릴 수 있습니다
