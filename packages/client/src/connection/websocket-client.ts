@@ -149,7 +149,7 @@ export class WebSocketClient {
   }
 
   /**
-   * Send stored events / 저장된 이벤트 전송
+   * Send stored messages / 저장된 메시지 전송
    */
   private async sendStoredEvents(socket: WebSocket): Promise<void> {
     if (!this.eventStorage || this.rrwebConfig.enableEventStorage === false) {
@@ -157,33 +157,35 @@ export class WebSocketClient {
     }
 
     try {
-      const storedEvents = await this.eventStorage.getEvents();
-      if (storedEvents.length > 0) {
-        // Send all events in batches / 모든 이벤트를 배치로 전송
+      const storedMessages = await this.eventStorage.getEvents();
+      if (storedMessages.length > 0) {
+        // Send all messages in batches / 모든 메시지를 배치로 전송
         const batchSize = 100;
-        for (let i = 0; i < storedEvents.length; i += batchSize) {
-          const batch = storedEvents.slice(i, i + batchSize);
-          for (const event of batch) {
+        for (let i = 0; i < storedMessages.length; i += batchSize) {
+          const batch = storedMessages.slice(i, i + batchSize);
+          for (const postMessage of batch) {
             if (socket.readyState === WebSocket.OPEN) {
-              socket.send(
-                JSON.stringify({
-                  method: event.method,
-                  params: event.params,
-                })
-              );
+              try {
+                // Parse postMessage format to extract CDP message / postMessage 형식을 파싱하여 CDP 메시지 추출
+                const cdpMessage = JSON.parse(postMessage.message);
+                // Send CDP message via WebSocket / WebSocket을 통해 CDP 메시지 전송
+                socket.send(JSON.stringify(cdpMessage));
+              } catch (error) {
+                console.warn('Failed to parse stored message / 저장된 메시지 파싱 실패:', error);
+              }
             }
           }
           // Small delay between batches / 배치 간 작은 지연
           await new Promise((resolve) => setTimeout(resolve, 10));
         }
 
-        // Clear events after sending if configured / 설정된 경우 전송 후 이벤트 삭제
+        // Clear messages after sending if configured / 설정된 경우 전송 후 메시지 삭제
         if (this.rrwebConfig.clearOnSend !== false) {
           await this.eventStorage.clearEvents();
         }
       }
     } catch (error) {
-      console.error('Failed to send stored events / 저장된 이벤트 전송 실패:', error);
+      console.error('Failed to send stored messages / 저장된 메시지 전송 실패:', error);
     }
   }
 

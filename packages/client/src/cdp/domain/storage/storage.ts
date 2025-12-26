@@ -13,48 +13,57 @@ export class Storage extends BaseDomain {
   }
 
   /**
-   * Replay all stored events (console, network, etc.) / 모든 저장된 이벤트 재생 (console, network 등)
-   * Called when Inspector connects to send previously stored events / Inspector 연결 시 이전에 저장된 이벤트를 전송하기 위해 호출됨
+   * Replay all stored messages (console, network, etc.) / 모든 저장된 메시지 재생 (console, network 등)
+   * Called when Inspector connects to send previously stored messages / Inspector 연결 시 이전에 저장된 메시지를 전송하기 위해 호출됨
    */
   async replayStoredEvents(): Promise<{ success: boolean; count?: number }> {
     if (!this.eventStorage || !this.socket) {
       console.warn(
-        'Cannot replay stored events: eventStorage or socket not available / 저장된 이벤트 재생 불가: eventStorage 또는 socket이 사용 불가'
+        'Cannot replay stored messages: eventStorage or socket not available / 저장된 메시지 재생 불가: eventStorage 또는 socket이 사용 불가'
       );
       return { success: false };
     }
 
     try {
-      const storedEvents = await this.eventStorage.getEvents();
+      const storedMessages = await this.eventStorage.getEvents();
 
-      if (storedEvents.length === 0) {
+      if (storedMessages.length === 0) {
         return { success: true, count: 0 };
       }
 
       // Filter out SessionReplay events (handled separately) / SessionReplay 이벤트 제외 (별도 처리)
-      const eventsToReplay = storedEvents.filter((e) => !e.method.startsWith('SessionReplay.'));
+      const messagesToReplay = storedMessages.filter((msg) => {
+        try {
+          const cdpMessage = JSON.parse(msg.message);
+          const method = cdpMessage.method || '';
+          return !method.startsWith('SessionReplay.');
+        } catch {
+          return true; // If parsing fails, include it / 파싱 실패 시 포함
+        }
+      });
 
-      if (eventsToReplay.length === 0) {
+      if (messagesToReplay.length === 0) {
         return { success: true, count: 0 };
       }
 
-      // Send all stored events via WebSocket / WebSocket을 통해 모든 저장된 이벤트 전송
+      // Send all stored messages via WebSocket / WebSocket을 통해 모든 저장된 메시지 전송
       const batchSize = 100;
       let sentCount = 0;
-      for (let i = 0; i < eventsToReplay.length; i += batchSize) {
-        const batch = eventsToReplay.slice(i, i + batchSize);
-        for (const event of batch) {
+      for (let i = 0; i < messagesToReplay.length; i += batchSize) {
+        const batch = messagesToReplay.slice(i, i + batchSize);
+        for (const postMessage of batch) {
           if (this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(
-              JSON.stringify({
-                method: event.method,
-                params: event.params,
-              })
-            );
-            sentCount++;
+            try {
+              // Parse postMessage format to extract CDP message / postMessage 형식을 파싱하여 CDP 메시지 추출
+              const cdpMessage = JSON.parse(postMessage.message);
+              this.socket.send(JSON.stringify(cdpMessage));
+              sentCount++;
+            } catch (error) {
+              console.warn('Failed to parse stored message / 저장된 메시지 파싱 실패:', error);
+            }
           } else {
             console.warn(
-              `WebSocket not open, cannot send event ${event.method} / WebSocket이 열려있지 않아 이벤트 ${event.method} 전송 불가`
+              `WebSocket not open, cannot send message / WebSocket이 열려있지 않아 메시지 전송 불가`
             );
           }
         }
@@ -64,7 +73,7 @@ export class Storage extends BaseDomain {
 
       return { success: true, count: sentCount };
     } catch (error) {
-      console.error('Failed to replay stored events / 저장된 이벤트 재생 실패:', error);
+      console.error('Failed to replay stored messages / 저장된 메시지 재생 실패:', error);
       return { success: false };
     }
   }
