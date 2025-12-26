@@ -156,7 +156,10 @@ describe('sendStorageItemsAsEvents', () => {
   });
 
   test('should send localStorage and sessionStorage items as events / localStorage/sessionStorage 항목을 이벤트로 전송', () => {
-    const storageItems = {
+    const storageItems: {
+      localStorage: Array<[string, string]>;
+      sessionStorage: Array<[string, string]>;
+    } = {
       localStorage: [
         ['key1', 'value1'],
         ['key2', 'value2'],
@@ -171,7 +174,10 @@ describe('sendStorageItemsAsEvents', () => {
   });
 
   test('should send localStorage items first, then sessionStorage / localStorage 먼저, sessionStorage 나중에 전송', () => {
-    const storageItems = {
+    const storageItems: {
+      localStorage: Array<[string, string]>;
+      sessionStorage: Array<[string, string]>;
+    } = {
       localStorage: [['localKey', 'localValue']],
       sessionStorage: [['sessionKey', 'sessionValue']],
     };
@@ -192,7 +198,10 @@ describe('sendStorageItemsAsEvents', () => {
   });
 
   test('should send all localStorage items before sessionStorage / 모든 localStorage 항목을 sessionStorage 전에 전송', () => {
-    const storageItems = {
+    const storageItems: {
+      localStorage: Array<[string, string]>;
+      sessionStorage: Array<[string, string]>;
+    } = {
       localStorage: [
         ['localKey1', 'localValue1'],
         ['localKey2', 'localValue2'],
@@ -220,7 +229,10 @@ describe('sendStorageItemsAsEvents', () => {
   });
 
   test('should include correct storageId in events / 이벤트에 올바른 storageId 포함', () => {
-    const storageItems = {
+    const storageItems: {
+      localStorage: Array<[string, string]>;
+      sessionStorage: Array<[string, string]>;
+    } = {
       localStorage: [['key1', 'value1']],
       sessionStorage: [],
     };

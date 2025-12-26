@@ -12,9 +12,6 @@ import {
 } from '../message-handlers';
 import { createResponseBodyStore } from '../response-body-store';
 import type { CommandHandlerContext } from '../message-handlers';
-import type { PostMessageCDPMessage } from '@/shared/lib/file-to-cdp';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
 // Helper to create File from JSON / JSON에서 File 생성 헬퍼
 function createTestFile(data: unknown): File {
