@@ -822,11 +822,64 @@ export class EventStorage {
     try {
       const messages = await this.getEvents();
 
+      // Get cookies at export time / 내보내기 시점에 쿠키 가져오기
+      const cookies: Array<{ name: string; value: string; domain: string; path: string }> = [];
+      if (document.cookie) {
+        document.cookie.split(';').forEach((cookie) => {
+          const [name, value] = cookie.split('=').map((s) => s.trim());
+          if (name && value) {
+            cookies.push({
+              name,
+              value,
+              domain: location.hostname,
+              path: '/',
+            });
+          }
+        });
+      }
+
+      // Get localStorage and sessionStorage at export time / 내보내기 시점에 localStorage와 sessionStorage 가져오기
+      const localStorage: Array<[string, string]> = [];
+      const sessionStorage: Array<[string, string]> = [];
+
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const key = window.localStorage.key(i);
+        if (key) {
+          const value = window.localStorage.getItem(key);
+          if (value !== null) {
+            localStorage.push([key, value]);
+          }
+        }
+      }
+
+      for (let i = 0; i < window.sessionStorage.length; i++) {
+        const key = window.sessionStorage.key(i);
+        if (key) {
+          const value = window.sessionStorage.getItem(key);
+          if (value !== null) {
+            sessionStorage.push([key, value]);
+          }
+        }
+      }
+
+      // Get DOM tree at export time / 내보내기 시점에 DOM 트리 가져오기
+      // Store HTML and use it to reconstruct DOM tree in replay mode / HTML을 저장하고 replay 모드에서 DOM 트리를 재구성하는 데 사용
+      const domHTML = document.documentElement.outerHTML;
+      const domTree = {
+        documentURL: document.URL || location.href,
+        baseURL: document.baseURI || location.href,
+        html: domHTML,
+      };
+
       const exportData = {
         version: '1.0.0',
         exportDate: new Date().toISOString(),
         clientId: this.clientId,
         events: messages, // PostMessage format messages / PostMessage 형식 메시지
+        cookies, // Cookies at export time / 내보내기 시점의 쿠키
+        localStorage, // LocalStorage at export time / 내보내기 시점의 localStorage
+        sessionStorage, // SessionStorage at export time / 내보내기 시점의 sessionStorage
+        domTree, // DOM tree at export time / 내보내기 시점의 DOM 트리
       };
 
       const json = JSON.stringify(exportData, null, 2);
