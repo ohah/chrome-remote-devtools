@@ -49,7 +49,6 @@ describe('EventStorage', () => {
 
   test('should require clientId / clientId 필수', () => {
     expect(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       new EventStorage({} as any);
     }).toThrow('clientId is required');
   });

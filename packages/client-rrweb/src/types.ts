@@ -11,7 +11,6 @@ export type RrwebEvent = eventWithTime;
 export interface RrwebRecordOptions {
   emit: (event: RrwebEvent) => void;
   // Allow rrweb options passthrough / rrweb 옵션 전달 허용
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 

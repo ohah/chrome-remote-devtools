@@ -7,7 +7,6 @@ export interface RrwebConfig {
   enable: boolean;
   flushIntervalMs?: number;
   maxBatchSize?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recordOptions?: Record<string, any>;
   // Event storage options / 이벤트 저장 옵션
   enableEventStorage?: boolean;

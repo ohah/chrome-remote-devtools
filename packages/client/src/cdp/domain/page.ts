@@ -11,7 +11,6 @@ export default class Page extends BaseDomain {
   // Enable Page domain / Page 도메인 활성화
   override enable(): void {
     const xhr = new XMLHttpRequest();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (xhr as any).$$requestType = 'Document';
     xhr.onload = () => {
       this.frame.set(location.href, xhr.responseText);
