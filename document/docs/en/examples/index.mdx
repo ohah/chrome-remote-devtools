@@ -2,4 +2,142 @@ import { DevToolsPlayground } from '../../../components/DevToolsPlayground';
 
 # Playground
 
-<DevToolsPlayground buttonText="Open DevTools" />
+Test and experience various features of Chrome Remote DevTools in the playground.
+
+<DevToolsPlayground buttonText="Open DevTools" lang="en" />
+
+## Features
+
+### Open DevTools
+
+Click the **Open DevTools** button to open Chrome DevTools in a popup window. This DevTools is connected to the current page, allowing you to monitor console messages, network requests, DOM structure, and more in real-time.
+
+### Test Console
+
+Click the **Test Console** button to output various levels of console messages:
+
+- `console.log()` - General log messages
+- `console.error()` - Error messages
+- `console.warn()` - Warning messages
+- `console.info()` - Info messages
+
+With DevTools open, clicking this button will show each message with different colors and icons in the Console panel.
+
+### Test Network
+
+Click the **Test Network** button to send a network request to the GitHub API. With DevTools open, clicking this button will:
+
+- Show HTTP requests and responses in the Network panel
+- Display detailed request headers, response headers, and response bodies
+- Show network timing information
+
+### Test LocalStorage
+
+Click the **Test LocalStorage** button to store test data in localStorage. With DevTools open, clicking this button will:
+
+- Show stored data in the Local Storage section of the Application panel
+- Allow you to view and modify key-value pairs directly
+
+### Export File
+
+Click the **Export File** button to export all events that occurred on the current page to a JSON file.
+
+#### How to Use
+
+1. **Collect Events**: First, open DevTools and trigger various events on the page. The client script automatically stores console messages, network requests, SessionReplay events, etc.
+
+2. **Export File**: Click the **Export File** button in the playground to automatically download a JSON file. Alternatively, you can call `window.chromeRemoteDevTools.exportEvents()` on the page.
+
+3. **Save File**: The downloaded file can be replayed later or shared with others.
+
+### Replay File
+
+Click the **Replay File** button to select and replay previously exported event files (.json).
+
+#### How to Use
+
+1. **Select File**: Click the **Replay File** button in the playground and select the exported JSON file.
+
+2. **View Replay**: Once the file is loaded, DevTools will automatically open in replay mode and all stored events will be replayed:
+   - Console messages appear in the Console panel
+   - Network requests appear in the Network panel
+   - SessionReplay events appear in the SessionReplay panel
+   - DOMStorage events appear in the Application panel
+
+#### File Format
+
+The exported JSON file has the following structure:
+
+```json
+{
+  "version": "1.0.0",
+  "exportDate": "2024-01-01T00:00:00.000Z",
+  "clientId": "client-123",
+  "events": [
+    {
+      "type": "CDP_MESSAGE",
+      "message": "{\"method\":\"Console.messageAdded\",\"params\":{...}}"
+    }
+  ],
+  "cookies": [...],
+  "localStorage": [...],
+  "sessionStorage": [...],
+  "domTree": {...}
+}
+```
+
+#### Replay Mode Features
+
+- **Offline Replay**: Replay stored events without the original page or server
+- **Time Travel**: Review and analyze past events
+- **Debugging**: Accurately reproduce the state at the time of an issue
+- **Sharing**: Share event files with team members to reproduce the same situation
+
+## Example Code
+
+### Output Console Messages
+
+```javascript
+console.log('General log message');
+console.error('Error message');
+console.warn('Warning message');
+console.info('Info message');
+```
+
+### Send Network Request
+
+```javascript
+fetch('https://api.github.com/repos/octocat/Hello-World')
+  .then(response => response.json())
+  .then(data => console.log('Response data:', data))
+  .catch(error => console.error('Request failed:', error));
+```
+
+### Use LocalStorage
+
+```javascript
+// Store data
+localStorage.setItem('key', 'value');
+
+// Retrieve data
+const value = localStorage.getItem('key');
+
+// Delete data
+localStorage.removeItem('key');
+```
+
+### Export Events
+
+```javascript
+// After client script is loaded
+if (window.chromeRemoteDevTools) {
+  await window.chromeRemoteDevTools.exportEvents();
+}
+```
+
+## Notes
+
+- Make sure the page is fully loaded before opening DevTools
+- Network testing requires an internet connection as it sends actual network requests
+- The file replay feature may not work if popup blockers are enabled
+- Replaying large event files may take some time
