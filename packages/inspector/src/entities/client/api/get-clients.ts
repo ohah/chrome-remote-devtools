@@ -1,6 +1,6 @@
 // Get clients from server / 서버에서 클라이언트 목록 가져오기
 import type { Client } from '@/entities/client';
-import { SERVER_URL } from '@/shared/lib';
+import { getServerUrl } from '@/shared/lib';
 
 /**
  * Error thrown when fetching clients fails / 클라이언트 가져오기 실패 시 발생하는 에러
@@ -17,11 +17,18 @@ export class GetClientsError extends Error {
 
 /**
  * Fetch clients list / 클라이언트 목록 가져오기
+ * @returns Empty array if server URL is not set / 서버 URL이 설정되지 않았으면 빈 배열 반환
  * @throws {GetClientsError} When fetch fails or response is invalid / 가져오기 실패 또는 응답이 유효하지 않을 때
  */
 export async function getClients(): Promise<Client[]> {
+  const serverUrl = getServerUrl();
+  if (!serverUrl) {
+    // Return empty array if server URL is not set / 서버 URL이 설정되지 않았으면 빈 배열 반환
+    return [];
+  }
+
   try {
-    const response = await fetch(`${SERVER_URL}/json/clients`);
+    const response = await fetch(`${serverUrl}/json/clients`);
 
     if (!response.ok) {
       throw new GetClientsError(
