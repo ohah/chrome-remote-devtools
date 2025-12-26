@@ -79,7 +79,6 @@ export default class Page extends BaseDomain {
             method: Event.screencastFrame,
             params: {
               data: base64.replace(/^data:image\/jpeg;base64,/, ''),
-              sessionId: 1,
               metadata: {
                 deviceHeight: window.innerHeight,
                 deviceWidth: window.innerWidth,
