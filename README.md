@@ -12,8 +12,6 @@ Chrome Remote DevTools enables remote debugging of web pages by implementing CDP
 - **Page Control**: Navigation, page information, and screenshot capture
 - **Console & Logging**: Receive and display console messages, execute JavaScript
 - **Network Monitoring**: Track network requests/responses, block and modify requests
-- **Debugging**: Set breakpoints, step debugging, inspect variables and stack traces
-- **Performance Profiling**: CPU profiling, memory heap snapshots, rendering performance analysis
 
 ## Architecture
 
@@ -202,6 +200,6 @@ This project is inspired by and references the following projects:
 
 ## Links
 
-- [Documentation](https://github.com/ohah/chrome-remote-devtools) (coming soon)
+- [Documentation](https://ohah.github.io/chrome-remote-devtools/)
 - [Issues](https://github.com/ohah/chrome-remote-devtools/issues)
 - [Discussions](https://github.com/ohah/chrome-remote-devtools/discussions)
