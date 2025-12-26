@@ -59,11 +59,11 @@ describe('fileToCDPMessages', () => {
         {
           type: 'INVALID_TYPE',
           message: '{"method":"DOM.setChildNodes","params":{}}',
-        } as PostMessageCDPMessage,
+        } as unknown as PostMessageCDPMessage,
         {
           type: 'CDP_MESSAGE',
           // Missing message field / message 필드 누락
-        } as PostMessageCDPMessage,
+        } as unknown as PostMessageCDPMessage,
       ],
     };
 
