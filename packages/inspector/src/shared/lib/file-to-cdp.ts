@@ -12,11 +12,33 @@ export interface PostMessageCDPMessage {
  * CDP event file format / CDP 이벤트 파일 형식
  * Events are stored in postMessage format / 이벤트는 postMessage 형식으로 저장됨
  */
+/**
+ * CDP event file format / CDP 이벤트 파일 형식
+ */
 export interface CDPEventFile {
+  /** File format version / 파일 형식 버전 */
   version: string;
+  /** Export date in ISO format / ISO 형식의 내보내기 날짜 */
   exportDate: string;
+  /** Client identifier / 클라이언트 식별자 */
   clientId: string;
+  /** CDP messages in PostMessage format / PostMessage 형식의 CDP 메시지 */
   events: PostMessageCDPMessage[];
+  /** Cookies at export time / 내보내기 시점의 쿠키 */
+  cookies?: Array<{ name: string; value: string; domain: string; path: string }>;
+  /** LocalStorage at export time / 내보내기 시점의 localStorage */
+  localStorage?: Array<[string, string]>;
+  /** SessionStorage at export time / 내보내기 시점의 sessionStorage */
+  sessionStorage?: Array<[string, string]>;
+  /** DOM tree at export time / 내보내기 시점의 DOM 트리 */
+  domTree?: {
+    /** Document URL / 문서 URL */
+    documentURL: string;
+    /** Base URL / 기본 URL */
+    baseURL: string;
+    /** HTML content / HTML 내용 */
+    html: string;
+  };
 }
 
 /**
