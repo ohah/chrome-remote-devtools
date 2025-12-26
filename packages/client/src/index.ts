@@ -60,3 +60,23 @@ if (typeof document !== 'undefined') {
   // Initialize CDP client with skipWebSocket flag / skipWebSocket 플래그로 CDP 클라이언트 초기화
   void initCDPClient(effectiveServerUrl, rrwebConfig, skipWebSocket);
 }
+
+// Global API for export / export를 위한 전역 API
+if (typeof window !== 'undefined') {
+  (window as any).chromeRemoteDevTools = {
+    async exportEvents() {
+      if (!clientInstance) {
+        throw new Error('CDP client not initialized / CDP 클라이언트가 초기화되지 않았습니다');
+      }
+      const domain = clientInstance.getDomain();
+      if (!domain) {
+        throw new Error('CDP domain not available / CDP 도메인을 사용할 수 없습니다');
+      }
+      const eventStorage = domain.getEventStorage();
+      if (!eventStorage) {
+        throw new Error('Event storage not available / 이벤트 저장소를 사용할 수 없습니다');
+      }
+      await eventStorage.exportToFile();
+    },
+  };
+}

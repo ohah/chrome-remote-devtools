@@ -1,5 +1,5 @@
 // Index route / 인덱스 라우트 (Connection page / 연결 페이지)
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { ClientTable, ClientFilter, filterClients } from '@/features/client-list';
@@ -71,15 +71,23 @@ function ConnectionPage() {
               </span>
             </div>
           </div>
-          <a
-            href={GITHUB_REPO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-gray-400 hover:text-gray-200"
-            aria-label="Open GitHub repository in new tab"
-          >
-            Help
-          </a>
+          <div className="flex items-center gap-4">
+            <Link
+              to="/replay"
+              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Offline File DevTools
+            </Link>
+            <a
+              href={GITHUB_REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-400 hover:text-gray-200"
+              aria-label="Open GitHub repository in new tab"
+            >
+              Help
+            </a>
+          </div>
         </div>
 
         {/* Error banner / 에러 배너 */}

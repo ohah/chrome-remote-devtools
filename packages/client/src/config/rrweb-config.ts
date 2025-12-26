@@ -16,6 +16,8 @@ export interface RrwebConfig {
   maxStorageSize?: number;
   storageSizeCheckInterval?: number;
   clearOnSend?: boolean;
+  // Export button options / Export 버튼 옵션
+  enableExportButton?: boolean;
 }
 
 /**
@@ -31,6 +33,8 @@ export function getRrwebConfig(script: HTMLScriptElement | null): RrwebConfig {
   const enableAttr = script.dataset.enableRrweb || script.getAttribute('data-enable-rrweb');
   const flushMsAttr = script.dataset.rrwebFlushMs || script.getAttribute('data-rrweb-flush-ms');
   const maxBatchAttr = script.dataset.rrwebMaxBatch || script.getAttribute('data-rrweb-max-batch');
+  const enableExportButtonAttr =
+    script.dataset.enableExportButton || script.getAttribute('data-enable-export-button');
 
   return {
     // Only enable if explicitly set to "true" / 명시적으로 "true"로 설정된 경우에만 활성화
@@ -38,5 +42,6 @@ export function getRrwebConfig(script: HTMLScriptElement | null): RrwebConfig {
     enable: enableAttr === 'true',
     flushIntervalMs: flushMsAttr ? Number(flushMsAttr) : undefined,
     maxBatchSize: maxBatchAttr ? Number(maxBatchAttr) : undefined,
+    enableExportButton: enableExportButtonAttr === 'true',
   };
 }

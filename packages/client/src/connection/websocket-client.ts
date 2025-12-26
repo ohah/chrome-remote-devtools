@@ -130,6 +130,12 @@ export class WebSocketClient {
 
       // Cleanup orphaned events / orphaned 이벤트 정리
       await this.eventStorage?.cleanupOrphanedEvents();
+
+      // Inject export button if enabled / 활성화된 경우 export 버튼 주입
+      if (this.rrwebConfig.enableExportButton === true && this.eventStorage) {
+        const { injectExportButton } = await import('../ui/export-button');
+        injectExportButton(this.eventStorage);
+      }
     });
   }
 
