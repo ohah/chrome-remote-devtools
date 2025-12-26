@@ -3,6 +3,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useState, useRef } from 'react';
 import { fileToCDPMessages } from '@/shared/lib/file-to-cdp';
 import { buildDevToolsReplayUrl } from '@/shared/lib/devtools-url';
+import { createResponseBodyStore } from './replay/utils/response-body-store';
+import { handleCDPCommand } from './replay/utils/message-handlers';
+import { sendCDPMessages, sendSessionReplayEvents } from './replay/utils/message-sender-extended';
+import type { SendCDPMessagesContext } from './replay/utils/message-sender-extended';
 
 // File-based routing: routes/replay.tsx automatically maps to `/replay` / 파일 기반 라우팅: routes/replay.tsx가 자동으로 `/replay`에 매핑됨
 export const Route = createFileRoute('/replay')({
@@ -69,272 +73,7 @@ function ReplayPage() {
       const messagesSentRef = { current: false };
 
       // Response body store for replay mode / replay 모드를 위한 응답 본문 저장소
-      const responseBodyStore = {
-        // Internal storage / 내부 저장소
-        _storage: new Map<string, string>(),
-
-        /**
-         * Store response body from responseReceived event / responseReceived 이벤트에서 응답 본문 저장
-         * @param requestId - Request identifier / 요청 식별자
-         * @param body - Response body / 응답 본문
-         */
-        store(requestId: string, body: string): void {
-          if (requestId && body) {
-            this._storage.set(requestId, body);
-          }
-        },
-
-        /**
-         * Get stored response body / 저장된 응답 본문 가져오기
-         * @param requestId - Request identifier / 요청 식별자
-         * @returns Response body or undefined / 응답 본문 또는 undefined
-         */
-        get(requestId: string): string | undefined {
-          return this._storage.get(requestId);
-        },
-
-        /**
-         * Check if response body exists / 응답 본문 존재 여부 확인
-         * @param requestId - Request identifier / 요청 식별자
-         * @returns True if exists / 존재하면 true
-         */
-        has(requestId: string): boolean {
-          return this._storage.has(requestId);
-        },
-
-        /**
-         * Clear all stored response bodies / 저장된 모든 응답 본문 삭제
-         */
-        clear(): void {
-          this._storage.clear();
-        },
-      };
-
-      // Function to send fake responses for commands / 명령에 대한 가짜 응답 전송 함수
-      const sendFakeResponse = (targetWindow: Window, commandId: number, result?: unknown) => {
-        // Send fake response for command / 명령에 대한 가짜 응답 전송
-        // In replay mode, there's no backend, so we simulate successful responses / replay 모드에서는 백엔드가 없으므로 성공 응답을 시뮬레이션
-        setTimeout(() => {
-          const responseMessage = {
-            type: 'CDP_MESSAGE' as const,
-            message: JSON.stringify({
-              id: commandId,
-              result: result || {}, // Use provided result or empty object / 제공된 result 사용 또는 빈 객체
-            }),
-          };
-          targetWindow.postMessage(responseMessage, '*');
-        }, 10); // Small delay to ensure command is processed first / 명령이 먼저 처리되도록 작은 지연
-      };
-
-      // Function to send buffered CDP messages / 버퍼에 있는 CDP 메시지 전송 함수
-      const sendBufferedMessages = async (messages: typeof cdpMessages) => {
-        if (!iframeRef.current?.contentWindow || messages.length === 0) {
-          return;
-        }
-
-        const targetWindow = iframeRef.current.contentWindow;
-
-        // Extract and store response bodies from responseReceived events before sending / 전송 전에 responseReceived 이벤트에서 응답 본문 추출 및 저장
-        for (const msg of messages) {
-          try {
-            const parsed = JSON.parse(msg.message);
-            if (parsed.method === 'Network.responseReceived' && parsed.params?.response?.body) {
-              const requestId = parsed.params.requestId;
-              const body = parsed.params.response.body;
-              responseBodyStore.store(requestId, body);
-            }
-          } catch {
-            // Ignore parsing errors / 파싱 오류 무시
-          }
-        }
-
-        // Send messages in batches / 배치로 메시지 전송
-        const batchSize = 100;
-        for (let i = 0; i < messages.length; i += batchSize) {
-          const batch = messages.slice(i, i + batchSize);
-          for (const message of batch) {
-            if (iframeRef.current?.contentWindow) {
-              try {
-                targetWindow.postMessage(message, '*');
-              } catch {
-                // Failed to send message / 메시지 전송 실패
-              }
-            }
-          }
-          // Small delay between batches / 배치 간 작은 지연
-          if (i + batchSize < messages.length) {
-            await new Promise((resolve) => setTimeout(resolve, 10));
-          }
-        }
-      };
-
-      // Function to send SessionReplay events only / SessionReplay 이벤트만 전송하는 함수
-      const sendSessionReplayEvents = async () => {
-        if (!iframeRef.current?.contentWindow) {
-          return;
-        }
-
-        // Collect all messages / 모든 메시지 수집
-        const messagesToSend = [...cdpMessagesRef.current, ...eventBufferRef.current];
-
-        if (messagesToSend.length === 0) {
-          return;
-        }
-
-        // Filter only SessionReplay events / SessionReplay 이벤트만 필터링
-        const sessionReplayEvents = messagesToSend.filter((msg) => {
-          try {
-            const parsed = JSON.parse(msg.message);
-            return parsed.method?.startsWith('SessionReplay.');
-          } catch {
-            return false;
-          }
-        });
-
-        if (sessionReplayEvents.length > 0) {
-          await sendBufferedMessages(sessionReplayEvents);
-        }
-      };
-
-      // Function to send CDP messages when DevTools is ready / DevTools가 준비될 때 CDP 메시지 전송 함수
-      const sendCDPMessages = async (includeSessionReplay = false) => {
-        // Prevent duplicate sending / 중복 전송 방지
-        if (messagesSentRef.current || !iframeRef.current?.contentWindow) {
-          return;
-        }
-
-        const targetWindow = iframeRef.current.contentWindow;
-
-        // Mark as sent to prevent duplicate calls / 중복 호출 방지를 위해 전송 완료 표시
-        messagesSentRef.current = true;
-
-        // Mark panel as active / 패널을 활성화 상태로 표시
-        isPanelActiveRef.current = true;
-
-        // Collect all messages to send: initial messages + buffered messages / 전송할 모든 메시지 수집: 초기 메시지 + 버퍼에 있는 메시지
-        const messagesToSend = [...cdpMessagesRef.current, ...eventBufferRef.current];
-
-        if (messagesToSend.length === 0) {
-          setIsLoading(false);
-          return;
-        }
-
-        // Separate commands and events / 명령과 이벤트 분리
-        const commands: typeof cdpMessages = [];
-        const events: typeof cdpMessages = [];
-
-        for (const msg of messagesToSend) {
-          try {
-            const parsed = JSON.parse(msg.message);
-            if (parsed.id !== undefined) {
-              // This is a command / 이것은 명령임
-              commands.push(msg);
-            } else {
-              // This is an event / 이것은 이벤트임
-              events.push(msg);
-            }
-          } catch {
-            // If parsing fails, treat as event / 파싱 실패 시 이벤트로 처리
-            events.push(msg);
-          }
-        }
-
-        // Send commands first (initialization commands from file) / 먼저 명령 전송 (파일에서 읽은 초기화 명령)
-        // If no commands in file, send default initialization commands / 파일에 명령이 없으면 기본 초기화 명령 전송
-        if (commands.length === 0) {
-          // Send default initialization commands / 기본 초기화 명령 전송
-          const defaultInitCommands = [
-            { id: 1, method: 'Runtime.enable', params: {} },
-            { id: 2, method: 'DOM.enable', params: {} },
-            { id: 3, method: 'Network.enable', params: {} },
-            { id: 4, method: 'DOMStorage.enable', params: {} },
-            { id: 5, method: 'SessionReplay.enable', params: {} },
-          ];
-
-          for (const cmd of defaultInitCommands) {
-            const commandMessage = {
-              type: 'CDP_MESSAGE' as const,
-              message: JSON.stringify(cmd),
-            };
-            targetWindow.postMessage(commandMessage, '*');
-            sendFakeResponse(targetWindow, cmd.id);
-          }
-          // Wait for DevTools to process initialization commands / DevTools가 초기화 명령을 처리할 시간 대기
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        } else {
-          // Send commands from file / 파일에서 읽은 명령 전송
-          for (const commandMsg of commands) {
-            try {
-              const parsed = JSON.parse(commandMsg.message);
-              targetWindow.postMessage(commandMsg, '*');
-              // Send fake response for command / 명령에 대한 가짜 응답 전송
-              if (parsed.id !== undefined) {
-                sendFakeResponse(targetWindow, parsed.id);
-              }
-            } catch {
-              // Failed to parse command / 명령 파싱 실패
-            }
-          }
-          // Wait for DevTools to process commands / DevTools가 명령을 처리할 시간 대기
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-
-        // Separate events by type / 이벤트 타입별로 분리
-        const domStorageEvents = events.filter((msg) => {
-          try {
-            const parsed = JSON.parse(msg.message);
-            return parsed.method?.startsWith('DOMStorage.');
-          } catch {
-            return false;
-          }
-        });
-
-        const sessionReplayEvents = events.filter((msg) => {
-          try {
-            const parsed = JSON.parse(msg.message);
-            return parsed.method?.startsWith('SessionReplay.');
-          } catch {
-            return false;
-          }
-        });
-
-        const otherEvents = events.filter((msg) => {
-          try {
-            const parsed = JSON.parse(msg.message);
-            return (
-              !parsed.method?.startsWith('DOMStorage.') &&
-              !parsed.method?.startsWith('SessionReplay.')
-            );
-          } catch {
-            return true; // If parsing fails, include it in other events / 파싱 실패 시 다른 이벤트에 포함
-          }
-        });
-
-        // Send DOMStorage events first (initial state) / DOMStorage 이벤트를 먼저 전송 (초기 상태)
-        if (domStorageEvents.length > 0) {
-          await sendBufferedMessages(domStorageEvents);
-          // Delay to ensure DOMStorage events are processed / DOMStorage 이벤트가 처리될 시간 제공
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-
-        // Then send other events / 그 다음 다른 이벤트 전송
-        // Note: sendBufferedMessages will extract and store response bodies before sending / 참고: sendBufferedMessages가 전송 전에 응답 본문을 추출하고 저장함
-        if (otherEvents.length > 0) {
-          await sendBufferedMessages(otherEvents);
-        }
-
-        // Send SessionReplay events if this is the first activation / 첫 활성화인 경우 SessionReplay 이벤트도 전송
-        if (includeSessionReplay && sessionReplayEvents.length > 0) {
-          await sendBufferedMessages(sessionReplayEvents);
-        }
-
-        // Keep SessionReplay events for later when panel is activated / SessionReplay 이벤트는 나중에 패널이 활성화될 때를 위해 유지
-        // Clear other events but keep SessionReplay events / 다른 이벤트는 비우고 SessionReplay 이벤트는 유지
-        cdpMessagesRef.current = sessionReplayEvents;
-        eventBufferRef.current = [];
-
-        setIsLoading(false);
-      };
+      const responseBodyStore = createResponseBodyStore();
 
       // Wait for DevTools to be ready / DevTools 준비 대기
       const handleMessage = (event: MessageEvent) => {
@@ -342,25 +81,26 @@ function ReplayPage() {
           return;
         }
 
-        // Handle getResponseBody command from DevTools / DevTools에서 getResponseBody 명령 처리
+        // Handle commands from DevTools / DevTools에서 명령 처리
         if (event.data?.type === 'CDP_MESSAGE') {
           try {
             const parsed = JSON.parse(event.data.message);
-            // Check if this is a getResponseBody command / getResponseBody 명령인지 확인
-            if (parsed.method === 'Network.getResponseBody' && parsed.id !== undefined) {
-              const requestId = parsed.params?.requestId;
-              if (!requestId || !iframeRef.current?.contentWindow) {
-                return;
-              }
-
-              // Get stored response body / 저장된 응답 본문 가져오기
-              const body = responseBodyStore.get(requestId);
-              sendFakeResponse(iframeRef.current.contentWindow, parsed.id, {
-                body: body || '',
-                base64Encoded: false,
-              });
-              return; // Don't process further / 더 이상 처리하지 않음
+            if (parsed.id === undefined || !iframeRef.current?.contentWindow) {
+              return;
             }
+
+            const targetWindow = iframeRef.current.contentWindow;
+
+            // Create handler context / 핸들러 컨텍스트 생성
+            const handlerContext = {
+              file: fileToUse,
+              cdpMessages: cdpMessagesRef.current,
+              responseBodyStore,
+              targetWindow,
+            };
+
+            // Try to handle command / 명령 처리 시도
+            handleCDPCommand(parsed, handlerContext);
           } catch {
             // Ignore parsing errors / 파싱 오류 무시
           }
@@ -373,7 +113,15 @@ function ReplayPage() {
             // Wait a bit for DevTools to fully initialize / DevTools가 완전히 초기화될 시간 제공
             setTimeout(() => {
               if (!messagesSentRef.current && cdpMessagesRef.current.length > 0) {
-                void sendCDPMessages();
+                const sendContext: SendCDPMessagesContext = {
+                  cdpMessages: cdpMessagesRef.current,
+                  eventBuffer: eventBufferRef.current,
+                  file: fileToUse,
+                  targetWindow: iframeRef.current!.contentWindow!,
+                  responseBodyStore,
+                  setIsLoading,
+                };
+                void sendCDPMessages(sendContext);
               }
             }, 1000);
           }
@@ -389,10 +137,26 @@ function ReplayPage() {
           // Send messages when panel is activated / 패널이 활성화될 때 메시지 전송
           // If this is the first activation, send all messages including SessionReplay / 첫 활성화인 경우 SessionReplay를 포함한 모든 메시지 전송
           if (!messagesSentRef.current && cdpMessagesRef.current.length > 0) {
-            void sendCDPMessages(true); // Include SessionReplay events on first activation / 첫 활성화 시 SessionReplay 이벤트 포함
+            const sendContext: SendCDPMessagesContext = {
+              cdpMessages: cdpMessagesRef.current,
+              eventBuffer: eventBufferRef.current,
+              file: fileToUse,
+              targetWindow: iframeRef.current!.contentWindow!,
+              responseBodyStore,
+              setIsLoading,
+            };
+            void sendCDPMessages(sendContext, true); // Include SessionReplay events on first activation / 첫 활성화 시 SessionReplay 이벤트 포함
           } else {
             // If other messages already sent, only send SessionReplay events / 다른 메시지가 이미 전송되었다면 SessionReplay 이벤트만 전송
-            void sendSessionReplayEvents();
+            const sendContext: SendCDPMessagesContext = {
+              cdpMessages: cdpMessagesRef.current,
+              eventBuffer: eventBufferRef.current,
+              file: fileToUse,
+              targetWindow: iframeRef.current!.contentWindow!,
+              responseBodyStore,
+              setIsLoading,
+            };
+            void sendSessionReplayEvents(sendContext);
           }
         } else if (event.data?.type === 'SESSION_REPLAY_HIDDEN') {
           // Handle SessionReplay panel deactivation / SessionReplay 패널 비활성화 처리
@@ -422,7 +186,15 @@ function ReplayPage() {
             cdpMessagesRef.current.length > 0 &&
             !messagesSentRef.current
           ) {
-            void sendCDPMessages();
+            const sendContext: SendCDPMessagesContext = {
+              cdpMessages: cdpMessagesRef.current,
+              eventBuffer: eventBufferRef.current,
+              file: fileToUse,
+              targetWindow: iframeRef.current.contentWindow,
+              responseBodyStore,
+              setIsLoading,
+            };
+            void sendCDPMessages(sendContext);
           }
         }, 5000); // Give DevTools time to fully initialize (backup if DEVTOOLS_READY not received) / DevTools가 완전히 초기화될 시간 제공 (DEVTOOLS_READY를 받지 못한 경우 백업)
       };
@@ -481,6 +253,7 @@ function ReplayPage() {
         src={devtoolsUrl || undefined}
         className={`w-full h-full border-none ${devtoolsUrl ? '' : 'hidden'}`}
         title="Replay DevTools"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
       />
 
       {/* Loading/Empty states overlay / 로딩/빈 상태 오버레이 */}
