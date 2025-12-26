@@ -30,7 +30,10 @@ export default class Network extends BaseDomain {
   private requestId = 0;
   private responseData = new Map<string, NetworkResponse>();
   // Use WeakMap for XHR metadata to avoid memory leaks / 메모리 누수 방지를 위해 XHR 메타데이터에 WeakMap 사용
-  private xhrMetadata = new WeakMap<XMLHttpRequest, { method: string; url: string }>();
+  private xhrMetadata = new WeakMap<
+    XMLHttpRequest,
+    { method: string; url: string; headers?: Record<string, string> }
+  >();
 
   constructor(options: DomainOptions) {
     super(options);
@@ -129,6 +132,7 @@ export default class Network extends BaseDomain {
     const self = this;
     const originalOpen = XMLHttpRequest.prototype.open;
     const originalSend = XMLHttpRequest.prototype.send;
+    const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
 
     XMLHttpRequest.prototype.open = function (
       method: string,
@@ -139,8 +143,19 @@ export default class Network extends BaseDomain {
       self.xhrMetadata.set(this, {
         method,
         url: typeof url === 'string' ? url : url.toString(),
+        headers: {}, // Initialize headers object / 헤더 객체 초기화
       });
       return originalOpen.apply(this, [method, url, ...args] as Parameters<typeof originalOpen>);
+    };
+
+    // Hook setRequestHeader to track custom headers / 커스텀 헤더 추적을 위해 setRequestHeader 훅
+    XMLHttpRequest.prototype.setRequestHeader = function (name: string, value: string) {
+      const metadata = self.xhrMetadata.get(this);
+      if (metadata) {
+        metadata.headers = metadata.headers || {};
+        metadata.headers[name] = value;
+      }
+      return originalSetRequestHeader.apply(this, [name, value]);
     };
 
     XMLHttpRequest.prototype.send = function (body?: Document | XMLHttpRequestBodyInit | null) {
@@ -149,14 +164,20 @@ export default class Network extends BaseDomain {
       if (!metadata) {
         return originalSend.apply(this, [body]);
       }
-      const { method, url } = metadata;
+      const { method, url, headers: customHeaders = {} } = metadata;
       const requestId = `${self.requestId++}`;
+
+      // Merge default headers with custom headers / 기본 헤더와 커스텀 헤더 병합
+      const headers = {
+        ...Network.getDefaultHeaders(),
+        ...customHeaders,
+      };
 
       const request: NetworkRequest = {
         requestId,
         url,
         method,
-        headers: Network.getDefaultHeaders(),
+        headers,
       };
 
       if (body) {
@@ -206,6 +227,8 @@ export default class Network extends BaseDomain {
               statusText: this.statusText,
               headers: response.headers,
               mimeType: response.mimeType,
+              // Include response body for replay mode / replay 모드를 위해 응답 본문 포함
+              body: response.body,
             },
           },
         });
@@ -246,14 +269,41 @@ export default class Network extends BaseDomain {
       const method = init?.method || 'GET';
       const requestId = `${self.requestId++}`;
 
+      // Parse headers from init / init에서 헤더 파싱
+      let headers: Record<string, string> = Network.getDefaultHeaders();
+
+      if (init?.headers) {
+        if (init.headers instanceof Headers) {
+          // Headers object / Headers 객체
+          init.headers.forEach((value, key) => {
+            headers[key] = value;
+          });
+        } else if (Array.isArray(init.headers)) {
+          // Array of [key, value] pairs / [key, value] 쌍의 배열
+          init.headers.forEach(([key, value]) => {
+            headers[key] = value;
+          });
+        } else {
+          // Plain object / 일반 객체
+          headers = {
+            ...headers,
+            ...(init.headers as Record<string, string>),
+          };
+        }
+      }
+
+      // Also check if input is a Request object with headers / input이 Request 객체이고 헤더가 있는지 확인
+      if (input instanceof Request && input.headers) {
+        input.headers.forEach((value, key) => {
+          headers[key] = value;
+        });
+      }
+
       const request: NetworkRequest = {
         requestId,
         url,
         method,
-        headers: {
-          ...Network.getDefaultHeaders(),
-          ...((init?.headers as Record<string, string>) || {}),
-        },
+        headers,
       };
 
       if (init?.body) {
@@ -279,16 +329,19 @@ export default class Network extends BaseDomain {
 
       return originalFetch(input, init)
         .then((response) => {
-          response
-            .clone()
+          // Clone response before reading body to avoid consuming the original / 원본을 소비하지 않도록 본문을 읽기 전에 response 복제
+          const clonedResponse = response.clone();
+
+          // Format headers using forEach / forEach를 사용하여 헤더 포맷팅
+          let headersText = '';
+          response.headers.forEach((value, key) => {
+            headersText += `${key}: ${value}\r\n`;
+          });
+
+          // Read response body asynchronously / 응답 본문을 비동기로 읽기
+          clonedResponse
             .text()
             .then((body) => {
-              // Format headers using forEach / forEach를 사용하여 헤더 포맷팅
-              let headersText = '';
-              response.headers.forEach((value, key) => {
-                headersText += `${key}: ${value}\r\n`;
-              });
-
               const networkResponse: NetworkResponse = {
                 requestId,
                 url,
@@ -314,6 +367,50 @@ export default class Network extends BaseDomain {
                     statusText: response.statusText,
                     headers: networkResponse.headers,
                     mimeType: networkResponse.mimeType,
+                    // Include response body for replay mode / replay 모드를 위해 응답 본문 포함
+                    body: networkResponse.body,
+                  },
+                },
+              });
+
+              self.socketSend({
+                method: Event.loadingFinished,
+                params: {
+                  requestId,
+                  timestamp: getTimestamp(),
+                },
+              });
+            })
+            .catch((error) => {
+              // If reading body fails, still send response without body / 본문 읽기 실패 시 본문 없이 응답 전송
+              console.warn('Failed to read response body / 응답 본문 읽기 실패:', error);
+
+              const networkResponse: NetworkResponse = {
+                requestId,
+                url,
+                status: response.status,
+                statusText: response.statusText,
+                headers: Network.formatResponseHeader(headersText),
+                mimeType: response.headers.get('content-type') || 'text/plain',
+                body: '',
+              };
+
+              self.responseData.set(requestId, networkResponse);
+
+              self.socketSend({
+                method: Event.responseReceived,
+                params: {
+                  requestId,
+                  loaderId: requestId,
+                  timestamp: getTimestamp(),
+                  type: 'Fetch',
+                  response: {
+                    url,
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: networkResponse.headers,
+                    mimeType: networkResponse.mimeType,
+                    body: '',
                   },
                 },
               });
@@ -327,6 +424,7 @@ export default class Network extends BaseDomain {
               });
             });
 
+          // Return original response immediately / 원본 response를 즉시 반환
           return response;
         })
         .catch((error) => {
@@ -380,6 +478,8 @@ export default class Network extends BaseDomain {
                 statusText: 'OK',
                 headers: {},
                 mimeType: 'image/*',
+                // Image response body is not available in browser / 이미지 응답 본문은 브라우저에서 사용 불가
+                body: undefined,
               },
             },
           });
@@ -417,15 +517,21 @@ export default class Network extends BaseDomain {
   // Format response header / 응답 헤더 포맷팅
   static formatResponseHeader(header: string): Record<string, string> {
     const headers: Record<string, string> = {};
-    header
-      .split('\n')
-      .filter((val) => val)
-      .forEach((item) => {
-        const [key, ...valueParts] = item.split(':');
-        if (key) {
-          headers[key2UpperCase(key.trim())] = valueParts.join(':').trim();
-        }
-      });
+    const lines = header.split('\n');
+
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (trimmedLine === '') {
+        continue;
+      }
+
+      // Use split(':', 2) to handle headers with colons in values / 헤더 값에 콜론이 포함된 경우를 처리하기 위해 split(':', 2) 사용
+      const [key, val] = trimmedLine.split(':', 2);
+      if (key) {
+        headers[key2UpperCase(key.trim())] = val ? val.trim() : '';
+      }
+    }
+
     return headers;
   }
 
