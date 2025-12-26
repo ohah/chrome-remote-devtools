@@ -1,12 +1,33 @@
 {
   "name": "@ohah/chrome-remote-devtools-client",
   "version": "0.1.0",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.esm.js",
+  "module": "./dist/index.esm.js",
+  "browser": "./dist/index.iife.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "browser": "./dist/index.iife.js"
+    },
+    "./iife": "./dist/index.iife.js"
+  },
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target browser --format iife --minify",
-    "build:watch": "bun build src/index.ts --outdir dist --target browser --format iife --minify --watch",
+    "build": "bun run build:esm && bun run build:iife && bun run build:types",
+    "build:esm": "bun build src/index.ts --outdir dist --target browser --format esm --minify --outfile dist/index.esm.js",
+    "build:iife": "bun build src/index.ts --outdir dist --target browser --format iife --minify --outfile dist/index.iife.js --global-name ChromeRemoteDevTools",
+    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
+    "build:watch": "bun run build:esm:watch & bun run build:iife:watch",
+    "build:esm:watch": "bun build src/index.ts --outdir dist --target browser --format esm --minify --outfile dist/index.esm.js --watch",
+    "build:iife:watch": "bun build src/index.ts --outdir dist --target browser --format iife --minify --outfile dist/index.iife.js --global-name ChromeRemoteDevTools --watch",
+    "prepublishOnly": "bun run build",
     "clean": "rm -rf dist",
     "test": "bun test"
   },
@@ -15,6 +36,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "fake-indexeddb": "^6.2.5"
+    "fake-indexeddb": "^6.2.5",
+    "typescript": "^5.0.0"
   }
 }
