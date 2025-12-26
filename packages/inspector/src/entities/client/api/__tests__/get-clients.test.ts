@@ -2,16 +2,22 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { getClients, GetClientsError } from '../get-clients';
 import type { Client } from '@/entities/client';
+import { setServerUrl, resetServerUrl } from '@/shared/lib/server-url';
 
 describe('getClients', () => {
   let originalFetch: typeof fetch;
+  const mockServerUrl = 'http://localhost:8080';
 
   beforeEach(() => {
     originalFetch = globalThis.fetch;
+    // Set server URL for tests / 테스트를 위해 서버 URL 설정
+    setServerUrl(mockServerUrl);
   });
 
   afterEach(() => {
     globalThis.fetch = originalFetch;
+    // Reset server URL after tests / 테스트 후 서버 URL 재설정
+    resetServerUrl();
   });
 
   test('should fetch clients successfully / 클라이언트를 성공적으로 가져와야 함', async () => {
