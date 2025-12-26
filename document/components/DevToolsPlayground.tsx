@@ -327,7 +327,7 @@ export function DevToolsPlayground({
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const [_replayWindow, setReplayWindow] = useState<Window | null>(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [_isReplayLoading, setIsReplayLoading] = useState(false);
+  const [isReplayLoading, setIsReplayLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
   const interceptorRef = useRef<((event: MessageEvent) => void) | null>(null);
@@ -714,37 +714,51 @@ export function DevToolsPlayground({
 
       <button
         onClick={handleOpenReplayFile}
-        disabled={true}
+        disabled={isReplayLoading}
         style={{
           padding: '12px 24px',
-          background: '#6b7280',
+          background: isReplayLoading ? '#6b7280' : '#ef4444',
           color: 'white',
           border: 'none',
           borderRadius: '6px',
-          cursor: 'not-allowed',
+          cursor: isReplayLoading ? 'not-allowed' : 'pointer',
           fontSize: '16px',
           fontWeight: 500,
           transition: 'background-color 0.2s',
-          opacity: 0.6,
+          opacity: isReplayLoading ? 0.6 : 1,
+        }}
+        onMouseEnter={(e) => {
+          if (!isReplayLoading) {
+            e.currentTarget.style.background = '#dc2626';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isReplayLoading) {
+            e.currentTarget.style.background = '#ef4444';
+          }
         }}
       >
-        {t.replayFile}
+        {isReplayLoading ? t.loading : t.replayFile}
       </button>
 
       <button
         onClick={handleExportFile}
-        disabled={true}
         style={{
           padding: '12px 24px',
-          background: '#6b7280',
+          background: '#06b6d4',
           color: 'white',
           border: 'none',
           borderRadius: '6px',
-          cursor: 'not-allowed',
+          cursor: 'pointer',
           fontSize: '16px',
           fontWeight: 500,
           transition: 'background-color 0.2s',
-          opacity: 0.6,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = '#0891b2';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = '#06b6d4';
         }}
       >
         {t.exportFile}

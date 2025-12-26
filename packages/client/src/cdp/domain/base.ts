@@ -144,6 +144,12 @@ export default class BaseDomain {
    * Note: SessionReplay events are excluded and handled separately by SessionReplay domain / 참고: SessionReplay 이벤트는 제외되고 SessionReplay 도메인에서 별도로 처리됨
    */
   private async sendStoredEventsFromIndexedDB(): Promise<void> {
+    // In replay mode, don't send stored events / replay 모드에서는 저장된 이벤트를 전송하지 않음
+    // Only file-based messages should be sent in replay mode / replay 모드에서는 파일 기반 메시지만 전송되어야 함
+    if (typeof window !== 'undefined' && (window as any).__CHROME_REMOTE_DEVTOOLS_REPLAY_MODE__) {
+      return;
+    }
+
     if (!this.devtoolsWindow || !this.eventStorage) {
       return;
     }
@@ -198,6 +204,13 @@ export default class BaseDomain {
    * Handles message storage, WebSocket transmission, and postMessage fallback / 메시지 저장, WebSocket 전송, postMessage 폴백 처리
    */
   protected send(data: unknown): void {
+    // In replay mode, only file-based messages should be sent / replay 모드에서는 파일 기반 메시지만 전송되어야 함
+    // File messages are sent directly from DevToolsPlayground, not through this method / 파일 메시지는 DevToolsPlayground에서 직접 전송되며, 이 메서드를 거치지 않음
+    // Block all other message sending (stored events, new events) / 다른 모든 메시지 전송 차단 (저장된 이벤트, 새로운 이벤트)
+    if (typeof window !== 'undefined' && (window as any).__CHROME_REMOTE_DEVTOOLS_REPLAY_MODE__) {
+      return;
+    }
+
     // Save all CDP messages (events and commands) to storage / 모든 CDP 메시지(이벤트 및 명령)를 저장소에 저장
     if (this.isCDPMessage(data)) {
       this.saveMessageToStorage(data);
