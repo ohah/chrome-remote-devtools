@@ -2,7 +2,6 @@
 import { useEffect, useRef } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { buildDevToolsUrl } from '@/shared/lib/devtools-url';
-import { SERVER_URL } from '@/shared/lib';
 
 // Export component for route / 라우트용 컴포넌트 export
 export { DevToolsPage as component };
@@ -16,7 +15,7 @@ function DevToolsPage() {
   useEffect(() => {
     if (!iframeRef.current || !clientId) return;
 
-    const devtoolsUrl = buildDevToolsUrl(clientId, SERVER_URL);
+    const devtoolsUrl = buildDevToolsUrl(clientId);
     iframeRef.current.src = devtoolsUrl;
   }, [clientId]);
 
