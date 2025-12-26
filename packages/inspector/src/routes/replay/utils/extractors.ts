@@ -90,7 +90,7 @@ export async function extractDOMTree(
       const parsed = JSON.parse(msg.message);
       if (parsed.method === 'DOM.setChildNodes' && parsed.params) {
         const { parentId, nodes } = parsed.params;
-        // parentId가 0이거나 undefined이면 문서 루트 / parentId가 0이거나 undefined이면 문서 루트
+        // parentId가 0이거나 undefined이면 문서 루트 / If parentId is 0 or undefined, it's the document root
         if (parentId === 0 || parentId === undefined || parentId === null) {
           // Return document node with children / 자식이 있는 문서 노드 반환
           return {

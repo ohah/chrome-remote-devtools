@@ -44,7 +44,7 @@ export default class ChromeDomain {
     }
 
     // Save command to storage if eventStorage is available / eventStorage가 있으면 명령 저장
-    if (this.eventStorage && method) {
+    if (this.eventStorage) {
       void this.eventStorage.saveMessage({ id, method, params });
     }
 

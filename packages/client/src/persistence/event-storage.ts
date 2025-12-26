@@ -826,14 +826,19 @@ export class EventStorage {
       const cookies: Array<{ name: string; value: string; domain: string; path: string }> = [];
       if (document.cookie) {
         document.cookie.split(';').forEach((cookie) => {
-          const [name, value] = cookie.split('=').map((s) => s.trim());
-          if (name && value) {
-            cookies.push({
-              name,
-              value,
-              domain: location.hostname,
-              path: '/',
-            });
+          // Split only on first '=' to handle cookies with '=' in value / 값에 '='가 있는 쿠키를 처리하기 위해 첫 번째 '='에서만 분할
+          const equalIndex = cookie.indexOf('=');
+          if (equalIndex > 0) {
+            const name = cookie.substring(0, equalIndex).trim();
+            const value = cookie.substring(equalIndex + 1).trim();
+            if (name && value) {
+              cookies.push({
+                name,
+                value,
+                domain: location.hostname,
+                path: '/',
+              });
+            }
           }
         });
       }

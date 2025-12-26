@@ -12,9 +12,6 @@ export interface PostMessageCDPMessage {
  * CDP event file format / CDP 이벤트 파일 형식
  * Events are stored in postMessage format / 이벤트는 postMessage 형식으로 저장됨
  */
-/**
- * CDP event file format / CDP 이벤트 파일 형식
- */
 export interface CDPEventFile {
   /** File format version / 파일 형식 버전 */
   version: string;
