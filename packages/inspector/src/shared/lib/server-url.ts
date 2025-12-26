@@ -1,7 +1,6 @@
 // Server URL management / 서버 URL 관리
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DEFAULT_SERVER_URL } from './constants';
 
 interface ServerUrlState {
   /** Server URL / 서버 URL */
