@@ -63,15 +63,14 @@ function ConnectionPage() {
       const fileData = {
         name: file.name,
         type: file.type,
-        size: file.size,
-        lastModified: file.lastModified,
         content: await file.text(), // Read file content
       };
 
       // Navigate to replay page with file data in state
+      // TanStack Router state type is strict, use type assertion / TanStack Router state 타입이 엄격하므로 타입 단언 사용
       navigate({
         to: '/replay',
-        state: { fileData } as any, // TanStack Router state type is strict, use type assertion
+        state: { fileData } as any,
       });
     } catch (error) {
       console.error('Failed to read file:', error);

@@ -1,6 +1,6 @@
 // Replay route / 리플레이 라우트
 import { createFileRoute, useLocation } from '@tanstack/react-router';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { fileToCDPMessages } from '@/shared/lib/file-to-cdp';
 import { buildDevToolsReplayUrl } from '@/shared/lib/devtools-url';
 import { createResponseBodyStore } from './replay/utils/response-body-store';
@@ -22,27 +22,7 @@ function ReplayPage() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-process uploaded file from navigation state / 네비게이션 state에서 업로드된 파일 자동 처리
-  useEffect(() => {
-    const fileData = (
-      location.state as { fileData?: { name: string; type: string; content: string } }
-    )?.fileData;
-
-    if (fileData) {
-      try {
-        const file = new File([fileData.content], fileData.name, { type: fileData.type });
-        // handleOpenReplayDevTools will be called after it's defined / handleOpenReplayDevTools가 정의된 후 호출됨
-        // Use setTimeout to ensure handleOpenReplayDevTools is available / handleOpenReplayDevTools가 사용 가능한지 확인하기 위해 setTimeout 사용
-        setTimeout(() => {
-          void handleOpenReplayDevTools(file);
-        }, 0);
-      } catch (e) {
-        setError('Failed to create file from navigation state.');
-        console.error('Error creating file from navigation state:', e);
-      }
-    }
-  }, [location.state]);
-
-  const handleOpenReplayDevTools = async (file: File) => {
+  const handleOpenReplayDevTools = useCallback(async (file: File) => {
     if (!file) {
       return;
     }
@@ -54,7 +34,7 @@ function ReplayPage() {
       const cdpMessages = await fileToCDPMessages(file);
 
       if (!iframeRef.current) {
-        throw new Error('Iframe not available / Iframe을 사용할 수 없습니다');
+        throw new Error('Iframe not available');
       }
 
       // Clean up previous handlers / 이전 핸들러 정리
@@ -216,7 +196,23 @@ function ReplayPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to open replay DevTools');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const fileData = (
+      location.state as { fileData?: { name: string; type: string; content: string } }
+    )?.fileData;
+
+    if (fileData) {
+      try {
+        const file = new File([fileData.content], fileData.name, { type: fileData.type });
+        void handleOpenReplayDevTools(file);
+      } catch (e) {
+        setError('Failed to create file from navigation state.');
+        console.error('Error creating file from navigation state:', e);
+      }
+    }
+  }, [location.state, handleOpenReplayDevTools]);
 
   return (
     <div className="h-full bg-gray-900 text-gray-100 relative overflow-hidden">

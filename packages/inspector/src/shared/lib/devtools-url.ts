@@ -12,7 +12,7 @@ import { getServerUrl } from './server-url';
 export function buildDevToolsUrl(clientId: string, serverUrl?: string): string {
   const serverUrlValue = serverUrl ?? getServerUrl();
   if (!serverUrlValue) {
-    throw new Error('Server URL is not set / 서버 URL이 설정되지 않았습니다');
+    throw new Error('Server URL is not set');
   }
 
   const devtoolsUrl = new URL(DEVTOOLS_FRONTEND_PATH, window.location.origin);

@@ -24,7 +24,7 @@ const useServerUrlStore = create<ServerUrlState>()(
           new URL(url);
           set({ serverUrl: url });
         } catch {
-          throw new Error('Invalid URL format / 잘못된 URL 형식');
+          throw new Error('Invalid URL format');
         }
       },
       resetServerUrl: () => {

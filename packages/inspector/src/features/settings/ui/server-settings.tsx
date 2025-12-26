@@ -30,7 +30,12 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
         setIsSaving(false);
       }, 500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save server URL');
+      // Handle error from Zustand store (may contain Korean text) / Zustand store에서 오는 에러 처리 (한글 포함 가능)
+      const errorMessage =
+        err instanceof Error && err.message.includes('Invalid URL format')
+          ? 'Invalid URL format. Please enter a valid URL (e.g., http://localhost:8080)'
+          : 'Failed to save server URL. Please check that it is a valid URL.';
+      setError(errorMessage);
       setIsSaving(false);
     }
   };
