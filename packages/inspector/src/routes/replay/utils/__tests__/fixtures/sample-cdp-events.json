@@ -1,0 +1,48 @@
+{
+  "version": "1.0.0",
+  "exportDate": "2025-12-26T08:55:38.567Z",
+  "clientId": "test-client-id",
+  "events": [
+    {
+      "type": "CDP_MESSAGE",
+      "message": "{\"method\":\"Network.responseReceived\",\"params\":{\"requestId\":\"1\",\"response\":{\"body\":\"test body\",\"status\":200,\"headers\":{}}}}"
+    },
+    {
+      "type": "CDP_MESSAGE",
+      "message": "{\"method\":\"DOM.setChildNodes\",\"params\":{\"parentId\":0,\"nodes\":[{\"nodeId\":1,\"backendNodeId\":1,\"nodeType\":1,\"nodeName\":\"HTML\",\"localName\":\"html\",\"childNodeCount\":2}]}}"
+    },
+    {
+      "type": "CDP_MESSAGE",
+      "message": "{\"method\":\"DOMStorage.domStorageItemAdded\",\"params\":{\"storageId\":{\"isLocalStorage\":true,\"storageKey\":\"http://localhost:1420\",\"securityOrigin\":\"http://localhost:1420\"},\"key\":\"test\",\"newValue\":\"value\"}}"
+    },
+    {
+      "type": "CDP_MESSAGE",
+      "message": "{\"method\":\"DOMStorage.domStorageItemAdded\",\"params\":{\"storageId\":{\"isLocalStorage\":false,\"storageKey\":\"http://localhost:1420\",\"securityOrigin\":\"http://localhost:1420\"},\"key\":\"sessionKey\",\"newValue\":\"sessionValue\"}}"
+    },
+    {
+      "type": "CDP_MESSAGE",
+      "message": "{\"method\":\"Network.requestWillBeSent\",\"params\":{\"requestId\":\"1\",\"request\":{\"url\":\"http://localhost:1420/test\",\"method\":\"GET\",\"headers\":{}}}}"
+    }
+  ],
+  "cookies": [
+    {
+      "name": "test",
+      "value": "cookie",
+      "domain": "localhost",
+      "path": "/"
+    }
+  ],
+  "localStorage": [
+    ["key1", "value1"],
+    ["key2", "value2"]
+  ],
+  "sessionStorage": [
+    ["sessionKey", "sessionValue"],
+    ["debug_id", "test-debug-id"]
+  ],
+  "domTree": {
+    "documentURL": "http://localhost:1420",
+    "baseURL": "http://localhost:1420",
+    "html": "<html><head><title>Test</title></head><body><div>Test</div></body></html>"
+  }
+}
