@@ -61,6 +61,13 @@ export class PostMessageHandler {
       return;
     }
 
+    // Check if we're in replay mode and ignore messages from DevTools windows / replay 모드인지 확인하고 DevTools 창에서 온 메시지 무시
+    if (typeof window !== 'undefined' && (window as any).__CHROME_REMOTE_DEVTOOLS_REPLAY_MODE__) {
+      // In replay mode, ignore all messages from DevTools windows / replay 모드에서는 DevTools 창에서 온 모든 메시지 무시
+      // Only file-based messages should be processed / 파일 기반 메시지만 처리되어야 함
+      return;
+    }
+
     // Handle DEVTOOLS_READY message / DEVTOOLS_READY 메시지 처리
     if (event.data.type === 'DEVTOOLS_READY') {
       // Try to store DevTools window reference / DevTools window 참조 저장 시도
