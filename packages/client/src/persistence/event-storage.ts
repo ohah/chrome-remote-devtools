@@ -1,5 +1,6 @@
 // IndexedDB event storage utility / IndexedDB 이벤트 저장 유틸리티
 import { compress } from './compression';
+import type { PostMessageCDPMessage } from '../cdp/types';
 
 const DB_NAME = 'CDPEventStorage';
 const DB_VERSION = 1;
@@ -10,8 +11,8 @@ const ORPHANED_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours / 24시간
 interface StoredEvent {
   id?: number;
   clientId: string; // Tab-specific client ID / 탭별 고유 클라이언트 ID
-  method: string;
-  params: unknown;
+  type: 'CDP_MESSAGE'; // PostMessage format type / PostMessage 형식 타입
+  message: string; // JSON stringified CDP message / JSON 문자열화된 CDP 메시지
   timestamp: number;
   compressed?: boolean;
   size?: number;
@@ -124,16 +125,18 @@ export class EventStorage {
   }
 
   /**
-   * Check if event should be stored / 이벤트를 저장해야 하는지 확인
+   * Check if CDP message should be stored / CDP 메시지를 저장해야 하는지 확인
+   * Store all CDP messages (events and commands) / 모든 CDP 메시지(이벤트 및 명령) 저장
    */
-  private shouldStore(method: string): boolean {
-    // Store console, network, and session replay events / console, network, session replay 이벤트 저장
-    // Exclude DOM events / DOM 이벤트 제외
-    return (
-      method.startsWith('Runtime.consoleAPICalled') ||
-      method.startsWith('Network.') ||
-      method.startsWith('SessionReplay.eventRecorded')
-    );
+  private shouldStore(cdpMessage: unknown): boolean {
+    // Store all CDP messages (events and commands) / 모든 CDP 메시지(이벤트 및 명령) 저장
+    // Check if it's a valid CDP message / 유효한 CDP 메시지인지 확인
+    if (typeof cdpMessage !== 'object' || cdpMessage === null) {
+      return false;
+    }
+
+    // Must have method (for events) or id (for commands) / method(이벤트용) 또는 id(명령용)가 있어야 함
+    return 'method' in cdpMessage || 'id' in cdpMessage;
   }
 
   /**
@@ -278,13 +281,12 @@ export class EventStorage {
   }
 
   /**
-   * Save event to IndexedDB / IndexedDB에 이벤트 저장
-   * @param method - CDP method name / CDP 메소드 이름
-   * @param params - Event parameters / 이벤트 파라미터
+   * Save CDP message to IndexedDB / IndexedDB에 CDP 메시지 저장
+   * @param cdpMessage - CDP message (event or command) / CDP 메시지 (이벤트 또는 명령)
    * @param retryCount - Internal retry counter to prevent infinite recursion / 무한 재귀 방지를 위한 내부 재시도 카운터
    */
-  async saveEvent(method: string, params: unknown, retryCount = 0): Promise<void> {
-    if (!this.shouldStore(method)) {
+  async saveMessage(cdpMessage: unknown, retryCount = 0): Promise<void> {
+    if (!this.shouldStore(cdpMessage)) {
       return;
     }
 
@@ -299,45 +301,47 @@ export class EventStorage {
 
     try {
       const timestamp = Date.now();
-      let storedParams: unknown;
+      let storedMessage: string;
       let compressed = false;
       let size: number;
 
-      // Serialize event data / 이벤트 데이터 직렬화
-      const eventData = JSON.stringify({ method, params, timestamp });
-      size = new Blob([eventData]).size;
+      // Store only the CDP message JSON string (not the full postMessage object) / CDP 메시지 JSON 문자열만 저장 (전체 postMessage 객체가 아님)
+      const cdpMessageString = JSON.stringify(cdpMessage);
+      size = new Blob([cdpMessageString]).size;
 
       // Compress if enabled / 압축 활성화 시 압축
       if (this.config.enableCompression) {
-        const compressedData = await compress(eventData);
+        const compressedData = await compress(cdpMessageString);
         if (compressedData) {
           // Store compressed data as array of bytes / 압축된 데이터를 바이트 배열로 저장
-          storedParams = {
+          storedMessage = JSON.stringify({
             compressed: true,
             data: Array.from(new Uint8Array(compressedData)),
-          };
+          });
           compressed = true;
           size = compressedData.byteLength;
         } else {
           // Compression failed, store uncompressed / 압축 실패 시 압축하지 않고 저장
-          storedParams = params;
+          // Store CDP message JSON string directly / CDP 메시지 JSON 문자열을 직접 저장
+          storedMessage = cdpMessageString;
         }
       } else {
-        storedParams = params;
+        // Store CDP message JSON string directly / CDP 메시지 JSON 문자열을 직접 저장
+        storedMessage = cdpMessageString;
       }
 
       // Ensure storage space / 저장 공간 확보
       await this.ensureStorageSpace(size);
 
-      // Store event / 이벤트 저장
+      // Store message / 메시지 저장
       return new Promise((resolve) => {
         const transaction = this.db!.transaction([STORE_NAME], 'readwrite');
         const store = transaction.objectStore(STORE_NAME);
 
         const storedEvent: StoredEvent = {
           clientId: this.clientId,
-          method,
-          params: storedParams,
+          type: 'CDP_MESSAGE',
+          message: storedMessage,
           timestamp,
           compressed,
           size,
@@ -354,7 +358,7 @@ export class EventStorage {
           if (request.error?.name === 'QuotaExceededError' && retryCount < 1) {
             // Try deleting old events and retry once / 오래된 이벤트 삭제 후 한 번만 재시도
             void this.deleteOldEvents(size).then(() => {
-              void this.saveEvent(method, params, retryCount + 1)
+              void this.saveMessage(cdpMessage, retryCount + 1)
                 .then(resolve)
                 .catch(() => {
                   // Ignore retry errors / 재시도 에러 무시
@@ -362,22 +366,34 @@ export class EventStorage {
                 });
             });
           } else {
-            console.error('Failed to save event / 이벤트 저장 실패:', request.error);
-            // Don't reject - allow event transmission to continue / reject하지 않음 - 이벤트 전송 계속
+            console.error('Failed to save message / 메시지 저장 실패:', request.error);
+            // Don't reject - allow message transmission to continue / reject하지 않음 - 메시지 전송 계속
             resolve();
           }
         };
       });
     } catch (error) {
-      console.error('Error saving event / 이벤트 저장 오류:', error);
-      // Don't throw - allow event transmission to continue / 에러를 던지지 않음 - 이벤트 전송은 계속
+      console.error('Error saving message / 메시지 저장 오류:', error);
+      // Don't throw - allow message transmission to continue / 에러를 던지지 않음 - 메시지 전송은 계속
     }
   }
 
   /**
-   * Get all stored events for this client / 현재 클라이언트의 저장된 모든 이벤트 가져오기
+   * Save event to IndexedDB (backward compatibility) / IndexedDB에 이벤트 저장 (하위 호환성)
+   * @param method - CDP method name / CDP 메소드 이름
+   * @param params - Event parameters / 이벤트 파라미터
+   * @param retryCount - Internal retry counter to prevent infinite recursion / 무한 재귀 방지를 위한 내부 재시도 카운터
    */
-  async getEvents(): Promise<Array<{ method: string; params: unknown; timestamp: number }>> {
+  async saveEvent(method: string, params: unknown, retryCount = 0): Promise<void> {
+    // Convert to CDP message format and save / CDP 메시지 형식으로 변환하여 저장
+    return this.saveMessage({ method, params }, retryCount);
+  }
+
+  /**
+   * Get all stored messages for this client / 현재 클라이언트의 저장된 모든 메시지 가져오기
+   * @returns Array of postMessage format CDP messages / postMessage 형식의 CDP 메시지 배열
+   */
+  async getEvents(): Promise<PostMessageCDPMessage[]> {
     if (!this.db) {
       await this.init();
     }
@@ -396,31 +412,70 @@ export class EventStorage {
 
       request.onsuccess = async () => {
         const events = request.result as StoredEvent[];
-        const decompressedEvents = await Promise.all(
+        const decompressedMessages = await Promise.all(
           events.map(async (event) => {
+            let message: string;
             if (event.compressed) {
               // Decompress if needed / 필요 시 압축 해제
               const { decompress } = await import('./compression');
-              const compressedData = new Uint8Array((event.params as { data: number[] }).data)
-                .buffer;
+              const compressedData = new Uint8Array(
+                (JSON.parse(event.message) as { data: number[] }).data
+              ).buffer;
               const decompressed = await decompress(compressedData);
               if (decompressed) {
-                const parsed = JSON.parse(decompressed);
-                return {
-                  method: event.method,
-                  params: parsed.params,
-                  timestamp: event.timestamp,
-                };
+                // Decompressed data is CDP message JSON string (new format) / 압축 해제된 데이터는 CDP 메시지 JSON 문자열임 (새로운 형식)
+                // Handle both new format (CDP message JSON string) and legacy format (full postMessage object) / 새로운 형식(CDP 메시지 JSON 문자열) 및 레거시 형식(전체 postMessage 객체) 모두 처리
+                try {
+                  const parsed = JSON.parse(decompressed);
+                  if (
+                    parsed &&
+                    typeof parsed === 'object' &&
+                    'message' in parsed &&
+                    parsed.type === 'CDP_MESSAGE'
+                  ) {
+                    // Legacy format: full postMessage object / 레거시 형식: 전체 postMessage 객체
+                    message = parsed.message;
+                  } else {
+                    // New format: decompressed data is already the CDP message JSON string / 새로운 형식: 압축 해제된 데이터가 이미 CDP 메시지 JSON 문자열
+                    message = decompressed;
+                  }
+                } catch {
+                  // If parsing fails, assume decompressed data is already the CDP message JSON string / 파싱 실패 시 압축 해제된 데이터가 이미 CDP 메시지 JSON 문자열로 가정
+                  message = decompressed;
+                }
+              } else {
+                message = event.message;
+              }
+            } else {
+              // Message is already the CDP message JSON string (new format) / message는 이미 CDP 메시지 JSON 문자열임 (새로운 형식)
+              // Handle both new format (CDP message JSON string) and legacy format (full postMessage object) / 새로운 형식(CDP 메시지 JSON 문자열) 및 레거시 형식(전체 postMessage 객체) 모두 처리
+              try {
+                // Try to parse as postMessage object first (legacy format) / 먼저 postMessage 객체로 파싱 시도 (레거시 형식)
+                const parsed = JSON.parse(event.message);
+                if (
+                  parsed &&
+                  typeof parsed === 'object' &&
+                  'message' in parsed &&
+                  parsed.type === 'CDP_MESSAGE'
+                ) {
+                  // Legacy format: full postMessage object / 레거시 형식: 전체 postMessage 객체
+                  message = parsed.message;
+                } else {
+                  // New format: message is already the CDP message JSON string / 새로운 형식: message가 이미 CDP 메시지 JSON 문자열
+                  message = event.message;
+                }
+              } catch {
+                // If parsing fails, assume it's already the CDP message JSON string / 파싱 실패 시 이미 CDP 메시지 JSON 문자열로 가정
+                message = event.message;
               }
             }
             return {
-              method: event.method,
-              params: event.params,
-              timestamp: event.timestamp,
+              type: 'CDP_MESSAGE' as const,
+              message,
             };
           })
         );
-        resolve(decompressedEvents);
+        resolve(decompressedMessages);
       };
 
       request.onerror = () => {
@@ -430,11 +485,10 @@ export class EventStorage {
   }
 
   /**
-   * Get events after a specific timestamp for this client / 현재 클라이언트의 특정 타임스탬프 이후의 이벤트 가져오기
+   * Get messages after a specific timestamp for this client / 현재 클라이언트의 특정 타임스탬프 이후의 메시지 가져오기
+   * @returns Array of postMessage format CDP messages / postMessage 형식의 CDP 메시지 배열
    */
-  async getEventsAfter(
-    timestamp: number
-  ): Promise<Array<{ method: string; params: unknown; timestamp: number }>> {
+  async getEventsAfter(timestamp: number): Promise<PostMessageCDPMessage[]> {
     if (!this.db) {
       await this.init();
     }
@@ -458,30 +512,69 @@ export class EventStorage {
 
       request.onsuccess = async () => {
         const events = request.result as StoredEvent[];
-        const decompressedEvents = await Promise.all(
+        const decompressedMessages = await Promise.all(
           events.map(async (event) => {
+            let message: string;
             if (event.compressed) {
               const { decompress } = await import('./compression');
-              const compressedData = new Uint8Array((event.params as { data: number[] }).data)
-                .buffer;
+              const compressedData = new Uint8Array(
+                (JSON.parse(event.message) as { data: number[] }).data
+              ).buffer;
               const decompressed = await decompress(compressedData);
               if (decompressed) {
-                const parsed = JSON.parse(decompressed);
-                return {
-                  method: event.method,
-                  params: parsed.params,
-                  timestamp: event.timestamp,
-                };
+                // Decompressed data is CDP message JSON string (new format) / 압축 해제된 데이터는 CDP 메시지 JSON 문자열임 (새로운 형식)
+                // Handle both new format (CDP message JSON string) and legacy format (full postMessage object) / 새로운 형식(CDP 메시지 JSON 문자열) 및 레거시 형식(전체 postMessage 객체) 모두 처리
+                try {
+                  const parsed = JSON.parse(decompressed);
+                  if (
+                    parsed &&
+                    typeof parsed === 'object' &&
+                    'message' in parsed &&
+                    parsed.type === 'CDP_MESSAGE'
+                  ) {
+                    // Legacy format: full postMessage object / 레거시 형식: 전체 postMessage 객체
+                    message = parsed.message;
+                  } else {
+                    // New format: decompressed data is already the CDP message JSON string / 새로운 형식: 압축 해제된 데이터가 이미 CDP 메시지 JSON 문자열
+                    message = decompressed;
+                  }
+                } catch {
+                  // If parsing fails, assume decompressed data is already the CDP message JSON string / 파싱 실패 시 압축 해제된 데이터가 이미 CDP 메시지 JSON 문자열로 가정
+                  message = decompressed;
+                }
+              } else {
+                message = event.message;
+              }
+            } else {
+              // Message is already the CDP message JSON string (new format) / message는 이미 CDP 메시지 JSON 문자열임 (새로운 형식)
+              // Handle both new format (CDP message JSON string) and legacy format (full postMessage object) / 새로운 형식(CDP 메시지 JSON 문자열) 및 레거시 형식(전체 postMessage 객체) 모두 처리
+              try {
+                // Try to parse as postMessage object first (legacy format) / 먼저 postMessage 객체로 파싱 시도 (레거시 형식)
+                const parsed = JSON.parse(event.message);
+                if (
+                  parsed &&
+                  typeof parsed === 'object' &&
+                  'message' in parsed &&
+                  parsed.type === 'CDP_MESSAGE'
+                ) {
+                  // Legacy format: full postMessage object / 레거시 형식: 전체 postMessage 객체
+                  message = parsed.message;
+                } else {
+                  // New format: message is already the CDP message JSON string / 새로운 형식: message가 이미 CDP 메시지 JSON 문자열
+                  message = event.message;
+                }
+              } catch {
+                // If parsing fails, assume it's already the CDP message JSON string / 파싱 실패 시 이미 CDP 메시지 JSON 문자열로 가정
+                message = event.message;
               }
             }
             return {
-              method: event.method,
-              params: event.params,
-              timestamp: event.timestamp,
+              type: 'CDP_MESSAGE' as const,
+              message,
             };
           })
         );
-        resolve(decompressedEvents);
+        resolve(decompressedMessages);
       };
 
       request.onerror = () => {
@@ -509,16 +602,21 @@ export class EventStorage {
         const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
         if (cursor) {
           const storedEvent = cursor.value as StoredEvent;
-          // Skip events that should be excluded / 제외해야 할 이벤트 건너뛰기
-          if (
-            excludeMethods &&
-            excludeMethods.some((method) => storedEvent.method.startsWith(method))
-          ) {
-            cursor.continue();
-          } else {
-            cursor.delete();
-            cursor.continue();
+          // Skip events that should be excluded / 제외해야 할 메시지 건너뛰기
+          if (excludeMethods) {
+            try {
+              const cdpMessage = JSON.parse(storedEvent.message);
+              const method = cdpMessage.method || '';
+              if (excludeMethods.some((excludeMethod) => method.startsWith(excludeMethod))) {
+                cursor.continue();
+                return;
+              }
+            } catch {
+              // If parsing fails, delete it / 파싱 실패 시 삭제
+            }
           }
+          cursor.delete();
+          cursor.continue();
         } else {
           resolve();
         }
@@ -710,7 +808,7 @@ export class EventStorage {
   }
 
   /**
-   * Export all events to JSON file / 모든 이벤트를 JSON 파일로 내보내기
+   * Export all messages to JSON file / 모든 메시지를 JSON 파일로 내보내기
    */
   async exportToFile(): Promise<void> {
     if (!this.db) {
@@ -722,13 +820,13 @@ export class EventStorage {
     }
 
     try {
-      const events = await this.getEvents();
+      const messages = await this.getEvents();
 
       const exportData = {
         version: '1.0.0',
         exportDate: new Date().toISOString(),
         clientId: this.clientId,
-        events,
+        events: messages, // PostMessage format messages / PostMessage 형식 메시지
       };
 
       const json = JSON.stringify(exportData, null, 2);
@@ -742,7 +840,7 @@ export class EventStorage {
 
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to export events / 이벤트 내보내기 실패:', error);
+      console.error('Failed to export messages / 메시지 내보내기 실패:', error);
       throw error;
     }
   }
