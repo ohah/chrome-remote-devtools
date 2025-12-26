@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "rspress build",
+    "build": "rspress build && bun scripts/fix-devtools-files.ts",
     "dev": "rspress dev --port 2000",
     "preview": "rspress preview"
   },

@@ -50,6 +50,12 @@ export default defineConfig({
           copyPatterns.push({
             from: devtoolsPath,
             to: 'devtools-frontend',
+            // Force overwrite to prevent empty files / 빈 파일 방지를 위해 강제 덮어쓰기
+            force: true,
+            // Ignore patterns that might conflict / 충돌할 수 있는 패턴 무시
+            globOptions: {
+              ignore: ['**/node_modules/**'],
+            },
           });
         }
 
