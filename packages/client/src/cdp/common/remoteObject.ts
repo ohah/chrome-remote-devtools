@@ -293,7 +293,6 @@ export function getObjectProperties(params: GetObjectPropertiesParams): Array<{
     value: unknown;
   }> = [];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const proto = (curObject as any).__proto__;
 
   // If the current object has a __proto__ prototype and needs to obtain non-self attributes

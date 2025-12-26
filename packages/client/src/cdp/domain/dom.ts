@@ -308,11 +308,9 @@ export default class Dom extends BaseDomain {
     const node = getNodeById(nodeId);
     if (!node) {
       console.warn(`[CDP DOM] setInspectedNode: Node not found for nodeId: ${nodeId}`);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).$0 = null;
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).$0 = node;
   }
 
@@ -591,21 +589,15 @@ export default class Dom extends BaseDomain {
 
   // Set $, $$, $x functions / $, $$, $x 함수 설정
   static set$Function(): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (typeof (window as any).$ !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).$ = (selector: string) => document.querySelector(selector);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (typeof (window as any).$$ !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).$$ = (selector: string) => document.querySelectorAll(selector);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (typeof (window as any).$x !== 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).$x = (xpath: string) => {
         const xpathResult = document.evaluate(
           xpath,

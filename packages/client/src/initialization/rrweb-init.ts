@@ -55,8 +55,14 @@ export async function initRrwebRecording(
         // Start recording immediately without waiting for load / 로드를 기다리지 않고 즉시 녹화 시작
         // recordAfter: 'load' removed to prevent infinite reload loops / 무한 리로드 루프 방지를 위해 recordAfter: 'load' 제거
 
-        // Force full snapshot generation / 풀 스냅샷 강제 생성
-        checkoutEveryNth: 1,
+        // Optimize snapshot frequency to reduce storage size / 저장 용량 감소를 위해 스냅샷 빈도 최적화
+        // Generate full snapshot every 200 events or 5 seconds / 200개 이벤트마다 또는 5초마다 전체 스냅샷 생성
+        checkoutEveryNth: 200,
+        checkoutEveryNms: 5000,
+
+        // Disable heavy recording options to reduce storage size / 저장 용량 감소를 위해 무거운 기록 옵션 비활성화
+        recordCanvas: false, // Canvas recording disabled to save space / 용량 절감을 위해 Canvas 기록 비활성화
+        inlineStylesheet: false, // Minimize inline stylesheet recording / 인라인 스타일시트 기록 최소화
 
         // Use rr-block class to block elements from recording / rr-block 클래스를 사용하여 요소를 기록에서 제외
         // DevTools iframe should have 'rr-block' class / DevTools iframe은 'rr-block' 클래스를 가져야 함
