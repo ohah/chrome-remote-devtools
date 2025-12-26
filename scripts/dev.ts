@@ -24,6 +24,7 @@ const config = {
   includeExample: process.env.INCLUDE_EXAMPLE !== 'false', // Default: true
   includeIframeExample: process.env.INCLUDE_IFRAME_EXAMPLE !== 'false', // Default: true
   includePopupExample: process.env.INCLUDE_POPUP_EXAMPLE !== 'false', // Default: true
+  includeTauri: process.env.INCLUDE_TAURI !== 'false', // Default: true
   healthCheckTimeout: process.env.HEALTH_CHECK_TIMEOUT
     ? parseInt(process.env.HEALTH_CHECK_TIMEOUT)
     : 10000, // 10 seconds
@@ -35,6 +36,7 @@ const colors = {
   client: '\x1b[36m', // Cyan
   server: '\x1b[32m', // Green
   inspector: '\x1b[33m', // Yellow
+  tauri: '\x1b[94m', // Bright Blue
   example: '\x1b[35m', // Magenta
   info: '\x1b[34m', // Blue
   error: '\x1b[31m', // Red
@@ -84,6 +86,13 @@ const services: Service[] = [
     healthCheckUrl: `http://localhost:${config.inspectorPort}`,
   },
   {
+    name: 'TAURI',
+    color: colors.tauri,
+    cwd: join(rootDir, 'packages/inspector'),
+    command: ['bun', 'run', 'tauri', 'dev'],
+    optional: true,
+  },
+  {
     name: 'EXAMPLE',
     color: colors.example,
     cwd: join(rootDir, 'examples/basic'),
@@ -119,6 +128,9 @@ const services: Service[] = [
     return false;
   }
   if (service.name === 'POPUP_EXAMPLE' && !config.includePopupExample) {
+    return false;
+  }
+  if (service.name === 'TAURI' && !config.includeTauri) {
     return false;
   }
   return true;
