@@ -1,5 +1,5 @@
 // DevTools URL builder / DevTools URL 빌더
-import { DEFAULT_SERVER_URL, DEVTOOLS_FRONTEND_PATH, DEVTOOLS_CONFIG } from './constants';
+import { DEVTOOLS_FRONTEND_PATH, DEVTOOLS_CONFIG } from './constants';
 import { getServerUrl } from './server-url';
 
 /**
