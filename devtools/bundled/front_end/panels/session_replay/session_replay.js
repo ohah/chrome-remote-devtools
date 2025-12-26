@@ -42,98 +42,71 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
   // Update interval ID / 업데이트 간격 ID
   constructor() {
     super("session-replay");
-    console.log("SessionReplay: Panel constructor called / \uD328\uB110 \uC0DD\uC131\uC790 \uD638\uCD9C\uB428");
     this.render();
   }
   wasShown() {
     super.wasShown();
-    console.log("SessionReplay: Panel was shown / \uD328\uB110 \uD45C\uC2DC\uB428");
+    if (window !== window.top) {
+      window.parent.postMessage({ type: "SESSION_REPLAY_READY" }, "*");
+    } else if (window.opener) {
+      window.opener.postMessage({ type: "SESSION_REPLAY_READY" }, "*");
+    }
+    this.#currentTime = 0;
     this.updateContainerHeight();
+    this.updateProgress();
     this.setupCDPListener();
     setTimeout(() => {
       if (!this.#target) {
-        console.log("SessionReplay: Retrying setup after delay / \uC9C0\uC5F0 \uD6C4 \uC7AC\uC2DC\uB3C4");
         this.setupCDPListener();
       }
       this.updateContainerHeight();
     }, 1e3);
   }
   setupCDPListener() {
-    console.log("SessionReplay: setupCDPListener called / setupCDPListener \uD638\uCD9C\uB428");
     const target = SDK.TargetManager.TargetManager.instance().primaryPageTarget();
-    console.log("SessionReplay: Primary target / \uC8FC\uC694 \uD0C0\uAC9F:", target);
     if (!target) {
-      console.log("SessionReplay: No target available, waiting... / \uD0C0\uAC9F \uC5C6\uC74C, \uB300\uAE30 \uC911...");
       SDK.TargetManager.TargetManager.instance().addEventListener("AvailableTargetsChanged", () => {
-        console.log("SessionReplay: AVAILABLE_TARGETS_CHANGED event / \uD0C0\uAC9F \uBCC0\uACBD \uC774\uBCA4\uD2B8");
         const newTarget = SDK.TargetManager.TargetManager.instance().primaryPageTarget();
         if (newTarget && !this.#target) {
-          console.log("SessionReplay: New target available / \uC0C8 \uD0C0\uAC9F \uC0AC\uC6A9 \uAC00\uB2A5:", newTarget);
           this.#target = newTarget;
           this.attachToTarget(newTarget);
         }
       }, this);
       return;
     }
-    console.log("SessionReplay: Target available, attaching... / \uD0C0\uAC9F \uC0AC\uC6A9 \uAC00\uB2A5, \uC5F0\uACB0 \uC911...");
     this.#target = target;
     this.attachToTarget(target);
   }
   attachToTarget(target) {
     const router = target.router();
     if (!router) {
-      console.warn("SessionReplay: Router not available / \uB77C\uC6B0\uD130\uB97C \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uC74C");
       return;
     }
     const connection = router.connection;
     if (!connection) {
-      console.warn("SessionReplay: Connection not available / \uC5F0\uACB0\uC744 \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uC74C");
       return;
     }
-    console.log("SessionReplay: Attaching to target / \uD0C0\uAC9F\uC5D0 \uC5F0\uACB0 \uC911...", target);
     const sessionReplayAgent = target.sessionReplayAgent();
     if (sessionReplayAgent) {
       sessionReplayAgent.invoke_enable().then(() => {
-        console.log("SessionReplay: Domain enabled / \uB3C4\uBA54\uC778 \uD65C\uC131\uD654\uB428");
-      }).catch((error) => {
-        console.error("SessionReplay: Failed to enable domain / \uB3C4\uBA54\uC778 \uD65C\uC131\uD654 \uC2E4\uD328:", error);
+      }).catch((_error) => {
       });
-    } else {
-      console.warn("SessionReplay: SessionReplayAgent not available / SessionReplayAgent\uB97C \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uC74C");
     }
     this.#observer = {
       onEvent: (event) => {
-        if (this.#rrwebEvents.length < 5) {
-          console.log("SessionReplay: CDP event received / CDP \uC774\uBCA4\uD2B8 \uC218\uC2E0:", event.method, event.params);
-        }
-        if (event.method?.includes("SessionReplay") || event.method?.toLowerCase().includes("session")) {
-          console.log("SessionReplay: Received SessionReplay event / SessionReplay \uC774\uBCA4\uD2B8 \uC218\uC2E0:", event.method, event.params);
-        }
         if (event.method === "SessionReplay.eventRecorded") {
           const params = event.params;
-          console.log("SessionReplay: eventRecorded event received / eventRecorded \uC774\uBCA4\uD2B8 \uC218\uC2E0:", params);
           if (Array.isArray(params.events)) {
-            console.log("SessionReplay: Received events / \uC774\uBCA4\uD2B8 \uC218\uC2E0:", params.events.length);
             this.#rrwebEvents.push(...params.events);
-            console.log("SessionReplay: Total events / \uCD1D \uC774\uBCA4\uD2B8:", this.#rrwebEvents.length);
             void this.updateReplay();
-          } else {
-            console.warn("SessionReplay: params.events is not an array / params.events\uAC00 \uBC30\uC5F4\uC774 \uC544\uB2D8:", params);
           }
         }
       },
       onDisconnect: (_reason) => {
-        console.log("SessionReplay: Connection disconnected / \uC5F0\uACB0 \uB04A\uAE40:", _reason);
         this.#observer = null;
       }
     };
     connection.observe(this.#observer);
-    console.log("SessionReplay: Observer attached / \uC635\uC800\uBC84 \uC5F0\uACB0\uB428");
-    console.log("SessionReplay: Connection state / \uC5F0\uACB0 \uC0C1\uD0DC:", {
-      hasObserver: !!this.#observer,
-      connectionReady: !!connection,
-      targetId: target.id()
-    });
   }
   render() {
     this.injectRrwebStyles();
@@ -263,8 +236,7 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
           } else {
             this.#currentTime = Math.min(this.#totalTime, this.#currentTime + 100);
           }
-        } catch (error) {
-          console.warn("SessionReplay: Failed to get current time / \uD604\uC7AC \uC2DC\uAC04 \uAC00\uC838\uC624\uAE30 \uC2E4\uD328:", error);
+        } catch (_error) {
         }
         this.updateProgress();
       }
@@ -280,6 +252,7 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
     if (!this.#progressFill || !this.#timeDisplay || this.#totalTime === 0) {
       return;
     }
+    this.#currentTime = Math.max(0, Math.min(this.#totalTime, this.#currentTime));
     const percentage = Math.min(100, this.#currentTime / this.#totalTime * 100);
     this.#progressFill.style.width = `${percentage}%`;
     const currentTimeStr = this.formatTime(this.#currentTime);
@@ -287,7 +260,8 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
     this.#timeDisplay.textContent = `${currentTimeStr} / ${totalTimeStr}`;
   }
   formatTime(ms) {
-    const seconds = Math.floor(ms / 1e3);
+    const clampedMs = Math.max(0, ms);
+    const seconds = Math.floor(clampedMs / 1e3);
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
@@ -320,15 +294,9 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
   }
   async updateReplay() {
     if (!this.#container) {
-      console.warn("SessionReplay: Container not available / \uCEE8\uD14C\uC774\uB108\uB97C \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uC74C");
       return;
     }
     const hasFullSnapshot = this.#rrwebEvents.some((event) => event.type === 2);
-    console.log("SessionReplay: updateReplay called / updateReplay \uD638\uCD9C\uB428", {
-      eventCount: this.#rrwebEvents.length,
-      hasFullSnapshot,
-      rrwebLoaded: this.#rrwebLoaded
-    });
     if (this.#rrwebEvents.length < 2 || !hasFullSnapshot) {
       this.#container.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999;">
@@ -339,13 +307,10 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
     }
     if (!this.#rrwebLoaded) {
       try {
-        console.log("SessionReplay: Initializing Replayer / Replayer \uCD08\uAE30\uD654 \uC911...");
-        console.log("SessionReplay: Replayer class / Replayer \uD074\uB798\uC2A4:", Replayer);
         this.#rrwebLoaded = true;
         this.#container.innerHTML = "";
         const wrapper = document.createElement("div");
         this.#container.appendChild(wrapper);
-        console.log("SessionReplay: Creating Replayer with events / \uC774\uBCA4\uD2B8\uB85C Replayer \uC0DD\uC131:", this.#rrwebEvents.length);
         this.#totalTime = this.calculateTotalTime();
         this.#currentTime = 0;
         let viewportWidth = 1920;
@@ -355,10 +320,6 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
           if (evt.type === 4 && evt.data?.width && evt.data?.height) {
             viewportWidth = evt.data.width;
             viewportHeight = evt.data.height;
-            console.log("SessionReplay: Found viewport size from Meta event / Meta \uC774\uBCA4\uD2B8\uC5D0\uC11C \uBDF0\uD3EC\uD2B8 \uD06C\uAE30 \uBC1C\uACAC:", {
-              width: viewportWidth,
-              height: viewportHeight
-            });
             break;
           }
         }
@@ -368,10 +329,6 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
           skipInactive: false,
           showWarning: false
         });
-        console.log("SessionReplay: Replayer created / Replayer \uC0DD\uC131\uB428", {
-          totalTime: this.#totalTime,
-          eventCount: this.#rrwebEvents.length
-        });
         setTimeout(() => {
           if (this.#replayer) {
             const replayer = this.#replayer;
@@ -379,10 +336,6 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
               replayer.iframe.setAttribute("width", String(viewportWidth));
               replayer.iframe.setAttribute("height", String(viewportHeight));
               replayer.iframe.style.display = "inherit";
-              console.log("SessionReplay: Set iframe size / iframe \uD06C\uAE30 \uC124\uC815:", {
-                width: viewportWidth,
-                height: viewportHeight
-              });
             }
           }
         }, 100);
@@ -390,13 +343,6 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
         this.updateProgress();
         this.updatePlayPauseButton(false);
       } catch (error) {
-        console.error("Failed to initialize rrweb replayer / rrweb replayer \uCD08\uAE30\uD654 \uC2E4\uD328:", error);
-        console.error("Error details / \uC624\uB958 \uC0C1\uC138:", {
-          error,
-          errorMessage: error instanceof Error ? error.message : String(error),
-          errorStack: error instanceof Error ? error.stack : void 0,
-          ReplayerAvailable: typeof Replayer !== "undefined"
-        });
         this.#container.innerHTML = `
           <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #f00;">
             Failed to load replay: ${error instanceof Error ? error.message : String(error)}
@@ -405,7 +351,6 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
         this.#rrwebLoaded = false;
       }
     } else if (this.#replayer) {
-      console.log("SessionReplay: Recreating replayer with new events / \uC0C8 \uC774\uBCA4\uD2B8\uB85C replayer \uC7AC\uC0DD\uC131");
       this.stopProgressUpdate();
       this.#replayer.pause();
       this.#replayer = null;
@@ -421,13 +366,11 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
       const replayer = this.#replayer;
       if (replayer.emitter?.on) {
         replayer.emitter.on("start", () => {
-          console.log("SessionReplay: Replayer started / Replayer \uC2DC\uC791\uB428");
           this.#isPlaying = true;
           this.updatePlayPauseButton(true);
           this.startProgressUpdate();
         });
         replayer.emitter.on("pause", () => {
-          console.log("SessionReplay: Replayer paused / Replayer \uC77C\uC2DC\uC815\uC9C0\uB428");
           this.#isPlaying = false;
           this.updatePlayPauseButton(false);
           this.stopProgressUpdate();
@@ -437,22 +380,23 @@ var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
           }
         });
         replayer.emitter.on("finish", () => {
-          console.log("SessionReplay: Replayer finished / Replayer \uC885\uB8CC\uB428");
           this.#isPlaying = false;
           this.#currentTime = this.#totalTime;
           this.updatePlayPauseButton(false);
           this.stopProgressUpdate();
           this.updateProgress();
         });
-      } else {
-        console.warn("SessionReplay: Emitter not available / Emitter\uB97C \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uC74C");
       }
-    } catch (error) {
-      console.warn("SessionReplay: Could not setup replayer events / replayer \uC774\uBCA4\uD2B8 \uC124\uC815 \uC2E4\uD328:", error);
+    } catch (_error) {
     }
   }
   willHide() {
     super.willHide();
+    if (window !== window.top) {
+      window.parent.postMessage({ type: "SESSION_REPLAY_HIDDEN" }, "*");
+    } else if (window.opener) {
+      window.opener.postMessage({ type: "SESSION_REPLAY_HIDDEN" }, "*");
+    }
     this.stopProgressUpdate();
     if (this.#replayer) {
       this.#replayer.pause();
