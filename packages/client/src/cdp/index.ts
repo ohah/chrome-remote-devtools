@@ -16,8 +16,10 @@ import type { CDPMessage, CDPResponse, DomainOptions } from './types';
 export default class ChromeDomain {
   private protocol: Record<string, (...args: unknown[]) => unknown> = {};
   private domains: BaseDomain[] = [];
+  private eventStorage: DomainOptions['eventStorage'];
 
   constructor(options: DomainOptions) {
+    this.eventStorage = options.eventStorage;
     this.registerProtocol(options);
   }
 
@@ -103,5 +105,12 @@ export default class ChromeDomain {
         });
       }
     });
+  }
+
+  /**
+   * Get event storage instance / 이벤트 저장소 인스턴스 가져오기
+   */
+  getEventStorage(): DomainOptions['eventStorage'] {
+    return this.eventStorage;
   }
 }
