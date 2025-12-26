@@ -86,63 +86,58 @@ export default class SessionReplay extends BaseDomain {
     }
 
     try {
-      const storedEvents = await this.eventStorage.getEvents();
-      const sessionReplayEvents = storedEvents.filter(
-        (e) => e.method === 'SessionReplay.eventRecorded'
-      );
+      const storedMessages = await this.eventStorage.getEvents();
+      // Filter SessionReplay events from postMessage format / postMessage 형식에서 SessionReplay 이벤트 필터링
+      const sessionReplayMessages = storedMessages.filter((msg) => {
+        try {
+          const cdpMessage = JSON.parse(msg.message);
+          return cdpMessage.method === 'SessionReplay.eventRecorded';
+        } catch {
+          return false;
+        }
+      });
 
-      if (sessionReplayEvents.length === 0) {
+      if (sessionReplayMessages.length === 0) {
         return { success: true, count: 0 };
       }
 
       let sentCount = 0;
-      for (const event of sessionReplayEvents) {
-        const params = event.params as { events?: unknown[] };
-        if (params && Array.isArray(params.events) && params.events.length > 0) {
-          // For WebSocket mode: send directly / WebSocket 모드: 직접 전송
-          if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(
-              JSON.stringify({
-                method: Event.sessionReplayEventRecorded,
-                params: {
-                  events: params.events,
-                },
-              })
-            );
-            sentCount++;
-          } else if (!this.socket) {
-            // For postMessage mode: send directly via postMessage (like BaseDomain.sendStoredEventsFromIndexedDB) / postMessage 모드: postMessage로 직접 전송 (BaseDomain.sendStoredEventsFromIndexedDB처럼)
-            if (this.devtoolsWindow) {
-              const cdpMessage = {
-                type: 'CDP_MESSAGE',
-                message: JSON.stringify({
-                  method: Event.sessionReplayEventRecorded,
-                  params: {
-                    events: params.events,
-                  },
-                }),
-              };
-              try {
-                this.devtoolsWindow.postMessage(cdpMessage, '*');
-                sentCount++;
-              } catch (error) {
-                console.warn(
-                  '[SessionReplay] Failed to send event via postMessage / [SessionReplay] postMessage로 이벤트 전송 실패:',
-                  error
-                );
+      for (const postMessage of sessionReplayMessages) {
+        try {
+          const cdpMessage = JSON.parse(postMessage.message);
+          const params = cdpMessage.params as { events?: unknown[] };
+          if (params && Array.isArray(params.events) && params.events.length > 0) {
+            // For WebSocket mode: send CDP message directly / WebSocket 모드: CDP 메시지 직접 전송
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+              this.socket.send(JSON.stringify(cdpMessage));
+              sentCount++;
+            } else if (!this.socket) {
+              // For postMessage mode: use stored postMessage format directly / postMessage 모드: 저장된 postMessage 형식을 직접 사용
+              if (this.devtoolsWindow) {
+                try {
+                  this.devtoolsWindow.postMessage(postMessage, '*');
+                  sentCount++;
+                } catch (error) {
+                  console.warn(
+                    '[SessionReplay] Failed to send event via postMessage / [SessionReplay] postMessage로 이벤트 전송 실패:',
+                    error
+                  );
+                }
+              } else {
+                // DevTools window not ready yet, will retry when setDevToolsWindow is called / DevTools window가 아직 준비되지 않음, setDevToolsWindow 호출 시 재시도
+                return { success: false };
               }
-            } else {
-              // DevTools window not ready yet, will retry when setDevToolsWindow is called / DevTools window가 아직 준비되지 않음, setDevToolsWindow 호출 시 재시도
-              return { success: false };
             }
+            // Small delay between events / 이벤트 간 작은 지연
+            await new Promise((resolve) => setTimeout(resolve, 10));
+          } else {
+            console.warn(
+              `[SessionReplay] Event params invalid or empty events array / [SessionReplay] 이벤트 params가 유효하지 않거나 events 배열이 비어있음:`,
+              params
+            );
           }
-          // Small delay between events / 이벤트 간 작은 지연
-          await new Promise((resolve) => setTimeout(resolve, 10));
-        } else {
-          console.warn(
-            `[SessionReplay] Event params invalid or empty events array / [SessionReplay] 이벤트 params가 유효하지 않거나 events 배열이 비어있음:`,
-            params
-          );
+        } catch (error) {
+          console.warn('[SessionReplay] Failed to parse stored message / [SessionReplay] 저장된 메시지 파싱 실패:', error);
         }
       }
 

@@ -105,6 +105,16 @@ export default class BaseDomain {
   }
 
   /**
+   * Save CDP message to IndexedDB / IndexedDB에 CDP 메시지 저장
+   * Can save both events and commands / 이벤트와 명령 모두 저장 가능
+   */
+  private saveMessageToStorage(cdpMessage: unknown): void {
+    if (this.eventStorage) {
+      void this.eventStorage.saveMessage(cdpMessage);
+    }
+  }
+
+  /**
    * Send event via WebSocket / WebSocket으로 이벤트 전송
    */
   private sendViaWebSocket(data: unknown): boolean {
@@ -130,7 +140,7 @@ export default class BaseDomain {
   }
 
   /**
-   * Send stored events from IndexedDB to DevTools / IndexedDB에 저장된 이벤트를 DevTools로 전송
+   * Send stored messages from IndexedDB to DevTools / IndexedDB에 저장된 메시지를 DevTools로 전송
    * Note: SessionReplay events are excluded and handled separately by SessionReplay domain / 참고: SessionReplay 이벤트는 제외되고 SessionReplay 도메인에서 별도로 처리됨
    */
   private async sendStoredEventsFromIndexedDB(): Promise<void> {
@@ -139,35 +149,40 @@ export default class BaseDomain {
     }
 
     try {
-      const storedEvents = await this.eventStorage.getEvents();
-      if (storedEvents.length > 0) {
+      const storedMessages = await this.eventStorage.getEvents();
+      if (storedMessages.length > 0) {
         // Filter out SessionReplay events (handled separately by SessionReplay domain) / SessionReplay 이벤트 제외 (SessionReplay 도메인에서 별도 처리)
-        const eventsToSend = storedEvents.filter((e) => !e.method.startsWith('SessionReplay.'));
+        const messagesToSend = storedMessages.filter((msg) => {
+          try {
+            const cdpMessage = JSON.parse(msg.message);
+            const method = cdpMessage.method || '';
+            return !method.startsWith('SessionReplay.');
+          } catch {
+            return true; // If parsing fails, include it / 파싱 실패 시 포함
+          }
+        });
 
-        if (eventsToSend.length > 0) {
-          // Send all events in batches / 모든 이벤트를 배치로 전송
+        if (messagesToSend.length > 0) {
+          // Send all messages in batches (already in postMessage format) / 모든 메시지를 배치로 전송 (이미 postMessage 형식)
           const batchSize = 100;
-          for (let i = 0; i < eventsToSend.length; i += batchSize) {
-            const batch = eventsToSend.slice(i, i + batchSize);
-            for (const event of batch) {
-              const cdpMessage = this.createCDPMessage({
-                method: event.method,
-                params: event.params,
-              });
-              this.sendViaPostMessage(cdpMessage, this.devtoolsWindow!);
+          for (let i = 0; i < messagesToSend.length; i += batchSize) {
+            const batch = messagesToSend.slice(i, i + batchSize);
+            for (const message of batch) {
+              // Use stored postMessage format directly / 저장된 postMessage 형식을 직접 사용
+              this.sendViaPostMessage(message, this.devtoolsWindow!);
             }
             // Small delay between batches / 배치 간 작은 지연
             await new Promise((resolve) => setTimeout(resolve, 10));
           }
         }
 
-        // Clear non-SessionReplay events after sending / 전송 후 SessionReplay가 아닌 이벤트 삭제
+        // Clear non-SessionReplay messages after sending / 전송 후 SessionReplay가 아닌 메시지 삭제
         // SessionReplay events will be sent separately by SessionReplay.replayStoredEvents() / SessionReplay 이벤트는 SessionReplay.replayStoredEvents()에서 별도로 전송됨
         await this.eventStorage.clearEvents(['SessionReplay.']);
       }
     } catch (error) {
       console.error(
-        'Failed to send stored events to DevTools / 저장된 이벤트를 DevTools로 전송 실패:',
+        'Failed to send stored messages to DevTools / 저장된 메시지를 DevTools로 전송 실패:',
         error
       );
     }
@@ -180,12 +195,12 @@ export default class BaseDomain {
 
   /**
    * Send CDP message / CDP 메시지 전송
-   * Handles event storage, WebSocket transmission, and postMessage fallback / 이벤트 저장, WebSocket 전송, postMessage 폴백 처리
+   * Handles message storage, WebSocket transmission, and postMessage fallback / 메시지 저장, WebSocket 전송, postMessage 폴백 처리
    */
   protected send(data: unknown): void {
-    // Check if this is an event and save to storage / 이벤트인지 확인하고 저장소에 저장
-    if (this.isCDPEvent(data)) {
-      this.saveEventToStorage(data.method, data.params);
+    // Save all CDP messages (events and commands) to storage / 모든 CDP 메시지(이벤트 및 명령)를 저장소에 저장
+    if (this.isCDPMessage(data)) {
+      this.saveMessageToStorage(data);
     }
 
     // Try to send via WebSocket first / 먼저 WebSocket으로 전송 시도
@@ -193,22 +208,33 @@ export default class BaseDomain {
       return;
     }
 
-    // If WebSocket is not available and this is an event, use postMessage / WebSocket을 사용할 수 없고 이벤트인 경우 postMessage 사용
+    // If WebSocket is not available and this is a message, use postMessage / WebSocket을 사용할 수 없고 메시지인 경우 postMessage 사용
     // This happens when skipWebSocket is true (postMessage mode) / skipWebSocket이 true일 때 발생 (postMessage 모드)
-    if (this.isCDPEvent(data)) {
+    if (this.isCDPMessage(data)) {
       const targetWindow = this.getTargetWindow();
       const cdpMessage = this.createCDPMessage(data);
 
       if (targetWindow) {
         // Try to send via postMessage / postMessage로 전송 시도
         if (!this.sendViaPostMessage(cdpMessage, targetWindow)) {
-          // If postMessage fails, queue the event / postMessage 실패 시 이벤트를 큐에 저장
+          // If postMessage fails, queue the message / postMessage 실패 시 메시지를 큐에 저장
           this.queueEvent(cdpMessage);
         }
       } else {
-        // No target window yet, queue the event / 대상 창이 아직 없으면 이벤트를 큐에 저장
+        // No target window yet, queue the message / 대상 창이 아직 없으면 메시지를 큐에 저장
         this.queueEvent(cdpMessage);
       }
     }
+  }
+
+  /**
+   * Check if data is a CDP message (event or command) / 데이터가 CDP 메시지(이벤트 또는 명령)인지 확인
+   */
+  private isCDPMessage(data: unknown): boolean {
+    if (typeof data !== 'object' || data === null) {
+      return false;
+    }
+    // Must have method (for events) or id (for commands) / method(이벤트용) 또는 id(명령용)가 있어야 함
+    return 'method' in data || 'id' in data;
   }
 }

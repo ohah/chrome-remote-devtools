@@ -43,6 +43,11 @@ export default class ChromeDomain {
       return { id };
     }
 
+    // Save command to storage if eventStorage is available / eventStorage가 있으면 명령 저장
+    if (this.eventStorage && method) {
+      void this.eventStorage.saveMessage({ id, method, params });
+    }
+
     const methodCall = this.protocol[method];
     if (typeof methodCall !== 'function') {
       return { id };
