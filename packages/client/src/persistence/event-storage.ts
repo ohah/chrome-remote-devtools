@@ -708,4 +708,42 @@ export class EventStorage {
       };
     });
   }
+
+  /**
+   * Export all events to JSON file / 모든 이벤트를 JSON 파일로 내보내기
+   */
+  async exportToFile(): Promise<void> {
+    if (!this.db) {
+      await this.init();
+    }
+
+    if (!this.db) {
+      throw new Error('IndexedDB not available / IndexedDB 사용 불가');
+    }
+
+    try {
+      const events = await this.getEvents();
+
+      const exportData = {
+        version: '1.0.0',
+        exportDate: new Date().toISOString(),
+        clientId: this.clientId,
+        events,
+      };
+
+      const json = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cdp-events-${this.clientId}-${Date.now()}.json`;
+      a.click();
+
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export events / 이벤트 내보내기 실패:', error);
+      throw error;
+    }
+  }
 }
