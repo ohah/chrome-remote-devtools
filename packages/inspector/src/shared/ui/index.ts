@@ -1,6 +1,6 @@
 /**
- * Public API / 공개 API
- * Export shared UI components / 공유 UI 컴포넌트 export
+ * Public API
+ * Export shared UI components
  */
-export { LoadingState, ErrorState, EmptyState } from './empty-states';
-export type { ErrorStateProps, EmptyStateProps } from './empty-states';
+export { LoadingState, ErrorState } from './empty-states';
+export type { ErrorStateProps } from './empty-states';

@@ -1,6 +1,6 @@
-// Replay route / Replay 라우트 (Offline File DevTools / 오프라인 파일 DevTools)
-import { createFileRoute } from '@tanstack/react-router';
-import { useState, useRef } from 'react';
+// Replay route / 리플레이 라우트
+import { createFileRoute, useLocation } from '@tanstack/react-router';
+import { useState, useRef, useEffect } from 'react';
 import { fileToCDPMessages } from '@/shared/lib/file-to-cdp';
 import { buildDevToolsReplayUrl } from '@/shared/lib/devtools-url';
 import { createResponseBodyStore } from './replay/utils/response-body-store';
@@ -14,42 +14,44 @@ export const Route = createFileRoute('/replay')({
 });
 
 function ReplayPage() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
   const [error, setError] = useState<string | null>(null);
   const [devtoolsUrl, setDevtoolsUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  // Auto-process uploaded file from navigation state / 네비게이션 state에서 업로드된 파일 자동 처리
+  useEffect(() => {
+    const fileData = (
+      location.state as { fileData?: { name: string; type: string; content: string } }
+    )?.fileData;
+
+    if (fileData) {
+      try {
+        const file = new File([fileData.content], fileData.name, { type: fileData.type });
+        // handleOpenReplayDevTools will be called after it's defined / handleOpenReplayDevTools가 정의된 후 호출됨
+        // Use setTimeout to ensure handleOpenReplayDevTools is available / handleOpenReplayDevTools가 사용 가능한지 확인하기 위해 setTimeout 사용
+        setTimeout(() => {
+          void handleOpenReplayDevTools(file);
+        }, 0);
+      } catch (e) {
+        setError('Failed to create file from navigation state.');
+        console.error('Error creating file from navigation state:', e);
+      }
+    }
+  }, [location.state]);
+
+  const handleOpenReplayDevTools = async (file: File) => {
     if (!file) {
       return;
     }
 
     setError(null);
-    setSelectedFile(file);
-    // Reset DevTools URL when new file is selected / 새 파일 선택 시 DevTools URL 초기화
-    setDevtoolsUrl(null);
-
-    // Automatically open DevTools when file is selected / 파일 선택 시 자동으로 DevTools 열기
-    void handleOpenReplayDevTools(file);
-  };
-
-  const handleOpenReplayDevTools = async (file?: File | null) => {
-    const fileToUse = file ?? selectedFile;
-    if (!fileToUse) {
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
 
     try {
       // Convert events to CDP messages / 이벤트를 CDP 메시지로 변환
-      const cdpMessages = await fileToCDPMessages(fileToUse);
+      const cdpMessages = await fileToCDPMessages(file);
 
       if (!iframeRef.current) {
         throw new Error('Iframe not available / Iframe을 사용할 수 없습니다');
@@ -93,7 +95,7 @@ function ReplayPage() {
 
             // Create handler context / 핸들러 컨텍스트 생성
             const handlerContext = {
-              file: fileToUse,
+              file,
               cdpMessages: cdpMessagesRef.current,
               responseBodyStore,
               targetWindow,
@@ -116,10 +118,10 @@ function ReplayPage() {
                 const sendContext: SendCDPMessagesContext = {
                   cdpMessages: cdpMessagesRef.current,
                   eventBuffer: eventBufferRef.current,
-                  file: fileToUse,
+                  file,
                   targetWindow: iframeRef.current!.contentWindow!,
                   responseBodyStore,
-                  setIsLoading,
+                  setIsLoading: () => {}, // No-op since loading state is not displayed in UI / UI에 로딩 상태가 표시되지 않으므로 no-op
                 };
                 void sendCDPMessages(sendContext);
               }
@@ -140,10 +142,10 @@ function ReplayPage() {
             const sendContext: SendCDPMessagesContext = {
               cdpMessages: cdpMessagesRef.current,
               eventBuffer: eventBufferRef.current,
-              file: fileToUse,
+              file,
               targetWindow: iframeRef.current!.contentWindow!,
               responseBodyStore,
-              setIsLoading,
+              setIsLoading: () => {}, // No-op since loading state is not displayed in UI
             };
             void sendCDPMessages(sendContext, true); // Include SessionReplay events on first activation / 첫 활성화 시 SessionReplay 이벤트 포함
           } else {
@@ -151,10 +153,10 @@ function ReplayPage() {
             const sendContext: SendCDPMessagesContext = {
               cdpMessages: cdpMessagesRef.current,
               eventBuffer: eventBufferRef.current,
-              file: fileToUse,
+              file,
               targetWindow: iframeRef.current!.contentWindow!,
               responseBodyStore,
-              setIsLoading,
+              setIsLoading: () => {}, // No-op since loading state is not displayed in UI
             };
             void sendSessionReplayEvents(sendContext);
           }
@@ -189,10 +191,10 @@ function ReplayPage() {
             const sendContext: SendCDPMessagesContext = {
               cdpMessages: cdpMessagesRef.current,
               eventBuffer: eventBufferRef.current,
-              file: fileToUse,
+              file,
               targetWindow: iframeRef.current.contentWindow,
               responseBodyStore,
-              setIsLoading,
+              setIsLoading: () => {}, // No-op since loading state is not displayed in UI
             };
             void sendCDPMessages(sendContext);
           }
@@ -208,46 +210,23 @@ function ReplayPage() {
         messageHandlerRef.current = null;
         // Check if messages were sent / 메시지가 전송되었는지 확인
         if (!messagesSentRef.current && cdpMessagesRef.current.length > 0) {
-          setIsLoading(false);
-          setError('DevTools did not respond in time / DevTools가 시간 내에 응답하지 않았습니다');
+          setError('DevTools did not respond in time');
         }
       }, 10000);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to open replay DevTools / Replay DevTools 열기 실패'
-      );
-      setIsLoading(false);
+      setError(err instanceof Error ? err.message : 'Failed to open replay DevTools');
     }
   };
 
   return (
-    <div className="h-screen bg-gray-900 text-gray-100 relative overflow-hidden">
-      <input
-        type="file"
-        accept=".json"
-        onChange={handleFileSelect}
-        className="hidden"
-        ref={fileInputRef}
-      />
-      {/* Fixed Select File button / 고정된 Select File 버튼 */}
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        className="fixed top-4 right-4 z-50 px-4 py-2 bg-blue-600/80 hover:bg-blue-600 text-white rounded-md transition-all shadow-lg backdrop-blur-sm"
-        disabled={isLoading}
-      >
-        Select File
-      </button>
-
+    <div className="h-full bg-gray-900 text-gray-100 relative overflow-hidden">
       {/* Error message / 에러 메시지 */}
       {error && (
         <div className="fixed top-4 left-4 z-50 p-3 bg-red-900/90 border border-red-700 rounded-md text-red-200 text-sm shadow-lg backdrop-blur-sm max-w-md">
           {error}
         </div>
       )}
-
-      {/* DevTools iframe (always rendered, hidden when not ready) / DevTools iframe (항상 렌더링, 준비되지 않았을 때 숨김) */}
+      {/* DevTools iframe (always rendered, hidden when not ready) / DevTools iframe (항상 렌더링되며 준비되지 않았을 때 숨김) */}
       <iframe
         ref={iframeRef}
         src={devtoolsUrl || undefined}
@@ -255,35 +234,6 @@ function ReplayPage() {
         title="Replay DevTools"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
       />
-
-      {/* Loading/Empty states overlay / 로딩/빈 상태 오버레이 */}
-      {!devtoolsUrl && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-          {selectedFile ? (
-            <div className="text-center">
-              <div className="text-lg text-gray-400 mb-4">
-                Selected: <span className="text-gray-200">{selectedFile.name}</span>
-              </div>
-              {isLoading ? (
-                <div className="text-gray-400">Opening DevTools...</div>
-              ) : (
-                <button
-                  onClick={() => void handleOpenReplayDevTools()}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading}
-                >
-                  Open Replay DevTools
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="text-center">
-              <h1 className="text-2xl font-bold mb-4">Offline File DevTools</h1>
-              <p className="text-gray-400">Select a JSON file to start</p>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
