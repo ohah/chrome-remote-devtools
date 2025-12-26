@@ -27,3 +27,24 @@ export function buildDevToolsUrl(clientId: string, serverUrl: string = SERVER_UR
 
   return url.toString();
 }
+
+/**
+ * Build DevTools replay mode URL / DevTools replay 모드 URL 구성
+ * @returns DevTools replay URL / DevTools replay URL
+ */
+export function buildDevToolsReplayUrl(): string {
+  const url = new URL(DEVTOOLS_FRONTEND_PATH, window.location.origin);
+  const params = url.searchParams;
+
+  // Replay mode / Replay 모드
+  params.append('replay', 'true');
+  // PostMessage mode is required for iframe communication / iframe 통신을 위해 PostMessage 모드 필요
+  params.append('postMessage', 'true');
+
+  // DevTools configuration parameters / DevTools 설정 파라미터
+  Object.entries(DEVTOOLS_CONFIG).forEach(([key, value]) => {
+    params.append(key, value);
+  });
+
+  return url.toString();
+}

@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReplayRouteImport } from './routes/replay'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DevtoolsClientIdRouteImport } from './routes/devtools/$clientId'
 
+const ReplayRoute = ReplayRouteImport.update({
+  id: '/replay',
+  path: '/replay',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -25,32 +31,43 @@ const DevtoolsClientIdRoute = DevtoolsClientIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/replay': typeof ReplayRoute
   '/devtools/$clientId': typeof DevtoolsClientIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/replay': typeof ReplayRoute
   '/devtools/$clientId': typeof DevtoolsClientIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/replay': typeof ReplayRoute
   '/devtools/$clientId': typeof DevtoolsClientIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/devtools/$clientId'
+  fullPaths: '/' | '/replay' | '/devtools/$clientId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/devtools/$clientId'
-  id: '__root__' | '/' | '/devtools/$clientId'
+  to: '/' | '/replay' | '/devtools/$clientId'
+  id: '__root__' | '/' | '/replay' | '/devtools/$clientId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ReplayRoute: typeof ReplayRoute
   DevtoolsClientIdRoute: typeof DevtoolsClientIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/replay': {
+      id: '/replay'
+      path: '/replay'
+      fullPath: '/replay'
+      preLoaderRoute: typeof ReplayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ReplayRoute: ReplayRoute,
   DevtoolsClientIdRoute: DevtoolsClientIdRoute,
 }
 export const routeTree = rootRouteImport
