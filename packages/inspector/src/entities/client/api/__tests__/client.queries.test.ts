@@ -28,10 +28,17 @@ describe('clientQueries', () => {
     expect(listOptions.refetchInterval).toBe(CLIENT_REFRESH_INTERVAL);
   });
 
-  test('should have staleTime set to 0 / staleTime이 0으로 설정되어 있어야 함', () => {
+  test('should have staleTime configured / staleTime이 설정되어 있어야 함', () => {
     const listOptions = clientQueries.list();
 
-    expect(listOptions.staleTime).toBe(0);
+    expect(listOptions.staleTime).toBe(1000);
+  });
+
+  test('should have placeholderData configured / placeholderData가 설정되어 있어야 함', () => {
+    const listOptions = clientQueries.list();
+
+    expect(listOptions.placeholderData).toBeDefined();
+    expect(typeof listOptions.placeholderData).toBe('function');
   });
 
   test('should return queryOptions object / queryOptions 객체를 반환해야 함', () => {
