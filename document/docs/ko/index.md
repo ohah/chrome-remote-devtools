@@ -13,7 +13,7 @@ hero:
       text: GitHub
       link: https://github.com/ohah/chrome-remote-devtools
   image:
-    src: /rspress-icon.png
+    src: /logo.png
     alt: Chrome Remote DevTools 로고
 features:
   - title: 연결 관리
