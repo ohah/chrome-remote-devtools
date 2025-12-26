@@ -26,6 +26,7 @@ export const clientQueries = {
       queryKey: clientQueries.lists(),
       queryFn: getClients,
       refetchInterval: CLIENT_REFRESH_INTERVAL,
-      staleTime: 0, // Always consider data stale for real-time updates / 실시간 업데이트를 위해 항상 stale로 간주
+      staleTime: 1000, // Consider data fresh for 1 second to reduce flickering / 플리커링 방지를 위해 1초간 fresh로 간주
+      placeholderData: (previousData) => previousData, // Keep previous data while refetching / 새로고침 중에도 이전 데이터 유지
     }),
 };
