@@ -20,7 +20,8 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "rrweb-player": "^1.0.0-alpha.4",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "zustand": "5.0.9"
   },
   "devDependencies": {
     "@rrweb/types": "^2.0.0-alpha.18",
