@@ -1,5 +1,24 @@
 // Data extractors for replay mode / replay 모드를 위한 데이터 추출 함수
 import type { CDPMessageArray, StorageItems, Cookie, DOMTree } from '../types';
+import type { CDPEventFile } from '@/shared/lib/file-to-cdp';
+
+// Add file data cache / 파일 데이터 캐시 추가
+const fileDataCache = new WeakMap<File, Promise<CDPEventFile>>();
+
+/**
+ * Get cached file data or read from file / 캐시된 파일 데이터 가져오기 또는 파일에서 읽기
+ * @param file - CDP event file / CDP 이벤트 파일
+ * @returns Promise resolving to file data / 파일 데이터로 resolve되는 Promise
+ */
+async function getCachedFileData(file: File): Promise<CDPEventFile> {
+  let cached = fileDataCache.get(file);
+  if (!cached) {
+    const { readCDPFile } = await import('@/shared/lib/file-to-cdp');
+    cached = readCDPFile(file);
+    fileDataCache.set(file, cached);
+  }
+  return cached;
+}
 
 /**
  * Extract DOM tree from file data / 파일 데이터에서 DOM 트리 추출
@@ -13,8 +32,7 @@ export async function extractDOMTree(
 ): Promise<DOMTree | null> {
   // First, try to get DOM tree from file data / 먼저 파일 데이터에서 DOM 트리 가져오기 시도
   try {
-    const { readCDPFile } = await import('@/shared/lib/file-to-cdp');
-    const fileData = await readCDPFile(file);
+    const fileData = await getCachedFileData(file);
     if (fileData.domTree?.html) {
       // Parse HTML to create a simple DOM tree structure / HTML을 파싱하여 간단한 DOM 트리 구조 생성
       // Note: This is a simplified version, full DOM tree parsing would be complex / 참고: 이것은 간소화된 버전이며, 전체 DOM 트리 파싱은 복잡함
@@ -80,8 +98,9 @@ export async function extractDOMTree(
         root: convertNode(doc, 1),
       };
     }
-  } catch {
-    // Ignore errors / 오류 무시
+  } catch (error) {
+    // Log error for debugging / 디버깅을 위해 에러 로깅
+    console.warn('Failed to extract DOM tree from file / 파일에서 DOM 트리 추출 실패:', error);
   }
 
   // Fallback: Find the first DOM.setChildNodes event with parentId 0 or undefined (document root) / 폴백: parentId가 0이거나 undefined인 첫 번째 DOM.setChildNodes 이벤트 찾기 (문서 루트)
@@ -130,13 +149,17 @@ export async function extractDOMStorageItems(
 ): Promise<StorageItems> {
   // Read file to get storage items / storage 항목을 가져오기 위해 파일 읽기
   try {
-    const { readCDPFile } = await import('@/shared/lib/file-to-cdp');
-    const fileData = await readCDPFile(file);
+    const fileData = await getCachedFileData(file);
     return {
       localStorage: fileData.localStorage || [],
       sessionStorage: fileData.sessionStorage || [],
     };
-  } catch {
+  } catch (error) {
+    // Log error for debugging / 디버깅을 위해 에러 로깅
+    console.warn(
+      'Failed to extract storage items from file / 파일에서 storage 항목 추출 실패:',
+      error
+    );
     // Fallback: extract from stored events / 폴백: 저장된 이벤트에서 추출
     const localStorageItems = new Map<string, string>();
     const sessionStorageItems = new Map<string, string>();
@@ -193,13 +216,13 @@ export async function extractDOMStorageItems(
 export async function extractCookies(file: File): Promise<Cookie[]> {
   // Read file to get cookies / 쿠키를 가져오기 위해 파일 읽기
   try {
-    const { readCDPFile } = await import('@/shared/lib/file-to-cdp');
-    const fileData = await readCDPFile(file);
+    const fileData = await getCachedFileData(file);
     if (fileData.cookies && Array.isArray(fileData.cookies)) {
       return fileData.cookies;
     }
-  } catch {
-    // Ignore errors / 오류 무시
+  } catch (error) {
+    // Log error for debugging / 디버깅을 위해 에러 로깅
+    console.warn('Failed to extract cookies from file / 파일에서 쿠키 추출 실패:', error);
   }
 
   // Fallback: return empty array if no cookies found / 쿠키를 찾을 수 없으면 빈 배열 반환
