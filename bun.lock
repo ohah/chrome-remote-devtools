@@ -114,6 +114,7 @@
       "devDependencies": {
         "@types/bun": "latest",
         "fake-indexeddb": "^6.2.5",
+        "typescript": "^5.0.0",
       },
     },
     "packages/client-rrweb": {
@@ -160,12 +161,16 @@
     "packages/server": {
       "name": "@ohah/chrome-remote-devtools-server",
       "version": "0.1.0",
+      "bin": {
+        "chrome-remote-devtools-server": "./dist/index.js",
+      },
       "dependencies": {
         "ws": "^8.18.0",
       },
       "devDependencies": {
         "@types/node": "^20.0.0",
         "@types/ws": "^8.5.10",
+        "typescript": "^5.0.0",
       },
     },
   },
@@ -1897,6 +1902,10 @@
     "@mdx-js/mdx/@types/hast": ["@types/hast@3.0.4", "", { "dependencies": { "@types/unist": "*" } }, "sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ=="],
 
     "@mdx-js/mdx/vfile": ["vfile@6.0.3", "", { "dependencies": { "@types/unist": "^3.0.0", "vfile-message": "^4.0.0" } }, "sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q=="],
+
+    "@ohah/chrome-remote-devtools-client/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+
+    "@ohah/chrome-remote-devtools-server/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "@parcel/watcher/detect-libc": ["detect-libc@1.0.3", "", { "bin": { "detect-libc": "./bin/detect-libc.js" } }, "sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg=="],
 
