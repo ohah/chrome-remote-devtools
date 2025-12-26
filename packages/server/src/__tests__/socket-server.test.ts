@@ -18,7 +18,7 @@ describe('SocketServer', () => {
   });
 
   test('should return empty clients list initially / 초기에는 빈 클라이언트 목록 반환', () => {
-    const clients = socketServer.getClients();
+    const clients = socketServer.getAllClients();
     expect(clients).toEqual([]);
   });
 

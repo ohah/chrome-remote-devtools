@@ -32,7 +32,7 @@ describe('HTTP API', () => {
 
       if (url.pathname === '/json') {
         res.writeHead(200, headers);
-        res.end(JSON.stringify({ targets: socketServer.getClients() }));
+        res.end(JSON.stringify({ targets: socketServer.getAllClients() }));
         return;
       }
 

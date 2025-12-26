@@ -500,9 +500,4 @@ export class SocketServer {
   getAllInspectors(): Array<Omit<DevTools, 'ws'>> {
     return Array.from(this.devtools.values()).map(({ ws: _ws, ...data }) => data);
   }
-
-  // Alias for getAllClients for backward compatibility / 하위 호환성을 위한 getAllClients 별칭
-  getClients(): Array<Omit<Client, 'ws'>> {
-    return this.getAllClients();
-  }
 }

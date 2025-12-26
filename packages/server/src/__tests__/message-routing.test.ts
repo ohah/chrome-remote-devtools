@@ -18,7 +18,7 @@ describe('Message Routing', () => {
     // 실제 WebSocket 연결은 통합 테스트에서 검증
     // This test verifies basic structure / 기본 구조 검증
     expect(socketServer).toBeDefined();
-    const clients = socketServer.getClients();
+    const clients = socketServer.getAllClients();
     expect(Array.isArray(clients)).toBe(true);
   });
 

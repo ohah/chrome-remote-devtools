@@ -35,7 +35,7 @@ export function createHttpRouter(socketServer: SocketServer) {
     if (url.pathname === '/json') {
       // Get all clients / 모든 클라이언트 가져오기
       res.writeHead(200, headers);
-      res.end(JSON.stringify({ targets: socketServer.getClients() }));
+      res.end(JSON.stringify({ targets: socketServer.getAllClients() }));
       return;
     }
 
