@@ -4,6 +4,9 @@ import type { ResponseBodyStore } from '../types';
 import { sendFakeResponse, sendStorageItemsAsEvents } from './message-sender';
 import { extractDOMTree, extractDOMStorageItems, extractCookies } from './extractors';
 
+// Storage key cache / Storage key 캐시
+let cachedStorageKey: string | null = null;
+
 /**
  * Command handler context / 명령 핸들러 컨텍스트
  */
@@ -144,6 +147,7 @@ export function handleGetStorageKey(
   }
 
   const storageKey = window.location.origin;
+  cachedStorageKey = storageKey; // Cache storage key / storage key 캐시
   sendFakeResponse(context.targetWindow, parsed.id, {
     storageKey,
   });
@@ -197,19 +201,41 @@ export function handleGetDOMStorageItems(
 
   const storageId = parsed.params?.storageId;
   const commandId = parsed.id; // Store id after undefined check / undefined 체크 후 id 저장
-  if (storageId && commandId !== undefined) {
-    // Extract storage items from file data / 파일 데이터에서 storage 항목 추출
-    void extractDOMStorageItems(context.file, context.cdpMessages).then((storageItems) => {
-      const entries = storageId.isLocalStorage
-        ? storageItems.localStorage
-        : storageItems.sessionStorage;
-      sendFakeResponse(context.targetWindow, commandId, {
-        entries,
+
+  // If storageId is not provided, wait a bit and use cached/default storageId / storageId가 제공되지 않았으면 잠시 대기 후 캐시된/기본 storageId 사용
+  if (!storageId) {
+    // Wait for storageId to be set (Storage.getStorageKey or DOMStorage.enable) / storageId가 설정될 때까지 대기 (Storage.getStorageKey 또는 DOMStorage.enable)
+    setTimeout(() => {
+      // Use cached storageKey or default / 캐시된 storageKey 또는 기본값 사용
+      const storageKey = cachedStorageKey || window.location.origin;
+      const defaultStorageId = {
+        isLocalStorage: true, // Default to localStorage / 기본값은 localStorage
+        storageKey,
+        securityOrigin: storageKey,
+      };
+
+      void extractDOMStorageItems(context.file, context.cdpMessages).then((storageItems) => {
+        const entries = defaultStorageId.isLocalStorage
+          ? storageItems.localStorage
+          : storageItems.sessionStorage;
+        sendFakeResponse(context.targetWindow, commandId, {
+          entries,
+        });
       });
-    });
+    }, 300); // Wait 300ms for Storage.getStorageKey to be called / Storage.getStorageKey가 호출될 때까지 300ms 대기
     return true;
   }
-  return false;
+
+  // Extract storage items from file data / 파일 데이터에서 storage 항목 추출
+  void extractDOMStorageItems(context.file, context.cdpMessages).then((storageItems) => {
+    const entries = storageId.isLocalStorage
+      ? storageItems.localStorage
+      : storageItems.sessionStorage;
+    sendFakeResponse(context.targetWindow, commandId, {
+      entries,
+    });
+  });
+  return true;
 }
 
 /**
