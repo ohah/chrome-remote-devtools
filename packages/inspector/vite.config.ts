@@ -5,7 +5,6 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import { readFileSync, existsSync, copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
 import tailwindcss from '@tailwindcss/vite';
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const host = process.env.TAURI_DEV_HOST;
 
 // DevTools frontend path - use bundled only / DevTools frontend 경로 - bundled만 사용
