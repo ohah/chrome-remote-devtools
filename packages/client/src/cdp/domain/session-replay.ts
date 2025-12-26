@@ -137,7 +137,10 @@ export default class SessionReplay extends BaseDomain {
             );
           }
         } catch (error) {
-          console.warn('[SessionReplay] Failed to parse stored message / [SessionReplay] 저장된 메시지 파싱 실패:', error);
+          console.warn(
+            '[SessionReplay] Failed to parse stored message / [SessionReplay] 저장된 메시지 파싱 실패:',
+            error
+          );
         }
       }
 
