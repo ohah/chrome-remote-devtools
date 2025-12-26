@@ -1,19 +1,75 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
 import { gunzipSync } from 'zlib';
+import { createWriteStream, mkdirSync } from 'fs';
+import { dirname } from 'path';
 
 // Log configuration / 로그 설정
 // Default: disabled in both development and production / 기본값: 개발 및 프로덕션 모두에서 비활성화
-const logEnabled = process.env.LOG_ENABLED === 'true';
-const logMethodsEnv = process.env.LOG_METHODS || '';
-const allowedMethods = logMethodsEnv
-  ? new Set(
-      logMethodsEnv
-        .split(',')
-        .map((m) => m.trim())
-        .filter(Boolean)
-    )
-  : null; // null means all methods are allowed / null이면 모든 메소드 허용
+let logEnabled = process.env.LOG_ENABLED === 'true';
+let logMethodsEnv = process.env.LOG_METHODS || '';
+let logFile: string | undefined = process.env.LOG_FILE_PATH;
+let logStream: ReturnType<typeof createWriteStream> | null = null;
+let allowedMethods: Set<string> | null = null;
+
+// Initialize allowed methods / 허용된 메소드 초기화
+function updateAllowedMethods(methods: string): void {
+  allowedMethods = methods
+    ? new Set(
+        methods
+          .split(',')
+          .map((m) => m.trim())
+          .filter(Boolean)
+      )
+    : null; // null means all methods are allowed / null이면 모든 메소드 허용
+}
+
+// Initialize log file stream if path is provided / 로그 파일 경로가 제공되면 스트림 초기화
+if (logFile) {
+  try {
+    // Create directory if it doesn't exist / 디렉토리가 없으면 생성
+    const logDir = dirname(logFile);
+    mkdirSync(logDir, { recursive: true });
+    logStream = createWriteStream(logFile, { flags: 'a' });
+  } catch (error) {
+    console.error(`Failed to create log file / 로그 파일 생성 실패: ${logFile}`, error);
+  }
+}
+
+// Initialize allowed methods / 허용된 메소드 초기화
+updateAllowedMethods(logMethodsEnv);
+
+/**
+ * Set log configuration / 로그 설정 변경
+ * @param enabled - Enable logging / 로깅 활성화
+ * @param methods - Comma-separated list of methods to log / 로깅할 메소드 목록 (쉼표로 구분)
+ * @param filePath - Path to log file / 로그 파일 경로
+ */
+export function setLogConfig(enabled: boolean, methods?: string, filePath?: string): void {
+  logEnabled = enabled;
+  logMethodsEnv = methods || '';
+  logFile = filePath;
+
+  // Update allowed methods / 허용된 메소드 업데이트
+  updateAllowedMethods(logMethodsEnv);
+
+  // Close existing stream if any / 기존 스트림이 있으면 닫기
+  if (logStream) {
+    logStream.end();
+    logStream = null;
+  }
+
+  // Create new stream if file path is provided / 파일 경로가 제공되면 새 스트림 생성
+  if (logFile) {
+    try {
+      const logDir = dirname(logFile);
+      mkdirSync(logDir, { recursive: true });
+      logStream = createWriteStream(logFile, { flags: 'a' });
+    } catch (error) {
+      console.error(`Failed to create log file / 로그 파일 생성 실패: ${logFile}`, error);
+    }
+  }
+}
 
 /**
  * Log helper with method filtering / 메소드 필터링이 있는 로그 헬퍼
@@ -40,10 +96,25 @@ function log(
   }
 
   const prefix = `[${type}] ${id}`;
+  const timestamp = new Date().toISOString();
+  let logMessage: string;
+
   if (data !== undefined) {
+    const dataStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    logMessage = `${timestamp} ${prefix} ${message} ${dataStr}\n`;
     console.log(`${prefix} ${message}`, data);
   } else {
+    logMessage = `${timestamp} ${prefix} ${message}\n`;
     console.log(`${prefix} ${message}`);
+  }
+
+  // Write to file if log stream is available / 로그 스트림이 있으면 파일에 기록
+  if (logStream) {
+    try {
+      logStream.write(logMessage);
+    } catch (error) {
+      console.error('Failed to write to log file / 로그 파일 쓰기 실패:', error);
+    }
   }
 }
 
@@ -60,10 +131,25 @@ function logError(
     return;
   }
   const prefix = `[${type}] ${id}`;
+  const timestamp = new Date().toISOString();
+  let logMessage: string;
+
   if (error !== undefined) {
+    const errorStr = error instanceof Error ? error.stack || error.message : String(error);
+    logMessage = `${timestamp} ${prefix} ${message}: ${errorStr}\n`;
     console.error(`${prefix} ${message}:`, error);
   } else {
+    logMessage = `${timestamp} ${prefix} ${message}\n`;
     console.error(`${prefix} ${message}`);
+  }
+
+  // Write to file if log stream is available / 로그 스트림이 있으면 파일에 기록
+  if (logStream) {
+    try {
+      logStream.write(logMessage);
+    } catch (writeError) {
+      console.error('Failed to write to log file / 로그 파일 쓰기 실패:', writeError);
+    }
   }
 }
 
