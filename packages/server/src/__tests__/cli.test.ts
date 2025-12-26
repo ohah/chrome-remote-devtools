@@ -1,6 +1,6 @@
 // CLI parser tests / CLI 파서 테스트
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { parseCLIArgs, type CLIOptions } from '../cli';
+import { parseCLIArgs } from '../cli';
 
 describe('CLI Parser', () => {
   let originalArgv: string[];

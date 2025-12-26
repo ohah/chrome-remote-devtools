@@ -10,7 +10,7 @@ describe('SocketServer', () => {
 
   test('should return empty clients list initially', () => {
     const server = new SocketServer();
-    const clients = server.getClients();
+    const clients = server.getAllClients();
     expect(clients).toEqual([]);
   });
 });
