@@ -232,7 +232,7 @@ export async function sendCDPMessages(
   // Sort network events by type within each requestId group / 각 requestId 그룹 내에서 이벤트 타입별로 정렬
   // Order: requestWillBeSent -> responseReceived -> loadingFinished / 순서: requestWillBeSent -> responseReceived -> loadingFinished
   const sortedNetworkEvents: PostMessageCDPMessage[] = [];
-  for (const [requestId, events] of networkEventsByRequestId) {
+  for (const [, events] of networkEventsByRequestId) {
     // Find events by type / 타입별로 이벤트 찾기
     const requestWillBeSent = events.find((e) => {
       try {
