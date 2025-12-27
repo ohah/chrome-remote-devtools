@@ -13,7 +13,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target bun && bun run build:types",
+    "build": "bun build src/index.ts --outdir dist --target node && bun run build:types",
     "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
     "prepublishOnly": "bun run build",
     "start": "bun run dist/index.js",

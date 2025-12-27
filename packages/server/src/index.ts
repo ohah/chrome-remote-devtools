@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+// Chrome Remote DevTools Server / Chrome Remote DevTools 서버
 import { createServer as createHttpServer } from 'http';
 import { createServer as createHttpsServer } from 'https';
 import { readFileSync, existsSync } from 'fs';
