@@ -13,11 +13,15 @@ npm install @ohah/chrome-remote-devtools-client
 ### React / ESM
 
 ```typescript
-import { initCDPClient } from '@ohah/chrome-remote-devtools-client';
+import { init } from '@ohah/chrome-remote-devtools-client';
 
 useEffect(() => {
-  initCDPClient('wss://your-server.com', {
-    enable: true, // rrweb 세션 녹화 활성화
+  init({
+    serverUrl: 'wss://your-server.com',
+    rrweb: {
+      enable: true, // rrweb 세션 녹화 활성화
+      enableExportButton: true, // 선택사항: 페이지에 export 버튼 표시
+    },
   });
 }, []);
 ```
@@ -31,6 +35,7 @@ useEffect(() => {
     serverUrl: 'wss://your-server.com',
     rrweb: {
       enable: true, // rrweb 세션 녹화 활성화
+      enableExportButton: true, // 선택사항: 페이지에 export 버튼 표시
     },
   });
 </script>
@@ -45,6 +50,7 @@ useEffect(() => {
     serverUrl: 'wss://your-server.com',
     rrweb: {
       enable: true,
+      enableExportButton: true,
     },
   });
 </script>
@@ -52,24 +58,30 @@ useEffect(() => {
 
 ## API
 
-### `initCDPClient(serverUrl, rrwebConfig?, skipWebSocket?)`
+### `init(options)` (ESM)
 
-CDP 클라이언트 초기화 (ESM 전용).
+CDP 클라이언트 초기화.
 
 **매개변수:**
 
-- `serverUrl` (string) - 서버 WebSocket URL
-- `rrwebConfig` (object, 선택) - Rrweb 설정
-  - `enable` (boolean) - rrweb 세션 녹화 활성화
-- `skipWebSocket` (boolean, 선택) - WebSocket 연결 건너뛰기 (postMessage만 사용)
+- `options` (object) - 설정 옵션
+  - `serverUrl` (string, 선택) - 서버 WebSocket URL
+  - `rrweb` (object, 선택) - Rrweb 설정
+    - `enable` (boolean) - rrweb 세션 녹화 활성화 (기본값: `false`)
+    - `enableExportButton` (boolean) - 페이지에 export 버튼 표시 (기본값: `false`)
+  - `skipWebSocket` (boolean, 선택) - WebSocket 연결 건너뛰기 (postMessage만 사용, 기본값: `false`)
 
 **예시:**
 
 ```typescript
-import { initCDPClient } from '@ohah/chrome-remote-devtools-client';
+import { init } from '@ohah/chrome-remote-devtools-client';
 
-await initCDPClient('wss://your-server.com', {
-  enable: true,
+await init({
+  serverUrl: 'wss://your-server.com',
+  rrweb: {
+    enable: true,
+    enableExportButton: true,
+  },
 });
 ```
 
@@ -82,8 +94,9 @@ await initCDPClient('wss://your-server.com', {
 - `options` (object) - 설정 옵션
   - `serverUrl` (string, 선택) - 서버 WebSocket URL
   - `rrweb` (object, 선택) - Rrweb 설정
-    - `enable` (boolean) - rrweb 세션 녹화 활성화
-  - `skipWebSocket` (boolean, 선택) - WebSocket 연결 건너뛰기 (postMessage만 사용)
+    - `enable` (boolean) - rrweb 세션 녹화 활성화 (기본값: `false`)
+    - `enableExportButton` (boolean) - 페이지에 export 버튼 표시 (기본값: `false`)
+  - `skipWebSocket` (boolean, 선택) - WebSocket 연결 건너뛰기 (postMessage만 사용, 기본값: `false`)
 
 **예시:**
 
@@ -92,6 +105,7 @@ ChromeRemoteDevTools.init({
   serverUrl: 'wss://your-server.com',
   rrweb: {
     enable: true,
+    enableExportButton: true,
   },
 });
 ```
@@ -119,6 +133,7 @@ ChromeRemoteDevTools.init({
   serverUrl: 'wss://your-server.com',
   rrweb: {
     enable: true,
+    enableExportButton: true,
   },
 });
 
