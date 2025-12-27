@@ -277,7 +277,6 @@ This document tracks the implementation status of Chrome Remote DevTools compone
 - ✅ `GET /json/inspectors` - Get all inspectors
 - ✅ `GET /json/client/:id` - Get specific client
 - ✅ `GET /client.js` - Serve built client script
-- ✅ `GET /test-page.html` - Serve test page
 
 ---
 

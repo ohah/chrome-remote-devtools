@@ -89,14 +89,6 @@ GET /client.js
 
 Serves the built client script for embedding in web pages.
 
-### Serve Test Page
-
-```http
-GET /test-page.html
-```
-
-Serves a test page with the client script pre-loaded.
-
 ## WebSocket Protocol
 
 ### Client Connection

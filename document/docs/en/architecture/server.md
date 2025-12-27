@@ -58,7 +58,6 @@ The server provides HTTP endpoints for client discovery:
 - `GET /json/inspectors` - Get all inspectors
 - `GET /json/client/:id` - Get specific client
 - `GET /client.js` - Serve built client script
-- `GET /test-page.html` - Serve test page
 
 ## Features
 
