@@ -10,26 +10,26 @@ npm install @ohah/chrome-remote-devtools-server
 
 ## Usage
 
-### Basic Usage / 기본 사용법
+### Basic Usage
 
 ```bash
 npx chrome-remote-devtools-server
 ```
 
-### With Environment Variables / 환경 변수와 함께
+### With Environment Variables
 
 ```bash
 PORT=8080 npx chrome-remote-devtools-server
 ```
 
-### With SSL (HTTPS/WSS) / SSL과 함께
+### With SSL (HTTPS/WSS)
 
 For production, you'll need to set up SSL certificates. You can either:
 
 1. Use a reverse proxy (Nginx/Caddy) - Recommended
 2. Use Bun's built-in HTTPS support
 
-#### Using CLI Options / CLI 옵션 사용
+#### Using CLI Options
 
 ```bash
 npx chrome-remote-devtools-server \
@@ -38,7 +38,7 @@ npx chrome-remote-devtools-server \
   --key /path/to/key.pem
 ```
 
-#### Using Environment Variables / 환경 변수 사용
+#### Using Environment Variables
 
 ```bash
 USE_SSL=true \
@@ -47,15 +47,15 @@ SSL_KEY_PATH=/path/to/key.pem \
 npx chrome-remote-devtools-server
 ```
 
-### With Logging / 로깅과 함께
+### With Logging
 
-#### Enable All Logs / 모든 로그 활성화
+#### Enable All Logs
 
 ```bash
 npx chrome-remote-devtools-server --log-enabled
 ```
 
-#### Filter Logs by Methods / 메소드로 로그 필터링
+#### Filter Logs by Methods
 
 ```bash
 npx chrome-remote-devtools-server \
@@ -63,7 +63,7 @@ npx chrome-remote-devtools-server \
   --log-methods "Runtime.evaluate,Page.navigate"
 ```
 
-#### File Logging / 파일 로깅
+#### File Logging
 
 ```bash
 npx chrome-remote-devtools-server \
@@ -71,26 +71,26 @@ npx chrome-remote-devtools-server \
   --log-file ./logs/server.log
 ```
 
-## Environment Variables / 환경 변수
+## Environment Variables
 
-### Basic Configuration / 기본 설정
+### Basic Configuration
 
-- `PORT` - Server port (default: `8080` for HTTP, `8443` for HTTPS) / 서버 포트 (기본값: HTTP는 `8080`, HTTPS는 `8443`)
-- `HOST` - Server host (default: `0.0.0.0`) / 서버 호스트 (기본값: `0.0.0.0`)
+- `PORT` - Server port (default: `8080` for HTTP, `8443` for HTTPS)
+- `HOST` - Server host (default: `0.0.0.0`)
 
-### SSL Configuration / SSL 설정
+### SSL Configuration
 
-- `USE_SSL` - Enable HTTPS/WSS (default: `false`) / HTTPS/WSS 활성화 (기본값: `false`)
-- `SSL_CERT_PATH` - Path to SSL certificate file (required when `USE_SSL=true`) / SSL 인증서 파일 경로 (`USE_SSL=true`일 때 필수)
-- `SSL_KEY_PATH` - Path to SSL private key file (required when `USE_SSL=true`) / SSL 개인 키 파일 경로 (`USE_SSL=true`일 때 필수)
+- `USE_SSL` - Enable HTTPS/WSS (default: `false`)
+- `SSL_CERT_PATH` - Path to SSL certificate file (required when `USE_SSL=true`)
+- `SSL_KEY_PATH` - Path to SSL private key file (required when `USE_SSL=true`)
 
-### Logging Configuration / 로깅 설정
+### Logging Configuration
 
-- `LOG_ENABLED` - Enable logging (default: `false`) / 로깅 활성화 (기본값: `false`)
-- `LOG_METHODS` - Comma-separated list of CDP methods to log (default: all methods) / 로깅할 CDP 메소드 목록 (쉼표로 구분, 기본값: 모든 메소드)
-- `LOG_FILE_PATH` - Path to log file (logs will be written to both console and file) / 로그 파일 경로 (콘솔과 파일 모두에 기록)
+- `LOG_ENABLED` - Enable logging (default: `false`)
+- `LOG_METHODS` - Comma-separated list of CDP methods to log (default: all methods)
+- `LOG_FILE_PATH` - Path to log file (logs will be written to both console and file)
 
-## CLI Options / CLI 옵션
+## CLI Options
 
 - `-p, --port <number>` - Server port
 - `-h, --host <string>` - Server host
@@ -102,11 +102,11 @@ npx chrome-remote-devtools-server \
 - `--log-file <path>` - Path to log file
 - `--help` - Show help message
 
-**Note**: CLI options take precedence over environment variables. / CLI 옵션이 환경 변수보다 우선순위가 높습니다.
+**Note**: CLI options take precedence over environment variables.
 
-## SSL Certificate Setup / SSL 인증서 설정
+## SSL Certificate Setup
 
-### Using Let's Encrypt (Recommended) / Let's Encrypt 사용 (권장)
+### Using Let's Encrypt (Recommended)
 
 ```bash
 # Install certbot
@@ -122,7 +122,7 @@ SSL_KEY_PATH=/etc/letsencrypt/live/your-domain.com/privkey.pem \
 npx chrome-remote-devtools-server
 ```
 
-### Using Self-Signed Certificate (Development Only) / 자체 서명 인증서 사용 (개발 전용)
+### Using Self-Signed Certificate (Development Only)
 
 ```bash
 # Generate self-signed certificate
@@ -139,11 +139,11 @@ npx chrome-remote-devtools-server \
   --key ./key.pem
 ```
 
-**Warning / 경고**: Self-signed certificates are not secure for production use. Use Let's Encrypt or a trusted CA for production. / 자체 서명 인증서는 프로덕션에서 안전하지 않습니다. 프로덕션에서는 Let's Encrypt나 신뢰할 수 있는 CA를 사용하세요.
+**Warning**: Self-signed certificates are not secure for production use. Use Let's Encrypt or a trusted CA for production.
 
-## Examples / 예시
+## Examples
 
-### Development Server / 개발 서버
+### Development Server
 
 ```bash
 # HTTP on default port
@@ -156,7 +156,7 @@ npx chrome-remote-devtools-server --port 3000
 npx chrome-remote-devtools-server --log-enabled
 ```
 
-### Production Server / 프로덕션 서버
+### Production Server
 
 ```bash
 # HTTPS with Let's Encrypt

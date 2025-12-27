@@ -25,28 +25,36 @@ useEffect(() => {
 ### HTML / IIFE
 
 ```html
-<script
-  src="node_modules/@ohah/chrome-remote-devtools-client/dist/index.iife.js"
-  data-server-url="wss://your-server.com"
-  data-enable-rrweb="true"
-></script>
+<script src="node_modules/@ohah/chrome-remote-devtools-client/dist/index.iife.js"></script>
+<script>
+  ChromeRemoteDevTools.init({
+    serverUrl: 'wss://your-server.com',
+    rrweb: {
+      enable: true, // Enable rrweb session recording
+    },
+  });
+</script>
 ```
 
 Or load from CDN (when published):
 
 ```html
-<script
-  src="https://unpkg.com/@ohah/chrome-remote-devtools-client/dist/index.iife.js"
-  data-server-url="wss://your-server.com"
-  data-enable-rrweb="true"
-></script>
+<script src="https://unpkg.com/@ohah/chrome-remote-devtools-client/dist/index.iife.js"></script>
+<script>
+  ChromeRemoteDevTools.init({
+    serverUrl: 'wss://your-server.com',
+    rrweb: {
+      enable: true,
+    },
+  });
+</script>
 ```
 
 ## API
 
 ### `initCDPClient(serverUrl, rrwebConfig?, skipWebSocket?)`
 
-Initialize the CDP client.
+Initialize the CDP client (ESM only).
 
 **Parameters:**
 
@@ -65,13 +73,28 @@ await initCDPClient('wss://your-server.com', {
 });
 ```
 
-## Data Attributes (IIFE only)
+### `ChromeRemoteDevTools.init(options)` (IIFE only)
 
-When using the IIFE build with a script tag, you can configure the client using data attributes:
+Initialize the CDP client using the global API.
 
-- `data-server-url` - Server WebSocket URL (required)
-- `data-enable-rrweb` - Enable rrweb session recording (`"true"` or `"false"`)
-- `data-enable-export-button` - Show export button (`"true"` or `"false"`)
+**Parameters:**
+
+- `options` (object) - Configuration options
+  - `serverUrl` (string, optional) - Server WebSocket URL
+  - `rrweb` (object, optional) - Rrweb configuration
+    - `enable` (boolean) - Enable rrweb session recording
+  - `skipWebSocket` (boolean, optional) - Skip WebSocket connection (use postMessage only)
+
+**Example:**
+
+```javascript
+ChromeRemoteDevTools.init({
+  serverUrl: 'wss://your-server.com',
+  rrweb: {
+    enable: true,
+  },
+});
+```
 
 ## CDP Domains
 
@@ -88,11 +111,19 @@ The client implements the following CDP domains:
 
 ## Global API (IIFE only)
 
-When using the IIFE build, a global `chromeRemoteDevTools` object is available:
+When using the IIFE build, a global `ChromeRemoteDevTools` object is available:
 
 ```javascript
+// Initialize the client
+ChromeRemoteDevTools.init({
+  serverUrl: 'wss://your-server.com',
+  rrweb: {
+    enable: true,
+  },
+});
+
 // Export recorded events
-await chromeRemoteDevTools.exportEvents();
+await ChromeRemoteDevTools.exportEvents();
 ```
 
 ## Build Formats
