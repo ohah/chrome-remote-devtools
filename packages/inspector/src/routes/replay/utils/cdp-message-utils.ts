@@ -130,4 +130,3 @@ export function categorizeEvents(events: PostMessageCDPMessage[]): {
     nonNetworkEvents,
   };
 }
-
