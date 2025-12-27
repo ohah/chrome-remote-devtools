@@ -7,7 +7,8 @@ import { rspack } from '@rspack/core';
 // DevTools frontend path - use bundled only / DevTools frontend 경로 - bundled만 사용
 const devtoolsPath = path.resolve(__dirname, '../devtools/bundled/front_end');
 // Client script path / 클라이언트 스크립트 경로
-const clientPath = path.resolve(__dirname, '../packages/client/dist/index.js');
+// Use IIFE format for script tag loading / script 태그 로딩을 위해 IIFE 형식 사용
+const clientPath = path.resolve(__dirname, '../packages/client/dist/index.iife.js');
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
