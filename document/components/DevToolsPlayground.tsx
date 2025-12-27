@@ -27,6 +27,41 @@ interface CDPEventFile {
 }
 
 /**
+ * Storage items type / Storage 항목 타입
+ */
+interface StorageItems {
+  localStorage: Array<[string, string]>;
+  sessionStorage: Array<[string, string]>;
+}
+
+/**
+ * DOM tree type / DOM 트리 타입
+ */
+interface DOMTree {
+  root: unknown;
+}
+
+/**
+ * Response body store interface / 응답 본문 저장소 인터페이스
+ */
+interface ResponseBodyStore {
+  store(requestId: string, body: string): void;
+  get(requestId: string): string | undefined;
+  has(requestId: string): boolean;
+  clear(): void;
+}
+
+/**
+ * Command handler context / 명령 핸들러 컨텍스트
+ */
+interface CommandHandlerContext {
+  file: File;
+  cdpMessages: PostMessageCDPMessage[];
+  responseBodyStore: ResponseBodyStore;
+  targetWindow: Window;
+}
+
+/**
  * Get origin for embedded mode / embedded 모드를 위한 origin 가져오기
  */
 function getHostOrigin(): string {
@@ -155,6 +190,508 @@ function sendFakeResponse(targetWindow: Window, commandId: number, result?: unkn
 }
 
 /**
+ * Create response body store / 응답 본문 저장소 생성
+ */
+function createResponseBodyStore(): ResponseBodyStore {
+  const store = new Map<string, string>();
+  return {
+    store(requestId: string, body: string) {
+      store.set(requestId, body);
+    },
+    get(requestId: string) {
+      return store.get(requestId);
+    },
+    has(requestId: string) {
+      return store.has(requestId);
+    },
+    clear() {
+      store.clear();
+    },
+  };
+}
+
+/**
+ * Extract DOM tree from file data / 파일 데이터에서 DOM 트리 추출
+ */
+async function extractDOMTree(
+  file: File,
+  cdpMessages: PostMessageCDPMessage[]
+): Promise<DOMTree | null> {
+  try {
+    const text = await file.text();
+    const fileData: CDPEventFile = JSON.parse(text);
+
+    if (fileData.domTree?.html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(fileData.domTree.html, 'text/html');
+
+      const convertNode = (node: Node, nodeId: number): unknown => {
+        const result: Record<string, unknown> = {
+          nodeId,
+          backendNodeId: nodeId,
+          nodeType: node.nodeType,
+          nodeName: node.nodeName,
+        };
+
+        if (node.nodeType === Node.DOCUMENT_NODE) {
+          const doc = node as Document;
+          result.documentURL = fileData.domTree?.documentURL || window.location.href;
+          result.baseURL = fileData.domTree?.baseURL || window.location.href;
+          const children: unknown[] = [];
+          let childId = nodeId + 1;
+          doc.childNodes.forEach((child) => {
+            if (child.nodeType !== Node.TEXT_NODE || child.textContent?.trim()) {
+              children.push(convertNode(child, childId++));
+            }
+          });
+          result.childNodeCount = children.length;
+          if (children.length > 0) {
+            result.children = children;
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const element = node as Element;
+          result.localName = element.localName;
+          const attributes: string[] = [];
+          Array.from(element.attributes).forEach((attr) => {
+            attributes.push(attr.name, attr.value);
+          });
+          result.attributes = attributes;
+          const children: unknown[] = [];
+          let childId = nodeId + 1;
+          element.childNodes.forEach((child) => {
+            if (child.nodeType !== Node.TEXT_NODE || child.textContent?.trim()) {
+              children.push(convertNode(child, childId++));
+            }
+          });
+          result.childNodeCount = children.length;
+          if (children.length > 0) {
+            result.children = children;
+          }
+        } else if (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.COMMENT_NODE) {
+          result.nodeValue = node.nodeValue || '';
+        } else if (node.nodeType === Node.DOCUMENT_TYPE_NODE) {
+          const docType = node as DocumentType;
+          result.nodeValue = docType.name || '';
+          result.publicId = docType.publicId || '';
+          result.systemId = docType.systemId || '';
+        }
+
+        return result;
+      };
+
+      return {
+        root: convertNode(doc, 1),
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to extract DOM tree from file / 파일에서 DOM 트리 추출 실패:', error);
+  }
+
+  // Fallback: Find DOM.setChildNodes event / 폴백: DOM.setChildNodes 이벤트 찾기
+  for (const msg of cdpMessages) {
+    try {
+      const parsed = JSON.parse(msg.message);
+      if (parsed.method === 'DOM.setChildNodes' && parsed.params) {
+        const { parentId, nodes } = parsed.params;
+        if (parentId === 0 || parentId === undefined || parentId === null) {
+          return {
+            root: {
+              nodeId: 1,
+              backendNodeId: 1,
+              nodeType: 9, // DOCUMENT_NODE
+              nodeName: '#document',
+              documentURL: window.location.href,
+              baseURL: window.location.href,
+              childNodeCount: nodes?.length || 0,
+              children: nodes || [],
+            },
+          };
+        }
+      }
+    } catch {
+      // Ignore parsing errors / 파싱 오류 무시
+    }
+  }
+  return null;
+}
+
+/**
+ * Extract localStorage and sessionStorage from file data / 파일 데이터에서 localStorage와 sessionStorage 추출
+ */
+async function extractDOMStorageItems(
+  file: File,
+  cdpMessages: PostMessageCDPMessage[]
+): Promise<StorageItems> {
+  try {
+    const text = await file.text();
+    const fileData: CDPEventFile = JSON.parse(text);
+    return {
+      localStorage: fileData.localStorage || [],
+      sessionStorage: fileData.sessionStorage || [],
+    };
+  } catch (error) {
+    console.warn(
+      'Failed to extract storage items from file / 파일에서 storage 항목 추출 실패:',
+      error
+    );
+
+    // Fallback: extract from stored events / 폴백: 저장된 이벤트에서 추출
+    const localStorageItems = new Map<string, string>();
+    const sessionStorageItems = new Map<string, string>();
+
+    for (const msg of cdpMessages) {
+      try {
+        const parsed = JSON.parse(msg.message);
+        if (parsed.method === 'DOMStorage.domStorageItemAdded' && parsed.params) {
+          const { storageId, key, newValue } = parsed.params;
+          if (storageId?.isLocalStorage) {
+            localStorageItems.set(key, newValue);
+          } else {
+            sessionStorageItems.set(key, newValue);
+          }
+        } else if (parsed.method === 'DOMStorage.domStorageItemUpdated' && parsed.params) {
+          const { storageId, key, newValue } = parsed.params;
+          if (storageId?.isLocalStorage) {
+            localStorageItems.set(key, newValue);
+          } else {
+            sessionStorageItems.set(key, newValue);
+          }
+        } else if (parsed.method === 'DOMStorage.domStorageItemRemoved' && parsed.params) {
+          const { storageId, key } = parsed.params;
+          if (storageId?.isLocalStorage) {
+            localStorageItems.delete(key);
+          } else {
+            sessionStorageItems.delete(key);
+          }
+        } else if (parsed.method === 'DOMStorage.domStorageItemsCleared' && parsed.params) {
+          const { storageId } = parsed.params;
+          if (storageId?.isLocalStorage) {
+            localStorageItems.clear();
+          } else {
+            sessionStorageItems.clear();
+          }
+        }
+      } catch {
+        // Ignore parsing errors / 파싱 오류 무시
+      }
+    }
+
+    return {
+      localStorage: Array.from(localStorageItems.entries()),
+      sessionStorage: Array.from(sessionStorageItems.entries()),
+    };
+  }
+}
+
+/**
+ * Extract cookies from file data / 파일 데이터에서 쿠키 추출
+ */
+async function extractCookies(
+  file: File
+): Promise<Array<{ name: string; value: string; domain: string; path: string }>> {
+  try {
+    const text = await file.text();
+    const fileData: CDPEventFile = JSON.parse(text);
+    if (fileData.cookies && Array.isArray(fileData.cookies)) {
+      return fileData.cookies;
+    }
+  } catch (error) {
+    console.warn('Failed to extract cookies from file / 파일에서 쿠키 추출 실패:', error);
+  }
+  return [];
+}
+
+/**
+ * Send storage items as domStorageItemAdded events / storage 항목을 domStorageItemAdded 이벤트로 전송
+ */
+function sendStorageItemsAsEvents(storageItems: StorageItems, targetWindow: Window): void {
+  const storageKey = window.location.origin;
+
+  // Send localStorage items as domStorageItemAdded events / localStorage 항목을 domStorageItemAdded 이벤트로 전송
+  storageItems.localStorage.forEach(([key, value]) => {
+    const eventData = {
+      method: 'DOMStorage.domStorageItemAdded',
+      params: {
+        storageId: {
+          isLocalStorage: true,
+          storageKey,
+          securityOrigin: storageKey,
+        },
+        key,
+        newValue: value,
+      },
+    };
+    const eventMessage = {
+      type: 'CDP_MESSAGE' as const,
+      message: JSON.stringify(eventData),
+    };
+    targetWindow.postMessage(eventMessage, '*');
+  });
+
+  // Send sessionStorage items as domStorageItemAdded events / sessionStorage 항목을 domStorageItemAdded 이벤트로 전송
+  storageItems.sessionStorage.forEach(([key, value]) => {
+    const eventData = {
+      method: 'DOMStorage.domStorageItemAdded',
+      params: {
+        storageId: {
+          isLocalStorage: false,
+          storageKey,
+          securityOrigin: storageKey,
+        },
+        key,
+        newValue: value,
+      },
+    };
+    const eventMessage = {
+      type: 'CDP_MESSAGE' as const,
+      message: JSON.stringify(eventData),
+    };
+    targetWindow.postMessage(eventMessage, '*');
+  });
+}
+
+// Storage key cache / Storage key 캐시
+let cachedStorageKey: string | null = null;
+
+/**
+ * Handle Network.getResponseBody command / Network.getResponseBody 명령 처리
+ */
+function handleGetResponseBody(
+  parsed: { method: string; id?: number; params?: { requestId?: string } },
+  context: CommandHandlerContext
+): boolean {
+  if (parsed.method !== 'Network.getResponseBody' || parsed.id === undefined) {
+    return false;
+  }
+
+  const requestId = parsed.params?.requestId;
+  if (requestId) {
+    const body = context.responseBodyStore.get(requestId);
+    sendFakeResponse(context.targetWindow, parsed.id, {
+      body: body || '',
+      base64Encoded: false,
+    });
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Handle DOM.getDocument command / DOM.getDocument 명령 처리
+ */
+function handleGetDocument(
+  parsed: { method: string; id?: number },
+  context: CommandHandlerContext
+): boolean {
+  if (parsed.method !== 'DOM.getDocument' || parsed.id === undefined) {
+    return false;
+  }
+
+  void extractDOMTree(context.file, context.cdpMessages).then((domTree) => {
+    if (domTree) {
+      sendFakeResponse(context.targetWindow, parsed.id!, domTree);
+    } else {
+      // Fallback to empty document if no DOM tree found / DOM 트리를 찾을 수 없으면 빈 문서로 폴백
+      sendFakeResponse(context.targetWindow, parsed.id!, {
+        root: {
+          nodeId: 1,
+          backendNodeId: 1,
+          nodeType: 9, // DOCUMENT_NODE
+          nodeName: '#document',
+          documentURL: window.location.href,
+          baseURL: window.location.href,
+          childNodeCount: 0,
+          children: [],
+        },
+      });
+    }
+  });
+  return true;
+}
+
+/**
+ * Handle Network.getCookies command / Network.getCookies 명령 처리
+ */
+function handleGetCookies(
+  parsed: { method: string; id?: number },
+  context: CommandHandlerContext
+): boolean {
+  if (parsed.method !== 'Network.getCookies' || parsed.id === undefined) {
+    return false;
+  }
+
+  void extractCookies(context.file).then((cookies) => {
+    sendFakeResponse(context.targetWindow, parsed.id!, {
+      cookies,
+    });
+  });
+  return true;
+}
+
+/**
+ * Handle Page.getResourceTree command / Page.getResourceTree 명령 처리
+ */
+function handleGetResourceTree(
+  parsed: { method: string; id?: number },
+  context: CommandHandlerContext
+): boolean {
+  if (parsed.method !== 'Page.getResourceTree' || parsed.id === undefined) {
+    return false;
+  }
+
+  sendFakeResponse(context.targetWindow, parsed.id, {
+    frameTree: {
+      frame: {
+        id: 'main',
+        mimeType: 'text/html',
+        securityOrigin: window.location.origin,
+        url: window.location.href,
+      },
+      resources: [],
+    },
+  });
+  return true;
+}
+
+/**
+ * Handle Storage.getStorageKey command / Storage.getStorageKey 명령 처리
+ */
+function handleGetStorageKey(
+  parsed: { method: string; id?: number },
+  context: CommandHandlerContext
+): boolean {
+  if (parsed.method !== 'Storage.getStorageKey' || parsed.id === undefined) {
+    return false;
+  }
+
+  const storageKey = window.location.origin;
+  cachedStorageKey = storageKey; // Cache storage key / storage key 캐시
+  sendFakeResponse(context.targetWindow, parsed.id, {
+    storageKey,
+  });
+  return true;
+}
+
+/**
+ * Handle DOMStorage.enable command / DOMStorage.enable 명령 처리
+ */
+function handleDOMStorageEnable(
+  parsed: { method: string; id?: number },
+  context: CommandHandlerContext
+): boolean {
+  if (parsed.method !== 'DOMStorage.enable' || parsed.id === undefined) {
+    return false;
+  }
+
+  // Send fake response first / 먼저 가짜 응답 전송
+  sendFakeResponse(context.targetWindow, parsed.id, {});
+
+  // Wait a bit for storage to be created by StorageKeyManager / StorageKeyManager가 storage를 생성할 시간 대기
+  setTimeout(() => {
+    // Then send initial storage items as events / 그 다음 초기 storage 항목을 이벤트로 전송
+    void extractDOMStorageItems(context.file, context.cdpMessages).then((storageItems) => {
+      sendStorageItemsAsEvents(storageItems, context.targetWindow);
+    });
+  }, 200); // Wait 200ms for storage to be created / storage가 생성될 시간을 위해 200ms 대기
+  return true;
+}
+
+/**
+ * Handle DOMStorage.getDOMStorageItems command / DOMStorage.getDOMStorageItems 명령 처리
+ */
+function handleGetDOMStorageItems(
+  parsed: {
+    method: string;
+    id?: number;
+    params?: { storageId?: { isLocalStorage?: boolean } };
+  },
+  context: CommandHandlerContext
+): boolean {
+  if (parsed.method !== 'DOMStorage.getDOMStorageItems' || parsed.id === undefined) {
+    return false;
+  }
+
+  const storageId = parsed.params?.storageId;
+  const commandId = parsed.id; // Store id after undefined check / undefined 체크 후 id 저장
+
+  // If storageId is not provided, wait a bit and use cached/default storageId / storageId가 제공되지 않았으면 잠시 대기 후 캐시된/기본 storageId 사용
+  if (!storageId) {
+    // Wait for storageId to be set (Storage.getStorageKey or DOMStorage.enable) / storageId가 설정될 때까지 대기 (Storage.getStorageKey 또는 DOMStorage.enable)
+    setTimeout(() => {
+      // Use cached storageKey or default / 캐시된 storageKey 또는 기본값 사용
+      const storageKey = cachedStorageKey || window.location.origin;
+      const defaultStorageId = {
+        isLocalStorage: true, // Default to localStorage / 기본값은 localStorage
+        storageKey,
+        securityOrigin: storageKey,
+      };
+
+      void extractDOMStorageItems(context.file, context.cdpMessages).then((storageItems) => {
+        const entries = defaultStorageId.isLocalStorage
+          ? storageItems.localStorage
+          : storageItems.sessionStorage;
+        sendFakeResponse(context.targetWindow, commandId, {
+          entries,
+        });
+      });
+    }, 300); // Wait 300ms for Storage.getStorageKey to be called / Storage.getStorageKey가 호출될 때까지 300ms 대기
+    return true;
+  }
+
+  // Extract storage items from file data / 파일 데이터에서 storage 항목 추출
+  void extractDOMStorageItems(context.file, context.cdpMessages).then((storageItems) => {
+    const entries = storageId.isLocalStorage
+      ? storageItems.localStorage
+      : storageItems.sessionStorage;
+    sendFakeResponse(context.targetWindow, commandId, {
+      entries,
+    });
+  });
+  return true;
+}
+
+/**
+ * Handle Console.enable command / Console.enable 명령 처리
+ * Prevents error when DevTools sends Console.enable / DevTools가 Console.enable을 보낼 때 에러 방지
+ */
+function handleConsoleEnable(
+  parsed: { method: string; id?: number },
+  context: CommandHandlerContext
+): boolean {
+  if (parsed.method !== 'Console.enable' || parsed.id === undefined) {
+    return false;
+  }
+
+  // Just send fake response to prevent error / 에러 방지를 위해 가짜 응답만 전송
+  sendFakeResponse(context.targetWindow, parsed.id, {});
+  return true;
+}
+
+/**
+ * Handle all CDP commands / 모든 CDP 명령 처리
+ */
+function handleCDPCommand(
+  parsed: {
+    method: string;
+    id?: number;
+    params?: { requestId?: string; storageId?: { isLocalStorage?: boolean } };
+  },
+  context: CommandHandlerContext
+): boolean {
+  // Try each handler in order / 각 핸들러를 순서대로 시도
+  return (
+    handleGetResponseBody(parsed, context) ||
+    handleGetDocument(parsed, context) ||
+    handleGetCookies(parsed, context) ||
+    handleGetResourceTree(parsed, context) ||
+    handleGetStorageKey(parsed, context) ||
+    handleDOMStorageEnable(parsed, context) ||
+    handleGetDOMStorageItems(parsed, context) ||
+    handleConsoleEnable(parsed, context)
+  );
+}
+
+/**
  * Default initialization commands / 기본 초기화 명령
  */
 const DEFAULT_INIT_COMMANDS = [
@@ -182,13 +719,31 @@ async function sendDefaultInitCommands(targetWindow: Window): Promise<void> {
 
 /**
  * Send CDP messages / CDP 메시지 전송
+ * Extract and store response bodies before sending / 전송 전에 응답 본문 추출 및 저장
  */
 async function sendCDPMessages(
   messages: PostMessageCDPMessage[],
-  targetWindow: Window
+  targetWindow: Window,
+  responseBodyStore?: ResponseBodyStore
 ): Promise<void> {
   if (messages.length === 0) {
     return;
+  }
+
+  // Extract and store response bodies from responseReceived events before sending / 전송 전에 responseReceived 이벤트에서 응답 본문 추출 및 저장
+  if (responseBodyStore) {
+    for (const msg of messages) {
+      try {
+        const parsed = JSON.parse(msg.message);
+        if (parsed.method === 'Network.responseReceived' && parsed.params?.response?.body) {
+          const requestId = parsed.params.requestId;
+          const body = parsed.params.response.body;
+          responseBodyStore.store(requestId, body);
+        }
+      } catch {
+        // Ignore parsing errors / 파싱 오류 무시
+      }
+    }
   }
 
   // Separate commands and events / 명령과 이벤트 분리
@@ -376,8 +931,14 @@ export function DevToolsPlayground({
 
   /**
    * Test localStorage / 로컬스토리지 테스트
+   * Simply sets localStorage item - the message handler will automatically send it to DevTools / localStorage 항목만 설정 - 메시지 핸들러가 자동으로 DevTools로 전송
    */
   const testLocalStorage = () => {
+    if (!popupWindow || popupWindow.closed) {
+      console.warn('DevTools is not open / DevTools가 열려있지 않습니다');
+      return;
+    }
+
     const testData = {
       timestamp: new Date().toISOString(),
       message: t.testData,
@@ -385,6 +946,9 @@ export function DevToolsPlayground({
     localStorage.setItem('devtools-test', JSON.stringify(testData));
     const retrieved = localStorage.getItem('devtools-test');
     console.log(t.localStorageTest, retrieved);
+
+    // The message handler will automatically handle DOMStorage.enable and send storage items / 메시지 핸들러가 자동으로 DOMStorage.enable을 처리하고 storage 항목을 전송함
+    // When DevTools sends DOMStorage.enable command, the handler will intercept it and send current localStorage / DevTools가 DOMStorage.enable 명령을 보내면 핸들러가 가로채서 현재 localStorage를 전송함
   };
 
   /**
@@ -436,6 +1000,9 @@ export function DevToolsPlayground({
         window.removeEventListener('message', interceptorRef.current, true);
       }
 
+      // Create response body store for replay mode / replay 모드를 위한 응답 본문 저장소 생성
+      const responseBodyStore = createResponseBodyStore();
+
       // Set up message handler / 메시지 핸들러 설정
       const handleMessage = (event: MessageEvent) => {
         // Only handle messages from replay window / replay 창에서 온 메시지만 처리
@@ -443,12 +1010,35 @@ export function DevToolsPlayground({
           return;
         }
 
-        // In replay mode, only handle control messages (DEVTOOLS_READY, etc.) / replay 모드에서는 제어 메시지만 처리 (DEVTOOLS_READY 등)
-        // Ignore all CDP_MESSAGE events from the original page / 원본 페이지에서 온 모든 CDP_MESSAGE 이벤트 무시
-        // Only messages from the file will be sent / 파일에서 읽은 메시지만 전송됨
+        // Handle commands from DevTools (same as Inspector) / DevTools에서 명령 처리 (Inspector와 동일)
         if (event.data?.type === 'CDP_MESSAGE') {
-          // Ignore CDP messages in replay mode - only file messages should be processed / replay 모드에서 CDP 메시지 무시 - 파일 메시지만 처리되어야 함
-          return;
+          try {
+            const parsed = JSON.parse(event.data.message);
+            if (parsed.id === undefined) {
+              return;
+            }
+
+            // Create handler context / 핸들러 컨텍스트 생성
+            const handlerContext: CommandHandlerContext = {
+              file,
+              cdpMessages: cdpMessagesRef.current,
+              responseBodyStore,
+              targetWindow: newWindow,
+            };
+
+            // Try to handle command / 명령 처리 시도
+            if (handleCDPCommand(parsed, handlerContext)) {
+              // Command was handled, stop propagation / 명령이 처리되었으므로 전파 중지
+              event.stopImmediatePropagation();
+              if (event.stopPropagation) {
+                event.stopPropagation();
+              }
+              event.preventDefault();
+              return;
+            }
+          } catch {
+            // Ignore parsing errors / 파싱 오류 무시
+          }
         }
 
         // Handle DevTools ready message / DevTools 준비 메시지 처리
@@ -457,7 +1047,7 @@ export function DevToolsPlayground({
             // Wait a bit for DevTools to fully initialize / DevTools가 완전히 초기화될 시간 제공
             setTimeout(() => {
               if (!messagesSentRef.current && cdpMessagesRef.current.length > 0 && newWindow) {
-                void sendCDPMessages(cdpMessagesRef.current, newWindow);
+                void sendCDPMessages(cdpMessagesRef.current, newWindow, responseBodyStore);
                 messagesSentRef.current = true;
                 setIsReplayLoading(false);
               }
@@ -518,7 +1108,7 @@ export function DevToolsPlayground({
       // Fallback: send messages after 5 seconds if DEVTOOLS_READY not received / 폴백: DEVTOOLS_READY를 받지 못한 경우 5초 후 메시지 전송
       setTimeout(() => {
         if (!messagesSentRef.current && cdpMessagesRef.current.length > 0 && newWindow) {
-          void sendCDPMessages(cdpMessagesRef.current, newWindow);
+          void sendCDPMessages(cdpMessagesRef.current, newWindow, responseBodyStore);
           messagesSentRef.current = true;
           setIsReplayLoading(false);
         }
@@ -552,10 +1142,113 @@ export function DevToolsPlayground({
         setPopupWindow(newWindow);
 
         // Set up message handler to ensure stored events are replayed / 저장된 이벤트가 재생되도록 메시지 핸들러 설정
+        // Also handle DOMStorage.enable command like Inspector / Inspector처럼 DOMStorage.enable 명령도 처리
         const handleDevToolsMessage = (event: MessageEvent) => {
           // Only handle messages from DevTools window / DevTools 창에서 온 메시지만 처리
           if (event.source !== newWindow) {
             return;
+          }
+
+          // Handle commands from DevTools (same as Inspector) / DevTools에서 명령 처리 (Inspector와 동일)
+          if (event.data?.type === 'CDP_MESSAGE') {
+            try {
+              const parsed = JSON.parse(event.data.message);
+              if (parsed.id === undefined) {
+                return;
+              }
+
+              // Handle DOMStorage.enable command (same as Inspector's handleDOMStorageEnable) / DOMStorage.enable 명령 처리 (Inspector의 handleDOMStorageEnable과 동일)
+              if (parsed.method === 'DOMStorage.enable') {
+                // Send fake response first / 먼저 가짜 응답 전송
+                sendFakeResponse(newWindow, parsed.id, {});
+
+                // Wait a bit for storage to be created by StorageKeyManager / StorageKeyManager가 storage를 생성할 시간 대기
+                setTimeout(() => {
+                  // Extract localStorage items from current page / 현재 페이지에서 localStorage 항목 추출
+                  const storageKey = window.location.origin;
+                  const localStorageItems: Array<[string, string]> = [];
+                  for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key !== null) {
+                      const value = localStorage.getItem(key);
+                      if (value !== null) {
+                        localStorageItems.push([key, value]);
+                      }
+                    }
+                  }
+
+                  // Extract sessionStorage items / sessionStorage 항목 추출
+                  const sessionStorageItems: Array<[string, string]> = [];
+                  for (let i = 0; i < sessionStorage.length; i++) {
+                    const key = sessionStorage.key(i);
+                    if (key !== null) {
+                      const value = sessionStorage.getItem(key);
+                      if (value !== null) {
+                        sessionStorageItems.push([key, value]);
+                      }
+                    }
+                  }
+
+                  // Send storage items as events (same as Inspector's sendStorageItemsAsEvents) / storage 항목을 이벤트로 전송 (Inspector의 sendStorageItemsAsEvents와 동일)
+                  const storageItems = {
+                    localStorage: localStorageItems,
+                    sessionStorage: sessionStorageItems,
+                  };
+
+                  // Send localStorage items as domStorageItemAdded events / localStorage 항목을 domStorageItemAdded 이벤트로 전송
+                  storageItems.localStorage.forEach(([key, value]) => {
+                    const eventData = {
+                      method: 'DOMStorage.domStorageItemAdded',
+                      params: {
+                        storageId: {
+                          isLocalStorage: true,
+                          storageKey,
+                          securityOrigin: storageKey,
+                        },
+                        key,
+                        newValue: value,
+                      },
+                    };
+                    const eventMessage = {
+                      type: 'CDP_MESSAGE' as const,
+                      message: JSON.stringify(eventData),
+                    };
+                    newWindow.postMessage(eventMessage, '*');
+                  });
+
+                  // Send sessionStorage items as domStorageItemAdded events / sessionStorage 항목을 domStorageItemAdded 이벤트로 전송
+                  storageItems.sessionStorage.forEach(([key, value]) => {
+                    const eventData = {
+                      method: 'DOMStorage.domStorageItemAdded',
+                      params: {
+                        storageId: {
+                          isLocalStorage: false,
+                          storageKey,
+                          securityOrigin: storageKey,
+                        },
+                        key,
+                        newValue: value,
+                      },
+                    };
+                    const eventMessage = {
+                      type: 'CDP_MESSAGE' as const,
+                      message: JSON.stringify(eventData),
+                    };
+                    newWindow.postMessage(eventMessage, '*');
+                  });
+                }, 200); // Wait 200ms for storage to be created (same as Inspector) / storage가 생성될 시간을 위해 200ms 대기 (Inspector와 동일)
+
+                // Stop event propagation to prevent client script from handling it / 클라이언트 스크립트가 처리하지 않도록 이벤트 전파 중지
+                event.stopImmediatePropagation();
+                if (event.stopPropagation) {
+                  event.stopPropagation();
+                }
+                event.preventDefault();
+                return;
+              }
+            } catch {
+              // Ignore parsing errors / 파싱 오류 무시
+            }
           }
 
           // Handle DevTools ready message / DevTools 준비 메시지 처리
