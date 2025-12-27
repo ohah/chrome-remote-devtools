@@ -109,7 +109,7 @@ describe('HTTP API', () => {
           }
           const response = await fetch(`http://localhost:${address.port}/json`);
           expect(response.status).toBe(200);
-          const data = await response.json();
+          const data = (await response.json()) as { targets: unknown[] };
           expect(data).toHaveProperty('targets');
           expect(Array.isArray(data.targets)).toBe(true);
           httpServer.close(() => resolve());
@@ -131,7 +131,7 @@ describe('HTTP API', () => {
           }
           const response = await fetch(`http://localhost:${address.port}/json/clients`);
           expect(response.status).toBe(200);
-          const data = await response.json();
+          const data = (await response.json()) as { clients: unknown[] };
           expect(data).toHaveProperty('clients');
           expect(Array.isArray(data.clients)).toBe(true);
           httpServer.close(() => resolve());
@@ -153,7 +153,7 @@ describe('HTTP API', () => {
           }
           const response = await fetch(`http://localhost:${address.port}/json/inspectors`);
           expect(response.status).toBe(200);
-          const data = await response.json();
+          const data = (await response.json()) as { inspectors: unknown[] };
           expect(data).toHaveProperty('inspectors');
           expect(Array.isArray(data.inspectors)).toBe(true);
           httpServer.close(() => resolve());
