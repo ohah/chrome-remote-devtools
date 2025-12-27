@@ -1,6 +1,10 @@
 {
   "name": "@ohah/chrome-remote-devtools-client",
   "version": "0.1.0-rc.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ohah/chrome-remote-devtools.git"
+  },
   "files": [
     "dist",
     "README.md"
