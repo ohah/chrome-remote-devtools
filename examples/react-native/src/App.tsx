@@ -102,6 +102,35 @@ function App() {
     }
   };
 
+  // Test console methods / 콘솔 메서드 테스트
+  const handleTestConsole = (type: 'log' | 'error' | 'warn' | 'info' | 'debug') => {
+    if (connectionStatus !== 'connected') {
+      Alert.alert('Error', 'Please connect to server first');
+      return;
+    }
+
+    const timestamp = new Date().toLocaleTimeString();
+    const message = `Test ${type} message at ${timestamp}`;
+
+    switch (type) {
+      case 'log':
+        console.log('📝 Log:', message, { count: 1, status: 'ok' });
+        break;
+      case 'error':
+        console.error('❌ Error:', message, new Error('Test error'));
+        break;
+      case 'warn':
+        console.warn('⚠️ Warning:', message, { warning: true });
+        break;
+      case 'info':
+        console.info('ℹ️ Info:', message, { info: 'test' });
+        break;
+      case 'debug':
+        console.debug('🐛 Debug:', message, { debug: true });
+        break;
+    }
+  };
+
   // Get status style / 상태 스타일 가져오기
   const getStatusStyle = (status: ConnectionStatus) => {
     switch (status) {
@@ -196,6 +225,47 @@ function App() {
               </>
             )}
           </View>
+
+          {/* Console Test Buttons / 콘솔 테스트 버튼 */}
+          {connectionStatus === 'connected' && (
+            <View style={styles.consoleTestContainer}>
+              <Text style={styles.consoleTestTitle}>Console Test / 콘솔 테스트</Text>
+              <View style={styles.consoleButtonRow}>
+                <TouchableOpacity
+                  style={[styles.consoleButton, styles.consoleLogButton]}
+                  onPress={() => handleTestConsole('log')}
+                >
+                  <Text style={styles.consoleButtonText}>Log</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.consoleButton, styles.consoleErrorButton]}
+                  onPress={() => handleTestConsole('error')}
+                >
+                  <Text style={styles.consoleButtonText}>Error</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.consoleButton, styles.consoleWarnButton]}
+                  onPress={() => handleTestConsole('warn')}
+                >
+                  <Text style={styles.consoleButtonText}>Warn</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.consoleButtonRow}>
+                <TouchableOpacity
+                  style={[styles.consoleButton, styles.consoleInfoButton]}
+                  onPress={() => handleTestConsole('info')}
+                >
+                  <Text style={styles.consoleButtonText}>Info</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.consoleButton, styles.consoleDebugButton]}
+                  onPress={() => handleTestConsole('debug')}
+                >
+                  <Text style={styles.consoleButtonText}>Debug</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
 
           {/* Instructions / 사용 방법 */}
           <View style={styles.instructionsContainer}>
@@ -342,6 +412,52 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     color: '#333333',
+  },
+  consoleTestContainer: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    padding: 16,
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  consoleTestTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#000000',
+  },
+  consoleButtonRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
+  },
+  consoleButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  consoleButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  consoleLogButton: {
+    backgroundColor: '#2196F3',
+  },
+  consoleErrorButton: {
+    backgroundColor: '#F44336',
+  },
+  consoleWarnButton: {
+    backgroundColor: '#FF9800',
+  },
+  consoleInfoButton: {
+    backgroundColor: '#00BCD4',
+  },
+  consoleDebugButton: {
+    backgroundColor: '#9C27B0',
   },
 });
 
