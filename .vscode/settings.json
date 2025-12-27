@@ -47,5 +47,8 @@
   // File associations / 파일 연결
   "files.associations": {
     "*.toml": "toml"
-  }
+  },
+
+  // Show files excluded by .gitignore in explorer / 탐색기에서 .gitignore로 제외된 파일도 표시
+  "explorer.excludeGitIgnore": false
 }
