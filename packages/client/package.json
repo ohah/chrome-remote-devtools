@@ -27,7 +27,7 @@
     "build:watch": "bun run build:esm:watch & bun run build:iife:watch",
     "build:esm:watch": "bun build src/index.ts --target browser --format esm --minify --outfile dist/index.esm.js --watch",
     "build:iife:watch": "bun build src/index.ts --target browser --format iife --minify --outfile dist/index.iife.js --watch",
-    "prepublishOnly": "bun run ../../scripts/prepare-publish.ts package.json && bun run build",
+    "prepublishOnly": "bun run build",
     "clean": "rm -rf dist",
     "test": "bun test"
   },
