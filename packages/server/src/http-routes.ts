@@ -68,7 +68,7 @@ export function createHttpRouter(socketServer: SocketServer) {
     }
 
     if (url.pathname === '/client.js') {
-      // Serve built client script (IIFE format for script tags) / 빌드된 클라이언트 스크립트 서빙 (script 태그용 IIFE 형식)
+      // Serve built client script for testing / 테스트를 위한 빌드된 클라이언트 스크립트 서빙
       try {
         // Try IIFE format first (for script tags) / 먼저 IIFE 형식 시도 (script 태그용)
         const clientScriptPath = join(__dirname, '../../client/dist/index.iife.js');

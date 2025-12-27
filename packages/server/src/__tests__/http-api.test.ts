@@ -2,8 +2,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { SocketServer } from '../index';
 import { createServer } from 'http';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
 describe('HTTP API', () => {
   let socketServer: SocketServer;
@@ -57,37 +55,6 @@ describe('HTTP API', () => {
         } else {
           res.writeHead(404, headers);
           res.end(JSON.stringify({ error: 'Client not found' }));
-        }
-        return;
-      }
-
-      if (url.pathname === '/client.js') {
-        // Try IIFE format first (for script tags) / 먼저 IIFE 형식 시도 (script 태그용)
-        try {
-          const clientScriptPath = join(__dirname, '../../client/dist/index.iife.js');
-          const clientScript = readFileSync(clientScriptPath, 'utf-8');
-          res.writeHead(200, {
-            ...headers,
-            'Content-Type': 'application/javascript', // Override Content-Type / Content-Type 덮어쓰기
-          });
-          res.end(clientScript);
-        } catch {
-          // Fallback: try index.js if iife doesn't exist / Fallback: iife가 없으면 index.js 시도
-          try {
-            const clientScriptPath = join(__dirname, '../../client/dist/index.js');
-            const clientScript = readFileSync(clientScriptPath, 'utf-8');
-            res.writeHead(200, {
-              ...headers,
-              'Content-Type': 'application/javascript', // Override Content-Type / Content-Type 덮어쓰기
-            });
-            res.end(clientScript);
-          } catch {
-            res.writeHead(200, {
-              ...headers,
-              'Content-Type': 'application/javascript', // Override Content-Type / Content-Type 덮어쓰기
-            });
-            res.end(`console.error('Client script not found');`);
-          }
         }
         return;
       }
@@ -189,26 +156,6 @@ describe('HTTP API', () => {
           expect(response.status).toBe(404);
           const data = await response.json();
           expect(data).toHaveProperty('error');
-          httpServer.close(() => resolve());
-        } catch (error) {
-          httpServer.close(() => reject(error));
-        }
-      });
-    });
-  });
-
-  test('GET /client.js should return JavaScript / GET /client.js는 JavaScript 반환', async () => {
-    return new Promise<void>((resolve, reject) => {
-      httpServer.listen(0, async () => {
-        try {
-          const address = httpServer.address();
-          if (!address || typeof address === 'string') {
-            reject(new Error('Invalid server address'));
-            return;
-          }
-          const response = await fetch(`http://localhost:${address.port}/client.js`);
-          expect(response.status).toBe(200);
-          expect(response.headers.get('content-type')).toContain('application/javascript');
           httpServer.close(() => resolve());
         } catch (error) {
           httpServer.close(() => reject(error));
