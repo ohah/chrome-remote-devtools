@@ -53,9 +53,46 @@ function ReplayPage() {
       const isPanelActiveRef = { current: false };
       // Track if messages have been sent to prevent duplicate sending / 중복 전송 방지를 위한 메시지 전송 여부 추적
       const messagesSentRef = { current: false };
+      // Track if messages are currently being sent to prevent race conditions / 경쟁 상태 방지를 위한 메시지 전송 중 여부 추적
+      const isSendingRef = { current: false };
 
       // Response body store for replay mode / replay 모드를 위한 응답 본문 저장소
       const responseBodyStore = createResponseBodyStore();
+
+      // Safe message sending function to prevent race conditions / 경쟁 상태 방지를 위한 안전한 메시지 전송 함수
+      const sendMessagesSafely = async (includeSessionReplay = false) => {
+        // Already sending or already sent, ignore / 이미 전송 중이거나 전송 완료된 경우 무시
+        if (isSendingRef.current || messagesSentRef.current) {
+          return;
+        }
+
+        if (!iframeRef.current?.contentWindow || cdpMessagesRef.current.length === 0) {
+          return;
+        }
+
+        isSendingRef.current = true; // Mark as sending / 전송 시작 표시
+
+        try {
+          const sendContext: SendCDPMessagesContext = {
+            cdpMessages: cdpMessagesRef.current,
+            eventBuffer: eventBufferRef.current,
+            file,
+            targetWindow: iframeRef.current.contentWindow,
+            responseBodyStore,
+            setIsLoading: () => {}, // No-op since loading state is not displayed in UI / UI에 로딩 상태가 표시되지 않으므로 no-op
+          };
+
+          // Wait for completion before setting flag / 완료를 기다린 후 플래그 설정
+          await sendCDPMessages(sendContext, includeSessionReplay);
+          messagesSentRef.current = true;
+        } catch (error) {
+          console.error('Failed to send CDP messages / CDP 메시지 전송 실패:', error);
+          // Reset flag on error to allow retry / 에러 발생 시 플래그 리셋하여 재시도 가능하게
+          isSendingRef.current = false;
+        } finally {
+          isSendingRef.current = false;
+        }
+      };
 
       // Wait for DevTools to be ready / DevTools 준비 대기
       const handleMessage = (event: MessageEvent) => {
@@ -94,18 +131,7 @@ function ReplayPage() {
           if (!messagesSentRef.current && cdpMessagesRef.current.length > 0) {
             // Wait a bit for DevTools to fully initialize / DevTools가 완전히 초기화될 시간 제공
             setTimeout(() => {
-              if (!messagesSentRef.current && cdpMessagesRef.current.length > 0) {
-                const sendContext: SendCDPMessagesContext = {
-                  cdpMessages: cdpMessagesRef.current,
-                  eventBuffer: eventBufferRef.current,
-                  file,
-                  targetWindow: iframeRef.current!.contentWindow!,
-                  responseBodyStore,
-                  setIsLoading: () => {}, // No-op since loading state is not displayed in UI / UI에 로딩 상태가 표시되지 않으므로 no-op
-                };
-                void sendCDPMessages(sendContext);
-                messagesSentRef.current = true;
-              }
+              void sendMessagesSafely();
             }, 1000);
           }
         }
@@ -120,16 +146,7 @@ function ReplayPage() {
           // Send messages when panel is activated / 패널이 활성화될 때 메시지 전송
           // If this is the first activation, send all messages including SessionReplay / 첫 활성화인 경우 SessionReplay를 포함한 모든 메시지 전송
           if (!messagesSentRef.current && cdpMessagesRef.current.length > 0) {
-            const sendContext: SendCDPMessagesContext = {
-              cdpMessages: cdpMessagesRef.current,
-              eventBuffer: eventBufferRef.current,
-              file,
-              targetWindow: iframeRef.current!.contentWindow!,
-              responseBodyStore,
-              setIsLoading: () => {}, // No-op since loading state is not displayed in UI
-            };
-            void sendCDPMessages(sendContext, true); // Include SessionReplay events on first activation / 첫 활성화 시 SessionReplay 이벤트 포함
-            messagesSentRef.current = true;
+            void sendMessagesSafely(true); // Include SessionReplay events on first activation / 첫 활성화 시 SessionReplay 이벤트 포함
           } else {
             // If other messages already sent, only send SessionReplay events / 다른 메시지가 이미 전송되었다면 SessionReplay 이벤트만 전송
             const sendContext: SendCDPMessagesContext = {
@@ -165,22 +182,7 @@ function ReplayPage() {
         // This ensures messages are sent regardless of which panel is active / 어떤 패널이 활성화되어 있든 메시지가 전송되도록 보장
         // DEVTOOLS_READY or SESSION_REPLAY_READY will trigger earlier sending / DEVTOOLS_READY 또는 SESSION_REPLAY_READY가 더 일찍 전송을 트리거함
         setTimeout(() => {
-          if (
-            iframeRef.current?.contentWindow &&
-            cdpMessagesRef.current.length > 0 &&
-            !messagesSentRef.current
-          ) {
-            const sendContext: SendCDPMessagesContext = {
-              cdpMessages: cdpMessagesRef.current,
-              eventBuffer: eventBufferRef.current,
-              file,
-              targetWindow: iframeRef.current.contentWindow,
-              responseBodyStore,
-              setIsLoading: () => {}, // No-op since loading state is not displayed in UI
-            };
-            void sendCDPMessages(sendContext);
-            messagesSentRef.current = true;
-          }
+          void sendMessagesSafely();
         }, 5000); // Give DevTools time to fully initialize (backup if DEVTOOLS_READY not received) / DevTools가 완전히 초기화될 시간 제공 (DEVTOOLS_READY를 받지 못한 경우 백업)
       };
 

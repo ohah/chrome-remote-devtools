@@ -39,17 +39,26 @@ export async function sendBufferedMessages(
   }
 
   // Extract and store response bodies from responseReceived events before sending / 전송 전에 responseReceived 이벤트에서 응답 본문 추출 및 저장
+  const responseReceivedEvents: Array<{ requestId: string; body: string }> = [];
   for (const msg of messages) {
     try {
       const parsed = JSON.parse(msg.message);
       if (parsed.method === 'Network.responseReceived' && parsed.params?.response?.body) {
         const requestId = parsed.params.requestId;
         const body = parsed.params.response.body;
-        responseBodyStore.store(requestId, body);
+        if (requestId && body) {
+          responseBodyStore.store(requestId, body);
+          responseReceivedEvents.push({ requestId, body });
+        }
       }
     } catch {
       // Ignore parsing errors / 파싱 오류 무시
     }
+  }
+
+  // Wait a bit to ensure response bodies are stored / 응답 본문이 저장되었는지 확인하기 위해 잠시 대기
+  if (responseReceivedEvents.length > 0) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
   }
 
   // Send messages in batches / 배치로 메시지 전송

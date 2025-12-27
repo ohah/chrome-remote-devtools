@@ -176,11 +176,23 @@ export async function sendCDPMessages(
     }
   });
 
-  const otherEvents = events.filter((msg) => {
+  // Separate network events from other events / 네트워크 이벤트와 다른 이벤트 분리
+  const networkEvents = events.filter((msg) => {
+    try {
+      const parsed = JSON.parse(msg.message);
+      return parsed.method?.startsWith('Network.');
+    } catch {
+      return false;
+    }
+  });
+
+  const nonNetworkEvents = events.filter((msg) => {
     try {
       const parsed = JSON.parse(msg.message);
       return (
-        !parsed.method?.startsWith('DOMStorage.') && !parsed.method?.startsWith('SessionReplay.')
+        !parsed.method?.startsWith('DOMStorage.') &&
+        !parsed.method?.startsWith('SessionReplay.') &&
+        !parsed.method?.startsWith('Network.')
       );
     } catch {
       return true; // If parsing fails, include it in other events / 파싱 실패 시 다른 이벤트에 포함
@@ -194,10 +206,79 @@ export async function sendCDPMessages(
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
-  // Then send other events / 그 다음 다른 이벤트 전송
-  // Note: sendBufferedMessages will extract and store response bodies before sending / 참고: sendBufferedMessages가 전송 전에 응답 본문을 추출하고 저장함
-  if (otherEvents.length > 0) {
-    await sendBufferedMessages(otherEvents, context.targetWindow, context.responseBodyStore);
+  // Sort network events by requestId to ensure proper order / 네트워크 이벤트를 requestId별로 정렬하여 순서 보장
+  // Group network events by requestId / requestId별로 네트워크 이벤트 그룹화
+  const networkEventsByRequestId = new Map<string, PostMessageCDPMessage[]>();
+  const networkEventsWithoutRequestId: PostMessageCDPMessage[] = [];
+
+  for (const msg of networkEvents) {
+    try {
+      const parsed = JSON.parse(msg.message);
+      const requestId = parsed.params?.requestId;
+      if (requestId) {
+        if (!networkEventsByRequestId.has(requestId)) {
+          networkEventsByRequestId.set(requestId, []);
+        }
+        networkEventsByRequestId.get(requestId)!.push(msg);
+      } else {
+        networkEventsWithoutRequestId.push(msg);
+      }
+    } catch {
+      // If parsing fails, add to without requestId / 파싱 실패 시 requestId 없는 그룹에 추가
+      networkEventsWithoutRequestId.push(msg);
+    }
+  }
+
+  // Sort network events by type within each requestId group / 각 requestId 그룹 내에서 이벤트 타입별로 정렬
+  // Order: requestWillBeSent -> responseReceived -> loadingFinished / 순서: requestWillBeSent -> responseReceived -> loadingFinished
+  const sortedNetworkEvents: PostMessageCDPMessage[] = [];
+  for (const [requestId, events] of networkEventsByRequestId) {
+    // Find events by type / 타입별로 이벤트 찾기
+    const requestWillBeSent = events.find((e) => {
+      try {
+        return JSON.parse(e.message).method === 'Network.requestWillBeSent';
+      } catch {
+        return false;
+      }
+    });
+    const responseReceived = events.find((e) => {
+      try {
+        return JSON.parse(e.message).method === 'Network.responseReceived';
+      } catch {
+        return false;
+      }
+    });
+    const loadingFinished = events.find((e) => {
+      try {
+        return JSON.parse(e.message).method === 'Network.loadingFinished';
+      } catch {
+        return false;
+      }
+    });
+
+    // Add in correct order / 올바른 순서로 추가
+    if (requestWillBeSent) sortedNetworkEvents.push(requestWillBeSent);
+    if (responseReceived) sortedNetworkEvents.push(responseReceived);
+    if (loadingFinished) sortedNetworkEvents.push(loadingFinished);
+  }
+
+  // Add network events without requestId at the end / requestId가 없는 네트워크 이벤트를 마지막에 추가
+  sortedNetworkEvents.push(...networkEventsWithoutRequestId);
+
+  // Send network events in sorted order / 정렬된 순서로 네트워크 이벤트 전송
+  if (sortedNetworkEvents.length > 0) {
+    await sendBufferedMessages(
+      sortedNetworkEvents,
+      context.targetWindow,
+      context.responseBodyStore
+    );
+    // Delay to ensure network events are processed / 네트워크 이벤트가 처리될 시간 제공
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+
+  // Then send other non-network events / 그 다음 다른 비네트워크 이벤트 전송
+  if (nonNetworkEvents.length > 0) {
+    await sendBufferedMessages(nonNetworkEvents, context.targetWindow, context.responseBodyStore);
   }
 
   // Send SessionReplay events if this is the first activation / 첫 활성화인 경우 SessionReplay 이벤트도 전송
