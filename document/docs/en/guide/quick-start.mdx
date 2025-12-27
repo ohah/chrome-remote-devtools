@@ -1,6 +1,16 @@
+import { PackageManagerTabs } from '@theme';
+
 # Quick Start
 
 This guide will help you get started with Chrome Remote DevTools in just a few minutes.
+
+## Installation
+
+### Install Client Package
+
+To use Chrome Remote DevTools in your web page, you need to install the client package:
+
+<PackageManagerTabs command="install @ohah/chrome-remote-devtools-client" />
 
 ## Start the Development Servers
 
@@ -24,17 +34,17 @@ The Inspector will be available at `http://localhost:5173` (or the port shown in
 
 ### 3. Initialize the Client in Your Web Page
 
-**Using npm package (ESM):**
-
-```bash
-npm install @ohah/chrome-remote-devtools-client
-```
+**Using ESM module (TypeScript/React etc.):**
 
 ```typescript
 import { init } from '@ohah/chrome-remote-devtools-client';
 
 init({
   serverUrl: 'ws://localhost:8080',
+  rrweb: {
+    enable: true,
+    enableExportButton: true,
+  },
 });
 ```
 
@@ -45,9 +55,20 @@ init({
 <script>
   ChromeRemoteDevTools.init({
     serverUrl: 'ws://localhost:8080',
+    rrweb: {
+      enable: true,
+      enableExportButton: true,
+    },
   });
 </script>
 ```
+
+#### Configuration Options
+
+- `serverUrl`: WebSocket server URL (use `wss://` for HTTPS, `ws://` for HTTP)
+- `rrweb.enable`: Enable session replay recording (optional, default: `false`)
+- `rrweb.enableExportButton`: Show export button on page (optional, default: `false`)
+- `skipWebSocket`: Skip WebSocket connection and use postMessage only (optional, default: `false`)
 
 ## Your First Debugging Session
 
@@ -69,3 +90,4 @@ The Inspector will connect to your page and you can use all DevTools features:
 - Learn about the [Architecture](/architecture/overview)
 - Try the [Playground](/examples/)
 - Read the [API Documentation](/api/server)
+

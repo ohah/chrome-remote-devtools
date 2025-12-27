@@ -1,5 +1,4 @@
 import { DevToolsPlayground } from '../../../components/DevToolsPlayground';
-// @ts-expect-error - @theme is provided by Rspress at runtime
 import { PackageManagerTabs } from '@theme';
 
 # 플레이그라운드
@@ -127,9 +126,7 @@ npx chrome-remote-devtools-server
 
 클라이언트 패키지를 설치하고 애플리케이션에서 초기화합니다:
 
-```bash
-npm install @ohah/chrome-remote-devtools-client
-```
+<PackageManagerTabs command="install @ohah/chrome-remote-devtools-client" />
 
 **React / TypeScript:**
 
