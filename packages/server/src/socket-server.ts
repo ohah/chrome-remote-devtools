@@ -368,7 +368,9 @@ export class SocketServer {
       let data = this.convertMessageToString(message);
 
       // Check if message contains compressed data / 메시지에 압축된 데이터가 포함되어 있는지 확인
-      const parsed = safeParseCDPMessage(data) as CDPMessage & { params?: CompressedParams | unknown } | null;
+      const parsed = safeParseCDPMessage(data) as
+        | (CDPMessage & { params?: CompressedParams | unknown })
+        | null;
       if (parsed) {
         // Decompress if needed / 필요시 압축 해제
         data = this.decompressMessage(parsed, id);
