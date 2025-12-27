@@ -176,7 +176,6 @@ The server provides the following HTTP endpoints:
 - `GET /json/clients` - Get all clients with details
 - `GET /json/inspectors` - Get all inspectors
 - `GET /json/client/:id` - Get specific client
-- `GET /client.js` - Serve built client script
 
 WebSocket endpoints:
 
