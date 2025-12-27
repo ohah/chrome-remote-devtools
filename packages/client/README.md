@@ -13,11 +13,15 @@ npm install @ohah/chrome-remote-devtools-client
 ### React / ESM
 
 ```typescript
-import { initCDPClient } from '@ohah/chrome-remote-devtools-client';
+import { init } from '@ohah/chrome-remote-devtools-client';
 
 useEffect(() => {
-  initCDPClient('wss://your-server.com', {
-    enable: true, // Enable rrweb session recording
+  init({
+    serverUrl: 'wss://your-server.com',
+    rrweb: {
+      enable: true, // Enable rrweb session recording
+      enableExportButton: true, // Optional: show export button on page
+    },
   });
 }, []);
 ```
@@ -31,6 +35,7 @@ useEffect(() => {
     serverUrl: 'wss://your-server.com',
     rrweb: {
       enable: true, // Enable rrweb session recording
+      enableExportButton: true, // Optional: show export button on page
     },
   });
 </script>
@@ -45,6 +50,7 @@ Or load from CDN (when published):
     serverUrl: 'wss://your-server.com',
     rrweb: {
       enable: true,
+      enableExportButton: true,
     },
   });
 </script>
@@ -52,24 +58,30 @@ Or load from CDN (when published):
 
 ## API
 
-### `initCDPClient(serverUrl, rrwebConfig?, skipWebSocket?)`
+### `init(options)` (ESM)
 
-Initialize the CDP client (ESM only).
+Initialize the CDP client.
 
 **Parameters:**
 
-- `serverUrl` (string) - Server WebSocket URL
-- `rrwebConfig` (object, optional) - Rrweb configuration
-  - `enable` (boolean) - Enable rrweb session recording
-- `skipWebSocket` (boolean, optional) - Skip WebSocket connection (use postMessage only)
+- `options` (object) - Configuration options
+  - `serverUrl` (string, optional) - Server WebSocket URL
+  - `rrweb` (object, optional) - Rrweb configuration
+    - `enable` (boolean) - Enable rrweb session recording (default: `false`)
+    - `enableExportButton` (boolean) - Show export button on page (default: `false`)
+  - `skipWebSocket` (boolean, optional) - Skip WebSocket connection (use postMessage only, default: `false`)
 
 **Example:**
 
 ```typescript
-import { initCDPClient } from '@ohah/chrome-remote-devtools-client';
+import { init } from '@ohah/chrome-remote-devtools-client';
 
-await initCDPClient('wss://your-server.com', {
-  enable: true,
+await init({
+  serverUrl: 'wss://your-server.com',
+  rrweb: {
+    enable: true,
+    enableExportButton: true,
+  },
 });
 ```
 
@@ -82,8 +94,9 @@ Initialize the CDP client using the global API.
 - `options` (object) - Configuration options
   - `serverUrl` (string, optional) - Server WebSocket URL
   - `rrweb` (object, optional) - Rrweb configuration
-    - `enable` (boolean) - Enable rrweb session recording
-  - `skipWebSocket` (boolean, optional) - Skip WebSocket connection (use postMessage only)
+    - `enable` (boolean) - Enable rrweb session recording (default: `false`)
+    - `enableExportButton` (boolean) - Show export button on page (default: `false`)
+  - `skipWebSocket` (boolean, optional) - Skip WebSocket connection (use postMessage only, default: `false`)
 
 **Example:**
 
@@ -92,6 +105,7 @@ ChromeRemoteDevTools.init({
   serverUrl: 'wss://your-server.com',
   rrweb: {
     enable: true,
+    enableExportButton: true,
   },
 });
 ```
@@ -119,6 +133,7 @@ ChromeRemoteDevTools.init({
   serverUrl: 'wss://your-server.com',
   rrweb: {
     enable: true,
+    enableExportButton: true,
   },
 });
 
