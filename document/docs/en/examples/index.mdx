@@ -1,5 +1,4 @@
 import { DevToolsPlayground } from '../../../components/DevToolsPlayground';
-// @ts-expect-error - @theme is provided by Rspress at runtime
 import { PackageManagerTabs } from '@theme';
 
 # Playground
@@ -127,9 +126,7 @@ npx chrome-remote-devtools-server
 
 Install the client package and initialize it in your application:
 
-```bash
-npm install @ohah/chrome-remote-devtools-client
-```
+<PackageManagerTabs command="install @ohah/chrome-remote-devtools-client" />
 
 **React / TypeScript:**
 

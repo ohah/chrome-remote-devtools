@@ -1,6 +1,16 @@
+import { PackageManagerTabs } from '@theme';
+
 # 빠른 시작
 
 이 가이드는 몇 분 안에 Chrome Remote DevTools를 시작하는 데 도움이 됩니다.
+
+## 설치
+
+### 클라이언트 패키지 설치
+
+웹 페이지에서 Chrome Remote DevTools를 사용하려면 클라이언트 패키지를 설치해야 합니다:
+
+<PackageManagerTabs command="install @ohah/chrome-remote-devtools-client" />
 
 ## 개발 서버 시작
 
@@ -24,17 +34,17 @@ Inspector는 `http://localhost:5173` (또는 터미널에 표시된 포트)에�
 
 ### 3. 웹 페이지에서 클라이언트 초기화
 
-**npm 패키지 사용 (ESM):**
-
-```bash
-npm install @ohah/chrome-remote-devtools-client
-```
+**ESM 모듈 사용 (TypeScript/React 등):**
 
 ```typescript
 import { init } from '@ohah/chrome-remote-devtools-client';
 
 init({
   serverUrl: 'ws://localhost:8080',
+  rrweb: {
+    enable: true,
+    enableExportButton: true,
+  },
 });
 ```
 
@@ -45,9 +55,20 @@ init({
 <script>
   ChromeRemoteDevTools.init({
     serverUrl: 'ws://localhost:8080',
+    rrweb: {
+      enable: true,
+      enableExportButton: true,
+    },
   });
 </script>
 ```
+
+#### 설정 옵션
+
+- `serverUrl`: WebSocket 서버 URL (HTTPS는 `wss://`, HTTP는 `ws://` 사용)
+- `rrweb.enable`: 세션 리플레이 녹화 활성화 (선택사항, 기본값: `false`)
+- `rrweb.enableExportButton`: 페이지에 export 버튼 표시 (선택사항, 기본값: `false`)
+- `skipWebSocket`: WebSocket 연결 건너뛰고 postMessage만 사용 (선택사항, 기본값: `false`)
 
 ## 첫 디버깅 세션
 
@@ -69,3 +90,4 @@ Inspector가 페이지에 연결되고 모든 DevTools 기능을 사용할 수 �
 - [아키텍처](/ko/architecture/overview) 알아보기
 - [플레이그라운드](/ko/examples/) 체험하기
 - [API 문서](/ko/api/server) 읽기
+
