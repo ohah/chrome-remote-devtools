@@ -110,10 +110,7 @@ jobs:
       - name: Publish to npm
         working-directory: packages/client
         run: |
-          # Remove workspace dependencies before publish / publish 전에 workspace 의존성 제거
-          bun run ../../scripts/prepare-publish.ts package.json
-          npm version ${{ needs.detect-package.outputs.version }} --no-git-tag-version --allow-same-version
-          npm publish --provenance --access public
+          npm publish --provenance --access public --tag latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -151,9 +148,6 @@ jobs:
       - name: Publish to npm
         working-directory: packages/server
         run: |
-          # Remove workspace dependencies before publish / publish 전에 workspace 의존성 제거
-          bun run ../../scripts/prepare-publish.ts package.json
-          npm version ${{ needs.detect-package.outputs.version }} --no-git-tag-version --allow-same-version
-          npm publish --provenance --access public
+          npm publish --provenance --access public --tag latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
