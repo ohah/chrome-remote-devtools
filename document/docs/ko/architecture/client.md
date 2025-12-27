@@ -81,15 +81,29 @@ graph TB
 
 ## 초기화
 
-클라이언트는 두 가지 방법으로 초기화할 수 있습니다:
+클라이언트는 `init()` 함수를 사용하여 초기화합니다:
 
-1. **자동**: 데이터 속성이 있는 스크립트 태그를 통해
-2. **수동**: `initCDPClient()` 함수를 통해 프로그래밍 방식으로
+```typescript
+import { init } from '@ohah/chrome-remote-devtools-client';
+
+init({
+  serverUrl: 'ws://localhost:8080',
+  rrweb: {
+    enable: true,
+  },
+});
+```
+
+Vanilla JavaScript (IIFE)의 경우 전역 API를 사용합니다:
 
 ```html
-<script
-  src="http://localhost:8080/client.js"
-  data-server-url="http://localhost:8080"
-  data-enable-rrweb="true"
-></script>
+<script src="http://localhost:8080/client.js"></script>
+<script>
+  ChromeRemoteDevTools.init({
+    serverUrl: 'ws://localhost:8080',
+    rrweb: {
+      enable: true,
+    },
+  });
+</script>
 ```

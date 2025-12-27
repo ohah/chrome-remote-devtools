@@ -6,9 +6,6 @@ import { rspack } from '@rspack/core';
 
 // DevTools frontend path - use bundled only / DevTools frontend 경로 - bundled만 사용
 const devtoolsPath = path.resolve(__dirname, '../devtools/bundled/front_end');
-// Client script path / 클라이언트 스크립트 경로
-// Use IIFE format for script tag loading / script 태그 로딩을 위해 IIFE 형식 사용
-const clientPath = path.resolve(__dirname, '../packages/client/dist/index.iife.js');
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -31,6 +28,8 @@ export default defineConfig({
   // Type assertion needed because rspress-plugin-mermaid may not export proper types
   // 타입 단언이 필요합니다. rspress-plugin-mermaid가 적절한 타입을 내보내지 않을 수 있기 때문입니다
   plugins: [pluginMermaid() as any],
+  // Global UI components / 전역 UI 컴포넌트
+  globalUIComponents: [path.join(__dirname, 'docs/components/ClientInit.tsx')],
   builderConfig: {
     output: {
       distPath: {
@@ -56,13 +55,6 @@ export default defineConfig({
           });
         }
 
-        if (existsSync(clientPath)) {
-          copyPatterns.push({
-            from: clientPath,
-            to: 'client.js',
-          });
-        }
-
         if (copyPatterns.length > 0) {
           config.plugins = config.plugins || [];
           config.plugins.push(
@@ -78,29 +70,9 @@ export default defineConfig({
     // Configure dev server / 개발 서버 설정
     dev: {
       setupMiddlewares: (middlewares, _server) => {
-        // Add custom middleware to serve devtools-frontend and client.js / devtools-frontend와 client.js 서빙을 위한 커스텀 미들웨어 추가
+        // Add custom middleware to serve devtools-frontend / devtools-frontend 서빙을 위한 커스텀 미들웨어 추가
         middlewares.push((req, res, next) => {
           const urlPath = req.url || '';
-
-          // Handle client.js request (with base path) / client.js 요청 처리 (base 경로 포함)
-          if (urlPath === '/chrome-remote-devtools/client.js' || urlPath === '/client.js') {
-            if (existsSync(clientPath) && statSync(clientPath).isFile()) {
-              try {
-                const content = readFileSync(clientPath);
-                res.setHeader('Content-Type', 'application/javascript');
-                res.end(content);
-                return;
-              } catch (error) {
-                console.error(`Error serving client.js:`, error);
-                res.statusCode = 500;
-                res.end('Internal server error');
-                return;
-              }
-            }
-            res.statusCode = 404;
-            res.end('File not found');
-            return;
-          }
 
           // Handle devtools-frontend requests (with base path) / devtools-frontend 요청 처리 (base 경로 포함)
           const devtoolsPrefix = '/chrome-remote-devtools/devtools-frontend';

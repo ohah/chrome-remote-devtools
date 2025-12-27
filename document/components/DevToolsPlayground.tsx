@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { exportEvents } from '@ohah/chrome-remote-devtools-client';
 
 /**
  * PostMessage CDP message format / PostMessage CDP 메시지 형식
@@ -800,26 +801,6 @@ async function sendCDPMessages(
 }
 
 /**
- * Load client script dynamically / 동적으로 클라이언트 스크립트 로드
- * Same as popup example / 팝업 예제와 동일
- * Uses built client.js from document build / 문서 빌드의 빌드된 client.js 사용
- */
-function loadClientScript(): void {
-  // Check if script is already loaded / 스크립트가 이미 로드되었는지 확인
-  if (document.querySelector('script[data-chrome-remote-devtools-client]')) {
-    return;
-  }
-
-  // Use built client.js from document build / 문서 빌드의 빌드된 client.js 사용
-  const script = document.createElement('script');
-  script.src = '/chrome-remote-devtools/client.js';
-  script.setAttribute('data-enable-rrweb', 'true');
-  script.setAttribute('data-chrome-remote-devtools-client', 'true');
-  // Popup mode uses postMessage (no data-server-url needed) / 팝업 모드는 postMessage 사용 (data-server-url 불필요)
-  document.head.appendChild(script);
-}
-
-/**
  * DevTools Playground Component / DevTools 플레이그라운드 컴포넌트
  * Opens DevTools in a popup window / 팝업 창에서 DevTools를 엽니다
  */
@@ -889,11 +870,6 @@ export function DevToolsPlayground({
   const interceptorRef = useRef<((event: MessageEvent) => void) | null>(null);
   const cdpMessagesRef = useRef<PostMessageCDPMessage[]>([]);
   const messagesSentRef = useRef(false);
-
-  // Load client script on mount / 마운트 시 클라이언트 스크립트 로드
-  useEffect(() => {
-    loadClientScript();
-  }, []);
 
   // Cleanup message handler on unmount / 언마운트 시 메시지 핸들러 정리
   useEffect(() => {
@@ -1289,12 +1265,8 @@ export function DevToolsPlayground({
    */
   const handleExportFile = async () => {
     try {
-      if (typeof window !== 'undefined' && (window as any).chromeRemoteDevTools) {
-        await (window as any).chromeRemoteDevTools.exportEvents();
-        console.log(t.exportSuccess);
-      } else {
-        alert(t.exportNotAvailable);
-      }
+      await exportEvents();
+      console.log(t.exportSuccess);
     } catch (error) {
       console.error(t.exportFailed, error);
       alert(t.exportFailed);

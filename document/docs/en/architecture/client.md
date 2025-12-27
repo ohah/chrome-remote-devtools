@@ -81,15 +81,29 @@ graph TB
 
 ## Initialization
 
-The client can be initialized in two ways:
+The client is initialized using the `init()` function:
 
-1. **Automatic**: Via script tag with data attributes
-2. **Manual**: Programmatically via `initCDPClient()` function
+```typescript
+import { init } from '@ohah/chrome-remote-devtools-client';
+
+init({
+  serverUrl: 'ws://localhost:8080',
+  rrweb: {
+    enable: true,
+  },
+});
+```
+
+For vanilla JavaScript (IIFE), use the global API:
 
 ```html
-<script
-  src="http://localhost:8080/client.js"
-  data-server-url="http://localhost:8080"
-  data-enable-rrweb="true"
-></script>
+<script src="./client.js"></script>
+<script>
+  ChromeRemoteDevTools.init({
+    serverUrl: 'ws://localhost:8080',
+    rrweb: {
+      enable: true,
+    },
+  });
+</script>
 ```

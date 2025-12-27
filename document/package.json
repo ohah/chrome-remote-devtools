@@ -8,6 +8,7 @@
     "preview": "rspress preview"
   },
   "dependencies": {
+    "@ohah/chrome-remote-devtools-client": "workspace:*",
     "@rspress/core": "^2.0.0-rc.1"
   },
   "devDependencies": {
