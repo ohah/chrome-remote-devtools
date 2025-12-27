@@ -27,51 +27,75 @@ export function parseCLIArgs(): CLIOptions {
     switch (arg) {
       case '--port':
       case '-p':
-        if (nextArg) {
-          options.port = parseInt(nextArg);
+        if (nextArg && !nextArg.startsWith('-')) {
+          const port = parseInt(nextArg, 10);
+          if (isNaN(port) || port < 1 || port > 65535) {
+            console.error(`Invalid port number: ${nextArg}`);
+            process.exit(1);
+          }
+          options.port = port;
           i++;
+        } else {
+          console.error('--port requires a valid port number');
+          process.exit(1);
         }
         break;
       case '--host':
-      case '-h':
-        if (nextArg) {
+      case '-H':
+        if (nextArg && !nextArg.startsWith('-')) {
           options.host = nextArg;
           i++;
+        } else {
+          console.error('--host requires a host value');
+          process.exit(1);
         }
+        break;
+      case '-h':
+      case '--help':
+        printHelp();
+        process.exit(0);
         break;
       case '--ssl':
         options.useSsl = true;
         break;
       case '--cert':
-        if (nextArg) {
+        if (nextArg && !nextArg.startsWith('-')) {
           options.sslCertPath = nextArg;
           i++;
+        } else {
+          console.error('--cert requires a certificate file path');
+          process.exit(1);
         }
         break;
       case '--key':
-        if (nextArg) {
+        if (nextArg && !nextArg.startsWith('-')) {
           options.sslKeyPath = nextArg;
           i++;
+        } else {
+          console.error('--key requires a key file path');
+          process.exit(1);
         }
         break;
       case '--log-enabled':
         options.logEnabled = true;
         break;
       case '--log-methods':
-        if (nextArg) {
+        if (nextArg && !nextArg.startsWith('-')) {
           options.logMethods = nextArg;
           i++;
+        } else {
+          console.error('--log-methods requires a methods string');
+          process.exit(1);
         }
         break;
       case '--log-file':
-        if (nextArg) {
+        if (nextArg && !nextArg.startsWith('-')) {
           options.logFile = nextArg;
           i++;
+        } else {
+          console.error('--log-file requires a file path');
+          process.exit(1);
         }
-        break;
-      case '--help':
-        printHelp();
-        process.exit(0);
         break;
     }
   }
@@ -91,7 +115,8 @@ Usage:
 
 Options:
   -p, --port <number>        Server port (default: 8080 for HTTP, 8443 for HTTPS)
-  -h, --host <string>        Server host (default: 0.0.0.0)
+  -H, --host <string>        Server host (default: 0.0.0.0)
+  -h, --help                  Show this help message
   --ssl                      Enable HTTPS/WSS
   --cert <path>              Path to SSL certificate file (required with --ssl)
   --key <path>               Path to SSL private key file (required with --ssl)
