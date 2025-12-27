@@ -47,7 +47,7 @@ DevTools를 연 상태에서 이 버튼을 클릭하면 Console 패널에서 각
 
 1. **이벤트 수집**: 먼저 DevTools를 열고 페이지에서 다양한 이벤트를 발생시킵니다. 클라이언트 스크립트가 자동으로 콘솔 메시지, 네트워크 요청, SessionReplay 이벤트 등을 저장합니다.
 
-2. **파일 내보내기**: 플레이그라운드의 **파일 다운로드** 버튼을 클릭하면 JSON 파일이 자동으로 다운로드됩니다. 또는 페이지에서 `window.chromeRemoteDevTools.exportEvents()`를 호출할 수도 있습니다.
+2. **파일 내보내기**: 플레이그라운드의 **파일 다운로드** 버튼을 클릭하면 JSON 파일이 자동으로 다운로드됩니다. 또는 페이지에서 `ChromeRemoteDevTools.exportEvents()`를 호출할 수도 있습니다.
 
 3. **파일 저장**: 다운로드된 파일은 나중에 재생하거나 다른 사람과 공유할 수 있습니다.
 
@@ -223,8 +223,8 @@ localStorage.removeItem('key');
 
 ```javascript
 // 클라이언트 스크립트가 로드된 후
-if (window.chromeRemoteDevTools) {
-  await window.chromeRemoteDevTools.exportEvents();
+if (typeof ChromeRemoteDevTools !== 'undefined') {
+  await ChromeRemoteDevTools.exportEvents();
 }
 ```
 
