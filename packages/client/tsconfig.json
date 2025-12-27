@@ -8,6 +8,7 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": false,
+    // JavaScript is bundled by Bun (bun build); TypeScript only emits declaration files here / JavaScript는 Bun(bun build)으로 번들링됨; TypeScript는 여기서 선언 파일만 생성
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
