@@ -126,8 +126,10 @@ export const Route = createRootRoute({
     const location = useLocation();
     const currentPath = location.pathname;
     const showTitleBar = isTauri;
+    // Show back button on routes that are not the root / 루트가 아닌 경로에서 뒤로가기 버튼 표시
     const routesWithBackButton = ['/replay'];
-    const showBack = routesWithBackButton.includes(currentPath);
+    const isDevtoolsRoute = currentPath.startsWith('/devtools/');
+    const showBack = routesWithBackButton.includes(currentPath) || isDevtoolsRoute;
     return (
       <div className="h-screen flex flex-col bg-gray-900">
         {showTitleBar && <TitleBar showBack={showBack} />}
