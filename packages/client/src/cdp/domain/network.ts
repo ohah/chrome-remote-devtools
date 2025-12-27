@@ -238,6 +238,7 @@ export default class Network extends BaseDomain {
           params: {
             requestId,
             timestamp: getTimestamp(),
+            encodedDataLength: new Blob([this.responseText]).size,
           },
         });
       });
@@ -378,6 +379,7 @@ export default class Network extends BaseDomain {
                 params: {
                   requestId,
                   timestamp: getTimestamp(),
+                  encodedDataLength: new Blob([body]).size,
                 },
               });
             })
@@ -420,6 +422,7 @@ export default class Network extends BaseDomain {
                 params: {
                   requestId,
                   timestamp: getTimestamp(),
+                  encodedDataLength: 0,
                 },
               });
             });
@@ -489,6 +492,7 @@ export default class Network extends BaseDomain {
             params: {
               requestId,
               timestamp: getTimestamp(),
+              encodedDataLength: 0,
             },
           });
         });
