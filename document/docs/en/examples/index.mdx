@@ -47,7 +47,7 @@ Click the **Export File** button to export all events that occurred on the curre
 
 1. **Collect Events**: First, open DevTools and trigger various events on the page. The client script automatically stores console messages, network requests, SessionReplay events, etc.
 
-2. **Export File**: Click the **Export File** button in the playground to automatically download a JSON file. Alternatively, you can call `window.chromeRemoteDevTools.exportEvents()` on the page.
+2. **Export File**: Click the **Export File** button in the playground to automatically download a JSON file. Alternatively, you can call `ChromeRemoteDevTools.exportEvents()` on the page.
 
 3. **Save File**: The downloaded file can be replayed later or shared with others.
 
@@ -223,8 +223,8 @@ localStorage.removeItem('key');
 
 ```javascript
 // After client script is loaded
-if (window.chromeRemoteDevTools) {
-  await window.chromeRemoteDevTools.exportEvents();
+if (typeof ChromeRemoteDevTools !== 'undefined') {
+  await ChromeRemoteDevTools.exportEvents();
 }
 ```
 
