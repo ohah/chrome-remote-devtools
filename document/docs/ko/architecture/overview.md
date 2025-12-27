@@ -50,6 +50,10 @@ sequenceDiagram
 - **@ohah/chrome-remote-devtools-client**: CDP 클라이언트 (JavaScript, 웹페이지에 로드)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, 웹/데스크탑 공유)
 
+## 데이터 저장소
+
+- **IndexedDB**: 브라우저에서 오프라인 로깅 및 세션 리플레이 데이터 저장에 사용
+
 ## 주요 구성 요소
 
 ### Client
