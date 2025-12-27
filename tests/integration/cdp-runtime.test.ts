@@ -3,7 +3,7 @@ import { test, expect } from './fixtures/server';
 
 test.describe('Runtime Domain Integration', () => {
   test('should connect to server / 서버에 연결', async ({ page, serverUrl }) => {
-    await page.goto(serverUrl);
+    await page.goto(serverUrl, { waitUntil: 'networkidle' });
     expect(page.url()).toContain('localhost:8080');
   });
 
@@ -17,7 +17,7 @@ test.describe('Runtime Domain Integration', () => {
 
   test('should handle WebSocket connection / WebSocket 연결 처리', async ({ page, serverUrl }) => {
     // Navigate to server / 서버로 이동
-    await page.goto(serverUrl);
+    await page.goto(serverUrl, { waitUntil: 'networkidle' });
     expect(page.url()).toContain('localhost:8080');
   });
 });

@@ -6,12 +6,12 @@ test.describe('Full Flow', () => {
     page,
     serverUrl,
   }) => {
-    await page.goto(serverUrl);
+    await page.goto(serverUrl, { waitUntil: 'networkidle' });
     expect(page.url()).toContain('localhost:8080');
   });
 
   test('should handle multiple clients / 여러 클라이언트 처리', async ({ page, serverUrl }) => {
-    await page.goto(serverUrl);
+    await page.goto(serverUrl, { waitUntil: 'networkidle' });
 
     // Check if server is running / 서버가 실행 중인지 확인
     const response = await page.request.get(`${serverUrl}/json/clients`);
@@ -25,7 +25,7 @@ test.describe('Full Flow', () => {
     page,
     serverUrl,
   }) => {
-    await page.goto(serverUrl);
+    await page.goto(serverUrl, { waitUntil: 'networkidle' });
 
     // Get clients list / 클라이언트 목록 가져오기
     const response = await page.request.get(`${serverUrl}/json/clients`);
@@ -38,7 +38,7 @@ test.describe('Full Flow', () => {
     page,
     serverUrl,
   }) => {
-    await page.goto(serverUrl);
+    await page.goto(serverUrl, { waitUntil: 'networkidle' });
 
     // Check server endpoints / 서버 엔드포인트 확인
     const clientsResponse = await page.request.get(`${serverUrl}/json/clients`);
