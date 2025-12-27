@@ -58,7 +58,6 @@ sequenceDiagram
 - `GET /json/inspectors` - 모든 Inspector 가져오기
 - `GET /json/client/:id` - 특정 클라이언트 가져오기
 - `GET /client.js` - 빌드된 클라이언트 스크립트 제공
-- `GET /test-page.html` - 테스트 페이지 제공
 
 ## 기능
 
