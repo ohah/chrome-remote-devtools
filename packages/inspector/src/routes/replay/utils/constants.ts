@@ -19,4 +19,3 @@ export const DELAYS = {
   /** Delay for timeout / 타임아웃 지연 */
   TIMEOUT: 10000,
 } as const;
-
