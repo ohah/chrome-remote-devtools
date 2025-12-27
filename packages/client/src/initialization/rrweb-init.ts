@@ -1,6 +1,10 @@
 // Rrweb initialization / Rrweb 초기화
 import type ChromeDomain from '../cdp';
 import type { RrwebConfig } from '../config/rrweb-config';
+import {
+  createDefaultCDPTransport,
+  initRrwebRecorder,
+} from '@ohah/chrome-remote-devtools-client-rrweb';
 
 /**
  * Rrweb recorder handle interface / Rrweb 레코더 핸들 인터페이스
@@ -28,9 +32,6 @@ export async function initRrwebRecording(
   }
 
   try {
-    const { createDefaultCDPTransport, initRrwebRecorder } =
-      await import('@ohah/chrome-remote-devtools-client-rrweb');
-
     // Enable SessionReplay domain via CDP method / CDP 메서드로 SessionReplay 도메인 활성화
     domain.execute({ method: 'SessionReplay.enable' });
 
