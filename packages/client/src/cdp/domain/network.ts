@@ -233,12 +233,19 @@ export default class Network extends BaseDomain {
           },
         });
 
+        // Calculate encoded data length from Content-Length header or body size / Content-Length 헤더 또는 본문 크기에서 인코딩된 데이터 길이 계산
+        const contentLength = this.getResponseHeader('content-length');
+        const encodedDataLength = Network.calculateEncodedDataLength(
+          contentLength,
+          this.responseText
+        );
+
         self.socketSend({
           method: Event.loadingFinished,
           params: {
             requestId,
             timestamp: getTimestamp(),
-            encodedDataLength: new Blob([this.responseText]).size,
+            encodedDataLength,
           },
         });
       });
@@ -374,12 +381,16 @@ export default class Network extends BaseDomain {
                 },
               });
 
+              // Calculate encoded data length from Content-Length header or body size / Content-Length 헤더 또는 본문 크기에서 인코딩된 데이터 길이 계산
+              const contentLength = response.headers.get('content-length');
+              const encodedDataLength = Network.calculateEncodedDataLength(contentLength, body);
+
               self.socketSend({
                 method: Event.loadingFinished,
                 params: {
                   requestId,
                   timestamp: getTimestamp(),
-                  encodedDataLength: new Blob([body]).size,
+                  encodedDataLength,
                 },
               });
             })
@@ -548,5 +559,22 @@ export default class Network extends BaseDomain {
       headers.Cookie = document.cookie;
     }
     return headers;
+  }
+
+  // Calculate encoded data length from Content-Length header or body size / Content-Length 헤더 또는 본문 크기에서 인코딩된 데이터 길이 계산
+  // Prefer Content-Length header as it represents actual network transfer size / 실제 네트워크 전송 크기를 나타내므로 Content-Length 헤더를 우선 사용
+  static calculateEncodedDataLength(
+    contentLengthHeader: string | null | undefined,
+    body: string
+  ): number {
+    // Try to use Content-Length header first / 먼저 Content-Length 헤더 사용 시도
+    if (contentLengthHeader) {
+      const parsed = parseInt(contentLengthHeader, 10);
+      if (!isNaN(parsed) && parsed >= 0) {
+        return parsed;
+      }
+    }
+    // Fallback to Blob size calculation / Blob 크기 계산으로 폴백
+    return new Blob([body]).size;
   }
 }
