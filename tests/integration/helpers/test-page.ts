@@ -11,14 +11,17 @@ export function createTestPageHTML(content: string, serverUrl: string): string {
   <script>
     // Wait for script to load before initializing / 스크립트 로드 후 초기화
     (function() {
+      var maxRetries = 100;
       function initClient() {
         if (typeof ChromeRemoteDevTools !== 'undefined') {
           ChromeRemoteDevTools.init({
             serverUrl: '${wsUrl}',
           });
-        } else {
-          // Retry after a short delay / 짧은 지연 후 재시도
+        } else if (maxRetries > 0) {
+          maxRetries--;
           setTimeout(initClient, 50);
+        } else {
+          console.error('ChromeRemoteDevTools failed to load after multiple attempts.');
         }
       }
       // Start initialization / 초기화 시작

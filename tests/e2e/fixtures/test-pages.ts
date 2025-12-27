@@ -12,9 +12,27 @@ export function generateTestPage(serverUrl: string): string {
   <title>Test Page</title>
   <script src="${serverUrl}/client.js"></script>
   <script>
-    ChromeRemoteDevTools.init({
-      serverUrl: '${wsUrl}',
-    });
+    // Wait for script to load before initializing / 스크립트 로드 후 초기화
+    (function() {
+      var maxRetries = 100;
+      function initClient() {
+        if (typeof ChromeRemoteDevTools !== 'undefined') {
+          ChromeRemoteDevTools.init({
+            serverUrl: '${wsUrl}',
+          });
+        } else if (maxRetries > 0) {
+          maxRetries--;
+          setTimeout(initClient, 50);
+        } else {
+          console.error('ChromeRemoteDevTools failed to load after multiple attempts.');
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initClient);
+      } else {
+        initClient();
+      }
+    })();
   </script>
 </head>
 <body>
@@ -42,9 +60,27 @@ export function generateNetworkTestPage(serverUrl: string): string {
   <title>Network Test Page</title>
   <script src="${serverUrl}/client.js"></script>
   <script>
-    ChromeRemoteDevTools.init({
-      serverUrl: '${wsUrl}',
-    });
+    // Wait for script to load before initializing / 스크립트 로드 후 초기화
+    (function() {
+      var maxRetries = 100;
+      function initClient() {
+        if (typeof ChromeRemoteDevTools !== 'undefined') {
+          ChromeRemoteDevTools.init({
+            serverUrl: '${wsUrl}',
+          });
+        } else if (maxRetries > 0) {
+          maxRetries--;
+          setTimeout(initClient, 50);
+        } else {
+          console.error('ChromeRemoteDevTools failed to load after multiple attempts.');
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initClient);
+      } else {
+        initClient();
+      }
+    })();
   </script>
 </head>
 <body>
@@ -73,9 +109,27 @@ export function generateDOMTestPage(serverUrl: string): string {
   <title>DOM Test Page</title>
   <script src="${serverUrl}/client.js"></script>
   <script>
-    ChromeRemoteDevTools.init({
-      serverUrl: '${wsUrl}',
-    });
+    // Wait for script to load before initializing / 스크립트 로드 후 초기화
+    (function() {
+      var maxRetries = 100;
+      function initClient() {
+        if (typeof ChromeRemoteDevTools !== 'undefined') {
+          ChromeRemoteDevTools.init({
+            serverUrl: '${wsUrl}',
+          });
+        } else if (maxRetries > 0) {
+          maxRetries--;
+          setTimeout(initClient, 50);
+        } else {
+          console.error('ChromeRemoteDevTools failed to load after multiple attempts.');
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initClient);
+      } else {
+        initClient();
+      }
+    })();
   </script>
 </head>
 <body>
