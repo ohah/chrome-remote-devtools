@@ -15,7 +15,7 @@ import {
   waitForCDPResponse,
   waitForCDPResponseAndEvent,
 } from './helpers/cdp-messages';
-import { createTestPageHTML } from './helpers/test-page';
+import { createTestPageHTML, waitForDebugId } from './helpers/test-page';
 
 test.describe('Storage Domain Integration', () => {
   test('should get storage key / storage key 가져오기', async ({ page, serverUrl, wsUrl }) => {
@@ -46,13 +46,9 @@ test.describe('Storage Domain Integration', () => {
     });
 
     await page.goto(testUrl, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000); // Wait for client script to load / 클라이언트 스크립트 로드 대기
 
-    // Get client ID from page / 페이지에서 클라이언트 ID 가져오기
-    const clientId = await page.evaluate(() => {
-      return sessionStorage.getItem('debug_id');
-    });
-
+    // Wait for debug_id to be stored in sessionStorage / sessionStorage에 debug_id가 저장될 때까지 대기
+    const clientId = await waitForDebugId(page);
     expect(clientId).toBeTruthy();
 
     if (!clientId) return;
@@ -117,12 +113,9 @@ test.describe('Storage Domain Integration', () => {
     });
 
     await page.goto(testUrl, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000); // Wait for client script to load / 클라이언트 스크립트 로드 대기
 
-    const clientId = await page.evaluate(() => {
-      return sessionStorage.getItem('debug_id');
-    });
-
+    // Wait for debug_id to be stored in sessionStorage / sessionStorage에 debug_id가 저장될 때까지 대기
+    const clientId = await waitForDebugId(page);
     expect(clientId).toBeTruthy();
     if (!clientId) return;
 
@@ -213,12 +206,9 @@ test.describe('Storage Domain Integration', () => {
     });
 
     await page.goto(testUrl, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000); // Wait for client script to load / 클라이언트 스크립트 로드 대기
 
-    const clientId = await page.evaluate(() => {
-      return sessionStorage.getItem('debug_id');
-    });
-
+    // Wait for debug_id to be stored in sessionStorage / sessionStorage에 debug_id가 저장될 때까지 대기
+    const clientId = await waitForDebugId(page);
     expect(clientId).toBeTruthy();
     if (!clientId) return;
 
@@ -335,12 +325,9 @@ test.describe('Storage Domain Integration', () => {
     });
 
     await page.goto(testUrl, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000); // Wait for client script to load / 클라이언트 스크립트 로드 대기
 
-    const clientId = await page.evaluate(() => {
-      return sessionStorage.getItem('debug_id');
-    });
-
+    // Wait for debug_id to be stored in sessionStorage / sessionStorage에 debug_id가 저장될 때까지 대기
+    const clientId = await waitForDebugId(page);
     expect(clientId).toBeTruthy();
     if (!clientId) return;
 
@@ -441,12 +428,9 @@ test.describe('Storage Domain Integration', () => {
     });
 
     await page.goto(testUrl, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000); // Wait for client script to load / 클라이언트 스크립트 로드 대기
 
-    const clientId = await page.evaluate(() => {
-      return sessionStorage.getItem('debug_id');
-    });
-
+    // Wait for debug_id to be stored in sessionStorage / sessionStorage에 debug_id가 저장될 때까지 대기
+    const clientId = await waitForDebugId(page);
     expect(clientId).toBeTruthy();
     if (!clientId) return;
 
