@@ -15,7 +15,7 @@
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target node && bun run build:types",
     "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
-    "prepublishOnly": "bun run ../../scripts/prepare-publish.ts package.json && bun run build",
+    "prepublishOnly": "bun run build",
     "start": "bun run dist/index.js",
     "test": "bun test"
   },
