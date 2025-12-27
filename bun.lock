@@ -22,6 +22,7 @@
       "name": "docs",
       "version": "1.0.0",
       "dependencies": {
+        "@ohah/chrome-remote-devtools-client": "workspace:*",
         "@rspress/core": "^2.0.0-rc.1",
       },
       "devDependencies": {
@@ -170,7 +171,7 @@
       "devDependencies": {
         "@types/node": "^20.0.0",
         "@types/ws": "^8.5.10",
-        "typescript": "^5.0.0",
+        "typescript": "^5.9.3",
       },
     },
   },
