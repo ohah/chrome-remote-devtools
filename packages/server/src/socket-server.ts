@@ -80,6 +80,20 @@ export function setLogConfig(enabled: boolean, methods?: string, filePath?: stri
 }
 
 /**
+ * Write log message to file / 로그 메시지를 파일에 기록
+ * @param logMessage - Log message to write / 기록할 로그 메시지
+ */
+function writeLog(logMessage: string): void {
+  if (logStream) {
+    try {
+      logStream.write(logMessage);
+    } catch (error) {
+      console.error('Failed to write to log file / 로그 파일 쓰기 실패:', error);
+    }
+  }
+}
+
+/**
  * Log helper with method filtering / 메소드 필터링이 있는 로그 헬퍼
  * @param type - Log type (client, devtools, etc.) / 로그 타입 (client, devtools 등)
  * @param id - Client or DevTools ID / 클라이언트 또는 DevTools ID
@@ -117,13 +131,7 @@ function log(
   }
 
   // Write to file if log stream is available / 로그 스트림이 있으면 파일에 기록
-  if (logStream) {
-    try {
-      logStream.write(logMessage);
-    } catch (error) {
-      console.error('Failed to write to log file / 로그 파일 쓰기 실패:', error);
-    }
-  }
+  writeLog(logMessage);
 }
 
 /**
@@ -152,13 +160,7 @@ function logError(
   }
 
   // Write to file if log stream is available / 로그 스트림이 있으면 파일에 기록
-  if (logStream) {
-    try {
-      logStream.write(logMessage);
-    } catch (writeError) {
-      console.error('Failed to write to log file / 로그 파일 쓰기 실패:', writeError);
-    }
-  }
+  writeLog(logMessage);
 }
 
 // CDP message types / CDP 메시지 타입
@@ -168,6 +170,19 @@ export interface CDPMessage {
   id?: number;
   result?: unknown;
   error?: unknown;
+}
+
+/**
+ * Safely parse CDP message / CDP 메시지를 안전하게 파싱
+ * @param message - Message string to parse / 파싱할 메시지 문자열
+ * @returns Parsed message or null if parsing fails / 파싱된 메시지 또는 파싱 실패 시 null
+ */
+function safeParseCDPMessage(message: string): CDPMessage | null {
+  try {
+    return JSON.parse(message) as CDPMessage;
+  } catch {
+    return null;
+  }
 }
 
 interface CompressedParams {
@@ -353,16 +368,18 @@ export class SocketServer {
       let data = this.convertMessageToString(message);
 
       // Check if message contains compressed data / 메시지에 압축된 데이터가 포함되어 있는지 확인
-      try {
-        const parsed = JSON.parse(data) as CDPMessage & { params?: CompressedParams | unknown };
+      const parsed = safeParseCDPMessage(data) as CDPMessage & { params?: CompressedParams | unknown } | null;
+      if (parsed) {
         // Decompress if needed / 필요시 압축 해제
         data = this.decompressMessage(parsed, id);
 
         // Re-parse after decompression for logging / 로깅을 위해 압축 해제 후 재파싱
-        const parsedForLog = JSON.parse(data) as CDPMessage;
-        const method = parsedForLog?.method;
-        log('client', id, 'received:', JSON.stringify(parsedForLog, null, 2), method);
-      } catch {
+        const parsedForLog = safeParseCDPMessage(data);
+        if (parsedForLog) {
+          const method = parsedForLog.method;
+          log('client', id, 'received:', JSON.stringify(parsedForLog, null, 2), method);
+        }
+      } else {
         // If parsing fails, log and send raw data / 파싱 실패 시 원본 데이터 로그 및 전송
         log('client', id, 'received (raw):', data);
       }
@@ -428,11 +445,11 @@ export class SocketServer {
       const data = this.convertMessageToString(message);
 
       // Log received message from Inspector / Inspector로부터 수신된 메시지 로깅
-      try {
-        const parsed = JSON.parse(data) as CDPMessage;
-        const method = parsed?.method;
+      const parsed = safeParseCDPMessage(data);
+      if (parsed) {
+        const method = parsed.method;
         log('devtools', id, 'received:', JSON.stringify(parsed, null, 2), method);
-      } catch {
+      } else {
         log('devtools', id, 'received (raw):', data);
       }
 
