@@ -3,6 +3,13 @@ import type { PostMessageCDPMessage } from '@/shared/lib/file-to-cdp';
 import type { ResponseBodyStore } from '../types';
 import { sendBufferedMessages, sendFakeResponse, sendStorageItemsAsEvents } from './message-sender';
 import { extractDOMStorageItems } from './extractors';
+import { DELAYS } from './constants';
+import {
+  safeParseCDPMessage,
+  categorizeMessages,
+  categorizeEvents,
+  filterMessagesByMethod,
+} from './cdp-message-utils';
 
 /**
  * Context for sending CDP messages / CDP 메시지 전송을 위한 컨텍스트
@@ -43,7 +50,7 @@ export async function sendDefaultInitCommands(context: SendCDPMessagesContext): 
     // Note: Don't send storage items here because handleMessage will handle DOMStorage.enable command / 참고: handleMessage에서 DOMStorage.enable 명령을 처리하므로 여기서는 storage 항목을 전송하지 않음
   }
   // Wait for DevTools to process initialization commands / DevTools가 초기화 명령을 처리할 시간 대기
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, DELAYS.DEVTOOLS_INIT));
 }
 
 /**
@@ -56,29 +63,29 @@ export async function sendCommandsFromFile(
   context: SendCDPMessagesContext
 ): Promise<void> {
   for (const commandMsg of commands) {
-    try {
-      const parsed = JSON.parse(commandMsg.message);
-      context.targetWindow.postMessage(commandMsg, '*');
-      // Send fake response for command / 명령에 대한 가짜 응답 전송
-      if (parsed.id !== undefined) {
-        sendFakeResponse(context.targetWindow, parsed.id);
+    const parsed = safeParseCDPMessage(commandMsg.message);
+    if (!parsed) {
+      continue; // Skip invalid messages / 유효하지 않은 메시지 건너뛰기
+    }
 
-        // Send initial storage items after DOMStorage.enable from file / 파일에서 읽은 DOMStorage.enable 후 초기 storage 항목 전송
-        if (parsed.method === 'DOMStorage.enable') {
-          // Wait a bit for DevTools to process the enable command / DevTools가 enable 명령을 처리할 시간 대기
-          setTimeout(() => {
-            void extractDOMStorageItems(context.file, context.cdpMessages).then((storageItems) => {
-              sendStorageItemsAsEvents(storageItems, context.targetWindow);
-            });
-          }, 100);
-        }
+    context.targetWindow.postMessage(commandMsg, '*');
+    // Send fake response for command / 명령에 대한 가짜 응답 전송
+    if (parsed.id !== undefined) {
+      sendFakeResponse(context.targetWindow, parsed.id);
+
+      // Send initial storage items after DOMStorage.enable from file / 파일에서 읽은 DOMStorage.enable 후 초기 storage 항목 전송
+      if (parsed.method === 'DOMStorage.enable') {
+        // Wait a bit for DevTools to process the enable command / DevTools가 enable 명령을 처리할 시간 대기
+        setTimeout(() => {
+          void extractDOMStorageItems(context.file, context.cdpMessages).then((storageItems) => {
+            sendStorageItemsAsEvents(storageItems, context.targetWindow);
+          });
+        }, DELAYS.STORAGE_INIT);
       }
-    } catch {
-      // Failed to parse command / 명령 파싱 실패
     }
   }
   // Wait for DevTools to process commands / DevTools가 명령을 처리할 시간 대기
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, DELAYS.DEVTOOLS_INIT));
 }
 
 /**
@@ -94,14 +101,7 @@ export async function sendSessionReplayEvents(context: SendCDPMessagesContext): 
   }
 
   // Filter only SessionReplay events / SessionReplay 이벤트만 필터링
-  const sessionReplayEvents = messagesToSend.filter((msg) => {
-    try {
-      const parsed = JSON.parse(msg.message);
-      return parsed.method?.startsWith('SessionReplay.');
-    } catch {
-      return false;
-    }
-  });
+  const sessionReplayEvents = filterMessagesByMethod(messagesToSend, 'SessionReplay.');
 
   if (sessionReplayEvents.length > 0) {
     await sendBufferedMessages(
@@ -117,6 +117,74 @@ export async function sendSessionReplayEvents(context: SendCDPMessagesContext): 
  * @param context - Send context / 전송 컨텍스트
  * @param includeSessionReplay - Whether to include SessionReplay events / SessionReplay 이벤트 포함 여부
  */
+/**
+ * Sort network events by type within each requestId group / 각 requestId 그룹 내에서 이벤트 타입별로 정렬
+ * @param networkEvents - Network events grouped by requestId / requestId별로 그룹화된 네트워크 이벤트
+ * @returns Sorted network events / 정렬된 네트워크 이벤트
+ */
+function sortNetworkEventsByType(
+  networkEvents: Map<string, PostMessageCDPMessage[]>
+): PostMessageCDPMessage[] {
+  const sortedNetworkEvents: PostMessageCDPMessage[] = [];
+  const networkEventTypes = [
+    'Network.requestWillBeSent',
+    'Network.responseReceived',
+    'Network.loadingFinished',
+  ] as const;
+
+  for (const [, events] of networkEvents) {
+    // Find events by type in order / 순서대로 타입별로 이벤트 찾기
+    for (const eventType of networkEventTypes) {
+      const event = events.find((e) => {
+        const parsed = safeParseCDPMessage(e.message);
+        return parsed?.method === eventType;
+      });
+      if (event) {
+        sortedNetworkEvents.push(event);
+      }
+    }
+  }
+
+  return sortedNetworkEvents;
+}
+
+/**
+ * Group network events by requestId / 네트워크 이벤트를 requestId별로 그룹화
+ * @param networkEvents - Network events to group / 그룹화할 네트워크 이벤트
+ * @returns Grouped events and events without requestId / 그룹화된 이벤트와 requestId가 없는 이벤트
+ */
+function groupNetworkEventsByRequestId(networkEvents: PostMessageCDPMessage[]): {
+  eventsByRequestId: Map<string, PostMessageCDPMessage[]>;
+  eventsWithoutRequestId: PostMessageCDPMessage[];
+} {
+  const eventsByRequestId = new Map<string, PostMessageCDPMessage[]>();
+  const eventsWithoutRequestId: PostMessageCDPMessage[] = [];
+
+  for (const msg of networkEvents) {
+    const parsed = safeParseCDPMessage(msg.message);
+    if (!parsed) {
+      eventsWithoutRequestId.push(msg);
+      continue;
+    }
+
+    const requestId =
+      parsed.params && typeof parsed.params === 'object' && 'requestId' in parsed.params
+        ? (parsed.params.requestId as string)
+        : undefined;
+
+    if (requestId) {
+      if (!eventsByRequestId.has(requestId)) {
+        eventsByRequestId.set(requestId, []);
+      }
+      eventsByRequestId.get(requestId)!.push(msg);
+    } else {
+      eventsWithoutRequestId.push(msg);
+    }
+  }
+
+  return { eventsByRequestId, eventsWithoutRequestId };
+}
+
 export async function sendCDPMessages(
   context: SendCDPMessagesContext,
   includeSessionReplay = false
@@ -130,24 +198,7 @@ export async function sendCDPMessages(
   }
 
   // Separate commands and events / 명령과 이벤트 분리
-  const commands: PostMessageCDPMessage[] = [];
-  const events: PostMessageCDPMessage[] = [];
-
-  for (const msg of messagesToSend) {
-    try {
-      const parsed = JSON.parse(msg.message);
-      if (parsed.id !== undefined) {
-        // This is a command / 이것은 명령임
-        commands.push(msg);
-      } else {
-        // This is an event / 이것은 이벤트임
-        events.push(msg);
-      }
-    } catch {
-      // If parsing fails, treat as event / 파싱 실패 시 이벤트로 처리
-      events.push(msg);
-    }
-  }
+  const { commands, events } = categorizeMessages(messagesToSend);
 
   // Send commands first (initialization commands from file) / 먼저 명령 전송 (파일에서 읽은 초기화 명령)
   // If no commands in file, send default initialization commands / 파일에 명령이 없으면 기본 초기화 명령 전송
@@ -158,112 +209,24 @@ export async function sendCDPMessages(
   }
 
   // Separate events by type / 이벤트 타입별로 분리
-  const domStorageEvents = events.filter((msg) => {
-    try {
-      const parsed = JSON.parse(msg.message);
-      return parsed.method?.startsWith('DOMStorage.');
-    } catch {
-      return false;
-    }
-  });
-
-  const sessionReplayEvents = events.filter((msg) => {
-    try {
-      const parsed = JSON.parse(msg.message);
-      return parsed.method?.startsWith('SessionReplay.');
-    } catch {
-      return false;
-    }
-  });
-
-  // Separate network events from other events / 네트워크 이벤트와 다른 이벤트 분리
-  const networkEvents = events.filter((msg) => {
-    try {
-      const parsed = JSON.parse(msg.message);
-      return parsed.method?.startsWith('Network.');
-    } catch {
-      return false;
-    }
-  });
-
-  const nonNetworkEvents = events.filter((msg) => {
-    try {
-      const parsed = JSON.parse(msg.message);
-      return (
-        !parsed.method?.startsWith('DOMStorage.') &&
-        !parsed.method?.startsWith('SessionReplay.') &&
-        !parsed.method?.startsWith('Network.')
-      );
-    } catch {
-      return true; // If parsing fails, include it in other events / 파싱 실패 시 다른 이벤트에 포함
-    }
-  });
+  const { domStorageEvents, sessionReplayEvents, networkEvents, nonNetworkEvents } =
+    categorizeEvents(events);
 
   // Send DOMStorage events first (initial state) / DOMStorage 이벤트를 먼저 전송 (초기 상태)
   if (domStorageEvents.length > 0) {
     await sendBufferedMessages(domStorageEvents, context.targetWindow, context.responseBodyStore);
     // Delay to ensure DOMStorage events are processed / DOMStorage 이벤트가 처리될 시간 제공
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, DELAYS.DOM_STORAGE_PROCESSING));
   }
 
   // Sort network events by requestId to ensure proper order / 네트워크 이벤트를 requestId별로 정렬하여 순서 보장
-  // Group network events by requestId / requestId별로 네트워크 이벤트 그룹화
-  const networkEventsByRequestId = new Map<string, PostMessageCDPMessage[]>();
-  const networkEventsWithoutRequestId: PostMessageCDPMessage[] = [];
-
-  for (const msg of networkEvents) {
-    try {
-      const parsed = JSON.parse(msg.message);
-      const requestId = parsed.params?.requestId;
-      if (requestId) {
-        if (!networkEventsByRequestId.has(requestId)) {
-          networkEventsByRequestId.set(requestId, []);
-        }
-        networkEventsByRequestId.get(requestId)!.push(msg);
-      } else {
-        networkEventsWithoutRequestId.push(msg);
-      }
-    } catch {
-      // If parsing fails, add to without requestId / 파싱 실패 시 requestId 없는 그룹에 추가
-      networkEventsWithoutRequestId.push(msg);
-    }
-  }
+  const { eventsByRequestId, eventsWithoutRequestId } = groupNetworkEventsByRequestId(networkEvents);
 
   // Sort network events by type within each requestId group / 각 requestId 그룹 내에서 이벤트 타입별로 정렬
-  // Order: requestWillBeSent -> responseReceived -> loadingFinished / 순서: requestWillBeSent -> responseReceived -> loadingFinished
-  const sortedNetworkEvents: PostMessageCDPMessage[] = [];
-  for (const [, events] of networkEventsByRequestId) {
-    // Find events by type / 타입별로 이벤트 찾기
-    const requestWillBeSent = events.find((e) => {
-      try {
-        return JSON.parse(e.message).method === 'Network.requestWillBeSent';
-      } catch {
-        return false;
-      }
-    });
-    const responseReceived = events.find((e) => {
-      try {
-        return JSON.parse(e.message).method === 'Network.responseReceived';
-      } catch {
-        return false;
-      }
-    });
-    const loadingFinished = events.find((e) => {
-      try {
-        return JSON.parse(e.message).method === 'Network.loadingFinished';
-      } catch {
-        return false;
-      }
-    });
-
-    // Add in correct order / 올바른 순서로 추가
-    if (requestWillBeSent) sortedNetworkEvents.push(requestWillBeSent);
-    if (responseReceived) sortedNetworkEvents.push(responseReceived);
-    if (loadingFinished) sortedNetworkEvents.push(loadingFinished);
-  }
+  const sortedNetworkEvents = sortNetworkEventsByType(eventsByRequestId);
 
   // Add network events without requestId at the end / requestId가 없는 네트워크 이벤트를 마지막에 추가
-  sortedNetworkEvents.push(...networkEventsWithoutRequestId);
+  sortedNetworkEvents.push(...eventsWithoutRequestId);
 
   // Send network events in sorted order / 정렬된 순서로 네트워크 이벤트 전송
   if (sortedNetworkEvents.length > 0) {
@@ -273,7 +236,7 @@ export async function sendCDPMessages(
       context.responseBodyStore
     );
     // Delay to ensure network events are processed / 네트워크 이벤트가 처리될 시간 제공
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, DELAYS.NETWORK_PROCESSING));
   }
 
   // Then send other non-network events / 그 다음 다른 비네트워크 이벤트 전송
