@@ -1,4 +1,6 @@
 import { DevToolsPlayground } from '../../../components/DevToolsPlayground';
+// @ts-expect-error - @theme is provided by Rspress at runtime
+import { PackageManagerTabs } from '@theme';
 
 # 플레이그라운드
 
@@ -92,6 +94,76 @@ DevTools를 연 상태에서 이 버튼을 클릭하면 Console 패널에서 각
 - **시간 여행**: 과거의 이벤트를 다시 확인하고 분석할 수 있습니다
 - **디버깅**: 문제가 발생한 시점의 상태를 정확히 재현할 수 있습니다
 - **공유**: 팀원들과 이벤트 파일을 공유하여 동일한 상황을 재현할 수 있습니다
+
+## 시작하기
+
+### 서버 설정
+
+먼저 서버를 설치하고 시작합니다:
+
+서버 패키지 설치:
+
+<PackageManagerTabs command="install -g @ohah/chrome-remote-devtools-server" />
+
+서버 시작 (기본 포트: 8080):
+
+```bash
+# npm의 경우 npx 사용
+npx chrome-remote-devtools-server
+
+# 다른 패키지 매니저의 경우 명령어 직접 사용
+chrome-remote-devtools-server
+```
+
+프로덕션 환경에서 SSL과 함께 사용:
+
+```bash
+USE_SSL=true \
+SSL_CERT_PATH=/path/to/cert.pem \
+SSL_KEY_PATH=/path/to/key.pem \
+npx chrome-remote-devtools-server
+```
+
+### 클라이언트 통합
+
+HTML 페이지에 클라이언트 스크립트를 추가합니다. 서버는 자동으로 `/client.js`에서 클라이언트 스크립트를 제공합니다:
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>내 앱</title>
+    <!-- 서버에서 클라이언트 스크립트 로드 -->
+    <script
+      src="https://your-server.com/client.js"
+      data-server-url="wss://your-server.com"
+      data-enable-rrweb="true"
+      data-enable-export-button="true"
+    ></script>
+  </head>
+  <body>
+    <h1>내 앱</h1>
+    <!-- 앱 콘텐츠 -->
+  </body>
+</html>
+```
+
+#### 클라이언트 스크립트 속성
+
+- `src`: 클라이언트 스크립트 URL (서버가 `/client.js`에서 제공)
+- `data-server-url`: WebSocket 서버 URL (HTTPS는 `wss://`, HTTP는 `ws://` 사용)
+- `data-enable-rrweb`: 세션 리플레이 녹화 활성화 (선택사항, 기본값: `false`)
+- `data-enable-export-button`: 페이지에 내보내기 버튼 표시 (선택사항, 기본값: `false`)
+
+### Inspector 접근
+
+클라이언트 스크립트가 로드되면 Inspector를 사용하여 연결할 수 있습니다:
+
+1. **웹 Inspector**: 브라우저에서 `https://your-server.com/inspector` 열기
+2. **데스크탑 Inspector**: 데스크탑 애플리케이션 다운로드 및 실행
+
+Inspector는 자동으로 연결된 클라이언트를 감지하고 디버깅할 수 있게 해줍니다.
 
 ## 예제 코드
 

@@ -1,4 +1,6 @@
 import { DevToolsPlayground } from '../../../components/DevToolsPlayground';
+// @ts-expect-error - @theme is provided by Rspress at runtime
+import { PackageManagerTabs } from '@theme';
 
 # Playground
 
@@ -92,6 +94,76 @@ The exported JSON file has the following structure:
 - **Time Travel**: Review and analyze past events
 - **Debugging**: Accurately reproduce the state at the time of an issue
 - **Sharing**: Share event files with team members to reproduce the same situation
+
+## Getting Started
+
+### Server Setup
+
+First, install and start the server:
+
+Install the server package:
+
+<PackageManagerTabs command="install -g @ohah/chrome-remote-devtools-server" />
+
+Start the server (default port: 8080):
+
+```bash
+# For npm, use npx
+npx chrome-remote-devtools-server
+
+# For other package managers, use the command directly
+chrome-remote-devtools-server
+```
+
+For production with SSL:
+
+```bash
+USE_SSL=true \
+SSL_CERT_PATH=/path/to/cert.pem \
+SSL_KEY_PATH=/path/to/key.pem \
+npx chrome-remote-devtools-server
+```
+
+### Client Integration
+
+Add the client script to your HTML page. The server automatically serves the client script at `/client.js`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My App</title>
+    <!-- Load client script from your server -->
+    <script
+      src="https://your-server.com/client.js"
+      data-server-url="wss://your-server.com"
+      data-enable-rrweb="true"
+      data-enable-export-button="true"
+    ></script>
+  </head>
+  <body>
+    <h1>My App</h1>
+    <!-- Your app content -->
+  </body>
+</html>
+```
+
+#### Client Script Attributes
+
+- `src`: URL to the client script (served by the server at `/client.js`)
+- `data-server-url`: WebSocket server URL (use `wss://` for HTTPS, `ws://` for HTTP)
+- `data-enable-rrweb`: Enable session replay recording (optional, default: `false`)
+- `data-enable-export-button`: Show export button in the page (optional, default: `false`)
+
+### Inspector Access
+
+Once the client script is loaded, you can connect using the Inspector:
+
+1. **Web Inspector**: Open `https://your-server.com/inspector` in your browser
+2. **Desktop Inspector**: Download and run the desktop application
+
+The Inspector will automatically detect connected clients and allow you to debug them.
 
 ## Example Code
 
