@@ -4,7 +4,6 @@ Chrome Remote DevTools 가이드에 오신 것을 환영합니다!
 
 ## 시작하기
 
-- [설치](/ko/guide/installation) - Chrome Remote DevTools 설정
 - [빠른 시작](/ko/guide/quick-start) - 몇 분 안에 시작하기
 - [개발](/ko/guide/development) - 개발 환경 설정
 
