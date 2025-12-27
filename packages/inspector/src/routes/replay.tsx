@@ -120,7 +120,7 @@ function ReplayPage() {
           };
 
           // Try to handle command / 명령 처리 시도
-          handleCDPCommand(parsed, handlerContext);
+          handleCDPCommand(parsed as any, handlerContext);
         }
 
         // Handle DevTools ready message / DevTools 준비 메시지 처리
