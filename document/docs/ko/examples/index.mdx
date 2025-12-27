@@ -125,7 +125,27 @@ npx chrome-remote-devtools-server
 
 ### 클라이언트 통합
 
-HTML 페이지에 클라이언트 스크립트를 추가합니다. 서버는 자동으로 `/client.js`에서 클라이언트 스크립트를 제공합니다:
+클라이언트 패키지를 설치하고 애플리케이션에서 초기화합니다:
+
+```bash
+npm install @ohah/chrome-remote-devtools-client
+```
+
+**React / TypeScript:**
+
+```typescript
+import { init } from '@ohah/chrome-remote-devtools-client';
+
+init({
+  serverUrl: 'wss://your-server.com',
+  rrweb: {
+    enable: true,
+    enableExportButton: true,
+  },
+});
+```
+
+**Vanilla JavaScript (IIFE):**
 
 ```html
 <!DOCTYPE html>
@@ -133,27 +153,29 @@ HTML 페이지에 클라이언트 스크립트를 추가합니다. 서버는 자
   <head>
     <meta charset="UTF-8" />
     <title>내 앱</title>
-    <!-- 서버에서 클라이언트 스크립트 로드 -->
-    <script
-      src="https://your-server.com/client.js"
-      data-server-url="wss://your-server.com"
-      data-enable-rrweb="true"
-      data-enable-export-button="true"
-    ></script>
+    <script src="https://your-server.com/client.js"></script>
   </head>
   <body>
     <h1>내 앱</h1>
-    <!-- 앱 콘텐츠 -->
+    <script>
+      ChromeRemoteDevTools.init({
+        serverUrl: 'wss://your-server.com',
+        rrweb: {
+          enable: true,
+          enableExportButton: true,
+        },
+      });
+    </script>
   </body>
 </html>
 ```
 
-#### 클라이언트 스크립트 속성
+#### 설정 옵션
 
-- `src`: 클라이언트 스크립트 URL (서버가 `/client.js`에서 제공)
-- `data-server-url`: WebSocket 서버 URL (HTTPS는 `wss://`, HTTP는 `ws://` 사용)
-- `data-enable-rrweb`: 세션 리플레이 녹화 활성화 (선택사항, 기본값: `false`)
-- `data-enable-export-button`: 페이지에 내보내기 버튼 표시 (선택사항, 기본값: `false`)
+- `serverUrl`: WebSocket 서버 URL (HTTPS는 `wss://`, HTTP는 `ws://` 사용)
+- `rrweb.enable`: 세션 리플레이 녹화 활성화 (선택사항, 기본값: `false`)
+- `rrweb.enableExportButton`: 페이지에 export 버튼 표시 (선택사항, 기본값: `false`)
+- `skipWebSocket`: WebSocket 연결 건너뛰고 postMessage만 사용 (선택사항, 기본값: `false`)
 
 ### Inspector 접근
 

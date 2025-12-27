@@ -125,7 +125,27 @@ npx chrome-remote-devtools-server
 
 ### Client Integration
 
-Add the client script to your HTML page. The server automatically serves the client script at `/client.js`:
+Install the client package and initialize it in your application:
+
+```bash
+npm install @ohah/chrome-remote-devtools-client
+```
+
+**React / TypeScript:**
+
+```typescript
+import { init } from '@ohah/chrome-remote-devtools-client';
+
+init({
+  serverUrl: 'wss://your-server.com',
+  rrweb: {
+    enable: true,
+    enableExportButton: true,
+  },
+});
+```
+
+**Vanilla JavaScript (IIFE):**
 
 ```html
 <!DOCTYPE html>
@@ -133,27 +153,29 @@ Add the client script to your HTML page. The server automatically serves the cli
   <head>
     <meta charset="UTF-8" />
     <title>My App</title>
-    <!-- Load client script from your server -->
-    <script
-      src="https://your-server.com/client.js"
-      data-server-url="wss://your-server.com"
-      data-enable-rrweb="true"
-      data-enable-export-button="true"
-    ></script>
+    <script src="https://your-server.com/client.js"></script>
   </head>
   <body>
     <h1>My App</h1>
-    <!-- Your app content -->
+    <script>
+      ChromeRemoteDevTools.init({
+        serverUrl: 'wss://your-server.com',
+        rrweb: {
+          enable: true,
+          enableExportButton: true,
+        },
+      });
+    </script>
   </body>
 </html>
 ```
 
-#### Client Script Attributes
+#### Configuration Options
 
-- `src`: URL to the client script (served by the server at `/client.js`)
-- `data-server-url`: WebSocket server URL (use `wss://` for HTTPS, `ws://` for HTTP)
-- `data-enable-rrweb`: Enable session replay recording (optional, default: `false`)
-- `data-enable-export-button`: Show export button in the page (optional, default: `false`)
+- `serverUrl`: WebSocket server URL (use `wss://` for HTTPS, `ws://` for HTTP)
+- `rrweb.enable`: Enable session replay recording (optional, default: `false`)
+- `rrweb.enableExportButton`: Show export button in the page (optional, default: `false`)
+- `skipWebSocket`: Skip WebSocket connection and use postMessage only (optional, default: `false`)
 
 ### Inspector Access
 

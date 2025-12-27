@@ -22,15 +22,31 @@ bun run dev:inspector
 
 Inspector는 `http://localhost:5173` (또는 터미널에 표시된 포트)에서 사용할 수 있습니다.
 
-### 3. 웹 페이지에 클라이언트 스크립트 로드
+### 3. 웹 페이지에서 클라이언트 초기화
 
-HTML 페이지에 클라이언트 스크립트를 추가합니다:
+**npm 패키지 사용 (ESM):**
+
+```bash
+npm install @ohah/chrome-remote-devtools-client
+```
+
+```typescript
+import { init } from '@ohah/chrome-remote-devtools-client';
+
+init({
+  serverUrl: 'ws://localhost:8080',
+});
+```
+
+**스크립트 태그 사용 (IIFE):**
 
 ```html
-<script
-  src="http://localhost:8080/client.js"
-  data-server-url="http://localhost:8080"
-></script>
+<script src="http://localhost:8080/client.js"></script>
+<script>
+  ChromeRemoteDevTools.init({
+    serverUrl: 'ws://localhost:8080',
+  });
+</script>
 ```
 
 ## 첫 디버깅 세션

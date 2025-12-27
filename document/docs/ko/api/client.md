@@ -4,32 +4,26 @@
 
 ## 초기화
 
-### 자동 초기화
-
-데이터 속성이 있는 클라이언트 스크립트를 로드합니다:
-
-```html
-<script
-  src="http://localhost:8080/client.js"
-  data-server-url="http://localhost:8080"
-  data-enable-rrweb="true"
-></script>
-```
-
-**속성:**
-
-- `data-server-url`: 서버 WebSocket URL
-- `data-enable-rrweb`: rrweb 세션 기록 활성화 (선택 사항)
-
-### 수동 초기화
+`init()` 함수를 사용하여 클라이언트를 초기화합니다:
 
 ```typescript
-import { initCDPClient } from '@ohah/chrome-remote-devtools-client';
+import { init } from '@ohah/chrome-remote-devtools-client';
 
-await initCDPClient('http://localhost:8080', {
-  enable: true, // Enable rrweb
+init({
+  serverUrl: 'ws://localhost:8080',
+  rrweb: {
+    enable: true,
+    enableExportButton: true,
+  },
 });
 ```
+
+**옵션:**
+
+- `serverUrl`: 서버 WebSocket URL (HTTPS는 `wss://`, HTTP는 `ws://` 사용)
+- `rrweb.enable`: rrweb 세션 리플레이 녹화 활성화 (선택사항, 기본값: `false`)
+- `rrweb.enableExportButton`: 페이지에 export 버튼 표시 (선택사항, 기본값: `false`)
+- `skipWebSocket`: WebSocket 연결 건너뛰고 postMessage만 사용 (선택사항, 기본값: `false`)
 
 ## CDP Domains
 

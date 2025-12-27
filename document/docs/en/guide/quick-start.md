@@ -22,15 +22,31 @@ bun run dev:inspector
 
 The Inspector will be available at `http://localhost:5173` (or the port shown in the terminal).
 
-### 3. Load the Client Script in Your Web Page
+### 3. Initialize the Client in Your Web Page
 
-Add the client script to your HTML page:
+**Using npm package (ESM):**
+
+```bash
+npm install @ohah/chrome-remote-devtools-client
+```
+
+```typescript
+import { init } from '@ohah/chrome-remote-devtools-client';
+
+init({
+  serverUrl: 'ws://localhost:8080',
+});
+```
+
+**Using script tag (IIFE):**
 
 ```html
-<script
-  src="http://localhost:8080/client.js"
-  data-server-url="http://localhost:8080"
-></script>
+<script src="http://localhost:8080/client.js"></script>
+<script>
+  ChromeRemoteDevTools.init({
+    serverUrl: 'ws://localhost:8080',
+  });
+</script>
 ```
 
 ## Your First Debugging Session

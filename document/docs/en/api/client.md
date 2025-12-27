@@ -4,32 +4,26 @@ The client API allows you to initialize and interact with the CDP client in your
 
 ## Initialization
 
-### Automatic Initialization
-
-Load the client script with data attributes:
-
-```html
-<script
-  src="http://localhost:8080/client.js"
-  data-server-url="http://localhost:8080"
-  data-enable-rrweb="true"
-></script>
-```
-
-**Attributes:**
-
-- `data-server-url`: Server WebSocket URL
-- `data-enable-rrweb`: Enable rrweb session recording (optional)
-
-### Manual Initialization
+Initialize the client using the `init()` function:
 
 ```typescript
-import { initCDPClient } from '@ohah/chrome-remote-devtools-client';
+import { init } from '@ohah/chrome-remote-devtools-client';
 
-await initCDPClient('http://localhost:8080', {
-  enable: true, // Enable rrweb
+init({
+  serverUrl: 'ws://localhost:8080',
+  rrweb: {
+    enable: true,
+    enableExportButton: true,
+  },
 });
 ```
+
+**Options:**
+
+- `serverUrl`: Server WebSocket URL (use `wss://` for HTTPS, `ws://` for HTTP)
+- `rrweb.enable`: Enable rrweb session recording (optional, default: `false`)
+- `rrweb.enableExportButton`: Show export button in the page (optional, default: `false`)
+- `skipWebSocket`: Skip WebSocket connection and use postMessage only (optional, default: `false`)
 
 ## CDP Domains
 
