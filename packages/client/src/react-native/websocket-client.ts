@@ -1,6 +1,7 @@
 // WebSocket client for React Native / React Native용 WebSocket 클라이언트
 
 import { SessionReplayDomain } from './session-replay';
+import { getId, getQuery } from './utils';
 
 /**
  * WebSocket client for React Native / React Native용 WebSocket 클라이언트
@@ -16,12 +17,34 @@ export class ReactNativeWebSocketClient {
   constructor(private serverUrl: string) {}
 
   /**
+   * Build WebSocket URL with correct path / 올바른 경로로 WebSocket URL 구성
+   */
+  private buildWebSocketUrl(): string {
+    // Extract protocol and host from serverUrl / serverUrl에서 프로토콜과 호스트 추출
+    let protocol = 'ws:';
+    if (this.serverUrl.startsWith('wss://') || this.serverUrl.startsWith('https://')) {
+      protocol = 'wss:';
+    } else if (this.serverUrl.startsWith('ws://') || this.serverUrl.startsWith('http://')) {
+      protocol = 'ws:';
+    }
+
+    const host = this.serverUrl.replace(/^(http|https|ws|wss):\/\//i, '');
+    const clientId = getId();
+    const query = getQuery();
+
+    // Build URL: ws://host/remote/debug/client/:id?query / URL 구성: ws://host/remote/debug/client/:id?query
+    return `${protocol}//${host}/remote/debug/client/${clientId}?${query}`;
+  }
+
+  /**
    * Initialize WebSocket connection / WebSocket 연결 초기화
    */
   async initialize(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        this.socket = new WebSocket(this.serverUrl);
+        const wsUrl = this.buildWebSocketUrl();
+        console.log('[React Native] Connecting to / [React Native] 연결 중:', wsUrl);
+        this.socket = new WebSocket(wsUrl);
 
         this.socket.onopen = () => {
           console.log('[React Native] WebSocket connected / [React Native] WebSocket 연결됨');
