@@ -21,12 +21,12 @@
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "build": "bun run build:esm && bun run build:iife && bun run build:types",
-    "build:esm": "bun build src/index.ts --outdir dist --target browser --format esm --minify --outfile dist/index.esm.js",
-    "build:iife": "bun build src/index.ts --outdir dist --target browser --format iife --minify --outfile dist/index.iife.js --global-name ChromeRemoteDevTools",
+    "build:esm": "bun build src/index.ts --target browser --format esm --minify --outfile dist/index.esm.js",
+    "build:iife": "bun build src/index.ts --target browser --format iife --minify --outfile dist/index.iife.js",
     "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
     "build:watch": "bun run build:esm:watch & bun run build:iife:watch",
-    "build:esm:watch": "bun build src/index.ts --outdir dist --target browser --format esm --minify --outfile dist/index.esm.js --watch",
-    "build:iife:watch": "bun build src/index.ts --outdir dist --target browser --format iife --minify --outfile dist/index.iife.js --global-name ChromeRemoteDevTools --watch",
+    "build:esm:watch": "bun build src/index.ts --target browser --format esm --minify --outfile dist/index.esm.js --watch",
+    "build:iife:watch": "bun build src/index.ts --target browser --format iife --minify --outfile dist/index.iife.js --watch",
     "prepublishOnly": "bun run build",
     "clean": "rm -rf dist",
     "test": "bun test"
