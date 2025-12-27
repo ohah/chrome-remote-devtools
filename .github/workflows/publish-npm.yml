@@ -5,8 +5,6 @@ on:
     tags:
       - 'chrome-remote-devtools-client-v*'
       - 'chrome-remote-devtools-server-v*'
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       package:
@@ -58,24 +56,8 @@ jobs:
             echo "package-name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
             echo "version=$VERSION_INPUT" >> $GITHUB_OUTPUT
             echo "should-publish=true" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event_name }}" = "release" ]; then
-            TAG_NAME="${{ github.event.release.tag_name }}"
-
-            if [[ "$TAG_NAME" == chrome-remote-devtools-client-v* ]]; then
-              PACKAGE_NAME="chrome-remote-devtools-client"
-              VERSION="${TAG_NAME#chrome-remote-devtools-client-v}"
-            elif [[ "$TAG_NAME" == chrome-remote-devtools-server-v* ]]; then
-              PACKAGE_NAME="chrome-remote-devtools-server"
-              VERSION="${TAG_NAME#chrome-remote-devtools-server-v}"
-            else
-              echo "Unknown tag format: $TAG_NAME"
-              exit 1
-            fi
-
-            echo "package-name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "should-publish=true" >> $GITHUB_OUTPUT
           else
+            # Tag push event / 태그 푸시 이벤트
             TAG_NAME="${{ github.ref_name }}"
 
             if [[ "$TAG_NAME" == chrome-remote-devtools-client-v* ]]; then
@@ -128,7 +110,7 @@ jobs:
       - name: Publish to npm
         working-directory: packages/client
         run: |
-          npm version ${{ needs.detect-package.outputs.version }} --no-git-tag-version
+          npm version ${{ needs.detect-package.outputs.version }} --no-git-tag-version --allow-same-version
           npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -167,7 +149,7 @@ jobs:
       - name: Publish to npm
         working-directory: packages/server
         run: |
-          npm version ${{ needs.detect-package.outputs.version }} --no-git-tag-version
+          npm version ${{ needs.detect-package.outputs.version }} --no-git-tag-version --allow-same-version
           npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
