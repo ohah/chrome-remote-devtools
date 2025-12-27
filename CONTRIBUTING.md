@@ -1,5 +1,7 @@
 # Contributing to Chrome Remote DevTools
 
+[한국어](CONTRIBUTING_KO.md) | [English](CONTRIBUTING.md)
+
 Thank you for your interest in contributing to Chrome Remote DevTools!
 
 We welcome contributions from the community and appreciate your efforts to help improve this project.
