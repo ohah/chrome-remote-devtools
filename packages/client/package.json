@@ -7,18 +7,21 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "src"
   ],
   "type": "module",
   "main": "./dist/index.esm.js",
   "module": "./dist/index.esm.js",
   "browser": "./dist/index.iife.js",
   "types": "./dist/index.d.ts",
+  "react-native": "./src/react-native/index.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
-      "browser": "./dist/index.iife.js"
+      "browser": "./dist/index.iife.js",
+      "react-native": "./src/react-native/index.ts"
     },
     "./iife": "./dist/index.iife.js"
   },
@@ -31,10 +34,12 @@
     "build:watch": "bun run scripts/build-watch.ts",
     "build:esm:watch": "bun build src/index.ts --target browser --format esm --minify --outfile dist/index.esm.js --watch",
     "build:iife:watch": "bun build src/index.ts --target browser --format iife --minify --outfile dist/index.iife.js --watch",
+    "prepublishOnly": "bun run build",
     "clean": "rm -rf dist",
     "test": "bun test"
   },
   "dependencies": {
+    "@babel/runtime": "^7.25.0",
     "@ohah/chrome-remote-devtools-client-rrweb": "workspace:*"
   },
   "devDependencies": {
