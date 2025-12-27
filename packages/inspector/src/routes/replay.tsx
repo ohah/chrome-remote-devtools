@@ -7,6 +7,8 @@ import { createResponseBodyStore } from './replay/utils/response-body-store';
 import { handleCDPCommand } from './replay/utils/message-handlers';
 import { sendCDPMessages, sendSessionReplayEvents } from './replay/utils/message-sender-extended';
 import type { SendCDPMessagesContext } from './replay/utils/message-sender-extended';
+import { DELAYS } from './replay/utils/constants';
+import { safeParseCDPMessage } from './replay/utils/cdp-message-utils';
 
 // File-based routing: routes/replay.tsx automatically maps to `/replay` / 파일 기반 라우팅: routes/replay.tsx가 자동으로 `/replay`에 매핑됨
 export const Route = createFileRoute('/replay')({
@@ -102,27 +104,23 @@ function ReplayPage() {
 
         // Handle commands from DevTools / DevTools에서 명령 처리
         if (event.data?.type === 'CDP_MESSAGE') {
-          try {
-            const parsed = JSON.parse(event.data.message);
-            if (parsed.id === undefined || !iframeRef.current?.contentWindow) {
-              return;
-            }
-
-            const targetWindow = iframeRef.current.contentWindow;
-
-            // Create handler context / 핸들러 컨텍스트 생성
-            const handlerContext = {
-              file,
-              cdpMessages: cdpMessagesRef.current,
-              responseBodyStore,
-              targetWindow,
-            };
-
-            // Try to handle command / 명령 처리 시도
-            handleCDPCommand(parsed, handlerContext);
-          } catch {
-            // Ignore parsing errors / 파싱 오류 무시
+          const parsed = safeParseCDPMessage(event.data.message);
+          if (!parsed || parsed.id === undefined || !iframeRef.current?.contentWindow) {
+            return;
           }
+
+          const targetWindow = iframeRef.current.contentWindow;
+
+          // Create handler context / 핸들러 컨텍스트 생성
+          const handlerContext = {
+            file,
+            cdpMessages: cdpMessagesRef.current,
+            responseBodyStore,
+            targetWindow,
+          };
+
+          // Try to handle command / 명령 처리 시도
+          handleCDPCommand(parsed, handlerContext);
         }
 
         // Handle DevTools ready message / DevTools 준비 메시지 처리
@@ -132,7 +130,7 @@ function ReplayPage() {
             // Wait a bit for DevTools to fully initialize / DevTools가 완전히 초기화될 시간 제공
             setTimeout(() => {
               void sendMessagesSafely();
-            }, 1000);
+            }, DELAYS.DEVTOOLS_INIT);
           }
         }
         // Handle SessionReplay panel activation / SessionReplay 패널 활성화 처리
@@ -183,13 +181,13 @@ function ReplayPage() {
         // DEVTOOLS_READY or SESSION_REPLAY_READY will trigger earlier sending / DEVTOOLS_READY 또는 SESSION_REPLAY_READY가 더 일찍 전송을 트리거함
         setTimeout(() => {
           void sendMessagesSafely();
-        }, 5000); // Give DevTools time to fully initialize (backup if DEVTOOLS_READY not received) / DevTools가 완전히 초기화될 시간 제공 (DEVTOOLS_READY를 받지 못한 경우 백업)
+        }, DELAYS.DEVTOOLS_FULL_INIT_BACKUP);
       };
 
       // Set up iframe load handler / iframe 로드 핸들러 설정
       iframeRef.current.addEventListener('load', handleIframeLoadInternal);
 
-      // Timeout after 10 seconds / 10초 후 타임아웃
+      // Timeout after configured delay / 설정된 지연 후 타임아웃
       timeoutRef.current = setTimeout(() => {
         window.removeEventListener('message', handleMessage);
         messageHandlerRef.current = null;
@@ -197,7 +195,7 @@ function ReplayPage() {
         if (!messagesSentRef.current && cdpMessagesRef.current.length > 0) {
           setError('DevTools did not respond in time');
         }
-      }, 10000);
+      }, DELAYS.TIMEOUT);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to open replay DevTools');
     }

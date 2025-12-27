@@ -1,6 +1,8 @@
 // Message sender utilities for replay mode / replay 모드를 위한 메시지 전송 유틸리티
 import type { PostMessageCDPMessage } from '@/shared/lib/file-to-cdp';
 import type { ResponseBodyStore } from '../types';
+import { DELAYS } from './constants';
+import { safeParseCDPMessage } from './cdp-message-utils';
 
 /**
  * Send fake response for command / 명령에 대한 가짜 응답 전송
@@ -20,7 +22,7 @@ export function sendFakeResponse(targetWindow: Window, commandId: number, result
       }),
     };
     targetWindow.postMessage(responseMessage, '*');
-  }, 10); // Small delay to ensure command is processed first / 명령이 먼저 처리되도록 작은 지연
+  }, DELAYS.COMMAND_PROCESSING);
 }
 
 /**
@@ -41,18 +43,23 @@ export async function sendBufferedMessages(
   // Extract and store response bodies from responseReceived events before sending / 전송 전에 responseReceived 이벤트에서 응답 본문 추출 및 저장
   const responseReceivedEvents: Array<{ requestId: string; body: string }> = [];
   for (const msg of messages) {
-    try {
-      const parsed = JSON.parse(msg.message);
-      if (parsed.method === 'Network.responseReceived' && parsed.params?.response?.body) {
-        const requestId = parsed.params.requestId;
-        const body = parsed.params.response.body;
-        if (requestId && body) {
-          responseBodyStore.store(requestId, body);
-          responseReceivedEvents.push({ requestId, body });
-        }
+    const parsed = safeParseCDPMessage(msg.message);
+    if (
+      parsed?.method === 'Network.responseReceived' &&
+      parsed.params &&
+      typeof parsed.params === 'object' &&
+      'response' in parsed.params &&
+      parsed.params.response &&
+      typeof parsed.params.response === 'object' &&
+      'body' in parsed.params.response
+    ) {
+      const params = parsed.params as { requestId?: string; response?: { body?: string } };
+      const requestId = params.requestId;
+      const body = params.response?.body;
+      if (requestId && body && typeof body === 'string') {
+        responseBodyStore.store(requestId, body);
+        responseReceivedEvents.push({ requestId, body });
       }
-    } catch {
-      // Ignore parsing errors / 파싱 오류 무시
     }
   }
 
@@ -80,6 +87,40 @@ export async function sendBufferedMessages(
 }
 
 /**
+ * Send storage item as domStorageItemAdded event / storage 항목을 domStorageItemAdded 이벤트로 전송
+ * @param key - Storage key / Storage 키
+ * @param value - Storage value / Storage 값
+ * @param isLocalStorage - Whether it's localStorage / localStorage인지 여부
+ * @param storageKey - Storage key (origin) / Storage 키 (origin)
+ * @param targetWindow - Target window to send message to / 메시지를 전송할 대상 창
+ */
+function sendStorageItemAsEvent(
+  key: string,
+  value: string,
+  isLocalStorage: boolean,
+  storageKey: string,
+  targetWindow: Window
+): void {
+  const eventData = {
+    method: 'DOMStorage.domStorageItemAdded',
+    params: {
+      storageId: {
+        isLocalStorage,
+        storageKey,
+        securityOrigin: storageKey,
+      },
+      key,
+      newValue: value,
+    },
+  };
+  const eventMessage = {
+    type: 'CDP_MESSAGE' as const,
+    message: JSON.stringify(eventData),
+  };
+  targetWindow.postMessage(eventMessage, '*');
+}
+
+/**
  * Send storage items as domStorageItemAdded events / storage 항목을 domStorageItemAdded 이벤트로 전송
  * @param storageItems - Storage items to send / 전송할 storage 항목
  * @param targetWindow - Target window to send messages to / 메시지를 전송할 대상 창
@@ -92,43 +133,11 @@ export function sendStorageItemsAsEvents(
 
   // Send localStorage items as domStorageItemAdded events / localStorage 항목을 domStorageItemAdded 이벤트로 전송
   storageItems.localStorage.forEach(([key, value]) => {
-    const eventData = {
-      method: 'DOMStorage.domStorageItemAdded',
-      params: {
-        storageId: {
-          isLocalStorage: true,
-          storageKey,
-          securityOrigin: storageKey,
-        },
-        key,
-        newValue: value,
-      },
-    };
-    const eventMessage = {
-      type: 'CDP_MESSAGE' as const,
-      message: JSON.stringify(eventData),
-    };
-    targetWindow.postMessage(eventMessage, '*');
+    sendStorageItemAsEvent(key, value, true, storageKey, targetWindow);
   });
 
   // Send sessionStorage items as domStorageItemAdded events / sessionStorage 항목을 domStorageItemAdded 이벤트로 전송
   storageItems.sessionStorage.forEach(([key, value]) => {
-    const eventData = {
-      method: 'DOMStorage.domStorageItemAdded',
-      params: {
-        storageId: {
-          isLocalStorage: false,
-          storageKey,
-          securityOrigin: storageKey,
-        },
-        key,
-        newValue: value,
-      },
-    };
-    const eventMessage = {
-      type: 'CDP_MESSAGE' as const,
-      message: JSON.stringify(eventData),
-    };
-    targetWindow.postMessage(eventMessage, '*');
+    sendStorageItemAsEvent(key, value, false, storageKey, targetWindow);
   });
 }

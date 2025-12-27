@@ -3,6 +3,7 @@ import type { PostMessageCDPMessage } from '@/shared/lib/file-to-cdp';
 import type { ResponseBodyStore } from '../types';
 import { sendFakeResponse, sendStorageItemsAsEvents } from './message-sender';
 import { extractDOMTree, extractDOMStorageItems, extractCookies } from './extractors';
+import { DELAYS } from './constants';
 
 // Storage key cache / Storage key 캐시
 let cachedStorageKey: string | null = null;
@@ -177,7 +178,7 @@ export function handleDOMStorageEnable(
     void extractDOMStorageItems(context.file, context.cdpMessages).then((storageItems) => {
       sendStorageItemsAsEvents(storageItems, context.targetWindow);
     });
-  }, 200); // Wait 200ms for storage to be created / storage가 생성될 시간을 위해 200ms 대기
+  }, DELAYS.STORAGE_INIT);
   return true;
 }
 
@@ -222,7 +223,7 @@ export function handleGetDOMStorageItems(
           entries,
         });
       });
-    }, 300); // Wait 300ms for Storage.getStorageKey to be called / Storage.getStorageKey가 호출될 때까지 300ms 대기
+    }, DELAYS.STORAGE_INIT + 100); // Wait for Storage.getStorageKey to be called / Storage.getStorageKey가 호출될 때까지 대기
     return true;
   }
 
