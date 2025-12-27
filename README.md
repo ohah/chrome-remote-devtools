@@ -212,21 +212,27 @@ This project is inspired by and references the following projects:
 ## Screenshots
 
 ### Welcome Screen
+
 ![Welcome Screen](images/welcome.png)
 
 ### Client List
+
 ![Client List](images/list.png)
 
 ### Console Panel
+
 ![Console Panel](images/console.png)
 
 ### Network Panel
+
 ![Network Panel](images/network.png)
 
 ### Application Panel
+
 ![Application Panel](images/application.png)
 
 ### Session Replay Panel
+
 ![Session Replay Panel](images/sessionReplay.png)
 
 ## Links

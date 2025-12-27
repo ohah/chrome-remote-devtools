@@ -198,21 +198,27 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.
 ## 사용 화면
 
 ### 환영 화면
+
 ![환영 화면](images/welcome.png)
 
 ### 클라이언트 목록
+
 ![클라이언트 목록](images/list.png)
 
 ### 콘솔 패널
+
 ![콘솔 패널](images/console.png)
 
 ### 네트워크 패널
+
 ![네트워크 패널](images/network.png)
 
 ### 애플리케이션 패널
+
 ![애플리케이션 패널](images/application.png)
 
 ### 세션 리플레이 패널
+
 ![세션 리플레이 패널](images/sessionReplay.png)
 
 ## 링크
