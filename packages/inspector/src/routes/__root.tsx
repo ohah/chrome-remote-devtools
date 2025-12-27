@@ -42,11 +42,11 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
   };
 
   return (
-    <div
-      className="fixed top-0 left-0 right-0 z-[1000] h-[30px] bg-gray-800 select-none grid grid-cols-[1fr_max-content]"
-      data-tauri-drag-region={isTauri ? true : undefined}
-    >
-      <div className="titlebar-drag-region flex items-center pl-2">
+    <div className="fixed top-0 left-0 right-0 z-[1000] h-[30px] bg-gray-800 select-none grid grid-cols-[1fr_max-content]">
+      <div
+        className="titlebar-drag-region flex items-center pl-2"
+        data-tauri-drag-region={isTauri ? true : undefined}
+      >
         {showBack && (
           <button
             className="titlebar-nav-button appearance-none p-0 m-0 border-0 inline-flex justify-center items-center w-[24px] h-[24px] bg-transparent text-gray-400 cursor-pointer transition-colors hover:bg-white/10 rounded"
