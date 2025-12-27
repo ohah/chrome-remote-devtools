@@ -1,10 +1,22 @@
 // CDP Client - WebSocket connection and CDP initialization / CDP 클라이언트 - WebSocket 연결 및 CDP 초기화
 import { CDPClient } from './core/cdp-client';
 import { getId } from './utils/debug-id';
-import { getRrwebConfig, type RrwebConfig } from './config/rrweb-config';
+import type { RrwebConfig } from './config/rrweb-config';
 
 // Global CDP client instance / 전역 CDP 클라이언트 인스턴스
 let clientInstance: CDPClient | null = null;
+
+/**
+ * Configuration options for Chrome Remote DevTools / Chrome Remote DevTools 설정 옵션
+ */
+export interface ChromeRemoteDevToolsOptions {
+  /** Server WebSocket URL / 서버 WebSocket URL */
+  serverUrl?: string;
+  /** Rrweb configuration / Rrweb 설정 */
+  rrweb?: RrwebConfig;
+  /** Skip WebSocket connection (use postMessage only) / WebSocket 연결 건너뛰기 (postMessage만 사용) */
+  skipWebSocket?: boolean;
+}
 
 /**
  * Initialize CDP client / CDP 클라이언트 초기화
@@ -27,56 +39,63 @@ export async function initCDPClient(
   await clientInstance.initialize(serverUrl, rrwebConfig, skipWebSocket);
 }
 
-// Auto-initialize CDP client / CDP 클라이언트 자동 초기화
-if (typeof document !== 'undefined') {
-  const script = document.currentScript as HTMLScriptElement | null;
-  const serverUrl = script?.dataset.serverUrl || script?.getAttribute('data-server-url');
-  const debugId = getId(); // Create debug_id / debug_id 생성
+/**
+ * Initialize Chrome Remote DevTools / Chrome Remote DevTools 초기화
+ * @param options - Configuration options / 설정 옵션
+ */
+export async function init(options: ChromeRemoteDevToolsOptions = {}): Promise<void> {
+  const { serverUrl, rrweb = { enable: false }, skipWebSocket = false } = options;
 
-  // Skip WebSocket if no serverUrl (use postMessage only) / serverUrl이 없으면 WebSocket 건너뛰기 (postMessage만 사용)
-  const skipWebSocket = !serverUrl;
-
-  // If no serverUrl, use empty string (will be ignored in WebSocketClient) / serverUrl이 없으면 빈 문자열 사용 (WebSocketClient에서 무시됨)
   const effectiveServerUrl = serverUrl || '';
+  const shouldSkipWebSocket = skipWebSocket || !serverUrl;
 
-  // If in iframe and no serverUrl, notify parent about debug_id / iframe이고 serverUrl이 없으면 부모에 debug_id 알림
-  if (skipWebSocket && window.parent !== window) {
-    // Try to store in parent's sessionStorage via postMessage / postMessage로 부모의 sessionStorage에 저장 시도
-    try {
-      window.parent.postMessage({ type: 'SET_DEBUG_ID', debugId }, '*');
-    } catch {
-      // Ignore cross-origin errors / cross-origin 오류 무시
-    }
+  // Always generate and store debug_id for testing and debugging / 테스트 및 디버깅을 위해 항상 debug_id 생성 및 저장
+  if (typeof window !== 'undefined') {
+    const debugId = getId(); // This will create and store in sessionStorage / sessionStorage에 생성 및 저장됨
 
-    // Also try localStorage (shared in same origin) / localStorage도 시도 (같은 origin에서 공유)
-    try {
-      localStorage.setItem('debug_id', debugId);
-    } catch {
-      // Ignore if localStorage is not available / localStorage를 사용할 수 없으면 무시
+    // If in iframe and no serverUrl, notify parent about debug_id / iframe이고 serverUrl이 없으면 부모에 debug_id 알림
+    if (shouldSkipWebSocket && window.parent !== window) {
+      try {
+        window.parent.postMessage({ type: 'SET_DEBUG_ID', debugId }, '*');
+      } catch {
+        // Ignore cross-origin errors / cross-origin 오류 무시
+      }
+      try {
+        localStorage.setItem('debug_id', debugId);
+      } catch {
+        // Ignore if localStorage is not available / localStorage를 사용할 수 없으면 무시
+      }
     }
   }
 
-  const rrwebConfig = getRrwebConfig(script);
-  // Initialize CDP client with skipWebSocket flag / skipWebSocket 플래그로 CDP 클라이언트 초기화
-  void initCDPClient(effectiveServerUrl, rrwebConfig, skipWebSocket);
+  await initCDPClient(effectiveServerUrl, rrweb, shouldSkipWebSocket);
 }
 
-// Global API for export / export를 위한 전역 API
+/**
+ * Export events to file / 이벤트를 파일로 내보내기
+ */
+export async function exportEvents(): Promise<void> {
+  if (!clientInstance) {
+    throw new Error('CDP client not initialized / CDP 클라이언트가 초기화되지 않았습니다');
+  }
+  const domain = clientInstance.getDomain();
+  if (!domain) {
+    throw new Error('CDP domain not available / CDP 도메인을 사용할 수 없습니다');
+  }
+  const eventStorage = domain.getEventStorage();
+  if (!eventStorage) {
+    throw new Error('Event storage not available / 이벤트 저장소를 사용할 수 없습니다');
+  }
+  await eventStorage.exportToFile();
+}
+
+// Global API for browser / 브라우저용 전역 API
 if (typeof window !== 'undefined') {
-  (window as any).chromeRemoteDevTools = {
-    async exportEvents() {
-      if (!clientInstance) {
-        throw new Error('CDP client not initialized / CDP 클라이언트가 초기화되지 않았습니다');
-      }
-      const domain = clientInstance.getDomain();
-      if (!domain) {
-        throw new Error('CDP domain not available / CDP 도메인을 사용할 수 없습니다');
-      }
-      const eventStorage = domain.getEventStorage();
-      if (!eventStorage) {
-        throw new Error('Event storage not available / 이벤트 저장소를 사용할 수 없습니다');
-      }
-      await eventStorage.exportToFile();
-    },
+  (window as any).ChromeRemoteDevTools = {
+    init,
+    exportEvents,
   };
 }
+
+// Export types / 타입 export
+export type { RrwebConfig } from './config/rrweb-config';
