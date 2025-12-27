@@ -135,7 +135,22 @@ export default defineConfig({
           // Serve all bundled files as static (already built, no transformation needed) / 모든 bundled 파일을 정적으로 서빙 (이미 빌드됨, 변환 불필요)
           if (existsSync(filePath) && statSync(filePath).isFile()) {
             try {
-              const content = readFileSync(filePath);
+              let content = readFileSync(filePath, 'utf-8');
+
+              // Fix import paths in JavaScript files for RSPress base path / RSPress base path를 위한 JavaScript 파일의 import 경로 수정
+              if (ext === '.js' || ext === '.mjs') {
+                // Convert Windows-style backslashes to forward slashes in import paths / import 경로의 Windows 스타일 백슬래시를 슬래시로 변환
+                // Match all import/from statements with relative paths containing backslashes / 백슬래시를 포함한 상대 경로가 있는 모든 import/from 문 매칭
+                content = content.replace(
+                  /(?:import|from)\s+["']([^"']*\\[^"']*)["']/g,
+                  (match, path) => {
+                    // Convert all backslashes to forward slashes / 모든 백슬래시를 슬래시로 변환
+                    const normalizedPath = path.replace(/\\/g, '/');
+                    return match.replace(path, normalizedPath);
+                  }
+                );
+              }
+
               // Set appropriate content type / 적절한 Content-Type 설정
               if (ext === '.css') {
                 res.setHeader('Content-Type', 'text/css');
