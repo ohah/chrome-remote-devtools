@@ -127,7 +127,7 @@ describe('sendCommandsFromFile', () => {
     expect(storageEvents.length).toBeGreaterThan(0);
   });
 
-  test('should send storage items after 100ms delay / DOMStorage.enable 후 100ms 후 storage items 전송', async () => {
+  test('should send storage items after 200ms delay / DOMStorage.enable 후 200ms 후 storage items 전송', async () => {
     const commands: PostMessageCDPMessage[] = [
       {
         type: 'CDP_MESSAGE',
@@ -147,20 +147,20 @@ describe('sendCommandsFromFile', () => {
     // Wait a short time to ensure setTimeout is set up / setTimeout이 설정되도록 짧은 시간 대기
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    // Check that storage items are not sent yet (before 100ms) / storage items가 아직 전송되지 않았는지 확인 (100ms 전)
+    // Check that storage items are not sent yet (before 200ms) / storage items가 아직 전송되지 않았는지 확인 (200ms 전)
     const earlyCheckTime = Date.now() - startTime;
     const earlyStorageEvents = sentEvents.filter(
       (e) => e.method === 'DOMStorage.domStorageItemAdded'
     );
-    // Should not be sent if less than 100ms has passed / 100ms가 지나지 않았으면 전송되지 않아야 함
-    if (earlyCheckTime < 100) {
+    // Should not be sent if less than 200ms has passed / 200ms가 지나지 않았으면 전송되지 않아야 함
+    if (earlyCheckTime < 200) {
       expect(earlyStorageEvents.length).toBe(0);
     }
 
-    // Wait for 100ms delay to complete / 100ms 지연 완료 대기
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    // Wait for 200ms delay to complete / 200ms 지연 완료 대기
+    await new Promise((resolve) => setTimeout(resolve, 250));
 
-    // After 100ms, storage items should be sent / 100ms 후에는 storage items가 전송되어야 함
+    // After 200ms, storage items should be sent / 200ms 후에는 storage items가 전송되어야 함
     const lateStorageEvents = sentEvents.filter(
       (e) => e.method === 'DOMStorage.domStorageItemAdded'
     );
