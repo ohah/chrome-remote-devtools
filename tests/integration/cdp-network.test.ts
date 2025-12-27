@@ -3,7 +3,7 @@ import { test, expect } from './fixtures/server';
 
 test.describe('Network Domain Integration', () => {
   test('should connect to server / 서버에 연결', async ({ page, serverUrl }) => {
-    await page.goto(serverUrl);
+    await page.goto(serverUrl, { waitUntil: 'networkidle' });
     expect(page.url()).toContain('localhost:8080');
   });
 
