@@ -1,0 +1,9 @@
+[tools]
+rust = "stable"
+bun = "latest"
+node = "24.11.1"
+ruby = "3.3"
+
+[env]
+RUST_BACKTRACE = "1"
+
