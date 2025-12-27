@@ -20,7 +20,7 @@ function DevToolsPage() {
   }, [clientId]);
 
   return (
-    <div className="w-full h-screen">
+    <div className="w-full h-full">
         {/* DevTools iframe / DevTools iframe */}
         <iframe
           ref={iframeRef}

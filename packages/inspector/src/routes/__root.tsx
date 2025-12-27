@@ -131,7 +131,7 @@ export const Route = createRootRoute({
     return (
       <div className="h-screen flex flex-col bg-gray-900">
         {showTitleBar && <TitleBar showBack={showBack} />}
-        <div className={`flex-1 overflow-hidden ${showTitleBar ? 'pt-[30px] h-full' : ''}`}>
+        <div className={`flex-1 overflow-hidden ${showTitleBar ? 'pt-[30px]' : ''}`}>
           <Outlet />
         </div>
       </div>
