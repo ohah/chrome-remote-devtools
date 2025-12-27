@@ -62,8 +62,9 @@ describe('HTTP API', () => {
       }
 
       if (url.pathname === '/client.js') {
+        // Try IIFE format first (for script tags) / 먼저 IIFE 형식 시도 (script 태그용)
         try {
-          const clientScriptPath = join(__dirname, '../../client/dist/index.js');
+          const clientScriptPath = join(__dirname, '../../client/dist/index.iife.js');
           const clientScript = readFileSync(clientScriptPath, 'utf-8');
           res.writeHead(200, {
             ...headers,
@@ -71,11 +72,22 @@ describe('HTTP API', () => {
           });
           res.end(clientScript);
         } catch {
-          res.writeHead(200, {
-            ...headers,
-            'Content-Type': 'application/javascript', // Override Content-Type / Content-Type 덮어쓰기
-          });
-          res.end(`console.error('Client script not found');`);
+          // Fallback: try index.js if iife doesn't exist / Fallback: iife가 없으면 index.js 시도
+          try {
+            const clientScriptPath = join(__dirname, '../../client/dist/index.js');
+            const clientScript = readFileSync(clientScriptPath, 'utf-8');
+            res.writeHead(200, {
+              ...headers,
+              'Content-Type': 'application/javascript', // Override Content-Type / Content-Type 덮어쓰기
+            });
+            res.end(clientScript);
+          } catch {
+            res.writeHead(200, {
+              ...headers,
+              'Content-Type': 'application/javascript', // Override Content-Type / Content-Type 덮어쓰기
+            });
+            res.end(`console.error('Client script not found');`);
+          }
         }
         return;
       }
