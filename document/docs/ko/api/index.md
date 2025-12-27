@@ -16,3 +16,4 @@ Chrome Remote DevTools 패키지의 API 문서입니다.
 - [Page](/ko/api/domains/page) - 페이지 네비게이션 및 생명주기 도메인
 - [DOM](/ko/api/domains/dom) - DOM 검사 및 페이지 구조 보기 도메인
 - [Network](/ko/api/domains/network) - 네트워크 모니터링 도메인
+- [SessionReplay](/ko/api/domains/session-replay) - 세션 녹화 및 재생 도메인
