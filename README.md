@@ -1,10 +1,14 @@
 # Chrome Remote DevTools
 
+[한국어](README_KO.md) | [English](README.md)
+
 A remote debugging tool that uses Chrome DevTools Protocol (CDP) to control and debug remote Chrome browsers.
 
 ## Overview
 
 Chrome Remote DevTools enables remote debugging of web pages by implementing CDP on the client side and relaying messages through a WebSocket server. It provides a full-featured DevTools interface for debugging web applications remotely.
+
+![Demo](images/play.gif)
 
 ## Features
 
@@ -204,6 +208,26 @@ This project is inspired by and references the following projects:
 - [chii](https://github.com/liriliri/chii) - Remote debugging tool using chobitsu
 - [chobitsu](https://github.com/liriliri/chobitsu) - CDP protocol JavaScript implementation library
 - [devtools-protocol](https://github.com/ChromeDevTools/devtools-protocol) - Official CDP definitions
+
+## Screenshots
+
+### Welcome Screen
+![Welcome Screen](images/welcome.png)
+
+### Client List
+![Client List](images/list.png)
+
+### Console Panel
+![Console Panel](images/console.png)
+
+### Network Panel
+![Network Panel](images/network.png)
+
+### Application Panel
+![Application Panel](images/application.png)
+
+### Session Replay Panel
+![Session Replay Panel](images/sessionReplay.png)
 
 ## Links
 
