@@ -225,7 +225,10 @@ async function extractDOMTree(
       const parser = new DOMParser();
       const doc = parser.parseFromString(fileData.domTree.html, 'text/html');
 
-      const convertNode = (node: Node, nodeId: number): unknown => {
+      // Use a counter to ensure unique node IDs across the entire tree / 전체 트리에서 고유한 노드 ID를 보장하기 위한 카운터 사용
+      let nextNodeId = 1;
+      const convertNode = (node: Node): unknown => {
+        const nodeId = nextNodeId++;
         const result: Record<string, unknown> = {
           nodeId,
           backendNodeId: nodeId,
@@ -238,10 +241,9 @@ async function extractDOMTree(
           result.documentURL = fileData.domTree?.documentURL || window.location.href;
           result.baseURL = fileData.domTree?.baseURL || window.location.href;
           const children: unknown[] = [];
-          let childId = nodeId + 1;
           doc.childNodes.forEach((child) => {
             if (child.nodeType !== Node.TEXT_NODE || child.textContent?.trim()) {
-              children.push(convertNode(child, childId++));
+              children.push(convertNode(child));
             }
           });
           result.childNodeCount = children.length;
@@ -257,10 +259,9 @@ async function extractDOMTree(
           });
           result.attributes = attributes;
           const children: unknown[] = [];
-          let childId = nodeId + 1;
           element.childNodes.forEach((child) => {
             if (child.nodeType !== Node.TEXT_NODE || child.textContent?.trim()) {
-              children.push(convertNode(child, childId++));
+              children.push(convertNode(child));
             }
           });
           result.childNodeCount = children.length;
@@ -280,7 +281,7 @@ async function extractDOMTree(
       };
 
       return {
-        root: convertNode(doc, 1),
+        root: convertNode(doc),
       };
     }
   } catch (error) {
