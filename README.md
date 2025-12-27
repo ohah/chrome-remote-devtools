@@ -9,9 +9,12 @@ Chrome Remote DevTools enables remote debugging of web pages by implementing CDP
 ## Features
 
 - **Connection Management**: WebSocket connection to remote Chrome instances with automatic reconnection
-- **Page Control**: Navigation, page information, and screenshot capture
+- **Page Control**: Navigation and page information
 - **Console & Logging**: Receive and display console messages, execute JavaScript
 - **Network Monitoring**: Track network requests/responses, block and modify requests
+- **Storage Management**: View and manage session storage, local storage, and cookies
+- **Session Replay**: Record and replay user interactions and page changes
+- **Offline Logging**: Capture and store logs locally for offline analysis
 
 ## Architecture
 
@@ -27,6 +30,10 @@ Chrome Remote DevTools enables remote debugging of web pages by implementing CDP
 - **@ohah/chrome-remote-devtools-server**: WebSocket relay server (TypeScript/Bun)
 - **@ohah/chrome-remote-devtools-client**: CDP client (JavaScript, loaded in web pages)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, shared for web/desktop)
+
+### Data Storage
+
+- **IndexedDB**: Used for offline logging and session replay data storage in the browser
 
 ## Tech Stack
 

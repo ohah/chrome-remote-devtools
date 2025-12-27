@@ -9,11 +9,12 @@ Chrome Remote DevTools는 클라이언트 사이드에서 CDP를 구현하고 We
 ## 주요 기능
 
 - **연결 관리**: 원격 크롬 인스턴스에 WebSocket 연결 및 자동 재연결
-- **페이지 제어**: 네비게이션, 페이지 정보 조회, 스크린샷 캡처
+- **페이지 제어**: 네비게이션 및 페이지 정보 조회
 - **콘솔 및 로깅**: 콘솔 메시지 수신 및 표시, JavaScript 실행
 - **네트워크 모니터링**: 네트워크 요청/응답 추적, 요청 차단 및 수정
-- **디버깅**: 브레이크포인트 설정, 스텝 디버깅, 변수 및 스택 트레이스 조회
-- **성능 프로파일링**: CPU 프로파일링, 메모리 힙 스냅샷, 렌더링 성능 분석
+- **스토리지 관리**: 세션 스토리지, 로컬 스토리지, 쿠키 조회 및 관리
+- **세션 리플레이**: 사용자 상호작용 및 페이지 변경 기록 및 재생
+- **오프라인 로깅**: 로컬에서 로그를 캡처하고 저장하여 오프라인 분석
 
 ## 아키텍처
 
@@ -29,6 +30,10 @@ Chrome Remote DevTools는 클라이언트 사이드에서 CDP를 구현하고 We
 - **@ohah/chrome-remote-devtools-server**: WebSocket 중계 서버 (TypeScript/Bun)
 - **@ohah/chrome-remote-devtools-client**: CDP 클라이언트 (JavaScript, 웹페이지에 로드)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, 웹/데스크탑 공유)
+
+### 데이터 저장소
+
+- **IndexedDB**: 브라우저에서 오프라인 로깅 및 세션 리플레이 데이터 저장에 사용
 
 ## 기술 스택
 
@@ -188,6 +193,6 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.
 
 ## 링크
 
-- [문서](https://github.com/ohah/chrome-remote-devtools) (준비 중)
+- [문서](https://ohah.github.io/chrome-remote-devtools/)
 - [이슈](https://github.com/ohah/chrome-remote-devtools/issues)
 - [토론](https://github.com/ohah/chrome-remote-devtools/discussions)

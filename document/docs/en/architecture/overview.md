@@ -50,6 +50,10 @@ sequenceDiagram
 - **@ohah/chrome-remote-devtools-client**: CDP client (JavaScript, loaded in web pages)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, shared for web/desktop)
 
+## Data Storage
+
+- **IndexedDB**: Used for offline logging and session replay data storage in the browser
+
 ## Key Components
 
 ### Client
