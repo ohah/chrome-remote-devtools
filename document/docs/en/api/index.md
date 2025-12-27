@@ -16,3 +16,4 @@ API documentation for Chrome Remote DevTools packages.
 - [Page](/api/domains/page) - Page navigation and lifecycle domain
 - [DOM](/api/domains/dom) - DOM inspection and page structure viewing domain
 - [Network](/api/domains/network) - Network monitoring domain
+- [SessionReplay](/api/domains/session-replay) - Session recording and replay domain
