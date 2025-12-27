@@ -104,6 +104,7 @@ function ReplayPage() {
                   setIsLoading: () => {}, // No-op since loading state is not displayed in UI / UI에 로딩 상태가 표시되지 않으므로 no-op
                 };
                 void sendCDPMessages(sendContext);
+                messagesSentRef.current = true;
               }
             }, 1000);
           }
@@ -128,6 +129,7 @@ function ReplayPage() {
               setIsLoading: () => {}, // No-op since loading state is not displayed in UI
             };
             void sendCDPMessages(sendContext, true); // Include SessionReplay events on first activation / 첫 활성화 시 SessionReplay 이벤트 포함
+            messagesSentRef.current = true;
           } else {
             // If other messages already sent, only send SessionReplay events / 다른 메시지가 이미 전송되었다면 SessionReplay 이벤트만 전송
             const sendContext: SendCDPMessagesContext = {
@@ -177,6 +179,7 @@ function ReplayPage() {
               setIsLoading: () => {}, // No-op since loading state is not displayed in UI
             };
             void sendCDPMessages(sendContext);
+            messagesSentRef.current = true;
           }
         }, 5000); // Give DevTools time to fully initialize (backup if DEVTOOLS_READY not received) / DevTools가 완전히 초기화될 시간 제공 (DEVTOOLS_READY를 받지 못한 경우 백업)
       };
