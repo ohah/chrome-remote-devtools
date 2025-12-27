@@ -141,6 +141,7 @@
       "name": "@ohah/chrome-remote-devtools-client",
       "version": "0.1.0-rc.1",
       "dependencies": {
+        "@babel/runtime": "^7.25.0",
         "@ohah/chrome-remote-devtools-client-rrweb": "workspace:*",
       },
       "devDependencies": {
