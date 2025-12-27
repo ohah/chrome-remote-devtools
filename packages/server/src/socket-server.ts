@@ -55,7 +55,11 @@ export function setLogConfig(enabled: boolean, methods?: string, filePath?: stri
 
   // Close existing stream if any / 기존 스트림이 있으면 닫기
   if (logStream) {
-    logStream.end();
+    try {
+      logStream.end();
+    } catch (error) {
+      console.error('Failed to close log stream / 로그 스트림 닫기 실패:', error);
+    }
     logStream = null;
   }
 
@@ -65,6 +69,10 @@ export function setLogConfig(enabled: boolean, methods?: string, filePath?: stri
       const logDir = dirname(logFile);
       mkdirSync(logDir, { recursive: true });
       logStream = createWriteStream(logFile, { flags: 'a' });
+      // Add error handler for asynchronous write failures / 비동기 쓰기 실패를 위한 에러 핸들러 추가
+      logStream.on('error', (error) => {
+        console.error(`Log stream error / 로그 스트림 오류: ${logFile}`, error);
+      });
     } catch (error) {
       console.error(`Failed to create log file / 로그 파일 생성 실패: ${logFile}`, error);
     }
