@@ -2,11 +2,33 @@
 import type { Page } from '@playwright/test';
 
 export function createTestPageHTML(content: string, serverUrl: string): string {
+  const wsUrl = serverUrl.replace('http://', 'ws://').replace('https://', 'wss://');
   return `<!DOCTYPE html>
 <html>
 <head>
   <title>Test Page</title>
-  <script src="${serverUrl}/client.js" data-server-url="${serverUrl}"></script>
+  <script src="${serverUrl}/client.js"></script>
+  <script>
+    // Wait for script to load before initializing / 스크립트 로드 후 초기화
+    (function() {
+      function initClient() {
+        if (typeof ChromeRemoteDevTools !== 'undefined') {
+          ChromeRemoteDevTools.init({
+            serverUrl: '${wsUrl}',
+          });
+        } else {
+          // Retry after a short delay / 짧은 지연 후 재시도
+          setTimeout(initClient, 50);
+        }
+      }
+      // Start initialization / 초기화 시작
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initClient);
+      } else {
+        initClient();
+      }
+    })();
+  </script>
 </head>
 <body>
   ${content}

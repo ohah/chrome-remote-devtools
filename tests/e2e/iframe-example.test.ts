@@ -346,11 +346,11 @@ test.describe('iframe Example E2E Tests', () => {
     // Wait for page to load / 페이지 로드 대기
     await page.waitForLoadState('networkidle');
 
-    // Check if client script is loaded / 클라이언트 스크립트가 로드되었는지 확인
-    const clientScriptLoaded = await page.evaluate(() => {
-      return document.querySelector('script[src*="client.js"]') !== null;
+    // Check if client is initialized / 클라이언트가 초기화되었는지 확인
+    const clientInitialized = await page.evaluate(() => {
+      return typeof (window as any).ChromeRemoteDevTools !== 'undefined';
     });
-    expect(clientScriptLoaded).toBe(true);
+    expect(clientInitialized).toBe(true);
 
     // Wait for client connection / 클라이언트 연결 대기
     const clientId = await waitForClientConnection(page);
