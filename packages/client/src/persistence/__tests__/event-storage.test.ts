@@ -72,6 +72,9 @@ describe('EventStorage', () => {
     expect(event?.message).toBeDefined();
 
     // Parse message to get method and params / 메시지를 파싱하여 method와 params 가져오기
+    if (!event) {
+      throw new Error('Event is undefined');
+    }
     const parsed = JSON.parse(event.message);
     expect(parsed.method).toBe(method);
     expect(parsed.params).toEqual(params);
@@ -135,8 +138,13 @@ describe('EventStorage', () => {
     expect(eventsAfter.length).toBe(2);
     // Note: timestamp is stored in StoredEvent and used for filtering, but not in returned message / 참고: timestamp는 StoredEvent에 저장되고 필터링에 사용되지만 반환된 메시지에는 없음
     // Verify event order / 이벤트 순서 확인
-    const parsed0 = JSON.parse(eventsAfter[0].message);
-    const parsed1 = JSON.parse(eventsAfter[1].message);
+    const event0 = eventsAfter[0];
+    const event1 = eventsAfter[1];
+    if (!event0 || !event1) {
+      throw new Error('Events are undefined');
+    }
+    const parsed0 = JSON.parse(event0.message);
+    const parsed1 = JSON.parse(event1.message);
     expect(parsed0.method).toBe('Runtime.consoleAPICalled');
     expect(parsed1.method).toBe('Network.requestWillBeSent');
   });
@@ -208,6 +216,9 @@ describe('EventStorage', () => {
     const event = events[0];
     expect(event).toBeDefined();
     expect(event?.type).toBe('CDP_MESSAGE');
+    if (!event) {
+      throw new Error('Event is undefined');
+    }
     const parsed = JSON.parse(event.message);
     expect(parsed.method).toBe(method);
     expect(parsed.params).toEqual(params);

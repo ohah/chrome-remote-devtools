@@ -3,7 +3,7 @@
 /**
  * Navigator with wakeLock API / wakeLock API가 있는 Navigator
  */
-interface NavigatorWithWakeLock extends Navigator {
+interface NavigatorWithWakeLock {
   wakeLock?: {
     request(type: 'screen'): Promise<WakeLockSentinel>;
   };

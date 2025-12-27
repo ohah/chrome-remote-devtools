@@ -127,6 +127,10 @@ describe('ChromeDomain', () => {
       method: 'Storage.getStorageKey',
       params: {},
     });
+    // Storage.getStorageKey is synchronous, so result is CDPResponse / Storage.getStorageKey는 동기이므로 result는 CDPResponse
+    if (result instanceof Promise) {
+      return;
+    }
     expect(result).toHaveProperty('id', 1);
     expect(result).toHaveProperty('result');
     if (result.result && typeof result.result === 'object' && 'storageKey' in result.result) {
@@ -140,6 +144,10 @@ describe('ChromeDomain', () => {
       id: 1,
       method: 'Storage.getStorageKey',
     });
+    // Storage.getStorageKey is synchronous, so result is CDPResponse / Storage.getStorageKey는 동기이므로 result는 CDPResponse
+    if (result instanceof Promise) {
+      return;
+    }
     expect(result).toHaveProperty('id', 1);
     expect(result).toHaveProperty('result');
     if (result.result && typeof result.result === 'object' && 'storageKey' in result.result) {
