@@ -42,5 +42,5 @@ export function formatServerUrl(url: string): string {
  */
 export function getDefaultServerUrl(): string {
   // In development, use localhost / 개발 환경에서는 localhost 사용
-  return 'ws://localhost:9222';
+  return 'ws://localhost:8080';
 }

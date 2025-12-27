@@ -67,7 +67,18 @@ export class WebSocketClient {
    * Initialize WebSocket connection / WebSocket 연결 초기화
    */
   private async initializeWebSocket(): Promise<void> {
-    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    // Extract protocol from serverUrl or use default / serverUrl에서 프로토콜 추출 또는 기본값 사용
+    // React Native doesn't have location object / React Native에는 location 객체가 없음
+    let protocol = 'ws:';
+    if (this.serverUrl.startsWith('wss://') || this.serverUrl.startsWith('https://')) {
+      protocol = 'wss:';
+    } else if (this.serverUrl.startsWith('ws://') || this.serverUrl.startsWith('http://')) {
+      protocol = 'ws:';
+    } else if (typeof location !== 'undefined' && location.protocol === 'https:') {
+      // Fallback for browser environment / 브라우저 환경을 위한 폴백
+      protocol = 'wss:';
+    }
+
     const host = this.serverUrl.replace(/^(http|https|ws|wss):\/\//i, '');
     const socket = new WebSocket(
       `${protocol}//${host}/remote/debug/client/${getId()}?${getQuery()}`

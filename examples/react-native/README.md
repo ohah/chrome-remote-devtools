@@ -136,7 +136,7 @@ In a separate terminal, start the Chrome Remote DevTools server from the project
 bun run dev:server
 ```
 
-The server will start on `ws://localhost:9222` by default.
+The server will start on `ws://localhost:8080` by default.
 
 ### Step 5: Start Metro Bundler
 
@@ -175,7 +175,7 @@ npm run ios
 ## Usage
 
 1. **Connect to Server**:
-   - Enter the server WebSocket URL (default: `ws://localhost:9222`)
+   - Enter the server WebSocket URL (default: `ws://localhost:8080` for iOS, `ws://10.0.2.2:8080` for Android emulator)
    - Click "Connect" to establish connection
 
 2. **Start Recording**:
@@ -191,10 +191,12 @@ npm run ios
 
 ### Server URL
 
-The default server URL is `ws://localhost:9222`. You can change this in the app's UI or modify the default in `src/App.tsx`:
+The default server URL is `ws://localhost:8080` for iOS and `ws://10.0.2.2:8080` for Android emulator. You can change this in the app's UI or modify the default in `src/App.tsx`:
 
 ```typescript
-const [serverUrl, setServerUrl] = useState<string>('ws://localhost:9222');
+const [serverUrl, setServerUrl] = useState<string>(
+  Platform.OS === 'android' ? 'ws://10.0.2.2:8080' : 'ws://localhost:8080'
+);
 ```
 
 ### Rrweb Configuration
@@ -235,7 +237,7 @@ examples/react-native/
 
 - **Cannot connect to server**: Ensure the Chrome Remote DevTools server is running (`bun run dev:server`)
 - **WebSocket connection failed**: Check that the server URL is correct and the server is accessible
-- **Network error**: For Android emulator, use `ws://10.0.2.2:9222` instead of `ws://localhost:9222`
+- **Network error**: For Android emulator, use `ws://10.0.2.2:8080` instead of `ws://localhost:8080`
 
 ### iOS CocoaPods Installation Issues
 
