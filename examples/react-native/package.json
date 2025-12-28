@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
+    "android:release": "react-native run-android --mode=release",
     "ios": "react-native run-ios",
+    "ios:release": "react-native run-ios --mode Release --verbose",
     "start": "react-native start",
-    "dev": "react-native dev"
+    "build:android": "cd android && ./gradlew assembleRelease",
+    "build:ios": "cd ios && xcodebuild -workspace ChromeRemoteDevTools.xcworkspace -scheme ChromeRemoteDevTools -configuration Release -destination 'generic/platform=iOS' archive"
   },
   "dependencies": {
     "@ohah/chrome-remote-devtools-client": "workspace:*",

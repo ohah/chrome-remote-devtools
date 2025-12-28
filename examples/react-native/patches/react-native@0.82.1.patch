@@ -1,0 +1,43 @@
+diff --git a/Libraries/Utilities/HMRClient.js b/Libraries/Utilities/HMRClient.js
+index 0000000..1111111 100644
+--- a/Libraries/Utilities/HMRClient.js
++++ b/Libraries/Utilities/HMRClient.js
+@@ -167,7 +167,16 @@ const HMRClient: HMRClientNativeInterface = {
+     const serverHost = port !== null && port !== '' ? \`\${host}:\${port}\` : host;
+ 
+     const serverScheme = scheme;
+ 
+-    const origin = \`\${serverScheme}://\${serverHost}\`;
+-    const client = new MetroHMRClient(\`\${origin}/hot\`);
++    // Check if custom WebSocket URL is set for Chrome Remote DevTools / Chrome Remote DevTools를 위한 커스텀 WebSocket URL이 설정되어 있는지 확인
++    // Use custom URL if available, otherwise use default / 사용 가능하면 커스텀 URL 사용, 그렇지 않으면 기본값 사용
++    const customOrigin =
++      typeof global !== 'undefined' &&
++      global.__CHROME_REMOTE_DEVTOOLS_HMR_URL__ != null
++        ? global.__CHROME_REMOTE_DEVTOOLS_HMR_URL__
++        : null;
++
++    const origin = customOrigin ?? \`\${serverScheme}://\${serverHost}\`;
++    const client = new MetroHMRClient(\`\${origin}/hot\`);
+ 
+     hmrOrigin = origin;
+     hmrClient = client;
+diff --git a/Libraries/Core/setUpBatchedBridge.js b/Libraries/Core/setUpBatchedBridge.js
+index 0000000..2222222 100644
+--- a/Libraries/Core/setUpBatchedBridge.js
++++ b/Libraries/Core/setUpBatchedBridge.js
+@@ -33,7 +33,13 @@ registerModule(
+   () => require('../Utilities/GlobalPerformanceLogger').default,
+ );
+ 
+-if (__DEV__) {
++// Check if custom WebSocket URL is set for Chrome Remote DevTools / Chrome Remote DevTools를 위한 커스텀 WebSocket URL이 설정되어 있는지 확인
++// Use HMRClient in production if custom URL is set / 커스텀 URL이 설정되어 있으면 프로덕션에서도 HMRClient 사용
++const hasCustomInspectorUrl =
++  typeof global !== 'undefined' &&
++  global.__CHROME_REMOTE_DEVTOOLS_HMR_URL__ != null;
++
++if (__DEV__ || hasCustomInspectorUrl) {
+   registerModule('HMRClient', () => require('../Utilities/HMRClient').default);
+ } else {
+   registerModule(
