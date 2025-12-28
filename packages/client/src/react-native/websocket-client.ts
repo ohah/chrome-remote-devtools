@@ -1,6 +1,5 @@
 // WebSocket client for React Native / React Native용 WebSocket 클라이언트
 
-import { SessionReplayDomain } from './session-replay';
 import { ConsoleDomain } from './console';
 import { getId, getQuery } from './utils';
 
@@ -9,7 +8,6 @@ import { getId, getQuery } from './utils';
  */
 export class ReactNativeWebSocketClient {
   private socket: WebSocket | null = null;
-  private sessionReplay: SessionReplayDomain | null = null;
   private consoleDomain: ConsoleDomain | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
@@ -45,16 +43,32 @@ export class ReactNativeWebSocketClient {
     return new Promise((resolve, reject) => {
       try {
         const wsUrl = this.buildWebSocketUrl();
-        console.log('[React Native] Connecting to / [React Native] 연결 중:', wsUrl);
+        console.log(
+          '[ReactNativeWebSocketClient] Initializing WebSocket / [ReactNativeWebSocketClient] WebSocket 초기화 중'
+        );
+        console.log(
+          '[ReactNativeWebSocketClient] Connecting to / [ReactNativeWebSocketClient] 연결 중:',
+          wsUrl
+        );
         this.socket = new WebSocket(wsUrl);
 
         this.socket.onopen = () => {
-          console.log('[React Native] WebSocket connected / [React Native] WebSocket 연결됨');
+          console.log(
+            '[ReactNativeWebSocketClient] WebSocket connected / [ReactNativeWebSocketClient] WebSocket 연결됨'
+          );
           this.reconnectAttempts = 0;
-          this.sessionReplay = new SessionReplayDomain((message) => this.send(message));
           // Enable console domain by default / 기본적으로 console 도메인 활성화
+          console.log(
+            '[ReactNativeWebSocketClient] Creating Console domain / [ReactNativeWebSocketClient] Console 도메인 생성 중'
+          );
           this.consoleDomain = new ConsoleDomain((message) => this.send(message));
           this.consoleDomain.enable();
+          console.log(
+            '[ReactNativeWebSocketClient] Console domain enabled / [ReactNativeWebSocketClient] Console 도메인 활성화됨'
+          );
+          console.log(
+            '[ReactNativeWebSocketClient] Initialization complete / [ReactNativeWebSocketClient] 초기화 완료'
+          );
           resolve();
         };
 
@@ -235,13 +249,6 @@ export class ReactNativeWebSocketClient {
   }
 
   /**
-   * Get SessionReplay domain / SessionReplay 도메인 가져오기
-   */
-  getSessionReplay(): SessionReplayDomain | null {
-    return this.sessionReplay;
-  }
-
-  /**
    * Get Console domain / Console 도메인 가져오기
    */
   getConsole(): ConsoleDomain | null {
@@ -281,7 +288,5 @@ export class ReactNativeWebSocketClient {
       this.socket.close();
       this.socket = null;
     }
-
-    this.sessionReplay = null;
   }
 }

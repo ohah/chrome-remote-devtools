@@ -18,10 +18,18 @@
   "react-native": "./src/react-native/index.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "browser": "./dist/index.iife.js",
-      "react-native": "./src/react-native/index.ts"
+      "react-native": {
+        "types": "./src/react-native/index.ts",
+        "default": "./src/react-native/index.ts"
+      },
+      "iife": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "browser": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.iife.js"
+      }
     },
     "./iife": "./dist/index.iife.js"
   },
@@ -40,7 +48,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.25.0",
-    "@ohah/chrome-remote-devtools-client-rrweb": "workspace:*"
+    "@ohah/chrome-remote-devtools-client-rrweb": "workspace:*",
+    "@rrweb/types": "^2.0.0-alpha.18"
   },
   "devDependencies": {
     "@types/bun": "latest",
