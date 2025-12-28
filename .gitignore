@@ -53,3 +53,59 @@ doc_build/
 test-results/
 playwright-report/
 .playwright/
+
+# React Native / React Native
+# iOS
+**/ios/Pods/
+**/ios/build/
+**/ios/DerivedData/
+**/ios/*.xcworkspace/xcuserdata/
+**/ios/*.xcodeproj/xcuserdata/
+**/ios/*.xcworkspace/xcshareddata/
+**/ios/.xcode.env.local
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Android
+**/android/app/build/
+**/android/app/.cxx/
+**/android/build/
+**/android/.gradle/
+**/android/local.properties
+**/android/.cxx/
+**/android/.idea/
+**/android/.kotlin/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# React Native / Expo
+**/.expo/
+**/.expo-shared/
+**/.metro/
+**/web-build/
+
+# React Native certificates and keys / React Native 인증서 및 키
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+*.keystore
+
+# React Native logs / React Native 로그
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+metro-*.log
