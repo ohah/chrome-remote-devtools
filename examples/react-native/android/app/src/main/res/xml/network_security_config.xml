@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Network security configuration for WebSocket cleartext traffic / WebSocket cleartext traffic을 위한 네트워크 보안 설정 -->
+<network-security-config>
+    <!-- Allow cleartext traffic for development / 개발을 위한 cleartext traffic 허용 -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <!-- Allow cleartext traffic for specific domains / 특정 도메인에 대한 cleartext traffic 허용 -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Android emulator host / Android 에뮬레이터 호스트 -->
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <!-- Localhost / 로컬호스트 -->
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>
+
+
