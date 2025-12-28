@@ -182,9 +182,8 @@ export default class BaseDomain {
           }
         }
 
-        // Clear non-SessionReplay messages after sending / 전송 후 SessionReplay가 아닌 메시지 삭제
+        // Don't clear messages after sending to allow replay when DevTools reconnects / DevTools 재연결 시 재생을 위해 전송 후 메시지 삭제하지 않음
         // SessionReplay events will be sent separately by SessionReplay.replayStoredEvents() / SessionReplay 이벤트는 SessionReplay.replayStoredEvents()에서 별도로 전송됨
-        await this.eventStorage.clearEvents(['SessionReplay.']);
       }
     } catch (error) {
       console.error(

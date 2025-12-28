@@ -143,6 +143,11 @@ export class WebSocketClient {
    * Setup socket event handlers / 소켓 이벤트 핸들러 설정
    */
   private setupSocketHandlers(socket: WebSocket, domain: ChromeDomain): void {
+    // Send stored events when WebSocket opens / WebSocket이 열릴 때 저장된 이벤트 전송
+    socket.addEventListener('open', () => {
+      void this.sendStoredEvents(socket);
+    });
+
     socket.addEventListener('message', async ({ data }) => {
       await this.handleSocketMessage(data, domain, socket);
     });
@@ -179,10 +184,7 @@ export class WebSocketClient {
           await new Promise((resolve) => setTimeout(resolve, 10));
         }
 
-        // Clear messages after sending if configured / 설정된 경우 전송 후 메시지 삭제
-        if (this.rrwebConfig.clearOnSend !== false) {
-          await this.eventStorage.clearEvents();
-        }
+        // Don't clear messages after sending to allow replay when DevTools connects / DevTools 연결 시 재생을 위해 전송 후 메시지 삭제하지 않음
       }
     } catch (error) {
       console.error('Failed to send stored messages / 저장된 메시지 전송 실패:', error);
