@@ -1,13 +1,5 @@
 import { ReactNativeWebSocketClient } from './websocket-client';
-// console.log('test');
-// const init = () => {
-//   console.log('init');
-// }
-// export { init }
-// // React Native specific CDP client for rrweb / React Native 전용 rrweb용 CDP 클라이언트
-
-import { SessionReplayDomain } from './session-replay';
-import type { ChromeRemoteDevToolsOptions, RrwebConfig } from './config';
+import type { ChromeRemoteDevToolsOptions } from './config';
 
 // Global instances / 전역 인스턴스
 let websocketClient: ReactNativeWebSocketClient | null = null;
@@ -17,49 +9,52 @@ let websocketClient: ReactNativeWebSocketClient | null = null;
  * @param options - Configuration options / 설정 옵션
  */
 export async function init(options: ChromeRemoteDevToolsOptions): Promise<void> {
-  const { serverUrl, rrweb = { enable: false } } = options;
+  console.log('[React Native Client] Initializing / [React Native Client] 초기화 중');
+  const { serverUrl, interceptNativeInspector = false } = options;
 
   if (!serverUrl) {
     throw new Error('serverUrl is required / serverUrl이 필요합니다');
   }
 
+  console.log('[React Native Client] Server URL / [React Native Client] 서버 URL:', serverUrl);
+
+  // Set custom WebSocket URL for native inspector interception / 네이티브 인스펙터 가로채기를 위한 커스텀 WebSocket URL 설정
+  if (interceptNativeInspector && typeof global !== 'undefined') {
+    // Extract host and port from serverUrl / serverUrl에서 host와 port 추출
+    const url = new URL(serverUrl.replace(/^ws/, 'http'));
+    const customOrigin = `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}`;
+
+    // Set global variable for HMRClient to use / HMRClient가 사용할 전역 변수 설정
+    (global as any).__CHROME_REMOTE_DEVTOOLS_HMR_URL__ = customOrigin;
+    console.log(
+      '[React Native Client] Native inspector interception enabled / [React Native Client] 네이티브 인스펙터 가로채기 활성화됨:',
+      customOrigin
+    );
+  }
+
   // Cleanup existing connection / 기존 연결 정리
   if (websocketClient) {
+    console.log(
+      '[React Native Client] Cleaning up existing connection / [React Native Client] 기존 연결 정리 중'
+    );
     websocketClient.cleanup();
     websocketClient = null;
   }
 
   // Create WebSocket client / WebSocket 클라이언트 생성
+  console.log(
+    '[React Native Client] Creating WebSocket client / [React Native Client] WebSocket 클라이언트 생성 중'
+  );
   websocketClient = new ReactNativeWebSocketClient(serverUrl);
 
   // Initialize WebSocket connection / WebSocket 연결 초기화
+  console.log(
+    '[React Native Client] Initializing WebSocket connection / [React Native Client] WebSocket 연결 초기화 중'
+  );
   await websocketClient.initialize();
+  console.log('[React Native Client] WebSocket connected / [React Native Client] WebSocket 연결됨');
 
-  // Initialize rrweb recording if enabled / 활성화된 경우 rrweb 녹화 초기화
-  if (rrweb.enable) {
-    const sessionReplay = websocketClient.getSessionReplay();
-    if (sessionReplay) {
-      sessionReplay.enable();
-      await initRrwebRecording(rrweb, sessionReplay);
-    }
-  }
-}
-
-/**
- * Initialize rrweb recording for React Native / React Native용 rrweb 녹화 초기화
- * This will be implemented separately for React Native View hierarchy / React Native View 계층을 위해 별도로 구현됨
- */
-async function initRrwebRecording(
-  config: RrwebConfig,
-  sessionReplay: SessionReplayDomain
-): Promise<void> {
-  // TODO: Implement React Native specific rrweb recorder / React Native 전용 rrweb 레코더 구현
-  // This should record React Native View hierarchy instead of DOM / DOM 대신 React Native View 계층을 기록해야 함
-  console.log('[React Native] rrweb recording initialization / [React Native] rrweb 녹화 초기화');
-  console.log('[React Native] Config:', config);
-
-  // For now, just enable SessionReplay domain / 지금은 SessionReplay 도메인만 활성화
-  // The actual recording implementation will be added later / 실제 녹화 구현은 나중에 추가됨
+  console.log('[React Native Client] Initialization complete / [React Native Client] 초기화 완료');
 }
 
 /**
@@ -70,47 +65,13 @@ export function getWebSocketClient(): ReactNativeWebSocketClient | null {
 }
 
 /**
- * Get SessionReplay domain / SessionReplay 도메인 가져오기
+ * Get Console domain / Console 도메인 가져오기
  */
-export function getSessionReplayDomain(): SessionReplayDomain | null {
+export function getConsoleDomain(): import('./console').ConsoleDomain | null {
   if (!websocketClient) {
     return null;
   }
-  return websocketClient.getSessionReplay();
-}
-
-/**
- * Send rrweb events to SessionReplay domain / SessionReplay 도메인으로 rrweb 이벤트 전송
- * @param events - Array of rrweb events / rrweb 이벤트 배열
- */
-export function sendRrwebEvents(events: unknown[]): boolean {
-  const sessionReplay = getSessionReplayDomain();
-  if (!sessionReplay) {
-    return false;
-  }
-
-  const result = sessionReplay.sendEvent({ events });
-  return result.success;
-}
-
-/**
- * Enable SessionReplay recording / SessionReplay 녹화 활성화
- */
-export function enableRecording(): void {
-  const sessionReplay = getSessionReplayDomain();
-  if (sessionReplay) {
-    sessionReplay.enable();
-  }
-}
-
-/**
- * Disable SessionReplay recording / SessionReplay 녹화 비활성화
- */
-export function disableRecording(): void {
-  const sessionReplay = getSessionReplayDomain();
-  if (sessionReplay) {
-    sessionReplay.disable();
-  }
+  return websocketClient.getConsole();
 }
 
 /**
@@ -124,4 +85,4 @@ export function destroy(): void {
 }
 
 // Export types / 타입 export
-export type { ChromeRemoteDevToolsOptions, RrwebConfig } from './config';
+export type { ChromeRemoteDevToolsOptions } from './config';
