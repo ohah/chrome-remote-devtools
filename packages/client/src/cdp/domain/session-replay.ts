@@ -144,11 +144,7 @@ export default class SessionReplay extends BaseDomain {
         }
       }
 
-      // Clear SessionReplay events after sending / 전송 후 SessionReplay 이벤트 삭제
-      if (sentCount > 0 && this.eventStorage) {
-        // Clear only SessionReplay events / SessionReplay 이벤트만 삭제
-        await this.eventStorage.clearEvents(['SessionReplay.']);
-      }
+      // Don't clear SessionReplay events after sending to allow replay when DevTools reconnects / DevTools 재연결 시 재생을 위해 전송 후 SessionReplay 이벤트 삭제하지 않음
 
       return { success: true, count: sentCount };
     } catch (error) {
