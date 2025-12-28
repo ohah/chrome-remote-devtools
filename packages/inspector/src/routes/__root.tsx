@@ -23,6 +23,10 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
     navigate({ to: '/' });
   };
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   const handleMinimize = () => {
     if (appWindow) {
       void appWindow.minimize();
@@ -66,6 +70,29 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
             </svg>
           </button>
         )}
+        {/* Refresh button / 새로고침 버튼 */}
+        <button
+          className="titlebar-nav-button appearance-none p-0 m-0 border-0 inline-flex justify-center items-center w-[24px] h-[24px] bg-transparent text-gray-400 cursor-pointer transition-colors hover:bg-white/10 rounded ml-1"
+          onClick={handleRefresh}
+          aria-label="Refresh"
+          title="Refresh"
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M1 4v3h3" />
+            <path d="M11 8V5H8" />
+            <path d="M8.5 2.5A4.5 4.5 0 1 0 3.5 9.5" />
+            <path d="M3.5 2.5A4.5 4.5 0 1 1 8.5 9.5" />
+          </svg>
+        </button>
       </div>
       {isTauri && appWindow && (
         <div className="titlebar-controls flex">
