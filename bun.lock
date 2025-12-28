@@ -143,6 +143,7 @@
       "dependencies": {
         "@babel/runtime": "^7.25.0",
         "@ohah/chrome-remote-devtools-client-rrweb": "workspace:*",
+        "@rrweb/types": "^2.0.0-alpha.18",
       },
       "devDependencies": {
         "@types/bun": "latest",
