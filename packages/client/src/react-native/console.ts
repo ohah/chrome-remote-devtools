@@ -3,9 +3,18 @@
 /**
  * Console domain for sending console messages to DevTools / DevTools로 콘솔 메시지 전송을 위한 Console 도메인
  */
+// Console message listener type / 콘솔 메시지 리스너 타입
+export type ConsoleMessageListener = (message: {
+  type: string;
+  args: unknown[];
+  timestamp: number;
+  stackTrace?: { callFrames: unknown[] };
+}) => void;
+
 export class ConsoleDomain {
   private isEnabled = false;
   private sendMessage: (message: unknown) => void;
+  private messageListeners: Set<ConsoleMessageListener> = new Set();
   private originalConsole: {
     log?: typeof console.log;
     error?: typeof console.error;
@@ -16,6 +25,18 @@ export class ConsoleDomain {
 
   constructor(sendMessage: (message: unknown) => void) {
     this.sendMessage = sendMessage;
+  }
+
+  /**
+   * Add console message listener / 콘솔 메시지 리스너 추가
+   * @param listener - Message listener function / 메시지 리스너 함수
+   * @returns Unsubscribe function / 구독 해제 함수
+   */
+  addMessageListener(listener: ConsoleMessageListener): () => void {
+    this.messageListeners.add(listener);
+    return () => {
+      this.messageListeners.delete(listener);
+    };
   }
 
   /**
@@ -122,6 +143,8 @@ export class ConsoleDomain {
       ? { callFrames: this.getCallFrames() }
       : undefined;
 
+    const timestamp = Date.now();
+
     // Create CDP message matching web client format / 웹 클라이언트 형식과 일치하는 CDP 메시지 생성
     // Web client always includes stackTrace (even if empty) / 웹 클라이언트는 항상 stackTrace를 포함 (비어있어도)
     const cdpMessage = {
@@ -130,10 +153,24 @@ export class ConsoleDomain {
         type,
         args: formattedArgs,
         executionContextId: 1,
-        timestamp: Date.now(), // Use milliseconds like web client / 웹 클라이언트처럼 밀리초 사용
+        timestamp, // Use milliseconds like web client / 웹 클라이언트처럼 밀리초 사용
         stackTrace: stackTrace || { callFrames: [] }, // Always include stackTrace / 항상 stackTrace 포함
       },
     };
+
+    // Notify listeners / 리스너에 알림
+    this.messageListeners.forEach((listener) => {
+      try {
+        listener({
+          type,
+          args: formattedArgs,
+          timestamp,
+          stackTrace: stackTrace || { callFrames: [] },
+        });
+      } catch (error) {
+        // Ignore listener errors / 리스너 에러 무시
+      }
+    });
 
     // Send CDP message / CDP 메시지 전송
     this.sendMessage(cdpMessage);
