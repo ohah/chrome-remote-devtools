@@ -26,14 +26,6 @@ export function getNodeId(node: Node): number {
 export function getNodeById(nodeId: number): Node | null {
   const node = nodeMap.get(nodeId);
   if (!node) {
-    // Debug: log nodeMap size for debugging / 디버깅을 위해 nodeMap 크기 로그
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(
-        `[NodeManager] Node ${nodeId} not found in nodeMap. ` +
-          `Current nodeMap size: ${nodeMap.size}, ` +
-          `nodeIdCounter: ${nodeIdCounter}`
-      );
-    }
     return null;
   }
   return node;
