@@ -72,7 +72,7 @@ function serveDevtoolsFrontend() {
     },
     // Serve files in development / 개발 시 파일 서빙
     configureServer(server) {
-      server.middlewares.use('/devtools-frontend', (req, res, next) => {
+      server.middlewares.use('/devtools-frontend', (req, res, _next) => {
         const urlPath = req.url || '';
         // Remove query string / 쿼리 문자열 제거
         const cleanPath = urlPath.split('?')[0];
@@ -136,6 +136,8 @@ export default defineConfig(async () => ({
     tanstackRouter({
       target: 'react',
       autoCodeSplitting: true,
+      routesDirectory: './src/routes',
+      routeFileIgnorePattern: '(utils|__tests__|types\\.ts|\\.test\\.)',
     }),
     react(),
     serveDevtoolsFrontend(),
@@ -148,7 +150,7 @@ export default defineConfig(async () => ({
   clearScreen: false,
   // 2. tauri expects a fixed port, fail if that port is not available
   server: {
-    port: 1420,
+    port: 3420,
     strictPort: true,
     host: host || false,
     hmr: host
@@ -175,7 +177,7 @@ export default defineConfig(async () => ({
   // Preview server also needs to serve devtools-frontend / Preview 서버도 devtools-frontend 서빙 필요
   preview: {
     port: 1420,
-    strictPort: true,
+    strictPort: false, // Allow port fallback / 포트 폴백 허용
   },
   // Resolve devtools-frontend imports / devtools-frontend import 해결
   resolve: {
