@@ -358,46 +358,6 @@ export class SocketServer {
     const sendToDevtools = (message: Buffer | string) => {
       this.devtools.forEach((devtool) => {
         if (devtool.clientId === id) {
-          // Debug: log CSS.getMatchedStylesForNode responses and CSS.styleSheetAdded events / 디버깅: CSS.getMatchedStylesForNode 응답 및 CSS.styleSheetAdded 이벤트 로그
-          const messageStr = typeof message === 'string' ? message : message.toString();
-          try {
-            const parsed = JSON.parse(messageStr);
-            // Check for CSS.getMatchedStylesForNode response / CSS.getMatchedStylesForNode 응답 확인
-            if (parsed.id && parsed.result && parsed.result.matchedCSSRules) {
-              const styleSheetIds = new Set<string>();
-              parsed.result.matchedCSSRules?.forEach((rule: any) => {
-                if (rule.rule?.styleSheetId) {
-                  styleSheetIds.add(rule.rule.styleSheetId);
-                }
-              });
-              parsed.result.inherited?.forEach((inherited: any) => {
-                inherited.matchedCSSRules?.forEach((rule: any) => {
-                  if (rule.rule?.styleSheetId) {
-                    styleSheetIds.add(rule.rule.styleSheetId);
-                  }
-                });
-              });
-              console.log(`[SERVER] CSS.getMatchedStylesForNode response (id: ${parsed.id}):`, {
-                matchedCSSRulesCount: parsed.result.matchedCSSRules?.length || 0,
-                allStyleSheetIds: Array.from(styleSheetIds),
-                hasOrigin: parsed.result.matchedCSSRules?.[0]?.rule?.origin !== undefined,
-              });
-            }
-            // Check for CSS.styleSheetAdded event / CSS.styleSheetAdded 이벤트 확인
-            if (parsed.method === 'CSS.styleSheetAdded' && parsed.params?.header) {
-              const header = parsed.params.header;
-              console.log(`[SERVER] CSS.styleSheetAdded event:`, {
-                styleSheetId: header.styleSheetId,
-                sourceURL: header.sourceURL !== undefined ? header.sourceURL : '(undefined)',
-                isInline: header.isInline,
-                origin: header.origin || '(missing)',
-                hasOrigin: header.origin !== undefined,
-                hasSourceURL: header.sourceURL !== undefined,
-              });
-            }
-          } catch (e) {
-            // Not JSON or parse error, ignore / JSON이 아니거나 파싱 에러, 무시
-          }
           devtool.ws.send(message);
         }
       });

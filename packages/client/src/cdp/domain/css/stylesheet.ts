@@ -49,7 +49,7 @@ function getStyleSheetId(sourceUrl = ''): string {
     let hash = 0;
     for (let i = 0; i < sourceUrl.length; i++) {
       const char = sourceUrl.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer / 32비트 정수로 변환
     }
     return `stylesheet-${Math.abs(hash)}`;
@@ -139,9 +139,6 @@ function processCssRules(
         matchesEl = matchesSelector(node, selectorText);
       } catch (e) {
         // Invalid selector may throw error / 잘못된 셀렉터는 에러를 던질 수 있음
-        if (typeof console !== 'undefined' && console.debug) {
-          console.debug(`[Stylesheet] matchesSelector error for selector "${selectorText}":`, e);
-        }
         return;
       }
 
@@ -219,11 +216,6 @@ export function getMatchedCssRules(node: Element): Array<{
 
   const styleSheets = Array.from(document.styleSheets);
 
-  // Debug: log stylesheet count / 디버깅: 스타일시트 개수 로그
-  if (typeof console !== 'undefined' && console.debug) {
-    console.debug(`[Stylesheet] getMatchedCssRules: Processing ${styleSheets.length} stylesheets for element ${node.tagName}`);
-  }
-
   styleSheets.forEach((styleSheet, index) => {
     const styleSheetId = getStyleSheetIdForSheet(styleSheet);
     const href = (styleSheet as CSSStyleSheet).href || '';
@@ -233,53 +225,20 @@ export function getMatchedCssRules(node: Element): Array<{
       // Cross-origin stylesheets may throw error / 크로스 오리진 스타일시트는 에러를 던질 수 있음
       cssRules = (styleSheet as CSSStyleSheet).cssRules;
       if (!cssRules) {
-        // Debug: log skipped stylesheet / 디버깅: 건너뛴 스타일시트 로그
-        if (typeof console !== 'undefined' && console.debug) {
-          console.debug(`[Stylesheet] getMatchedCssRules: Skipping stylesheet ${index} (no cssRules): ${href || '(inline)'}, styleSheetId: ${styleSheetId}`);
-        }
         return; // Skip if no cssRules / cssRules가 없으면 건너뛰기
       }
     } catch (e) {
       // Cross-origin error, skip this stylesheet / 크로스 오리진 에러, 이 스타일시트 건너뛰기
-      // Debug: log cross-origin error / 디버깅: 크로스 오리진 에러 로그
-      if (typeof console !== 'undefined' && console.debug) {
-        console.debug(`[Stylesheet] getMatchedCssRules: Cross-origin error for stylesheet ${index}: ${href || '(inline)'}, styleSheetId: ${styleSheetId}`);
-      }
       return;
-    }
-
-    // Debug: log stylesheet being processed / 디버깅: 처리 중인 스타일시트 로그
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(`[Stylesheet] getMatchedCssRules: Processing stylesheet ${index}: ${href || '(inline)'}, styleSheetId: ${styleSheetId}, cssRules.length: ${cssRules.length}`);
     }
 
     processCssRules(cssRules, node, styleSheetId, unsorted, stats, 0);
   });
 
-  // Debug: log rule matching statistics only if no matches found / 디버깅: 매칭이 없을 때만 규칙 매칭 통계 로그
-  if (stats.styleRules > 0 && stats.matchedRules === 0 && stats.allSelectors.length <= 20) {
-    // Log selectors if no matches found and not too many / 매칭이 없고 셀렉터가 많지 않으면 로그
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(
-        `[Stylesheet] getMatchedCssRules: No matches for ${node.tagName}${node.className ? '.' + node.className.split(' ').join('.') : ''}: ` +
-          `totalRules=${stats.totalRules}, styleRules=${stats.styleRules}, matchedRules=${stats.matchedRules}`
-      );
-      console.debug(`[Stylesheet] Available selectors:`, stats.allSelectors);
-      console.debug(`[Stylesheet] Element info: tagName=${node.tagName}, id=${node.id}, className=${node.className}`);
-    }
-  }
-
   // Sort by priority (higher priority first) / 우선순위로 정렬 (높은 우선순위가 먼저)
   const sorted = unsorted
     .sort((a, b) => b.priority - a.priority)
     .map(({ priority, ...rest }) => rest);
-
-  // Debug: log found rules only if no matches found / 디버깅: 매칭이 없을 때만 로그
-  if (typeof console !== 'undefined' && console.debug && sorted.length === 0 && stats.styleRules > 0) {
-    console.debug(
-      `[Stylesheet] getMatchedCssRules: No matches for ${node.tagName}${node.className ? '.' + node.className.split(' ').join('.') : ''}`
-    );
-  }
 
   return sorted;
 }
@@ -291,7 +250,9 @@ export function getMatchedCssRules(node: Element): Array<{
 function calculateSelectorPriority(selector: string): number {
   const idCount = (selector.match(/#/g) || []).length;
   const classCount = (selector.match(/\./g) || []).length;
-  const elementCount = selector.split(/[#.\s>+~[\]]/).filter((s) => s && /^[a-zA-Z]/.test(s)).length;
+  const elementCount = selector
+    .split(/[#.\s>+~[\]]/)
+    .filter((s) => s && /^[a-zA-Z]/.test(s)).length;
 
   // Priority: IDs (1000) > Classes (100) > Elements (1) / 우선순위: ID (1000) > 클래스 (100) > 요소 (1)
   return idCount * 1000 + classCount * 100 + elementCount;
@@ -376,7 +337,9 @@ export async function getStyleSheetText(styleSheetId: string): Promise<string> {
 /**
  * Get shorthand entries from style / 스타일에서 shorthand 항목 가져오기
  */
-export function getShorthandEntries(style: CSSStyleDeclaration): Array<{ name: string; value: string }> {
+export function getShorthandEntries(
+  style: CSSStyleDeclaration
+): Array<{ name: string; value: string }> {
   const shorthandNames = ['background', 'font', 'border', 'margin', 'padding'];
   const ret: Array<{ name: string; value: string }> = [];
 
@@ -389,4 +352,3 @@ export function getShorthandEntries(style: CSSStyleDeclaration): Array<{ name: s
 
   return ret;
 }
-

@@ -167,16 +167,6 @@ export default class CSS extends BaseDomain {
     const href = (styleSheet as CSSStyleSheet).href || '';
     const isInline = !href;
 
-    // Debug: log styleSheetAdded event / 디버깅: styleSheetAdded 이벤트 로그
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(`[CDP CSS] Sending styleSheetAdded event:`, {
-        styleSheetId,
-        href: href || '(inline)',
-        isInline,
-        sourceURL: isInline ? undefined : href,
-      });
-    }
-
     this.send({
       method: Event.styleSheetAdded,
       params: {
@@ -201,38 +191,11 @@ export default class CSS extends BaseDomain {
    * Watch for dynamically added stylesheets (Vite HMR, Tailwind, etc.) / 동적으로 추가되는 스타일시트 감시 (Vite HMR, Tailwind 등)
    */
   override enable(): void {
-    // Debug: log document state / 디버깅: document 상태 로그
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(`[CDP CSS] enable: document.readyState: ${document.readyState}`);
-      console.debug(`[CDP CSS] enable: document.head.children.length: ${document.head?.children.length || 0}`);
-      // Log all <link> and <style> elements / 모든 <link> 및 <style> 요소 로그
-      const linkElements = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
-      const styleElements = Array.from(document.querySelectorAll('style'));
-      console.debug(`[CDP CSS] enable: Found ${linkElements.length} <link> elements and ${styleElements.length} <style> elements in document`);
-      linkElements.forEach((link, index) => {
-        console.debug(`[CDP CSS] enable: Link ${index}: href=${(link as HTMLLinkElement).href}, disabled=${(link as HTMLLinkElement).disabled}`);
-      });
-    }
-
     const styleSheets = getStyleSheets();
-    let addedCount = 0;
-
-    // Debug: log stylesheet count / 디버깅: 스타일시트 개수 로그
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(`[CDP CSS] enable: Found ${styleSheets.length} stylesheets in document.styleSheets`);
-      Array.from(styleSheets).forEach((styleSheet, index) => {
-        const href = (styleSheet as CSSStyleSheet).href || '';
-        const styleSheetId = getStyleSheetIdForSheet(styleSheet);
-        const ownerNode = (styleSheet as any).ownerNode;
-        const ownerNodeTag = ownerNode ? ownerNode.tagName : 'unknown';
-        console.debug(`[CDP CSS] enable: Stylesheet ${index}: ${href || '(inline)'}, styleSheetId: ${styleSheetId}, ownerNode: ${ownerNodeTag}, alreadyProcessed: ${this.processedStyleSheets.has(styleSheet)}`);
-      });
-    }
 
     // Send events for existing stylesheets / 기존 스타일시트에 대한 이벤트 전송
     Array.from(styleSheets).forEach((styleSheet) => {
       this.sendStyleSheetAdded(styleSheet);
-      addedCount++;
     });
 
     // Watch for dynamically added style elements / 동적으로 추가되는 style 요소 감시
@@ -290,11 +253,6 @@ export default class CSS extends BaseDomain {
 
     // Store interval ID for cleanup / 정리를 위해 interval ID 저장
     (this as any)._checkInterval = checkInterval;
-
-    // Debug: log enabled stylesheets / 디버깅: 활성화된 스타일시트 로그
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(`[CDP CSS] enable: Sent styleSheetAdded events for ${addedCount} stylesheets`);
-    }
   }
 
   /**
@@ -500,7 +458,9 @@ export default class CSS extends BaseDomain {
       // Remove properties that are already in cssPropertiesWithRange / cssPropertiesWithRange에 이미 있는 속성 제거
       const existingNames = new Set(cssPropertiesWithRange.map((p) => p.name));
       const cssPropertiesWithoutRange = toCssProperties(
-        Object.fromEntries(Object.entries(formattedStyle).filter(([name]) => !existingNames.has(name)))
+        Object.fromEntries(
+          Object.entries(formattedStyle).filter(([name]) => !existingNames.has(name))
+        )
       );
 
       inlineStyle.shorthandEntries = getShorthandEntries(style);
@@ -623,26 +583,7 @@ export default class CSS extends BaseDomain {
     const element = node as Element;
     const matchedCssRules = getMatchedCssRules(element);
 
-    // Debug: log matched rules count / 디버깅: 매칭된 규칙 개수 로그
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(
-        `[CDP CSS] getMatchedStylesForNode: Found ${matchedCssRules.length} matched CSS rules for nodeId: ${nodeId}`
-      );
-    }
-
     const formattedRules = matchedCssRules.map((rule) => formatMatchedCssRule(element, rule));
-
-    // Debug: log response structure / 디버깅: 응답 구조 로그
-    if (typeof console !== 'undefined' && console.debug && formattedRules.length > 0) {
-      console.debug(`[CDP CSS] getMatchedStylesForNode response for nodeId ${nodeId}:`, {
-        matchedCSSRulesCount: formattedRules.length,
-        firstRule: formattedRules[0] ? {
-          styleSheetId: formattedRules[0].rule.styleSheetId,
-          selectorText: formattedRules[0].rule.selectorList.text,
-          cssPropertiesCount: formattedRules[0].rule.style.cssProperties.length,
-        } : null,
-      });
-    }
 
     const inlineStyles = this.getInlineStylesForNode({ nodeId });
 
@@ -682,7 +623,9 @@ export default class CSS extends BaseDomain {
       const parentId = getNodeId(parent);
       if (parentId) {
         const parentMatchedRules = getMatchedCssRules(parent);
-        const parentFormattedRules = parentMatchedRules.map((rule) => formatMatchedCssRule(parent as Element, rule));
+        const parentFormattedRules = parentMatchedRules.map((rule) =>
+          formatMatchedCssRule(parent as Element, rule)
+        );
         const parentInlineStyles = this.getInlineStylesForNode({ nodeId: parentId });
 
         if (parentFormattedRules.length > 0 || parentInlineStyles.inlineStyle) {
@@ -700,7 +643,9 @@ export default class CSS extends BaseDomain {
       const htmlId = getNodeId(document.documentElement);
       if (htmlId) {
         const htmlMatchedRules = getMatchedCssRules(document.documentElement);
-        const htmlFormattedRules = htmlMatchedRules.map((rule) => formatMatchedCssRule(document.documentElement, rule));
+        const htmlFormattedRules = htmlMatchedRules.map((rule) =>
+          formatMatchedCssRule(document.documentElement, rule)
+        );
         const htmlInlineStyles = this.getInlineStylesForNode({ nodeId: htmlId });
 
         if (htmlFormattedRules.length > 0 || htmlInlineStyles.inlineStyle) {
@@ -728,39 +673,6 @@ export default class CSS extends BaseDomain {
       // cssFunctionRules: undefined,
     };
 
-    // Debug: log full response structure for first few calls / 디버깅: 처음 몇 번 호출에 대해 전체 응답 구조 로그
-    if (typeof console !== 'undefined' && console.debug) {
-      // Collect all styleSheetIds from matched rules and inherited rules / 매칭된 규칙과 상속된 규칙에서 모든 styleSheetId 수집
-      const allStyleSheetIds = new Set<string>();
-      response.matchedCSSRules?.forEach(rule => {
-        if (rule.rule.styleSheetId) {
-          allStyleSheetIds.add(rule.rule.styleSheetId);
-        }
-      });
-      response.inherited?.forEach(inheritedEntry => {
-        inheritedEntry.matchedCSSRules?.forEach(rule => {
-          if (rule.rule.styleSheetId) {
-            allStyleSheetIds.add(rule.rule.styleSheetId);
-          }
-        });
-      });
-
-      const responseSummary = {
-        matchedCSSRulesCount: response.matchedCSSRules?.length || 0,
-        hasInlineStyle: !!response.inlineStyle,
-        inheritedCount: response.inherited?.length || 0,
-        allStyleSheetIds: Array.from(allStyleSheetIds), // 모든 styleSheetId 표시
-        firstRuleStyleSheetId: response.matchedCSSRules?.[0]?.rule?.styleSheetId,
-        firstRuleSelector: response.matchedCSSRules?.[0]?.rule?.selectorList?.text,
-        elementInfo: {
-          tagName: element.tagName,
-          className: element.className,
-          id: element.id,
-        },
-      };
-      console.debug(`[CDP CSS] getMatchedStylesForNode full response summary for nodeId ${nodeId}:`, responseSummary);
-    }
-
     return response;
   }
 
@@ -774,7 +686,9 @@ export default class CSS extends BaseDomain {
   } {
     const node = getNodeById(nodeId);
     if (!node || node.nodeType !== Node.ELEMENT_NODE) {
-      console.warn(`[CDP CSS] getBackgroundColors: Node not found or not an element for nodeId: ${nodeId}`);
+      console.warn(
+        `[CDP CSS] getBackgroundColors: Node not found or not an element for nodeId: ${nodeId}`
+      );
       return { backgroundColors: [] };
     }
 
@@ -783,7 +697,9 @@ export default class CSS extends BaseDomain {
     const formattedStyle = formatStyle(computedStyle);
 
     return {
-      backgroundColors: formattedStyle['background-color'] ? [formattedStyle['background-color']] : [],
+      backgroundColors: formattedStyle['background-color']
+        ? [formattedStyle['background-color']]
+        : [],
       computedFontSize: formattedStyle['font-size'],
       computedFontWeight: formattedStyle['font-weight'],
     };
@@ -793,11 +709,6 @@ export default class CSS extends BaseDomain {
    * Get style sheet text / 스타일시트 텍스트 가져오기
    */
   async getStyleSheetText({ styleSheetId }: { styleSheetId: string }): Promise<{ text: string }> {
-    // Debug: log styleSheetText request / 디버깅: styleSheetText 요청 로그
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(`[CDP CSS] getStyleSheetText requested for styleSheetId: ${styleSheetId}`);
-    }
-
     // Check if it's an inline style attribute / 인라인 style 속성인지 확인
     const nodeId = getInlineStyleNodeId(styleSheetId);
     if (nodeId) {
@@ -805,9 +716,6 @@ export default class CSS extends BaseDomain {
       if (node && node.nodeType === Node.ELEMENT_NODE) {
         const element = node as Element;
         const text = element.getAttribute('style') || '';
-        if (typeof console !== 'undefined' && console.debug) {
-          console.debug(`[CDP CSS] getStyleSheetText: Found inline style attribute, text length: ${text.length}`);
-        }
         return { text };
       }
     }
@@ -828,16 +736,10 @@ export default class CSS extends BaseDomain {
               const text = Array.from(cssRules)
                 .map((rule) => rule.cssText)
                 .join('\n');
-              if (typeof console !== 'undefined' && console.debug) {
-                console.debug(`[CDP CSS] getStyleSheetText: Found inline stylesheet, text length: ${text.length}`);
-              }
               return { text };
             }
           } catch (e) {
             // Cross-origin error / 크로스 오리진 에러
-            if (typeof console !== 'undefined' && console.debug) {
-              console.debug(`[CDP CSS] getStyleSheetText: Cross-origin error for inline stylesheet: ${styleSheetId}`);
-            }
             return { text: '' };
           }
         }
@@ -846,9 +748,6 @@ export default class CSS extends BaseDomain {
 
     // Get from stylesheet cache / 스타일시트 캐시에서 가져오기
     const text = await getStyleSheetText(styleSheetId);
-    if (typeof console !== 'undefined' && console.debug) {
-      console.debug(`[CDP CSS] getStyleSheetText: Retrieved stylesheet text, length: ${text.length}`);
-    }
     return { text };
   }
 
@@ -957,4 +856,3 @@ export default class CSS extends BaseDomain {
     return { styles };
   }
 }
-

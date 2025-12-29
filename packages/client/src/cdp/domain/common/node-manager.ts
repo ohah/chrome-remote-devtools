@@ -38,4 +38,3 @@ export function getNodeById(nodeId: number): Node | null {
   }
   return node;
 }
-
