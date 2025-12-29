@@ -6,7 +6,7 @@ import {
   toCssProperties,
   getLineCount,
   getLastLine,
-} from '../utils';
+} from '../css/utils';
 
 describe('CSS Utils', () => {
   describe('parseCssText', () => {

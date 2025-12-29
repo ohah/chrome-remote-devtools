@@ -8,8 +8,8 @@ import {
   getShorthandEntries,
   getOrCreateInlineStyleSheetId,
   getInlineStyleNodeId,
-} from '../stylesheet';
-import { getNodeId } from '../../common/node-manager';
+} from '../css/stylesheet';
+import { getNodeId } from '../common/node-manager';
 
 describe('Stylesheet Utils', () => {
   beforeEach(() => {

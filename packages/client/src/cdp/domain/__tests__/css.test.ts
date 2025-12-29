@@ -1,13 +1,13 @@
 // CSS domain tests / CSS 도메인 테스트
 // happy-dom is registered via bunfig.toml preload / happy-dom은 bunfig.toml preload를 통해 등록됨
 import { describe, test, expect, beforeEach, beforeAll, afterAll, afterEach } from 'bun:test';
-import CSS from '../index';
+import CSS from '../css';
 import {
   createWebSocketTestServer,
   createWebSocketConnection,
   type WebSocketTestServer,
-} from '../../../../__tests__/helpers/websocket-server';
-import { getNodeId } from '../../common/node-manager';
+} from '../../../__tests__/helpers/websocket-server';
+import { getNodeId } from '../common/node-manager';
 
 describe('CSS Domain', () => {
   let socket: WebSocket;
