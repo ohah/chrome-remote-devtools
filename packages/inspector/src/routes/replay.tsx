@@ -3,12 +3,15 @@ import { createFileRoute, useLocation } from '@tanstack/react-router';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { fileToCDPMessages } from '@/shared/lib/file-to-cdp';
 import { buildDevToolsReplayUrl } from '@/shared/lib/devtools-url';
-import { createResponseBodyStore } from './replay/utils/response-body-store';
-import { handleCDPCommand } from './replay/utils/message-handlers';
-import { sendCDPMessages, sendSessionReplayEvents } from './replay/utils/message-sender-extended';
-import type { SendCDPMessagesContext } from './replay/utils/message-sender-extended';
-import { DELAYS } from './replay/utils/constants';
-import { safeParseCDPMessage } from './replay/utils/cdp-message-utils';
+import { createResponseBodyStore } from '@/features/replay/lib/response-body-store';
+import { handleCDPCommand } from '@/features/replay/lib/message-handlers';
+import {
+  sendCDPMessages,
+  sendSessionReplayEvents,
+} from '@/features/replay/lib/message-sender-extended';
+import type { SendCDPMessagesContext } from '@/features/replay/lib/message-sender-extended';
+import { DELAYS } from '@/features/replay/lib/constants';
+import { safeParseCDPMessage } from '@/features/replay/lib/cdp-message-utils';
 
 // File-based routing: routes/replay.tsx automatically maps to `/replay` / 파일 기반 라우팅: routes/replay.tsx가 자동으로 `/replay`에 매핑됨
 export const Route = createFileRoute('/replay')({
