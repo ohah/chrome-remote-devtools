@@ -113,11 +113,6 @@ export async function sendSessionReplayEvents(context: SendCDPMessagesContext): 
 }
 
 /**
- * Send CDP messages when DevTools is ready / DevTools가 준비될 때 CDP 메시지 전송
- * @param context - Send context / 전송 컨텍스트
- * @param includeSessionReplay - Whether to include SessionReplay events / SessionReplay 이벤트 포함 여부
- */
-/**
  * Sort network events by type within each requestId group / 각 requestId 그룹 내에서 이벤트 타입별로 정렬
  * @param networkEvents - Network events grouped by requestId / requestId별로 그룹화된 네트워크 이벤트
  * @returns Sorted network events / 정렬된 네트워크 이벤트
