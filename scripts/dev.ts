@@ -13,7 +13,7 @@ const rootDir = resolve(__dirname, '..');
 // Configuration from environment variables / 환경 변수에서 설정 읽기
 const config = {
   serverPort: process.env.PORT ? parseInt(process.env.PORT) : 8080,
-  inspectorPort: process.env.INSPECTOR_PORT ? parseInt(process.env.INSPECTOR_PORT) : 1420,
+  inspectorPort: process.env.INSPECTOR_PORT ? parseInt(process.env.INSPECTOR_PORT) : 3420,
   examplePort: process.env.EXAMPLE_PORT ? parseInt(process.env.EXAMPLE_PORT) : 5173,
   iframeExamplePort: process.env.IFRAME_EXAMPLE_PORT
     ? parseInt(process.env.IFRAME_EXAMPLE_PORT)
@@ -243,7 +243,7 @@ process.on('SIGTERM', cleanup);
 async function startServices() {
   console.log(`${colors.info}Starting development environment...${colors.reset}\n`);
 
-  const failedServices: string[] = [];
+  const failedServices: Set<string> = new Set();
   const startedServices: string[] = [];
 
   for (const service of services) {
@@ -283,7 +283,7 @@ async function startServices() {
           const processInfo = processes.find((p) => p.proc === proc);
           if (processInfo) {
             processInfo.started = false;
-            failedServices.push(service.name);
+            failedServices.add(service.name);
             console.error(
               `${colors.error}[${service.name}] Process exited with code ${code}${colors.reset}`
             );
@@ -294,7 +294,7 @@ async function startServices() {
       // Small delay between starts to avoid port conflicts / 포트 충돌 방지를 위한 시작 간 지연
       await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
-      failedServices.push(service.name);
+      failedServices.add(service.name);
       console.error(`${colors.error}[${service.name}] Failed to start: ${error}${colors.reset}`);
     }
   }
@@ -315,7 +315,7 @@ async function startServices() {
       } else {
         // For optional services, don't count as failure / 선택적 서비스는 실패로 간주하지 않음
         if (!service.optional) {
-          failedServices.push(service.name);
+          failedServices.add(service.name);
         }
         return false;
       }
@@ -336,8 +336,10 @@ async function startServices() {
   console.log(`\n${colors.info}Development environment status:${colors.reset}`);
   console.log(`${colors.success}✅ Started: ${startedServices.join(', ')}${colors.reset}`);
 
-  if (failedServices.length > 0) {
-    console.log(`${colors.error}❌ Failed: ${failedServices.join(', ')}${colors.reset}`);
+  if (failedServices.size > 0) {
+    console.log(
+      `${colors.error}❌ Failed: ${Array.from(failedServices).join(', ')}${colors.reset}`
+    );
   }
 
   // Print service URLs / 서비스 URL 출력
@@ -349,7 +351,7 @@ async function startServices() {
     }
   }
 
-  if (failedServices.some((name) => !services.find((s) => s.name === name)?.optional)) {
+  if (Array.from(failedServices).some((name) => !services.find((s) => s.name === name)?.optional)) {
     console.log(
       `\n${colors.warning}⚠ Some required services failed to start. Please check the logs above.${colors.reset}`
     );
