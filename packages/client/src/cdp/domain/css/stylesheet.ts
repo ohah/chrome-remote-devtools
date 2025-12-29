@@ -1,36 +1,13 @@
 // Stylesheet utility functions / 스타일시트 유틸리티 함수
 
-// Get element matches selector function / 요소가 셀렉터와 일치하는지 확인하는 함수 가져오기
-const elProto: any = Element.prototype;
-
-let matchesSel: (el: Element, selText: string) => boolean = () => false;
-
-if (elProto.webkitMatchesSelector) {
-  matchesSel = (el: Element, selText: string) => (el as any).webkitMatchesSelector(selText);
-} else if (elProto.mozMatchesSelector) {
-  matchesSel = (el: Element, selText: string) => (el as any).mozMatchesSelector(selText);
-} else if (elProto.msMatchesSelector) {
-  matchesSel = (el: Element, selText: string) => (el as any).msMatchesSelector(selText);
-} else if (elProto.matches) {
-  matchesSel = (el: Element, selText: string) => el.matches(selText);
-}
-
 /**
  * Check if element matches selector / 요소가 셀렉터와 일치하는지 확인
  */
 export function matchesSelector(el: Element, selText: string): boolean {
   try {
-    const result = matchesSel(el, selText);
-    return result;
-  } catch (e) {
-    // Fallback: try native matches if available / 폴백: 네이티브 matches가 있으면 시도
-    if (el.matches) {
-      try {
-        return el.matches(selText);
-      } catch (e2) {
-        return false;
-      }
-    }
+    return el.matches(selText);
+  } catch {
+    // Invalid selector may throw error / 잘못된 셀렉터는 에러를 던질 수 있음
     return false;
   }
 }
@@ -55,7 +32,7 @@ function getStyleSheetId(sourceUrl = ''): string {
     return `stylesheet-${Math.abs(hash)}`;
   }
   // Generate unique ID for inline styles / 인라인 스타일을 위한 고유 ID 생성
-  return `stylesheet-inline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `stylesheet-inline-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
 /**
@@ -64,7 +41,7 @@ function getStyleSheetId(sourceUrl = ''): string {
 export function getStyleSheetIdForSheet(styleSheet: StyleSheet): string {
   let id = styleSheetIdMap.get(styleSheet);
   if (!id) {
-    const href = (styleSheet as CSSStyleSheet).href || '';
+    const href = styleSheet.href || '';
     id = getStyleSheetId(href);
     styleSheetIdMap.set(styleSheet, id);
   }
@@ -137,7 +114,7 @@ function processCssRules(
 
       try {
         matchesEl = matchesSelector(node, selectorText);
-      } catch (e) {
+      } catch {
         // Invalid selector may throw error / 잘못된 셀렉터는 에러를 던질 수 있음
         return;
       }
@@ -165,7 +142,7 @@ function processCssRules(
         if (mediaRule.cssRules) {
           processCssRules(mediaRule.cssRules, node, styleSheetId, unsorted, stats, depth + 1);
         }
-      } catch (e) {
+      } catch {
         // Cross-origin or other error / 크로스 오리진 또는 기타 에러
       }
     }
@@ -177,7 +154,7 @@ function processCssRules(
         if (nestedRules) {
           processCssRules(nestedRules, node, styleSheetId, unsorted, stats, depth + 1);
         }
-      } catch (e) {
+      } catch {
         // Cross-origin or other error / 크로스 오리진 또는 기타 에러
       }
     }
@@ -185,7 +162,7 @@ function processCssRules(
     else if ((cssRule as any).cssRules) {
       try {
         processCssRules((cssRule as any).cssRules, node, styleSheetId, unsorted, stats, depth + 1);
-      } catch (e) {
+      } catch {
         // Ignore errors for nested rules / 중첩 규칙 에러 무시
       }
     }
@@ -216,18 +193,17 @@ export function getMatchedCssRules(node: Element): Array<{
 
   const styleSheets = Array.from(document.styleSheets);
 
-  styleSheets.forEach((styleSheet, index) => {
+  styleSheets.forEach((styleSheet) => {
     const styleSheetId = getStyleSheetIdForSheet(styleSheet);
-    const href = (styleSheet as CSSStyleSheet).href || '';
     let cssRules: CSSRuleList | null = null;
 
     try {
       // Cross-origin stylesheets may throw error / 크로스 오리진 스타일시트는 에러를 던질 수 있음
-      cssRules = (styleSheet as CSSStyleSheet).cssRules;
+      cssRules = styleSheet.cssRules;
       if (!cssRules) {
         return; // Skip if no cssRules / cssRules가 없으면 건너뛰기
       }
-    } catch (e) {
+    } catch {
       // Cross-origin error, skip this stylesheet / 크로스 오리진 에러, 이 스타일시트 건너뛰기
       return;
     }
@@ -238,7 +214,7 @@ export function getMatchedCssRules(node: Element): Array<{
   // Sort by priority (higher priority first) / 우선순위로 정렬 (높은 우선순위가 먼저)
   const sorted = unsorted
     .sort((a, b) => b.priority - a.priority)
-    .map(({ priority, ...rest }) => rest);
+    .map(({ priority: _priority, ...rest }) => rest);
 
   return sorted;
 }
@@ -309,20 +285,20 @@ export async function getStyleSheetText(styleSheetId: string): Promise<string> {
     const styleSheet = document.styleSheets[i];
     if (!styleSheet) continue;
     if (getStyleSheetIdForSheet(styleSheet) === styleSheetId) {
-      const href = (styleSheet as CSSStyleSheet).href;
+      const href = styleSheet.href;
       if (href) {
         try {
           const response = await fetch(href);
           const text = await response.text();
           styleSheetTexts.set(styleSheetId, text);
           return text;
-        } catch (e) {
+        } catch {
           // Cross-origin or network error / 크로스 오리진 또는 네트워크 에러
           return '';
         }
       } else {
         // Inline style sheet / 인라인 스타일시트
-        const text = Array.from((styleSheet as CSSStyleSheet).cssRules)
+        const text = Array.from(styleSheet.cssRules)
           .map((rule) => rule.cssText)
           .join('\n');
         styleSheetTexts.set(styleSheetId, text);
@@ -340,7 +316,49 @@ export async function getStyleSheetText(styleSheetId: string): Promise<string> {
 export function getShorthandEntries(
   style: CSSStyleDeclaration
 ): Array<{ name: string; value: string }> {
-  const shorthandNames = ['background', 'font', 'border', 'margin', 'padding'];
+  const shorthandNames = [
+    'background',
+    'font',
+    'border',
+    'margin',
+    'padding',
+    'animation',
+    'transition',
+    'flex',
+    'flex-flow',
+    'grid',
+    'grid-area',
+    'grid-column',
+    'grid-row',
+    'grid-template',
+    'grid-template-areas',
+    'grid-template-columns',
+    'grid-template-rows',
+    'gap',
+    'row-gap',
+    'column-gap',
+    'place-content',
+    'place-items',
+    'place-self',
+    'outline',
+    'list-style',
+    'border-radius',
+    'border-color',
+    'border-style',
+    'border-width',
+    'border-top',
+    'border-right',
+    'border-bottom',
+    'border-left',
+    'border-block',
+    'border-block-start',
+    'border-block-end',
+    'border-inline',
+    'border-inline-start',
+    'border-inline-end',
+    'columns',
+    'column-rule',
+  ];
   const ret: Array<{ name: string; value: string }> = [];
 
   shorthandNames.forEach((name) => {
