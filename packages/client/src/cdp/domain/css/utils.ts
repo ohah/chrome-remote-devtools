@@ -26,11 +26,87 @@ export function toCssProperties(style: Record<string, string>): Array<{
 }
 
 /**
+ * Remove CSS comments while preserving strings and URL values / 문자열과 URL 값을 보존하면서 CSS 주석 제거
+ */
+function removeCssCommentsPreserveStringsAndUrls(cssText: string): string {
+  let result = '';
+  let inComment = false;
+  let inString: '"' | "'" | null = null;
+  let inUrl = false;
+  let escapeNext = false;
+
+  for (let i = 0; i < cssText.length; i++) {
+    const char = cssText[i];
+    const nextChar = i + 1 < cssText.length ? cssText[i + 1] : '';
+
+    if (inComment) {
+      // End of comment / 주석 종료
+      if (char === '*' && nextChar === '/') {
+        inComment = false;
+        i++; // Skip '/' / '/' 건너뛰기
+      }
+      // Skip all characters while in comment / 주석 내부의 모든 문자 건너뛰기
+      continue;
+    }
+
+    if (inString) {
+      result += char;
+      if (escapeNext) {
+        escapeNext = false;
+      } else if (char === '\\') {
+        escapeNext = true;
+      } else if (char === inString) {
+        inString = null;
+      }
+      continue;
+    }
+
+    if (inUrl) {
+      result += char;
+      // Strings inside url(...) should be respected as well / url(...) 내부의 문자열도 보존해야 함
+      if (!inString && (char === '"' || char === "'")) {
+        inString = char;
+      } else if (char === ')') {
+        inUrl = false;
+      }
+      continue;
+    }
+
+    // Not in comment, string, or url(...) / 주석, 문자열, url(...) 외부
+    // Detect start of comment / 주석 시작 감지
+    if (char === '/' && nextChar === '*') {
+      inComment = true;
+      i++; // Skip '*' / '*' 건너뛰기
+      continue;
+    }
+
+    // Detect start of string / 문자열 시작 감지
+    if (char === '"' || char === "'") {
+      inString = char;
+      result += char;
+      continue;
+    }
+
+    // Detect url( ... ) (case-insensitive) / url(...) 감지 (대소문자 무시)
+    if ((char === 'u' || char === 'U') && cssText.slice(i, i + 4).toLowerCase() === 'url(') {
+      inUrl = true;
+      result += 'url(';
+      i += 3; // Already handled 'url(' / 'url(' 이미 처리됨
+      continue;
+    }
+
+    result += char;
+  }
+
+  return result;
+}
+
+/**
  * Parse CSS text / CSS 텍스트 파싱
  */
 export function parseCssText(cssText: string): Record<string, string> {
-  // Remove CSS comments properly / CSS 주석을 올바르게 제거
-  const cleaned = cssText.replace(/\/\*[\s\S]*?\*\//g, '');
+  // Remove CSS comments while preserving strings and URL values / 문자열과 URL 값을 보존하면서 CSS 주석 제거
+  const cleaned = removeCssCommentsPreserveStringsAndUrls(cssText);
   const properties = cleaned.split(';');
   const ret: Record<string, string> = {};
 
@@ -65,6 +141,7 @@ export function getLastLine(str: string): string {
 
 /**
  * Calculate range for CSS property / CSS 속성의 범위 계산
+ * Handles whitespace variations in CSS text / CSS 텍스트의 공백 변형 처리
  */
 export function calculatePropertyRange(
   cssText: string,
@@ -84,18 +161,47 @@ export function calculatePropertyRange(
   let endColumn = 0;
   let text = '';
 
-  const searchText = `${name}: ${value}`;
+  // Normalize value for comparison (trim and collapse whitespace) / 비교를 위해 값 정규화 (공백 제거 및 압축)
+  const normalizedValue = value.trim().replace(/\s+/g, ' ');
+
+  // Try multiple search patterns to handle whitespace variations / 공백 변형을 처리하기 위해 여러 검색 패턴 시도
+  const searchPatterns = [
+    `${name}: ${value}`, // Exact match / 정확한 일치
+    `${name}:${value}`, // No space after colon / 콜론 뒤 공백 없음
+    `${name}: ${normalizedValue}`, // Normalized value with space / 공백이 있는 정규화된 값
+    `${name}:${normalizedValue}`, // Normalized value without space / 공백이 없는 정규화된 값
+  ];
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line) continue;
-    const index = line.indexOf(searchText);
-    if (index !== -1) {
-      text = searchText;
+
+    // Try each pattern / 각 패턴 시도
+    for (const pattern of searchPatterns) {
+      const index = line.indexOf(pattern);
+      if (index !== -1) {
+        text = pattern;
+        startLine = i;
+        startColumn = index;
+        endLine = i;
+        endColumn = index + text.length;
+        return { startLine, startColumn, endLine, endColumn, text };
+      }
+    }
+
+    // Fallback: try regex-based matching for flexible whitespace / 폴백: 유연한 공백 처리를 위한 정규식 기반 매칭
+    const regex = new RegExp(
+      `${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*:\\s*${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')}`,
+      'i'
+    );
+    const match = line.match(regex);
+    if (match && match.index !== undefined) {
+      text = match[0];
       startLine = i;
-      startColumn = index;
+      startColumn = match.index;
       endLine = i;
-      endColumn = index + text.length;
-      break;
+      endColumn = match.index + text.length;
+      return { startLine, startColumn, endLine, endColumn, text };
     }
   }
 
