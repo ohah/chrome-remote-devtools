@@ -20,6 +20,15 @@ const protocolMethods = {
     'setNodeValue',
     'getBoxModel',
   ],
+  CSS: [
+    'enable',
+    'getComputedStyleForNode',
+    'getMatchedStylesForNode',
+    'getInlineStylesForNode',
+    'getBackgroundColors',
+    'getStyleSheetText',
+    'setStyleTexts',
+  ],
   Network: ['enable', 'getCookies', 'setCookie', 'deleteCookies', 'getResponseBody'],
   Console: ['enable', 'clearMessages'],
   DOMStorage: [
@@ -60,6 +69,10 @@ export const Event = {
   attributeRemoved: 'DOM.attributeRemoved',
   characterDataModified: 'DOM.characterDataModified',
   documentUpdated: 'DOM.documentUpdated',
+
+  // CSS events / CSS 이벤트
+  styleSheetAdded: 'CSS.styleSheetAdded',
+  styleSheetChanged: 'CSS.styleSheetChanged',
 
   // Network events / Network 이벤트
   requestWillBeSent: 'Network.requestWillBeSent',

@@ -2,6 +2,7 @@
 export { default as Runtime } from './runtime';
 export { default as Page } from './page';
 export { default as Dom } from './dom';
+export { default as CSS } from './css';
 export { default as Network } from './network';
 export { default as Console } from './console';
 export { DOMStorage, Storage } from './storage';
