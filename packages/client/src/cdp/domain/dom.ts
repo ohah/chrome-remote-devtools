@@ -2,30 +2,7 @@
 import { getObjectById } from '../common/remoteObject';
 import BaseDomain from './base';
 import { Event } from './protocol';
-
-// Simple node ID management / 간단한 노드 ID 관리
-// Use WeakMap to avoid memory leaks when nodes are removed / 노드가 제거될 때 메모리 누수를 방지하기 위해 WeakMap 사용
-const nodeIdMap = new WeakMap<Node, number>();
-const nodeMap = new Map<number, Node>();
-let nodeIdCounter = 1;
-
-function getNodeId(node: Node): number {
-  let id = nodeIdMap.get(node);
-  if (!id) {
-    id = nodeIdCounter++;
-    nodeIdMap.set(node, id);
-    nodeMap.set(id, node);
-  }
-  return id;
-}
-
-function getNodeById(nodeId: number): Node | null {
-  const node = nodeMap.get(nodeId);
-  if (!node) {
-    return null;
-  }
-  return node;
-}
+import { getNodeId, getNodeById } from './common/node-manager';
 
 // Find previous valid sibling node (skip whitespace nodes) / 이전 유효한 형제 노드 찾기 (공백 노드 제외)
 function findPreviousValidSibling(node: Node): Node | null {
@@ -455,9 +432,10 @@ export default class Dom extends BaseDomain {
   pushNodesByBackendIdsToFrontend({ backendNodeIds }: { backendNodeIds: number[] }): {
     nodeIds: number[];
   } {
+    // In our implementation, backendNodeId is same as nodeId / 우리 구현에서는 backendNodeId가 nodeId와 동일
     const nodeIds = backendNodeIds
       .map((id) => {
-        const node = nodeMap.get(id);
+        const node = getNodeById(id);
         return node ? getNodeId(node) : 0;
       })
       .filter((id) => id > 0);
