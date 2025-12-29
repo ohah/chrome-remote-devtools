@@ -28,7 +28,7 @@
     "build:esm": "bun build src/index.ts --target browser --format esm --minify --outfile dist/index.esm.js",
     "build:iife": "bun build src/index.ts --target browser --format iife --minify --outfile dist/index.iife.js",
     "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
-    "build:watch": "bun run build:esm:watch & bun run build:iife:watch",
+    "build:watch": "bun run scripts/build-watch.ts",
     "build:esm:watch": "bun build src/index.ts --target browser --format esm --minify --outfile dist/index.esm.js --watch",
     "build:iife:watch": "bun build src/index.ts --target browser --format iife --minify --outfile dist/index.iife.js --watch",
     "clean": "rm -rf dist",
