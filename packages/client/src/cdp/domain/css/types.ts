@@ -12,13 +12,9 @@ export type CssPropertyRange = {
 
 /**
  * CSS property with range / 범위가 있는 CSS 속성
+ * Alias of CssPropertyRange for semantic clarity and compatibility / 의미적 명확성과 호환성을 위한 CssPropertyRange 별칭
  */
-export type CssPropertyWithRange = {
-  startLine: number;
-  endColumn: number;
-  endLine: number;
-  startColumn: number;
-};
+export type CssPropertyWithRange = CssPropertyRange;
 
 /**
  * CSS property / CSS 속성
@@ -72,22 +68,12 @@ export type InheritedStyle = {
 };
 
 /**
- * Style text edit range / 스타일 텍스트 편집 범위
- */
-export type StyleTextEditRange = {
-  startLine: number;
-  endLine: number;
-  startColumn: number;
-  endColumn: number;
-};
-
-/**
  * Style text edit / 스타일 텍스트 편집
  */
 export type StyleTextEdit = {
   styleSheetId: string;
   text: string;
-  range?: StyleTextEditRange;
+  range?: CssPropertyRange;
 };
 
 /**
