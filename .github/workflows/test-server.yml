@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should-run: ${{ steps.changes.outputs.server }}
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
@@ -26,6 +29,9 @@ jobs:
     name: Test Server Package
     needs: check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,9 +51,51 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         run: bun install
 
-      - name: Run tests
+      - name: Run tests with coverage
         if: needs.check.outputs.should-run == 'true'
-        run: bun test packages/server
+        run: bun test packages/server --coverage
+
+      - name: Generate coverage comment
+        if: needs.check.outputs.should-run == 'true' && github.event_name == 'pull_request'
+        run: bun scripts/coverage-comment.ts packages/server Server
+
+      - name: Comment PR with coverage
+        if: needs.check.outputs.should-run == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const comment = fs.readFileSync('coverage-comment.md', 'utf8');
+
+            // Find existing comment from this bot / 기존 댓글 찾기
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existingComment = comments.data.find(
+              (c) => c.user.type === 'Bot' && c.body.includes('Test Coverage Report - Server')
+            );
+
+            if (existingComment) {
+              // Update existing comment / 기존 댓글 업데이트
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: comment
+              });
+            } else {
+              // Create new comment / 새 댓글 생성
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
 
       - name: Build package
         if: needs.check.outputs.should-run == 'true'
