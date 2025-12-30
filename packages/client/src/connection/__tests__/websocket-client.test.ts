@@ -415,9 +415,8 @@ describe('WebSocketClient', () => {
 
       // Send ArrayBuffer message / ArrayBuffer 메시지 전송
       if (socket && socket.readyState === WebSocket.OPEN) {
-        const encoder = new TextEncoder();
-        const buffer = encoder.encode(JSON.stringify({ method: 'Runtime.enable', id: 1 }));
         // Note: Bun WebSocket might not support ArrayBuffer directly / Bun WebSocket은 ArrayBuffer를 직접 지원하지 않을 수 있음
+        // This test verifies the structure / 이 테스트는 구조를 검증함
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
 

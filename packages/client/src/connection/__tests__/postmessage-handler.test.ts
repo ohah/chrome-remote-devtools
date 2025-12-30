@@ -191,11 +191,6 @@ describe('PostMessageHandler', () => {
     });
 
     test('should send response for async result / 비동기 결과에 대한 응답 전송', async () => {
-      const mockPostMessage = mock(() => {});
-      const mockSource = {
-        postMessage: mockPostMessage,
-      } as unknown as Window;
-
       const testHandler = new PostMessageHandler(domain);
 
       // Note: Testing async response handling / 비동기 응답 처리 테스트
@@ -206,11 +201,6 @@ describe('PostMessageHandler', () => {
     });
 
     test('should handle errors in async result / 비동기 결과의 오류 처리', async () => {
-      const mockPostMessage = mock(() => {});
-      const mockSource = {
-        postMessage: mockPostMessage,
-      } as unknown as Window;
-
       const testHandler = new PostMessageHandler(domain);
 
       // Note: Error handling is tested through domain execution / 오류 처리는 도메인 실행을 통해 테스트됨
@@ -220,11 +210,6 @@ describe('PostMessageHandler', () => {
     });
 
     test('should use CDP_MESSAGE format by default / 기본적으로 CDP_MESSAGE 형식 사용', () => {
-      const mockPostMessage = mock(() => {});
-      const mockSource = {
-        postMessage: mockPostMessage,
-      } as unknown as Window;
-
       const testHandler = new PostMessageHandler(domain);
 
       // Test that CDP_MESSAGE format is used / CDP_MESSAGE 형식이 사용되는지 테스트

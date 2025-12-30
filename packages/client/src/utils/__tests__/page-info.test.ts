@@ -1,6 +1,6 @@
 // Page info tests / 페이지 정보 테스트
 // happy-dom is registered via bunfig.toml preload / happy-dom은 bunfig.toml preload를 통해 등록됨
-import { describe, test, expect, beforeEach, mock } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
 import { getDocumentFavicon, getQuery } from '../page-info';
 
 describe('Page Info', () => {
