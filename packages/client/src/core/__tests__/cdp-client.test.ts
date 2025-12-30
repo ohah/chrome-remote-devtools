@@ -1,7 +1,7 @@
 // CDP Client tests / CDP 클라이언트 테스트
 // happy-dom is registered via bunfig.toml preload / happy-dom은 bunfig.toml preload를 통해 등록됨
 import 'fake-indexeddb/auto'; // Import fake-indexeddb for testing / 테스트를 위한 fake-indexeddb import
-import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { CDPClient } from '../cdp-client';
 
 describe('CDPClient', () => {
@@ -142,7 +142,6 @@ describe('CDPClient', () => {
     test('should stop rrweb recorder / rrweb 레코더 중지', async () => {
       await client.initialize('', { enable: true }, true);
 
-      const recorder = client.getRrwebRecorder();
       client.destroy();
 
       // Recorder should be stopped / 레코더가 중지되어야 함
