@@ -29,7 +29,7 @@
     "test:unit:client": "bun test packages/client --coverage",
     "test:unit:inspector": "bun test packages/inspector/src --coverage",
     "test:watch": "bun test --watch",
-    "test:coverage": "bun test packages/client",
+    "test:coverage": "bun test packages/server --coverage && bun test packages/client --coverage && bun test packages/inspector/src --coverage",
     "test:e2e": "playwright test tests/e2e",
     "test:e2e:integration": "playwright test tests/integration",
     "test:e2e:integration:ui": "playwright test --ui",

@@ -382,7 +382,7 @@ describe('WebSocketClient', () => {
         const blob = new Blob([JSON.stringify({ method: 'Runtime.enable', id: 1 })], {
           type: 'application/json',
         });
-        // Note: Bun WebSocket might not support Blob directly / Bun WebSocket은 Blob을 직접 지원하지 않을 수 있음
+        socket.send(blob);
         // This test verifies the structure / 이 테스트는 구조를 검증함
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
