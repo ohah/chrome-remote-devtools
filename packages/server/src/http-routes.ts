@@ -4,6 +4,7 @@ import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { SocketServer } from './socket-server';
+import { handleReactNativeInspectorHttpRequest } from './react-native/inspector-handler';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,6 +30,18 @@ export function createHttpRouter(socketServer: SocketServer) {
     if (req.method === 'OPTIONS') {
       res.writeHead(200, headers);
       res.end();
+      return;
+    }
+
+    // Handle React Native Inspector HTTP requests / React Native Inspector HTTP 요청 처리
+    if (
+      handleReactNativeInspectorHttpRequest(
+        req,
+        res,
+        socketServer.reactNativeInspectorManager,
+        socketServer
+      )
+    ) {
       return;
     }
 
