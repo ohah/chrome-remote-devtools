@@ -70,6 +70,7 @@ bun run build
 ```
 
 This will generate:
+
 - `dist/index.js` (CommonJS)
 - `dist/index.mjs` (ESM)
 - `dist/index.d.ts` (TypeScript types)
