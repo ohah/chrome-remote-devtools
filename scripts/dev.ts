@@ -74,6 +74,10 @@ const services: Service[] = [
     color: colors.server,
     cwd: join(rootDir, 'packages/server'),
     command: ['bun', 'run', 'dev'],
+    env: {
+      PORT: config.serverPort.toString(),
+      LOG_ENABLED: 'true', // Enable server logs / 서버 로그 활성화
+    },
     port: config.serverPort,
     healthCheckUrl: `http://localhost:${config.serverPort}/json`,
   },
