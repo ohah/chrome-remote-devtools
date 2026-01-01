@@ -326,6 +326,19 @@ export class SocketServer {
 
       // Handle React Native Inspector WebSocket connections / React Native Inspector WebSocket 연결 처리
       if (pathname === '/inspector/device') {
+        const deviceName = url.searchParams.get('name') || undefined;
+        const appName = url.searchParams.get('app') || undefined;
+        const deviceId = url.searchParams.get('device') || undefined;
+        log('rn-inspector', 'upgrade', 'WebSocket upgrade to /inspector/device', {
+          url: request.url,
+          deviceName,
+          appName,
+          deviceId,
+          headers: {
+            upgrade: request.headers.upgrade,
+            connection: request.headers.connection,
+          },
+        });
         this.wss.handleUpgrade(request, socket, head, (ws) => {
           handleReactNativeInspectorWebSocket(ws, request, this.reactNativeInspectorManager, this);
         });
@@ -373,7 +386,21 @@ export class SocketServer {
     const sendToDevtools = (message: Buffer | string) => {
       this.devtools.forEach((devtool) => {
         if (devtool.clientId === id) {
-          devtool.ws.send(message);
+          try {
+            // Log if this is a Runtime.consoleAPICalled event / Runtime.consoleAPICalled 이벤트인 경우 로깅
+            const messageStr = typeof message === 'string' ? message : message.toString('utf-8');
+            try {
+              const parsed = JSON.parse(messageStr);
+              if (parsed.method === 'Runtime.consoleAPICalled') {
+                log('client', id, `✅ Sending Runtime.consoleAPICalled to devtools ${devtool.id}, type: ${parsed.params?.type}`);
+              }
+            } catch {
+              // Ignore parse errors / 파싱 에러 무시
+            }
+            devtool.ws.send(message);
+          } catch (error) {
+            logError('client', id, `failed to send message to devtools ${devtool.id}`, error);
+          }
         }
       });
 
@@ -449,9 +476,18 @@ export class SocketServer {
 
     // Request stored events from client when DevTools connects / DevTools 연결 시 클라이언트에 저장된 이벤트 요청
     if (clientId) {
+      // Try regular client first / 일반 클라이언트 먼저 시도
       const client = this.clients.get(clientId);
       if (client) {
         this.requestStoredEvents(client, id);
+      } else {
+        // Try React Native Inspector connection / React Native Inspector 연결 시도
+        const inspector = this.reactNativeInspectorManager.getConnection(clientId);
+        if (inspector) {
+          // Associate DevTools with React Native Inspector / DevTools를 React Native Inspector와 연결
+          this.reactNativeInspectorManager.associateWithClient(clientId, clientId);
+          log('devtools', id, `associated with React Native Inspector ${clientId}`);
+        }
       }
     }
 
@@ -480,12 +516,43 @@ export class SocketServer {
       if (parsed) {
         const method = parsed.method;
         log('devtools', id, 'received:', JSON.stringify(parsed, null, 2), method);
+
+        // If DevTools sends Runtime.enable, log it / DevTools가 Runtime.enable을 보내면 로깅
+        if (method === 'Runtime.enable') {
+          log('devtools', id, 'Runtime.enable received - console events should now work');
+        }
+
+        // Log if we receive Runtime.consoleAPICalled from client / 클라이언트로부터 Runtime.consoleAPICalled를 받으면 로깅
+        // This shouldn't happen normally, but helps debug / 이것은 일반적으로 발생하지 않지만 디버깅에 도움이 됨
+        if (method === 'Runtime.consoleAPICalled') {
+          log('devtools', id, '⚠️ Received Runtime.consoleAPICalled from client (unexpected)');
+        }
       } else {
         log('devtools', id, 'received (raw):', data);
       }
 
-      const currentClient = this.clients.get(currentDevtool.clientId);
+      // Try regular client first / 일반 클라이언트 먼저 시도
+      let currentClient = this.clients.get(currentDevtool.clientId);
       if (!currentClient) {
+        // Try React Native Inspector connection / React Native Inspector 연결 시도
+        const inspector = this.reactNativeInspectorManager.getConnection(currentDevtool.clientId);
+        if (inspector && inspector.ws.readyState === WebSocket.OPEN) {
+          try {
+            log('devtools', id, `sending message to RN inspector ${currentDevtool.clientId}`);
+            inspector.ws.send(message);
+            log('devtools', id, `message sent to RN inspector ${currentDevtool.clientId}`);
+            return;
+          } catch (error) {
+            logError(
+              'devtools',
+              id,
+              `failed to send message to RN inspector ${currentDevtool.clientId}`,
+              error
+            );
+          }
+          return;
+        }
+        log('devtools', id, `no RN inspector found for clientId ${currentDevtool.clientId}`);
         return;
       }
 
@@ -540,6 +607,11 @@ export class SocketServer {
   // Get client with WebSocket (for internal use) / WebSocket이 포함된 클라이언트 가져오기 (내부 사용)
   getClientWithWebSocket(clientId: string): Client | undefined {
     return this.clients.get(clientId);
+  }
+
+  // Get Inspector with WebSocket (for internal use) / WebSocket이 포함된 Inspector 가져오기 (내부 사용)
+  getInspectorWithWebSocket(inspectorId: string): DevTools | undefined {
+    return this.devtools.get(inspectorId);
   }
 
   // Get all clients / 모든 클라이언트 가져오기

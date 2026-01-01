@@ -53,9 +53,27 @@ export function createHttpRouter(socketServer: SocketServer) {
     }
 
     if (url.pathname === '/json/clients') {
-      // Get all clients with details / 상세 정보와 함께 모든 클라이언트 가져오기
+      // Get all clients with details, including React Native Inspector connections / 상세 정보와 함께 모든 클라이언트 가져오기 (React Native Inspector 연결 포함)
+      const regularClients = socketServer.getAllClients();
+      const rnInspectors = socketServer.reactNativeInspectorManager.getAllConnections();
+
+      // Convert React Native Inspector connections to client format / React Native Inspector 연결을 클라이언트 형식으로 변환
+      const rnInspectorClients = rnInspectors.map((inspector) => ({
+        id: inspector.id,
+        title: `${inspector.deviceName || 'Unknown Device'} - ${inspector.appName || 'Unknown App'}`,
+        url: `rn-inspector://${inspector.deviceId || inspector.id}`,
+        type: 'react-native-inspector' as const,
+        deviceName: inspector.deviceName,
+        appName: inspector.appName,
+        deviceId: inspector.deviceId,
+        profiling: inspector.profiling,
+      }));
+
+      // Combine regular clients and React Native Inspector connections / 일반 클라이언트와 React Native Inspector 연결 결합
+      const allClients = [...regularClients, ...rnInspectorClients];
+
       res.writeHead(200, headers);
-      res.end(JSON.stringify({ clients: socketServer.getAllClients() }));
+      res.end(JSON.stringify({ clients: allClients }));
       return;
     }
 
@@ -67,16 +85,38 @@ export function createHttpRouter(socketServer: SocketServer) {
     }
 
     if (url.pathname.startsWith('/json/client/')) {
-      // Get specific client / 특정 클라이언트 가져오기
+      // Get specific client (including React Native Inspector) / 특정 클라이언트 가져오기 (React Native Inspector 포함)
       const clientId = url.pathname.replace('/json/client/', '');
+
+      // Try regular client first / 일반 클라이언트 먼저 시도
       const client = socketServer.getClient(clientId);
       if (client) {
         res.writeHead(200, headers);
         res.end(JSON.stringify({ client }));
-      } else {
-        res.writeHead(404, headers);
-        res.end(JSON.stringify({ error: 'Client not found' }));
+        return;
       }
+
+      // Try React Native Inspector connection / React Native Inspector 연결 시도
+      const inspector = socketServer.reactNativeInspectorManager.getConnection(clientId);
+      if (inspector) {
+        const inspectorClient = {
+          id: inspector.id,
+          title: `${inspector.deviceName || 'Unknown Device'} - ${inspector.appName || 'Unknown App'}`,
+          url: `rn-inspector://${inspector.deviceId || inspector.id}`,
+          type: 'react-native-inspector' as const,
+          deviceName: inspector.deviceName,
+          appName: inspector.appName,
+          deviceId: inspector.deviceId,
+          profiling: inspector.profiling,
+        };
+        res.writeHead(200, headers);
+        res.end(JSON.stringify({ client: inspectorClient }));
+        return;
+      }
+
+      // Not found / 찾을 수 없음
+      res.writeHead(404, headers);
+      res.end(JSON.stringify({ error: 'Client not found' }));
       return;
     }
 
