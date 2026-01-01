@@ -392,7 +392,11 @@ export class SocketServer {
             try {
               const parsed = JSON.parse(messageStr);
               if (parsed.method === 'Runtime.consoleAPICalled') {
-                log('client', id, `✅ Sending Runtime.consoleAPICalled to devtools ${devtool.id}, type: ${parsed.params?.type}`);
+                log(
+                  'client',
+                  id,
+                  `✅ Sending Runtime.consoleAPICalled to devtools ${devtool.id}, type: ${parsed.params?.type}`
+                );
               }
             } catch {
               // Ignore parse errors / 파싱 에러 무시
@@ -412,7 +416,12 @@ export class SocketServer {
             try {
               connection.ws.send(message);
             } catch (error) {
-              logError('client', id, `failed to send message to RN inspector ${inspector.id}`, error);
+              logError(
+                'client',
+                id,
+                `failed to send message to RN inspector ${inspector.id}`,
+                error
+              );
             }
           }
         }

@@ -138,7 +138,13 @@ export function handleReactNativeInspectorWebSocket(
     try {
       const parsed = JSON.parse(data);
       if (parsed.method) {
-        log('rn-inspector', inspectorId, 'received:', JSON.stringify(parsed, null, 2), parsed.method);
+        log(
+          'rn-inspector',
+          inspectorId,
+          'received:',
+          JSON.stringify(parsed, null, 2),
+          parsed.method
+        );
       } else {
         log('rn-inspector', inspectorId, 'received:', data);
       }
@@ -157,7 +163,12 @@ export function handleReactNativeInspectorWebSocket(
             try {
               const parsedMsg = JSON.parse(data);
               if (parsedMsg.method === 'Runtime.consoleAPICalled') {
-                log('rn-inspector', inspectorId, `sending Runtime.consoleAPICalled to devtools ${devtool.id}:`, parsedMsg);
+                log(
+                  'rn-inspector',
+                  inspectorId,
+                  `sending Runtime.consoleAPICalled to devtools ${devtool.id}:`,
+                  parsedMsg
+                );
               }
             } catch {
               // Ignore parse errors for logging / 로깅을 위한 파싱 에러 무시
@@ -171,8 +182,16 @@ export function handleReactNativeInspectorWebSocket(
             try {
               const parsedMsg = JSON.parse(data);
               if (parsedMsg.method === 'Runtime.consoleAPICalled') {
-                log('rn-inspector', inspectorId, `✅ Sent Runtime.consoleAPICalled to devtools ${devtool.id}, type: ${parsedMsg.params?.type}`);
-                log('rn-inspector', inspectorId, `📤 Actual JSON being sent to devtools: ${messageToSend}`);
+                log(
+                  'rn-inspector',
+                  inspectorId,
+                  `✅ Sent Runtime.consoleAPICalled to devtools ${devtool.id}, type: ${parsedMsg.params?.type}`
+                );
+                log(
+                  'rn-inspector',
+                  inspectorId,
+                  `📤 Actual JSON being sent to devtools: ${messageToSend}`
+                );
               } else {
                 log('rn-inspector', inspectorId, `forwarded message to devtools ${devtool.id}`);
               }
@@ -195,7 +214,11 @@ export function handleReactNativeInspectorWebSocket(
     });
 
     if (!forwarded) {
-      log('rn-inspector', inspectorId, `no devtools connected to forward message (clientId: ${connection.clientId})`);
+      log(
+        'rn-inspector',
+        inspectorId,
+        `no devtools connected to forward message (clientId: ${connection.clientId})`
+      );
     }
 
     // Also forward to regular client if exists (for backward compatibility) / 일반 클라이언트가 있으면 전달 (하위 호환성)
@@ -217,4 +240,3 @@ export function handleReactNativeInspectorWebSocket(
   // Forward messages from client to React Native Inspector / 클라이언트에서 React Native Inspector로 메시지 전달
   // This is handled by socket-server when client sends messages / 이것은 클라이언트가 메시지를 보낼 때 socket-server에서 처리됨
 }
-
