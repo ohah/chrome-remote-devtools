@@ -13,9 +13,18 @@ const ChromeRemoteDevToolsInspector = TurboModule || LegacyModule;
 
 // Debug: Log module availability / 디버그: 모듈 사용 가능성 로그
 if (__DEV__) {
-  console.log('[ChromeRemoteDevToolsInspector] TurboModule:', TurboModule ? '✅ Available' : '❌ Not available');
-  console.log('[ChromeRemoteDevToolsInspector] LegacyModule:', LegacyModule ? '✅ Available' : '❌ Not available');
-  console.log('[ChromeRemoteDevToolsInspector] Using:', TurboModule ? 'TurboModule' : LegacyModule ? 'LegacyModule' : 'None');
+  console.log(
+    '[ChromeRemoteDevToolsInspector] TurboModule:',
+    TurboModule ? '✅ Available' : '❌ Not available'
+  );
+  console.log(
+    '[ChromeRemoteDevToolsInspector] LegacyModule:',
+    LegacyModule ? '✅ Available' : '❌ Not available'
+  );
+  console.log(
+    '[ChromeRemoteDevToolsInspector] Using:',
+    TurboModule ? 'TurboModule' : LegacyModule ? 'LegacyModule' : 'None'
+  );
 }
 
 // Note: Console message interception is now handled at native level using RCTSetLogFunction / 참고: 콘솔 메시지 가로채기는 이제 RCTSetLogFunction을 사용하여 네이티브 레벨에서 처리됩니다
@@ -28,16 +37,13 @@ if (__DEV__) {
  */
 export async function connect(serverHostParam: string, serverPortParam: number): Promise<void> {
   if (!ChromeRemoteDevToolsInspector) {
-    throw new Error('ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다');
-  }
-
-  // Android implementation is a placeholder for now / Android 구현은 현재 플레이스홀더입니다
-  if (Platform.OS === 'android') {
-    console.warn('⚠️ Android Inspector connection is not yet fully implemented / Android Inspector 연결은 아직 완전히 구현되지 않았습니다');
+    throw new Error(
+      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
+    );
   }
 
   // Note: Console message interception is handled at native level / 참고: 콘솔 메시지 가로채기는 네이티브 레벨에서 처리됩니다
-  // The native module will hook RCTLog to intercept console messages / 네이티브 모듈이 RCTLog를 훅하여 콘솔 메시지를 가로챕니다
+  // The native module will hook ReactLog (iOS) or Logcat Reader (Android) to intercept console messages / 네이티브 모듈이 ReactLog (iOS) 또는 Logcat Reader (Android)를 훅하여 콘솔 메시지를 가로챕니다
 
   return ChromeRemoteDevToolsInspector.connect(serverHostParam, serverPortParam);
 }
@@ -48,7 +54,9 @@ export async function connect(serverHostParam: string, serverPortParam: number):
  */
 export async function disableDebugger(): Promise<void> {
   if (!ChromeRemoteDevToolsInspector) {
-    throw new Error('ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다');
+    throw new Error(
+      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
+    );
   }
   return ChromeRemoteDevToolsInspector.disableDebugger();
 }
@@ -59,7 +67,9 @@ export async function disableDebugger(): Promise<void> {
  */
 export async function isPackagerDisconnected(): Promise<boolean> {
   if (!ChromeRemoteDevToolsInspector) {
-    throw new Error('ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다');
+    throw new Error(
+      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
+    );
   }
   return ChromeRemoteDevToolsInspector.isPackagerDisconnected();
 }
@@ -71,9 +81,15 @@ export async function isPackagerDisconnected(): Promise<boolean> {
  * @param errorMessage Error message to show if failed / 실패 시 표시할 에러 메시지
  * @returns Promise that resolves when debugger is opened / 디버거가 열리면 resolve되는 Promise
  */
-export async function openDebugger(serverHost: string, serverPort: number, errorMessage: string): Promise<void> {
+export async function openDebugger(
+  serverHost: string,
+  serverPort: number,
+  errorMessage: string
+): Promise<void> {
   if (!ChromeRemoteDevToolsInspector) {
-    throw new Error('ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다');
+    throw new Error(
+      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
+    );
   }
   return ChromeRemoteDevToolsInspector.openDebugger(serverHost, serverPort, errorMessage);
 }
@@ -85,9 +101,15 @@ export async function openDebugger(serverHost: string, serverPort: number, error
  * @param message CDP message object / CDP 메시지 객체
  * @returns Promise that resolves when message is sent / 메시지가 전송되면 resolve되는 Promise
  */
-export async function sendCDPMessage(serverHost: string, serverPort: number, message: unknown): Promise<void> {
+export async function sendCDPMessage(
+  serverHost: string,
+  serverPort: number,
+  message: unknown
+): Promise<void> {
   if (!ChromeRemoteDevToolsInspector) {
-    throw new Error('ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다');
+    throw new Error(
+      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
+    );
   }
   const messageStr = JSON.stringify(message);
   return ChromeRemoteDevToolsInspector.sendCDPMessage(serverHost, serverPort, messageStr);
@@ -100,4 +122,3 @@ export default {
   openDebugger,
   sendCDPMessage,
 };
-
