@@ -13,23 +13,13 @@
   "type": "module",
   "main": "./dist/index.esm.js",
   "module": "./dist/index.esm.js",
-  "browser": "./dist/index.iife.js",
+  "browser": "./dist/index.esm.js",
   "types": "./dist/index.d.ts",
-  "react-native": "./src/react-native/index.ts",
   "exports": {
     ".": {
-      "react-native": {
-        "types": "./src/react-native/index.ts",
-        "default": "./src/react-native/index.ts"
-      },
-      "iife": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.esm.js"
-      },
-      "browser": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.iife.js"
-      }
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.esm.js",
+      "types": "./dist/index.d.ts"
     },
     "./iife": "./dist/index.iife.js"
   },
