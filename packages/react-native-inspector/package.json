@@ -2,6 +2,26 @@
   "name": "@ohah/chrome-remote-devtools-react-native",
   "version": "0.1.0",
   "description": "Chrome Remote DevTools Inspector Plugin for React Native",
+  "keywords": [
+    "debugging",
+    "devtools",
+    "inspector",
+    "react-native"
+  ],
+  "license": "MIT",
+  "author": "Chrome Remote DevTools",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ohah/chrome-remote-devtools.git",
+    "directory": "packages/react-native-inspector"
+  },
+  "files": [
+    "README.md",
+    "android/",
+    "dist/",
+    "ios/",
+    "src/"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -11,22 +31,6 @@
     "build:clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "react-native",
-    "devtools",
-    "inspector",
-    "debugging"
-  ],
-  "author": "Chrome Remote DevTools",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ohah/chrome-remote-devtools.git",
-    "directory": "packages/react-native-inspector"
-  },
-  "peerDependencies": {
-    "react-native": ">=0.83.0"
-  },
   "dependencies": {
     "@babel/runtime": "^7.25.0"
   },
@@ -34,12 +38,7 @@
     "tsdown": "^0.16.8",
     "typescript": "^5.9.3"
   },
-  "files": [
-    "dist/",
-    "src/",
-    "ios/",
-    "android/",
-    "README.md"
-  ]
+  "peerDependencies": {
+    "react-native": ">=0.83.0"
+  }
 }
-
