@@ -45,7 +45,29 @@ react {
 
     /* Hermes Commands */
     //   The hermes compiler command to run. By default it is 'hermesc'
-    // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"
+    //   Windows에서 hermesc 바이너리 경로 확인 및 설정 / Check and set hermesc binary path on Windows
+    //   모노레포 루트의 .bun 디렉토리에서 hermes-compiler 패키지 확인 / Check hermes-compiler package in monorepo root .bun directory
+    def osName = System.getProperty("os.name").toLowerCase()
+    if (osName.contains("windows")) {
+        // Use rootProject to get monorepo root / rootProject를 사용하여 모노레포 루트 가져오기
+        // rootProject.projectDir is android directory (examples/react-native/android)
+        // rootProject.projectDir는 android 디렉토리 (examples/react-native/android)
+        // Go up 3 levels: android -> react-native -> examples -> monorepo root
+        // 3단계 위로: android -> react-native -> examples -> 모노레포 루트
+        def monorepoRoot = rootProject.projectDir.parentFile.parentFile.parentFile
+        def bunHermesPath = new File(monorepoRoot, "node_modules/.bun/hermes-compiler@0.14.0/node_modules/hermes-compiler/hermesc/win64-bin/hermesc.exe")
+        if (bunHermesPath.exists()) {
+            hermesCommand = bunHermesPath.absolutePath
+        } else {
+            // Fallback: try with 2 levels up (if examples/react-native is the root)
+            // 대안: 2단계 위로 시도 (examples/react-native가 루트인 경우)
+            def fallbackRoot = rootProject.projectDir.parentFile.parentFile
+            def fallbackPath = new File(fallbackRoot, "node_modules/.bun/hermes-compiler@0.14.0/node_modules/hermes-compiler/hermesc/win64-bin/hermesc.exe")
+            if (fallbackPath.exists()) {
+                hermesCommand = fallbackPath.absolutePath
+            }
+        }
+    }
     //
     //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
     // hermesFlags = ["-O", "-output-source-map"]

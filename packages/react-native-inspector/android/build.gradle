@@ -3,9 +3,13 @@ buildscript {
     google()
     mavenCentral()
   }
+  dependencies {
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20")
+  }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
   compileSdkVersion 36
