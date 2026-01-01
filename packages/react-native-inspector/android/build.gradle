@@ -1,0 +1,50 @@
+buildscript {
+  repositories {
+    google()
+    mavenCentral()
+  }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion 36
+  buildToolsVersion "36.0.0"
+
+  namespace "com.ohah.chromeremotedevtools"
+
+  defaultConfig {
+    minSdkVersion 24
+    targetSdkVersion 36
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+
+  kotlinOptions {
+    jvmTarget = "17"
+  }
+}
+
+repositories {
+  google()
+  mavenCentral()
+  maven {
+    // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+    // React Native(JS, Obj-C 소스, Android 바이너리)는 모두 npm에서 설치됩니다
+    url("$rootDir/../node_modules/react-native/android")
+  }
+  maven {
+    // Android JSC is installed from npm
+    // Android JSC는 npm에서 설치됩니다
+    url("$rootDir/../node_modules/jsc-android/dist")
+  }
+}
+
+dependencies {
+  implementation("com.facebook.react:react-android")
+  implementation("com.facebook.react:react-native")
+}
+
