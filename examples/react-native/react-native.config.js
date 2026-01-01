@@ -14,7 +14,8 @@ const config = {
         },
         android: {
           sourceDir: path.resolve(__dirname, '../../packages/react-native-inspector/android'),
-          packageImportPath: 'import com.ohah.chromeremotedevtools.ChromeRemoteDevToolsInspectorPackage;',
+          packageImportPath:
+            'import com.ohah.chromeremotedevtools.ChromeRemoteDevToolsInspectorPackage;',
         },
       },
     },
