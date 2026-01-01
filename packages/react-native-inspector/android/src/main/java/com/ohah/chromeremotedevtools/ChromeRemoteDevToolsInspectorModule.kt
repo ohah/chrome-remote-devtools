@@ -13,16 +13,17 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.Arguments
 
 /**
  * TurboModule for Chrome Remote DevTools Inspector / Chrome Remote DevTools Inspector용 TurboModule
  * This allows JavaScript to call native Inspector methods / JavaScript에서 네이티브 Inspector 메서드를 호출할 수 있게 합니다
- *
- * Note: Android implementation is a placeholder for now / 참고: Android 구현은 현재 플레이스홀더입니다
- * The actual Inspector connection logic needs to be implemented / 실제 Inspector 연결 로직은 구현이 필요합니다
  */
 class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
+
+  private var connection: ChromeRemoteDevToolsInspectorPackagerConnection? = null
 
   override fun getName(): String {
     return NAME
@@ -39,16 +40,68 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
    */
   @ReactMethod
   fun connect(serverHost: String, serverPort: Int, promise: Promise) {
-    // TODO: Implement Android Inspector connection / Android Inspector 연결 구현 필요
-    // For now, this is a placeholder / 현재는 플레이스홀더입니다
-    promise.resolve(
-      mapOf(
-        "connected" to true,
-        "host" to serverHost,
-        "port" to serverPort,
-        "platform" to "android",
-      ),
-    )
+    try {
+      val context = reactApplicationContext
+      if (context == null) {
+        android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "React application context is null / React 애플리케이션 컨텍스트가 null입니다")
+        promise.reject("NO_CONTEXT", "React application context is null / React 애플리케이션 컨텍스트가 null입니다")
+        return
+      }
+
+      android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "connect() called / connect() 호출됨")
+      android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "serverHost: $serverHost, serverPort: $serverPort")
+
+      // Connect to server / 서버에 연결
+      connection = ChromeRemoteDevToolsInspector.connect(
+        context = context,
+        serverHost = serverHost,
+        serverPort = serverPort
+      )
+
+      if (connection != null) {
+        android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Connection object created / 연결 객체 생성됨")
+
+        // Set connection for log interception / 로그 가로채기를 위한 연결 설정
+        ChromeRemoteDevToolsLogHook.setConnection(connection)
+
+        // Hook React Native's logging system / React Native의 로깅 시스템 훅
+        ChromeRemoteDevToolsLogHook.hookReactLog()
+
+        // Note: WebSocket connection is asynchronous / 참고: WebSocket 연결은 비동기입니다
+        // The connection may not be established immediately / 연결이 즉시 설정되지 않을 수 있습니다
+        // Check connection status after a short delay / 짧은 지연 후 연결 상태 확인
+        // Capture variables for lambda / 람다를 위한 변수 캡처
+        val capturedHost = serverHost
+        val capturedPort = serverPort
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+          val isConnected = connection?.isConnected() ?: false
+          android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Connection status after delay / 지연 후 연결 상태: $isConnected")
+
+          // 연결 실패 시 경고 로그 추가 / 연결 실패 시 경고 로그 추가
+          if (!isConnected) {
+            android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "⚠️ WebSocket not connected after 500ms delay / 500ms 지연 후에도 WebSocket이 연결되지 않음")
+            android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Check Android logcat for WebSocket errors / WebSocket 에러를 확인하려면 Android logcat을 확인하세요")
+            android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Command: adb logcat | grep ChromeRemoteDevTools")
+            val serverAddress = "$capturedHost:$capturedPort"
+            android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Server should be running on $serverAddress")
+          } else {
+            android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "✅ WebSocket connected successfully / WebSocket 연결 성공")
+          }
+
+          val result: WritableMap = Arguments.createMap()
+          result.putBoolean("connected", isConnected)
+          result.putString("host", capturedHost)
+          result.putInt("port", capturedPort)
+          promise.resolve(result)
+        }, 500) // Wait 500ms for connection to establish / 연결이 설정될 때까지 500ms 대기
+      } else {
+        android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Failed to create connection object / 연결 객체 생성 실패")
+        promise.reject("CONNECTION_FAILED", "Failed to connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연결하지 못했습니다")
+      }
+    } catch (e: Exception) {
+      android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Exception in connect() / connect()에서 예외 발생", e)
+      promise.reject("CONNECTION_ERROR", "Error connecting to server / 서버 연결 중 오류: ${e.message}", e)
+    }
   }
 
   /**
@@ -66,8 +119,8 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
    */
   @ReactMethod
   fun isPackagerDisconnected(promise: Promise) {
-    // TODO: Implement Android packager disconnection check / Android packager 연결 끊김 확인 구현 필요
-    promise.resolve(false)
+    val disconnected = ChromeRemoteDevToolsInspector.isPackagerDisconnected()
+    promise.resolve(disconnected)
   }
 
   /**
@@ -80,6 +133,30 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
   fun openDebugger(serverHost: String, serverPort: Int, errorMessage: String, promise: Promise) {
     // TODO: Implement Android debugger opening / Android 디버거 열기 구현 필요
     promise.resolve(null)
+  }
+
+  /**
+   * Send CDP message to Inspector WebSocket / Inspector WebSocket으로 CDP 메시지 전송
+   */
+  @ReactMethod
+  fun sendCDPMessage(serverHost: String, serverPort: Int, message: String, promise: Promise) {
+    try {
+      val context = reactApplicationContext
+      if (context == null) {
+        promise.reject("NO_CONTEXT", "React application context is null")
+        return
+      }
+
+      ChromeRemoteDevToolsInspector.sendCDPMessage(
+        context = context,
+        serverHost = serverHost,
+        serverPort = serverPort,
+        message = message
+      )
+      promise.resolve(null)
+    } catch (e: Exception) {
+      promise.reject("SEND_ERROR", "Error sending CDP message: ${e.message}", e)
+    }
   }
 }
 

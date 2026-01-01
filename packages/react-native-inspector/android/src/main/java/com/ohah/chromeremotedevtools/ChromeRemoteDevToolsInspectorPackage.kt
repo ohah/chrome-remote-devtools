@@ -24,16 +24,29 @@ class ChromeRemoteDevToolsInspectorPackage : TurboReactPackage() {
     name: String,
     reactContext: ReactApplicationContext,
   ): NativeModule? {
+    android.util.Log.d("ChromeRemoteDevToolsInspectorPackage", "getModule called with name: $name")
+    android.util.Log.d("ChromeRemoteDevToolsInspectorPackage", "Expected name: ${ChromeRemoteDevToolsInspectorModule.NAME}")
+
     return if (name == ChromeRemoteDevToolsInspectorModule.NAME) {
-      ChromeRemoteDevToolsInspectorModule(reactContext)
+      try {
+        android.util.Log.d("ChromeRemoteDevToolsInspectorPackage", "Creating ChromeRemoteDevToolsInspectorModule")
+        val module = ChromeRemoteDevToolsInspectorModule(reactContext)
+        android.util.Log.d("ChromeRemoteDevToolsInspectorPackage", "ChromeRemoteDevToolsInspectorModule created successfully")
+        module
+      } catch (e: Exception) {
+        android.util.Log.e("ChromeRemoteDevToolsInspectorPackage", "Failed to create ChromeRemoteDevToolsInspectorModule", e)
+        null
+      }
     } else {
+      android.util.Log.d("ChromeRemoteDevToolsInspectorPackage", "Module name mismatch, returning null")
       null
     }
   }
 
   override fun getReactModuleInfoProvider(): ReactModuleInfoProvider {
+    android.util.Log.d("ChromeRemoteDevToolsInspectorPackage", "getReactModuleInfoProvider called")
     return ReactModuleInfoProvider {
-      mapOf(
+      val moduleInfo = mapOf(
         ChromeRemoteDevToolsInspectorModule.NAME to ReactModuleInfo(
           ChromeRemoteDevToolsInspectorModule.NAME,
           ChromeRemoteDevToolsInspectorModule::class.java.name,
@@ -41,9 +54,11 @@ class ChromeRemoteDevToolsInspectorPackage : TurboReactPackage() {
           true, // needsEagerInit / 즉시 초기화가 필요한지
           true, // hasConstants / 상수가 있는지
           false, // isCxxModule / C++ 모듈인지
-          true, // isTurboModule / TurboModule인지
+          false, // isTurboModule / TurboModule인지 (Legacy Module로 사용)
         ),
       )
+      android.util.Log.d("ChromeRemoteDevToolsInspectorPackage", "Module info: $moduleInfo")
+      moduleInfo
     }
   }
 }
