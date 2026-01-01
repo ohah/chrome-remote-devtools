@@ -3,6 +3,8 @@ import { createServer } from 'http';
 import { gunzipSync } from 'zlib';
 import { createWriteStream, mkdirSync } from 'fs';
 import { dirname } from 'path';
+import { ReactNativeInspectorConnectionManager } from './react-native/inspector-connection';
+import { handleReactNativeInspectorWebSocket } from './react-native/inspector-handler';
 
 // Log configuration / 로그 설정
 // Default: disabled in both development and production / 기본값: 개발 및 프로덕션 모두에서 비활성화
@@ -101,8 +103,8 @@ function writeLog(logMessage: string): void {
  * @param data - Optional data to log / 선택적 로그 데이터
  * @param method - Optional CDP method name for filtering / 필터링을 위한 선택적 CDP 메소드 이름
  */
-function log(
-  type: 'client' | 'devtools' | 'server',
+export function log(
+  type: 'client' | 'devtools' | 'server' | 'rn-inspector',
   id: string,
   message: string,
   data?: unknown,
@@ -137,8 +139,8 @@ function log(
 /**
  * Log error / 에러 로그
  */
-function logError(
-  type: 'client' | 'devtools' | 'server',
+export function logError(
+  type: 'client' | 'devtools' | 'server' | 'rn-inspector',
   id: string,
   message: string,
   error?: unknown
@@ -210,9 +212,11 @@ export class SocketServer {
   private clients: Map<string, Client> = new Map();
   private devtools: Map<string, DevTools> = new Map();
   private wss: WebSocketServer;
+  public readonly reactNativeInspectorManager: ReactNativeInspectorConnectionManager;
 
   constructor() {
     this.wss = new WebSocketServer({ noServer: true });
+    this.reactNativeInspectorManager = new ReactNativeInspectorConnectionManager();
   }
 
   /**
@@ -318,8 +322,19 @@ export class SocketServer {
   initSocketServer(server: ReturnType<typeof createServer>) {
     server.on('upgrade', (request, socket, head) => {
       const url = new URL(request.url || '/', `http://${request.headers.host}`);
-      const pathname = url.pathname.replace('/remote/debug', '');
-      const [, from, id] = pathname.split('/');
+      const pathname = url.pathname;
+
+      // Handle React Native Inspector WebSocket connections / React Native Inspector WebSocket 연결 처리
+      if (pathname === '/inspector/device') {
+        this.wss.handleUpgrade(request, socket, head, (ws) => {
+          handleReactNativeInspectorWebSocket(ws, request, this.reactNativeInspectorManager, this);
+        });
+        return;
+      }
+
+      // Handle standard Chrome Remote DevTools connections / 표준 Chrome Remote DevTools 연결 처리
+      const normalizedPathname = pathname.replace('/remote/debug', '');
+      const [, from, id] = normalizedPathname.split('/');
 
       if (from !== 'devtools' && from !== 'client') {
         socket.destroy();
@@ -359,6 +374,20 @@ export class SocketServer {
       this.devtools.forEach((devtool) => {
         if (devtool.clientId === id) {
           devtool.ws.send(message);
+        }
+      });
+
+      // Also send to React Native Inspector connections / React Native Inspector 연결에도 전송
+      this.reactNativeInspectorManager.getAllConnections().forEach((inspector) => {
+        if (inspector.clientId === id) {
+          const connection = this.reactNativeInspectorManager.getConnection(inspector.id);
+          if (connection && connection.ws.readyState === WebSocket.OPEN) {
+            try {
+              connection.ws.send(message);
+            } catch (error) {
+              logError('client', id, `failed to send message to RN inspector ${inspector.id}`, error);
+            }
+          }
         }
       });
     };
@@ -506,6 +535,11 @@ export class SocketServer {
     }
     const { ws: _ws, ...data } = client;
     return data;
+  }
+
+  // Get client with WebSocket (for internal use) / WebSocket이 포함된 클라이언트 가져오기 (내부 사용)
+  getClientWithWebSocket(clientId: string): Client | undefined {
+    return this.clients.get(clientId);
   }
 
   // Get all clients / 모든 클라이언트 가져오기
