@@ -293,7 +293,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
           'X-Custom-Header': 'test-value',
-          'Authorization': 'Bearer test-token',
+          Authorization: 'Bearer test-token',
         },
       });
       const customData = await customResponse.json();
