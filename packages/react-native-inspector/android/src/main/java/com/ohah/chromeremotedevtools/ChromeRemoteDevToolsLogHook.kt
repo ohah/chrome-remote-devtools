@@ -11,6 +11,9 @@ package com.ohah.chromeremotedevtools
 
 import android.util.Log
 import org.json.JSONObject
+import com.facebook.react.bridge.CatalystInstance
+import com.facebook.react.bridge.ReactContext
+import com.facebook.react.bridge.RuntimeExecutor
 
 /**
  * Log hook for intercepting console messages / 콘솔 메시지를 가로채기 위한 로그 훅
@@ -67,6 +70,55 @@ object ChromeRemoteDevToolsLogHook : ChromeRemoteDevToolsLogHookJNICallback {
     } catch (e: Exception) {
       Log.e(TAG, "Exception while hooking ReactLog / ReactLog 훅 중 예외 발생: ${e.message}", e)
       isHooked = false
+    }
+  }
+
+  /**
+   * Hook React Native's logging system at JSI level / JSI 레벨에서 React Native의 로깅 시스템 훅
+   * This intercepts console.log calls directly in JavaScript / 이것은 JavaScript에서 console.log 호출을 직접 인터셉트합니다
+   *
+   * @param reactContext ReactContext to get RuntimeExecutor / RuntimeExecutor를 얻기 위한 ReactContext
+   */
+  fun hookJSILog(reactContext: ReactContext?) {
+    if (reactContext == null) {
+      Log.w(TAG, "ReactContext is null, cannot hook JSI log / ReactContext가 null입니다, JSI 로그를 훅할 수 없습니다")
+      return
+    }
+
+    // Check if connection is set / 연결이 설정되었는지 확인
+    if (connection == null) {
+      Log.w(TAG, "Connection not set, cannot hook JSI log / 연결이 설정되지 않음, JSI 로그를 훅할 수 없습니다")
+      return
+    }
+
+    try {
+      // Get CatalystInstance from ReactContext / ReactContext에서 CatalystInstance 가져오기
+      val catalystInstance = reactContext.catalystInstance
+      if (catalystInstance == null) {
+        Log.w(TAG, "CatalystInstance is null, cannot hook JSI log / CatalystInstance가 null입니다, JSI 로그를 훅할 수 없습니다")
+        return
+      }
+
+      // Get RuntimeExecutor from CatalystInstance / CatalystInstance에서 RuntimeExecutor 가져오기
+      val runtimeExecutor = catalystInstance.runtimeExecutor
+      if (runtimeExecutor == null) {
+        Log.w(TAG, "RuntimeExecutor is null, cannot hook JSI log / RuntimeExecutor가 null입니다, JSI 로그를 훅할 수 없습니다")
+        return
+      }
+
+      // Use JNI to install JSI-level hook / JNI를 사용하여 JSI 레벨 훅 설치
+      // The JNI function will extract RuntimeExecutor and call it to access JSI runtime /
+      // JNI 함수가 RuntimeExecutor를 추출하고 호출하여 JSI 런타임에 접근합니다
+      val jsiHooked = ChromeRemoteDevToolsLogHookJNI.nativeHookJSILog(runtimeExecutor, this)
+
+      if (jsiHooked) {
+        Log.d(TAG, "JSI-level logging hook installed successfully / JSI 레벨 로깅 훅이 성공적으로 설치됨")
+      } else {
+        Log.w(TAG, "Failed to install JSI-level logging hook, falling back to native-level hooking / " +
+              "JSI 레벨 로깅 훅 설치 실패, 네이티브 레벨 훅으로 폴백합니다")
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "Exception while hooking JSI log / JSI 로그 훅 중 예외 발생: ${e.message}", e)
     }
   }
 
