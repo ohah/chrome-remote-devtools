@@ -41,6 +41,7 @@ target_link_libraries(
 
 # Link react-native (different prefab between RN 0.75 and RN 0.76) /
 # react-native 링크 (RN 0.75와 RN 0.76 사이의 다른 prefab)
+# Note: ReactAndroid::reactnative already includes folly / 참고: ReactAndroid::reactnative는 이미 folly를 포함합니다
 if(ReactAndroid_VERSION_MINOR GREATER_EQUAL 76)
   target_link_libraries(
     chromeremotedevtoolsinspector
