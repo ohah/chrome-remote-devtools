@@ -88,6 +88,11 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
 
             // Hook React Native's logging system after connection is established / 연결이 설정된 후 React Native의 로깅 시스템 훅
             // This ensures Logcat Reader starts only when connection is ready / 이를 통해 Logcat Reader가 연결이 준비된 후에만 시작되도록 보장
+
+            // Try JSI-level hooking first (more reliable) / 먼저 JSI 레벨 훅 시도 (더 안정적)
+            ChromeRemoteDevToolsLogHook.hookJSILog(context)
+
+            // Fallback to native-level hooking / 네이티브 레벨 훅으로 폴백
             ChromeRemoteDevToolsLogHook.hookReactLog()
           }
 

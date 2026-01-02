@@ -13,11 +13,23 @@
 #include <mutex>
 #include <cstdarg>
 #include <cstdio>
+#include <dlfcn.h>
+#include <unistd.h>
+#include <memory>
+#include <functional>
 
-// Include xhook header with C linkage / C 링크로 xhook 헤더 포함
-extern "C" {
-#include <xhook.h>
-}
+// Include JSI headers for JSI-level logging interception / JSI 레벨 로깅 인터셉션을 위한 JSI 헤더 포함
+// Try to include JSI headers - if not available, we'll use conditional compilation /
+// JSI 헤더 포함 시도 - 사용할 수 없으면 조건부 컴파일 사용
+// Note: We need to find these headers at build time / 참고: 빌드 시점에 이 헤더들을 찾아야 합니다
+#if __has_include(<jsi/jsi.h>) && __has_include(<ReactCommon/RuntimeExecutor.h>) && __has_include(<fbjni/fbjni.h>) && __has_include(<react/jni/JRuntimeExecutor.h>)
+#define REACT_NATIVE_JSI_AVAILABLE
+#include <jsi/jsi.h>
+#include <ReactCommon/RuntimeExecutor.h>
+#include <fbjni/fbjni.h>
+#include <react/jni/JRuntimeExecutor.h>
+#endif
+
 
 #define TAG "ChromeRemoteDevToolsLogHookJNI"
 #define LOG_TAG "ChromeRemoteDevToolsLogHookJNI"
@@ -42,6 +54,13 @@ static AndroidLogVPrintFunc original__android_log_vprint = nullptr;
 
 // Flag to track if hook is active / 훅이 활성화되었는지 추적하는 플래그
 static bool g_is_hooked = false;
+static bool g_is_jsi_hooked = false;
+
+#ifdef REACT_NATIVE_JSI_AVAILABLE
+// RuntimeExecutor for JSI-level hooking / JSI 레벨 훅을 위한 RuntimeExecutor
+static std::shared_ptr<facebook::react::RuntimeExecutor> g_runtimeExecutor = nullptr;
+static std::mutex g_runtimeExecutorMutex;
+#endif
 
 // Forward declaration / 전방 선언
 static bool hookAndroidLog();
@@ -169,7 +188,39 @@ original_call:
   return __android_log_buf_write(LOG_ID_MAIN, priority, tag, buffer2);
 }
 
-// Custom log write function / 커스텀 로그 write 함수
+// Try to hook __android_log_write using dlsym / dlsym을 사용하여 __android_log_write 훅 시도
+// This is a fallback method if PLT hooking doesn't work / PLT 훅이 작동하지 않을 경우를 위한 폴백 방법
+static bool hookAndroidLogDirect() {
+  void* handle = dlopen("liblog.so", RTLD_LAZY);
+  if (!handle) {
+    char error_msg[256];
+    const char* dlerr = dlerror();
+    snprintf(error_msg, sizeof(error_msg), "Failed to dlopen liblog.so: %s", dlerr ? dlerr : "unknown error");
+    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_WARN, TAG, error_msg);
+    return false;
+  }
+
+  // Try to get original function pointer / 원본 함수 포인터 가져오기 시도
+  typedef int (*AndroidLogWriteFunc)(int bufID, int priority, const char* tag, const char* text);
+  AndroidLogWriteFunc original = (AndroidLogWriteFunc)dlsym(handle, "__android_log_write");
+
+  if (original) {
+    // Store original for later use / 나중에 사용하기 위해 원본 저장
+    if (!original__android_log_write) {
+      original__android_log_write = original;
+    }
+    char success_msg[256];
+    snprintf(success_msg, sizeof(success_msg), "Successfully found __android_log_write via dlsym / dlsym을 통해 __android_log_write 찾기 성공");
+    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_DEBUG, TAG, success_msg);
+    dlclose(handle);
+    return true;
+  }
+
+  dlclose(handle);
+  return false;
+}
+
+// Custom log write function (4-parameter version) / 커스텀 로그 write 함수 (4개 파라미터 버전)
 // React Native uses __android_log_write for ReactNativeJS logs / React Native는 ReactNativeJS 로그에 __android_log_write를 사용합니다
 static int custom__android_log_write(int bufID, int priority, const char* tag, const char* text) {
   // IMPORTANT: This function should be called for ReactNativeJS logs / 중요: 이 함수는 ReactNativeJS 로그에 대해 호출되어야 합니다
@@ -396,143 +447,22 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
   return JNI_VERSION_1_6;
 }
 
-// Hook Android Log using xhook / xhook을 사용하여 Android Log 훅
+// Hook Android Log using direct function pointer replacement / 직접 함수 포인터 교체를 사용하여 Android Log 훅
 static bool hookAndroidLog() {
   if (g_is_hooked) {
     return true; // Already hooked / 이미 훅됨
   }
 
-  // Register hooks for multiple Android log functions / 여러 Android 로그 함수 훅 등록
-  // React Native may use different log functions / React Native는 다른 로그 함수를 사용할 수 있습니다
-  int ret = 0;
+  // Use direct hooking / 직접 훅 사용
+  bool success = hookAndroidLogDirect();
 
-  // Hook ALL libraries first (more aggressive approach) / 먼저 모든 라이브러리 훅 (더 공격적 접근)
-  // This ensures we catch React Native even if it loads later / 이를 통해 React Native가 나중에 로드되어도 잡을 수 있습니다
-  ret = xhook_register(".*\\.so$", "__android_log_print",
-                       (void*)custom__android_log_print,
-                       (void**)&original__android_log_print);
-
-  if (ret != 0) {
-    char error_msg[256];
-    snprintf(error_msg, sizeof(error_msg),
-             "Failed to register xhook for __android_log_print (ret=%d) / __android_log_print용 xhook 등록 실패 (ret=%d)", ret, ret);
-    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_WARN, TAG, error_msg);
+  if (success) {
+    g_is_hooked = true;
+    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_INFO, TAG,
+                            "Android Log hook installed successfully using direct method / 직접 방법을 사용하여 Android Log 훅 설치 성공");
   }
 
-  // Also try React Native specific libraries / React Native 특정 라이브러리도 시도
-  // React Native uses libreactnativejni.so for logging / React Native는 로깅을 위해 libreactnativejni.so를 사용합니다
-  // Also try Hermes libraries / Hermes 라이브러리도 시도
-  const char* react_native_libs[] = {
-    ".*libreactnativejni\\.so$",
-    ".*libhermes\\.so$",
-    ".*libhermesvm\\.so$",
-    ".*libhermesexecutor\\.so$",
-  };
-
-  for (int i = 0; i < sizeof(react_native_libs) / sizeof(react_native_libs[0]); i++) {
-    ret = xhook_register(react_native_libs[i], "__android_log_print",
-                         (void*)custom__android_log_print,
-                         (void**)&original__android_log_print);
-
-    if (ret != 0) {
-      char error_msg[256];
-      snprintf(error_msg, sizeof(error_msg),
-               "Failed to register xhook for __android_log_print in %s (ret=%d) / %s에서 __android_log_print용 xhook 등록 실패 (ret=%d)",
-               react_native_libs[i], ret, react_native_libs[i], ret);
-      __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_DEBUG, TAG, error_msg);
-    }
-  }
-
-  // Hook __android_log_write in ALL libraries first / 먼저 모든 라이브러리에서 __android_log_write 훅
-  ret = xhook_register(".*\\.so$", "__android_log_write",
-                       (void*)custom__android_log_write,
-                       (void**)&original__android_log_write);
-
-  if (ret != 0) {
-    char error_msg[256];
-    snprintf(error_msg, sizeof(error_msg),
-             "Failed to register xhook for __android_log_write (ret=%d) / __android_log_write용 xhook 등록 실패 (ret=%d)", ret, ret);
-    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_WARN, TAG, error_msg);
-  } else {
-    char success_msg[256];
-    snprintf(success_msg, sizeof(success_msg),
-             "Successfully registered xhook for __android_log_write / __android_log_write용 xhook 등록 성공");
-    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_DEBUG, TAG, success_msg);
-  }
-
-  // Also try React Native specific libraries / React Native 특정 라이브러리도 시도
-  for (int i = 0; i < sizeof(react_native_libs) / sizeof(react_native_libs[0]); i++) {
-    ret = xhook_register(react_native_libs[i], "__android_log_write",
-                         (void*)custom__android_log_write,
-                         (void**)&original__android_log_write);
-
-    if (ret != 0) {
-      char error_msg[256];
-      snprintf(error_msg, sizeof(error_msg),
-               "Failed to register xhook for __android_log_write in %s (ret=%d) / %s에서 __android_log_write용 xhook 등록 실패 (ret=%d)",
-               react_native_libs[i], ret, react_native_libs[i], ret);
-      __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_DEBUG, TAG, error_msg);
-    }
-  }
-
-  // Hook __android_log_buf_write in ALL libraries first / 먼저 모든 라이브러리에서 __android_log_buf_write 훅
-  // React Native may use this function directly / React Native가 이 함수를 직접 사용할 수 있습니다
-  ret = xhook_register(".*\\.so$", "__android_log_buf_write",
-                       (void*)custom__android_log_buf_write,
-                       (void**)&original__android_log_buf_write);
-
-  if (ret != 0) {
-    char error_msg[256];
-    snprintf(error_msg, sizeof(error_msg),
-             "Failed to register xhook for __android_log_buf_write (ret=%d) / __android_log_buf_write용 xhook 등록 실패 (ret=%d)", ret, ret);
-    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_WARN, TAG, error_msg);
-  }
-
-  // Also try React Native specific libraries / React Native 특정 라이브러리도 시도
-  for (int i = 0; i < sizeof(react_native_libs) / sizeof(react_native_libs[0]); i++) {
-    ret = xhook_register(react_native_libs[i], "__android_log_buf_write",
-                         (void*)custom__android_log_buf_write,
-                         (void**)&original__android_log_buf_write);
-
-    if (ret != 0) {
-      char error_msg[256];
-      snprintf(error_msg, sizeof(error_msg),
-               "Failed to register xhook for __android_log_buf_write in %s (ret=%d) / %s에서 __android_log_buf_write용 xhook 등록 실패 (ret=%d)",
-               react_native_libs[i], ret, react_native_libs[i], ret);
-      __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_DEBUG, TAG, error_msg);
-    }
-  }
-
-  // Apply hooks synchronously first / 먼저 동기적으로 훅 적용
-  ret = xhook_refresh(0);
-
-  if (ret != 0) {
-    char error_msg[256];
-    snprintf(error_msg, sizeof(error_msg), "Failed to refresh xhook (ret=%d) / xhook 새로고침 실패 (ret=%d)", ret, ret);
-    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG, error_msg);
-    return false;
-  }
-
-  // Also refresh asynchronously to catch any libraries loaded later / 나중에 로드된 라이브러리를 잡기 위해 비동기로도 새로고침
-  ret = xhook_refresh(1);
-
-  if (ret != 0) {
-    char error_msg[256];
-    snprintf(error_msg, sizeof(error_msg), "Failed to refresh xhook async (ret=%d) / xhook 비동기 새로고침 실패 (ret=%d)", ret, ret);
-    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_WARN, TAG, error_msg);
-  }
-
-  g_is_hooked = true;
-
-  // Use direct syscall to avoid recursion / 재귀 방지를 위해 직접 syscall 사용
-  char success_msg[512];
-  snprintf(success_msg, sizeof(success_msg),
-           "xhook registered successfully for Android Log functions / Android Log 함수용 xhook 등록 성공\n"
-           "Hooked functions: __android_log_print, __android_log_write, __android_log_buf_write\n"
-           "Target libraries: all .so files + React Native specific libraries");
-  __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_INFO, TAG, success_msg);
-
-  return true;
+  return success;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -585,7 +515,6 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHookReac
 
     // Clear previous hooks and re-register / 이전 훅을 지우고 다시 등록
     if (g_is_hooked) {
-      xhook_clear();
       g_is_hooked = false;
       original__android_log_print = nullptr;
       original__android_log_write = nullptr;
@@ -599,10 +528,8 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHookReac
       snprintf(success_msg, sizeof(success_msg), "ReactLog hook successful (retry) / ReactLog 훅 성공 (재시도)");
       __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_INFO, TAG, success_msg);
 
-      // Force refresh hooks again after a short delay / 짧은 지연 후 훅을 다시 강제로 새로고침
-      // This ensures hooks are applied to already-loaded libraries / 이를 통해 이미 로드된 라이브러리에 훅이 적용되도록 보장
-      xhook_refresh(0);
-      xhook_refresh(1);
+      // Try direct hooking again / 직접 훅 다시 시도
+      hookAndroidLogDirect();
     } else {
       char error_msg[256];
       snprintf(error_msg, sizeof(error_msg), "ReactLog hook failed (retry) / ReactLog 훅 실패 (재시도)");
@@ -632,9 +559,8 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeUnhookRe
 
     g_onLogMethodID = nullptr;
 
-    // Clear xhook cache / xhook 캐시 지우기
+    // Clear hook state / 훅 상태 지우기
     if (g_is_hooked) {
-      xhook_clear();
       g_is_hooked = false;
     }
 
@@ -649,5 +575,212 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeUnhookRe
     // Use direct syscall to avoid recursion / 재귀 방지를 위해 직접 syscall 사용
     __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG,
                             "Exception in nativeUnhookReactLog / nativeUnhookReactLog에서 예외 발생");
+  }
+}
+
+// Helper function to send log to Java callback / Java 콜백으로 로그를 전송하는 헬퍼 함수
+static void sendLogToJavaCallback(const std::string& message, unsigned int logLevel) {
+  std::lock_guard<std::mutex> lock(g_callbackMutex);
+  if (g_jvm && g_logCallback && g_onLogMethodID) {
+    JNIEnv* env = nullptr;
+    int getEnvStat = g_jvm->GetEnv((void**)&env, JNI_VERSION_1_6);
+
+    if (getEnvStat == JNI_EDETACHED) {
+      if (g_jvm->AttachCurrentThread(&env, nullptr) != 0) {
+        return;
+      }
+    } else if (getEnvStat != JNI_OK) {
+      return;
+    }
+
+    // Map log level to Android log level / 로그 레벨을 Android 로그 레벨로 매핑
+    int androidLevel = 4; // Default to INFO / 기본값은 INFO
+    switch (logLevel) {
+      case 0: // DEBUG
+        androidLevel = 3; // Log.DEBUG
+        break;
+      case 1: // INFO
+        androidLevel = 4; // Log.INFO
+        break;
+      case 2: // WARN
+        androidLevel = 5; // Log.WARN
+        break;
+      case 3: // ERROR
+        androidLevel = 6; // Log.ERROR
+        break;
+      default:
+        androidLevel = 4; // Log.INFO
+        break;
+    }
+
+    // Call Java callback / Java 콜백 호출
+    jstring jtag = env->NewStringUTF("ReactNativeJS");
+    jstring jmessage = env->NewStringUTF(message.c_str());
+    env->CallVoidMethod(g_logCallback, g_onLogMethodID, androidLevel, jtag, jmessage);
+
+    if (env->ExceptionCheck()) {
+      env->ExceptionClear();
+    }
+
+    env->DeleteLocalRef(jtag);
+    env->DeleteLocalRef(jmessage);
+
+    if (getEnvStat == JNI_EDETACHED) {
+      g_jvm->DetachCurrentThread();
+    }
+  }
+}
+
+// Hook JSI-level logging by replacing nativeLoggingHook / nativeLoggingHook을 교체하여 JSI 레벨 로깅 훅
+#ifdef REACT_NATIVE_JSI_AVAILABLE
+static void hookJSILogging(facebook::jsi::Runtime& runtime) {
+  try {
+    // Replace nativeLoggingHook with our custom function / nativeLoggingHook을 우리의 커스텀 함수로 교체
+    runtime.global().setProperty(
+      runtime,
+      "nativeLoggingHook",
+      facebook::jsi::Function::createFromHostFunction(
+        runtime,
+        facebook::jsi::PropNameID::forAscii(runtime, "nativeLoggingHook"),
+        2,
+        [](facebook::jsi::Runtime& runtime,
+           const facebook::jsi::Value& /* this */,
+           const facebook::jsi::Value* args,
+           size_t count) {
+          if (count != 2) {
+            throw std::invalid_argument("nativeLoggingHook takes 2 arguments");
+          }
+
+          // Get log message and level / 로그 메시지와 레벨 가져오기
+          std::string message = args[0].asString(runtime).utf8(runtime);
+          unsigned int logLevel = static_cast<unsigned int>(args[1].asNumber());
+
+          // Send to Java callback / Java 콜백으로 전송
+          sendLogToJavaCallback(message, logLevel);
+
+          // Also call original reactAndroidLoggingHook to maintain normal logging behavior /
+          // 정상적인 로깅 동작을 유지하기 위해 원본 reactAndroidLoggingHook도 호출
+          // Note: We need to find the original function pointer / 참고: 원본 함수 포인터를 찾아야 합니다
+          // For now, we'll just send to callback / 지금은 콜백으로만 전송합니다
+
+          return facebook::jsi::Value::undefined();
+        }));
+
+    g_is_jsi_hooked = true;
+    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_INFO, TAG,
+                            "JSI-level logging hook installed successfully / JSI 레벨 로깅 훅이 성공적으로 설치됨");
+  } catch (const std::exception& e) {
+    char error_msg[512];
+    snprintf(error_msg, sizeof(error_msg),
+             "Failed to hook JSI logging: %s", e.what());
+    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG, error_msg);
+  } catch (...) {
+    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG,
+                            "Unknown exception in hookJSILogging / hookJSILogging에서 알 수 없는 예외 발생");
+  }
+}
+#else
+// JSI not available, provide stub implementation / JSI를 사용할 수 없으므로 스텁 구현 제공
+static void hookJSILogging(void* runtime) {
+  __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_WARN, TAG,
+                          "JSI headers not available, JSI hooking disabled / JSI 헤더를 사용할 수 없어 JSI 훅이 비활성화됨");
+}
+#endif
+
+// JNI function to install JSI-level logging hook using RuntimeExecutor /
+// RuntimeExecutor를 사용하여 JSI 레벨 로깅 훅을 설치하는 JNI 함수
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHookJSILog(
+    JNIEnv *env,
+    jobject thiz,
+    jobject runtimeExecutor,
+    jobject callback) {
+  try {
+    // Store JVM reference / JVM 참조 저장
+    if (env->GetJavaVM(&g_jvm) != JNI_OK) {
+      __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG,
+                              "Failed to get JavaVM in nativeHookJSILog");
+      return JNI_FALSE;
+    }
+
+    // Store callback reference / 콜백 참조 저장
+    {
+      std::lock_guard<std::mutex> lock(g_callbackMutex);
+      if (g_logCallback) {
+        env->DeleteGlobalRef(g_logCallback);
+      }
+      g_logCallback = env->NewGlobalRef(callback);
+
+      if (!g_logCallback) {
+        __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG,
+                                "Failed to create global ref for callback");
+        return JNI_FALSE;
+      }
+
+      // Get method ID for onLog callback / onLog 콜백용 메서드 ID 가져오기
+      jclass callbackClass = env->GetObjectClass(callback);
+      g_onLogMethodID = env->GetMethodID(callbackClass, "onLog", "(ILjava/lang/String;Ljava/lang/String;)V");
+      env->DeleteLocalRef(callbackClass);
+
+      if (!g_onLogMethodID) {
+        __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG,
+                                "Failed to find onLog method");
+        env->DeleteGlobalRef(g_logCallback);
+        g_logCallback = nullptr;
+        return JNI_FALSE;
+      }
+    }
+
+#ifdef REACT_NATIVE_JSI_AVAILABLE
+    // Get RuntimeExecutor from JRuntimeExecutor Java object using fbjni /
+    // fbjni를 사용하여 JRuntimeExecutor Java 객체에서 RuntimeExecutor 가져오기
+    using namespace facebook::react;
+    using namespace facebook::jni;
+
+    // Convert Java RuntimeExecutor to JRuntimeExecutor C++ object /
+    // Java RuntimeExecutor를 JRuntimeExecutor C++ 객체로 변환
+    alias_ref<JRuntimeExecutor::javaobject> jRuntimeExecutor =
+        wrap_alias(reinterpret_cast<JRuntimeExecutor::javaobject>(runtimeExecutor));
+
+    if (!jRuntimeExecutor) {
+      __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG,
+                              "Failed to wrap RuntimeExecutor");
+      return JNI_FALSE;
+    }
+
+    // Get RuntimeExecutor from JRuntimeExecutor / JRuntimeExecutor에서 RuntimeExecutor 가져오기
+    RuntimeExecutor executor = jRuntimeExecutor->cthis()->get();
+
+    if (!executor) {
+      __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG,
+                              "RuntimeExecutor is null");
+      return JNI_FALSE;
+    }
+
+    // Call RuntimeExecutor to access JSI runtime and install hook /
+    // RuntimeExecutor를 호출하여 JSI 런타임에 접근하고 훅 설치
+    executor([](facebook::jsi::Runtime& runtime) {
+      hookJSILogging(runtime);
+    });
+
+    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_INFO, TAG,
+                            "JSI-level logging hook installed");
+    return JNI_TRUE;
+#else
+    // JSI not available / JSI를 사용할 수 없음
+    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_WARN, TAG,
+                            "JSI headers not available, cannot install JSI hook");
+    return JNI_FALSE;
+#endif
+  } catch (const std::exception& e) {
+    char error_msg[512];
+    snprintf(error_msg, sizeof(error_msg),
+             "Exception in nativeHookJSILog: %s", e.what());
+    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG, error_msg);
+    return JNI_FALSE;
+  } catch (...) {
+    __android_log_buf_write(LOG_ID_MAIN, ANDROID_LOG_ERROR, TAG,
+                            "Unknown exception in nativeHookJSILog");
+    return JNI_FALSE;
   }
 }

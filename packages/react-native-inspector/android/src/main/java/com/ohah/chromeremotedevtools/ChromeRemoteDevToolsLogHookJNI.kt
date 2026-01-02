@@ -57,6 +57,17 @@ class ChromeRemoteDevToolsLogHookJNI {
      */
     @JvmStatic
     external fun nativeUnhookReactLog()
+
+    /**
+     * Install JSI-level logging hook using RuntimeExecutor / RuntimeExecutor를 사용하여 JSI 레벨 로깅 훅 설치
+     * This intercepts console.log calls directly in JavaScript / 이것은 JavaScript에서 console.log 호출을 직접 인터셉트합니다
+     *
+     * @param runtimeExecutor RuntimeExecutor from React Native / React Native의 RuntimeExecutor
+     * @param callback Callback interface for receiving log messages / 로그 메시지를 받기 위한 콜백 인터페이스
+     * @return true if hooking was successful / 훅이 성공하면 true
+     */
+    @JvmStatic
+    external fun nativeHookJSILog(runtimeExecutor: Any, callback: ChromeRemoteDevToolsLogHookJNICallback): Boolean
   }
 }
 

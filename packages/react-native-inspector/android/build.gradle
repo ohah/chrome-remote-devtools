@@ -8,28 +8,57 @@ buildscript {
   }
 }
 
+def reactNativeArchitectures() {
+  def value = rootProject.getProperties().get("reactNativeArchitectures")
+  return value ? value.split(",") : ["x86", "x86_64", "armeabi-v7a", "arm64-v8a"]
+}
+
+def isNewArchitectureEnabled() {
+  return rootProject.hasProperty("newArchEnabled") && rootProject.getProperty("newArchEnabled") == "true"
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
-apply plugin: 'com.facebook.react'
+
+if (isNewArchitectureEnabled()) {
+  apply plugin: 'com.facebook.react'
+}
+
+def getExtOrDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["ChromeRemoteDevTools_" + name]
+}
+
+def getExtOrIntegerDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["ChromeRemoteDevTools_" + name]).toInteger()
+}
 
 android {
-  compileSdkVersion 36
+  ndkVersion getExtOrDefault("ndkVersion")
+  compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
   buildToolsVersion "36.0.0"
 
   namespace "com.ohah.chromeremotedevtools"
 
   defaultConfig {
-    minSdkVersion 24
-    targetSdkVersion 36
+    minSdkVersion getExtOrIntegerDefault("minSdkVersion")
+    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+    buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
     externalNativeBuild {
       cmake {
-        arguments "-DANDROID_STL=c++_shared"
-      }
-    }
+        cppFlags "-frtti -fexceptions -Wall -Wextra -fstack-protector-all"
+        arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+        abiFilters (*reactNativeArchitectures())
 
-    ndk {
-      abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        buildTypes {
+          debug {
+            cppFlags "-O1 -g"
+          }
+          release {
+            cppFlags "-O2"
+          }
+        }
+      }
     }
   }
 
@@ -44,24 +73,61 @@ android {
 
   externalNativeBuild {
     cmake {
-      path "src/main/cpp/CMakeLists.txt"
+      path "CMakeLists.txt"
+    }
+  }
+
+  packagingOptions {
+    excludes = [
+            "META-INF",
+            "META-INF/**",
+            "**/libc++_shared.so",
+            "**/libfbjni.so",
+            "**/libjsi.so",
+            "**/libfolly_json.so",
+            "**/libfolly_runtime.so",
+            "**/libglog.so",
+            "**/libhermes.so",
+            "**/libhermes-executor-debug.so",
+            "**/libhermes_executor.so",
+            "**/libreactnative.so",
+            "**/libreactnativejni.so",
+            "**/libturbomodulejsijni.so",
+            "**/libreact_nativemodule_core.so",
+            "**/libjscexecutor.so"
+    ]
+  }
+
+  buildFeatures {
+    buildConfig true
+    prefab true
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+
+  lintOptions {
+    disable "GradleCompatible"
+  }
+
+  sourceSets {
+    main {
+      if (isNewArchitectureEnabled()) {
+        java.srcDirs += [
+          // React Codegen files / React Codegen 파일
+          "${project.buildDir}/generated/source/codegen/java"
+        ]
+      }
     }
   }
 }
 
 repositories {
-  google()
   mavenCentral()
-  maven {
-    // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-    // React Native(JS, Obj-C 소스, Android 바이너리)는 모두 npm에서 설치됩니다
-    url("$rootDir/../node_modules/react-native/android")
-  }
-  maven {
-    // Android JSC is installed from npm
-    // Android JSC는 npm에서 설치됩니다
-    url("$rootDir/../node_modules/jsc-android/dist")
-  }
+  google()
 }
 
 dependencies {
