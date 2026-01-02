@@ -10,6 +10,7 @@ buildscript {
 
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'com.facebook.react'
 
 android {
   compileSdkVersion 36
@@ -20,6 +21,16 @@ android {
   defaultConfig {
     minSdkVersion 24
     targetSdkVersion 36
+
+    externalNativeBuild {
+      cmake {
+        arguments "-DANDROID_STL=c++_shared"
+      }
+    }
+
+    ndk {
+      abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+    }
   }
 
   compileOptions {
@@ -29,6 +40,12 @@ android {
 
   kotlinOptions {
     jvmTarget = "17"
+  }
+
+  externalNativeBuild {
+    cmake {
+      path "src/main/cpp/CMakeLists.txt"
+    }
   }
 }
 
