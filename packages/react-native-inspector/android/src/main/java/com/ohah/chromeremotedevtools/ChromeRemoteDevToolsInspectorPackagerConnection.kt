@@ -137,9 +137,18 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
    */
   fun sendCDPMessage(message: String) {
     if (isConnected && webSocket != null) {
-      webSocket?.send(message)
+      try {
+        val sent = webSocket?.send(message) ?: false
+        if (sent) {
+          Log.d(TAG, "CDP message sent successfully / CDP 메시지 전송 성공: ${message.take(100)}...")
+        } else {
+          Log.w(TAG, "Failed to send CDP message (send returned false) / CDP 메시지 전송 실패 (send가 false 반환): ${message.take(100)}...")
+        }
+      } catch (e: Exception) {
+        Log.e(TAG, "Exception while sending CDP message / CDP 메시지 전송 중 예외 발생", e)
+      }
     } else {
-      Log.w(TAG, "Cannot send message, WebSocket not connected / 메시지를 전송할 수 없습니다. WebSocket이 연결되지 않았습니다")
+      Log.w(TAG, "Cannot send message, WebSocket not connected / 메시지를 전송할 수 없습니다. WebSocket이 연결되지 않았습니다 (isConnected=$isConnected, webSocket=${webSocket != null})")
     }
   }
 
