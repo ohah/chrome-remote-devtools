@@ -479,9 +479,14 @@ export class SocketServer {
   private createDevtoolsSocketConnect(ws: WebSocket, connectInfo: Omit<DevTools, 'ws'>) {
     const { id, clientId } = connectInfo;
     log('devtools', id, `connected${clientId ? ` to client ${clientId}` : ''}`);
+    log('devtools', id, `WebSocket URL: ${ws.url || 'N/A'}, protocol: ${ws.protocol || 'N/A'}`);
 
     const devtool: DevTools = { ws, ...connectInfo };
     this.devtools.set(id, devtool);
+
+    // Add message handler to log messages received FROM DevTools / DevTools로부터 받은 메시지를 로깅하기 위한 메시지 핸들러 추가
+    // This is already handled in ws.on('message') below, but we add a separate listener for incoming messages
+    // 이것은 아래의 ws.on('message')에서 이미 처리되지만, 들어오는 메시지를 위해 별도의 리스너 추가
 
     // Request stored events from client when DevTools connects / DevTools 연결 시 클라이언트에 저장된 이벤트 요청
     if (clientId) {
@@ -495,6 +500,7 @@ export class SocketServer {
         if (inspector) {
           // Associate DevTools with React Native Inspector / DevTools를 React Native Inspector와 연결
           this.reactNativeInspectorManager.associateWithClient(clientId, clientId);
+          devtool.clientId = clientId; // Update devtool's clientId / devtool의 clientId 업데이트
           log('devtools', id, `associated with React Native Inspector ${clientId}`);
         }
       }
@@ -513,9 +519,21 @@ export class SocketServer {
     // Handle client switching by checking current clientId / 현재 clientId를 확인하여 클라이언트 전환 처리
     ws.on('message', (message) => {
       const currentDevtool = this.devtools.get(id);
-      if (!currentDevtool || !currentDevtool.clientId) {
+      log(
+        'devtools',
+        id,
+        `onMessage called, currentDevtool: ${currentDevtool ? 'exists' : 'null'}`
+      );
+      if (!currentDevtool) {
+        log('devtools', id, 'no currentDevtool found, returning');
         return;
       }
+      if (!currentDevtool.clientId) {
+        log('devtools', id, 'no clientId in currentDevtool, returning');
+        return;
+      }
+
+      log('devtools', id, `clientId: ${currentDevtool.clientId}`);
 
       // Convert message to string for logging / 로깅을 위해 메시지를 문자열로 변환
       const data = this.convertMessageToString(message);
@@ -529,6 +547,11 @@ export class SocketServer {
         // If DevTools sends Runtime.enable, log it / DevTools가 Runtime.enable을 보내면 로깅
         if (method === 'Runtime.enable') {
           log('devtools', id, 'Runtime.enable received - console events should now work');
+          log(
+            'devtools',
+            id,
+            `Attempting to forward Runtime.enable to clientId: ${currentDevtool.clientId}`
+          );
         }
 
         // Log if we receive Runtime.consoleAPICalled from client / 클라이언트로부터 Runtime.consoleAPICalled를 받으면 로깅
@@ -542,14 +565,47 @@ export class SocketServer {
 
       // Try regular client first / 일반 클라이언트 먼저 시도
       let currentClient = this.clients.get(currentDevtool.clientId);
+      log(
+        'devtools',
+        id,
+        `regular client lookup for ${currentDevtool.clientId}: ${currentClient ? 'found' : 'not found'}`
+      );
       if (!currentClient) {
         // Try React Native Inspector connection / React Native Inspector 연결 시도
+        log(
+          'devtools',
+          id,
+          `trying to find RN inspector with clientId: ${currentDevtool.clientId}`
+        );
         const inspector = this.reactNativeInspectorManager.getConnection(currentDevtool.clientId);
+        log('devtools', id, `RN inspector lookup result: ${inspector ? 'found' : 'not found'}`);
+        if (inspector) {
+          log(
+            'devtools',
+            id,
+            `RN inspector WebSocket state: ${inspector.ws.readyState} (OPEN=${WebSocket.OPEN})`
+          );
+        }
         if (inspector && inspector.ws.readyState === WebSocket.OPEN) {
           try {
-            log('devtools', id, `sending message to RN inspector ${currentDevtool.clientId}`);
-            inspector.ws.send(message);
-            log('devtools', id, `message sent to RN inspector ${currentDevtool.clientId}`);
+            log('devtools', id, `✅ sending message to RN inspector ${currentDevtool.clientId}`);
+            log('devtools', id, `Message content: ${data.substring(0, 200)}...`);
+            log(
+              'devtools',
+              id,
+              `Message type: ${typeof message}, isBuffer: ${Buffer.isBuffer(message)}, isString: ${typeof message === 'string'}`
+            );
+
+            // Ensure message is sent as string / 메시지를 문자열로 전송
+            const messageToSend = typeof message === 'string' ? message : data;
+            log('devtools', id, `Sending as string, length: ${messageToSend.length}`);
+
+            inspector.ws.send(messageToSend);
+            log(
+              'devtools',
+              id,
+              `✅ message sent to RN inspector ${currentDevtool.clientId} (after send call)`
+            );
             return;
           } catch (error) {
             logError(
@@ -561,13 +617,20 @@ export class SocketServer {
           }
           return;
         }
-        log('devtools', id, `no RN inspector found for clientId ${currentDevtool.clientId}`);
+        log('devtools', id, `❌ no RN inspector found for clientId ${currentDevtool.clientId}`);
+        log(
+          'devtools',
+          id,
+          `Available RN inspectors: ${JSON.stringify(this.reactNativeInspectorManager.getAllConnections().map((c) => ({ id: c.id, clientId: c.clientId })))}`
+        );
         return;
       }
 
       if (currentClient.ws.readyState === WebSocket.OPEN) {
         try {
+          log('devtools', id, `sending message to regular client ${currentDevtool.clientId}`);
           currentClient.ws.send(message);
+          log('devtools', id, `message sent to regular client ${currentDevtool.clientId}`);
         } catch (error) {
           logError(
             'devtools',
@@ -576,6 +639,12 @@ export class SocketServer {
             error
           );
         }
+      } else {
+        log(
+          'devtools',
+          id,
+          `regular client ${currentDevtool.clientId} WebSocket not OPEN (state: ${currentClient.ws.readyState})`
+        );
       }
     });
   }

@@ -192,6 +192,11 @@ export function handleReactNativeInspectorWebSocket(
                   inspectorId,
                   `📤 Actual JSON being sent to devtools: ${messageToSend}`
                 );
+                log(
+                  'rn-inspector',
+                  inspectorId,
+                  `🔍 DevTools WebSocket state: ${devtoolWs.ws.readyState} (OPEN=${1}), url: ${devtoolWs.ws.url || 'N/A'}`
+                );
               } else {
                 log('rn-inspector', inspectorId, `forwarded message to devtools ${devtool.id}`);
               }
@@ -199,8 +204,31 @@ export function handleReactNativeInspectorWebSocket(
               log('rn-inspector', inspectorId, `forwarded message to devtools ${devtool.id}`);
             }
 
-            devtoolWs.ws.send(messageToSend);
-            forwarded = true;
+            // Check WebSocket state before sending / 전송 전 WebSocket 상태 확인
+            if (devtoolWs.ws.readyState !== 1) {
+              log(
+                'rn-inspector',
+                inspectorId,
+                `⚠️ DevTools WebSocket not OPEN (state: ${devtoolWs.ws.readyState}), cannot send message`
+              );
+            } else {
+              try {
+                devtoolWs.ws.send(messageToSend);
+                log(
+                  'rn-inspector',
+                  inspectorId,
+                  `✅ Message sent to DevTools ${devtool.id} (WebSocket.send() completed)`
+                );
+                forwarded = true;
+              } catch (error) {
+                logError(
+                  'rn-inspector',
+                  inspectorId,
+                  `❌ Failed to send message to DevTools ${devtool.id}`,
+                  error
+                );
+              }
+            }
           } catch (error) {
             logError(
               'rn-inspector',
