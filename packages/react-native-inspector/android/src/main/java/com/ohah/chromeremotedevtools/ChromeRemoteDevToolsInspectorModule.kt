@@ -52,20 +52,19 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
       android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "serverHost: $serverHost, serverPort: $serverPort")
 
       // Connect to server / 서버에 연결
-      connection = ChromeRemoteDevToolsInspector.connect(
+      // Use Kotlin implementation directly / Kotlin 구현을 직접 사용
+      val connectionObj = ChromeRemoteDevToolsInspector.connect(
         context = context,
         serverHost = serverHost,
         serverPort = serverPort
       )
+      connection = connectionObj
 
       if (connection != null) {
         android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Connection object created / 연결 객체 생성됨")
 
         // Set connection for log interception / 로그 가로채기를 위한 연결 설정
         ChromeRemoteDevToolsLogHook.setConnection(connection)
-
-        // Hook React Native's logging system / React Native의 로깅 시스템 훅
-        ChromeRemoteDevToolsLogHook.hookReactLog()
 
         // Note: WebSocket connection is asynchronous / 참고: WebSocket 연결은 비동기입니다
         // The connection may not be established immediately / 연결이 즉시 설정되지 않을 수 있습니다
@@ -86,6 +85,10 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
             android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Server should be running on $serverAddress")
           } else {
             android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "✅ WebSocket connected successfully / WebSocket 연결 성공")
+
+            // Hook React Native's logging system after connection is established / 연결이 설정된 후 React Native의 로깅 시스템 훅
+            // This ensures Logcat Reader starts only when connection is ready / 이를 통해 Logcat Reader가 연결이 준비된 후에만 시작되도록 보장
+            ChromeRemoteDevToolsLogHook.hookReactLog()
           }
 
           val result: WritableMap = Arguments.createMap()
