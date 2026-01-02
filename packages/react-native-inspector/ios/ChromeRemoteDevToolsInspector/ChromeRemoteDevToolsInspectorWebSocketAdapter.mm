@@ -89,6 +89,53 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
 - (void)webSocket:(__unused SRWebSocket *)webSocket didReceiveMessageWithString:(NSString *)message
 {
   // NOTE: We are on the main queue here, per SRWebSocket's defaults.
+
+  // Handle CDP requests (messages with id field) / CDP 요청 처리 (id 필드가 있는 메시지)
+  // Check if this is Page.getResourceTree request / Page.getResourceTree 요청인지 확인
+  NSError *error = nil;
+  NSData *jsonData = [message dataUsingEncoding:NSUTF8StringEncoding];
+  NSDictionary *messageDict = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:&error];
+
+  if (!error && messageDict[@"id"] && messageDict[@"method"]) {
+    NSString *method = messageDict[@"method"];
+    if ([method isEqualToString:@"Page.getResourceTree"]) {
+      NSNumber *requestId = messageDict[@"id"];
+      RCTLogInfo(@"[ChromeRemoteDevTools] Page.getResourceTree detected! / Page.getResourceTree 감지됨!");
+
+      // Create minimal frame tree for React Native / React Native를 위한 최소한의 프레임 트리 생성
+      NSDictionary *frame = @{
+        @"id": @"1",
+        @"mimeType": @"application/javascript",
+        @"securityOrigin": @"react-native://",
+        @"url": @"react-native://"
+      };
+
+      NSDictionary *frameTree = @{
+        @"frame": frame,
+        @"resources": @[] // Empty resources array / 빈 리소스 배열
+      };
+
+      NSDictionary *response = @{
+        @"id": requestId,
+        @"result": @{
+          @"frameTree": frameTree
+        }
+      };
+
+      NSError *responseError = nil;
+      NSData *responseJsonData = [NSJSONSerialization dataWithJSONObject:response options:0 error:&responseError];
+      if (!responseError && responseJsonData) {
+        NSString *responseStr = [[NSString alloc] initWithData:responseJsonData encoding:NSUTF8StringEncoding];
+        if (responseStr) {
+          RCTLogInfo(@"[ChromeRemoteDevTools] Sending Page.getResourceTree response / Page.getResourceTree 응답 전송: %@", responseStr);
+          [self send:[responseStr UTF8String]];
+          return; // Don't forward the original message / 원본 메시지를 전달하지 않음
+        }
+      }
+    }
+  }
+
+  // Forward other messages to delegate / 다른 메시지는 delegate로 전달
   if (auto delegate = _delegate.lock()) {
     delegate->didReceiveMessage([message UTF8String]);
   }

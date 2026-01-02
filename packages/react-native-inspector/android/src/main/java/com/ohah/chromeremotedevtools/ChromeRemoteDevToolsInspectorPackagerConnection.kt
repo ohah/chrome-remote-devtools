@@ -64,19 +64,66 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
         isConnected = true
         Log.d(TAG, "WebSocket connected successfully / WebSocket 연결 성공")
         Log.d(TAG, "Response code: ${response.code}, message: ${response.message}")
-
-        // Send Runtime.executionContextCreated after connection / 연결 후 Runtime.executionContextCreated 전송
-        // Use a small delay to ensure WebSocket is fully ready / WebSocket이 완전히 준비되었는지 확인하기 위해 짧은 지연 사용
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-          if (isConnected) {
-            sendExecutionContextCreated()
-          }
-        }, 100)
+        Log.d(TAG, "WebSocket instance / WebSocket 인스턴스: $webSocket")
+        Log.d(TAG, "WebSocket stored / WebSocket 저장됨: ${this@ChromeRemoteDevToolsInspectorPackagerConnection.webSocket != null}")
+        Log.d(TAG, "Is connected flag / 연결 플래그: $isConnected")
+        Log.d(TAG, "Response headers / 응답 헤더: ${response.headers}")
       }
 
       override fun onMessage(webSocket: WebSocket, text: String) {
         // Handle incoming CDP messages / 들어오는 CDP 메시지 처리
         Log.d(TAG, "Received message / 메시지 수신: $text")
+        Log.d(TAG, "Message length / 메시지 길이: ${text.length}")
+        Log.d(TAG, "Is connected / 연결 상태: $isConnected")
+
+        try {
+          val message = org.json.JSONObject(text)
+          Log.d(TAG, "Parsed JSON successfully / JSON 파싱 성공")
+          Log.d(TAG, "Has method field / method 필드 존재: ${message.has("method")}")
+
+          // Handle CDP requests (messages with id field) / CDP 요청 처리 (id 필드가 있는 메시지)
+          if (message.has("id")) {
+            val requestId = message.getInt("id")
+            Log.d(TAG, "CDP request received / CDP 요청 수신: id=$requestId")
+
+            if (message.has("method")) {
+              val method = message.getString("method")
+              Log.d(TAG, "Method: $method")
+
+              // Handle Page.getResourceTree request / Page.getResourceTree 요청 처리
+              if (method == "Page.getResourceTree") {
+                Log.d(TAG, "Page.getResourceTree detected! / Page.getResourceTree 감지됨!")
+                sendPageGetResourceTreeResponse(requestId)
+                return
+              }
+
+              // Check if this is Runtime.enable command / Runtime.enable 명령인지 확인
+              if (method == "Runtime.enable") {
+                Log.d(TAG, "Runtime.enable detected! / Runtime.enable 감지됨!")
+                // Runtime.enable이 전송되면 executionContextCreated 전송 / Runtime.enable이 전송되면 executionContextCreated 전송
+                // Use a small delay to ensure Runtime.enable is processed first / Runtime.enable이 먼저 처리되도록 짧은 지연 사용
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                  if (isConnected) {
+                    Log.d(TAG, "Runtime.enable detected, sending Runtime.executionContextCreated / Runtime.enable 감지됨, Runtime.executionContextCreated 전송")
+                    sendExecutionContextCreated()
+                  } else {
+                    Log.w(TAG, "Not connected when trying to send executionContextCreated / executionContextCreated 전송 시도 시 연결되지 않음")
+                  }
+                }, 50)
+              }
+            }
+          } else if (message.has("method")) {
+            // Handle CDP events (messages without id field) / CDP 이벤트 처리 (id 필드가 없는 메시지)
+            val method = message.getString("method")
+            Log.d(TAG, "CDP event received / CDP 이벤트 수신: $method")
+          } else {
+            Log.d(TAG, "Message has no method field / 메시지에 method 필드 없음")
+          }
+        } catch (e: Exception) {
+          // Log parse errors for debugging / 디버깅을 위해 파싱 에러 로깅
+          Log.e(TAG, "Failed to parse message / 메시지 파싱 실패: ${e.message}", e)
+          Log.e(TAG, "Message content / 메시지 내용: $text")
+        }
       }
 
       override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -89,6 +136,7 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
         Log.e(TAG, "URL: $url")
         Log.e(TAG, "Error type: ${t.javaClass.simpleName}")
         Log.e(TAG, "Error message: ${t.message}")
+        Log.e(TAG, "WebSocket instance / WebSocket 인스턴스: $webSocket")
         if (response != null) {
           Log.e(TAG, "HTTP Response code: ${response.code}")
           Log.e(TAG, "HTTP Response message: ${response.message}")
@@ -108,11 +156,13 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
       override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         isConnected = false
         Log.d(TAG, "WebSocket closing / WebSocket 종료 중: code=$code, reason=$reason")
+        Log.d(TAG, "WebSocket instance / WebSocket 인스턴스: $webSocket")
       }
 
       override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         isConnected = false
         Log.d(TAG, "WebSocket closed / WebSocket 종료됨: code=$code, reason=$reason")
+        Log.d(TAG, "WebSocket instance / WebSocket 인스턴스: $webSocket")
       }
     })
 
@@ -136,8 +186,12 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
    * Send CDP message / CDP 메시지 전송
    */
   fun sendCDPMessage(message: String) {
+    Log.d(TAG, "sendCDPMessage called / sendCDPMessage 호출됨")
+    Log.d(TAG, "Is connected / 연결 상태: $isConnected")
+    Log.d(TAG, "WebSocket is null / WebSocket null 여부: ${webSocket == null}")
     if (isConnected && webSocket != null) {
       try {
+        Log.d(TAG, "Attempting to send message / 메시지 전송 시도")
         val sent = webSocket?.send(message) ?: false
         if (sent) {
           Log.d(TAG, "CDP message sent successfully / CDP 메시지 전송 성공: ${message.take(100)}...")
@@ -156,6 +210,7 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
    * Send Runtime.executionContextCreated event / Runtime.executionContextCreated 이벤트 전송
    */
   private fun sendExecutionContextCreated() {
+    Log.d(TAG, "sendExecutionContextCreated called / sendExecutionContextCreated 호출됨")
     val executionContext = org.json.JSONObject().apply {
       put("id", 1)
       put("origin", "react-native://")
@@ -172,7 +227,41 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
       })
     }
 
-    sendCDPMessage(cdpMessage.toString())
+    val messageStr = cdpMessage.toString()
+    Log.d(TAG, "Sending Runtime.executionContextCreated / Runtime.executionContextCreated 전송: $messageStr")
+    sendCDPMessage(messageStr)
+  }
+
+  /**
+   * Send Page.getResourceTree response / Page.getResourceTree 응답 전송
+   * This provides a minimal resource tree for React Native / React Native를 위한 최소한의 리소스 트리 제공
+   */
+  private fun sendPageGetResourceTreeResponse(requestId: Int) {
+    Log.d(TAG, "sendPageGetResourceTreeResponse called / sendPageGetResourceTreeResponse 호출됨: requestId=$requestId")
+
+    // Create minimal frame tree for React Native / React Native를 위한 최소한의 프레임 트리 생성
+    val frame = org.json.JSONObject().apply {
+      put("id", "1")
+      put("mimeType", "application/javascript")
+      put("securityOrigin", "react-native://")
+      put("url", "react-native://")
+    }
+
+    val frameTree = org.json.JSONObject().apply {
+      put("frame", frame)
+      put("resources", org.json.JSONArray()) // Empty resources array / 빈 리소스 배열
+    }
+
+    val response = org.json.JSONObject().apply {
+      put("id", requestId)
+      put("result", org.json.JSONObject().apply {
+        put("frameTree", frameTree)
+      })
+    }
+
+    val messageStr = response.toString()
+    Log.d(TAG, "Sending Page.getResourceTree response / Page.getResourceTree 응답 전송: $messageStr")
+    sendCDPMessage(messageStr)
   }
 
   companion object {
