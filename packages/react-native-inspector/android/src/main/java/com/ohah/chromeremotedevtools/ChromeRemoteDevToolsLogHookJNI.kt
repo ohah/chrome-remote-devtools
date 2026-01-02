@@ -16,13 +16,13 @@ import android.util.Log
  */
 interface ChromeRemoteDevToolsLogHookJNICallback {
   /**
-   * Called when a log message is intercepted / 로그 메시지가 인터셉트될 때 호출됨
+   * Called when a log message is intercepted with parsed arguments / 파싱된 인자와 함께 로그 메시지가 인터셉트될 때 호출됨
    *
    * @param level Android log level (Log.ERROR, Log.WARN, Log.INFO, Log.DEBUG) / Android 로그 레벨
    * @param tag Log tag / 로그 태그
-   * @param message Log message / 로그 메시지
+   * @param args Parsed console arguments as JSON strings / JSON 문자열로 파싱된 콘솔 인자들
    */
-  fun onLog(level: Int, tag: String?, message: String?)
+  fun onLog(level: Int, tag: String?, args: Array<String>?)
 }
 
 /**

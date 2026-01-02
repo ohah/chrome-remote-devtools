@@ -123,33 +123,33 @@ object ChromeRemoteDevToolsLogHook : ChromeRemoteDevToolsLogHookJNICallback {
   }
 
   /**
-   * Callback from native JNI hook / 네이티브 JNI 훅에서의 콜백
-   * This method is called when a log message is intercepted by native code / 이 메서드는 네이티브 코드에서 로그 메시지가 인터셉트될 때 호출됩니다
+   * Callback from native JNI hook with parsed arguments / 파싱된 인자와 함께 네이티브 JNI 훅에서의 콜백
+   * This method is called when a log message is intercepted by native code with parsed arguments / 이 메서드는 파싱된 인자와 함께 네이티브 코드에서 로그 메시지가 인터셉트될 때 호출됩니다
    */
-  override fun onLog(level: Int, tag: String?, message: String?) {
-    interceptLog(level, tag, message)
+  override fun onLog(level: Int, tag: String?, args: Array<String>?) {
+    interceptLog(level, tag, args)
   }
 
   /**
-   * Intercept log message and send as CDP event / 로그 메시지를 가로채서 CDP 이벤트로 전송
-   * This method is called from Android Log interceptor / 이 메서드는 Android Log 인터셉터에서 호출됩니다
+   * Intercept log message with parsed arguments and send as CDP event / 파싱된 인자와 함께 로그 메시지를 가로채서 CDP 이벤트로 전송
+   * This method is called from native code with parsed arguments / 이 메서드는 파싱된 인자와 함께 네이티브 코드에서 호출됩니다
    *
    * @param level Android log level (Log.ERROR, Log.WARN, Log.INFO, Log.DEBUG) / Android 로그 레벨
    * @param tag Log tag / 로그 태그
-   * @param message Log message / 로그 메시지
+   * @param args Parsed console arguments / 파싱된 콘솔 인자들
    */
-  fun interceptLog(level: Int, tag: String?, message: String?) {
+  fun interceptLog(level: Int, tag: String?, args: Array<String>?) {
     // Prevent infinite recursion / 무한 재귀 방지
     if (isProcessingLog) {
       return
     }
 
-    if (message == null || message.isEmpty()) {
+    if (args == null || args.isEmpty()) {
       return
     }
 
     // Skip our own debug messages / 우리 자신의 디버그 메시지 건너뛰기
-    if (message.contains("[ChromeRemoteDevTools]")) {
+    if (args.any { it.contains("[ChromeRemoteDevTools]") }) {
       return
     }
 
@@ -160,8 +160,6 @@ object ChromeRemoteDevToolsLogHook : ChromeRemoteDevToolsLogHookJNICallback {
 
     // Filter out native Android logs / 네이티브 Android 로그 필터링
     // Only intercept React Native JavaScript logs / React Native JavaScript 로그만 인터셉트
-    // React Native uses "ReactNativeJS" for console.log/info/warn/debug and "unknown:ReactNative" for console.error
-    // React Native는 console.log/info/warn/debug에 "ReactNativeJS"를, console.error에 "unknown:ReactNative"를 사용합니다
     val isReactNativeLog = tag != null && (
       tag.startsWith("ReactNative") ||
       tag.startsWith("ReactNativeJS") ||
@@ -180,12 +178,10 @@ object ChromeRemoteDevToolsLogHook : ChromeRemoteDevToolsLogHookJNICallback {
 
     val conn = connection
     if (conn == null) {
-      // Don't use Log.d here to avoid infinite loop / 무한 루프 방지를 위해 여기서 Log.d 사용하지 않음
       return
     }
 
     if (!conn.isConnected()) {
-      // Don't use Log.d here to avoid infinite loop / 무한 루프 방지를 위해 여기서 Log.d 사용하지 않음
       return
     }
 
@@ -201,18 +197,24 @@ object ChromeRemoteDevToolsLogHook : ChromeRemoteDevToolsLogHookJNICallback {
       }
 
       // Generate unique timestamp / 고유한 타임스탬프 생성
-      val timestamp = System.currentTimeMillis() + (++timestampCounter % 1000)
+      // Use nanosecond precision for uniqueness / 고유성을 위해 나노초 정밀도 사용
+      val baseTime = System.currentTimeMillis()
+      val nanoTime = System.nanoTime() % 1000000 // Use last 6 digits of nanosecond / 나노초의 마지막 6자리 사용
+      val timestamp = baseTime + (nanoTime / 1000) // Convert to milliseconds / 밀리초로 변환
 
-      // Create CDP Runtime.consoleAPICalled event / CDP Runtime.consoleAPICalled 이벤트 생성
+      // Create CDP Runtime.consoleAPICalled event with parsed arguments / 파싱된 인자와 함께 CDP Runtime.consoleAPICalled 이벤트 생성
       val cdpMessage = JSONObject().apply {
         put("method", "Runtime.consoleAPICalled")
         put("params", JSONObject().apply {
           put("type", type)
           put("args", org.json.JSONArray().apply {
-            put(JSONObject().apply {
-              put("type", "string")
-              put("value", message)
-            })
+            // Add each parsed argument as separate item / 파싱된 각 인자를 별도 항목으로 추가
+            args.forEach { arg ->
+              put(JSONObject().apply {
+                put("type", "string")
+                put("value", arg)
+              })
+            }
           })
           put("executionContextId", 1)
           put("timestamp", timestamp)
@@ -223,10 +225,8 @@ object ChromeRemoteDevToolsLogHook : ChromeRemoteDevToolsLogHookJNICallback {
       }
 
       val messageStr = cdpMessage.toString()
-      // Don't use Log.d here to avoid infinite loop / 무한 루프 방지를 위해 여기서 Log.d 사용하지 않음
       try {
         conn.sendCDPMessage(messageStr)
-        // Don't use Log.d here to avoid infinite loop / 무한 루프 방지를 위해 여기서 Log.d 사용하지 않음
       } catch (e: Exception) {
         // Only log errors, and use a different tag to avoid recursion / 에러만 로깅하고, 재귀 방지를 위해 다른 태그 사용
         android.util.Log.e("ChromeRemoteDevToolsError", "Failed to send CDP message / CDP 메시지 전송 실패: ${e.message}")

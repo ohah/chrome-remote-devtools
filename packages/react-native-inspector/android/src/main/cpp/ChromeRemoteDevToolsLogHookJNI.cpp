@@ -17,6 +17,9 @@
 #include <unistd.h>
 #include <memory>
 #include <functional>
+#include <vector>
+#include <folly/dynamic.h>
+#include <folly/json.h>
 
 // Include JSI headers for JSI-level logging interception / JSI 레벨 로깅 인터셉션을 위한 JSI 헤더 포함
 // Try to include JSI headers - if not available, we'll use conditional compilation /
@@ -64,6 +67,110 @@ static std::mutex g_runtimeExecutorMutex;
 
 // Forward declaration / 전방 선언
 static bool hookAndroidLog();
+
+/**
+ * Parse console message to extract individual arguments / 콘솔 메시지를 파싱하여 개별 인자 추출
+ * React Native formats multiple arguments as: "'arg1', 'arg2', [object]" / React Native는 여러 인자를 "'arg1', 'arg2', [object]" 형식으로 포맷팅합니다
+ * @param message Original message string / 원본 메시지 문자열
+ * @return Vector of parsed argument strings / 파싱된 인자 문자열 벡터
+ */
+static std::vector<std::string> parseConsoleMessage(const char* message) {
+  std::vector<std::string> args;
+
+  if (!message || strlen(message) == 0) {
+    return args;
+  }
+
+  // Try to parse as JSON array first using folly / 먼저 folly를 사용하여 JSON 배열로 파싱 시도
+  try {
+    folly::dynamic json = folly::parseJson(message);
+    if (json.isArray()) {
+      for (const auto& item : json) {
+        args.push_back(folly::toJson(item));
+      }
+      return args;
+    }
+  } catch (...) {
+    // Not JSON array, try to parse as formatted string / JSON 배열이 아니면 포맷된 문자열로 파싱 시도
+  }
+
+  // Parse formatted string: "'arg1', 'arg2', {object}" / 포맷된 문자열 파싱: "'arg1', 'arg2', {object}"
+  std::string msg(message);
+  size_t i = 0;
+
+  while (i < msg.length()) {
+    // Skip whitespace and commas / 공백과 쉼표 건너뛰기
+    while (i < msg.length() && (std::isspace(msg[i]) || msg[i] == ',')) {
+      i++;
+    }
+    if (i >= msg.length()) break;
+
+    // Check if it's a quoted string / 따옴표로 감싼 문자열인지 확인
+    if (msg[i] == '\'') {
+      // Parse quoted string / 따옴표로 감싼 문자열 파싱
+      i++; // Skip opening quote / 여는 따옴표 건너뛰기
+      size_t start = i;
+      while (i < msg.length() && msg[i] != '\'') {
+        if (msg[i] == '\\' && i + 1 < msg.length()) {
+          i += 2; // Skip escaped character / 이스케이프된 문자 건너뛰기
+        } else {
+          i++;
+        }
+      }
+      std::string value = msg.substr(start, i - start);
+      args.push_back(value);
+      if (i < msg.length() && msg[i] == '\'') {
+        i++; // Skip closing quote / 닫는 따옴표 건너뛰기
+      }
+    }
+    // Check if it's an object/array notation / 객체/배열 표기법인지 확인
+    else if (msg[i] == '{' || msg[i] == '[') {
+      // Parse until matching closing bracket / 일치하는 닫는 괄호까지 파싱
+      char openChar = msg[i];
+      char closeChar = (openChar == '{') ? '}' : ']';
+      int depth = 0;
+      size_t start = i;
+      while (i < msg.length()) {
+        if (msg[i] == openChar) depth++;
+        if (msg[i] == closeChar) {
+          depth--;
+          if (depth == 0) {
+            i++;
+            break;
+          }
+        }
+        i++;
+      }
+      std::string value = msg.substr(start, i - start);
+      args.push_back(value);
+    }
+    // Default: parse until comma / 기본값: 쉼표까지 파싱
+    else {
+      size_t start = i;
+      while (i < msg.length() && msg[i] != ',') {
+        i++;
+      }
+      std::string value = msg.substr(start, i - start);
+      // Trim whitespace / 공백 제거
+      while (!value.empty() && std::isspace(value.back())) {
+        value.pop_back();
+      }
+      while (!value.empty() && std::isspace(value.front())) {
+        value.erase(0, 1);
+      }
+      if (!value.empty()) {
+        args.push_back(value);
+      }
+    }
+  }
+
+  // If parsing failed, return original message as single argument / 파싱이 실패하면 원본 메시지를 단일 인자로 반환
+  if (args.empty()) {
+    args.push_back(std::string(message));
+  }
+
+  return args;
+}
 
 // Custom log function / 커스텀 로그 함수
 // This function replaces __android_log_print via PLT hooking / 이 함수는 PLT 훅을 통해 __android_log_print를 대체합니다
@@ -149,17 +256,30 @@ static int custom__android_log_print(int priority, const char* tag, const char* 
           break;
       }
 
-      // Call Java callback / Java 콜백 호출
+      // Parse message to extract individual arguments / 메시지를 파싱하여 개별 인자 추출
+      std::vector<std::string> parsedArgs = parseConsoleMessage(buffer);
+
       jstring jtag = env->NewStringUTF(tag);
-      jstring jmessage = env->NewStringUTF(buffer);
-      env->CallVoidMethod(g_logCallback, g_onLogMethodID, level, jtag, jmessage);
+
+      // Create Java String array / Java String 배열 생성
+      jclass stringClass = env->FindClass("java/lang/String");
+      jobjectArray jargs = env->NewObjectArray(parsedArgs.size(), stringClass, nullptr);
+
+      for (size_t i = 0; i < parsedArgs.size(); i++) {
+        jstring jarg = env->NewStringUTF(parsedArgs[i].c_str());
+        env->SetObjectArrayElement(jargs, i, jarg);
+        env->DeleteLocalRef(jarg);
+      }
+
+      env->CallVoidMethod(g_logCallback, g_onLogMethodID, level, jtag, jargs);
 
       if (env->ExceptionCheck()) {
         env->ExceptionClear();
       }
 
+      env->DeleteLocalRef(jargs);
+      env->DeleteLocalRef(stringClass);
       env->DeleteLocalRef(jtag);
-      env->DeleteLocalRef(jmessage);
 
       if (getEnvStat == JNI_EDETACHED) {
         g_jvm->DetachCurrentThread();
@@ -298,17 +418,30 @@ static int custom__android_log_write(int bufID, int priority, const char* tag, c
           break;
       }
 
-      // Call Java callback / Java 콜백 호출
+      // Parse message to extract individual arguments / 메시지를 파싱하여 개별 인자 추출
+      std::vector<std::string> parsedArgs = parseConsoleMessage(text);
+
       jstring jtag = env->NewStringUTF(tag);
-      jstring jmessage = env->NewStringUTF(text);
-      env->CallVoidMethod(g_logCallback, g_onLogMethodID, level, jtag, jmessage);
+
+      // Create Java String array / Java String 배열 생성
+      jclass stringClass = env->FindClass("java/lang/String");
+      jobjectArray jargs = env->NewObjectArray(parsedArgs.size(), stringClass, nullptr);
+
+      for (size_t i = 0; i < parsedArgs.size(); i++) {
+        jstring jarg = env->NewStringUTF(parsedArgs[i].c_str());
+        env->SetObjectArrayElement(jargs, i, jarg);
+        env->DeleteLocalRef(jarg);
+      }
+
+      env->CallVoidMethod(g_logCallback, g_onLogMethodID, level, jtag, jargs);
 
       if (env->ExceptionCheck()) {
         env->ExceptionClear();
       }
 
+      env->DeleteLocalRef(jargs);
+      env->DeleteLocalRef(stringClass);
       env->DeleteLocalRef(jtag);
-      env->DeleteLocalRef(jmessage);
 
       if (getEnvStat == JNI_EDETACHED) {
         g_jvm->DetachCurrentThread();
@@ -404,16 +537,30 @@ static int custom__android_log_buf_write(int bufID, int priority, const char* ta
           break;
       }
 
+      // Parse message to extract individual arguments / 메시지를 파싱하여 개별 인자 추출
+      std::vector<std::string> parsedArgs = parseConsoleMessage(text);
+
       jstring jtag = env->NewStringUTF(tag);
-      jstring jmessage = env->NewStringUTF(text);
-      env->CallVoidMethod(g_logCallback, g_onLogMethodID, level, jtag, jmessage);
+
+      // Create Java String array / Java String 배열 생성
+      jclass stringClass = env->FindClass("java/lang/String");
+      jobjectArray jargs = env->NewObjectArray(parsedArgs.size(), stringClass, nullptr);
+
+      for (size_t i = 0; i < parsedArgs.size(); i++) {
+        jstring jarg = env->NewStringUTF(parsedArgs[i].c_str());
+        env->SetObjectArrayElement(jargs, i, jarg);
+        env->DeleteLocalRef(jarg);
+      }
+
+      env->CallVoidMethod(g_logCallback, g_onLogMethodID, level, jtag, jargs);
 
       if (env->ExceptionCheck()) {
         env->ExceptionClear();
       }
 
+      env->DeleteLocalRef(jargs);
+      env->DeleteLocalRef(stringClass);
       env->DeleteLocalRef(jtag);
-      env->DeleteLocalRef(jmessage);
 
       if (getEnvStat == JNI_EDETACHED) {
         g_jvm->DetachCurrentThread();
@@ -494,9 +641,9 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHookReac
         return JNI_FALSE;
       }
 
-      // Get method ID for onLog callback / onLog 콜백용 메서드 ID 가져오기
+      // Get method ID for callback method / 콜백 메서드용 메서드 ID 가져오기
       jclass callbackClass = env->GetObjectClass(callback);
-      g_onLogMethodID = env->GetMethodID(callbackClass, "onLog", "(ILjava/lang/String;Ljava/lang/String;)V");
+      g_onLogMethodID = env->GetMethodID(callbackClass, "onLog", "(ILjava/lang/String;[Ljava/lang/String;)V");
       env->DeleteLocalRef(callbackClass);
 
       if (!g_onLogMethodID) {
@@ -613,17 +760,31 @@ static void sendLogToJavaCallback(const std::string& message, unsigned int logLe
         break;
     }
 
+    // Parse message to extract individual arguments / 메시지를 파싱하여 개별 인자 추출
+    std::vector<std::string> parsedArgs = parseConsoleMessage(message.c_str());
+
     // Call Java callback / Java 콜백 호출
     jstring jtag = env->NewStringUTF("ReactNativeJS");
-    jstring jmessage = env->NewStringUTF(message.c_str());
-    env->CallVoidMethod(g_logCallback, g_onLogMethodID, androidLevel, jtag, jmessage);
+
+    // Create Java String array / Java String 배열 생성
+    jclass stringClass = env->FindClass("java/lang/String");
+    jobjectArray jargs = env->NewObjectArray(parsedArgs.size(), stringClass, nullptr);
+
+    for (size_t i = 0; i < parsedArgs.size(); i++) {
+      jstring jarg = env->NewStringUTF(parsedArgs[i].c_str());
+      env->SetObjectArrayElement(jargs, i, jarg);
+      env->DeleteLocalRef(jarg);
+    }
+
+    env->CallVoidMethod(g_logCallback, g_onLogMethodID, androidLevel, jtag, jargs);
 
     if (env->ExceptionCheck()) {
       env->ExceptionClear();
     }
 
+    env->DeleteLocalRef(jargs);
+    env->DeleteLocalRef(stringClass);
     env->DeleteLocalRef(jtag);
-    env->DeleteLocalRef(jmessage);
 
     if (getEnvStat == JNI_EDETACHED) {
       g_jvm->DetachCurrentThread();
@@ -719,7 +880,7 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHookJSIL
 
       // Get method ID for onLog callback / onLog 콜백용 메서드 ID 가져오기
       jclass callbackClass = env->GetObjectClass(callback);
-      g_onLogMethodID = env->GetMethodID(callbackClass, "onLog", "(ILjava/lang/String;Ljava/lang/String;)V");
+      g_onLogMethodID = env->GetMethodID(callbackClass, "onLog", "(ILjava/lang/String;[Ljava/lang/String;)V");
       env->DeleteLocalRef(callbackClass);
 
       if (!g_onLogMethodID) {
