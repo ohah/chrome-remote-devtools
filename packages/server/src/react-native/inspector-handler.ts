@@ -135,8 +135,9 @@ export function handleReactNativeInspectorWebSocket(
     const data = typeof message === 'string' ? message : message.toString('utf-8');
 
     // Log received message / 수신된 메시지 로깅
+    let parsed: any;
     try {
-      const parsed = JSON.parse(data);
+      parsed = JSON.parse(data);
       if (parsed.method) {
         log(
           'rn-inspector',
@@ -196,6 +197,13 @@ export function handleReactNativeInspectorWebSocket(
                   'rn-inspector',
                   inspectorId,
                   `🔍 DevTools WebSocket state: ${devtoolWs.ws.readyState} (OPEN=${1}), url: ${devtoolWs.ws.url || 'N/A'}`
+                );
+              } else if (parsedMsg.id) {
+                // This is a response message (has id field) / 이것은 응답 메시지 (id 필드가 있음)
+                log(
+                  'rn-inspector',
+                  inspectorId,
+                  `📥 Received response from native (id: ${parsedMsg.id}), forwarding to devtools ${devtool.id}`
                 );
               } else {
                 log('rn-inspector', inspectorId, `forwarded message to devtools ${devtool.id}`);

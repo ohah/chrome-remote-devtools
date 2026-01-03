@@ -12,20 +12,6 @@ package com.ohah.chromeremotedevtools
 import android.util.Log
 
 /**
- * Callback interface for log messages / 로그 메시지용 콜백 인터페이스
- */
-interface ChromeRemoteDevToolsLogHookJNICallback {
-  /**
-   * Called when a log message is intercepted with parsed arguments / 파싱된 인자와 함께 로그 메시지가 인터셉트될 때 호출됨
-   *
-   * @param level Android log level (Log.ERROR, Log.WARN, Log.INFO, Log.DEBUG) / Android 로그 레벨
-   * @param tag Log tag / 로그 태그
-   * @param args Parsed console arguments as JSON strings / JSON 문자열로 파싱된 콘솔 인자들
-   */
-  fun onLog(level: Int, tag: String?, args: Array<String>?)
-}
-
-/**
  * JNI wrapper for native log hooking / 네이티브 로그 훅을 위한 JNI 래퍼
  */
 class ChromeRemoteDevToolsLogHookJNI {
@@ -44,30 +30,64 @@ class ChromeRemoteDevToolsLogHookJNI {
     }
 
     /**
-     * Hook React Native's logging system using native code / 네이티브 코드를 사용하여 React Native의 로깅 시스템 훅
-     *
-     * @param callback Callback interface for receiving log messages / 로그 메시지를 받기 위한 콜백 인터페이스
-     * @return true if hooking was successful / 훅이 성공하면 true
-     */
-    @JvmStatic
-    external fun nativeHookReactLog(callback: ChromeRemoteDevToolsLogHookJNICallback): Boolean
-
-    /**
-     * Unhook React Native's logging system / React Native의 로깅 시스템 언훅
-     */
-    @JvmStatic
-    external fun nativeUnhookReactLog()
-
-    /**
      * Install JSI-level logging hook using RuntimeExecutor / RuntimeExecutor를 사용하여 JSI 레벨 로깅 훅 설치
      * This intercepts console.log calls directly in JavaScript / 이것은 JavaScript에서 console.log 호출을 직접 인터셉트합니다
      *
      * @param runtimeExecutor RuntimeExecutor from React Native / React Native의 RuntimeExecutor
-     * @param callback Callback interface for receiving log messages / 로그 메시지를 받기 위한 콜백 인터페이스
      * @return true if hooking was successful / 훅이 성공하면 true
      */
     @JvmStatic
-    external fun nativeHookJSILog(runtimeExecutor: Any, callback: ChromeRemoteDevToolsLogHookJNICallback): Boolean
+    external fun nativeHookJSILog(runtimeExecutor: Any): Boolean
+
+    /**
+     * Get object properties for Runtime.getProperties / Runtime.getProperties를 위한 객체 속성 가져오기
+     * @param objectId Object ID / 객체 ID
+     * @return JSON string of properties response, or null if not found / 속성 응답의 JSON 문자열, 찾지 못하면 null
+     */
+    @JvmStatic
+    external fun nativeGetObjectProperties(objectId: String): String?
+
+    /**
+     * Send CDP message directly from C++ / C++에서 직접 CDP 메시지 전송
+     * This bypasses JavaScript/TurboModule layer / JavaScript/TurboModule 레이어를 우회합니다
+     * Called from native C++ code via JNI / JNI를 통해 네이티브 C++ 코드에서 호출됨
+     * @param serverHost Server host / 서버 호스트
+     * @param serverPort Server port / 서버 포트
+     * @param message CDP message JSON string / CDP 메시지 JSON 문자열
+     */
+    @JvmStatic
+    fun sendCDPMessageFromNative(serverHost: String, serverPort: Int, message: String) {
+      try {
+        val context = g_applicationContext
+        if (context != null) {
+          // Call ChromeRemoteDevToolsInspector directly / ChromeRemoteDevToolsInspector를 직접 호출
+          // This is the same function that TurboModule calls / 이것은 TurboModule이 호출하는 것과 동일한 함수입니다
+          ChromeRemoteDevToolsInspector.sendCDPMessage(
+            context = context,
+            serverHost = serverHost,
+            serverPort = serverPort,
+            message = message
+          )
+        } else {
+          Log.w(TAG, "Application context not available, cannot send CDP message / 애플리케이션 컨텍스트를 사용할 수 없어 CDP 메시지를 전송할 수 없습니다")
+        }
+      } catch (e: Exception) {
+        Log.e(TAG, "Failed to send CDP message from native / 네이티브에서 CDP 메시지 전송 실패: ${e.message}", e)
+      }
+    }
+
+    // Store application context for native access / 네이티브 접근을 위한 애플리케이션 컨텍스트 저장
+    private var g_applicationContext: android.content.Context? = null
+
+    /**
+     * Set application context for native CDP message sending / 네이티브 CDP 메시지 전송을 위한 애플리케이션 컨텍스트 설정
+     * @param context Application context / 애플리케이션 컨텍스트
+     */
+    @JvmStatic
+    fun setApplicationContext(context: android.content.Context) {
+      g_applicationContext = context.applicationContext
+    }
+
   }
 }
 
