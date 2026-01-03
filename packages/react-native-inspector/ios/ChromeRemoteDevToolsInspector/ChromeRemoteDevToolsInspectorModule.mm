@@ -42,16 +42,13 @@ static RCTLogFunction originalLogFunction = nil;
 static id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> g_connection = nil;
 
 // Objective-C++ callback for sending CDP messages / CDP 메시지 전송을 위한 Objective-C++ 콜백
-// Note: WebSocket execution is disabled for now, will be reconnected later / 참고: WebSocket 실행은 현재 비활성화되어 있으며, 나중에 다시 연결됩니다
 #ifdef CONSOLE_HOOK_AVAILABLE
 void sendCDPMessageIOS(const char* serverHost, int serverPort, const char* message) {
   @autoreleasepool {
     NSString* host = [NSString stringWithUTF8String:serverHost];
     NSString* msg = [NSString stringWithUTF8String:message];
 
-    // WebSocket execution disabled - code preserved for later reconnection / WebSocket 실행 비활성화 - 나중에 재연결을 위해 코드 보존
-    // TODO: Re-enable WebSocket connection / TODO: WebSocket 연결 재활성화
-    /*
+    // Try to send via stored connection first / 먼저 저장된 연결을 통해 전송 시도
     if (g_connection && [g_connection respondsToSelector:@selector(sendCDPMessage:)]) {
       [g_connection sendCDPMessage:msg];
     } else {
@@ -60,10 +57,6 @@ void sendCDPMessageIOS(const char* serverHost, int serverPort, const char* messa
                                                            serverPort:serverPort
                                                                message:msg];
     }
-    */
-
-    // Log for debugging (will be removed when WebSocket is reconnected) / 디버깅용 로그 (WebSocket 재연결 시 제거됨)
-    NSLog(@"[ChromeRemoteDevToolsInspectorModule] sendCDPMessageIOS called (WebSocket disabled) / sendCDPMessageIOS 호출됨 (WebSocket 비활성화): %@:%d - %@", host, serverPort, [msg substringToIndex:MIN(100, msg.length)]);
   }
 }
 #endif
@@ -121,9 +114,6 @@ static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
   }
 
   // Check connection status / 연결 상태 확인
-  // WebSocket execution disabled - code preserved for later reconnection / WebSocket 실행 비활성화 - 나중에 재연결을 위해 코드 보존
-  // TODO: Re-enable WebSocket connection check / TODO: WebSocket 연결 확인 재활성화
-  /*
   if (!g_connection) {
     isProcessingLog = NO;
     return;
@@ -133,11 +123,6 @@ static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
     isProcessingLog = NO;
     return;
   }
-  */
-
-  // WebSocket disabled, skip CDP message sending / WebSocket 비활성화, CDP 메시지 전송 건너뛰기
-  isProcessingLog = NO;
-  return;
 
   // Skip CDP message sending - JavaScript layer hook handles this / CDP 메시지 전송 건너뛰기 - JavaScript 레이어 훅이 처리합니다
   // JavaScript layer hook provides better stack traces with source map support / JavaScript 레이어 훅은 소스맵 지원과 함께 더 나은 스택 트레이스를 제공합니다
@@ -205,13 +190,10 @@ static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
     return;
   }
 
-  // WebSocket execution disabled - code preserved for later reconnection / WebSocket 실행 비활성화 - 나중에 재연결을 위해 코드 보존
-  // TODO: Re-enable WebSocket message sending / TODO: WebSocket 메시지 전송 재활성화
-  /*
+  // Send CDP message via WebSocket connection / WebSocket 연결을 통해 CDP 메시지 전송
   if ([g_connection respondsToSelector:@selector(sendCDPMessage:)]) {
     [g_connection sendCDPMessage:jsonString];
   }
-  */
 
   isProcessingLog = NO;
 };
@@ -350,9 +332,6 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] connect: called / connect: 호출됨");
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] Server: %@:%@", serverHost, serverPort);
 
-  // WebSocket execution disabled - code preserved for later reconnection / WebSocket 실행 비활성화 - 나중에 재연결을 위해 코드 보존
-  // TODO: Re-enable WebSocket connection / TODO: WebSocket 연결 재활성화
-  /*
   // Call Objective-C++ implementation / Objective-C++ 구현 호출
   id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> connection =
     [ChromeRemoteDevToolsInspectorObjC connectWithServerHost:serverHost serverPort:[serverPort integerValue]];
@@ -360,10 +339,14 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
   if (connection) {
     // Store connection for log interception / 로그 가로채기를 위한 연결 저장
     g_connection = connection;
-    NSLog(@"[ChromeRemoteDevToolsInspectorModule] Connection stored for CDP message sending / CDP 메시지 전송을 위한 연결 저장됨");
-  */
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Connection stored for CDP message sending / CDP 메시지 전송을 위한 연결 저장됨");
+  } else {
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ❌ Failed to create connection / 연결 생성 실패");
+    rejecter(@"CONNECTION_FAILED", @"Failed to connect to Chrome Remote DevTools server", nil);
+    return;
+  }
 
-  // Set platform callback for C++ code (even without WebSocket, hooks can be installed) / C++ 코드를 위한 플랫폼 콜백 설정 (WebSocket 없이도 훅은 설치 가능)
+  // Set platform callback for C++ code / C++ 코드를 위한 플랫폼 콜백 설정
 #ifdef CONSOLE_HOOK_AVAILABLE
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] Setting platform callback for C++ hooks / C++ 훅을 위한 플랫폼 콜백 설정");
   chrome_remote_devtools::setSendCDPMessageCallback(sendCDPMessageIOS);
@@ -391,27 +374,16 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
   // Enable network interception at native level (NSURLProtocol) / 네이티브 레벨에서 네트워크 인터셉션 활성화 (NSURLProtocol)
   // Note: JSI network hook will also be installed via installJSIBindingsWithRuntime / 참고: JSI 네트워크 훅도 installJSIBindingsWithRuntime을 통해 설치됩니다
   // JSI hook provides better integration with JavaScript fetch/XMLHttpRequest / JSI 훅은 JavaScript fetch/XMLHttpRequest와 더 나은 통합을 제공합니다
-  // WebSocket execution disabled - code preserved for later reconnection / WebSocket 실행 비활성화 - 나중에 재연결을 위해 코드 보존
-  // TODO: Re-enable network interception when WebSocket is reconnected / TODO: WebSocket 재연결 시 네트워크 인터셉션 재활성화
-  /*
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] Enabling native network interception (NSURLProtocol) / 네이티브 네트워크 인터셉션 활성화 (NSURLProtocol)");
   [ChromeRemoteDevToolsNetworkHook enableWithServerHost:serverHost serverPort:[serverPort integerValue]];
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Native network interception enabled / 네이티브 네트워크 인터셉션 활성화됨");
-  */
 
-  // Return success (WebSocket connection will be implemented later) / 성공 반환 (WebSocket 연결은 나중에 구현됨)
+  // Return success / 성공 반환
   resolver(@{
     @"connected": @YES,
     @"host": serverHost,
-    @"port": serverPort,
-    @"websocketDisabled": @YES  // Indicate WebSocket is disabled / WebSocket이 비활성화되었음을 표시
+    @"port": serverPort
   });
-
-  /*
-  } else {
-    rejecter(@"CONNECTION_FAILED", @"Failed to connect to Chrome Remote DevTools server", nil);
-  }
-  */
 }
 
 /**

@@ -215,18 +215,20 @@ bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
         if (prototypeValue.isObject()) {
           facebook::jsi::Object xhrPrototype = prototypeValue.asObject(runtime);
 
-          // Store original methods in backup properties / 백업 속성에 원본 메서드 저장
-          facebook::jsi::Value originalOpen = xhrPrototype.getProperty(runtime, "open");
-          if (originalOpen.isObject() && originalOpen.asObject(runtime).isFunction(runtime)) {
-            xhrPrototype.setProperty(runtime, "__original_open", std::move(originalOpen));
+          // Store original methods in prototype backup properties / prototype의 백업 속성에 원본 메서드 저장
+          facebook::jsi::Value originalOpenValue = xhrPrototype.getProperty(runtime, "open");
+          if (originalOpenValue.isObject() && originalOpenValue.asObject(runtime).isFunction(runtime)) {
+            xhrPrototype.setProperty(runtime, "__original_open", std::move(originalOpenValue));
           }
-          facebook::jsi::Value originalSend = xhrPrototype.getProperty(runtime, "send");
-          if (originalSend.isObject() && originalSend.asObject(runtime).isFunction(runtime)) {
-            xhrPrototype.setProperty(runtime, "__original_send", std::move(originalSend));
+
+          facebook::jsi::Value originalSendValue = xhrPrototype.getProperty(runtime, "send");
+          if (originalSendValue.isObject() && originalSendValue.asObject(runtime).isFunction(runtime)) {
+            xhrPrototype.setProperty(runtime, "__original_send", std::move(originalSendValue));
           }
-          facebook::jsi::Value originalSetRequestHeader = xhrPrototype.getProperty(runtime, "setRequestHeader");
-          if (originalSetRequestHeader.isObject() && originalSetRequestHeader.asObject(runtime).isFunction(runtime)) {
-            xhrPrototype.setProperty(runtime, "__original_setRequestHeader", std::move(originalSetRequestHeader));
+
+          facebook::jsi::Value originalSetRequestHeaderValue = xhrPrototype.getProperty(runtime, "setRequestHeader");
+          if (originalSetRequestHeaderValue.isObject() && originalSetRequestHeaderValue.asObject(runtime).isFunction(runtime)) {
+            xhrPrototype.setProperty(runtime, "__original_setRequestHeader", std::move(originalSetRequestHeaderValue));
           }
 
           // Hook open / open 훅
@@ -251,26 +253,27 @@ bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
                 xhr.setProperty(rt, "__cdpNetworkMetadata", metadata);
               }
 
-              // Call original from prototype backup property / prototype의 백업 속성에서 원본 호출
+              // Get original function from prototype / prototype에서 원본 함수 가져오기
               try {
-                // Get constructor from instance / 인스턴스에서 constructor 가져오기
-                facebook::jsi::Value constructorValue = thisVal.asObject(rt).getProperty(rt, "constructor");
-                if (constructorValue.isObject()) {
-                  facebook::jsi::Object constructor = constructorValue.asObject(rt);
-                  facebook::jsi::Value prototypeValue = constructor.getProperty(rt, "prototype");
+                if (!thisVal.isObject()) {
+                  return facebook::jsi::Value::undefined();
+                }
+                // Get XMLHttpRequest constructor from global / 전역에서 XMLHttpRequest constructor 가져오기
+                facebook::jsi::Value xhrConstructorValue = rt.global().getProperty(rt, "XMLHttpRequest");
+                if (xhrConstructorValue.isObject()) {
+                  facebook::jsi::Object xhrConstructor = xhrConstructorValue.asObject(rt);
+                  facebook::jsi::Value prototypeValue = xhrConstructor.getProperty(rt, "prototype");
                   if (prototypeValue.isObject()) {
                     facebook::jsi::Object prototype = prototypeValue.asObject(rt);
                     facebook::jsi::Value originalOpenValue = prototype.getProperty(rt, "__original_open");
                     if (originalOpenValue.isObject() && originalOpenValue.asObject(rt).isFunction(rt)) {
                       facebook::jsi::Function originalOpen = originalOpenValue.asObject(rt).asFunction(rt);
-                      if (thisVal.isObject()) {
-                        return originalOpen.callWithThis(rt, thisVal.asObject(rt), args, count);
-                      }
+                      return originalOpen.callWithThis(rt, thisVal.asObject(rt), args, count);
                     }
                   }
                 }
-              } catch (...) {
-                // Failed to call original / 원본 호출 실패
+              } catch (const std::exception& e) {
+                LOGE("Failed to call original XMLHttpRequest.open: %s", e.what());
               }
               return facebook::jsi::Value::undefined();
             }
@@ -301,26 +304,27 @@ bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
                 }
               }
 
-              // Call original from prototype backup property / prototype의 백업 속성에서 원본 호출
+              // Get original function from prototype / prototype에서 원본 함수 가져오기
               try {
-                // Get constructor from instance / 인스턴스에서 constructor 가져오기
-                facebook::jsi::Value constructorValue = thisVal.asObject(rt).getProperty(rt, "constructor");
-                if (constructorValue.isObject()) {
-                  facebook::jsi::Object constructor = constructorValue.asObject(rt);
-                  facebook::jsi::Value prototypeValue = constructor.getProperty(rt, "prototype");
+                if (!thisVal.isObject()) {
+                  return facebook::jsi::Value::undefined();
+                }
+                // Get XMLHttpRequest constructor from global / 전역에서 XMLHttpRequest constructor 가져오기
+                facebook::jsi::Value xhrConstructorValue = rt.global().getProperty(rt, "XMLHttpRequest");
+                if (xhrConstructorValue.isObject()) {
+                  facebook::jsi::Object xhrConstructor = xhrConstructorValue.asObject(rt);
+                  facebook::jsi::Value prototypeValue = xhrConstructor.getProperty(rt, "prototype");
                   if (prototypeValue.isObject()) {
                     facebook::jsi::Object prototype = prototypeValue.asObject(rt);
                     facebook::jsi::Value originalSetRequestHeaderValue = prototype.getProperty(rt, "__original_setRequestHeader");
                     if (originalSetRequestHeaderValue.isObject() && originalSetRequestHeaderValue.asObject(rt).isFunction(rt)) {
                       facebook::jsi::Function originalSetRequestHeader = originalSetRequestHeaderValue.asObject(rt).asFunction(rt);
-                      if (thisVal.isObject()) {
-                        return originalSetRequestHeader.callWithThis(rt, thisVal.asObject(rt), args, count);
-                      }
+                      return originalSetRequestHeader.callWithThis(rt, thisVal.asObject(rt), args, count);
                     }
                   }
                 }
-              } catch (...) {
-                // Failed to call original / 원본 호출 실패
+              } catch (const std::exception& e) {
+                LOGE("Failed to call original XMLHttpRequest.setRequestHeader: %s", e.what());
               }
               return facebook::jsi::Value::undefined();
             }
@@ -509,26 +513,27 @@ bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
                   }
                 }
 
-                // Call original from prototype backup property / prototype의 백업 속성에서 원본 호출
+                // Get original function from prototype / prototype에서 원본 함수 가져오기
                 try {
-                  // Get constructor from instance / 인스턴스에서 constructor 가져오기
-                  facebook::jsi::Value constructorValue = thisVal.asObject(rt).getProperty(rt, "constructor");
-                  if (constructorValue.isObject()) {
-                    facebook::jsi::Object constructor = constructorValue.asObject(rt);
-                    facebook::jsi::Value prototypeValue = constructor.getProperty(rt, "prototype");
+                  if (!thisVal.isObject()) {
+                    return facebook::jsi::Value::undefined();
+                  }
+                  // Get XMLHttpRequest constructor from global / 전역에서 XMLHttpRequest constructor 가져오기
+                  facebook::jsi::Value xhrConstructorValue = rt.global().getProperty(rt, "XMLHttpRequest");
+                  if (xhrConstructorValue.isObject()) {
+                    facebook::jsi::Object xhrConstructor = xhrConstructorValue.asObject(rt);
+                    facebook::jsi::Value prototypeValue = xhrConstructor.getProperty(rt, "prototype");
                     if (prototypeValue.isObject()) {
                       facebook::jsi::Object prototype = prototypeValue.asObject(rt);
                       facebook::jsi::Value originalSendValue = prototype.getProperty(rt, "__original_send");
                       if (originalSendValue.isObject() && originalSendValue.asObject(rt).isFunction(rt)) {
                         facebook::jsi::Function originalSend = originalSendValue.asObject(rt).asFunction(rt);
-                        if (thisVal.isObject()) {
-                          return originalSend.callWithThis(rt, thisVal.asObject(rt), args, count);
-                        }
+                        return originalSend.callWithThis(rt, thisVal.asObject(rt), args, count);
                       }
                     }
                   }
-                } catch (...) {
-                  // Failed to call original / 원본 호출 실패
+                } catch (const std::exception& e) {
+                  LOGE("Failed to call original XMLHttpRequest.send: %s", e.what());
                 }
                 return facebook::jsi::Value::undefined();
               }
@@ -663,166 +668,182 @@ bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
               facebook::jsi::Value originalFetchValue = rt.global().getProperty(rt, "__original_fetch");
               if (originalFetchValue.isObject() && originalFetchValue.asObject(rt).isFunction(rt)) {
                 fetchResult = originalFetchValue.asObject(rt).asFunction(rt).call(rt, args, count);
+              } else {
+                // Fallback: try to get original fetch from global / 폴백: 전역에서 원본 fetch 가져오기 시도
+                facebook::jsi::Value globalFetch = rt.global().getProperty(rt, "fetch");
+                if (globalFetch.isObject() && globalFetch.asObject(rt).isFunction(rt)) {
+                  fetchResult = globalFetch.asObject(rt).asFunction(rt).call(rt, args, count);
+                }
               }
-            } catch (...) {
-              // Failed to call original fetch / 원본 fetch 호출 실패
+            } catch (const std::exception& e) {
+              LOGE("Failed to call original fetch: %s", e.what());
+              // Return undefined if all attempts fail / 모든 시도가 실패하면 undefined 반환
+              return facebook::jsi::Value::undefined();
             }
-            if (fetchResult.isObject()) {
-              facebook::jsi::Object promiseObj = fetchResult.asObject(rt);
-              facebook::jsi::Value thenValue = promiseObj.getProperty(rt, "then");
-              if (thenValue.isObject() && thenValue.asObject(rt).isFunction(rt)) {
-                facebook::jsi::Function then = thenValue.asObject(rt).asFunction(rt);
-                facebook::jsi::Value onFulfilled = facebook::jsi::Function::createFromHostFunction(
-                  rt,
-                  facebook::jsi::PropNameID::forAscii(rt, "onFulfilled"),
-                  1,
-                  [requestId, url](facebook::jsi::Runtime& runtime,
-                                   const facebook::jsi::Value&,
-                                   const facebook::jsi::Value* args,
-                                   size_t count) -> facebook::jsi::Value {
-                    if (count > 0 && args[0].isObject()) {
-                      facebook::jsi::Object response = args[0].asObject(runtime);
 
-                      // Get response properties / 응답 속성 가져오기
-                      int status = 0;
-                      std::string statusText;
-                      std::string contentType;
-                      folly::dynamic responseHeaders = folly::dynamic::object;
+            // Ensure fetchResult is a valid Promise / fetchResult가 유효한 Promise인지 확인
+            if (!fetchResult.isObject()) {
+              LOGE("Original fetch did not return a Promise / 원본 fetch가 Promise를 반환하지 않음");
+              return fetchResult;
+            }
 
-                      try {
-                        facebook::jsi::Value statusValue = response.getProperty(runtime, "status");
-                        if (statusValue.isNumber()) {
-                          status = static_cast<int>(statusValue.asNumber());
-                        }
-                        facebook::jsi::Value statusTextValue = response.getProperty(runtime, "statusText");
-                        if (statusTextValue.isString()) {
-                          statusText = statusTextValue.asString(runtime).utf8(runtime);
-                        }
-                        facebook::jsi::Value headersValue = response.getProperty(runtime, "headers");
-                        if (headersValue.isObject()) {
-                          facebook::jsi::Object headersObj = headersValue.asObject(runtime);
-                          facebook::jsi::Value getValue = headersObj.getProperty(runtime, "get");
-                          if (getValue.isObject() && getValue.asObject(runtime).isFunction(runtime)) {
-                            facebook::jsi::Function get = getValue.asObject(runtime).asFunction(runtime);
-                            facebook::jsi::Value contentTypeValue = get.call(runtime, facebook::jsi::String::createFromUtf8(runtime, "content-type"));
-                            if (contentTypeValue.isString()) {
-                              contentType = contentTypeValue.asString(runtime).utf8(runtime);
-                            }
+            facebook::jsi::Object promiseObj = fetchResult.asObject(rt);
+            facebook::jsi::Value thenValue = promiseObj.getProperty(rt, "then");
+            if (thenValue.isObject() && thenValue.asObject(rt).isFunction(rt)) {
+              facebook::jsi::Function then = thenValue.asObject(rt).asFunction(rt);
+              facebook::jsi::Value onFulfilled = facebook::jsi::Function::createFromHostFunction(
+                rt,
+                facebook::jsi::PropNameID::forAscii(rt, "onFulfilled"),
+                1,
+                [requestId, url](facebook::jsi::Runtime& runtime,
+                                 const facebook::jsi::Value&,
+                                 const facebook::jsi::Value* args,
+                                 size_t count) -> facebook::jsi::Value {
+                  if (count > 0 && args[0].isObject()) {
+                    facebook::jsi::Object response = args[0].asObject(runtime);
 
-                            // Get all headers / 모든 헤더 가져오기
-                            facebook::jsi::Value forEachValue = headersObj.getProperty(runtime, "forEach");
-                            if (forEachValue.isObject() && forEachValue.asObject(runtime).isFunction(runtime)) {
-                              facebook::jsi::Function forEach = forEachValue.asObject(runtime).asFunction(runtime);
-                              // Note: forEach callback would need to be implemented / 참고: forEach 콜백 구현 필요
-                            }
+                    // Get response properties / 응답 속성 가져오기
+                    int status = 0;
+                    std::string statusText;
+                    std::string contentType;
+                    folly::dynamic responseHeaders = folly::dynamic::object;
+
+                    try {
+                      facebook::jsi::Value statusValue = response.getProperty(runtime, "status");
+                      if (statusValue.isNumber()) {
+                        status = static_cast<int>(statusValue.asNumber());
+                      }
+                      facebook::jsi::Value statusTextValue = response.getProperty(runtime, "statusText");
+                      if (statusTextValue.isString()) {
+                        statusText = statusTextValue.asString(runtime).utf8(runtime);
+                      }
+                      facebook::jsi::Value headersValue = response.getProperty(runtime, "headers");
+                      if (headersValue.isObject()) {
+                        facebook::jsi::Object headersObj = headersValue.asObject(runtime);
+                        facebook::jsi::Value getValue = headersObj.getProperty(runtime, "get");
+                        if (getValue.isObject() && getValue.asObject(runtime).isFunction(runtime)) {
+                          facebook::jsi::Function get = getValue.asObject(runtime).asFunction(runtime);
+                          facebook::jsi::Value contentTypeValue = get.call(runtime, facebook::jsi::String::createFromUtf8(runtime, "content-type"));
+                          if (contentTypeValue.isString()) {
+                            contentType = contentTypeValue.asString(runtime).utf8(runtime);
+                          }
+
+                          // Get all headers / 모든 헤더 가져오기
+                          facebook::jsi::Value forEachValue = headersObj.getProperty(runtime, "forEach");
+                          if (forEachValue.isObject() && forEachValue.asObject(runtime).isFunction(runtime)) {
+                            facebook::jsi::Function forEach = forEachValue.asObject(runtime).asFunction(runtime);
+                            // Note: forEach callback would need to be implemented / 참고: forEach 콜백 구현 필요
                           }
                         }
+                      }
 
-                        // Clone response and read body / 응답 복제 및 본문 읽기
-                        facebook::jsi::Value cloneValue = response.getProperty(runtime, "clone");
-                        if (cloneValue.isObject() && cloneValue.asObject(runtime).isFunction(runtime)) {
-                          facebook::jsi::Function clone = cloneValue.asObject(runtime).asFunction(runtime);
-                          facebook::jsi::Object clonedResponse = clone.call(runtime).asObject(runtime);
-                          facebook::jsi::Value textValue = clonedResponse.getProperty(runtime, "text");
-                          if (textValue.isObject() && textValue.asObject(runtime).isFunction(runtime)) {
-                            facebook::jsi::Function text = textValue.asObject(runtime).asFunction(runtime);
-                            facebook::jsi::Value textPromise = text.call(runtime);
-                            if (textPromise.isObject()) {
-                              facebook::jsi::Object textPromiseObj = textPromise.asObject(runtime);
-                              facebook::jsi::Value thenValue = textPromiseObj.getProperty(runtime, "then");
-                              if (thenValue.isObject() && thenValue.asObject(runtime).isFunction(runtime)) {
-                                facebook::jsi::Function textThen = thenValue.asObject(runtime).asFunction(runtime);
-                                facebook::jsi::Value onTextFulfilled = facebook::jsi::Function::createFromHostFunction(
-                                  runtime,
-                                  facebook::jsi::PropNameID::forAscii(runtime, "onTextFulfilled"),
-                                  1,
-                                  [requestId, url, status, statusText, contentType, responseHeaders](facebook::jsi::Runtime& rt,
-                                                                                                      const facebook::jsi::Value&,
-                                                                                                      const facebook::jsi::Value* textArgs,
-                                                                                                      size_t) -> facebook::jsi::Value {
-                                    std::string responseText;
-                                    if (textArgs[0].isString()) {
-                                      responseText = textArgs[0].asString(rt).utf8(rt);
-                                    }
-
-                                    // Store response data / 응답 데이터 저장
-                                    g_responseData[requestId] = responseText;
-
-                                    // Send responseReceived event / responseReceived 이벤트 전송
-                                    folly::dynamic responseObj = folly::dynamic::object;
-                                    responseObj["url"] = url;
-                                    responseObj["status"] = status;
-                                    responseObj["statusText"] = statusText;
-                                    responseObj["headers"] = responseHeaders;
-                                    responseObj["mimeType"] = contentType.empty() ? "text/plain" : contentType;
-                                    responseObj["body"] = responseText;
-
-                                    folly::dynamic responseParams = folly::dynamic::object;
-                                    responseParams["requestId"] = requestId;
-                                    responseParams["loaderId"] = requestId;
-                                    responseParams["timestamp"] = getTimestamp();
-                                    responseParams["type"] = "Fetch";
-                                    responseParams["response"] = responseObj;
-
-                                    folly::dynamic responseEvent = folly::dynamic::object;
-                                    responseEvent["method"] = "Network.responseReceived";
-                                    responseEvent["params"] = responseParams;
-                                    sendCDPNetworkEvent(rt, responseEvent);
-
-                                    // Send loadingFinished event / loadingFinished 이벤트 전송
-                                    size_t encodedDataLength = calculateEncodedDataLength("", responseText);
-                                    folly::dynamic loadingParams = folly::dynamic::object;
-                                    loadingParams["requestId"] = requestId;
-                                    loadingParams["timestamp"] = getTimestamp();
-                                    loadingParams["encodedDataLength"] = encodedDataLength;
-
-                                    folly::dynamic loadingEvent = folly::dynamic::object;
-                                    loadingEvent["method"] = "Network.loadingFinished";
-                                    loadingEvent["params"] = loadingParams;
-                                    sendCDPNetworkEvent(rt, loadingEvent);
-
-                                    return facebook::jsi::Value::undefined();
+                      // Clone response and read body / 응답 복제 및 본문 읽기
+                      facebook::jsi::Value cloneValue = response.getProperty(runtime, "clone");
+                      if (cloneValue.isObject() && cloneValue.asObject(runtime).isFunction(runtime)) {
+                        facebook::jsi::Function clone = cloneValue.asObject(runtime).asFunction(runtime);
+                        facebook::jsi::Object clonedResponse = clone.call(runtime).asObject(runtime);
+                        facebook::jsi::Value textValue = clonedResponse.getProperty(runtime, "text");
+                        if (textValue.isObject() && textValue.asObject(runtime).isFunction(runtime)) {
+                          facebook::jsi::Function text = textValue.asObject(runtime).asFunction(runtime);
+                          facebook::jsi::Value textPromise = text.call(runtime);
+                          if (textPromise.isObject()) {
+                            facebook::jsi::Object textPromiseObj = textPromise.asObject(runtime);
+                            facebook::jsi::Value thenValue = textPromiseObj.getProperty(runtime, "then");
+                            if (thenValue.isObject() && thenValue.asObject(runtime).isFunction(runtime)) {
+                              facebook::jsi::Function textThen = thenValue.asObject(runtime).asFunction(runtime);
+                              facebook::jsi::Value onTextFulfilled = facebook::jsi::Function::createFromHostFunction(
+                                runtime,
+                                facebook::jsi::PropNameID::forAscii(runtime, "onTextFulfilled"),
+                                1,
+                                [requestId, url, status, statusText, contentType, responseHeaders](facebook::jsi::Runtime& rt,
+                                                                                                    const facebook::jsi::Value&,
+                                                                                                    const facebook::jsi::Value* textArgs,
+                                                                                                    size_t) -> facebook::jsi::Value {
+                                  std::string responseText;
+                                  if (textArgs[0].isString()) {
+                                    responseText = textArgs[0].asString(rt).utf8(rt);
                                   }
-                                );
-                                textThen.call(runtime, onTextFulfilled);
-                              }
+
+                                  // Store response data / 응답 데이터 저장
+                                  g_responseData[requestId] = responseText;
+
+                                  // Send responseReceived event / responseReceived 이벤트 전송
+                                  folly::dynamic responseObj = folly::dynamic::object;
+                                  responseObj["url"] = url;
+                                  responseObj["status"] = status;
+                                  responseObj["statusText"] = statusText;
+                                  responseObj["headers"] = responseHeaders;
+                                  responseObj["mimeType"] = contentType.empty() ? "text/plain" : contentType;
+                                  responseObj["body"] = responseText;
+
+                                  folly::dynamic responseParams = folly::dynamic::object;
+                                  responseParams["requestId"] = requestId;
+                                  responseParams["loaderId"] = requestId;
+                                  responseParams["timestamp"] = getTimestamp();
+                                  responseParams["type"] = "Fetch";
+                                  responseParams["response"] = responseObj;
+
+                                  folly::dynamic responseEvent = folly::dynamic::object;
+                                  responseEvent["method"] = "Network.responseReceived";
+                                  responseEvent["params"] = responseParams;
+                                  sendCDPNetworkEvent(rt, responseEvent);
+
+                                  // Send loadingFinished event / loadingFinished 이벤트 전송
+                                  size_t encodedDataLength = calculateEncodedDataLength("", responseText);
+                                  folly::dynamic loadingParams = folly::dynamic::object;
+                                  loadingParams["requestId"] = requestId;
+                                  loadingParams["timestamp"] = getTimestamp();
+                                  loadingParams["encodedDataLength"] = encodedDataLength;
+
+                                  folly::dynamic loadingEvent = folly::dynamic::object;
+                                  loadingEvent["method"] = "Network.loadingFinished";
+                                  loadingEvent["params"] = loadingParams;
+                                  sendCDPNetworkEvent(rt, loadingEvent);
+
+                                  return facebook::jsi::Value::undefined();
+                                }
+                              );
+                              textThen.call(runtime, onTextFulfilled);
                             }
                           }
                         }
-                      } catch (...) {
-                        // Failed to process response / 응답 처리 실패
                       }
+                    } catch (...) {
+                      // Failed to process response / 응답 처리 실패
                     }
-                    // Return original response / 원본 응답 반환
-                    // In Promise then callback, we need to return the value as-is / Promise then 콜백에서는 값을 그대로 반환해야 함
-                    // Since jsi::Value is move-only, we need to use std::move / jsi::Value가 move-only이므로 std::move 사용 필요
-                    // However, we can't move from const reference, so we need to create a new Promise that resolves with the value
-                    // 하지만 const reference에서 move할 수 없으므로, 값을 resolve하는 새로운 Promise를 생성해야 함
-                    if (count > 0) {
-                      // Create a Promise that resolves with the original value / 원본 값으로 resolve하는 Promise 생성
-                      try {
-                        facebook::jsi::Value PromiseValue = runtime.global().getProperty(runtime, "Promise");
-                        if (PromiseValue.isObject()) {
-                          facebook::jsi::Object PromiseObj = PromiseValue.asObject(runtime);
-                          facebook::jsi::Value resolveValue = PromiseObj.getProperty(runtime, "resolve");
-                          if (resolveValue.isObject() && resolveValue.asObject(runtime).isFunction(runtime)) {
-                            facebook::jsi::Function resolve = resolveValue.asObject(runtime).asFunction(runtime);
-                            return resolve.call(runtime, args[0]);
-                          }
-                        }
-                      } catch (...) {
-                        // Failed to create Promise, try direct return / Promise 생성 실패, 직접 반환 시도
-                      }
-                      // Fallback: use std::move (may cause issues but should work for Promise chain) / 대체: std::move 사용 (문제가 있을 수 있지만 Promise 체인에서는 작동해야 함)
-                      return std::move(const_cast<facebook::jsi::Value&>(args[0]));
-                    }
-                    return facebook::jsi::Value::undefined();
                   }
-                );
-                then.call(rt, onFulfilled);
+                  // Return original response / 원본 응답 반환
+                  // In Promise then callback, we need to return the value as-is / Promise then 콜백에서는 값을 그대로 반환해야 함
+                  if (count > 0) {
+                    // Create a Promise that resolves with the original value / 원본 값으로 resolve하는 Promise 생성
+                    try {
+                      facebook::jsi::Value PromiseValue = runtime.global().getProperty(runtime, "Promise");
+                      if (PromiseValue.isObject()) {
+                        facebook::jsi::Object PromiseObj = PromiseValue.asObject(runtime);
+                        facebook::jsi::Value resolveValue = PromiseObj.getProperty(runtime, "resolve");
+                        if (resolveValue.isObject() && resolveValue.asObject(runtime).isFunction(runtime)) {
+                          facebook::jsi::Function resolve = resolveValue.asObject(runtime).asFunction(runtime);
+                          return resolve.call(runtime, args[0]);
+                        }
+                      }
+                    } catch (...) {
+                      // Failed to create Promise, try direct return / Promise 생성 실패, 직접 반환 시도
+                    }
+                    // Fallback: use std::move (may cause issues but should work for Promise chain) / 대체: std::move 사용 (문제가 있을 수 있지만 Promise 체인에서는 작동해야 함)
+                    return std::move(const_cast<facebook::jsi::Value&>(args[0]));
+                  }
+                  return facebook::jsi::Value::undefined();
+                }
+              );
+
+              // then.call()은 새로운 Promise를 반환하므로, 그것을 반환해야 함 / then.call() returns a new Promise, so we must return it
+              facebook::jsi::Value hookedPromise = then.call(rt, onFulfilled);
+              if (hookedPromise.isObject()) {
+                return hookedPromise;  // 훅이 적용된 Promise 반환 / Return Promise with hook applied
               }
             }
 
+            // Fallback: 원본 Promise 반환 (훅 적용 실패 시) / Fallback: return original Promise (if hook failed)
             return fetchResult;
           }
         );
