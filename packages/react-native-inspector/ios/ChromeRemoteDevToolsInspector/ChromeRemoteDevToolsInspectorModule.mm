@@ -109,6 +109,12 @@ static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
     return;
   }
 
+  // Skip CDP message sending - JavaScript layer hook handles this / CDP 메시지 전송 건너뛰기 - JavaScript 레이어 훅이 처리합니다
+  // JavaScript layer hook provides better stack traces with source map support / JavaScript 레이어 훅은 소스맵 지원과 함께 더 나은 스택 트레이스를 제공합니다
+  isProcessingLog = NO;
+  return;
+
+  // NOTE: The following code is disabled in favor of JavaScript layer hook / 참고: 다음 코드는 JavaScript 레이어 훅을 위해 비활성화됨
   // Convert to CDP Runtime.consoleAPICalled event / CDP Runtime.consoleAPICalled 이벤트로 변환
   // Map RCTLogLevel to CDP console type / RCTLogLevel을 CDP console type으로 매핑
   // Note: React Native console methods map to different log levels / 참고: React Native console 메서드는 다른 로그 레벨로 매핑됨
