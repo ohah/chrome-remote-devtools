@@ -51,6 +51,9 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
       android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "connect() called / connect() 호출됨")
       android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "serverHost: $serverHost, serverPort: $serverPort")
 
+      // Set application context for native JNI access / 네이티브 JNI 접근을 위한 애플리케이션 컨텍스트 설정
+      ChromeRemoteDevToolsLogHookJNI.setApplicationContext(context)
+
       // Connect to server / 서버에 연결
       // Use Kotlin implementation directly / Kotlin 구현을 직접 사용
       val connectionObj = ChromeRemoteDevToolsInspector.connect(
@@ -62,9 +65,6 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
 
       if (connection != null) {
         android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Connection object created / 연결 객체 생성됨")
-
-        // Set connection for log interception / 로그 가로채기를 위한 연결 설정
-        ChromeRemoteDevToolsLogHook.setConnection(connection)
 
         // Note: WebSocket connection is asynchronous / 참고: WebSocket 연결은 비동기입니다
         // The connection may not be established immediately / 연결이 즉시 설정되지 않을 수 있습니다
@@ -86,14 +86,29 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
           } else {
             android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "✅ WebSocket connected successfully / WebSocket 연결 성공")
 
-            // Hook React Native's logging system after connection is established / 연결이 설정된 후 React Native의 로깅 시스템 훅
-            // This ensures Logcat Reader starts only when connection is ready / 이를 통해 Logcat Reader가 연결이 준비된 후에만 시작되도록 보장
-
-            // Try JSI-level hooking first (more reliable) / 먼저 JSI 레벨 훅 시도 (더 안정적)
-            ChromeRemoteDevToolsLogHook.hookJSILog(context)
-
-            // Fallback to native-level hooking / 네이티브 레벨 훅으로 폴백
-            ChromeRemoteDevToolsLogHook.hookReactLog()
+            // Install JSI-level console hook / JSI 레벨 console 훅 설치
+            // JSI hook is installed directly via JNI, and JSI code will send messages via TurboModule / JSI 훅은 JNI를 통해 직접 설치되며, JSI 코드가 TurboModule을 통해 메시지를 전송합니다
+            try {
+              val catalystInstance = context.catalystInstance
+              if (catalystInstance != null) {
+                val runtimeExecutor = catalystInstance.runtimeExecutor
+                if (runtimeExecutor != null) {
+                  // Call JNI directly to install JSI hook / JSI 훅을 설치하기 위해 JNI를 직접 호출
+                  val jsiHooked = ChromeRemoteDevToolsLogHookJNI.nativeHookJSILog(runtimeExecutor)
+                  if (jsiHooked) {
+                    android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "JSI-level logging hook installed successfully / JSI 레벨 로깅 훅이 성공적으로 설치됨")
+                  } else {
+                    android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Failed to install JSI-level logging hook / JSI 레벨 로깅 훅 설치 실패")
+                  }
+                } else {
+                  android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "RuntimeExecutor is null, cannot hook JSI log / RuntimeExecutor가 null입니다, JSI 로그를 훅할 수 없습니다")
+                }
+              } else {
+                android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "CatalystInstance is null, cannot hook JSI log / CatalystInstance가 null입니다, JSI 로그를 훅할 수 없습니다")
+              }
+            } catch (e: Exception) {
+              android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Exception while hooking JSI log / JSI 로그 훅 중 예외 발생: ${e.message}", e)
+            }
           }
 
           val result: WritableMap = Arguments.createMap()

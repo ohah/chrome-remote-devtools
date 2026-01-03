@@ -43,6 +43,7 @@ Pod::Spec.new do |s|
       '"$(PODS_ROOT)/React-Core"',
       '"$(PODS_ROOT)/React-jsinspector"',
       '"$(PODS_ROOT)/React-jsinspector/ReactCommon/jsinspector-modern"',
+      '"$(PODS_TARGET_SRCROOT)/../cpp"',  # Common C++ code / 공통 C++ 코드
     ]
   }
 

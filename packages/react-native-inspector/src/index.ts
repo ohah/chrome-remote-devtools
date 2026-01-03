@@ -42,6 +42,9 @@ export async function connect(serverHostParam: string, serverPortParam: number):
     );
   }
 
+  // Store server info in global for JSI access / JSI 접근을 위해 서버 정보를 전역에 저장
+  setServerInfo(serverHostParam, serverPortParam);
+
   // Note: Console message interception is handled at native level / 참고: 콘솔 메시지 가로채기는 네이티브 레벨에서 처리됩니다
   // The native module will hook ReactLog (iOS) or Logcat Reader (Android) to intercept console messages / 네이티브 모듈이 ReactLog (iOS) 또는 Logcat Reader (Android)를 훅하여 콘솔 메시지를 가로챕니다
 
@@ -115,10 +118,17 @@ export async function sendCDPMessage(
   return ChromeRemoteDevToolsInspector.sendCDPMessage(serverHost, serverPort, messageStr);
 }
 
+// Store server connection info in global for JSI access / JSI 접근을 위해 서버 연결 정보를 전역에 저장
+export function setServerInfo(serverHost: string, serverPort: number): void {
+  (global as any).__ChromeRemoteDevToolsServerHost = serverHost;
+  (global as any).__ChromeRemoteDevToolsServerPort = serverPort;
+}
+
 export default {
   connect,
   disableDebugger,
   isPackagerDisconnected,
   openDebugger,
   sendCDPMessage,
+  setServerInfo,
 };

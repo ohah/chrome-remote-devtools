@@ -9,16 +9,27 @@ file(GLOB_RECURSE android_files RELATIVE ${CMAKE_SOURCE_DIR}
      "src/main/cpp/**.cpp"
 )
 
+# Find common C++ files / 공통 C++ 파일 찾기
+file(GLOB_RECURSE common_files RELATIVE ${CMAKE_SOURCE_DIR}
+     "../cpp/**.cpp"
+)
+
 # Add library / 라이브러리 추가
 add_library(
   chromeremotedevtoolsinspector
   SHARED
   ${android_files}
+  ${common_files}
 )
 
 # Set up local includes / 로컬 include 설정
+# Get absolute path to common C++ directory / 공통 C++ 디렉토리의 절대 경로 가져오기
+# CMAKE_CURRENT_SOURCE_DIR is packages/react-native-inspector/android
+# So ../cpp points to packages/react-native-inspector/cpp
+get_filename_component(COMMON_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../cpp" ABSOLUTE)
 include_directories(
   "src/main/cpp"
+  "${COMMON_CPP_DIR}"
 )
 
 # Find required packages / 필요한 패키지 찾기

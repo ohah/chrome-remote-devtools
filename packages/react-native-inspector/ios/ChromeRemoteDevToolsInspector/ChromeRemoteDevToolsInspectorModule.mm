@@ -13,6 +13,12 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTLog.h>
 
+// Include common C++ console hook / 공통 C++ console 훅 포함
+#if __has_include("ConsoleHook.h")
+#include "ConsoleHook.h"
+#define CONSOLE_HOOK_AVAILABLE
+#endif
+
 #if RCT_DEV || RCT_REMOTE_PROFILE
 
 // Store original log function / 원본 로그 함수 저장
@@ -20,6 +26,25 @@ static RCTLogFunction originalLogFunction = nil;
 
 // Store connection for sending CDP messages / CDP 메시지 전송을 위한 연결 저장
 static id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> g_connection = nil;
+
+// Objective-C++ callback for sending CDP messages / CDP 메시지 전송을 위한 Objective-C++ 콜백
+#ifdef CONSOLE_HOOK_AVAILABLE
+void sendCDPMessageIOS(const char* serverHost, int serverPort, const char* message) {
+  @autoreleasepool {
+    NSString* host = [NSString stringWithUTF8String:serverHost];
+    NSString* msg = [NSString stringWithUTF8String:message];
+
+    if (g_connection && [g_connection respondsToSelector:@selector(sendCDPMessage:)]) {
+      [g_connection sendCDPMessage:msg];
+    } else {
+      // Fallback: Use ChromeRemoteDevToolsInspector helper / 폴백: ChromeRemoteDevToolsInspector 헬퍼 사용
+      [ChromeRemoteDevToolsInspectorObjC sendCDPMessageWithServerHost:host
+                                                           serverPort:serverPort
+                                                               message:msg];
+    }
+  }
+}
+#endif
 
 /**
  * Custom log function to intercept console messages and send as CDP events / 콘솔 메시지를 가로채서 CDP 이벤트로 전송하는 커스텀 로그 함수
@@ -179,6 +204,16 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
   if (connection) {
     // Store connection for log interception / 로그 가로채기를 위한 연결 저장
     g_connection = connection;
+
+#ifdef CONSOLE_HOOK_AVAILABLE
+    // Set platform callback for C++ code / C++ 코드를 위한 플랫폼 콜백 설정
+    chrome_remote_devtools::setSendCDPMessageCallback(sendCDPMessageIOS);
+
+    // Hook JSI console methods if available (same as Android) / 사용 가능한 경우 JSI console 메서드 훅 (Android와 동일)
+    // Note: This requires accessing the runtime executor from bridge / 참고: 이것은 bridge에서 런타임 실행자에 접근해야 합니다
+    // For now, we'll use RCTLogFunction as fallback / 지금은 RCTLogFunction을 폴백으로 사용합니다
+    // TODO: Add JSI hooking support for iOS / TODO: iOS용 JSI 훅 지원 추가
+#endif
 
     // Hook RCTLog to intercept console messages at native level / 네이티브 레벨에서 콘솔 메시지를 가로채기 위해 RCTLog 훅
     if (!originalLogFunction) {
