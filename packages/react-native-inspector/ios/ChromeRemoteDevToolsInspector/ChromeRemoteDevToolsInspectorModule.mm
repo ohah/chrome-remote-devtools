@@ -10,7 +10,6 @@
 #import "ChromeRemoteDevToolsInspectorModule.h"
 #import "ChromeRemoteDevToolsInspector.h"
 #import "ChromeRemoteDevToolsInspectorPackagerConnection.h"
-#import "ChromeRemoteDevToolsNetworkHook.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTLog.h>
 
@@ -371,12 +370,9 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
     NSLog(@"[ChromeRemoteDevToolsInspectorModule] RCTLogFunction already hooked / RCTLogFunction이 이미 훅됨");
   }
 
-  // Enable network interception at native level (NSURLProtocol) / 네이티브 레벨에서 네트워크 인터셉션 활성화 (NSURLProtocol)
-  // Note: JSI network hook will also be installed via installJSIBindingsWithRuntime / 참고: JSI 네트워크 훅도 installJSIBindingsWithRuntime을 통해 설치됩니다
+  // Note: Network hooking is handled at JSI level (C++ hook) via installJSIBindingsWithRuntime / 참고: 네트워크 훅은 installJSIBindingsWithRuntime을 통해 JSI 레벨(C++ 훅)에서 처리됩니다
   // JSI hook provides better integration with JavaScript fetch/XMLHttpRequest / JSI 훅은 JavaScript fetch/XMLHttpRequest와 더 나은 통합을 제공합니다
-  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Enabling native network interception (NSURLProtocol) / 네이티브 네트워크 인터셉션 활성화 (NSURLProtocol)");
-  [ChromeRemoteDevToolsNetworkHook enableWithServerHost:serverHost serverPort:[serverPort integerValue]];
-  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Native network interception enabled / 네이티브 네트워크 인터셉션 활성화됨");
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Network hooking is handled at JSI level (C++ hook) / 네트워크 훅은 JSI 레벨(C++ 훅)에서 처리됩니다");
 
   // Return success / 성공 반환
   resolver(@{
@@ -392,8 +388,7 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
 RCT_EXPORT_METHOD(disableDebugger:(RCTPromiseResolveBlock)resolver
                   rejecter:(RCTPromiseRejectBlock)rejecter) {
   [ChromeRemoteDevToolsInspectorObjC disableDebugger];
-  // Disable network interception / 네트워크 인터셉션 비활성화
-  [ChromeRemoteDevToolsNetworkHook disable];
+  // Note: Network hooking is handled at JSI level, no need to disable separately / 참고: 네트워크 훅은 JSI 레벨에서 처리되므로 별도로 비활성화할 필요 없음
   resolver(nil);
 }
 
