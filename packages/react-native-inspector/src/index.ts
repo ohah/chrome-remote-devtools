@@ -3,7 +3,7 @@
 // This package provides native Inspector integration via TurboModule
 // TurboModule을 통해 네이티브 Inspector 통합을 제공합니다
 
-import { NativeModules, Platform, TurboModuleRegistry } from 'react-native';
+import { NativeModules, TurboModuleRegistry } from 'react-native';
 import type { Spec } from './NativeChromeRemoteDevToolsInspector';
 
 // Try to get TurboModule first (New Architecture), fallback to Legacy Module / TurboModule을 먼저 시도 (New Architecture), Legacy Module로 폴백
@@ -27,9 +27,7 @@ if (__DEV__) {
   );
 }
 
-// Note: Console message interception is handled at both native level (RCTSetLogFunction) and JavaScript level (console hook) / 참고: 콘솔 메시지 가로채기는 네이티브 레벨(RCTSetLogFunction)과 JavaScript 레벨(console 훅) 모두에서 처리됩니다
-
-import { hookConsole } from './consoleHook';
+// Note: Console message interception is handled at native level (RCTSetLogFunction) and JSI level (C++ console hook) / 참고: 콘솔 메시지 가로채기는 네이티브 레벨(RCTSetLogFunction)과 JSI 레벨(C++ console 훅)에서 처리됩니다
 
 /**
  * Connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연결
@@ -50,12 +48,7 @@ export async function connect(serverHostParam: string, serverPortParam: number):
   // Connect to server / 서버에 연결
   await ChromeRemoteDevToolsInspector.connect(serverHostParam, serverPortParam);
 
-  // Hook console methods at JavaScript level for stack trace support (iOS only) / 스택 트레이스 지원을 위해 JavaScript 레벨에서 console 메서드 훅 (iOS만)
-  // Android uses JSI console hook, so JavaScript layer hook is not needed / Android는 JSI console 훅을 사용하므로 JavaScript 레이어 훅이 필요 없습니다
-  // This provides source map support and better stack traces / 이것은 소스맵 지원과 더 나은 스택 트레이스를 제공합니다
-  if (Platform.OS === 'ios') {
-    hookConsole();
-  }
+  // Note: Console hooking is handled at native level (JSI C++ hook) / 참고: Console 훅은 네이티브 레벨(JSI C++ 훅)에서 처리됩니다
 }
 
 /**
