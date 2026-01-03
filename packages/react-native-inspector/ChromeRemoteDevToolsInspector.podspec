@@ -25,9 +25,14 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '15.1'
   s.requires_arc = true
 
-  # Include Legacy Module files / Legacy Module 파일 포함
-  s.source_files = 'ios/**/*.{h,mm}'
-  s.public_header_files = 'ios/**/*.h'
+  # npm 패키지 구조에 맞게 경로 수정 / 경로 수정 for npm package structure
+  # Include TurboModule files (Objective-C++ only, no Swift) / TurboModule 파일 포함 (Objective-C++만, Swift 없음)
+  # Also include common C++ files / 공통 C++ 파일도 포함
+  s.source_files = [
+    'ios/ChromeRemoteDevToolsInspector/**/*.{h,mm}',
+    'cpp/**/*.{h,cpp}'  # Common C++ code / 공통 C++ 코드
+  ]
+  s.public_header_files = 'ios/ChromeRemoteDevToolsInspector/**/*.h'
 
   # Enable module / 모듈 활성화
   s.module_name = 'ChromeRemoteDevToolsInspector'
@@ -36,10 +41,20 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
     'CLANG_ENABLE_MODULES' => 'YES',
+    'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
+    'HEADER_SEARCH_PATHS' => [
+      '"$(PODS_TARGET_SRCROOT)/cpp"',  # Common C++ code / 공통 C++ 코드
+    ]
   }
 
-  s.dependency 'React-Core'
+  # Use install_modules_dependencies to automatically add React Native dependencies / install_modules_dependencies를 사용하여 React Native 의존성 자동 추가
+  # This function automatically adds React-Core, React-jsi, and header search paths / 이 함수는 React-Core, React-jsi 및 헤더 검색 경로를 자동으로 추가합니다
+  # Reference: mmkv and NativeCxxModuleExample use this approach / 참고: mmkv와 NativeCxxModuleExample이 이 방식을 사용합니다
+  install_modules_dependencies(s)
+
+  # Additional dependencies / 추가 의존성
   s.dependency 'React-jsinspector'
+  s.dependency 'ReactCommon/turbomodule/core'  # TurboModule headers (RCTTurboModule, RCTTurboModuleWithJSIBindings, etc.) / TurboModule 헤더 (RCTTurboModule, RCTTurboModuleWithJSIBindings 등)
   s.dependency 'SocketRocket'
 
   s.compiler_flags = '-DRCT_DEV=1 -DRCT_REMOTE_PROFILE=1'
