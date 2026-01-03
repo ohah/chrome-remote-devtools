@@ -39,7 +39,8 @@ namespace chrome_remote_devtools {
 static std::atomic<size_t> g_objectIdCounter{1};
 
 // Platform-specific callback for sending CDP messages / CDP 메시지 전송을 위한 플랫폼별 콜백
-static SendCDPMessageCallback g_sendCDPMessageCallback = nullptr;
+// Note: Made non-static so NetworkHook can access it / 참고: NetworkHook에서 접근할 수 있도록 static 제거
+SendCDPMessageCallback g_sendCDPMessageCallback = nullptr;
 
 void setSendCDPMessageCallback(SendCDPMessageCallback callback) {
   g_sendCDPMessageCallback = callback;

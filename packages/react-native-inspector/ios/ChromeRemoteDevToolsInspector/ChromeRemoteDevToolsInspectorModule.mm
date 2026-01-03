@@ -10,6 +10,7 @@
 #import "ChromeRemoteDevToolsInspectorModule.h"
 #import "ChromeRemoteDevToolsInspector.h"
 #import "ChromeRemoteDevToolsInspectorPackagerConnection.h"
+#import "ChromeRemoteDevToolsNetworkHook.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTLog.h>
 
@@ -227,6 +228,9 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
       RCTSetLogFunction(ChromeRemoteDevToolsLogFunction);
     }
 
+    // Enable network interception / 네트워크 인터셉션 활성화
+    [ChromeRemoteDevToolsNetworkHook enableWithServerHost:serverHost serverPort:[serverPort integerValue]];
+
     resolver(@{
       @"connected": @YES,
       @"host": serverHost,
@@ -243,6 +247,8 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
 RCT_EXPORT_METHOD(disableDebugger:(RCTPromiseResolveBlock)resolver
                   rejecter:(RCTPromiseRejectBlock)rejecter) {
   [ChromeRemoteDevToolsInspectorObjC disableDebugger];
+  // Disable network interception / 네트워크 인터셉션 비활성화
+  [ChromeRemoteDevToolsNetworkHook disable];
   resolver(nil);
 }
 
