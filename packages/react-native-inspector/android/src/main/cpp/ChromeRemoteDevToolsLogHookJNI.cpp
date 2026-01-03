@@ -24,6 +24,8 @@
 
 // Include common C++ console hook / 공통 C++ console 훅 포함
 #include "ConsoleHook.h"
+// Include network hook / 네트워크 훅 포함
+#include "NetworkHook.h"
 
 #define TAG "ChromeRemoteDevToolsLogHookJNI"
 
@@ -145,15 +147,24 @@ static void hookJSILogging(facebook::jsi::Runtime& runtime) {
     chrome_remote_devtools::setSendCDPMessageCallback(sendCDPMessageAndroid);
 
     // Use common C++ hook function / 공통 C++ 훅 함수 사용
-    bool success = chrome_remote_devtools::hookConsoleMethods(runtime);
+    bool consoleSuccess = chrome_remote_devtools::hookConsoleMethods(runtime);
+    bool networkSuccess = chrome_remote_devtools::hookNetworkMethods(runtime);
 
-    if (success) {
-    g_is_jsi_hooked = true;
+    if (consoleSuccess) {
+      g_is_jsi_hooked = true;
       __android_log_print(ANDROID_LOG_INFO, TAG,
                           "JSI-level console hook installed successfully using common C++ code / 공통 C++ 코드를 사용하여 JSI 레벨 console 훅이 성공적으로 설치됨");
     } else {
       __android_log_print(ANDROID_LOG_ERROR, TAG,
                           "Failed to hook JSI console using common C++ code / 공통 C++ 코드를 사용하여 JSI console 훅 실패");
+    }
+
+    if (networkSuccess) {
+      __android_log_print(ANDROID_LOG_INFO, TAG,
+                          "JSI-level network hook installed successfully / JSI 레벨 네트워크 훅이 성공적으로 설치됨");
+    } else {
+      __android_log_print(ANDROID_LOG_WARN, TAG,
+                          "Failed to hook JSI network methods / JSI 네트워크 메서드 훅 실패");
     }
   } catch (const std::exception& e) {
     __android_log_print(ANDROID_LOG_ERROR, TAG,

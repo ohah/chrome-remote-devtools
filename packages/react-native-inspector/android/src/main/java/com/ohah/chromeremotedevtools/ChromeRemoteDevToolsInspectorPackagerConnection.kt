@@ -83,8 +83,8 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
 
           // Handle CDP requests (messages with id field) / CDP 요청 처리 (id 필드가 있는 메시지)
           if (message.has("id")) {
-            val requestId = message.getInt("id")
-            Log.d(TAG, "CDP request received / CDP 요청 수신: id=$requestId")
+            val cdpRequestId = message.getInt("id")
+            Log.d(TAG, "CDP request received / CDP 요청 수신: id=$cdpRequestId")
 
             if (message.has("method")) {
               val method = message.getString("method")
@@ -93,7 +93,7 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
               // Handle Page.getResourceTree request / Page.getResourceTree 요청 처리
               if (method == "Page.getResourceTree") {
                 Log.d(TAG, "Page.getResourceTree detected! / Page.getResourceTree 감지됨!")
-                sendPageGetResourceTreeResponse(requestId)
+                sendPageGetResourceTreeResponse(cdpRequestId)
                 return
               }
 
@@ -110,6 +110,17 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
                     Log.w(TAG, "Not connected when trying to send executionContextCreated / executionContextCreated 전송 시도 시 연결되지 않음")
                   }
                 }, 50)
+                return
+              }
+
+              // Handle Network.getResponseBody request / Network.getResponseBody 요청 처리
+              if (method == "Network.getResponseBody") {
+                Log.d(TAG, "Network.getResponseBody detected! / Network.getResponseBody 감지됨!")
+                val params = message.optJSONObject("params")
+                val networkRequestId = params?.optString("requestId") ?: ""
+                Log.d(TAG, "Network.getResponseBody requestId / Network.getResponseBody requestId: $networkRequestId")
+                sendNetworkGetResponseBodyResponse(cdpRequestId, networkRequestId)
+                return
               }
             }
           } else if (message.has("method")) {
@@ -229,6 +240,31 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
 
     val messageStr = cdpMessage.toString()
     Log.d(TAG, "Sending Runtime.executionContextCreated / Runtime.executionContextCreated 전송: $messageStr")
+    sendCDPMessage(messageStr)
+  }
+
+  /**
+   * Send Network.getResponseBody response / Network.getResponseBody 응답 전송
+   * @param requestId CDP request ID / CDP 요청 ID
+   * @param networkRequestId Network request ID / 네트워크 요청 ID
+   */
+  private fun sendNetworkGetResponseBodyResponse(requestId: Int, networkRequestId: String) {
+    Log.d(TAG, "sendNetworkGetResponseBodyResponse called / sendNetworkGetResponseBodyResponse 호출됨: requestId=$requestId, networkRequestId=$networkRequestId")
+
+    // Get response body from network interceptor / 네트워크 인터셉터에서 응답 본문 가져오기
+    val responseBody = com.ohah.chromeremotedevtools.ChromeRemoteDevToolsNetworkInterceptor.getResponseBody(networkRequestId)
+    Log.d(TAG, "Response body retrieved / 응답 본문 가져옴: length=${responseBody.length}")
+
+    val response = org.json.JSONObject().apply {
+      put("id", requestId)
+      put("result", org.json.JSONObject().apply {
+        put("body", responseBody)
+        put("base64Encoded", false)
+      })
+    }
+
+    val messageStr = response.toString()
+    Log.d(TAG, "Sending Network.getResponseBody response / Network.getResponseBody 응답 전송: ${messageStr.take(200)}...")
     sendCDPMessage(messageStr)
   }
 

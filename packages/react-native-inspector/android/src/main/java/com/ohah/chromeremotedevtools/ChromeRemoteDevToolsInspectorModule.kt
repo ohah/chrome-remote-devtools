@@ -86,6 +86,10 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
           } else {
             android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "✅ WebSocket connected successfully / WebSocket 연결 성공")
 
+            // Note: Network interception is now handled by JSI hook / 참고: 네트워크 인터셉션은 이제 JSI 훅에서 처리됩니다
+            // Native OkHttp interceptor is disabled when JSI hook is available / JSI 훅을 사용할 수 있을 때 네이티브 OkHttp 인터셉터는 비활성화됩니다
+            // ChromeRemoteDevToolsNetworkInterceptor.enable(capturedHost, capturedPort, connection)
+
             // Install JSI-level console hook / JSI 레벨 console 훅 설치
             // JSI hook is installed directly via JNI, and JSI code will send messages via TurboModule / JSI 훅은 JNI를 통해 직접 설치되며, JSI 코드가 TurboModule을 통해 메시지를 전송합니다
             try {
@@ -132,6 +136,8 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
    */
   @ReactMethod
   fun disableDebugger(promise: Promise) {
+    // Disable network interception / 네트워크 인터셉션 비활성화
+    ChromeRemoteDevToolsNetworkInterceptor.disable()
     // TODO: Implement Android debugger disable / Android 디버거 비활성화 구현 필요
     promise.resolve(null)
   }
