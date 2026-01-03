@@ -27,7 +27,9 @@ if (__DEV__) {
   );
 }
 
-// Note: Console message interception is now handled at native level using RCTSetLogFunction / 참고: 콘솔 메시지 가로채기는 이제 RCTSetLogFunction을 사용하여 네이티브 레벨에서 처리됩니다
+// Note: Console message interception is handled at both native level (RCTSetLogFunction) and JavaScript level (console hook) / 참고: 콘솔 메시지 가로채기는 네이티브 레벨(RCTSetLogFunction)과 JavaScript 레벨(console 훅) 모두에서 처리됩니다
+
+import { hookConsole } from './consoleHook';
 
 /**
  * Connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연결
@@ -45,10 +47,15 @@ export async function connect(serverHostParam: string, serverPortParam: number):
   // Store server info in global for JSI access / JSI 접근을 위해 서버 정보를 전역에 저장
   setServerInfo(serverHostParam, serverPortParam);
 
-  // Note: Console message interception is handled at native level / 참고: 콘솔 메시지 가로채기는 네이티브 레벨에서 처리됩니다
-  // The native module will hook ReactLog (iOS) or Logcat Reader (Android) to intercept console messages / 네이티브 모듈이 ReactLog (iOS) 또는 Logcat Reader (Android)를 훅하여 콘솔 메시지를 가로챕니다
+  // Connect to server / 서버에 연결
+  await ChromeRemoteDevToolsInspector.connect(serverHostParam, serverPortParam);
 
-  return ChromeRemoteDevToolsInspector.connect(serverHostParam, serverPortParam);
+  // Hook console methods at JavaScript level for stack trace support (iOS only) / 스택 트레이스 지원을 위해 JavaScript 레벨에서 console 메서드 훅 (iOS만)
+  // Android uses JSI console hook, so JavaScript layer hook is not needed / Android는 JSI console 훅을 사용하므로 JavaScript 레이어 훅이 필요 없습니다
+  // This provides source map support and better stack traces / 이것은 소스맵 지원과 더 나은 스택 트레이스를 제공합니다
+  if (Platform.OS === 'ios') {
+    hookConsole();
+  }
 }
 
 /**
