@@ -4,7 +4,7 @@
  */
 module.exports = {
   ios: {
-    podspecPath: './ios/ChromeRemoteDevToolsInspector.podspec',
+    podspecPath: './ChromeRemoteDevToolsInspector.podspec',
   },
   android: {
     sourceDir: './android',

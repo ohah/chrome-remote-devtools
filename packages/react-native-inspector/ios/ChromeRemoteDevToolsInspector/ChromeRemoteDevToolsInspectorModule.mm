@@ -14,10 +14,23 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTLog.h>
 
+// Import TurboModule headers for JSI Runtime access / JSI Runtime 접근을 위한 TurboModule 헤더 import
+#import <ReactCommon/RCTTurboModule.h>
+#import <ReactCommon/RCTTurboModuleWithJSIBindings.h>
+// Note: RCTInteropTurboModule is in ReactCommon/turbomodule/core pod / 참고: RCTInteropTurboModule은 ReactCommon/turbomodule/core pod에 있음
+// Use #include for C++ header / C++ 헤더는 #include 사용
+#include <ReactCommon/RCTInteropTurboModule.h>
+
 // Include common C++ console hook / 공통 C++ console 훅 포함
 #if __has_include("ConsoleHook.h")
 #include "ConsoleHook.h"
 #define CONSOLE_HOOK_AVAILABLE
+#endif
+
+// Include common C++ network hook / 공통 C++ network 훅 포함
+#if __has_include("NetworkHook.h")
+#include "NetworkHook.h"
+#define NETWORK_HOOK_AVAILABLE
 #endif
 
 #if RCT_DEV || RCT_REMOTE_PROFILE
@@ -29,12 +42,16 @@ static RCTLogFunction originalLogFunction = nil;
 static id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> g_connection = nil;
 
 // Objective-C++ callback for sending CDP messages / CDP 메시지 전송을 위한 Objective-C++ 콜백
+// Note: WebSocket execution is disabled for now, will be reconnected later / 참고: WebSocket 실행은 현재 비활성화되어 있으며, 나중에 다시 연결됩니다
 #ifdef CONSOLE_HOOK_AVAILABLE
 void sendCDPMessageIOS(const char* serverHost, int serverPort, const char* message) {
   @autoreleasepool {
     NSString* host = [NSString stringWithUTF8String:serverHost];
     NSString* msg = [NSString stringWithUTF8String:message];
 
+    // WebSocket execution disabled - code preserved for later reconnection / WebSocket 실행 비활성화 - 나중에 재연결을 위해 코드 보존
+    // TODO: Re-enable WebSocket connection / TODO: WebSocket 연결 재활성화
+    /*
     if (g_connection && [g_connection respondsToSelector:@selector(sendCDPMessage:)]) {
       [g_connection sendCDPMessage:msg];
     } else {
@@ -43,6 +60,10 @@ void sendCDPMessageIOS(const char* serverHost, int serverPort, const char* messa
                                                            serverPort:serverPort
                                                                message:msg];
     }
+    */
+
+    // Log for debugging (will be removed when WebSocket is reconnected) / 디버깅용 로그 (WebSocket 재연결 시 제거됨)
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] sendCDPMessageIOS called (WebSocket disabled) / sendCDPMessageIOS 호출됨 (WebSocket 비활성화): %@:%d - %@", host, serverPort, [msg substringToIndex:MIN(100, msg.length)]);
   }
 }
 #endif
@@ -100,6 +121,9 @@ static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
   }
 
   // Check connection status / 연결 상태 확인
+  // WebSocket execution disabled - code preserved for later reconnection / WebSocket 실행 비활성화 - 나중에 재연결을 위해 코드 보존
+  // TODO: Re-enable WebSocket connection check / TODO: WebSocket 연결 확인 재활성화
+  /*
   if (!g_connection) {
     isProcessingLog = NO;
     return;
@@ -109,6 +133,11 @@ static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
     isProcessingLog = NO;
     return;
   }
+  */
+
+  // WebSocket disabled, skip CDP message sending / WebSocket 비활성화, CDP 메시지 전송 건너뛰기
+  isProcessingLog = NO;
+  return;
 
   // Skip CDP message sending - JavaScript layer hook handles this / CDP 메시지 전송 건너뛰기 - JavaScript 레이어 훅이 처리합니다
   // JavaScript layer hook provides better stack traces with source map support / JavaScript 레이어 훅은 소스맵 지원과 함께 더 나은 스택 트레이스를 제공합니다
@@ -176,9 +205,13 @@ static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
     return;
   }
 
+  // WebSocket execution disabled - code preserved for later reconnection / WebSocket 실행 비활성화 - 나중에 재연결을 위해 코드 보존
+  // TODO: Re-enable WebSocket message sending / TODO: WebSocket 메시지 전송 재활성화
+  /*
   if ([g_connection respondsToSelector:@selector(sendCDPMessage:)]) {
     [g_connection sendCDPMessage:jsonString];
   }
+  */
 
   isProcessingLog = NO;
 };
@@ -195,6 +228,116 @@ RCT_EXPORT_MODULE(ChromeRemoteDevToolsInspector)
   return NO;
 }
 
+#pragma mark - RCTTurboModule
+
+/**
+ * Create TurboModule instance / TurboModule 인스턴스 생성
+ * Return ObjCInteropTurboModule to wrap Legacy Module / Legacy Module을 래핑하기 위해 ObjCInteropTurboModule 반환
+ * This ensures installJSIBindingsWithRuntime is called / 이를 통해 installJSIBindingsWithRuntime이 호출됩니다
+ */
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params {
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] getTurboModule: called / getTurboModule: 호출됨");
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Module name: %s", params.moduleName.c_str());
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Creating ObjCInteropTurboModule wrapper / ObjCInteropTurboModule 래퍼 생성");
+
+  // Create ObjCInteropTurboModule to wrap Legacy Module / Legacy Module을 래핑하기 위해 ObjCInteropTurboModule 생성
+  // This allows installJSIBindingsWithRuntime to be called / 이를 통해 installJSIBindingsWithRuntime이 호출됩니다
+  auto turboModule = std::make_shared<facebook::react::ObjCInteropTurboModule>(params);
+
+  if (turboModule) {
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ ObjCInteropTurboModule created successfully / ObjCInteropTurboModule이 성공적으로 생성됨");
+  } else {
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ❌ Failed to create ObjCInteropTurboModule / ObjCInteropTurboModule 생성 실패");
+  }
+
+  return turboModule;
+}
+
+#pragma mark - RCTTurboModuleWithJSIBindings
+
+/**
+ * Install JSI bindings when TurboModule is created / TurboModule이 생성될 때 JSI 바인딩 설치
+ * This method is automatically called by React Native / 이 메서드는 React Native에 의해 자동으로 호출됩니다
+ * This is where we can access JSI Runtime and install hooks / 여기서 JSI Runtime에 접근하여 훅을 설치할 수 있습니다
+ */
+- (void)installJSIBindingsWithRuntime:(facebook::jsi::Runtime &)runtime
+                          callInvoker:(const std::shared_ptr<facebook::react::CallInvoker> &)callInvoker {
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ========================================");
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] installJSIBindingsWithRuntime:callInvoker: called / installJSIBindingsWithRuntime:callInvoker: 호출됨");
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] This is the key method for JSI Runtime access / 이것은 JSI Runtime 접근을 위한 핵심 메서드입니다");
+
+  // Check if hooks are available / 훅이 사용 가능한지 확인
+#ifdef CONSOLE_HOOK_AVAILABLE
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ ConsoleHook.h is available / ConsoleHook.h를 사용할 수 있음");
+#else
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ❌ ConsoleHook.h is NOT available / ConsoleHook.h를 사용할 수 없음");
+#endif
+
+#ifdef NETWORK_HOOK_AVAILABLE
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ NetworkHook.h is available / NetworkHook.h를 사용할 수 있음");
+#else
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ❌ NetworkHook.h is NOT available / NetworkHook.h를 사용할 수 없음");
+#endif
+
+  // Set platform callback for C++ code / C++ 코드를 위한 플랫폼 콜백 설정
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Setting platform callback for CDP message sending / CDP 메시지 전송을 위한 플랫폼 콜백 설정");
+#ifdef CONSOLE_HOOK_AVAILABLE
+  chrome_remote_devtools::setSendCDPMessageCallback(sendCDPMessageIOS);
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Platform callback set successfully / 플랫폼 콜백이 성공적으로 설정됨");
+#else
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ⚠️ Cannot set platform callback - ConsoleHook.h not available / 플랫폼 콜백을 설정할 수 없음 - ConsoleHook.h를 사용할 수 없음");
+#endif
+
+  // Install console hook / console 훅 설치
+  bool consoleSuccess = false;
+#ifdef CONSOLE_HOOK_AVAILABLE
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Installing console hook... / console 훅 설치 중...");
+  @try {
+    consoleSuccess = chrome_remote_devtools::hookConsoleMethods(runtime);
+    if (consoleSuccess) {
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Console hook installed successfully / console 훅이 성공적으로 설치됨");
+    } else {
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] ❌ Failed to install console hook / console 훅 설치 실패");
+    }
+  } @catch (NSException *exception) {
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ❌ Exception while installing console hook: %@ / console 훅 설치 중 예외 발생: %@", exception);
+  }
+#else
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ⚠️ Console hook not available - ConsoleHook.h not included / console 훅을 사용할 수 없음 - ConsoleHook.h가 포함되지 않음");
+#endif
+
+  // Install network hook / 네트워크 훅 설치
+  bool networkSuccess = false;
+#ifdef NETWORK_HOOK_AVAILABLE
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Installing network hook... / 네트워크 훅 설치 중...");
+  @try {
+    networkSuccess = chrome_remote_devtools::hookNetworkMethods(runtime);
+    if (networkSuccess) {
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Network hook installed successfully / 네트워크 훅이 성공적으로 설치됨");
+    } else {
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] ❌ Failed to install network hook / 네트워크 훅 설치 실패");
+    }
+  } @catch (NSException *exception) {
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ❌ Exception while installing network hook: %@ / 네트워크 훅 설치 중 예외 발생: %@", exception);
+  }
+#else
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ⚠️ Network hook not available - NetworkHook.h not included / 네트워크 훅을 사용할 수 없음 - NetworkHook.h가 포함되지 않음");
+#endif
+
+  // Summary / 요약
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ========================================");
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] JSI Hooks Installation Summary / JSI 훅 설치 요약:");
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule]   Console Hook: %@", consoleSuccess ? @"✅ Success" : @"❌ Failed");
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule]   Network Hook: %@", networkSuccess ? @"✅ Success" : @"❌ Failed");
+  if (consoleSuccess && networkSuccess) {
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ All JSI hooks installed successfully / 모든 JSI 훅이 성공적으로 설치됨");
+  } else {
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ⚠️ Some JSI hooks failed to install / 일부 JSI 훅 설치 실패");
+  }
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ========================================");
+}
+
 /**
  * Connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연결
  * @param serverHost Server host / 서버 호스트
@@ -204,6 +347,12 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
                   serverPort:(NSNumber *)serverPort
                   resolver:(RCTPromiseResolveBlock)resolver
                   rejecter:(RCTPromiseRejectBlock)rejecter) {
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] connect: called / connect: 호출됨");
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Server: %@:%@", serverHost, serverPort);
+
+  // WebSocket execution disabled - code preserved for later reconnection / WebSocket 실행 비활성화 - 나중에 재연결을 위해 코드 보존
+  // TODO: Re-enable WebSocket connection / TODO: WebSocket 연결 재활성화
+  /*
   // Call Objective-C++ implementation / Objective-C++ 구현 호출
   id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> connection =
     [ChromeRemoteDevToolsInspectorObjC connectWithServerHost:serverHost serverPort:[serverPort integerValue]];
@@ -211,34 +360,58 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
   if (connection) {
     // Store connection for log interception / 로그 가로채기를 위한 연결 저장
     g_connection = connection;
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] Connection stored for CDP message sending / CDP 메시지 전송을 위한 연결 저장됨");
+  */
 
+  // Set platform callback for C++ code (even without WebSocket, hooks can be installed) / C++ 코드를 위한 플랫폼 콜백 설정 (WebSocket 없이도 훅은 설치 가능)
 #ifdef CONSOLE_HOOK_AVAILABLE
-    // Set platform callback for C++ code / C++ 코드를 위한 플랫폼 콜백 설정
-    chrome_remote_devtools::setSendCDPMessageCallback(sendCDPMessageIOS);
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Setting platform callback for C++ hooks / C++ 훅을 위한 플랫폼 콜백 설정");
+  chrome_remote_devtools::setSendCDPMessageCallback(sendCDPMessageIOS);
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Platform callback set / 플랫폼 콜백 설정됨");
 
-    // Hook JSI console methods if available (same as Android) / 사용 가능한 경우 JSI console 메서드 훅 (Android와 동일)
-    // Note: This requires accessing the runtime executor from bridge / 참고: 이것은 bridge에서 런타임 실행자에 접근해야 합니다
-    // For now, we'll use RCTLogFunction as fallback / 지금은 RCTLogFunction을 폴백으로 사용합니다
-    // TODO: Add JSI hooking support for iOS / TODO: iOS용 JSI 훅 지원 추가
+  // Note: JSI hooks will be installed automatically via installJSIBindingsWithRuntime / 참고: JSI 훅은 installJSIBindingsWithRuntime을 통해 자동으로 설치됩니다
+  // This method is called when TurboModule is created / 이 메서드는 TurboModule이 생성될 때 호출됩니다
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] JSI hooks will be installed automatically when TurboModule is created / TurboModule이 생성될 때 JSI 훅이 자동으로 설치됩니다");
+#else
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ⚠️ ConsoleHook.h not available - JSI hooks will not be installed / ConsoleHook.h를 사용할 수 없음 - JSI 훅이 설치되지 않습니다");
 #endif
 
-    // Hook RCTLog to intercept console messages at native level / 네이티브 레벨에서 콘솔 메시지를 가로채기 위해 RCTLog 훅
-    if (!originalLogFunction) {
-      originalLogFunction = RCTGetLogFunction();
-      RCTSetLogFunction(ChromeRemoteDevToolsLogFunction);
-    }
+  // Hook RCTLog to intercept console messages at native level (fallback) / 네이티브 레벨에서 콘솔 메시지를 가로채기 위해 RCTLog 훅 (폴백)
+  // This is a fallback in case JSI hooks are not available / JSI 훅을 사용할 수 없는 경우를 위한 폴백입니다
+  // JSI hooks provide better stack traces with source map support / JSI 훅은 소스맵 지원과 함께 더 나은 스택 트레이스를 제공합니다
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Setting up RCTLogFunction as fallback / RCTLogFunction을 폴백으로 설정");
+  if (!originalLogFunction) {
+    originalLogFunction = RCTGetLogFunction();
+    RCTSetLogFunction(ChromeRemoteDevToolsLogFunction);
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ RCTLogFunction hook installed (fallback) / RCTLogFunction 훅 설치됨 (폴백)");
+  } else {
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] RCTLogFunction already hooked / RCTLogFunction이 이미 훅됨");
+  }
 
-    // Enable network interception / 네트워크 인터셉션 활성화
-    [ChromeRemoteDevToolsNetworkHook enableWithServerHost:serverHost serverPort:[serverPort integerValue]];
+  // Enable network interception at native level (NSURLProtocol) / 네이티브 레벨에서 네트워크 인터셉션 활성화 (NSURLProtocol)
+  // Note: JSI network hook will also be installed via installJSIBindingsWithRuntime / 참고: JSI 네트워크 훅도 installJSIBindingsWithRuntime을 통해 설치됩니다
+  // JSI hook provides better integration with JavaScript fetch/XMLHttpRequest / JSI 훅은 JavaScript fetch/XMLHttpRequest와 더 나은 통합을 제공합니다
+  // WebSocket execution disabled - code preserved for later reconnection / WebSocket 실행 비활성화 - 나중에 재연결을 위해 코드 보존
+  // TODO: Re-enable network interception when WebSocket is reconnected / TODO: WebSocket 재연결 시 네트워크 인터셉션 재활성화
+  /*
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Enabling native network interception (NSURLProtocol) / 네이티브 네트워크 인터셉션 활성화 (NSURLProtocol)");
+  [ChromeRemoteDevToolsNetworkHook enableWithServerHost:serverHost serverPort:[serverPort integerValue]];
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Native network interception enabled / 네이티브 네트워크 인터셉션 활성화됨");
+  */
 
-    resolver(@{
-      @"connected": @YES,
-      @"host": serverHost,
-      @"port": serverPort
-    });
+  // Return success (WebSocket connection will be implemented later) / 성공 반환 (WebSocket 연결은 나중에 구현됨)
+  resolver(@{
+    @"connected": @YES,
+    @"host": serverHost,
+    @"port": serverPort,
+    @"websocketDisabled": @YES  // Indicate WebSocket is disabled / WebSocket이 비활성화되었음을 표시
+  });
+
+  /*
   } else {
     rejecter(@"CONNECTION_FAILED", @"Failed to connect to Chrome Remote DevTools server", nil);
   }
+  */
 }
 
 /**
