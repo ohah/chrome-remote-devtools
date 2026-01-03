@@ -67,6 +67,30 @@ react {
                 hermesCommand = fallbackPath.absolutePath
             }
         }
+    } else {
+        // macOS/Linux: Try bun's hermes-compiler package first / macOS/Linux: bun의 hermes-compiler 패키지 먼저 시도
+        def monorepoRoot = rootProject.projectDir.parentFile.parentFile.parentFile
+        def osBin = osName.contains("mac") ? "osx-bin" : "linux-bin"
+        def bunHermesPath = new File(monorepoRoot, "node_modules/.bun/hermes-compiler@0.14.0/node_modules/hermes-compiler/hermesc/${osBin}/hermesc")
+        if (bunHermesPath.exists()) {
+            hermesCommand = bunHermesPath.absolutePath
+        } else {
+            // Fallback: try with 2 levels up (if examples/react-native is the root)
+            // 대안: 2단계 위로 시도 (examples/react-native가 루트인 경우)
+            def fallbackRoot = rootProject.projectDir.parentFile.parentFile
+            def fallbackPath = new File(fallbackRoot, "node_modules/.bun/hermes-compiler@0.14.0/node_modules/hermes-compiler/hermesc/${osBin}/hermesc")
+            if (fallbackPath.exists()) {
+                hermesCommand = fallbackPath.absolutePath
+            } else {
+                // Last fallback: try React Native's default path (may not exist in 0.83.1)
+                // 마지막 대안: React Native 기본 경로 시도 (0.83.1에서는 존재하지 않을 수 있음)
+                def reactNativeDir = file("../../node_modules/react-native")
+                def defaultHermesPath = new File(reactNativeDir, "sdks/hermesc/${osBin}/hermesc")
+                if (defaultHermesPath.exists()) {
+                    hermesCommand = defaultHermesPath.absolutePath
+                }
+            }
+        }
     }
     //
     //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
