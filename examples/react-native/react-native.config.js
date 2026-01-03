@@ -9,7 +9,7 @@ const config = {
         ios: {
           podspecPath: path.resolve(
             __dirname,
-            '../../packages/react-native-inspector/ios/ChromeRemoteDevToolsInspector.podspec'
+            '../../packages/react-native-inspector/ChromeRemoteDevToolsInspector.podspec'
           ),
         },
         android: {
