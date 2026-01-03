@@ -11,15 +11,22 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Platform,
 } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-react-native';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+  const [fetchStatus, setFetchStatus] = useState<{
+    method: string;
+    status: 'success' | 'error' | null;
+  }>({ method: '', status: null });
+  const [xhrStatus, setXhrStatus] = useState<{
+    method: string;
+    status: 'success' | 'error' | null;
+  }>({ method: '', status: null });
 
   // Connect to Chrome Remote DevTools server on app start / 앱 시작 시 Chrome Remote DevTools 서버에 연결
   useEffect(() => {
@@ -136,27 +143,24 @@ function App() {
     console.log('=== Console Test Suite Completed ===');
   };
 
-  // Test network requests / 네트워크 요청 테스트
+  // Test network requests with fetch / fetch를 사용한 네트워크 요청 테스트
   const handleTestNetwork = async (type: 'get' | 'post' | 'put' | 'delete' | 'error') => {
-    const timestamp = new Date().toISOString();
+    setFetchStatus({ method: type.toUpperCase(), status: null });
 
     try {
       switch (type) {
         case 'get':
-          console.log(`[Network] GET request started at ${timestamp}`);
           const getResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
             },
           });
-          const getData = await getResponse.json();
-          console.log('[Network] GET response:', getData);
-          Alert.alert('Success', 'GET request completed');
+          await getResponse.json();
+          setFetchStatus({ method: 'GET', status: 'success' });
           break;
 
         case 'post':
-          console.log(`[Network] POST request started at ${timestamp}`);
           const postResponse = await fetch('https://jsonplaceholder.typicode.com/posts', {
             method: 'POST',
             headers: {
@@ -168,13 +172,11 @@ function App() {
               userId: 1,
             }),
           });
-          const postData = await postResponse.json();
-          console.log('[Network] POST response:', postData);
-          Alert.alert('Success', 'POST request completed');
+          await postResponse.json();
+          setFetchStatus({ method: 'POST', status: 'success' });
           break;
 
         case 'put':
-          console.log(`[Network] PUT request started at ${timestamp}`);
           const putResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
             method: 'PUT',
             headers: {
@@ -187,55 +189,117 @@ function App() {
               userId: 1,
             }),
           });
-          const putData = await putResponse.json();
-          console.log('[Network] PUT response:', putData);
-          Alert.alert('Success', 'PUT request completed');
+          await putResponse.json();
+          setFetchStatus({ method: 'PUT', status: 'success' });
           break;
 
         case 'delete':
-          console.log(`[Network] DELETE request started at ${timestamp}`);
           const deleteResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
             method: 'DELETE',
           });
-          console.log('[Network] DELETE response status:', deleteResponse.status);
-          Alert.alert('Success', 'DELETE request completed');
+          if (deleteResponse.ok) {
+            setFetchStatus({ method: 'DELETE', status: 'success' });
+          } else {
+            setFetchStatus({ method: 'DELETE', status: 'error' });
+          }
           break;
 
         case 'error':
-          console.log(`[Network] Error request started at ${timestamp}`);
           try {
             await fetch('https://invalid-url-that-does-not-exist-12345.com/api', {
               method: 'GET',
             });
-          } catch (error) {
-            console.error('[Network] Request failed:', error);
-            Alert.alert('Expected Error', 'Network error occurred (this is expected)');
+          } catch {
+            setFetchStatus({ method: 'GET', status: 'error' });
           }
           break;
       }
-    } catch (error) {
-      console.error('[Network] Request error:', error);
-      Alert.alert('Error', error instanceof Error ? error.message : 'Network request failed');
+    } catch {
+      setFetchStatus({ method: type.toUpperCase(), status: 'error' });
+    }
+  };
+
+  // Test network requests with XHR / XHR를 사용한 네트워크 요청 테스트
+  const handleTestXHR = (type: 'get' | 'post' | 'put' | 'delete' | 'error') => {
+    setXhrStatus({ method: type.toUpperCase(), status: null });
+
+    const xhr = new XMLHttpRequest();
+    const url = 'https://jsonplaceholder.typicode.com/posts';
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        setXhrStatus({ method: type.toUpperCase(), status: 'success' });
+      } else {
+        setXhrStatus({ method: type.toUpperCase(), status: 'error' });
+      }
+    };
+
+    xhr.onerror = () => {
+      setXhrStatus({ method: type.toUpperCase(), status: 'error' });
+    };
+
+    xhr.ontimeout = () => {
+      setXhrStatus({ method: type.toUpperCase(), status: 'error' });
+    };
+
+    switch (type) {
+      case 'get':
+        xhr.open('GET', `${url}/1`, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
+        break;
+
+      case 'post':
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(
+          JSON.stringify({
+            title: 'Test Post',
+            body: 'This is a test POST request with XHR',
+            userId: 1,
+          })
+        );
+        break;
+
+      case 'put':
+        xhr.open('PUT', `${url}/1`, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(
+          JSON.stringify({
+            id: 1,
+            title: 'Updated Test Post',
+            body: 'This is an updated test PUT request with XHR',
+            userId: 1,
+          })
+        );
+        break;
+
+      case 'delete':
+        xhr.open('DELETE', `${url}/1`, true);
+        xhr.send();
+        break;
+
+      case 'error':
+        xhr.open('GET', 'https://invalid-url-that-does-not-exist-12345.com/api', true);
+        xhr.send();
+        break;
     }
   };
 
   // Run all network tests / 모든 네트워크 테스트 실행
   const handleRunAllNetworkTests = async () => {
-    console.log('=== Network Test Suite Started ===');
+    setFetchStatus({ method: 'ALL', status: null });
 
     // Test GET request / GET 요청 테스트
     try {
-      console.log('[Network] Testing GET request...');
       const getResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1');
-      const getData = await getResponse.json();
-      console.log('[Network] GET success:', getData);
-    } catch (error) {
-      console.error('[Network] GET failed:', error);
+      await getResponse.json();
+    } catch {
+      // Ignore errors in batch test / 배치 테스트에서는 에러 무시
     }
 
     // Test POST request / POST 요청 테스트
     try {
-      console.log('[Network] Testing POST request...');
       const postResponse = await fetch('https://jsonplaceholder.typicode.com/posts', {
         method: 'POST',
         headers: {
@@ -247,15 +311,13 @@ function App() {
           userId: 1,
         }),
       });
-      const postData = await postResponse.json();
-      console.log('[Network] POST success:', postData);
-    } catch (error) {
-      console.error('[Network] POST failed:', error);
+      await postResponse.json();
+    } catch {
+      // Ignore errors in batch test / 배치 테스트에서는 에러 무시
     }
 
     // Test PUT request / PUT 요청 테스트
     try {
-      console.log('[Network] Testing PUT request...');
       const putResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
         method: 'PUT',
         headers: {
@@ -268,50 +330,21 @@ function App() {
           userId: 1,
         }),
       });
-      const putData = await putResponse.json();
-      console.log('[Network] PUT success:', putData);
-    } catch (error) {
-      console.error('[Network] PUT failed:', error);
+      await putResponse.json();
+    } catch {
+      // Ignore errors in batch test / 배치 테스트에서는 에러 무시
     }
 
     // Test DELETE request / DELETE 요청 테스트
     try {
-      console.log('[Network] Testing DELETE request...');
-      const deleteResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
+      await fetch('https://jsonplaceholder.typicode.com/posts/1', {
         method: 'DELETE',
       });
-      console.log('[Network] DELETE success, status:', deleteResponse.status);
-    } catch (error) {
-      console.error('[Network] DELETE failed:', error);
+    } catch {
+      // Ignore errors in batch test / 배치 테스트에서는 에러 무시
     }
 
-    // Test with custom headers / 커스텀 헤더로 테스트
-    try {
-      console.log('[Network] Testing request with custom headers...');
-      const customResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Custom-Header': 'test-value',
-          Authorization: 'Bearer test-token',
-        },
-      });
-      const customData = await customResponse.json();
-      console.log('[Network] Custom headers success:', customData);
-    } catch (error) {
-      console.error('[Network] Custom headers failed:', error);
-    }
-
-    // Test error case / 에러 케이스 테스트
-    try {
-      console.log('[Network] Testing error case...');
-      await fetch('https://invalid-url-that-does-not-exist-12345.com/api');
-    } catch (error) {
-      console.error('[Network] Expected error occurred:', error);
-    }
-
-    console.log('=== Network Test Suite Completed ===');
-    Alert.alert('Complete', 'All network tests completed. Check console for details.');
+    setFetchStatus({ method: 'ALL', status: 'success' });
   };
 
   return (
@@ -375,9 +408,30 @@ function App() {
             </TouchableOpacity>
           </View>
 
-          {/* Network Test Buttons / 네트워크 테스트 버튼 */}
+          {/* Network Test Buttons (Fetch) / 네트워크 테스트 버튼 (Fetch) */}
           <View style={styles.networkTestContainer}>
-            <Text style={styles.networkTestTitle}>Network Test / 네트워크 테스트</Text>
+            <Text style={styles.networkTestTitle}>
+              Network Test (Fetch) / 네트워크 테스트 (Fetch)
+            </Text>
+            {/* Fetch Status / Fetch 상태 */}
+            <View
+              style={[
+                styles.networkStatusContainer,
+                fetchStatus.status === 'success'
+                  ? styles.networkStatusSuccess
+                  : fetchStatus.status === 'error'
+                    ? styles.networkStatusError
+                    : styles.networkStatusEmpty,
+              ]}
+            >
+              <Text style={styles.networkStatusText}>
+                {fetchStatus.status
+                  ? `FETCH ${fetchStatus.method}: ${
+                      fetchStatus.status === 'success' ? 'Success' : 'Failed'
+                    }`
+                  : ''}
+              </Text>
+            </View>
             <View style={styles.networkButtonRow}>
               <TouchableOpacity
                 style={[styles.networkButton, styles.networkGetButton]}
@@ -418,6 +472,64 @@ function App() {
             >
               <Text style={styles.networkButtonText}>Run All Network Tests</Text>
             </TouchableOpacity>
+          </View>
+
+          {/* Network Test Buttons (XHR) / 네트워크 테스트 버튼 (XHR) */}
+          <View style={styles.networkTestContainer}>
+            <Text style={styles.networkTestTitle}>Network Test (XHR) / 네트워크 테스트 (XHR)</Text>
+            {/* XHR Status / XHR 상태 */}
+            <View
+              style={[
+                styles.networkStatusContainer,
+                xhrStatus.status === 'success'
+                  ? styles.networkStatusSuccess
+                  : xhrStatus.status === 'error'
+                    ? styles.networkStatusError
+                    : styles.networkStatusEmpty,
+              ]}
+            >
+              <Text style={styles.networkStatusText}>
+                {xhrStatus.status
+                  ? `XHR ${xhrStatus.method}: ${
+                      xhrStatus.status === 'success' ? 'Success' : 'Failed'
+                    }`
+                  : ''}
+              </Text>
+            </View>
+            <View style={styles.networkButtonRow}>
+              <TouchableOpacity
+                style={[styles.networkButton, styles.networkGetButton]}
+                onPress={() => handleTestXHR('get')}
+              >
+                <Text style={styles.networkButtonText}>GET</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.networkButton, styles.networkPostButton]}
+                onPress={() => handleTestXHR('post')}
+              >
+                <Text style={styles.networkButtonText}>POST</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.networkButton, styles.networkPutButton]}
+                onPress={() => handleTestXHR('put')}
+              >
+                <Text style={styles.networkButtonText}>PUT</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.networkButtonRow}>
+              <TouchableOpacity
+                style={[styles.networkButton, styles.networkDeleteButton]}
+                onPress={() => handleTestXHR('delete')}
+              >
+                <Text style={styles.networkButtonText}>DELETE</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.networkButton, styles.networkErrorButton]}
+                onPress={() => handleTestXHR('error')}
+              >
+                <Text style={styles.networkButtonText}>Error</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Instructions / 사용 방법 */}
@@ -594,6 +706,33 @@ const styles = StyleSheet.create({
   networkTestAllButton: {
     backgroundColor: '#673AB7',
     marginTop: 8,
+  },
+  networkStatusContainer: {
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  networkStatusSuccess: {
+    backgroundColor: '#C8E6C9',
+    borderColor: '#4CAF50',
+    borderWidth: 1,
+  },
+  networkStatusError: {
+    backgroundColor: '#FFCDD2',
+    borderColor: '#F44336',
+    borderWidth: 1,
+  },
+  networkStatusEmpty: {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    minHeight: 44,
+  },
+  networkStatusText: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#000000',
   },
 });
 
