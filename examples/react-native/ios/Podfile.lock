@@ -1,9 +1,34 @@
 PODS:
   - boost (1.84.0)
   - ChromeRemoteDevToolsInspector (0.1.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
     - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
     - React-jsinspector
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
     - SocketRocket
+    - Yoga
   - DoubleConversion (1.1.6)
   - fast_float (8.0.0)
   - FBLazyVector (0.83.1)
@@ -2793,7 +2818,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
-  ChromeRemoteDevToolsInspector: ca8b95b42a94dfdd6fbd5c48badbf2fc954d9884
+  ChromeRemoteDevToolsInspector: 5697277697b95a47bc001e3e78cd176fc12b2fb5
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: 309703e71d3f2f1ed7dc7889d58309c9d77a95a4
