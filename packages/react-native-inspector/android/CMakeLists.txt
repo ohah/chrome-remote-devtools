@@ -10,10 +10,11 @@ file(GLOB_RECURSE android_files RELATIVE ${CMAKE_SOURCE_DIR}
 )
 
 # Find common C++ files / 공통 C++ 파일 찾기
-# Use absolute path to ensure NetworkHook.cpp is included / NetworkHook.cpp가 포함되도록 절대 경로 사용
+# Use absolute path to ensure all C++ files are included / 모든 C++ 파일이 포함되도록 절대 경로 사용
 get_filename_component(COMMON_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../cpp" ABSOLUTE)
 file(GLOB_RECURSE common_files
-     "${COMMON_CPP_DIR}/**.cpp"
+     "${COMMON_CPP_DIR}/*.cpp"
+     "${COMMON_CPP_DIR}/**/*.cpp"
 )
 
 # Add library / 라이브러리 추가
