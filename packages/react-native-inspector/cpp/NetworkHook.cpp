@@ -26,11 +26,12 @@
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 #elif defined(__APPLE__)
-#include <Foundation/Foundation.h>
+// Note: Cannot use Foundation.h in C++ files (Objective-C headers) / 참고: C++ 파일에서는 Foundation.h를 사용할 수 없음 (Objective-C 헤더)
+// Logging is disabled in C++ files for iOS. Use Objective-C++ wrapper (.mm) for NSLog if needed / iOS의 C++ 파일에서는 로깅이 비활성화됩니다. 필요하면 Objective-C++ 래퍼(.mm)에서 NSLog를 사용하세요
 #define LOG_TAG "NetworkHook"
-#define LOGI(...) NSLog(@"[INFO] " LOG_TAG ": " __VA_ARGS__)
-#define LOGE(...) NSLog(@"[ERROR] " LOG_TAG ": " __VA_ARGS__)
-#define LOGW(...) NSLog(@"[WARN] " LOG_TAG ": " __VA_ARGS__)
+#define LOGI(...) ((void)0)
+#define LOGE(...) ((void)0)
+#define LOGW(...) ((void)0)
 #else
 #define LOGI(...)
 #define LOGE(...)
