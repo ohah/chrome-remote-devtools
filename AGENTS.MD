@@ -376,3 +376,57 @@ refactor(inspector): reorganize component structure
 - [ ] (선택) `bun run lint` 실행하여 린트 검사
 - [ ] 모든 검사를 통과한 후 커밋 진행
 
+## React Native 원격 개발 전략
+
+### 기본 원칙
+
+**중요**: React Native의 모든 이벤트 인터셉션은 **JSI (JavaScript Interface) 레벨에서만** 처리합니다.
+
+1. **JSI 레벨 우선**: 모든 이벤트 인터셉션(네트워크, 콘솔, 디버깅 등)은 JSI 레벨에서 처리
+2. **네이티브 레벨 제한**: 네이티브 레벨 인터셉터는 사용하지 않음
+3. **함수 래핑 방식**: JavaScript 함수를 래핑하여 이벤트 정보 수집
+
+### 네트워크 인터셉션
+
+#### 구현 방식
+
+**XMLHttpRequest 인터셉션**:
+- `open()` 메서드 훅: method, url 정보 수집
+- `setRequestHeader()` 메서드 훅: headers 정보 수집
+- `send()` 메서드 훅: body 정보 수집 및 요청 전송 이벤트 발생
+- `load` 이벤트 리스너 추가: 응답 정보 수집 및 응답 수신 이벤트 발생
+
+**fetch 인터셉션**:
+- `fetch()` 함수 래핑: 요청 정보 수집 및 요청 전송 이벤트 발생
+- Promise의 `then()` 훅: 응답 정보 수집 및 응답 수신 이벤트 발생
+
+### 콘솔 인터셉션
+
+#### 구현 방식
+
+**console 메서드 인터셉션**:
+- `console.log()`, `console.warn()`, `console.error()` 등 모든 console 메서드 훅
+- 원본 메서드를 백업하고 래핑된 함수로 교체
+- 콘솔 메시지를 CDP 형식으로 변환하여 전송
+
+### 코드 구조 원칙
+
+1. **모듈화**: 이벤트 정보 수집 로직을 별도 함수로 분리
+2. **이벤트 전송 분리**: CDP 이벤트 전송 로직을 별도 함수로 분리
+3. **에러 처리**: 모든 JSI 호출은 try-catch로 감싸서 안전하게 처리
+4. **원본 함수 보존**: 원본 함수를 백업하여 정상 동작 보장
+5. **JSI 레벨 일관성**: 모든 인터셉션은 JSI 레벨에서 일관되게 처리
+
+#### 제한사항
+
+- **함수 래핑 필수**: 이벤트 정보를 얻기 위해 함수 래핑이 필요
+- **이벤트 리스너만으로는 부족**: 요청 정보를 얻기 위해서는 함수 호출을 가로채야 함
+- **성능 고려**: 함수 래핑은 성능에 영향을 줄 수 있으므로 최소한의 로직만 수행
+
+### 파일 위치
+
+- 네트워크 훅: `packages/react-native-inspector/cpp/NetworkHook.cpp`
+- 네트워크 훅 헤더: `packages/react-native-inspector/cpp/NetworkHook.h`
+- 콘솔 훅: `packages/react-native-inspector/cpp/ConsoleHook.cpp`
+- 콘솔 훅 헤더: `packages/react-native-inspector/cpp/ConsoleHook.h`
+
