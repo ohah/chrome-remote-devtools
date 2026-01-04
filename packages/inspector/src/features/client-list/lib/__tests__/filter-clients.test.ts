@@ -29,6 +29,22 @@ describe('filterClients', () => {
       ua: 'Firefox/121.0',
       ip: '10.0.0.1',
     },
+    {
+      id: 'rn-inspector-1',
+      type: 'react-native',
+      deviceName: 'sdk_gphone64_arm64',
+      appName: 'com.chromeremotedevtools',
+      deviceId: 'device-123',
+      profiling: false,
+    },
+    {
+      id: 'rn-inspector-2',
+      type: 'react-native',
+      deviceName: 'iPhone 15 Pro',
+      appName: 'com.example.app',
+      deviceId: 'device-456',
+      profiling: true,
+    },
   ];
 
   test('should return all clients when query is empty / 쿼리가 비어있을 때 모든 클라이언트를 반환해야 함', () => {
@@ -120,5 +136,59 @@ describe('filterClients', () => {
   test('should match multiple clients / 여러 클라이언트를 매칭해야 함', () => {
     const result = filterClients(mockClients, 'Page');
     expect(result).toHaveLength(3);
+  });
+
+  test('should filter React Native clients by device name / React Native 클라이언트를 디바이스 이름으로 필터링해야 함', () => {
+    const result = filterClients(mockClients, 'sdk_gphone64');
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('rn-inspector-1');
+    expect(result[0].type).toBe('react-native');
+  });
+
+  test('should filter React Native clients by app name / React Native 클라이언트를 앱 이름으로 필터링해야 함', () => {
+    const result = filterClients(mockClients, 'chromeremotedevtools');
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('rn-inspector-1');
+    expect(result[0].type).toBe('react-native');
+  });
+
+  test('should filter React Native clients by device ID / React Native 클라이언트를 디바이스 ID로 필터링해야 함', () => {
+    const result = filterClients(mockClients, 'device-456');
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('rn-inspector-2');
+    expect(result[0].type).toBe('react-native');
+  });
+
+  test('should filter mixed web and React Native clients / 웹과 React Native 클라이언트를 혼합하여 필터링해야 함', () => {
+    const result = filterClients(mockClients, 'example');
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe('client-1');
+    expect(result[0].type).toBe('web');
+    expect(result[1].id).toBe('rn-inspector-2');
+    expect(result[1].type).toBe('react-native');
+  });
+
+  test('should handle React Native clients with missing optional fields / 선택적 필드가 없는 React Native 클라이언트를 처리해야 함', () => {
+    const rnClientsWithMissingFields: Client[] = [
+      {
+        id: 'rn-1',
+        type: 'react-native',
+        // deviceName, appName, deviceId 모두 없음
+      },
+      {
+        id: 'rn-2',
+        type: 'react-native',
+        deviceName: 'Test Device',
+        // appName, deviceId 없음
+      },
+    ];
+
+    // ID로 필터링은 작동해야 함
+    const result1 = filterClients(rnClientsWithMissingFields, 'rn-1');
+    expect(result1).toHaveLength(1);
+
+    // deviceName으로 필터링도 작동해야 함
+    const result2 = filterClients(rnClientsWithMissingFields, 'Test Device');
+    expect(result2).toHaveLength(1);
   });
 });
