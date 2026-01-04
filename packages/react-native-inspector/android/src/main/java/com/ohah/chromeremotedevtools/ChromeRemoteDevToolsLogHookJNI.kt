@@ -40,6 +40,38 @@ class ChromeRemoteDevToolsLogHookJNI {
     external fun nativeHookJSILog(runtimeExecutor: Any): Boolean
 
     /**
+     * Enable console hook / console 훅 활성화
+     * @param runtimeExecutor RuntimeExecutor from React Native / React Native의 RuntimeExecutor
+     * @return true if enabling succeeded / 활성화가 성공하면 true
+     */
+    @JvmStatic
+    external fun nativeEnableConsoleHook(runtimeExecutor: Any): Boolean
+
+    /**
+     * Disable console hook / console 훅 비활성화
+     * @param runtimeExecutor RuntimeExecutor from React Native / React Native의 RuntimeExecutor
+     * @return true if disabling succeeded / 비활성화가 성공하면 true
+     */
+    @JvmStatic
+    external fun nativeDisableConsoleHook(runtimeExecutor: Any): Boolean
+
+    /**
+     * Enable network hook / 네트워크 훅 활성화
+     * @param runtimeExecutor RuntimeExecutor from React Native / React Native의 RuntimeExecutor
+     * @return true if enabling succeeded / 활성화가 성공하면 true
+     */
+    @JvmStatic
+    external fun nativeEnableNetworkHook(runtimeExecutor: Any): Boolean
+
+    /**
+     * Disable network hook / 네트워크 훅 비활성화
+     * @param runtimeExecutor RuntimeExecutor from React Native / React Native의 RuntimeExecutor
+     * @return true if disabling succeeded / 비활성화가 성공하면 true
+     */
+    @JvmStatic
+    external fun nativeDisableNetworkHook(runtimeExecutor: Any): Boolean
+
+    /**
      * Get network response body by request ID / 요청 ID로 네트워크 응답 본문 가져오기
      * @param requestId Network request ID / 네트워크 요청 ID
      * @return Response body as string, or null if not found / 응답 본문 문자열, 찾지 못하면 null

@@ -30,6 +30,40 @@ bool hookConsoleMethods(facebook::jsi::Runtime& runtime) {
   return console::hookConsoleMethods(runtime);
 }
 
+bool enableConsoleHook(facebook::jsi::Runtime& runtime) {
+  return console::hookConsoleMethods(runtime);
+}
+
+bool disableConsoleHook(facebook::jsi::Runtime& runtime) {
+  // Restore original console methods / 원본 console 메서드 복원
+  try {
+    facebook::jsi::Value consoleValue = runtime.global().getProperty(runtime, "console");
+    if (consoleValue.isObject()) {
+      facebook::jsi::Object consoleObj = consoleValue.asObject(runtime);
+      const char* methods[] = {"log", "warn", "error", "info", "debug"};
+
+      for (const char* methodName : methods) {
+        try {
+          std::string backupPropName = std::string("__original_") + methodName;
+          facebook::jsi::Value originalMethodValue = consoleObj.getProperty(runtime, backupPropName.c_str());
+          if (originalMethodValue.isObject() && originalMethodValue.asObject(runtime).isFunction(runtime)) {
+            // Restore original method / 원본 메서드 복원
+            consoleObj.setProperty(runtime, methodName, std::move(originalMethodValue));
+            // Remove backup property / 백업 속성 제거
+            consoleObj.setProperty(runtime, backupPropName.c_str(), facebook::jsi::Value::undefined());
+          }
+        } catch (...) {
+          // Failed to restore method / 메서드 복원 실패
+        }
+      }
+      return true;
+    }
+  } catch (...) {
+    // Failed to disable console hook / console 훅 비활성화 실패
+  }
+  return false;
+}
+
 facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::string& objectId) {
   return console::findObjectById(runtime, objectId);
 }

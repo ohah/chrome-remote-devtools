@@ -23,6 +23,20 @@ namespace chrome_remote_devtools {
 bool hookNetworkMethods(facebook::jsi::Runtime& runtime);
 
 /**
+ * Enable network hook / 네트워크 훅 활성화
+ * @param runtime JSI runtime instance / JSI 런타임 인스턴스
+ * @return true if enabling succeeded / 활성화가 성공하면 true
+ */
+bool enableNetworkHook(facebook::jsi::Runtime& runtime);
+
+/**
+ * Disable network hook / 네트워크 훅 비활성화
+ * @param runtime JSI runtime instance / JSI 런타임 인스턴스
+ * @return true if disabling succeeded / 비활성화가 성공하면 true
+ */
+bool disableNetworkHook(facebook::jsi::Runtime& runtime);
+
+/**
  * Get network response body by request ID / 요청 ID로 네트워크 응답 본문 가져오기
  * @param requestId Network request ID / 네트워크 요청 ID
  * @return Response body as string, or empty string if not found / 응답 본문 문자열, 없으면 빈 문자열

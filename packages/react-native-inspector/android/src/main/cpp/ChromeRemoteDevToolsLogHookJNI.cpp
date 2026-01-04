@@ -255,6 +255,154 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHookJSIL
   }
 }
 
+// JNI function to enable console hook / console 훅을 활성화하는 JNI 함수
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeEnableConsoleHook(
+    JNIEnv *env,
+    jobject /* thiz */,
+    jobject runtimeExecutor) {
+#ifdef REACT_NATIVE_JSI_AVAILABLE
+  try {
+    using namespace facebook::react;
+    using namespace facebook::jni;
+
+    alias_ref<JRuntimeExecutor::javaobject> jRuntimeExecutor =
+        wrap_alias(reinterpret_cast<JRuntimeExecutor::javaobject>(runtimeExecutor));
+
+    if (!jRuntimeExecutor) {
+      return JNI_FALSE;
+    }
+
+    RuntimeExecutor executor = jRuntimeExecutor->cthis()->get();
+    if (!executor) {
+      return JNI_FALSE;
+    }
+
+    bool success = false;
+    executor([&success](facebook::jsi::Runtime& runtime) {
+      success = chrome_remote_devtools::enableConsoleHook(runtime);
+    });
+
+    return success ? JNI_TRUE : JNI_FALSE;
+  } catch (...) {
+    return JNI_FALSE;
+  }
+#else
+  return JNI_FALSE;
+#endif
+}
+
+// JNI function to disable console hook / console 훅을 비활성화하는 JNI 함수
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeDisableConsoleHook(
+    JNIEnv *env,
+    jobject /* thiz */,
+    jobject runtimeExecutor) {
+#ifdef REACT_NATIVE_JSI_AVAILABLE
+  try {
+    using namespace facebook::react;
+    using namespace facebook::jni;
+
+    alias_ref<JRuntimeExecutor::javaobject> jRuntimeExecutor =
+        wrap_alias(reinterpret_cast<JRuntimeExecutor::javaobject>(runtimeExecutor));
+
+    if (!jRuntimeExecutor) {
+      return JNI_FALSE;
+    }
+
+    RuntimeExecutor executor = jRuntimeExecutor->cthis()->get();
+    if (!executor) {
+      return JNI_FALSE;
+    }
+
+    bool success = false;
+    executor([&success](facebook::jsi::Runtime& runtime) {
+      success = chrome_remote_devtools::disableConsoleHook(runtime);
+    });
+
+    return success ? JNI_TRUE : JNI_FALSE;
+  } catch (...) {
+    return JNI_FALSE;
+  }
+#else
+  return JNI_FALSE;
+#endif
+}
+
+// JNI function to enable network hook / 네트워크 훅을 활성화하는 JNI 함수
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeEnableNetworkHook(
+    JNIEnv *env,
+    jobject /* thiz */,
+    jobject runtimeExecutor) {
+#ifdef REACT_NATIVE_JSI_AVAILABLE
+  try {
+    using namespace facebook::react;
+    using namespace facebook::jni;
+
+    alias_ref<JRuntimeExecutor::javaobject> jRuntimeExecutor =
+        wrap_alias(reinterpret_cast<JRuntimeExecutor::javaobject>(runtimeExecutor));
+
+    if (!jRuntimeExecutor) {
+      return JNI_FALSE;
+    }
+
+    RuntimeExecutor executor = jRuntimeExecutor->cthis()->get();
+    if (!executor) {
+      return JNI_FALSE;
+    }
+
+    bool success = false;
+    executor([&success](facebook::jsi::Runtime& runtime) {
+      success = chrome_remote_devtools::enableNetworkHook(runtime);
+    });
+
+    return success ? JNI_TRUE : JNI_FALSE;
+  } catch (...) {
+    return JNI_FALSE;
+  }
+#else
+  return JNI_FALSE;
+#endif
+}
+
+// JNI function to disable network hook / 네트워크 훅을 비활성화하는 JNI 함수
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeDisableNetworkHook(
+    JNIEnv *env,
+    jobject /* thiz */,
+    jobject runtimeExecutor) {
+#ifdef REACT_NATIVE_JSI_AVAILABLE
+  try {
+    using namespace facebook::react;
+    using namespace facebook::jni;
+
+    alias_ref<JRuntimeExecutor::javaobject> jRuntimeExecutor =
+        wrap_alias(reinterpret_cast<JRuntimeExecutor::javaobject>(runtimeExecutor));
+
+    if (!jRuntimeExecutor) {
+      return JNI_FALSE;
+    }
+
+    RuntimeExecutor executor = jRuntimeExecutor->cthis()->get();
+    if (!executor) {
+      return JNI_FALSE;
+    }
+
+    bool success = false;
+    executor([&success](facebook::jsi::Runtime& runtime) {
+      success = chrome_remote_devtools::disableNetworkHook(runtime);
+    });
+
+    return success ? JNI_TRUE : JNI_FALSE;
+  } catch (...) {
+    return JNI_FALSE;
+  }
+#else
+  return JNI_FALSE;
+#endif
+}
+
 // JNI function to get network response body / 네트워크 응답 본문을 가져오는 JNI 함수
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeGetNetworkResponseBody(

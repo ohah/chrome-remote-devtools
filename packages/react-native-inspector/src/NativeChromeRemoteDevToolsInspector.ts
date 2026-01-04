@@ -48,6 +48,30 @@ export interface Spec extends TurboModule {
    * @returns Promise that resolves when message is sent / 메시지가 전송되면 resolve되는 Promise
    */
   sendCDPMessage(message: string): Promise<void>;
+
+  /**
+   * Enable console hook / console 훅 활성화
+   * @returns Promise that resolves to true if enabling succeeded / 활성화가 성공하면 true로 resolve되는 Promise
+   */
+  enableConsoleHook(): Promise<boolean>;
+
+  /**
+   * Disable console hook / console 훅 비활성화
+   * @returns Promise that resolves to true if disabling succeeded / 비활성화가 성공하면 true로 resolve되는 Promise
+   */
+  disableConsoleHook(): Promise<boolean>;
+
+  /**
+   * Enable network hook / 네트워크 훅 활성화
+   * @returns Promise that resolves to true if enabling succeeded / 활성화가 성공하면 true로 resolve되는 Promise
+   */
+  enableNetworkHook(): Promise<boolean>;
+
+  /**
+   * Disable network hook / 네트워크 훅 비활성화
+   * @returns Promise that resolves to true if disabling succeeded / 비활성화가 성공하면 true로 resolve되는 Promise
+   */
+  disableNetworkHook(): Promise<boolean>;
 }
 
 /**
