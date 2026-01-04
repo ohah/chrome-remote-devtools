@@ -102,8 +102,6 @@ export function createHttpRouter(socketServer: SocketServer) {
       if (inspector) {
         const inspectorClient = {
           id: inspector.id,
-          title: `${inspector.deviceName || 'Unknown Device'} - ${inspector.appName || 'Unknown App'}`,
-          url: `rn-inspector://${inspector.deviceId || inspector.id}`,
           type: 'react-native' as const,
           deviceName: inspector.deviceName,
           appName: inspector.appName,
