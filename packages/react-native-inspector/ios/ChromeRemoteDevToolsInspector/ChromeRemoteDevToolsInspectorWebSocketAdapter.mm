@@ -153,16 +153,32 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
       // Get response body from C++ network hook / C++ network 훅에서 응답 본문 가져오기
       std::string requestIdCpp = [networkRequestId UTF8String];
       std::string responseBody = chrome_remote_devtools::getNetworkResponseBody(requestIdCpp);
-      NSString *responseBodyStr = responseBody.empty() ? @"" : [NSString stringWithUTF8String:responseBody.c_str()];
 
-      if (responseBody.empty()) {
-        RCTLogInfo(@"[ChromeRemoteDevTools] Network response body not found / 네트워크 응답 본문을 찾을 수 없음: requestId=%@", networkRequestId);
+      NSString *responseBodyStr = @"";
+      BOOL base64Encoded = NO;
+
+      if (!responseBody.empty()) {
+        // Try to interpret the response body as UTF-8 text first / 먼저 응답 본문을 UTF-8 텍스트로 해석 시도
+        NSString *utf8String = [[NSString alloc] initWithBytes:responseBody.data()
+                                                        length:responseBody.size()
+                                                      encoding:NSUTF8StringEncoding];
+        if (utf8String) {
+          responseBodyStr = utf8String;
+          RCTLogInfo(@"[ChromeRemoteDevTools] Network response body retrieved / 네트워크 응답 본문 가져옴: requestId=%@, length=%zu", networkRequestId, responseBody.length());
+        } else {
+          // Fallback: treat as binary and base64-encode / 폴백: 바이너리로 간주하고 base64 인코딩
+          NSData *responseData = [NSData dataWithBytes:responseBody.data() length:responseBody.size()];
+          responseBodyStr = [responseData base64EncodedStringWithOptions:0];
+          base64Encoded = YES;
+          RCTLogWarn(@"[ChromeRemoteDevTools] Network response body is not valid UTF-8, using base64-encoded body / 네트워크 응답 본문이 유효한 UTF-8이 아니므로 base64 인코딩된 본문을 사용합니다: requestId=%@", networkRequestId);
+        }
       } else {
-        RCTLogInfo(@"[ChromeRemoteDevTools] Network response body retrieved / 네트워크 응답 본문 가져옴: requestId=%@, length=%zu", networkRequestId, responseBody.length());
+        RCTLogInfo(@"[ChromeRemoteDevTools] Network response body not found / 네트워크 응답 본문을 찾을 수 없음: requestId=%@", networkRequestId);
       }
 #else
       // Network hook not available, return empty body / 네트워크 훅을 사용할 수 없으므로 빈 본문 반환
       NSString *responseBodyStr = @"";
+      BOOL base64Encoded = NO;
       RCTLogWarn(@"[ChromeRemoteDevTools] Network hook not available, returning empty body / 네트워크 훅을 사용할 수 없어 빈 본문 반환");
 #endif
 
@@ -170,7 +186,7 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
         @"id": requestId,
         @"result": @{
           @"body": responseBodyStr,
-          @"base64Encoded": @NO
+          @"base64Encoded": @(base64Encoded)
         }
       };
 
@@ -182,8 +198,36 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
           RCTLogInfo(@"[ChromeRemoteDevTools] Sending Network.getResponseBody response / Network.getResponseBody 응답 전송: %@", [responseStr substringToIndex:MIN(200, responseStr.length)]);
           [self send:[responseStr UTF8String]];
           return; // Don't forward the original message / 원본 메시지를 전달하지 않음
+        } else {
+          // Failed to encode response as UTF-8 string / 응답을 UTF-8 문자열로 인코딩 실패
+          RCTLogError(@"[ChromeRemoteDevTools] Failed to encode Network.getResponseBody response as UTF-8 string / Network.getResponseBody 응답을 UTF-8 문자열로 인코딩 실패");
+        }
+      } else {
+        // Failed to serialize response / 응답 직렬화 실패
+        RCTLogError(@"[ChromeRemoteDevTools] Failed to serialize Network.getResponseBody response: %@ / Network.getResponseBody 응답 직렬화 실패: %@", responseError, response);
+      }
+
+      // Send error response if serialization failed / 직렬화 실패 시 오류 응답 전송
+      NSDictionary *errorResponse = @{
+        @"id": requestId,
+        @"error": @{
+          @"code": @(-32000),
+          @"message": @"Failed to serialize Network.getResponseBody response"
+        }
+      };
+      NSError *errorSerializationError = nil;
+      NSData *errorJsonData = [NSJSONSerialization dataWithJSONObject:errorResponse options:0 error:&errorSerializationError];
+      if (!errorSerializationError && errorJsonData) {
+        NSString *errorStr = [[NSString alloc] initWithData:errorJsonData encoding:NSUTF8StringEncoding];
+        if (errorStr) {
+          RCTLogInfo(@"[ChromeRemoteDevTools] Sending Network.getResponseBody error response / Network.getResponseBody 오류 응답 전송: %@", [errorStr substringToIndex:MIN(200, errorStr.length)]);
+          [self send:[errorStr UTF8String]];
+          return; // Don't forward the original message / 원본 메시지를 전달하지 않음
         }
       }
+      // If we reach here, even the error response serialization failed. Log and avoid forwarding.
+      RCTLogError(@"[ChromeRemoteDevTools] Failed to serialize Network.getResponseBody error response / Network.getResponseBody 오류 응답 직렬화 실패");
+      return; // Don't forward the original message / 원본 메시지를 전달하지 않음
     }
   }
 
