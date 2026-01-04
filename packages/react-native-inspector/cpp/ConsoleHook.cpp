@@ -46,11 +46,15 @@ bool disableConsoleHook(facebook::jsi::Runtime& runtime) {
         try {
           std::string backupPropName = std::string("__original_") + methodName;
           facebook::jsi::Value originalMethodValue = consoleObj.getProperty(runtime, backupPropName.c_str());
+          // Check if backup exists and is a function before restoring / 복원 전에 백업이 존재하고 함수인지 확인
           if (originalMethodValue.isObject() && originalMethodValue.asObject(runtime).isFunction(runtime)) {
             // Restore original method / 원본 메서드 복원
             consoleObj.setProperty(runtime, methodName, std::move(originalMethodValue));
             // Remove backup property / 백업 속성 제거
             consoleObj.setProperty(runtime, backupPropName.c_str(), facebook::jsi::Value::undefined());
+          } else if (!originalMethodValue.isUndefined()) {
+            // Backup property exists but is not a function, or already restored / 백업 속성이 존재하지만 함수가 아니거나 이미 복원됨
+            // Skip restoration to avoid setting method to undefined / 메서드를 undefined로 설정하는 것을 방지하기 위해 복원 건너뜀
           }
         } catch (...) {
           // Failed to restore method / 메서드 복원 실패
