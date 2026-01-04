@@ -134,4 +134,76 @@ describe('getClients', () => {
       }
     }
   });
+
+  test('should fetch React Native clients successfully / React Native 클라이언트를 성공적으로 가져와야 함', async () => {
+    const mockClients: Client[] = [
+      {
+        id: 'rn-inspector-1',
+        type: 'react-native',
+        deviceName: 'sdk_gphone64_arm64',
+        appName: 'com.chromeremotedevtools',
+        deviceId: 'device-123',
+        profiling: false,
+      },
+      {
+        id: 'rn-inspector-2',
+        type: 'react-native',
+        deviceName: 'iPhone 15 Pro',
+        appName: 'com.example.app',
+        deviceId: 'device-456',
+        profiling: true,
+      },
+    ];
+
+    globalThis.fetch = mock(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ clients: mockClients }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+    ) as unknown as typeof fetch;
+
+    const result = await getClients();
+
+    expect(result).toEqual(mockClients);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  test('should fetch mixed web and React Native clients / 웹과 React Native 클라이언트를 혼합하여 가져와야 함', async () => {
+    const mockClients: Client[] = [
+      {
+        id: 'client-1',
+        type: 'web',
+        url: 'http://example.com',
+        title: 'Example Page',
+        ua: 'Mozilla/5.0',
+        ip: '127.0.0.1',
+      },
+      {
+        id: 'rn-inspector-1',
+        type: 'react-native',
+        deviceName: 'sdk_gphone64_arm64',
+        appName: 'com.chromeremotedevtools',
+        deviceId: 'device-123',
+        profiling: false,
+      },
+    ];
+
+    globalThis.fetch = mock(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ clients: mockClients }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+    ) as unknown as typeof fetch;
+
+    const result = await getClients();
+
+    expect(result).toEqual(mockClients);
+    expect(result).toHaveLength(2);
+    expect(result[0].type).toBe('web');
+    expect(result[1].type).toBe('react-native');
+  });
 });
