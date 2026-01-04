@@ -10,6 +10,7 @@
 #include "NetworkHook.h"
 #include "network/XHRHook.h"
 #include "network/FetchHook.h"
+#include "network/NetworkGlobals.h"
 #include <atomic>
 
 // Platform-specific log support / 플랫폼별 로그 지원
@@ -70,6 +71,15 @@ bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
     LOGE("Failed to hook network methods / 네트워크 메서드 훅 실패: %s", e.what());
     return false;
   }
+}
+
+std::string getNetworkResponseBody(const std::string& requestId) {
+  std::lock_guard<std::mutex> lock(network::g_responseDataMutex);
+  auto it = network::g_responseData.find(requestId);
+  if (it != network::g_responseData.end()) {
+    return it->second;
+  }
+  return "";
 }
 
 } // namespace chrome_remote_devtools

@@ -247,13 +247,25 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
    * Send Network.getResponseBody response / Network.getResponseBody 응답 전송
    * @param requestId CDP request ID / CDP 요청 ID
    * @param networkRequestId Network request ID / 네트워크 요청 ID
+   * Note: Network interception is handled by C++ network hook (JSI level) / 참고: 네트워크 인터셉션은 C++ network 훅(JSI 레벨)에서 처리됩니다
+   * Get response body from C++ hook via JNI / JNI를 통해 C++ 훅에서 응답 본문 가져오기
    */
   private fun sendNetworkGetResponseBodyResponse(requestId: Int, networkRequestId: String) {
     Log.d(TAG, "sendNetworkGetResponseBodyResponse called / sendNetworkGetResponseBodyResponse 호출됨: requestId=$requestId, networkRequestId=$networkRequestId")
 
-    // Get response body from network interceptor / 네트워크 인터셉터에서 응답 본문 가져오기
-    val responseBody = com.ohah.chromeremotedevtools.ChromeRemoteDevToolsNetworkInterceptor.getResponseBody(networkRequestId)
-    Log.d(TAG, "Response body retrieved / 응답 본문 가져옴: length=${responseBody.length}")
+    // Get response body from C++ network hook via JNI / JNI를 통해 C++ network 훅에서 응답 본문 가져오기
+    val responseBody = try {
+      ChromeRemoteDevToolsLogHookJNI.nativeGetNetworkResponseBody(networkRequestId) ?: ""
+    } catch (e: Exception) {
+      Log.e(TAG, "Failed to get network response body from C++ hook / C++ 훅에서 네트워크 응답 본문 가져오기 실패: ${e.message}", e)
+      ""
+    }
+
+    if (responseBody.isEmpty()) {
+      Log.d(TAG, "Network response body not found for requestId / requestId에 대한 네트워크 응답 본문을 찾을 수 없음: $networkRequestId")
+    } else {
+      Log.d(TAG, "Network response body retrieved / 네트워크 응답 본문 가져옴: requestId=$networkRequestId, length=${responseBody.length}")
+    }
 
     val response = org.json.JSONObject().apply {
       put("id", requestId)
