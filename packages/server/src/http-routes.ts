@@ -54,15 +54,16 @@ export function createHttpRouter(socketServer: SocketServer) {
 
     if (url.pathname === '/json/clients') {
       // Get all clients with details, including React Native Inspector connections / 상세 정보와 함께 모든 클라이언트 가져오기 (React Native Inspector 연결 포함)
-      const regularClients = socketServer.getAllClients();
+      const regularClients = socketServer.getAllClients().map(({ title: _title, ...client }) => ({
+        ...client,
+        type: 'web' as const,
+      }));
       const rnInspectors = socketServer.reactNativeInspectorManager.getAllConnections();
 
       // Convert React Native Inspector connections to client format / React Native Inspector 연결을 클라이언트 형식으로 변환
       const rnInspectorClients = rnInspectors.map((inspector) => ({
         id: inspector.id,
-        title: `${inspector.deviceName || 'Unknown Device'} - ${inspector.appName || 'Unknown App'}`,
-        url: `rn-inspector://${inspector.deviceId || inspector.id}`,
-        type: 'react-native-inspector' as const,
+        type: 'react-native' as const,
         deviceName: inspector.deviceName,
         appName: inspector.appName,
         deviceId: inspector.deviceId,
@@ -103,7 +104,7 @@ export function createHttpRouter(socketServer: SocketServer) {
           id: inspector.id,
           title: `${inspector.deviceName || 'Unknown Device'} - ${inspector.appName || 'Unknown App'}`,
           url: `rn-inspector://${inspector.deviceId || inspector.id}`,
-          type: 'react-native-inspector' as const,
+          type: 'react-native' as const,
           deviceName: inspector.deviceName,
           appName: inspector.appName,
           deviceId: inspector.deviceId,
