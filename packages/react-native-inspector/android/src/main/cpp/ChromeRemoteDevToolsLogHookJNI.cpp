@@ -12,6 +12,8 @@
 #include <string>
 #include <mutex>
 #include <vector>
+#include <future>
+#include <chrono>
 
 // Include JSI headers for JSI-level logging interception / JSI 레벨 로깅 인터셉션을 위한 JSI 헤더 포함
 #if __has_include(<jsi/jsi.h>) && __has_include(<ReactCommon/RuntimeExecutor.h>) && __has_include(<fbjni/fbjni.h>) && __has_include(<react/jni/JRuntimeExecutor.h>)
@@ -258,7 +260,7 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHookJSIL
 // JNI function to enable console hook / console 훅을 활성화하는 JNI 함수
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeEnableConsoleHook(
-    JNIEnv *env,
+    JNIEnv * /* env */,
     jobject /* thiz */,
     jobject runtimeExecutor) {
 #ifdef REACT_NATIVE_JSI_AVAILABLE
@@ -278,13 +280,30 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeEnableCo
       return JNI_FALSE;
     }
 
-    bool success = false;
-    executor([&success](facebook::jsi::Runtime& runtime) {
-      success = chrome_remote_devtools::enableConsoleHook(runtime);
+    // Use promise/future to wait for async execution / 비동기 실행을 기다리기 위해 promise/future 사용
+    std::promise<bool> promise;
+    std::future<bool> future = promise.get_future();
+
+    executor([&promise](facebook::jsi::Runtime& runtime) {
+      bool success = chrome_remote_devtools::enableConsoleHook(runtime);
+      promise.set_value(success);
     });
 
-    return success ? JNI_TRUE : JNI_FALSE;
+    // Wait for result with timeout / 타임아웃과 함께 결과 대기
+    if (future.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
+      __android_log_print(ANDROID_LOG_ERROR, TAG,
+                          "Timeout waiting for enableConsoleHook / enableConsoleHook 대기 중 타임아웃");
+      return JNI_FALSE;
+    }
+
+    return future.get() ? JNI_TRUE : JNI_FALSE;
+  } catch (const std::exception& e) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Exception in nativeEnableConsoleHook: %s", e.what());
+    return JNI_FALSE;
   } catch (...) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Unknown exception in nativeEnableConsoleHook / nativeEnableConsoleHook에서 알 수 없는 예외");
     return JNI_FALSE;
   }
 #else
@@ -295,7 +314,7 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeEnableCo
 // JNI function to disable console hook / console 훅을 비활성화하는 JNI 함수
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeDisableConsoleHook(
-    JNIEnv *env,
+    JNIEnv * /* env */,
     jobject /* thiz */,
     jobject runtimeExecutor) {
 #ifdef REACT_NATIVE_JSI_AVAILABLE
@@ -315,13 +334,30 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeDisableC
       return JNI_FALSE;
     }
 
-    bool success = false;
-    executor([&success](facebook::jsi::Runtime& runtime) {
-      success = chrome_remote_devtools::disableConsoleHook(runtime);
+    // Use promise/future to wait for async execution / 비동기 실행을 기다리기 위해 promise/future 사용
+    std::promise<bool> promise;
+    std::future<bool> future = promise.get_future();
+
+    executor([&promise](facebook::jsi::Runtime& runtime) {
+      bool success = chrome_remote_devtools::disableConsoleHook(runtime);
+      promise.set_value(success);
     });
 
-    return success ? JNI_TRUE : JNI_FALSE;
+    // Wait for result with timeout / 타임아웃과 함께 결과 대기
+    if (future.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
+      __android_log_print(ANDROID_LOG_ERROR, TAG,
+                          "Timeout waiting for disableConsoleHook / disableConsoleHook 대기 중 타임아웃");
+      return JNI_FALSE;
+    }
+
+    return future.get() ? JNI_TRUE : JNI_FALSE;
+  } catch (const std::exception& e) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Exception in nativeDisableConsoleHook: %s", e.what());
+    return JNI_FALSE;
   } catch (...) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Unknown exception in nativeDisableConsoleHook / nativeDisableConsoleHook에서 알 수 없는 예외");
     return JNI_FALSE;
   }
 #else
@@ -332,7 +368,7 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeDisableC
 // JNI function to enable network hook / 네트워크 훅을 활성화하는 JNI 함수
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeEnableNetworkHook(
-    JNIEnv *env,
+    JNIEnv * /* env */,
     jobject /* thiz */,
     jobject runtimeExecutor) {
 #ifdef REACT_NATIVE_JSI_AVAILABLE
@@ -352,13 +388,30 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeEnableNe
       return JNI_FALSE;
     }
 
-    bool success = false;
-    executor([&success](facebook::jsi::Runtime& runtime) {
-      success = chrome_remote_devtools::enableNetworkHook(runtime);
+    // Use promise/future to wait for async execution / 비동기 실행을 기다리기 위해 promise/future 사용
+    std::promise<bool> promise;
+    std::future<bool> future = promise.get_future();
+
+    executor([&promise](facebook::jsi::Runtime& runtime) {
+      bool success = chrome_remote_devtools::enableNetworkHook(runtime);
+      promise.set_value(success);
     });
 
-    return success ? JNI_TRUE : JNI_FALSE;
+    // Wait for result with timeout / 타임아웃과 함께 결과 대기
+    if (future.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
+      __android_log_print(ANDROID_LOG_ERROR, TAG,
+                          "Timeout waiting for enableNetworkHook / enableNetworkHook 대기 중 타임아웃");
+      return JNI_FALSE;
+    }
+
+    return future.get() ? JNI_TRUE : JNI_FALSE;
+  } catch (const std::exception& e) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Exception in nativeEnableNetworkHook: %s", e.what());
+    return JNI_FALSE;
   } catch (...) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Unknown exception in nativeEnableNetworkHook / nativeEnableNetworkHook에서 알 수 없는 예외");
     return JNI_FALSE;
   }
 #else
@@ -369,7 +422,7 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeEnableNe
 // JNI function to disable network hook / 네트워크 훅을 비활성화하는 JNI 함수
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeDisableNetworkHook(
-    JNIEnv *env,
+    JNIEnv * /* env */,
     jobject /* thiz */,
     jobject runtimeExecutor) {
 #ifdef REACT_NATIVE_JSI_AVAILABLE
@@ -389,13 +442,30 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeDisableN
       return JNI_FALSE;
     }
 
-    bool success = false;
-    executor([&success](facebook::jsi::Runtime& runtime) {
-      success = chrome_remote_devtools::disableNetworkHook(runtime);
+    // Use promise/future to wait for async execution / 비동기 실행을 기다리기 위해 promise/future 사용
+    std::promise<bool> promise;
+    std::future<bool> future = promise.get_future();
+
+    executor([&promise](facebook::jsi::Runtime& runtime) {
+      bool success = chrome_remote_devtools::disableNetworkHook(runtime);
+      promise.set_value(success);
     });
 
-    return success ? JNI_TRUE : JNI_FALSE;
+    // Wait for result with timeout / 타임아웃과 함께 결과 대기
+    if (future.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
+      __android_log_print(ANDROID_LOG_ERROR, TAG,
+                          "Timeout waiting for disableNetworkHook / disableNetworkHook 대기 중 타임아웃");
+      return JNI_FALSE;
+    }
+
+    return future.get() ? JNI_TRUE : JNI_FALSE;
+  } catch (const std::exception& e) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Exception in nativeDisableNetworkHook: %s", e.what());
+    return JNI_FALSE;
   } catch (...) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Unknown exception in nativeDisableNetworkHook / nativeDisableNetworkHook에서 알 수 없는 예외");
     return JNI_FALSE;
   }
 #else
