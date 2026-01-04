@@ -61,13 +61,13 @@ void sendCDPMessageIOS(const char* serverHost, int serverPort, const char* messa
 #endif
 
 /**
- * Custom log function to intercept console messages and send as CDP events / 콘솔 메시지를 가로채서 CDP 이벤트로 전송하는 커스텀 로그 함수
+ * Custom log function to intercept console messages at native level (fallback) / 네이티브 레벨에서 콘솔 메시지를 가로채는 커스텀 로그 함수 (폴백)
  * Note: RCTLogFunction is a block type in React Native 0.83+ / 참고: RCTLogFunction은 React Native 0.83+에서 블록 타입입니다
+ * This is a fallback in case C++ console hook (JSI level) is not available / C++ console 훅(JSI 레벨)을 사용할 수 없는 경우를 위한 폴백입니다
+ * When C++ hook is installed, it handles CDP message sending, so this function skips sending to avoid duplicates / C++ 훅이 설치되면 CDP 메시지 전송을 처리하므로, 이 함수는 중복을 방지하기 위해 전송을 건너뜁니다
  */
 // Flag to prevent infinite recursion / 무한 재귀 방지를 위한 플래그
 static BOOL isProcessingLog = NO;
-// Counter to ensure unique timestamps / 고유한 타임스탬프를 보장하기 위한 카운터
-static NSUInteger timestampCounter = 0;
 
 static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
     RCTLogLevel level,
@@ -123,78 +123,11 @@ static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
     return;
   }
 
-  // Skip CDP message sending - JavaScript layer hook handles this / CDP 메시지 전송 건너뛰기 - JavaScript 레이어 훅이 처리합니다
-  // JavaScript layer hook provides better stack traces with source map support / JavaScript 레이어 훅은 소스맵 지원과 함께 더 나은 스택 트레이스를 제공합니다
+  // Skip CDP message sending - C++ console hook (JSI level) handles this / CDP 메시지 전송 건너뛰기 - C++ console 훅(JSI 레벨)이 처리합니다
+  // C++ console hook provides better stack traces with source map support / C++ console 훅은 소스맵 지원과 함께 더 나은 스택 트레이스를 제공합니다
+  // C++ hook sends CDP messages directly, so we skip here to avoid duplicates / C++ 훅이 CDP 메시지를 직접 전송하므로 중복을 방지하기 위해 여기서 건너뜁니다
   isProcessingLog = NO;
   return;
-
-  // NOTE: The following code is disabled in favor of JavaScript layer hook / 참고: 다음 코드는 JavaScript 레이어 훅을 위해 비활성화됨
-  // Convert to CDP Runtime.consoleAPICalled event / CDP Runtime.consoleAPICalled 이벤트로 변환
-  // Map RCTLogLevel to CDP console type / RCTLogLevel을 CDP console type으로 매핑
-  // Note: React Native console methods map to different log levels / 참고: React Native console 메서드는 다른 로그 레벨로 매핑됨
-  // console.log() -> RCTLogLevelInfo -> "log"
-  // console.info() -> RCTLogLevelInfo -> "info" (keep as info for console.info)
-  // console.warn() -> RCTLogLevelWarning -> "warning"
-  // console.error() -> RCTLogLevelError -> "error"
-  NSString *type = @"log"; // Default for console.log() / console.log()의 기본값
-  if (level == RCTLogLevelError) {
-    type = @"error";
-  } else if (level == RCTLogLevelWarning) {
-    type = @"warning";
-  } else if (level == RCTLogLevelInfo) {
-    // For RCTLogLevelInfo, check if message contains console.info indicator / RCTLogLevelInfo의 경우 console.info 표시자 확인
-    // Note: React Native doesn't distinguish between console.log and console.info at log level / 참고: React Native는 로그 레벨에서 console.log와 console.info를 구분하지 않음
-    // So we default to "log" for compatibility / 호환성을 위해 기본값은 "log"
-    type = @"log";
-  }
-  // Default and other levels map to "log" / 기본값 및 기타 레벨은 "log"로 매핑
-
-  // Generate unique timestamp / 고유한 타임스탬프 생성
-  // Use base time in milliseconds and add counter for uniqueness / 밀리초 단위 기본 시간을 사용하고 고유성을 위해 카운터 추가
-  NSTimeInterval baseTime = [[NSDate date] timeIntervalSince1970];
-  NSUInteger counter = ++timestampCounter;
-  // Add counter value (modulo 1000) to ensure uniqueness within same millisecond / 같은 밀리초 내에서 고유성을 보장하기 위해 카운터 값(모듈로 1000) 추가
-  // This ensures each message has a unique timestamp / 이를 통해 각 메시지가 고유한 타임스탬프를 가지게 됨
-  long long timestamp = (long long)(baseTime * 1000) + (counter % 1000);
-
-  // Format message as CDP Runtime.consoleAPICalled event / CDP Runtime.consoleAPICalled 이벤트로 메시지 포맷팅
-  // Note: args should be formatted as RemoteObject array / 참고: args는 RemoteObject 배열로 포맷팅되어야 함
-  // For string messages, use type "string" with value / 문자열 메시지의 경우 type "string"과 value 사용
-  NSDictionary *cdpMessage = @{
-    @"method": @"Runtime.consoleAPICalled",
-    @"params": @{
-      @"type": type,
-      @"args": @[@{
-        @"type": @"string",
-        @"value": message ?: @""
-      }],
-      @"executionContextId": @1,
-      @"timestamp": @(timestamp),
-      @"stackTrace": @{
-        @"callFrames": @[]
-      }
-    }
-  };
-
-  NSError *error = nil;
-  NSData *jsonData = [NSJSONSerialization dataWithJSONObject:cdpMessage options:0 error:&error];
-  if (!jsonData || error) {
-    isProcessingLog = NO;
-    return;
-  }
-
-  NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-  if (!jsonString) {
-    isProcessingLog = NO;
-    return;
-  }
-
-  // Send CDP message via WebSocket connection / WebSocket 연결을 통해 CDP 메시지 전송
-  if ([g_connection respondsToSelector:@selector(sendCDPMessage:)]) {
-    [g_connection sendCDPMessage:jsonString];
-  }
-
-  isProcessingLog = NO;
 };
 
 /**
