@@ -11,6 +11,7 @@
 
 #include <atomic>
 #include <map>
+#include <mutex>
 #include <string>
 
 namespace chrome_remote_devtools {
@@ -20,7 +21,9 @@ namespace network {
 extern std::atomic<size_t> g_requestIdCounter;
 
 // Store response data by requestId / requestId별로 응답 데이터 저장
+// Thread-safe access via g_responseDataMutex / g_responseDataMutex를 통한 스레드 안전 접근
 extern std::map<std::string, std::string> g_responseData;
+extern std::mutex g_responseDataMutex;
 
 } // namespace network
 } // namespace chrome_remote_devtools

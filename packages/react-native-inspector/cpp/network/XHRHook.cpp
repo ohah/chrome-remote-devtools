@@ -219,8 +219,11 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                       // Collect response info / 응답 정보 수집
                       ResponseInfo responseInfo = collectXHRResponseInfo(runtime, xhrObj);
 
-                      // Store response data / 응답 데이터 저장
-                      g_responseData[requestId] = responseInfo.responseText;
+                      // Store response data / 응답 데이터 저장 (thread-safe / 스레드 안전)
+                      {
+                        std::lock_guard<std::mutex> lock(g_responseDataMutex);
+                        g_responseData[requestId] = responseInfo.responseText;
+                      }
 
                       // Send responseReceived event / responseReceived 이벤트 전송
                       sendResponseReceived(runtime, requestId, capturedUrl, responseInfo, "XHR");

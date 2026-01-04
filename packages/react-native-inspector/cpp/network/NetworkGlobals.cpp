@@ -18,6 +18,9 @@ std::atomic<size_t> g_requestIdCounter{1};
 // Store response data by requestId / requestId별로 응답 데이터 저장
 std::map<std::string, std::string> g_responseData;
 
+// Mutex for thread-safe access to g_responseData / g_responseData에 대한 스레드 안전 접근을 위한 mutex
+std::mutex g_responseDataMutex;
+
 } // namespace network
 } // namespace chrome_remote_devtools
 

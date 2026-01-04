@@ -10,6 +10,7 @@
 #include "NetworkHook.h"
 #include "network/XHRHook.h"
 #include "network/FetchHook.h"
+#include <atomic>
 
 // Platform-specific log support / 플랫폼별 로그 지원
 #ifdef __ANDROID__
@@ -32,9 +33,9 @@
 namespace chrome_remote_devtools {
 
 bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
-  // Check if already hooked / 이미 훅되었는지 확인
-  static bool isHooked = false;
-  if (isHooked) {
+  // Check if already hooked / 이미 훅되었는지 확인 (thread-safe / 스레드 안전)
+  static std::atomic<bool> isHooked{false};
+  if (isHooked.load()) {
     LOGW("Network methods already hooked, skipping / 네트워크 메서드가 이미 훅되었으므로 건너뜀");
     return true;
   }
@@ -52,10 +53,16 @@ bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
       LOGE("Failed to hook fetch / fetch 훅 실패");
     }
 
-    if (xhrSuccess || fetchSuccess) {
-      isHooked = true;
+    // Only mark as hooked if both XHR and Fetch succeeded / XHR과 Fetch 둘 다 성공한 경우에만 훅 완료로 표시
+    if (xhrSuccess && fetchSuccess) {
+      isHooked.store(true);
       LOGI("Network hook installed successfully / 네트워크 훅이 성공적으로 설치됨");
       return true;
+    } else if (xhrSuccess || fetchSuccess) {
+      // At least one hook succeeded, but not both / 최소한 하나는 성공했지만 둘 다는 아님
+      LOGW("Partial network hook installation: XHR=%s, Fetch=%s",
+           xhrSuccess ? "success" : "failed", fetchSuccess ? "success" : "failed");
+      return true; // Return true to indicate partial success / 부분적 성공을 나타내기 위해 true 반환
     }
 
     return false;

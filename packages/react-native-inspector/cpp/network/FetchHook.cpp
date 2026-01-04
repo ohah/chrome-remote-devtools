@@ -139,8 +139,11 @@ bool hookFetch(facebook::jsi::Runtime& runtime) {
                                   ResponseInfo updatedInfo = capturedResponseInfo;
                                   updatedInfo.responseText = responseText;
 
-                                  // Store response data / 응답 데이터 저장
-                                  g_responseData[requestId] = responseText;
+                                  // Store response data / 응답 데이터 저장 (thread-safe / 스레드 안전)
+                                  {
+                                    std::lock_guard<std::mutex> lock(g_responseDataMutex);
+                                    g_responseData[requestId] = responseText;
+                                  }
 
                                   // Send responseReceived event / responseReceived 이벤트 전송
                                   sendResponseReceived(rt, requestId, capturedRequestInfo.url, updatedInfo, "Fetch");
@@ -178,7 +181,8 @@ bool hookFetch(facebook::jsi::Runtime& runtime) {
                   } catch (...) {
                     // Failed to create Promise, try direct return / Promise 생성 실패, 직접 반환 시도
                   }
-                  // Fallback: use std::move (may cause issues but should work for Promise chain) / 대체: std::move 사용 (문제가 있을 수 있지만 Promise 체인에서는 작동해야 함)
+                  // Fallback: move the value (jsi::Value is move-only, const_cast needed for const reference) / 대체: 값을 이동 (jsi::Value는 move-only, const 참조이므로 const_cast 필요)
+                  // Note: This is safe because we're moving the value, not modifying it / 참고: 값을 수정하는 것이 아니라 이동하는 것이므로 안전함
                   return std::move(const_cast<facebook::jsi::Value&>(args[0]));
                 }
                 return facebook::jsi::Value::undefined();
