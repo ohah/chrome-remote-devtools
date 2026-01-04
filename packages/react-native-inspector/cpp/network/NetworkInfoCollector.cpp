@@ -81,9 +81,32 @@ ResponseInfo collectXHRResponseInfo(facebook::jsi::Runtime& runtime,
     if (statusTextValue.isString()) {
       info.statusText = statusTextValue.asString(runtime).utf8(runtime);
     }
-    facebook::jsi::Value responseTextValue = xhrObj.getProperty(runtime, "responseText");
-    if (responseTextValue.isString()) {
-      info.responseText = responseTextValue.asString(runtime).utf8(runtime);
+
+    // Try to get responseText first / 먼저 responseText 시도
+    // Note: responseText may throw if responseType is not '' or 'text' / 참고: responseType이 '' 또는 'text'가 아니면 responseText가 에러를 던질 수 있음
+    try {
+      facebook::jsi::Value responseTextValue = xhrObj.getProperty(runtime, "responseText");
+      if (responseTextValue.isString()) {
+        info.responseText = responseTextValue.asString(runtime).utf8(runtime);
+      }
+    } catch (...) {
+      // responseText failed, try response instead / responseText 실패, 대신 response 시도
+      try {
+        facebook::jsi::Value responseValue = xhrObj.getProperty(runtime, "response");
+        if (responseValue.isString()) {
+          info.responseText = responseValue.asString(runtime).utf8(runtime);
+        } else if (responseValue.isObject()) {
+          // Try to stringify if it's an object / 객체인 경우 문자열화 시도
+          facebook::jsi::Value jsonValue = runtime.global().getPropertyAsObject(runtime, "JSON")
+            .getPropertyAsFunction(runtime, "stringify")
+            .call(runtime, responseValue);
+          if (jsonValue.isString()) {
+            info.responseText = jsonValue.asString(runtime).utf8(runtime);
+          }
+        }
+      } catch (...) {
+        // Failed to get response / response 가져오기 실패
+      }
     }
 
     // Get headers / 헤더 가져오기
