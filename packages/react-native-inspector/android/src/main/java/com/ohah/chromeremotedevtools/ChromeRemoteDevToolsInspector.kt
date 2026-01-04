@@ -45,7 +45,7 @@ object ChromeRemoteDevToolsInspector {
     val encodedAppName = java.net.URLEncoder.encode(appName, "UTF-8")
     val encodedDeviceId = java.net.URLEncoder.encode(deviceId, "UTF-8")
 
-    return "ws://$serverHost:$serverPort/inspector/device?name=$encodedDeviceName&app=$encodedAppName&device=$encodedDeviceId&profiling=false"
+    return "ws://$serverHost:$serverPort/inspector/device?name=$encodedDeviceName&app=$encodedAppName&device=$encodedDeviceId"
   }
 
   /**

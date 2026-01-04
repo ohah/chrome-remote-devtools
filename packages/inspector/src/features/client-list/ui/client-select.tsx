@@ -19,7 +19,9 @@ export function ClientSelect({ clients, selectedClientId, onSelect }: ClientSele
         <option value="">Select a client</option>
         {clients.map((client) => (
           <option key={client.id} value={client.id}>
-            {client.title || client.url || client.id}
+            {client.type === 'web'
+              ? client.url || client.id
+              : client.appName || client.deviceName || client.id}
           </option>
         ))}
       </select>

@@ -17,16 +17,21 @@ export function filterClients(clients: Client[], query: string): Client[] {
   const lowerQuery = query.toLowerCase();
 
   return clients.filter((client) => {
-    // Search in title, url, id, ua, ip, deviceName, appName, deviceId / title, url, id, ua, ip, deviceName, appName, deviceId에서 검색
-    return (
-      client.title?.toLowerCase().includes(lowerQuery) ||
-      client.url?.toLowerCase().includes(lowerQuery) ||
-      client.id.toLowerCase().includes(lowerQuery) ||
-      client.ua?.toLowerCase().includes(lowerQuery) ||
-      client.ip?.toLowerCase().includes(lowerQuery) ||
-      client.deviceName?.toLowerCase().includes(lowerQuery) ||
-      client.appName?.toLowerCase().includes(lowerQuery) ||
-      client.deviceId?.toLowerCase().includes(lowerQuery)
-    );
+    // Search in url, id, ua, ip, deviceName, appName, deviceId / url, id, ua, ip, deviceName, appName, deviceId에서 검색
+    if (client.type === 'web') {
+      return (
+        client.url?.toLowerCase().includes(lowerQuery) ||
+        client.id.toLowerCase().includes(lowerQuery) ||
+        client.ua?.toLowerCase().includes(lowerQuery) ||
+        client.ip?.toLowerCase().includes(lowerQuery)
+      );
+    } else {
+      return (
+        client.id.toLowerCase().includes(lowerQuery) ||
+        client.deviceName?.toLowerCase().includes(lowerQuery) ||
+        client.appName?.toLowerCase().includes(lowerQuery) ||
+        client.deviceId?.toLowerCase().includes(lowerQuery)
+      );
+    }
   });
 }
