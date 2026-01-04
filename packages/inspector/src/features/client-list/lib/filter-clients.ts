@@ -17,13 +17,16 @@ export function filterClients(clients: Client[], query: string): Client[] {
   const lowerQuery = query.toLowerCase();
 
   return clients.filter((client) => {
-    // Search in title, url, id, ua, ip / title, url, id, ua, ip에서 검색
+    // Search in title, url, id, ua, ip, deviceName, appName, deviceId / title, url, id, ua, ip, deviceName, appName, deviceId에서 검색
     return (
       client.title?.toLowerCase().includes(lowerQuery) ||
       client.url?.toLowerCase().includes(lowerQuery) ||
       client.id.toLowerCase().includes(lowerQuery) ||
       client.ua?.toLowerCase().includes(lowerQuery) ||
-      client.ip?.toLowerCase().includes(lowerQuery)
+      client.ip?.toLowerCase().includes(lowerQuery) ||
+      client.deviceName?.toLowerCase().includes(lowerQuery) ||
+      client.appName?.toLowerCase().includes(lowerQuery) ||
+      client.deviceId?.toLowerCase().includes(lowerQuery)
     );
   });
 }
