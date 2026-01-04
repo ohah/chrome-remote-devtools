@@ -40,7 +40,8 @@ void sendLoadingFinished(facebook::jsi::Runtime& runtime,
 // Send loadingFailed event / loadingFailed 이벤트 전송
 void sendLoadingFailed(facebook::jsi::Runtime& runtime,
                        const std::string& requestId,
-                       const std::string& errorText);
+                       const std::string& errorText,
+                       const std::string& type);
 
 } // namespace network
 } // namespace chrome_remote_devtools

@@ -311,6 +311,15 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                           // collectXHRResponseInfo will try responseText first, then response / collectXHRResponseInfo는 먼저 responseText를 시도하고, 그 다음 response를 시도함
                           ResponseInfo responseInfo = collectXHRResponseInfo(runtime, xhrObj);
 
+                          // Check if this is a network error (status === 0) / 네트워크 에러인지 확인 (status === 0)
+                          // XHR status is 0 for network errors (DNS failure, connection refused, etc.) / XHR status가 0이면 네트워크 에러 (DNS 실패, 연결 거부 등)
+                          if (responseInfo.status == 0) {
+                            // Network error - send loadingFailed event / 네트워크 에러 - loadingFailed 이벤트 전송
+                            LOGI("Network error detected (status=0) - sending loadingFailed / 네트워크 에러 감지 (status=0) - loadingFailed 전송");
+                            sendLoadingFailed(runtime, requestId, "Network error", "XHR");
+                            return facebook::jsi::Value::undefined();
+                          }
+
                           // Use headers collected at HEADERS_RECEIVED (readyState 2) / HEADERS_RECEIVED (readyState 2)에서 수집한 헤더 사용
                           // XHRInterceptor pattern: headers are collected at HEADERS_RECEIVED, not at DONE / XHRInterceptor 패턴: 헤더는 HEADERS_RECEIVED에서 수집하고, DONE에서 수집하지 않음
                           LOGI("ReadyState DONE (4) - using headers from metadata / ReadyState DONE (4) - 메타데이터에서 헤더 사용");
@@ -446,13 +455,31 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                     facebook::jsi::PropNameID::forAscii(rt, "errorListener"),
                     0,
                     [requestId](facebook::jsi::Runtime& runtime,
-                                const facebook::jsi::Value&,
+                                const facebook::jsi::Value& thisVal,
                                 const facebook::jsi::Value*,
                                 size_t) -> facebook::jsi::Value {
-                      sendLoadingFailed(runtime, requestId, "Network error");
-                    return facebook::jsi::Value::undefined();
-                  }
-                );
+                      // Check if already handled by readystatechange / readystatechange에서 이미 처리되었는지 확인
+                      // If readyState is DONE and status is 0, readystatechange will handle it / readyState가 DONE이고 status가 0이면 readystatechange가 처리함
+                      if (thisVal.isObject()) {
+                        facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
+                        facebook::jsi::Value readyStateValue = xhrObj.getProperty(runtime, "readyState");
+                        facebook::jsi::Value statusValue = xhrObj.getProperty(runtime, "status");
+                        if (readyStateValue.isNumber() && statusValue.isNumber()) {
+                          double readyState = readyStateValue.asNumber();
+                          double status = statusValue.asNumber();
+                          // If already DONE with status 0, readystatechange will handle it / 이미 DONE이고 status가 0이면 readystatechange가 처리함
+                          if (readyState == 4 && status == 0) {
+                            LOGI("Error event fired but already handled by readystatechange / 에러 이벤트 발생했지만 이미 readystatechange에서 처리됨");
+                            return facebook::jsi::Value::undefined();
+                          }
+                        }
+                      }
+                      // Otherwise, send loadingFailed / 그렇지 않으면 loadingFailed 전송
+                      LOGI("Error event fired - sending loadingFailed / 에러 이벤트 발생 - loadingFailed 전송");
+                      sendLoadingFailed(runtime, requestId, "Network error", "XHR");
+                      return facebook::jsi::Value::undefined();
+                    }
+                  );
 
                   facebook::jsi::Value errorEventName = facebook::jsi::String::createFromUtf8(rt, "error");
                   addEventListener.callWithThis(rt, xhr, std::move(errorEventName), std::move(errorListener));
@@ -466,7 +493,7 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                                 const facebook::jsi::Value&,
                                const facebook::jsi::Value*,
                                size_t) -> facebook::jsi::Value {
-                    sendLoadingFailed(runtime, requestId, "Request timeout");
+                    sendLoadingFailed(runtime, requestId, "Request timeout", "XHR");
                       return facebook::jsi::Value::undefined();
                     }
                   );

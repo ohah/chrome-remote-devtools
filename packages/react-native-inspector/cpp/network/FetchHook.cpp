@@ -189,8 +189,64 @@ bool hookFetch(facebook::jsi::Runtime& runtime) {
               }
             );
 
+            // Add error handler for Promise rejection / Promise rejection을 위한 에러 핸들러 추가
+            facebook::jsi::Value onRejected = facebook::jsi::Function::createFromHostFunction(
+              rt,
+              facebook::jsi::PropNameID::forAscii(rt, "onRejected"),
+              1,
+              [requestId](facebook::jsi::Runtime& runtime,
+                         const facebook::jsi::Value&,
+                         const facebook::jsi::Value* args,
+                         size_t count) -> facebook::jsi::Value {
+                // Extract error message / 에러 메시지 추출
+                std::string errorText = "Network error";
+                if (count > 0) {
+                  if (args[0].isString()) {
+                    errorText = args[0].asString(runtime).utf8(runtime);
+                  } else if (args[0].isObject()) {
+                    facebook::jsi::Object errorObj = args[0].asObject(runtime);
+                    facebook::jsi::Value messageValue = errorObj.getProperty(runtime, "message");
+                    if (messageValue.isString()) {
+                      errorText = messageValue.asString(runtime).utf8(runtime);
+                    } else {
+                      facebook::jsi::Value nameValue = errorObj.getProperty(runtime, "name");
+                      if (nameValue.isString()) {
+                        errorText = nameValue.asString(runtime).utf8(runtime);
+                      }
+                    }
+                  }
+                }
+
+                // Send loadingFailed event / loadingFailed 이벤트 전송
+                LOGE("Fetch request failed - sending loadingFailed: %s / Fetch 요청 실패 - loadingFailed 전송: %s", errorText.c_str());
+                sendLoadingFailed(runtime, requestId, errorText, "Fetch");
+
+                // Re-throw the error to preserve original behavior / 원본 동작을 보존하기 위해 에러를 다시 throw
+                // Create a rejected Promise / rejected Promise 생성
+                try {
+                  facebook::jsi::Value PromiseValue = runtime.global().getProperty(runtime, "Promise");
+                  if (PromiseValue.isObject()) {
+                    facebook::jsi::Object PromiseObj = PromiseValue.asObject(runtime);
+                    facebook::jsi::Value rejectValue = PromiseObj.getProperty(runtime, "reject");
+                    if (rejectValue.isObject() && rejectValue.asObject(runtime).isFunction(runtime)) {
+                      facebook::jsi::Function reject = rejectValue.asObject(runtime).asFunction(runtime);
+                      return reject.call(runtime, args[0]);
+                    }
+                  }
+                } catch (...) {
+                  // Failed to create rejected Promise / rejected Promise 생성 실패
+                }
+                // Fallback: return the error value / 폴백: 에러 값 반환
+                if (count > 0) {
+                  return std::move(const_cast<facebook::jsi::Value&>(args[0]));
+                }
+                return facebook::jsi::Value::undefined();
+              }
+            );
+
             // then.call()은 새로운 Promise를 반환하므로, 그것을 반환해야 함 / then.call() returns a new Promise, so we must return it
-            facebook::jsi::Value hookedPromise = then.call(rt, onFulfilled);
+            // Call then with both fulfilled and rejected handlers / fulfilled와 rejected 핸들러 모두 전달하여 then 호출
+            facebook::jsi::Value hookedPromise = then.call(rt, onFulfilled, onRejected);
             if (hookedPromise.isObject()) {
               return hookedPromise;  // 훅이 적용된 Promise 반환 / Return Promise with hook applied
             }
