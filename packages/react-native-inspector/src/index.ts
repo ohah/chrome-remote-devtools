@@ -176,6 +176,8 @@ export function setServerInfo(serverHost: string, serverPort: number): void {
   (global as any).__ChromeRemoteDevToolsServerPort = serverPort;
 }
 
+export { setupReduxDevToolsExtension } from './devtools-hook';
+
 export default {
   connect,
   disableDebugger,
