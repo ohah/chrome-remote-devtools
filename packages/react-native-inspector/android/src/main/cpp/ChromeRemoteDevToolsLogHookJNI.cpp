@@ -255,6 +255,51 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHookJSIL
   }
 }
 
+// JNI function to get network response body / 네트워크 응답 본문을 가져오는 JNI 함수
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeGetNetworkResponseBody(
+    JNIEnv *env,
+    jobject /* thiz */,
+    jstring requestId) {
+  try {
+    if (!requestId) {
+      return nullptr;
+    }
+
+    const char* requestIdStr = env->GetStringUTFChars(requestId, nullptr);
+    if (!requestIdStr) {
+      return nullptr;
+    }
+
+    std::string requestIdCpp(requestIdStr);
+    env->ReleaseStringUTFChars(requestId, requestIdStr);
+
+    // Get response body from C++ network hook / C++ network 훅에서 응답 본문 가져오기
+    std::string responseBody = chrome_remote_devtools::getNetworkResponseBody(requestIdCpp);
+
+    if (!responseBody.empty()) {
+      jstring result = env->NewStringUTF(responseBody.c_str());
+      __android_log_print(ANDROID_LOG_DEBUG, TAG,
+                          "Network response body retrieved / 네트워크 응답 본문 가져옴: requestId=%s, length=%zu",
+                          requestIdCpp.c_str(), responseBody.length());
+      return result;
+    }
+
+    __android_log_print(ANDROID_LOG_DEBUG, TAG,
+                        "Network response body not found / 네트워크 응답 본문을 찾을 수 없음: requestId=%s",
+                        requestIdCpp.c_str());
+    return nullptr;
+  } catch (const std::exception& e) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Exception in nativeGetNetworkResponseBody: %s", e.what());
+    return nullptr;
+  } catch (...) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Unknown exception in nativeGetNetworkResponseBody");
+    return nullptr;
+  }
+}
+
 // JNI function to get object properties / 객체 속성을 가져오는 JNI 함수
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeGetObjectProperties(

@@ -40,6 +40,14 @@ class ChromeRemoteDevToolsLogHookJNI {
     external fun nativeHookJSILog(runtimeExecutor: Any): Boolean
 
     /**
+     * Get network response body by request ID / 요청 ID로 네트워크 응답 본문 가져오기
+     * @param requestId Network request ID / 네트워크 요청 ID
+     * @return Response body as string, or null if not found / 응답 본문 문자열, 찾지 못하면 null
+     */
+    @JvmStatic
+    external fun nativeGetNetworkResponseBody(requestId: String): String?
+
+    /**
      * Get object properties for Runtime.getProperties / Runtime.getProperties를 위한 객체 속성 가져오기
      * @param objectId Object ID / 객체 ID
      * @return JSON string of properties response, or null if not found / 속성 응답의 JSON 문자열, 찾지 못하면 null

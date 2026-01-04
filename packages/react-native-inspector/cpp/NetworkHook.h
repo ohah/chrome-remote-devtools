@@ -21,5 +21,12 @@ namespace chrome_remote_devtools {
  */
 bool hookNetworkMethods(facebook::jsi::Runtime& runtime);
 
+/**
+ * Get network response body by request ID / 요청 ID로 네트워크 응답 본문 가져오기
+ * @param requestId Network request ID / 네트워크 요청 ID
+ * @return Response body as string, or empty string if not found / 응답 본문 문자열, 없으면 빈 문자열
+ */
+std::string getNetworkResponseBody(const std::string& requestId);
+
 } // namespace chrome_remote_devtools
 

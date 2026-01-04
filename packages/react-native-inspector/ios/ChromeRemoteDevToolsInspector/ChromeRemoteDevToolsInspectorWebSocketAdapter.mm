@@ -19,6 +19,12 @@
 #import <jsinspector-modern/InspectorPackagerConnection.h>
 #import <memory>
 
+// Include common C++ network hook / 공통 C++ network 훅 포함
+#if __has_include("NetworkHook.h")
+#include "NetworkHook.h"
+#define NETWORK_HOOK_AVAILABLE
+#endif
+
 using namespace facebook::react::jsinspector_modern;
 
 namespace {
@@ -98,6 +104,8 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
 
   if (!error && messageDict[@"id"] && messageDict[@"method"]) {
     NSString *method = messageDict[@"method"];
+
+    // Handle Page.getResourceTree request / Page.getResourceTree 요청 처리
     if ([method isEqualToString:@"Page.getResourceTree"]) {
       NSNumber *requestId = messageDict[@"id"];
       RCTLogInfo(@"[ChromeRemoteDevTools] Page.getResourceTree detected! / Page.getResourceTree 감지됨!");
@@ -128,6 +136,50 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
         NSString *responseStr = [[NSString alloc] initWithData:responseJsonData encoding:NSUTF8StringEncoding];
         if (responseStr) {
           RCTLogInfo(@"[ChromeRemoteDevTools] Sending Page.getResourceTree response / Page.getResourceTree 응답 전송: %@", responseStr);
+          [self send:[responseStr UTF8String]];
+          return; // Don't forward the original message / 원본 메시지를 전달하지 않음
+        }
+      }
+    }
+
+    // Handle Network.getResponseBody request / Network.getResponseBody 요청 처리
+    if ([method isEqualToString:@"Network.getResponseBody"]) {
+      NSNumber *requestId = messageDict[@"id"];
+      NSDictionary *params = messageDict[@"params"];
+      NSString *networkRequestId = params[@"requestId"] ?: @"";
+      RCTLogInfo(@"[ChromeRemoteDevTools] Network.getResponseBody detected! / Network.getResponseBody 감지됨: requestId=%@", networkRequestId);
+
+#ifdef NETWORK_HOOK_AVAILABLE
+      // Get response body from C++ network hook / C++ network 훅에서 응답 본문 가져오기
+      std::string requestIdCpp = [networkRequestId UTF8String];
+      std::string responseBody = chrome_remote_devtools::getNetworkResponseBody(requestIdCpp);
+      NSString *responseBodyStr = responseBody.empty() ? @"" : [NSString stringWithUTF8String:responseBody.c_str()];
+
+      if (responseBody.empty()) {
+        RCTLogInfo(@"[ChromeRemoteDevTools] Network response body not found / 네트워크 응답 본문을 찾을 수 없음: requestId=%@", networkRequestId);
+      } else {
+        RCTLogInfo(@"[ChromeRemoteDevTools] Network response body retrieved / 네트워크 응답 본문 가져옴: requestId=%@, length=%zu", networkRequestId, responseBody.length());
+      }
+#else
+      // Network hook not available, return empty body / 네트워크 훅을 사용할 수 없으므로 빈 본문 반환
+      NSString *responseBodyStr = @"";
+      RCTLogWarn(@"[ChromeRemoteDevTools] Network hook not available, returning empty body / 네트워크 훅을 사용할 수 없어 빈 본문 반환");
+#endif
+
+      NSDictionary *response = @{
+        @"id": requestId,
+        @"result": @{
+          @"body": responseBodyStr,
+          @"base64Encoded": @NO
+        }
+      };
+
+      NSError *responseError = nil;
+      NSData *responseJsonData = [NSJSONSerialization dataWithJSONObject:response options:0 error:&responseError];
+      if (!responseError && responseJsonData) {
+        NSString *responseStr = [[NSString alloc] initWithData:responseJsonData encoding:NSUTF8StringEncoding];
+        if (responseStr) {
+          RCTLogInfo(@"[ChromeRemoteDevTools] Sending Network.getResponseBody response / Network.getResponseBody 응답 전송: %@", [responseStr substringToIndex:MIN(200, responseStr.length)]);
           [self send:[responseStr UTF8String]];
           return; // Don't forward the original message / 원본 메시지를 전달하지 않음
         }
