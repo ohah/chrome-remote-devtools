@@ -77,7 +77,10 @@ std::string getNetworkResponseBody(const std::string& requestId) {
   std::lock_guard<std::mutex> lock(network::g_responseDataMutex);
   auto it = network::g_responseData.find(requestId);
   if (it != network::g_responseData.end()) {
-    return it->second;
+    // Move and erase to prevent memory leak / 메모리 누수 방지를 위해 이동 후 삭제
+    std::string body = std::move(it->second);
+    network::g_responseData.erase(it);
+    return body;
   }
   return "";
 }

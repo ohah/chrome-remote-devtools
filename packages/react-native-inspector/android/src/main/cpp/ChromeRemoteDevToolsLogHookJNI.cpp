@@ -279,6 +279,13 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeGetNetwo
 
     if (!responseBody.empty()) {
       jstring result = env->NewStringUTF(responseBody.c_str());
+      if (result == nullptr) {
+        // Invalid UTF-8 sequence, return empty string / 유효하지 않은 UTF-8 시퀀스, 빈 문자열 반환
+        __android_log_print(ANDROID_LOG_WARN, TAG,
+                            "Network response body contains invalid UTF-8, returning empty string / 네트워크 응답 본문에 유효하지 않은 UTF-8이 포함되어 빈 문자열 반환: requestId=%s",
+                            requestIdCpp.c_str());
+        return env->NewStringUTF("");
+      }
       __android_log_print(ANDROID_LOG_DEBUG, TAG,
                           "Network response body retrieved / 네트워크 응답 본문 가져옴: requestId=%s, length=%zu",
                           requestIdCpp.c_str(), responseBody.length());
