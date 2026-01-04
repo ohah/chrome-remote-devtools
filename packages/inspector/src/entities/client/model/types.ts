@@ -7,7 +7,7 @@ export interface Client {
   /** Client unique identifier / 클라이언트 고유 식별자 */
   id: string;
   /** Client type / 클라이언트 타입 */
-  type?: ClientType;
+  type: ClientType;
 
   // Web client fields / 웹 클라이언트 필드
   /** Page URL / 페이지 URL */

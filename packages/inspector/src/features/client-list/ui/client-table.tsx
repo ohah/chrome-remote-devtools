@@ -48,8 +48,10 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      role="img"
                       aria-label="React Native"
                     >
+                      <title>React Native</title>
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -63,8 +65,10 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      role="img"
                       aria-label="Web"
                     >
+                      <title>Web</title>
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
