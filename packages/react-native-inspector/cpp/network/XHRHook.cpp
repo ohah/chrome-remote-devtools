@@ -314,6 +314,17 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                           // Check if this is a network error (status === 0) / 네트워크 에러인지 확인 (status === 0)
                           // XHR status is 0 for network errors (DNS failure, connection refused, etc.) / XHR status가 0이면 네트워크 에러 (DNS 실패, 연결 거부 등)
                           if (responseInfo.status == 0) {
+                            // Mark error as handled in metadata to prevent duplicate handling / 중복 처리 방지를 위해 메타데이터에 에러 처리됨으로 표시
+                            try {
+                              facebook::jsi::Value metadataValue = xhrObj.getProperty(runtime, "__cdpNetworkMetadata");
+                              if (metadataValue.isObject()) {
+                                facebook::jsi::Object metadata = metadataValue.asObject(runtime);
+                                metadata.setProperty(runtime, "__errorHandled", facebook::jsi::Value(true));
+                              }
+                            } catch (...) {
+                              // Failed to set error handled flag / 에러 처리 플래그 설정 실패
+                            }
+                            
                             // Network error - send loadingFailed event / 네트워크 에러 - loadingFailed 이벤트 전송
                             LOGI("Network error detected (status=0) - sending loadingFailed / 네트워크 에러 감지 (status=0) - loadingFailed 전송");
                             sendLoadingFailed(runtime, requestId, "Network error", "XHR");
@@ -458,20 +469,24 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                                 const facebook::jsi::Value& thisVal,
                                 const facebook::jsi::Value*,
                                 size_t) -> facebook::jsi::Value {
-                      // Check if already handled by readystatechange / readystatechange에서 이미 처리되었는지 확인
-                      // If readyState is DONE and status is 0, readystatechange will handle it / readyState가 DONE이고 status가 0이면 readystatechange가 처리함
+                      // Check if already handled by readystatechange using metadata flag / 메타데이터 플래그를 사용하여 readystatechange에서 이미 처리되었는지 확인
+                      // Use metadata flag to prevent race conditions / race condition 방지를 위해 메타데이터 플래그 사용
                       if (thisVal.isObject()) {
                         facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
-                        facebook::jsi::Value readyStateValue = xhrObj.getProperty(runtime, "readyState");
-                        facebook::jsi::Value statusValue = xhrObj.getProperty(runtime, "status");
-                        if (readyStateValue.isNumber() && statusValue.isNumber()) {
-                          double readyState = readyStateValue.asNumber();
-                          double status = statusValue.asNumber();
-                          // If already DONE with status 0, readystatechange will handle it / 이미 DONE이고 status가 0이면 readystatechange가 처리함
-                          if (readyState == 4 && status == 0) {
-                            LOGI("Error event fired but already handled by readystatechange / 에러 이벤트 발생했지만 이미 readystatechange에서 처리됨");
-                            return facebook::jsi::Value::undefined();
+                        try {
+                          facebook::jsi::Value metadataValue = xhrObj.getProperty(runtime, "__cdpNetworkMetadata");
+                          if (metadataValue.isObject()) {
+                            facebook::jsi::Object metadata = metadataValue.asObject(runtime);
+                            facebook::jsi::Value errorHandledValue = metadata.getProperty(runtime, "__errorHandled");
+                            if (errorHandledValue.isBool() && errorHandledValue.getBool()) {
+                              LOGI("Error event fired but already handled by readystatechange / 에러 이벤트 발생했지만 이미 readystatechange에서 처리됨");
+                              return facebook::jsi::Value::undefined();
+                            }
+                            // Mark error as handled to prevent duplicate handling / 중복 처리 방지를 위해 에러 처리됨으로 표시
+                            metadata.setProperty(runtime, "__errorHandled", facebook::jsi::Value(true));
                           }
+                        } catch (...) {
+                          // Failed to check error handled flag / 에러 처리 플래그 확인 실패
                         }
                       }
                       // Otherwise, send loadingFailed / 그렇지 않으면 loadingFailed 전송

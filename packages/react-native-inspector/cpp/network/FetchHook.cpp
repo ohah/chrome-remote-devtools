@@ -218,7 +218,7 @@ bool hookFetch(facebook::jsi::Runtime& runtime) {
                 }
 
                 // Send loadingFailed event / loadingFailed 이벤트 전송
-                LOGE("Fetch request failed - sending loadingFailed: %s / Fetch 요청 실패 - loadingFailed 전송: %s", errorText.c_str());
+                LOGE("Fetch request failed - sending loadingFailed: %s", errorText.c_str());
                 sendLoadingFailed(runtime, requestId, errorText, "Fetch");
 
                 // Re-throw the error to preserve original behavior / 원본 동작을 보존하기 위해 에러를 다시 throw
@@ -237,6 +237,7 @@ bool hookFetch(facebook::jsi::Runtime& runtime) {
                   // Failed to create rejected Promise / rejected Promise 생성 실패
                 }
                 // Fallback: return the error value / 폴백: 에러 값 반환
+                // Note: This is safe because we're moving the value, not modifying it / 참고: 값을 수정하는 것이 아니라 이동하는 것이므로 안전함
                 if (count > 0) {
                   return std::move(const_cast<facebook::jsi::Value&>(args[0]));
                 }
