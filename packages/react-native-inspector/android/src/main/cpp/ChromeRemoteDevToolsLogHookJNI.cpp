@@ -14,6 +14,7 @@
 #include <vector>
 #include <future>
 #include <chrono>
+#include <memory>
 
 // Include JSI headers for JSI-level logging interception / JSI 레벨 로깅 인터셉션을 위한 JSI 헤더 포함
 #if __has_include(<jsi/jsi.h>) && __has_include(<ReactCommon/RuntimeExecutor.h>) && __has_include(<fbjni/fbjni.h>) && __has_include(<react/jni/JRuntimeExecutor.h>)
@@ -281,12 +282,13 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeEnableCo
     }
 
     // Use promise/future to wait for async execution / 비동기 실행을 기다리기 위해 promise/future 사용
-    std::promise<bool> promise;
-    std::future<bool> future = promise.get_future();
+    // Use shared_ptr to ensure promise remains valid for async execution / 비동기 실행 동안 promise가 유효하도록 shared_ptr 사용
+    auto promisePtr = std::make_shared<std::promise<bool>>();
+    std::future<bool> future = promisePtr->get_future();
 
-    executor([&promise](facebook::jsi::Runtime& runtime) {
+    executor([promisePtr](facebook::jsi::Runtime& runtime) {
       bool success = chrome_remote_devtools::enableConsoleHook(runtime);
-      promise.set_value(success);
+      promisePtr->set_value(success);
     });
 
     // Wait for result with timeout / 타임아웃과 함께 결과 대기
@@ -335,12 +337,13 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeDisableC
     }
 
     // Use promise/future to wait for async execution / 비동기 실행을 기다리기 위해 promise/future 사용
-    std::promise<bool> promise;
-    std::future<bool> future = promise.get_future();
+    // Use shared_ptr to ensure promise remains valid for async execution / 비동기 실행 동안 promise가 유효하도록 shared_ptr 사용
+    auto promisePtr = std::make_shared<std::promise<bool>>();
+    std::future<bool> future = promisePtr->get_future();
 
-    executor([&promise](facebook::jsi::Runtime& runtime) {
+    executor([promisePtr](facebook::jsi::Runtime& runtime) {
       bool success = chrome_remote_devtools::disableConsoleHook(runtime);
-      promise.set_value(success);
+      promisePtr->set_value(success);
     });
 
     // Wait for result with timeout / 타임아웃과 함께 결과 대기
@@ -389,12 +392,13 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeEnableNe
     }
 
     // Use promise/future to wait for async execution / 비동기 실행을 기다리기 위해 promise/future 사용
-    std::promise<bool> promise;
-    std::future<bool> future = promise.get_future();
+    // Use shared_ptr to ensure promise remains valid for async execution / 비동기 실행 동안 promise가 유효하도록 shared_ptr 사용
+    auto promisePtr = std::make_shared<std::promise<bool>>();
+    std::future<bool> future = promisePtr->get_future();
 
-    executor([&promise](facebook::jsi::Runtime& runtime) {
+    executor([promisePtr](facebook::jsi::Runtime& runtime) {
       bool success = chrome_remote_devtools::enableNetworkHook(runtime);
-      promise.set_value(success);
+      promisePtr->set_value(success);
     });
 
     // Wait for result with timeout / 타임아웃과 함께 결과 대기
@@ -443,12 +447,13 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeDisableN
     }
 
     // Use promise/future to wait for async execution / 비동기 실행을 기다리기 위해 promise/future 사용
-    std::promise<bool> promise;
-    std::future<bool> future = promise.get_future();
+    // Use shared_ptr to ensure promise remains valid for async execution / 비동기 실행 동안 promise가 유효하도록 shared_ptr 사용
+    auto promisePtr = std::make_shared<std::promise<bool>>();
+    std::future<bool> future = promisePtr->get_future();
 
-    executor([&promise](facebook::jsi::Runtime& runtime) {
+    executor([promisePtr](facebook::jsi::Runtime& runtime) {
       bool success = chrome_remote_devtools::disableNetworkHook(runtime);
-      promise.set_value(success);
+      promisePtr->set_value(success);
     });
 
     // Wait for result with timeout / 타임아웃과 함께 결과 대기

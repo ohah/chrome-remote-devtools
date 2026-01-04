@@ -141,20 +141,34 @@ ResponseInfo collectXHRResponseInfo(facebook::jsi::Runtime& runtime,
       else if (responseType == "blob") {
         if (responseValue.isObject()) {
           // For blob, access internal _response property which contains the raw string / blob의 경우 원시 문자열을 포함하는 내부 _response 속성에 접근
-          facebook::jsi::Value internalResponseValue = xhrObj.getProperty(runtime, "_response");
-          if (internalResponseValue.isString()) {
-            info.responseText = internalResponseValue.asString(runtime).utf8(runtime);
-            LOGI("NetworkInfoCollector: Collected response (blob): length=%zu / 응답 수집됨 (blob): 길이=%zu", info.responseText.length());
+          // Check if _response property exists before accessing / 접근 전에 _response 속성이 존재하는지 확인
+          if (xhrObj.hasProperty(runtime, "_response")) {
+            facebook::jsi::Value internalResponseValue = xhrObj.getProperty(runtime, "_response");
+            if (internalResponseValue.isString()) {
+              info.responseText = internalResponseValue.asString(runtime).utf8(runtime);
+              LOGI("NetworkInfoCollector: Collected response (blob): length=%zu / 응답 수집됨 (blob): 길이=%zu", info.responseText.length());
+            } else {
+              LOGW("NetworkInfoCollector: _response for blob is not a string / blob용 _response가 문자열이 아님");
+            }
+          } else {
+            LOGW("NetworkInfoCollector: _response not available for blob / blob용 _response 사용 불가");
           }
         }
       }
       // Case 4: responseType is 'arraybuffer' - use internal _response / 케이스 4: responseType이 'arraybuffer' - 내부 _response 사용
       else if (responseType == "arraybuffer") {
         // For arraybuffer, access internal _response property / arraybuffer의 경우 내부 _response 속성에 접근
-        facebook::jsi::Value internalResponseValue = xhrObj.getProperty(runtime, "_response");
-        if (internalResponseValue.isString()) {
-          info.responseText = internalResponseValue.asString(runtime).utf8(runtime);
-          LOGI("NetworkInfoCollector: Collected response (arraybuffer): length=%zu / 응답 수집됨 (arraybuffer): 길이=%zu", info.responseText.length());
+        // Check if _response property exists before accessing / 접근 전에 _response 속성이 존재하는지 확인
+        if (xhrObj.hasProperty(runtime, "_response")) {
+          facebook::jsi::Value internalResponseValue = xhrObj.getProperty(runtime, "_response");
+          if (internalResponseValue.isString()) {
+            info.responseText = internalResponseValue.asString(runtime).utf8(runtime);
+            LOGI("NetworkInfoCollector: Collected response (arraybuffer): length=%zu / 응답 수집됨 (arraybuffer): 길이=%zu", info.responseText.length());
+          } else {
+            LOGW("NetworkInfoCollector: _response for arraybuffer is not a string / arraybuffer용 _response가 문자열이 아님");
+          }
+        } else {
+          LOGW("NetworkInfoCollector: _response not available for arraybuffer / arraybuffer용 _response 사용 불가");
         }
       }
       // Case 5: Unknown responseType - try to handle as string or object / 케이스 5: 알 수 없는 responseType - 문자열 또는 객체로 처리 시도

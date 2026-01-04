@@ -70,7 +70,7 @@ export const PayloadView: React.FC<PayloadViewProps> = ({ title, data }: Payload
             {Object.entries(data.headers).map(([key, value], index) => {
               const uniqueKey = `${key}-${index}`;
               return (
-                <View key={uniqueKey} style={styles.headerRow} {...({} as any)}>
+                <View key={uniqueKey} style={styles.headerRow}>
                   <Text style={styles.headerKey}>{key}:</Text>
                   <Text style={styles.headerValue}>{String(value)}</Text>
                 </View>
