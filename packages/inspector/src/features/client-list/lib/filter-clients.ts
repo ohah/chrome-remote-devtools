@@ -25,13 +25,13 @@ export function filterClients(clients: Client[], query: string): Client[] {
         client.ua?.toLowerCase().includes(lowerQuery) ||
         client.ip?.toLowerCase().includes(lowerQuery)
       );
-    } else {
-      return (
-        client.id.toLowerCase().includes(lowerQuery) ||
-        client.deviceName?.toLowerCase().includes(lowerQuery) ||
-        client.appName?.toLowerCase().includes(lowerQuery) ||
-        client.deviceId?.toLowerCase().includes(lowerQuery)
-      );
     }
+    // client.type === 'react-native'
+    return (
+      client.id.toLowerCase().includes(lowerQuery) ||
+      client.deviceName?.toLowerCase().includes(lowerQuery) ||
+      client.appName?.toLowerCase().includes(lowerQuery) ||
+      client.deviceId?.toLowerCase().includes(lowerQuery)
+    );
   });
 }

@@ -9,7 +9,6 @@ describe('filterClients', () => {
       id: 'client-1',
       type: 'web',
       url: 'http://example.com',
-      title: 'Example Page',
       ua: 'Mozilla/5.0',
       ip: '127.0.0.1',
     },
@@ -17,7 +16,6 @@ describe('filterClients', () => {
       id: 'client-2',
       type: 'web',
       url: 'http://test.com',
-      title: 'Test Page',
       ua: 'Chrome/120.0',
       ip: '192.168.1.1',
     },
@@ -25,7 +23,6 @@ describe('filterClients', () => {
       id: 'client-3',
       type: 'web',
       url: 'http://demo.org',
-      title: 'Demo Page',
       ua: 'Firefox/121.0',
       ip: '10.0.0.1',
     },
@@ -74,7 +71,7 @@ describe('filterClients', () => {
   });
 
   test('should filter by user agent / User Agent로 필터링해야 함', () => {
-    const result = filterClients(mockClients, 'Chrome');
+    const result = filterClients(mockClients, 'Chrome/120.0');
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('client-2');
   });
@@ -86,7 +83,7 @@ describe('filterClients', () => {
   });
 
   test('should be case insensitive / 대소문자를 구분하지 않아야 함', () => {
-    const result = filterClients(mockClients, 'EXAMPLE');
+    const result = filterClients(mockClients, 'EXAMPLE.COM');
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('client-1');
   });
