@@ -4,33 +4,30 @@
  */
 
 import 'react-native-gesture-handler';
+// Note: Redux DevTools Extension is auto-initialized on import / 참고: Redux DevTools Extension은 import 시 자동 초기화됩니다
+import '@ohah/chrome-remote-devtools-react-native';
 import React, { useEffect } from 'react';
+
+// Type declarations for React Native environment / React Native 환경용 타입 선언
+declare const global: typeof globalThis;
 import { StatusBar, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
-import { setupReduxDevToolsExtension } from '@ohah/chrome-remote-devtools-react-native';
 import { store } from './store/redux/store';
 import AppNavigator from './navigation/AppNavigator';
-import { useConnection } from './hooks/useConnection';
-
-// Setup Redux DevTools Extension BEFORE importing stores / store import 전에 Redux DevTools Extension 설정
-// This is critical because Zustand/Redux stores check for extension during module initialization / 이것은 중요합니다. Zustand/Redux store가 모듈 초기화 중에 extension을 확인하기 때문입니다
-console.log('[App] Setting up Redux DevTools Extension at module level...');
-setupReduxDevToolsExtension('localhost', 8080);
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
-  // Connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연결
-  useConnection();
+  // Note: Chrome Remote DevTools connection is auto-established on import / 참고: Chrome Remote DevTools 연결은 import 시 자동으로 설정됩니다
 
   // Debug: Check if extension is available after stores are created / 디버그: store 생성 후 extension 사용 가능 여부 확인
   useEffect(() => {
     const checkExtension = () => {
       const globalObj =
         typeof global !== 'undefined'
-          ? global
+          ? (global as any)
           : typeof window !== 'undefined'
             ? window
             : {};
