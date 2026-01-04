@@ -5,6 +5,8 @@
 
 import { NativeModules, TurboModuleRegistry } from 'react-native';
 import type { Spec } from './NativeChromeRemoteDevToolsInspector';
+import { sendCDPMessage } from './cdp-message';
+import { setServerInfo } from './server-info';
 
 // Try to get TurboModule first (New Architecture), fallback to Legacy Module / TurboModule을 먼저 시도 (New Architecture), Legacy Module로 폴백
 const TurboModule = TurboModuleRegistry.get<Spec>('ChromeRemoteDevToolsInspector');
@@ -98,27 +100,6 @@ export async function openDebugger(
 }
 
 /**
- * Send CDP message to Inspector WebSocket / Inspector WebSocket으로 CDP 메시지 전송
- * @param serverHost Server host / 서버 호스트
- * @param serverPort Server port / 서버 포트
- * @param message CDP message object / CDP 메시지 객체
- * @returns Promise that resolves when message is sent / 메시지가 전송되면 resolve되는 Promise
- */
-export async function sendCDPMessage(
-  serverHost: string,
-  serverPort: number,
-  message: unknown
-): Promise<void> {
-  if (!ChromeRemoteDevToolsInspector) {
-    throw new Error(
-      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
-    );
-  }
-  const messageStr = JSON.stringify(message);
-  return ChromeRemoteDevToolsInspector.sendCDPMessage(serverHost, serverPort, messageStr);
-}
-
-/**
  * Enable console hook / console 훅 활성화
  * @returns Promise that resolves to true if enabling succeeded / 활성화가 성공하면 true로 resolve되는 Promise
  */
@@ -170,13 +151,14 @@ export async function disableNetworkHook(): Promise<boolean> {
   return ChromeRemoteDevToolsInspector.disableNetworkHook();
 }
 
-// Store server connection info in global for JSI access / JSI 접근을 위해 서버 연결 정보를 전역에 저장
-export function setServerInfo(serverHost: string, serverPort: number): void {
-  (global as any).__ChromeRemoteDevToolsServerHost = serverHost;
-  (global as any).__ChromeRemoteDevToolsServerPort = serverPort;
-}
-
+// Import devtools-hook to trigger auto-initialization / devtools-hook를 import하여 자동 초기화 트리거
+// This must be imported before exporting to ensure auto-initialization runs / 자동 초기화가 실행되도록 export 전에 import해야 함
+import './devtools-hook';
 export { setupReduxDevToolsExtension } from './devtools-hook';
+
+// Re-export from separate files to avoid circular dependency / 순환 참조를 피하기 위해 별도 파일에서 re-export
+export { sendCDPMessage } from './cdp-message';
+export { setServerInfo } from './server-info';
 
 export default {
   connect,
