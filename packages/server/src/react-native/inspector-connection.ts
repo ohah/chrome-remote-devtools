@@ -15,8 +15,6 @@ export interface ReactNativeInspectorConnection {
   appName?: string;
   /** Device ID / 디바이스 ID */
   deviceId?: string;
-  /** Whether profiling is enabled / 프로파일링 활성화 여부 */
-  profiling?: boolean;
   /** Associated client ID (if connected to a client) / 연결된 클라이언트 ID (클라이언트에 연결된 경우) */
   clientId?: string;
 }

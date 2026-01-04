@@ -35,7 +35,6 @@ describe('filterClients', () => {
       deviceName: 'sdk_gphone64_arm64',
       appName: 'com.chromeremotedevtools',
       deviceId: 'device-123',
-      profiling: false,
     },
     {
       id: 'rn-inspector-2',
@@ -43,7 +42,6 @@ describe('filterClients', () => {
       deviceName: 'iPhone 15 Pro',
       appName: 'com.example.app',
       deviceId: 'device-456',
-      profiling: true,
     },
   ];
 
@@ -57,8 +55,8 @@ describe('filterClients', () => {
     expect(result).toEqual(mockClients);
   });
 
-  test('should filter by title / 제목으로 필터링해야 함', () => {
-    const result = filterClients(mockClients, 'Example');
+  test('should filter by URL / URL로 필터링해야 함 (example)', () => {
+    const result = filterClients(mockClients, 'example.com');
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('client-1');
   });
@@ -109,13 +107,13 @@ describe('filterClients', () => {
       {
         id: 'client-1',
         type: 'web',
-        // url, title, ua, ip 모두 없음
+        // url, ua, ip 모두 없음
       },
       {
         id: 'client-2',
         type: 'web',
         url: 'http://test.com',
-        // title, ua, ip 없음
+        // ua, ip 없음
       },
     ];
 
@@ -134,7 +132,7 @@ describe('filterClients', () => {
   });
 
   test('should match multiple clients / 여러 클라이언트를 매칭해야 함', () => {
-    const result = filterClients(mockClients, 'Page');
+    const result = filterClients(mockClients, 'client');
     expect(result).toHaveLength(3);
   });
 

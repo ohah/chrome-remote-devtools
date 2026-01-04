@@ -25,7 +25,6 @@ export function handleReactNativeInspectorHttpRequest(
     const deviceName = url.searchParams.get('name') || undefined;
     const appName = url.searchParams.get('app') || undefined;
     const deviceId = url.searchParams.get('device') || undefined;
-    const profiling = url.searchParams.get('profiling') === 'true';
 
     // Check if this is a WebSocket upgrade request / WebSocket 업그레이드 요청인지 확인
     const upgrade = req.headers.upgrade;
@@ -35,7 +34,6 @@ export function handleReactNativeInspectorHttpRequest(
         deviceName,
         appName,
         deviceId,
-        profiling,
       });
       return false; // Let socket-server handle it / socket-server가 처리하도록 함
     }
@@ -46,7 +44,6 @@ export function handleReactNativeInspectorHttpRequest(
       deviceName,
       appName,
       deviceId,
-      profiling,
     });
 
     const response = {
@@ -54,7 +51,6 @@ export function handleReactNativeInspectorHttpRequest(
       name: deviceName || 'Unknown Device',
       app: appName || 'Unknown App',
       device: deviceId || 'unknown',
-      profiling,
     };
 
     res.writeHead(200, {
@@ -110,14 +106,12 @@ export function handleReactNativeInspectorWebSocket(
   const deviceName = url.searchParams.get('name') || undefined;
   const appName = url.searchParams.get('app') || undefined;
   const deviceId = url.searchParams.get('device') || undefined;
-  const profiling = url.searchParams.get('profiling') === 'true';
 
   // Create inspector connection / Inspector 연결 생성
   const inspectorId = inspectorManager.createConnection(ws, {
     deviceName,
     appName,
     deviceId,
-    profiling,
   });
 
   // Auto-associate with self as clientId (so DevTools can connect) / 자동으로 자신을 clientId로 연결 (DevTools가 연결할 수 있도록)

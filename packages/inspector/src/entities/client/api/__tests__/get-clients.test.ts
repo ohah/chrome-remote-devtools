@@ -26,7 +26,6 @@ describe('getClients', () => {
         id: 'client-1',
         type: 'web',
         url: 'http://example.com',
-        title: 'Example Page',
         ua: 'Mozilla/5.0',
         ip: '127.0.0.1',
       },
@@ -34,7 +33,6 @@ describe('getClients', () => {
         id: 'client-2',
         type: 'web',
         url: 'http://test.com',
-        title: 'Test Page',
         ua: 'Mozilla/5.0',
         ip: '192.168.1.1',
       },
@@ -143,7 +141,6 @@ describe('getClients', () => {
         deviceName: 'sdk_gphone64_arm64',
         appName: 'com.chromeremotedevtools',
         deviceId: 'device-123',
-        profiling: false,
       },
       {
         id: 'rn-inspector-2',
@@ -151,7 +148,6 @@ describe('getClients', () => {
         deviceName: 'iPhone 15 Pro',
         appName: 'com.example.app',
         deviceId: 'device-456',
-        profiling: true,
       },
     ];
 
@@ -176,7 +172,6 @@ describe('getClients', () => {
         id: 'client-1',
         type: 'web',
         url: 'http://example.com',
-        title: 'Example Page',
         ua: 'Mozilla/5.0',
         ip: '127.0.0.1',
       },
@@ -186,7 +181,6 @@ describe('getClients', () => {
         deviceName: 'sdk_gphone64_arm64',
         appName: 'com.chromeremotedevtools',
         deviceId: 'device-123',
-        profiling: false,
       },
     ];
 

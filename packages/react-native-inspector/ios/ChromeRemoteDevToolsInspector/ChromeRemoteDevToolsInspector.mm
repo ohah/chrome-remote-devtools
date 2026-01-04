@@ -104,9 +104,6 @@ static NSString *getInspectorDeviceId()
  */
 static NSURL *getInspectorDeviceUrl(NSString *serverHost, NSInteger serverPort)
 {
-  auto &inspectorFlags = facebook::react::jsinspector_modern::InspectorFlags::getInstance();
-  BOOL isProfilingBuild = inspectorFlags.getIsProfilingBuild();
-
   NSString *escapedDeviceName = [[[UIDevice currentDevice] name]
       stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
   NSString *escapedAppName = [[[NSBundle mainBundle] bundleIdentifier]
@@ -117,12 +114,11 @@ static NSURL *getInspectorDeviceUrl(NSString *serverHost, NSInteger serverPort)
 
   // Use WebSocket URL (ws://) instead of HTTP / HTTP 대신 WebSocket URL (ws://) 사용
   return [NSURL
-      URLWithString:[NSString stringWithFormat:@"ws://%@/inspector/device?name=%@&app=%@&device=%@&profiling=%@",
+      URLWithString:[NSString stringWithFormat:@"ws://%@/inspector/device?name=%@&app=%@&device=%@",
                                                getServerHost(serverHost, serverPort),
                                                escapedDeviceName,
                                                escapedAppName,
-                                               escapedInspectorDeviceId,
-                                               isProfilingBuild ? @"true" : @"false"]];
+                                               escapedInspectorDeviceId]];
 }
 
 @implementation ChromeRemoteDevToolsInspectorObjC

@@ -67,7 +67,6 @@ export function createHttpRouter(socketServer: SocketServer) {
         deviceName: inspector.deviceName,
         appName: inspector.appName,
         deviceId: inspector.deviceId,
-        profiling: inspector.profiling,
       }));
 
       // Combine regular clients and React Native Inspector connections / 일반 클라이언트와 React Native Inspector 연결 결합
@@ -106,7 +105,6 @@ export function createHttpRouter(socketServer: SocketServer) {
           deviceName: inspector.deviceName,
           appName: inspector.appName,
           deviceId: inspector.deviceId,
-          profiling: inspector.profiling,
         };
         res.writeHead(200, headers);
         res.end(JSON.stringify({ client: inspectorClient }));
