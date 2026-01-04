@@ -55,6 +55,7 @@ export default function AppNavigator() {
       screenOptions={{
         tabBarActiveTintColor: '#2196F3',
         tabBarInactiveTintColor: '#757575',
+        headerShown: false,
       }}
     >
       <BottomTab.Screen
@@ -62,7 +63,7 @@ export default function AppNavigator() {
         component={HomeStack}
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size = 24 }) => (
             <Icon name="home" size={size} color={color} />
           ),
         }}
@@ -72,7 +73,7 @@ export default function AppNavigator() {
         component={ReduxStack}
         options={{
           title: 'Redux',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size = 24 }) => (
             <Icon name="storage" size={size} color={color} />
           ),
         }}
@@ -82,7 +83,7 @@ export default function AppNavigator() {
         component={ZustandStack}
         options={{
           title: 'Zustand',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size = 24 }) => (
             <Icon name="inventory" size={size} color={color} />
           ),
         }}
