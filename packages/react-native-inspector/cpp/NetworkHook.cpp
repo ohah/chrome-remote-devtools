@@ -32,10 +32,12 @@
 
 namespace chrome_remote_devtools {
 
+// Track hook state / 훅 상태 추적
+static std::atomic<bool> g_isNetworkHooked{false};
+
 bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
   // Check if already hooked / 이미 훅되었는지 확인 (thread-safe / 스레드 안전)
-  static std::atomic<bool> isHooked{false};
-  if (isHooked.load()) {
+  if (g_isNetworkHooked.load()) {
     LOGW("Network methods already hooked, skipping / 네트워크 메서드가 이미 훅되었으므로 건너뜀");
     return true;
   }
@@ -51,13 +53,55 @@ bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
 
     // Fetch hook removed: React Native wraps fetch with XHR, so XHR hook handles all requests / Fetch 훅 제거: React Native가 fetch를 XHR로 래핑하므로 XHR 훅이 모든 요청을 처리함
 
-    isHooked.store(true);
+    g_isNetworkHooked.store(true);
     LOGI("Network hook installed successfully / 네트워크 훅이 성공적으로 설치됨");
     return true;
   } catch (const std::exception& e) {
     LOGE("Failed to hook network methods / 네트워크 메서드 훅 실패: %s", e.what());
     return false;
   }
+}
+
+bool enableNetworkHook(facebook::jsi::Runtime& runtime) {
+  return hookNetworkMethods(runtime);
+}
+
+bool disableNetworkHook(facebook::jsi::Runtime& runtime) {
+  // Restore original XMLHttpRequest methods / 원본 XMLHttpRequest 메서드 복원
+  try {
+    facebook::jsi::Value xhrValue = runtime.global().getProperty(runtime, "XMLHttpRequest");
+    if (xhrValue.isObject()) {
+      facebook::jsi::Object xhrConstructor = xhrValue.asObject(runtime);
+      facebook::jsi::Value prototypeValue = xhrConstructor.getProperty(runtime, "prototype");
+      if (prototypeValue.isObject()) {
+        facebook::jsi::Object xhrPrototype = prototypeValue.asObject(runtime);
+
+        // Restore original methods / 원본 메서드 복원
+        const char* methods[] = {"open", "send", "setRequestHeader"};
+        for (const char* methodName : methods) {
+          try {
+            std::string backupPropName = std::string("__original_") + methodName;
+            facebook::jsi::Value originalMethodValue = xhrPrototype.getProperty(runtime, backupPropName.c_str());
+            if (originalMethodValue.isObject() && originalMethodValue.asObject(runtime).isFunction(runtime)) {
+              // Restore original method / 원본 메서드 복원
+              xhrPrototype.setProperty(runtime, methodName, std::move(originalMethodValue));
+              // Remove backup property / 백업 속성 제거
+              xhrPrototype.setProperty(runtime, backupPropName.c_str(), facebook::jsi::Value::undefined());
+            }
+          } catch (...) {
+            // Failed to restore method / 메서드 복원 실패
+          }
+        }
+
+        g_isNetworkHooked.store(false);
+        LOGI("Network hook disabled successfully / 네트워크 훅이 성공적으로 비활성화됨");
+        return true;
+      }
+    }
+  } catch (...) {
+    // Failed to disable network hook / 네트워크 훅 비활성화 실패
+  }
+  return false;
 }
 
 std::string getNetworkResponseBody(const std::string& requestId) {

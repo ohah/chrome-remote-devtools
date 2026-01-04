@@ -12,6 +12,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
+  TextInput,
 } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
@@ -22,11 +23,37 @@ function App() {
   const [fetchStatus, setFetchStatus] = useState<{
     method: string;
     status: 'success' | 'error' | null;
+    request?: {
+      url: string;
+      method: string;
+      headers: Record<string, string>;
+      body?: string;
+    };
+    response?: {
+      status: number;
+      statusText: string;
+      headers: Record<string, string>;
+      body?: any;
+    };
   }>({ method: '', status: null });
   const [xhrStatus, setXhrStatus] = useState<{
     method: string;
     status: 'success' | 'error' | null;
+    request?: {
+      url: string;
+      method: string;
+      headers: Record<string, string>;
+      body?: string;
+    };
+    response?: {
+      status: number;
+      statusText: string;
+      headers: Record<string, string>;
+      body?: any;
+    };
   }>({ method: '', status: null });
+  const [consoleHookEnabled, setConsoleHookEnabled] = useState<boolean>(true);
+  const [networkHookEnabled, setNetworkHookEnabled] = useState<boolean>(true);
 
   // Connect to Chrome Remote DevTools server on app start / 앱 시작 시 Chrome Remote DevTools 서버에 연결
   useEffect(() => {
@@ -39,16 +66,16 @@ function App() {
     // For physical device: use your computer's IP address / 실제 기기: 컴퓨터의 IP 주소 사용
     console.log('🔌 Attempting to connect to localhost:8080...');
     ChromeRemoteDevToolsInspector.connect('localhost', 8080)
-      .then((result) => {
+      .then((result: unknown) => {
         console.log('✅ Chrome Remote DevTools Inspector connected to localhost:8080');
         console.log('Connection result:', result);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         console.error('❌ Failed to connect to Chrome Remote DevTools Inspector:', error);
         console.error('Error details:', {
-          message: error?.message,
-          stack: error?.stack,
-          name: error?.name,
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          name: error instanceof Error ? error.name : undefined,
         });
       });
   }, []);
@@ -149,73 +176,200 @@ function App() {
 
     try {
       switch (type) {
-        case 'get':
-          const getResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
+        case 'get': {
+          const getUrl = 'https://jsonplaceholder.typicode.com/posts/1';
+          const getHeaders = {
+            'Content-Type': 'application/json',
+          };
+          const getResponse = await fetch(getUrl, {
             method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
+            headers: getHeaders,
+          });
+          const getBody = await getResponse.json();
+          const getResponseHeaders: Record<string, string> = {};
+          getResponse.headers.forEach((value, key) => {
+            getResponseHeaders[key] = value;
+          });
+          setFetchStatus({
+            method: 'GET',
+            status: 'success',
+            request: {
+              url: getUrl,
+              method: 'GET',
+              headers: getHeaders,
+            },
+            response: {
+              status: getResponse.status,
+              statusText: getResponse.statusText,
+              headers: getResponseHeaders,
+              body: getBody,
             },
           });
-          await getResponse.json();
-          setFetchStatus({ method: 'GET', status: 'success' });
           break;
+        }
 
-        case 'post':
-          const postResponse = await fetch('https://jsonplaceholder.typicode.com/posts', {
+        case 'post': {
+          const postUrl = 'https://jsonplaceholder.typicode.com/posts';
+          const postHeaders = {
+            'Content-Type': 'application/json',
+          };
+          const postBody = {
+            title: 'Test Post',
+            body: 'This is a test POST request',
+            userId: 1,
+          };
+          const postResponse = await fetch(postUrl, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              title: 'Test Post',
-              body: 'This is a test POST request',
-              userId: 1,
-            }),
+            headers: postHeaders,
+            body: JSON.stringify(postBody),
           });
-          await postResponse.json();
-          setFetchStatus({ method: 'POST', status: 'success' });
+          const postResponseBody = await postResponse.json();
+          const postResponseHeaders: Record<string, string> = {};
+          postResponse.headers.forEach((value, key) => {
+            postResponseHeaders[key] = value;
+          });
+          setFetchStatus({
+            method: 'POST',
+            status: 'success',
+            request: {
+              url: postUrl,
+              method: 'POST',
+              headers: postHeaders,
+              body: JSON.stringify(postBody, null, 2),
+            },
+            response: {
+              status: postResponse.status,
+              statusText: postResponse.statusText,
+              headers: postResponseHeaders,
+              body: postResponseBody,
+            },
+          });
           break;
+        }
 
-        case 'put':
-          const putResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
+        case 'put': {
+          const putUrl = 'https://jsonplaceholder.typicode.com/posts/1';
+          const putHeaders = {
+            'Content-Type': 'application/json',
+          };
+          const putBody = {
+            id: 1,
+            title: 'Updated Test Post',
+            body: 'This is an updated test PUT request',
+            userId: 1,
+          };
+          const putResponse = await fetch(putUrl, {
             method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              id: 1,
-              title: 'Updated Test Post',
-              body: 'This is an updated test PUT request',
-              userId: 1,
-            }),
+            headers: putHeaders,
+            body: JSON.stringify(putBody),
           });
-          await putResponse.json();
-          setFetchStatus({ method: 'PUT', status: 'success' });
+          const putResponseBody = await putResponse.json();
+          const putResponseHeaders: Record<string, string> = {};
+          putResponse.headers.forEach((value, key) => {
+            putResponseHeaders[key] = value;
+          });
+          setFetchStatus({
+            method: 'PUT',
+            status: 'success',
+            request: {
+              url: putUrl,
+              method: 'PUT',
+              headers: putHeaders,
+              body: JSON.stringify(putBody, null, 2),
+            },
+            response: {
+              status: putResponse.status,
+              statusText: putResponse.statusText,
+              headers: putResponseHeaders,
+              body: putResponseBody,
+            },
+          });
           break;
+        }
 
-        case 'delete':
-          const deleteResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
+        case 'delete': {
+          const deleteUrl = 'https://jsonplaceholder.typicode.com/posts/1';
+          const deleteResponse = await fetch(deleteUrl, {
             method: 'DELETE',
           });
+          const deleteResponseHeaders: Record<string, string> = {};
+          deleteResponse.headers.forEach((value, key) => {
+            deleteResponseHeaders[key] = value;
+          });
           if (deleteResponse.ok) {
-            setFetchStatus({ method: 'DELETE', status: 'success' });
+            setFetchStatus({
+              method: 'DELETE',
+              status: 'success',
+              request: {
+                url: deleteUrl,
+                method: 'DELETE',
+                headers: {},
+              },
+              response: {
+                status: deleteResponse.status,
+                statusText: deleteResponse.statusText,
+                headers: deleteResponseHeaders,
+              },
+            });
           } else {
-            setFetchStatus({ method: 'DELETE', status: 'error' });
+            setFetchStatus({
+              method: 'DELETE',
+              status: 'error',
+              request: {
+                url: deleteUrl,
+                method: 'DELETE',
+                headers: {},
+              },
+              response: {
+                status: deleteResponse.status,
+                statusText: deleteResponse.statusText,
+                headers: deleteResponseHeaders,
+              },
+            });
           }
           break;
+        }
 
-        case 'error':
+        case 'error': {
+          const errorUrl = 'https://invalid-url-that-does-not-exist-12345.com/api';
           try {
-            await fetch('https://invalid-url-that-does-not-exist-12345.com/api', {
+            await fetch(errorUrl, {
               method: 'GET',
             });
-          } catch {
-            setFetchStatus({ method: 'GET', status: 'error' });
+          } catch (error) {
+            setFetchStatus({
+              method: 'GET',
+              status: 'error',
+              request: {
+                url: errorUrl,
+                method: 'GET',
+                headers: {},
+              },
+              response: {
+                status: 0,
+                statusText: error instanceof Error ? error.message : 'Network error',
+                headers: {},
+              },
+            });
           }
           break;
+        }
       }
-    } catch {
-      setFetchStatus({ method: type.toUpperCase(), status: 'error' });
+    } catch (error) {
+      setFetchStatus({
+        method: type.toUpperCase(),
+        status: 'error',
+        request: {
+          url: '',
+          method: type.toUpperCase(),
+          headers: {},
+        },
+        response: {
+          status: 0,
+          statusText: error instanceof Error ? error.message : 'Unknown error',
+          headers: {},
+        },
+      });
     }
   };
 
@@ -224,66 +378,287 @@ function App() {
     setXhrStatus({ method: type.toUpperCase(), status: null });
 
     const xhr = new XMLHttpRequest();
-    const url = 'https://jsonplaceholder.typicode.com/posts';
+    const baseUrl = 'https://jsonplaceholder.typicode.com/posts';
+    let requestUrl = '';
+    let requestMethod = '';
+    let requestHeaders: Record<string, string> = {};
+    let requestBody: string | undefined;
 
     xhr.onload = () => {
+      const responseHeaders: Record<string, string> = {};
+      const allHeaders = xhr.getAllResponseHeaders();
+      if (allHeaders) {
+        allHeaders.split('\r\n').forEach((line) => {
+          const parts = line.split(': ');
+          if (parts.length === 2) {
+            responseHeaders[parts[0]] = parts[1];
+          }
+        });
+      }
+
+      let responseBody: any;
+      try {
+        responseBody = xhr.responseText ? JSON.parse(xhr.responseText) : null;
+      } catch {
+        responseBody = xhr.responseText;
+      }
+
       if (xhr.status >= 200 && xhr.status < 300) {
-        setXhrStatus({ method: type.toUpperCase(), status: 'success' });
+        setXhrStatus({
+          method: type.toUpperCase(),
+          status: 'success',
+          request: {
+            url: requestUrl,
+            method: requestMethod,
+            headers: requestHeaders,
+            body: requestBody,
+          },
+          response: {
+            status: xhr.status,
+            statusText: xhr.statusText,
+            headers: responseHeaders,
+            body: responseBody,
+          },
+        });
       } else {
-        setXhrStatus({ method: type.toUpperCase(), status: 'error' });
+        setXhrStatus({
+          method: type.toUpperCase(),
+          status: 'error',
+          request: {
+            url: requestUrl,
+            method: requestMethod,
+            headers: requestHeaders,
+            body: requestBody,
+          },
+          response: {
+            status: xhr.status,
+            statusText: xhr.statusText,
+            headers: responseHeaders,
+            body: responseBody,
+          },
+        });
       }
     };
 
     xhr.onerror = () => {
-      setXhrStatus({ method: type.toUpperCase(), status: 'error' });
+      setXhrStatus({
+        method: type.toUpperCase(),
+        status: 'error',
+        request: {
+          url: requestUrl,
+          method: requestMethod,
+          headers: requestHeaders,
+          body: requestBody,
+        },
+        response: {
+          status: 0,
+          statusText: 'Network error',
+          headers: {},
+        },
+      });
     };
 
     xhr.ontimeout = () => {
-      setXhrStatus({ method: type.toUpperCase(), status: 'error' });
+      setXhrStatus({
+        method: type.toUpperCase(),
+        status: 'error',
+        request: {
+          url: requestUrl,
+          method: requestMethod,
+          headers: requestHeaders,
+          body: requestBody,
+        },
+        response: {
+          status: 0,
+          statusText: 'Request timeout',
+          headers: {},
+        },
+      });
     };
 
     switch (type) {
       case 'get':
-        xhr.open('GET', `${url}/1`, true);
+        requestUrl = `${baseUrl}/1`;
+        requestMethod = 'GET';
+        requestHeaders = { 'Content-Type': 'application/json' };
+        xhr.open('GET', requestUrl, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send();
         break;
 
-      case 'post':
-        xhr.open('POST', url, true);
+      case 'post': {
+        requestUrl = baseUrl;
+        requestMethod = 'POST';
+        requestHeaders = { 'Content-Type': 'application/json' };
+        const postBody = {
+          title: 'Test Post',
+          body: 'This is a test POST request with XHR',
+          userId: 1,
+        };
+        requestBody = JSON.stringify(postBody, null, 2);
+        xhr.open('POST', requestUrl, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(
-          JSON.stringify({
-            title: 'Test Post',
-            body: 'This is a test POST request with XHR',
-            userId: 1,
-          })
-        );
+        xhr.send(JSON.stringify(postBody));
         break;
+      }
 
-      case 'put':
-        xhr.open('PUT', `${url}/1`, true);
+      case 'put': {
+        requestUrl = `${baseUrl}/1`;
+        requestMethod = 'PUT';
+        requestHeaders = { 'Content-Type': 'application/json' };
+        const putBody = {
+          id: 1,
+          title: 'Updated Test Post',
+          body: 'This is an updated test PUT request with XHR',
+          userId: 1,
+        };
+        requestBody = JSON.stringify(putBody, null, 2);
+        xhr.open('PUT', requestUrl, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(
-          JSON.stringify({
-            id: 1,
-            title: 'Updated Test Post',
-            body: 'This is an updated test PUT request with XHR',
-            userId: 1,
-          })
-        );
+        xhr.send(JSON.stringify(putBody));
         break;
+      }
 
       case 'delete':
-        xhr.open('DELETE', `${url}/1`, true);
+        requestUrl = `${baseUrl}/1`;
+        requestMethod = 'DELETE';
+        requestHeaders = {};
+        xhr.open('DELETE', requestUrl, true);
         xhr.send();
         break;
 
       case 'error':
-        xhr.open('GET', 'https://invalid-url-that-does-not-exist-12345.com/api', true);
+        requestUrl = 'https://invalid-url-that-does-not-exist-12345.com/api';
+        requestMethod = 'GET';
+        requestHeaders = {};
+        xhr.open('GET', requestUrl, true);
         xhr.send();
         break;
     }
+  };
+
+  // Toggle console hook / console 훅 토글
+  const handleToggleConsoleHook = async () => {
+    try {
+      if (consoleHookEnabled) {
+        const success = await ChromeRemoteDevToolsInspector.disableConsoleHook();
+        if (success) {
+          setConsoleHookEnabled(false);
+        }
+      } else {
+        const success = await ChromeRemoteDevToolsInspector.enableConsoleHook();
+        if (success) {
+          setConsoleHookEnabled(true);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to toggle console hook / console 훅 토글 실패:', error);
+    }
+  };
+
+  // Toggle network hook / network 훅 토글
+  const handleToggleNetworkHook = async () => {
+    try {
+      if (networkHookEnabled) {
+        const success = await ChromeRemoteDevToolsInspector.disableNetworkHook();
+        if (success) {
+          setNetworkHookEnabled(false);
+        }
+      } else {
+        const success = await ChromeRemoteDevToolsInspector.enableNetworkHook();
+        if (success) {
+          setNetworkHookEnabled(true);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to toggle network hook / network 훅 토글 실패:', error);
+    }
+  };
+
+  // Format JSON for display / 표시용 JSON 포맷팅
+  const formatJSON = (obj: any): string => {
+    try {
+      if (typeof obj === 'string') {
+        // Try to parse if it's a JSON string / JSON 문자열이면 파싱 시도
+        try {
+          return JSON.stringify(JSON.parse(obj), null, 2);
+        } catch {
+          return obj;
+        }
+      }
+      return JSON.stringify(obj, null, 2);
+    } catch {
+      return String(obj);
+    }
+  };
+
+  // Render request/response payload / 요청/응답 페이로드 렌더링
+  const renderPayload = (
+    title: string,
+    data:
+      | {
+          url?: string;
+          method?: string;
+          headers?: Record<string, string>;
+          body?: string | any;
+          status?: number;
+          statusText?: string;
+        }
+      | undefined
+  ) => {
+    if (!data) return null;
+
+    return (
+      <View style={styles.payloadContainer}>
+        <Text style={styles.payloadTitle}>{title}</Text>
+        {data.url && (
+          <View style={styles.payloadSection}>
+            <Text style={styles.payloadLabel}>URL:</Text>
+            <Text style={styles.payloadValue}>{data.url}</Text>
+          </View>
+        )}
+        {data.method && (
+          <View style={styles.payloadSection}>
+            <Text style={styles.payloadLabel}>Method:</Text>
+            <Text style={styles.payloadValue}>{data.method}</Text>
+          </View>
+        )}
+        {data.status !== undefined && (
+          <View style={styles.payloadSection}>
+            <Text style={styles.payloadLabel}>Status:</Text>
+            <Text style={styles.payloadValue}>
+              {data.status} {data.statusText || ''}
+            </Text>
+          </View>
+        )}
+        {data.headers && Object.keys(data.headers).length > 0 && (
+          <View style={styles.payloadSection}>
+            <Text style={styles.payloadLabel}>Headers:</Text>
+            <View style={styles.headersContainer}>
+              {Object.entries(data.headers).map(([key, value], index) => (
+                <View key={index} style={styles.headerRow}>
+                  <Text style={styles.headerKey}>{key}:</Text>
+                  <Text style={styles.headerValue}>{String(value)}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+        {data.body !== undefined && (
+          <View style={styles.payloadSection}>
+            <Text style={styles.payloadLabel}>Body:</Text>
+            <ScrollView style={styles.payloadScrollView} nestedScrollEnabled>
+              <TextInput
+                style={styles.payloadText}
+                value={formatJSON(data.body)}
+                multiline
+                editable={false}
+              />
+            </ScrollView>
+          </View>
+        )}
+      </View>
+    );
   };
 
   // Run all network tests / 모든 네트워크 테스트 실행
@@ -472,6 +847,9 @@ function App() {
             >
               <Text style={styles.networkButtonText}>Run All Network Tests</Text>
             </TouchableOpacity>
+            {/* Fetch Request/Response Payload / Fetch 요청/응답 페이로드 */}
+            {fetchStatus.request && renderPayload('Request', fetchStatus.request)}
+            {fetchStatus.response && renderPayload('Response', fetchStatus.response)}
           </View>
 
           {/* Network Test Buttons (XHR) / 네트워크 테스트 버튼 (XHR) */}
@@ -530,6 +908,9 @@ function App() {
                 <Text style={styles.networkButtonText}>Error</Text>
               </TouchableOpacity>
             </View>
+            {/* XHR Request/Response Payload / XHR 요청/응답 페이로드 */}
+            {xhrStatus.request && renderPayload('Request', xhrStatus.request)}
+            {xhrStatus.response && renderPayload('Response', xhrStatus.response)}
           </View>
 
           {/* Instructions / 사용 방법 */}
@@ -547,6 +928,32 @@ function App() {
             </Text>
           </View>
         </ScrollView>
+
+        {/* Floating Hook Control Buttons / 플로팅 훅 제어 버튼 */}
+        <View style={styles.floatingButtonsContainer}>
+          <TouchableOpacity
+            style={[
+              styles.floatingButton,
+              consoleHookEnabled ? styles.floatingButtonEnabled : styles.floatingButtonDisabled,
+            ]}
+            onPress={handleToggleConsoleHook}
+          >
+            <Text style={styles.floatingButtonText}>
+              {consoleHookEnabled ? 'Console ON' : 'Console OFF'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.floatingButton,
+              networkHookEnabled ? styles.floatingButtonEnabled : styles.floatingButtonDisabled,
+            ]}
+            onPress={handleToggleNetworkHook}
+          >
+            <Text style={styles.floatingButtonText}>
+              {networkHookEnabled ? 'Network ON' : 'Network OFF'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaProvider>
   );
@@ -733,6 +1140,105 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     color: '#000000',
+  },
+  payloadContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  payloadTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#000000',
+  },
+  payloadSection: {
+    marginBottom: 12,
+  },
+  payloadLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+    color: '#666666',
+  },
+  payloadValue: {
+    fontSize: 12,
+    color: '#000000',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  payloadScrollView: {
+    maxHeight: 200,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 4,
+    padding: 8,
+  },
+  payloadText: {
+    fontSize: 11,
+    color: '#000000',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    padding: 0,
+  },
+  headersContainer: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 4,
+    padding: 8,
+    marginTop: 4,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    marginBottom: 6,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  headerKey: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1976D2',
+    marginRight: 8,
+    minWidth: 120,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  headerValue: {
+    fontSize: 12,
+    color: '#000000',
+    flex: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  floatingButtonsContainer: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    flexDirection: 'column',
+    gap: 12,
+    zIndex: 1000,
+  },
+  floatingButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    minWidth: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  floatingButtonEnabled: {
+    backgroundColor: '#4CAF50',
+  },
+  floatingButtonDisabled: {
+    backgroundColor: '#9E9E9E',
+  },
+  floatingButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

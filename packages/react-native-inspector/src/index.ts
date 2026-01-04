@@ -118,6 +118,58 @@ export async function sendCDPMessage(
   return ChromeRemoteDevToolsInspector.sendCDPMessage(serverHost, serverPort, messageStr);
 }
 
+/**
+ * Enable console hook / console 훅 활성화
+ * @returns Promise that resolves to true if enabling succeeded / 활성화가 성공하면 true로 resolve되는 Promise
+ */
+export async function enableConsoleHook(): Promise<boolean> {
+  if (!ChromeRemoteDevToolsInspector) {
+    throw new Error(
+      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
+    );
+  }
+  return ChromeRemoteDevToolsInspector.enableConsoleHook();
+}
+
+/**
+ * Disable console hook / console 훅 비활성화
+ * @returns Promise that resolves to true if disabling succeeded / 비활성화가 성공하면 true로 resolve되는 Promise
+ */
+export async function disableConsoleHook(): Promise<boolean> {
+  if (!ChromeRemoteDevToolsInspector) {
+    throw new Error(
+      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
+    );
+  }
+  return ChromeRemoteDevToolsInspector.disableConsoleHook();
+}
+
+/**
+ * Enable network hook / 네트워크 훅 활성화
+ * @returns Promise that resolves to true if enabling succeeded / 활성화가 성공하면 true로 resolve되는 Promise
+ */
+export async function enableNetworkHook(): Promise<boolean> {
+  if (!ChromeRemoteDevToolsInspector) {
+    throw new Error(
+      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
+    );
+  }
+  return ChromeRemoteDevToolsInspector.enableNetworkHook();
+}
+
+/**
+ * Disable network hook / 네트워크 훅 비활성화
+ * @returns Promise that resolves to true if disabling succeeded / 비활성화가 성공하면 true로 resolve되는 Promise
+ */
+export async function disableNetworkHook(): Promise<boolean> {
+  if (!ChromeRemoteDevToolsInspector) {
+    throw new Error(
+      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
+    );
+  }
+  return ChromeRemoteDevToolsInspector.disableNetworkHook();
+}
+
 // Store server connection info in global for JSI access / JSI 접근을 위해 서버 연결 정보를 전역에 저장
 export function setServerInfo(serverHost: string, serverPort: number): void {
   (global as any).__ChromeRemoteDevToolsServerHost = serverHost;
@@ -131,4 +183,8 @@ export default {
   openDebugger,
   sendCDPMessage,
   setServerInfo,
+  enableConsoleHook,
+  disableConsoleHook,
+  enableNetworkHook,
+  disableNetworkHook,
 };

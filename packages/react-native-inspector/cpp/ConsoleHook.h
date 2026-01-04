@@ -49,6 +49,20 @@ void setSendCDPMessageCallback(SendCDPMessageCallback callback);
 bool hookConsoleMethods(facebook::jsi::Runtime& runtime);
 
 /**
+ * Enable console hook / console 훅 활성화
+ * @param runtime JSI runtime instance / JSI 런타임 인스턴스
+ * @return true if enabling succeeded / 활성화가 성공하면 true
+ */
+bool enableConsoleHook(facebook::jsi::Runtime& runtime);
+
+/**
+ * Disable console hook / console 훅 비활성화
+ * @param runtime JSI runtime instance / JSI 런타임 인스턴스
+ * @return true if disabling succeeded / 비활성화가 성공하면 true
+ */
+bool disableConsoleHook(facebook::jsi::Runtime& runtime);
+
+/**
  * Convert JSI value to RemoteObject / JSI 값을 RemoteObject로 변환
  * @param runtime JSI runtime instance / JSI 런타임 인스턴스
  * @param value JSI value to convert / 변환할 JSI 값

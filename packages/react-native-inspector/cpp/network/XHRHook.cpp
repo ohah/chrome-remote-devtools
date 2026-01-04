@@ -178,44 +178,53 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
             const facebook::jsi::Value& thisVal,
             const facebook::jsi::Value* args,
             size_t count) -> facebook::jsi::Value {
-            if (thisVal.isObject()) {
-              facebook::jsi::Object xhr = thisVal.asObject(rt);
-              facebook::jsi::Value metadataValue = xhr.getProperty(rt, "__cdpNetworkMetadata");
-              if (metadataValue.isObject()) {
-                facebook::jsi::Object metadata = metadataValue.asObject(rt);
-                std::string requestId = std::to_string(g_requestIdCounter.fetch_add(1));
+            if (!thisVal.isObject()) {
+              return facebook::jsi::Value::undefined();
+            }
 
-                // Collect request info / 요청 정보 수집
-                RequestInfo requestInfo = collectXHRRequestInfo(rt, metadata, args, count);
+            facebook::jsi::Object xhr = thisVal.asObject(rt);
+            facebook::jsi::Value metadataValue = xhr.getProperty(rt, "__cdpNetworkMetadata");
 
-                // Send requestWillBeSent event / requestWillBeSent 이벤트 전송
-                sendRequestWillBeSent(rt, requestId, requestInfo, "XHR");
+            // CDP 이벤트 전송을 위한 정보 수집 (메타데이터가 있을 때만) / Collect info for CDP event (only if metadata exists)
+            std::string requestId;
+            std::string capturedUrl;
+            bool shouldTrack = false;
 
-                // Store requestId in metadata / 메타데이터에 requestId 저장
-                metadata.setProperty(rt, "requestId", facebook::jsi::String::createFromUtf8(rt, requestId));
+            if (metadataValue.isObject()) {
+              facebook::jsi::Object metadata = metadataValue.asObject(rt);
+              requestId = std::to_string(g_requestIdCounter.fetch_add(1));
 
-                // Capture requestInfo.url for lambda / 람다를 위해 requestInfo.url 캡처
-                std::string capturedUrl = requestInfo.url;
+              // Collect request info / 요청 정보 수집
+              RequestInfo requestInfo = collectXHRRequestInfo(rt, metadata, args, count);
+              capturedUrl = requestInfo.url;
 
-                // Hook onload property only (not addEventListener to prevent duplicate events) / onload 속성만 훅 (중복 이벤트 방지를 위해 addEventListener는 사용하지 않음)
-                // Store original onload if exists / 기존 onload가 있으면 저장
-                facebook::jsi::Value originalOnloadValue = xhr.getProperty(rt, "onload");
-                if (originalOnloadValue.isObject() && originalOnloadValue.asObject(rt).isFunction(rt)) {
-                  xhr.setProperty(rt, "__original_onload", std::move(originalOnloadValue));
-                }
+              // Send requestWillBeSent event / requestWillBeSent 이벤트 전송
+              sendRequestWillBeSent(rt, requestId, requestInfo, "XHR");
 
-                // Set wrapped onload handler / 래핑된 onload 핸들러 설정
-                facebook::jsi::Value wrappedOnload = facebook::jsi::Function::createFromHostFunction(
-                  rt,
-                  facebook::jsi::PropNameID::forAscii(rt, "onload"),
-                  0,
-                  [requestId, capturedUrl](facebook::jsi::Runtime& runtime,
-                                           const facebook::jsi::Value& thisVal,
-                                           const facebook::jsi::Value*,
-                                           size_t) -> facebook::jsi::Value {
-                    if (thisVal.isObject()) {
-                      facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
+              // Store requestId in metadata / 메타데이터에 requestId 저장
+              metadata.setProperty(rt, "requestId", facebook::jsi::String::createFromUtf8(rt, requestId));
+              shouldTrack = true;
 
+              // Hook event handlers BEFORE calling original send / 원본 send 호출 전에 이벤트 핸들러 훅
+              // Store original handlers if they exist / 기존 핸들러가 있으면 저장
+              facebook::jsi::Value originalOnloadValue = xhr.getProperty(rt, "onload");
+              if (originalOnloadValue.isObject() && originalOnloadValue.asObject(rt).isFunction(rt)) {
+                xhr.setProperty(rt, "__original_onload", std::move(originalOnloadValue));
+              }
+
+              // Set wrapped onload handler / 래핑된 onload 핸들러 설정
+              facebook::jsi::Value wrappedOnload = facebook::jsi::Function::createFromHostFunction(
+                rt,
+                facebook::jsi::PropNameID::forAscii(rt, "onload"),
+                0,
+                [requestId, capturedUrl, shouldTrack](facebook::jsi::Runtime& runtime,
+                                                     const facebook::jsi::Value& thisVal,
+                                                     const facebook::jsi::Value*,
+                                                     size_t) -> facebook::jsi::Value {
+                  if (thisVal.isObject()) {
+                    facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
+
+                    if (shouldTrack) {
                       // Collect response info / 응답 정보 수집
                       ResponseInfo responseInfo = collectXHRResponseInfo(runtime, xhrObj);
 
@@ -230,105 +239,101 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
 
                       // Send loadingFinished event / loadingFinished 이벤트 전송
                       sendLoadingFinished(runtime, requestId, responseInfo.responseText);
-
-                      // Call original onload if exists / 기존 onload가 있으면 호출
-                      try {
-                        facebook::jsi::Value originalOnloadValue = xhrObj.getProperty(runtime, "__original_onload");
-                        if (originalOnloadValue.isObject() && originalOnloadValue.asObject(runtime).isFunction(runtime)) {
-                          facebook::jsi::Function originalOnload = originalOnloadValue.asObject(runtime).asFunction(runtime);
-                          return originalOnload.call(runtime);
-                        }
-                      } catch (...) {
-                        // Original onload call failed / 기존 onload 호출 실패
-                      }
                     }
-                    return facebook::jsi::Value::undefined();
+
+                    // Call original onload if exists / 기존 onload가 있으면 호출
+                    try {
+                      facebook::jsi::Value originalOnloadValue = xhrObj.getProperty(runtime, "__original_onload");
+                      if (originalOnloadValue.isObject() && originalOnloadValue.asObject(runtime).isFunction(runtime)) {
+                        facebook::jsi::Function originalOnload = originalOnloadValue.asObject(runtime).asFunction(runtime);
+                        return originalOnload.call(runtime);
+                      }
+                    } catch (...) {
+                      // Original onload call failed / 기존 onload 호출 실패
+                    }
                   }
-                );
-                xhr.setProperty(rt, "onload", wrappedOnload);
-
-                // Hook onerror property / onerror 속성 훅
-                // Store original onerror if exists / 기존 onerror가 있으면 저장
-                facebook::jsi::Value originalOnerrorValue = xhr.getProperty(rt, "onerror");
-                if (originalOnerrorValue.isObject() && originalOnerrorValue.asObject(rt).isFunction(rt)) {
-                  xhr.setProperty(rt, "__original_onerror", std::move(originalOnerrorValue));
+                  return facebook::jsi::Value::undefined();
                 }
+              );
+              xhr.setProperty(rt, "onload", wrappedOnload);
 
-                // Set wrapped onerror handler / 래핑된 onerror 핸들러 설정
-                facebook::jsi::Value wrappedOnerror = facebook::jsi::Function::createFromHostFunction(
-                  rt,
-                  facebook::jsi::PropNameID::forAscii(rt, "onerror"),
-                  0,
-                  [requestId](facebook::jsi::Runtime& runtime,
-                              const facebook::jsi::Value& thisVal,
-                              const facebook::jsi::Value*,
-                              size_t) -> facebook::jsi::Value {
+              // Hook onerror property / onerror 속성 훅
+              facebook::jsi::Value originalOnerrorValue = xhr.getProperty(rt, "onerror");
+              if (originalOnerrorValue.isObject() && originalOnerrorValue.asObject(rt).isFunction(rt)) {
+                xhr.setProperty(rt, "__original_onerror", std::move(originalOnerrorValue));
+              }
+
+              facebook::jsi::Value wrappedOnerror = facebook::jsi::Function::createFromHostFunction(
+                rt,
+                facebook::jsi::PropNameID::forAscii(rt, "onerror"),
+                0,
+                [requestId, shouldTrack](facebook::jsi::Runtime& runtime,
+                                        const facebook::jsi::Value& thisVal,
+                                        const facebook::jsi::Value*,
+                                        size_t) -> facebook::jsi::Value {
+                  if (shouldTrack) {
                     // Send loadingFailed event / loadingFailed 이벤트 전송
                     sendLoadingFailed(runtime, requestId, "Network error");
-
-                    // Call original onerror if exists / 기존 onerror가 있으면 호출
-                    if (thisVal.isObject()) {
-                      try {
-                        facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
-                        facebook::jsi::Value originalOnerrorValue = xhrObj.getProperty(runtime, "__original_onerror");
-                        if (originalOnerrorValue.isObject() && originalOnerrorValue.asObject(runtime).isFunction(runtime)) {
-                          facebook::jsi::Function originalOnerror = originalOnerrorValue.asObject(runtime).asFunction(runtime);
-                          return originalOnerror.call(runtime);
-                        }
-                      } catch (...) {
-                        // Original onerror call failed / 기존 onerror 호출 실패
-                      }
-                    }
-                    return facebook::jsi::Value::undefined();
                   }
-                );
-                xhr.setProperty(rt, "onerror", wrappedOnerror);
 
-                // Hook ontimeout property / ontimeout 속성 훅
-                // Store original ontimeout if exists / 기존 ontimeout가 있으면 저장
-                facebook::jsi::Value originalOntimeoutValue = xhr.getProperty(rt, "ontimeout");
-                if (originalOntimeoutValue.isObject() && originalOntimeoutValue.asObject(rt).isFunction(rt)) {
-                  xhr.setProperty(rt, "__original_ontimeout", std::move(originalOntimeoutValue));
+                  // Call original onerror if exists / 기존 onerror가 있으면 호출
+                  if (thisVal.isObject()) {
+                    try {
+                      facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
+                      facebook::jsi::Value originalOnerrorValue = xhrObj.getProperty(runtime, "__original_onerror");
+                      if (originalOnerrorValue.isObject() && originalOnerrorValue.asObject(runtime).isFunction(runtime)) {
+                        facebook::jsi::Function originalOnerror = originalOnerrorValue.asObject(runtime).asFunction(runtime);
+                        return originalOnerror.call(runtime);
+                      }
+                    } catch (...) {
+                      // Original onerror call failed / 기존 onerror 호출 실패
+                    }
+                  }
+                  return facebook::jsi::Value::undefined();
                 }
+              );
+              xhr.setProperty(rt, "onerror", wrappedOnerror);
 
-                // Set wrapped ontimeout handler / 래핑된 ontimeout 핸들러 설정
-                facebook::jsi::Value wrappedOntimeout = facebook::jsi::Function::createFromHostFunction(
-                  rt,
-                  facebook::jsi::PropNameID::forAscii(rt, "ontimeout"),
-                  0,
-                  [requestId](facebook::jsi::Runtime& runtime,
-                               const facebook::jsi::Value& thisVal,
-                               const facebook::jsi::Value*,
-                               size_t) -> facebook::jsi::Value {
+              // Hook ontimeout property / ontimeout 속성 훅
+              facebook::jsi::Value originalOntimeoutValue = xhr.getProperty(rt, "ontimeout");
+              if (originalOntimeoutValue.isObject() && originalOntimeoutValue.asObject(rt).isFunction(rt)) {
+                xhr.setProperty(rt, "__original_ontimeout", std::move(originalOntimeoutValue));
+              }
+
+              facebook::jsi::Value wrappedOntimeout = facebook::jsi::Function::createFromHostFunction(
+                rt,
+                facebook::jsi::PropNameID::forAscii(rt, "ontimeout"),
+                0,
+                [requestId, shouldTrack](facebook::jsi::Runtime& runtime,
+                                         const facebook::jsi::Value& thisVal,
+                                         const facebook::jsi::Value*,
+                                         size_t) -> facebook::jsi::Value {
+                  if (shouldTrack) {
                     // Send loadingFailed event / loadingFailed 이벤트 전송
                     sendLoadingFailed(runtime, requestId, "Request timeout");
-
-                    // Call original ontimeout if exists / 기존 ontimeout가 있으면 호출
-                    if (thisVal.isObject()) {
-                      try {
-                        facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
-                        facebook::jsi::Value originalOntimeoutValue = xhrObj.getProperty(runtime, "__original_ontimeout");
-                        if (originalOntimeoutValue.isObject() && originalOntimeoutValue.asObject(runtime).isFunction(runtime)) {
-                          facebook::jsi::Function originalOntimeout = originalOntimeoutValue.asObject(runtime).asFunction(runtime);
-                          return originalOntimeout.call(runtime);
-                        }
-                      } catch (...) {
-                        // Original ontimeout call failed / 기존 ontimeout 호출 실패
-                      }
-                    }
-                    return facebook::jsi::Value::undefined();
                   }
-                );
-                xhr.setProperty(rt, "ontimeout", wrappedOntimeout);
-              }
+
+                  // Call original ontimeout if exists / 기존 ontimeout가 있으면 호출
+                  if (thisVal.isObject()) {
+                    try {
+                      facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
+                      facebook::jsi::Value originalOntimeoutValue = xhrObj.getProperty(runtime, "__original_ontimeout");
+                      if (originalOntimeoutValue.isObject() && originalOntimeoutValue.asObject(runtime).isFunction(runtime)) {
+                        facebook::jsi::Function originalOntimeout = originalOntimeoutValue.asObject(runtime).asFunction(runtime);
+                        return originalOntimeout.call(runtime);
+                      }
+                    } catch (...) {
+                      // Original ontimeout call failed / 기존 ontimeout 호출 실패
+                    }
+                  }
+                  return facebook::jsi::Value::undefined();
+                }
+              );
+              xhr.setProperty(rt, "ontimeout", wrappedOntimeout);
             }
 
-            // Get original function from prototype / prototype에서 원본 함수 가져오기
+            // Call original send function and return its result / 원본 send 함수 호출 및 결과 반환
             try {
-              if (!thisVal.isObject()) {
-                return facebook::jsi::Value::undefined();
-              }
-              // Get XMLHttpRequest constructor from global / 전역에서 XMLHttpRequest constructor 가져오기
               facebook::jsi::Value xhrConstructorValue = rt.global().getProperty(rt, "XMLHttpRequest");
               if (xhrConstructorValue.isObject()) {
                 facebook::jsi::Object xhrConstructor = xhrConstructorValue.asObject(rt);
@@ -338,13 +343,15 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                   facebook::jsi::Value originalSendValue = prototype.getProperty(rt, "__original_send");
                   if (originalSendValue.isObject() && originalSendValue.asObject(rt).isFunction(rt)) {
                     facebook::jsi::Function originalSend = originalSendValue.asObject(rt).asFunction(rt);
-                    return originalSend.callWithThis(rt, thisVal.asObject(rt), args, count);
+                    facebook::jsi::Value result = originalSend.callWithThis(rt, thisVal.asObject(rt), args, count);
+                    return result;  // 원본 send의 반환값을 그대로 반환 / Return original send's return value
                   }
                 }
               }
             } catch (const std::exception& e) {
               LOGE("Failed to call original XMLHttpRequest.send: %s", e.what());
             }
+
             return facebook::jsi::Value::undefined();
           }
         );

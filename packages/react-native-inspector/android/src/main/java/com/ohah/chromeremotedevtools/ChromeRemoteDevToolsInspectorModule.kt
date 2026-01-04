@@ -186,5 +186,129 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
       promise.reject("SEND_ERROR", "Error sending CDP message: ${e.message}", e)
     }
   }
+
+  /**
+   * Enable console hook / console 훅 활성화
+   */
+  @ReactMethod
+  fun enableConsoleHook(promise: Promise) {
+    try {
+      val context = reactApplicationContext
+      if (context == null) {
+        promise.reject("NO_CONTEXT", "React application context is null")
+        return
+      }
+
+      val catalystInstance = context.catalystInstance
+      if (catalystInstance == null) {
+        promise.reject("NO_CATALYST", "CatalystInstance is null")
+        return
+      }
+
+      val runtimeExecutor = catalystInstance.runtimeExecutor
+      if (runtimeExecutor == null) {
+        promise.reject("NO_RUNTIME", "RuntimeExecutor is null")
+        return
+      }
+
+      val success = ChromeRemoteDevToolsLogHookJNI.nativeEnableConsoleHook(runtimeExecutor)
+      promise.resolve(success)
+    } catch (e: Exception) {
+      promise.reject("ENABLE_CONSOLE_HOOK_ERROR", "Error enabling console hook: ${e.message}", e)
+    }
+  }
+
+  /**
+   * Disable console hook / console 훅 비활성화
+   */
+  @ReactMethod
+  fun disableConsoleHook(promise: Promise) {
+    try {
+      val context = reactApplicationContext
+      if (context == null) {
+        promise.reject("NO_CONTEXT", "React application context is null")
+        return
+      }
+
+      val catalystInstance = context.catalystInstance
+      if (catalystInstance == null) {
+        promise.reject("NO_CATALYST", "CatalystInstance is null")
+        return
+      }
+
+      val runtimeExecutor = catalystInstance.runtimeExecutor
+      if (runtimeExecutor == null) {
+        promise.reject("NO_RUNTIME", "RuntimeExecutor is null")
+        return
+      }
+
+      val success = ChromeRemoteDevToolsLogHookJNI.nativeDisableConsoleHook(runtimeExecutor)
+      promise.resolve(success)
+    } catch (e: Exception) {
+      promise.reject("DISABLE_CONSOLE_HOOK_ERROR", "Error disabling console hook: ${e.message}", e)
+    }
+  }
+
+  /**
+   * Enable network hook / 네트워크 훅 활성화
+   */
+  @ReactMethod
+  fun enableNetworkHook(promise: Promise) {
+    try {
+      val context = reactApplicationContext
+      if (context == null) {
+        promise.reject("NO_CONTEXT", "React application context is null")
+        return
+      }
+
+      val catalystInstance = context.catalystInstance
+      if (catalystInstance == null) {
+        promise.reject("NO_CATALYST", "CatalystInstance is null")
+        return
+      }
+
+      val runtimeExecutor = catalystInstance.runtimeExecutor
+      if (runtimeExecutor == null) {
+        promise.reject("NO_RUNTIME", "RuntimeExecutor is null")
+        return
+      }
+
+      val success = ChromeRemoteDevToolsLogHookJNI.nativeEnableNetworkHook(runtimeExecutor)
+      promise.resolve(success)
+    } catch (e: Exception) {
+      promise.reject("ENABLE_NETWORK_HOOK_ERROR", "Error enabling network hook: ${e.message}", e)
+    }
+  }
+
+  /**
+   * Disable network hook / 네트워크 훅 비활성화
+   */
+  @ReactMethod
+  fun disableNetworkHook(promise: Promise) {
+    try {
+      val context = reactApplicationContext
+      if (context == null) {
+        promise.reject("NO_CONTEXT", "React application context is null")
+        return
+      }
+
+      val catalystInstance = context.catalystInstance
+      if (catalystInstance == null) {
+        promise.reject("NO_CATALYST", "CatalystInstance is null")
+        return
+      }
+
+      val runtimeExecutor = catalystInstance.runtimeExecutor
+      if (runtimeExecutor == null) {
+        promise.reject("NO_RUNTIME", "RuntimeExecutor is null")
+        return
+      }
+
+      val success = ChromeRemoteDevToolsLogHookJNI.nativeDisableNetworkHook(runtimeExecutor)
+      promise.resolve(success)
+    } catch (e: Exception) {
+      promise.reject("DISABLE_NETWORK_HOOK_ERROR", "Error disabling network hook: ${e.message}", e)
+    }
+  }
 }
 

@@ -40,6 +40,10 @@ static RCTLogFunction originalLogFunction = nil;
 // Store connection for sending CDP messages / CDP 메시지 전송을 위한 연결 저장
 static id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> g_connection = nil;
 
+// Store CallInvoker and runtime accessor for safe JSI runtime access / 안전한 JSI 런타임 접근을 위한 CallInvoker 및 런타임 접근자 저장
+static std::shared_ptr<facebook::react::CallInvoker> g_callInvoker = nullptr;
+static std::function<void(std::function<void(facebook::jsi::Runtime&)>)> g_runtimeExecutor = nullptr;
+
 // Objective-C++ callback for sending CDP messages / CDP 메시지 전송을 위한 Objective-C++ 콜백
 #ifdef CONSOLE_HOOK_AVAILABLE
 void sendCDPMessageIOS(const char* serverHost, int serverPort, const char* message) {
@@ -180,6 +184,22 @@ RCT_EXPORT_MODULE(ChromeRemoteDevToolsInspector)
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] ========================================");
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] installJSIBindingsWithRuntime:callInvoker: called / installJSIBindingsWithRuntime:callInvoker: 호출됨");
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] This is the key method for JSI Runtime access / 이것은 JSI Runtime 접근을 위한 핵심 메서드입니다");
+
+  // Store CallInvoker for safe JSI runtime access in enable/disable methods / enable/disable 메서드에서 안전한 JSI 런타임 접근을 위해 CallInvoker 저장
+  g_callInvoker = callInvoker;
+
+  // Create runtime executor that captures runtime reference / 런타임 참조를 캡처하는 런타임 executor 생성
+  // Capture runtime by reference in lambda / 람다에서 런타임을 참조로 캡처
+  facebook::jsi::Runtime* runtimePtr = &runtime;
+  g_runtimeExecutor = [callInvoker, runtimePtr](std::function<void(facebook::jsi::Runtime&)> callback) {
+    if (callInvoker && runtimePtr) {
+      callInvoker->invokeAsync([callback, runtimePtr]() {
+        if (runtimePtr) {
+          callback(*runtimePtr);
+        }
+      });
+    }
+  };
 
   // Check if hooks are available / 훅이 사용 가능한지 확인
 #ifdef CONSOLE_HOOK_AVAILABLE
@@ -366,6 +386,106 @@ RCT_EXPORT_METHOD(sendCDPMessage:(NSString *)serverHost
                                                          serverPort:[serverPort integerValue]
                                                             message:message];
   resolver(nil);
+}
+
+/**
+ * Enable console hook / console 훅 활성화
+ */
+RCT_EXPORT_METHOD(enableConsoleHook:(RCTPromiseResolveBlock)resolver
+                  rejecter:(RCTPromiseRejectBlock)rejecter) {
+#ifdef CONSOLE_HOOK_AVAILABLE
+  if (g_runtimeExecutor) {
+    g_runtimeExecutor([resolver, rejecter](facebook::jsi::Runtime& runtime) {
+      @try {
+        bool success = chrome_remote_devtools::enableConsoleHook(runtime);
+        resolver(@(success));
+      } @catch (NSException *exception) {
+        rejecter(@"ENABLE_CONSOLE_HOOK_ERROR", exception.reason, nil);
+      } @catch (...) {
+        rejecter(@"ENABLE_CONSOLE_HOOK_ERROR", @"Unknown error / 알 수 없는 오류", nil);
+      }
+    });
+  } else {
+    rejecter(@"NO_RUNTIME_EXECUTOR", @"Runtime executor is not available / Runtime executor를 사용할 수 없습니다", nil);
+  }
+#else
+  rejecter(@"NOT_AVAILABLE", @"Console hook is not available / Console 훅을 사용할 수 없습니다", nil);
+#endif
+}
+
+/**
+ * Disable console hook / console 훅 비활성화
+ */
+RCT_EXPORT_METHOD(disableConsoleHook:(RCTPromiseResolveBlock)resolver
+                  rejecter:(RCTPromiseRejectBlock)rejecter) {
+#ifdef CONSOLE_HOOK_AVAILABLE
+  if (g_runtimeExecutor) {
+    g_runtimeExecutor([resolver, rejecter](facebook::jsi::Runtime& runtime) {
+      @try {
+        bool success = chrome_remote_devtools::disableConsoleHook(runtime);
+        resolver(@(success));
+      } @catch (NSException *exception) {
+        rejecter(@"DISABLE_CONSOLE_HOOK_ERROR", exception.reason, nil);
+      } @catch (...) {
+        rejecter(@"DISABLE_CONSOLE_HOOK_ERROR", @"Unknown error / 알 수 없는 오류", nil);
+      }
+    });
+  } else {
+    rejecter(@"NO_RUNTIME_EXECUTOR", @"Runtime executor is not available / Runtime executor를 사용할 수 없습니다", nil);
+  }
+#else
+  rejecter(@"NOT_AVAILABLE", @"Console hook is not available / Console 훅을 사용할 수 없습니다", nil);
+#endif
+}
+
+/**
+ * Enable network hook / 네트워크 훅 활성화
+ */
+RCT_EXPORT_METHOD(enableNetworkHook:(RCTPromiseResolveBlock)resolver
+                  rejecter:(RCTPromiseRejectBlock)rejecter) {
+#ifdef NETWORK_HOOK_AVAILABLE
+  if (g_runtimeExecutor) {
+    g_runtimeExecutor([resolver, rejecter](facebook::jsi::Runtime& runtime) {
+      @try {
+        bool success = chrome_remote_devtools::enableNetworkHook(runtime);
+        resolver(@(success));
+      } @catch (NSException *exception) {
+        rejecter(@"ENABLE_NETWORK_HOOK_ERROR", exception.reason, nil);
+      } @catch (...) {
+        rejecter(@"ENABLE_NETWORK_HOOK_ERROR", @"Unknown error / 알 수 없는 오류", nil);
+      }
+    });
+  } else {
+    rejecter(@"NO_RUNTIME_EXECUTOR", @"Runtime executor is not available / Runtime executor를 사용할 수 없습니다", nil);
+  }
+#else
+  rejecter(@"NOT_AVAILABLE", @"Network hook is not available / 네트워크 훅을 사용할 수 없습니다", nil);
+#endif
+}
+
+/**
+ * Disable network hook / 네트워크 훅 비활성화
+ */
+RCT_EXPORT_METHOD(disableNetworkHook:(RCTPromiseResolveBlock)resolver
+                  rejecter:(RCTPromiseRejectBlock)rejecter) {
+#ifdef NETWORK_HOOK_AVAILABLE
+  if (g_runtimeExecutor) {
+    g_runtimeExecutor([resolver, rejecter](facebook::jsi::Runtime& runtime) {
+      @try {
+        bool success = chrome_remote_devtools::disableNetworkHook(runtime);
+        resolver(@(success));
+      } @catch (NSException *exception) {
+        rejecter(@"DISABLE_NETWORK_HOOK_ERROR", exception.reason, nil);
+      } @catch (...) {
+        rejecter(@"DISABLE_NETWORK_HOOK_ERROR", @"Unknown error / 알 수 없는 오류", nil);
+      }
+    });
+  } else {
+    rejecter(@"NO_RUNTIME_EXECUTOR", @"Runtime executor is not available / Runtime executor를 사용할 수 없습니다", nil);
+  }
+#else
+  rejecter(@"NOT_AVAILABLE", @"Network hook is not available / 네트워크 훅을 사용할 수 없습니다", nil);
+#endif
 }
 
 @end
