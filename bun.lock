@@ -130,6 +130,7 @@
         "@react-native/gradle-plugin": "0.83.1",
         "@react-native/metro-config": "0.83.1",
         "@react-native/typescript-config": "0.83.1",
+        "@types/react": "^19.2.7",
         "@types/react-test-renderer": "^19.1.0",
         "react-test-renderer": "19.2.0",
         "typescript": "^5.8.3",
