@@ -231,13 +231,15 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
             // Add event listeners AFTER calling original send / 원본 send 호출 후 이벤트 리스너 추가
             // Use addEventListener instead of overriding onload/onerror/ontimeout / onload/onerror/ontimeout를 덮어쓰는 대신 addEventListener 사용
             // This preserves original event handlers / 이를 통해 원본 이벤트 핸들러를 보존합니다
+            // Follow React Native XHRInterceptor pattern: use readystatechange for DONE state / React Native XHRInterceptor 패턴 따름: readystatechange에서 DONE 상태 처리
             if (shouldTrack) {
               try {
                 facebook::jsi::Value addEventListenerValue = xhr.getProperty(rt, "addEventListener");
                 if (addEventListenerValue.isObject() && addEventListenerValue.asObject(rt).isFunction(rt)) {
                   facebook::jsi::Function addEventListener = addEventListenerValue.asObject(rt).asFunction(rt);
 
-                  // Create readystatechange listener / readystatechange 리스너 생성
+                  // Create readystatechange listener - React Native XHRInterceptor pattern / readystatechange 리스너 생성 - React Native XHRInterceptor 패턴
+                  // This matches the pattern used in React Native's XHRInterceptor.js / React Native의 XHRInterceptor.js에서 사용하는 패턴과 일치
                   facebook::jsi::Value readystatechangeListener = facebook::jsi::Function::createFromHostFunction(
                     rt,
                     facebook::jsi::PropNameID::forAscii(rt, "readystatechangeListener"),
@@ -249,8 +251,17 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                       if (thisVal.isObject()) {
                         facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
                         facebook::jsi::Value readyStateValue = xhrObj.getProperty(runtime, "readyState");
-                        if (readyStateValue.isNumber() && readyStateValue.asNumber() == 4) {
-                          // Request completed / 요청 완료
+                        if (!readyStateValue.isNumber()) {
+                          return facebook::jsi::Value::undefined();
+                        }
+
+                        double readyState = readyStateValue.asNumber();
+
+                        // DONE (4) - collect response data / 응답 데이터 수집
+                        // This is when React Native XHRInterceptor collects response / React Native XHRInterceptor가 응답을 수집하는 시점
+                        if (readyState == 4) {
+                          // Collect response info / 응답 정보 수집
+                          // collectXHRResponseInfo will try responseText first, then response / collectXHRResponseInfo는 먼저 responseText를 시도하고, 그 다음 response를 시도함
                           ResponseInfo responseInfo = collectXHRResponseInfo(runtime, xhrObj);
 
                           // Store response data / 응답 데이터 저장 (thread-safe / 스레드 안전)
@@ -274,12 +285,13 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                   facebook::jsi::Value eventName = facebook::jsi::String::createFromUtf8(rt, "readystatechange");
                   addEventListener.callWithThis(rt, xhr, std::move(eventName), std::move(readystatechangeListener));
 
-                  // Add load listener for response body / 응답 본문을 위한 load 리스너 추가
+                  // Also add load listener as fallback / 폴백으로 load 리스너도 추가
+                  // load event fires after readystatechange, so it's safer for response data / load 이벤트는 readystatechange 이후에 발생하므로 응답 데이터에 더 안전함
                   facebook::jsi::Value loadListener = facebook::jsi::Function::createFromHostFunction(
                     rt,
                     facebook::jsi::PropNameID::forAscii(rt, "loadListener"),
                     0,
-                    [requestId](facebook::jsi::Runtime& runtime,
+                    [requestId, capturedUrl](facebook::jsi::Runtime& runtime,
                                 const facebook::jsi::Value& thisVal,
                                 const facebook::jsi::Value*,
                                 size_t) -> facebook::jsi::Value {
@@ -287,8 +299,8 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                         facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
                         ResponseInfo responseInfo = collectXHRResponseInfo(runtime, xhrObj);
 
-                        // Store response data / 응답 데이터 저장 (thread-safe / 스레드 안전)
-                        {
+                        // Update response data if it was empty in readystatechange / readystatechange에서 비어있었으면 응답 데이터 업데이트
+                        if (!responseInfo.responseText.empty()) {
                           std::lock_guard<std::mutex> lock(g_responseDataMutex);
                           g_responseData[requestId] = responseInfo.responseText;
                         }
@@ -310,30 +322,30 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                                 const facebook::jsi::Value*,
                                 size_t) -> facebook::jsi::Value {
                       sendLoadingFailed(runtime, requestId, "Network error");
-                      return facebook::jsi::Value::undefined();
-                    }
-                  );
+                    return facebook::jsi::Value::undefined();
+                  }
+                );
 
                   facebook::jsi::Value errorEventName = facebook::jsi::String::createFromUtf8(rt, "error");
                   addEventListener.callWithThis(rt, xhr, std::move(errorEventName), std::move(errorListener));
 
                   // Add timeout listener / timeout 리스너 추가
                   facebook::jsi::Value timeoutListener = facebook::jsi::Function::createFromHostFunction(
-                    rt,
+                  rt,
                     facebook::jsi::PropNameID::forAscii(rt, "timeoutListener"),
-                    0,
-                    [requestId](facebook::jsi::Runtime& runtime,
+                  0,
+                  [requestId](facebook::jsi::Runtime& runtime,
                                 const facebook::jsi::Value&,
-                                const facebook::jsi::Value*,
-                                size_t) -> facebook::jsi::Value {
-                      sendLoadingFailed(runtime, requestId, "Request timeout");
+                               const facebook::jsi::Value*,
+                               size_t) -> facebook::jsi::Value {
+                    sendLoadingFailed(runtime, requestId, "Request timeout");
                       return facebook::jsi::Value::undefined();
                     }
                   );
 
                   facebook::jsi::Value timeoutEventName = facebook::jsi::String::createFromUtf8(rt, "timeout");
                   addEventListener.callWithThis(rt, xhr, std::move(timeoutEventName), std::move(timeoutListener));
-                }
+              }
               } catch (const std::exception& e) {
                 LOGW("Failed to add event listeners, CDP events may not be sent / 이벤트 리스너 추가 실패, CDP 이벤트가 전송되지 않을 수 있음: %s", e.what());
               }
