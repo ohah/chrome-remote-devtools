@@ -240,6 +240,8 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
 
                   // Create readystatechange listener - React Native XHRInterceptor pattern / readystatechange 리스너 생성 - React Native XHRInterceptor 패턴
                   // This matches the pattern used in React Native's XHRInterceptor.js / React Native의 XHRInterceptor.js에서 사용하는 패턴과 일치
+                  // HEADERS_RECEIVED (2) - collect response headers / 응답 헤더 수집
+                  // DONE (4) - collect response body and send events / 응답 본문 수집 및 이벤트 전송
                   facebook::jsi::Value readystatechangeListener = facebook::jsi::Function::createFromHostFunction(
                     rt,
                     facebook::jsi::PropNameID::forAscii(rt, "readystatechangeListener"),
@@ -257,15 +259,62 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
 
                         double readyState = readyStateValue.asNumber();
 
-                        // DONE (4) - collect response data / 응답 데이터 수집
-                        // This is when React Native XHRInterceptor collects response / React Native XHRInterceptor가 응답을 수집하는 시점
+                        // HEADERS_RECEIVED (2) - collect response headers / 응답 헤더 수집
+                        // This is when React Native XHRInterceptor collects headers / React Native XHRInterceptor가 헤더를 수집하는 시점
+                        if (readyState == 2) {
+                          // Get response headers and store in metadata / 응답 헤더 가져오기 및 메타데이터에 저장
+                          try {
+                            facebook::jsi::Value metadataValue = xhrObj.getProperty(runtime, "__cdpNetworkMetadata");
+                            if (metadataValue.isObject()) {
+                              facebook::jsi::Object metadata = metadataValue.asObject(runtime);
+
+                              // Get all response headers / 모든 응답 헤더 가져오기
+                              std::string allHeaders;
+                              facebook::jsi::Value getAllResponseHeadersValue = xhrObj.getProperty(runtime, "getAllResponseHeaders");
+                              if (getAllResponseHeadersValue.isObject() && getAllResponseHeadersValue.asObject(runtime).isFunction(runtime)) {
+                                facebook::jsi::Function getAllResponseHeaders = getAllResponseHeadersValue.asObject(runtime).asFunction(runtime);
+                                facebook::jsi::Value headersValue = getAllResponseHeaders.call(runtime);
+                                if (headersValue.isString()) {
+                                  allHeaders = headersValue.asString(runtime).utf8(runtime);
+                                  // Store headers string in metadata for later use / 나중에 사용하기 위해 메타데이터에 헤더 문자열 저장
+                                  metadata.setProperty(runtime, "__responseHeaders", facebook::jsi::String::createFromUtf8(runtime, allHeaders));
+                                }
+                              }
+                            }
+                          } catch (...) {
+                            // Failed to collect headers / 헤더 수집 실패
+                          }
+                        }
+
+                        // DONE (4) - collect response data and send events / 응답 데이터 수집 및 이벤트 전송
+                        // This is when React Native XHRInterceptor collects response body / React Native XHRInterceptor가 응답 본문을 수집하는 시점
                         if (readyState == 4) {
                           // Collect response info / 응답 정보 수집
                           // collectXHRResponseInfo will try responseText first, then response / collectXHRResponseInfo는 먼저 responseText를 시도하고, 그 다음 response를 시도함
                           ResponseInfo responseInfo = collectXHRResponseInfo(runtime, xhrObj);
 
+                          // If headers were collected at HEADERS_RECEIVED, use them / HEADERS_RECEIVED에서 헤더를 수집했다면 사용
+                          // Otherwise, use headers from collectXHRResponseInfo / 그렇지 않으면 collectXHRResponseInfo의 헤더 사용
+                          try {
+                            facebook::jsi::Value metadataValue = xhrObj.getProperty(runtime, "__cdpNetworkMetadata");
+                            if (metadataValue.isObject()) {
+                              facebook::jsi::Object metadata = metadataValue.asObject(runtime);
+                              facebook::jsi::Value headersValue = metadata.getProperty(runtime, "__responseHeaders");
+                              if (headersValue.isString()) {
+                                std::string allHeaders = headersValue.asString(runtime).utf8(runtime);
+                                if (!allHeaders.empty()) {
+                                  // Format and use stored headers / 저장된 헤더 포맷팅 및 사용
+                                  responseInfo.headers = formatResponseHeaders(allHeaders);
+                                }
+                              }
+                            }
+                          } catch (...) {
+                            // Failed to get stored headers, use headers from collectXHRResponseInfo / 저장된 헤더 가져오기 실패, collectXHRResponseInfo의 헤더 사용
+                          }
+
                           // Store response data / 응답 데이터 저장 (thread-safe / 스레드 안전)
-                          {
+                          // Only store if responseText is not empty / responseText가 비어있지 않을 때만 저장
+                          if (!responseInfo.responseText.empty()) {
                             std::lock_guard<std::mutex> lock(g_responseDataMutex);
                             g_responseData[requestId] = responseInfo.responseText;
                           }
@@ -287,11 +336,12 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
 
                   // Also add load listener as fallback / 폴백으로 load 리스너도 추가
                   // load event fires after readystatechange, so it's safer for response data / load 이벤트는 readystatechange 이후에 발생하므로 응답 데이터에 더 안전함
+                  // Note: This is a fallback in case readystatechange didn't capture the data / 참고: readystatechange에서 데이터를 캡처하지 못한 경우를 위한 폴백
                   facebook::jsi::Value loadListener = facebook::jsi::Function::createFromHostFunction(
                     rt,
                     facebook::jsi::PropNameID::forAscii(rt, "loadListener"),
                     0,
-                    [requestId, capturedUrl](facebook::jsi::Runtime& runtime,
+                    [requestId](facebook::jsi::Runtime& runtime,
                                 const facebook::jsi::Value& thisVal,
                                 const facebook::jsi::Value*,
                                 size_t) -> facebook::jsi::Value {
@@ -300,9 +350,13 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                         ResponseInfo responseInfo = collectXHRResponseInfo(runtime, xhrObj);
 
                         // Update response data if it was empty in readystatechange / readystatechange에서 비어있었으면 응답 데이터 업데이트
+                        // Only update if we have data and it's not already stored / 데이터가 있고 아직 저장되지 않았을 때만 업데이트
                         if (!responseInfo.responseText.empty()) {
                           std::lock_guard<std::mutex> lock(g_responseDataMutex);
-                          g_responseData[requestId] = responseInfo.responseText;
+                          // Only update if not already set / 이미 설정되지 않았을 때만 업데이트
+                          if (g_responseData.find(requestId) == g_responseData.end() || g_responseData[requestId].empty()) {
+                            g_responseData[requestId] = responseInfo.responseText;
+                          }
                         }
                       }
                       return facebook::jsi::Value::undefined();
