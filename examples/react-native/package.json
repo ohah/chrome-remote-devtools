@@ -14,9 +14,22 @@
   "dependencies": {
     "@ohah/chrome-remote-devtools-react-native": "workspace:*",
     "@react-native/new-app-screen": "0.83.1",
+    "@react-navigation/bottom-tabs": "^7.9.0",
+    "@react-navigation/material-top-tabs": "^7.4.11",
+    "@react-navigation/native": "^7.1.26",
+    "@react-navigation/stack": "^7.6.13",
+    "@reduxjs/toolkit": "^2.11.2",
     "react": "19.2.0",
     "react-native": "0.83.1",
-    "react-native-safe-area-context": "^5.5.2"
+    "react-native-gesture-handler": "^2.30.0",
+    "react-native-pager-view": "^8.0.0",
+    "react-native-safe-area-context": "^5.5.2",
+    "react-native-screens": "^4.19.0",
+    "react-native-vector-icons": "^10.3.0",
+    "react-redux": "^9.2.0",
+    "redux": "^5.0.1",
+    "redux-devtools-extension": "^2.13.9",
+    "zustand": "5.0.9"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -34,6 +47,7 @@
     "@react-native/typescript-config": "0.83.1",
     "@types/react": "^19.2.7",
     "@types/react-test-renderer": "^19.1.0",
+    "@types/redux-devtools-extension": "^2.13.2",
     "react-test-renderer": "19.2.0",
     "typescript": "^5.8.3"
   },
