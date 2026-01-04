@@ -9,7 +9,6 @@
 
 #include "NetworkHook.h"
 #include "network/XHRHook.h"
-#include "network/FetchHook.h"
 #include "network/NetworkGlobals.h"
 #include <atomic>
 
@@ -43,30 +42,18 @@ bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
 
   try {
     // Hook XMLHttpRequest / XMLHttpRequest 훅
+    // Note: React Native internally wraps fetch with XMLHttpRequest, so XHR hook will catch both fetch and XHR requests / 참고: React Native는 내부적으로 fetch를 XMLHttpRequest로 래핑하므로 XHR 훅이 fetch와 XHR 요청을 모두 잡음
     bool xhrSuccess = network::hookXHR(runtime);
     if (!xhrSuccess) {
       LOGE("Failed to hook XMLHttpRequest / XMLHttpRequest 훅 실패");
+      return false;
     }
 
-    // Hook fetch / fetch 훅
-    bool fetchSuccess = network::hookFetch(runtime);
-    if (!fetchSuccess) {
-      LOGE("Failed to hook fetch / fetch 훅 실패");
-    }
+    // Fetch hook removed: React Native wraps fetch with XHR, so XHR hook handles all requests / Fetch 훅 제거: React Native가 fetch를 XHR로 래핑하므로 XHR 훅이 모든 요청을 처리함
 
-    // Only mark as hooked if both XHR and Fetch succeeded / XHR과 Fetch 둘 다 성공한 경우에만 훅 완료로 표시
-    if (xhrSuccess && fetchSuccess) {
-      isHooked.store(true);
-      LOGI("Network hook installed successfully / 네트워크 훅이 성공적으로 설치됨");
-      return true;
-    } else if (xhrSuccess || fetchSuccess) {
-      // At least one hook succeeded, but not both / 최소한 하나는 성공했지만 둘 다는 아님
-      LOGW("Partial network hook installation: XHR=%s, Fetch=%s",
-           xhrSuccess ? "success" : "failed", fetchSuccess ? "success" : "failed");
-      return true; // Return true to indicate partial success / 부분적 성공을 나타내기 위해 true 반환
-    }
-
-    return false;
+    isHooked.store(true);
+    LOGI("Network hook installed successfully / 네트워크 훅이 성공적으로 설치됨");
+    return true;
   } catch (const std::exception& e) {
     LOGE("Failed to hook network methods / 네트워크 메서드 훅 실패: %s", e.what());
     return false;

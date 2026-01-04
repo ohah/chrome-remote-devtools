@@ -15,7 +15,8 @@
 namespace chrome_remote_devtools {
 
 /**
- * Hook network methods (XMLHttpRequest and fetch) in JSI runtime / JSI 런타임에서 네트워크 메서드 (XMLHttpRequest 및 fetch) 훅
+ * Hook network methods (XMLHttpRequest) in JSI runtime / JSI 런타임에서 네트워크 메서드 (XMLHttpRequest) 훅
+ * Note: React Native internally wraps fetch with XMLHttpRequest, so XHR hook handles both fetch and XHR requests / 참고: React Native는 내부적으로 fetch를 XMLHttpRequest로 래핑하므로 XHR 훅이 fetch와 XHR 요청을 모두 처리함
  * @param runtime JSI runtime instance / JSI 런타임 인스턴스
  * @return true if hooking succeeded / 훅이 성공하면 true
  */
