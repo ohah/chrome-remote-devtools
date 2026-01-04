@@ -1,6 +1,8 @@
 // Redux DevTools Extension hook for React Native / React Native용 Redux DevTools Extension 훅
 // Based on reference/redux-devtools implementation / reference/redux-devtools 구현 기반
-import { sendCDPMessage, setServerInfo } from './index';
+
+import { sendCDPMessage } from './cdp-message';
+import { setServerInfo } from './server-info';
 
 // Type declarations for React Native environment / React Native 환경용 타입 선언
 declare const global: typeof globalThis;
@@ -312,5 +314,29 @@ export function setupReduxDevToolsExtension(
   } else {
     console.log('[ReduxDevTools] __REDUX_DEVTOOLS_EXTENSION__ already exists');
   }
+}
+
+// Auto-initialize on import / import 시 자동 초기화
+// Default values from environment variables or fallback to localhost:8080 / 환경 변수에서 기본값 가져오거나 localhost:8080으로 폴백
+const DEFAULT_HOST =
+  (typeof process !== 'undefined' && process.env?.CHROME_REMOTE_DEVTOOLS_HOST) ||
+  (typeof global !== 'undefined' &&
+    (global as any).__ChromeRemoteDevToolsServerHost) ||
+  'localhost';
+const DEFAULT_PORT =
+  (typeof process !== 'undefined' &&
+    process.env?.CHROME_REMOTE_DEVTOOLS_PORT &&
+    parseInt(process.env.CHROME_REMOTE_DEVTOOLS_PORT, 10)) ||
+  (typeof global !== 'undefined' &&
+    (global as any).__ChromeRemoteDevToolsServerPort) ||
+  8080;
+
+// Auto-setup if not already set / 아직 설정되지 않았으면 자동 설정
+if (typeof global !== 'undefined' && !(global as any).__REDUX_DEVTOOLS_EXTENSION__) {
+  console.log('[ReduxDevTools] Auto-initializing with default values', {
+    host: DEFAULT_HOST,
+    port: DEFAULT_PORT,
+  });
+  setupReduxDevToolsExtension(DEFAULT_HOST, DEFAULT_PORT);
 }
 
