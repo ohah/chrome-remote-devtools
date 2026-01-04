@@ -156,6 +156,43 @@ export async function disableNetworkHook(): Promise<boolean> {
 import './devtools-hook';
 export { setupReduxDevToolsExtension } from './devtools-hook';
 
+// Auto-connect to server if not already connected / 아직 연결되지 않았으면 서버에 자동 연결
+// Default values from environment variables or fallback to localhost:8080 / 환경 변수에서 기본값 가져오거나 localhost:8080으로 폴백
+const DEFAULT_HOST =
+  (typeof process !== 'undefined' && process.env?.CHROME_REMOTE_DEVTOOLS_HOST) ||
+  (typeof global !== 'undefined' &&
+    (global as any).__ChromeRemoteDevToolsServerHost) ||
+  'localhost';
+const DEFAULT_PORT =
+  (typeof process !== 'undefined' &&
+    process.env?.CHROME_REMOTE_DEVTOOLS_PORT &&
+    parseInt(process.env.CHROME_REMOTE_DEVTOOLS_PORT, 10)) ||
+  (typeof global !== 'undefined' &&
+    (global as any).__ChromeRemoteDevToolsServerPort) ||
+  8080;
+
+// Auto-connect in development mode / 개발 모드에서 자동 연결
+if (__DEV__ && ChromeRemoteDevToolsInspector) {
+  // Connect asynchronously to avoid blocking module initialization / 모듈 초기화를 막지 않기 위해 비동기로 연결
+  setTimeout(() => {
+    ChromeRemoteDevToolsInspector.connect(DEFAULT_HOST, DEFAULT_PORT)
+      .then(() => {
+        console.log(
+          `[ChromeRemoteDevTools] Auto-connected to ${DEFAULT_HOST}:${DEFAULT_PORT}`
+        );
+      })
+      .catch((error: unknown) => {
+        // Silently fail - connection will be retried when needed / 조용히 실패 - 필요할 때 재시도됨
+        if (__DEV__) {
+          console.warn(
+            `[ChromeRemoteDevTools] Auto-connect failed (server may not be running):`,
+            error
+          );
+        }
+      });
+  }, 100);
+}
+
 // Re-export from separate files to avoid circular dependency / 순환 참조를 피하기 위해 별도 파일에서 re-export
 export { sendCDPMessage } from './cdp-message';
 export { setServerInfo } from './server-info';
