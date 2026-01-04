@@ -24,6 +24,7 @@ describe('getClients', () => {
     const mockClients: Client[] = [
       {
         id: 'client-1',
+        type: 'web',
         url: 'http://example.com',
         title: 'Example Page',
         ua: 'Mozilla/5.0',
@@ -31,6 +32,7 @@ describe('getClients', () => {
       },
       {
         id: 'client-2',
+        type: 'web',
         url: 'http://test.com',
         title: 'Test Page',
         ua: 'Mozilla/5.0',
