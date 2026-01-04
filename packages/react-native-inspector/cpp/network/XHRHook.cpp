@@ -183,27 +183,27 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
               return facebook::jsi::Value::undefined();
             }
 
-            facebook::jsi::Object xhr = thisVal.asObject(rt);
-            facebook::jsi::Value metadataValue = xhr.getProperty(rt, "__cdpNetworkMetadata");
+              facebook::jsi::Object xhr = thisVal.asObject(rt);
+              facebook::jsi::Value metadataValue = xhr.getProperty(rt, "__cdpNetworkMetadata");
 
             // CDP 이벤트 전송을 위한 정보 수집 (메타데이터가 있을 때만) / Collect info for CDP event (only if metadata exists)
             std::string requestId;
             std::string capturedUrl;
             bool shouldTrack = false;
 
-            if (metadataValue.isObject()) {
-              facebook::jsi::Object metadata = metadataValue.asObject(rt);
+              if (metadataValue.isObject()) {
+                facebook::jsi::Object metadata = metadataValue.asObject(rt);
               requestId = std::to_string(g_requestIdCounter.fetch_add(1));
 
-              // Collect request info / 요청 정보 수집
-              RequestInfo requestInfo = collectXHRRequestInfo(rt, metadata, args, count);
+                // Collect request info / 요청 정보 수집
+                RequestInfo requestInfo = collectXHRRequestInfo(rt, metadata, args, count);
               capturedUrl = requestInfo.url;
 
-              // Send requestWillBeSent event / requestWillBeSent 이벤트 전송
-              sendRequestWillBeSent(rt, requestId, requestInfo, "XHR");
+                // Send requestWillBeSent event / requestWillBeSent 이벤트 전송
+                sendRequestWillBeSent(rt, requestId, requestInfo, "XHR");
 
-              // Store requestId in metadata / 메타데이터에 requestId 저장
-              metadata.setProperty(rt, "requestId", facebook::jsi::String::createFromUtf8(rt, requestId));
+                // Store requestId in metadata / 메타데이터에 requestId 저장
+                metadata.setProperty(rt, "requestId", facebook::jsi::String::createFromUtf8(rt, requestId));
               shouldTrack = true;
             }
 
@@ -243,15 +243,15 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                   // HEADERS_RECEIVED (2) - collect response headers / 응답 헤더 수집
                   // DONE (4) - collect response body and send events / 응답 본문 수집 및 이벤트 전송
                   facebook::jsi::Value readystatechangeListener = facebook::jsi::Function::createFromHostFunction(
-                    rt,
+                  rt,
                     facebook::jsi::PropNameID::forAscii(rt, "readystatechangeListener"),
-                    0,
-                    [requestId, capturedUrl](facebook::jsi::Runtime& runtime,
-                                             const facebook::jsi::Value& thisVal,
-                                             const facebook::jsi::Value*,
-                                             size_t) -> facebook::jsi::Value {
-                      if (thisVal.isObject()) {
-                        facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
+                  0,
+                  [requestId, capturedUrl](facebook::jsi::Runtime& runtime,
+                                           const facebook::jsi::Value& thisVal,
+                                           const facebook::jsi::Value*,
+                                           size_t) -> facebook::jsi::Value {
+                    if (thisVal.isObject()) {
+                      facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
                         facebook::jsi::Value readyStateValue = xhrObj.getProperty(runtime, "readyState");
                         if (!readyStateValue.isNumber()) {
                           return facebook::jsi::Value::undefined();
@@ -262,6 +262,7 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                         // HEADERS_RECEIVED (2) - collect response headers / 응답 헤더 수집
                         // This is when React Native XHRInterceptor collects headers / React Native XHRInterceptor가 헤더를 수집하는 시점
                         if (readyState == 2) {
+                          LOGI("ReadyState HEADERS_RECEIVED (2) - collecting headers / ReadyState HEADERS_RECEIVED (2) - 헤더 수집 중");
                           // Get response headers and store in metadata / 응답 헤더 가져오기 및 메타데이터에 저장
                           try {
                             facebook::jsi::Value metadataValue = xhrObj.getProperty(runtime, "__cdpNetworkMetadata");
@@ -272,44 +273,117 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                               std::string allHeaders;
                               facebook::jsi::Value getAllResponseHeadersValue = xhrObj.getProperty(runtime, "getAllResponseHeaders");
                               if (getAllResponseHeadersValue.isObject() && getAllResponseHeadersValue.asObject(runtime).isFunction(runtime)) {
+                                LOGI("getAllResponseHeaders function found / getAllResponseHeaders 함수 발견");
                                 facebook::jsi::Function getAllResponseHeaders = getAllResponseHeadersValue.asObject(runtime).asFunction(runtime);
-                                facebook::jsi::Value headersValue = getAllResponseHeaders.call(runtime);
+                                facebook::jsi::Value headersValue = getAllResponseHeaders.callWithThis(runtime, xhrObj);
                                 if (headersValue.isString()) {
                                   allHeaders = headersValue.asString(runtime).utf8(runtime);
+                                  LOGI("Headers collected at HEADERS_RECEIVED: length=%zu", allHeaders.length());
+                                  if (!allHeaders.empty()) {
+                                    LOGI("Headers content (first 200 chars): %s", allHeaders.substr(0, 200).c_str());
+                                  } else {
+                                    LOGW("Headers string is empty at HEADERS_RECEIVED / HEADERS_RECEIVED에서 헤더 문자열이 비어있음");
+                                  }
                                   // Store headers string in metadata for later use / 나중에 사용하기 위해 메타데이터에 헤더 문자열 저장
                                   metadata.setProperty(runtime, "__responseHeaders", facebook::jsi::String::createFromUtf8(runtime, allHeaders));
+                                  LOGI("Headers stored in metadata / 메타데이터에 헤더 저장됨");
+                                } else {
+                                  LOGW("getAllResponseHeaders returned non-string value / getAllResponseHeaders가 문자열이 아닌 값을 반환함");
                                 }
+                              } else {
+                                LOGW("getAllResponseHeaders is not a function / getAllResponseHeaders가 함수가 아님");
                               }
+                            } else {
+                              LOGW("Metadata not found at HEADERS_RECEIVED / HEADERS_RECEIVED에서 메타데이터를 찾을 수 없음");
                             }
+                          } catch (const std::exception& e) {
+                            LOGE("Exception while collecting headers at HEADERS_RECEIVED: %s", e.what());
                           } catch (...) {
-                            // Failed to collect headers / 헤더 수집 실패
+                            LOGE("Unknown exception while collecting headers at HEADERS_RECEIVED / HEADERS_RECEIVED에서 헤더 수집 중 알 수 없는 예외");
                           }
                         }
 
                         // DONE (4) - collect response data and send events / 응답 데이터 수집 및 이벤트 전송
                         // This is when React Native XHRInterceptor collects response body / React Native XHRInterceptor가 응답 본문을 수집하는 시점
+                        // XHRInterceptor uses this.response (not responseText) / XHRInterceptor는 this.response를 사용함 (responseText 아님)
                         if (readyState == 4) {
                           // Collect response info / 응답 정보 수집
                           // collectXHRResponseInfo will try responseText first, then response / collectXHRResponseInfo는 먼저 responseText를 시도하고, 그 다음 response를 시도함
                           ResponseInfo responseInfo = collectXHRResponseInfo(runtime, xhrObj);
 
-                          // If headers were collected at HEADERS_RECEIVED, use them / HEADERS_RECEIVED에서 헤더를 수집했다면 사용
-                          // Otherwise, use headers from collectXHRResponseInfo / 그렇지 않으면 collectXHRResponseInfo의 헤더 사용
+                          // Use headers collected at HEADERS_RECEIVED (readyState 2) / HEADERS_RECEIVED (readyState 2)에서 수집한 헤더 사용
+                          // XHRInterceptor pattern: headers are collected at HEADERS_RECEIVED, not at DONE / XHRInterceptor 패턴: 헤더는 HEADERS_RECEIVED에서 수집하고, DONE에서 수집하지 않음
+                          LOGI("ReadyState DONE (4) - using headers from metadata / ReadyState DONE (4) - 메타데이터에서 헤더 사용");
+                          bool headersFound = false;
                           try {
                             facebook::jsi::Value metadataValue = xhrObj.getProperty(runtime, "__cdpNetworkMetadata");
                             if (metadataValue.isObject()) {
+                              LOGI("Metadata found, checking for stored headers / 메타데이터 발견, 저장된 헤더 확인 중");
                               facebook::jsi::Object metadata = metadataValue.asObject(runtime);
                               facebook::jsi::Value headersValue = metadata.getProperty(runtime, "__responseHeaders");
                               if (headersValue.isString()) {
                                 std::string allHeaders = headersValue.asString(runtime).utf8(runtime);
+                                LOGI("Stored headers found: length=%zu", allHeaders.length());
                                 if (!allHeaders.empty()) {
+                                  LOGI("Stored headers content (first 200 chars): %s", allHeaders.substr(0, 200).c_str());
                                   // Format and use stored headers / 저장된 헤더 포맷팅 및 사용
                                   responseInfo.headers = formatResponseHeaders(allHeaders);
+                                  headersFound = true;
+                                  LOGI("Headers formatted and set from metadata / 메타데이터에서 헤더 포맷팅 및 설정 완료");
+                                } else {
+                                  LOGW("Stored headers string is empty / 저장된 헤더 문자열이 비어있음");
                                 }
+                              } else {
+                                LOGW("__responseHeaders is not a string in metadata / 메타데이터의 __responseHeaders가 문자열이 아님");
                               }
+                            } else {
+                              LOGW("Metadata not found at DONE / DONE에서 메타데이터를 찾을 수 없음");
                             }
+                          } catch (const std::exception& e) {
+                            LOGE("Exception while getting stored headers: %s", e.what());
                           } catch (...) {
-                            // Failed to get stored headers, use headers from collectXHRResponseInfo / 저장된 헤더 가져오기 실패, collectXHRResponseInfo의 헤더 사용
+                            LOGE("Unknown exception while getting stored headers / 저장된 헤더 가져오기 중 알 수 없는 예외");
+                          }
+
+                          // Failed to get stored headers, try to collect at DONE as fallback / 저장된 헤더 가져오기 실패, 폴백으로 DONE에서 수집 시도
+                          if (!headersFound) {
+                            LOGI("Headers not found in metadata, trying to collect at DONE / 메타데이터에서 헤더를 찾을 수 없음, DONE에서 수집 시도");
+                            try {
+                              facebook::jsi::Value getAllResponseHeadersValue = xhrObj.getProperty(runtime, "getAllResponseHeaders");
+                              if (getAllResponseHeadersValue.isObject() && getAllResponseHeadersValue.asObject(runtime).isFunction(runtime)) {
+                                LOGI("getAllResponseHeaders function found at DONE / DONE에서 getAllResponseHeaders 함수 발견");
+                                facebook::jsi::Function getAllResponseHeaders = getAllResponseHeadersValue.asObject(runtime).asFunction(runtime);
+                                facebook::jsi::Value headersValue = getAllResponseHeaders.callWithThis(runtime, xhrObj);
+                                if (headersValue.isString()) {
+                                  std::string allHeaders = headersValue.asString(runtime).utf8(runtime);
+                                  LOGI("Headers collected at DONE: length=%zu", allHeaders.length());
+                                  if (!allHeaders.empty()) {
+                                    LOGI("Headers content at DONE (first 200 chars): %s", allHeaders.substr(0, 200).c_str());
+                                    // Format and use headers / 헤더 포맷팅 및 사용
+                                    responseInfo.headers = formatResponseHeaders(allHeaders);
+                                    headersFound = true;
+                                    LOGI("Headers formatted and set from DONE collection / DONE 수집에서 헤더 포맷팅 및 설정 완료");
+                                  } else {
+                                    LOGW("Headers string is empty at DONE / DONE에서 헤더 문자열이 비어있음");
+                                  }
+                                } else {
+                                  LOGW("getAllResponseHeaders returned non-string value at DONE / DONE에서 getAllResponseHeaders가 문자열이 아닌 값을 반환함");
+                                }
+                              } else {
+                                LOGW("getAllResponseHeaders is not a function at DONE / DONE에서 getAllResponseHeaders가 함수가 아님");
+                              }
+                            } catch (const std::exception& e) {
+                              LOGE("Exception while collecting headers at DONE: %s", e.what());
+                            } catch (...) {
+                              LOGE("Unknown exception while collecting headers at DONE / DONE에서 헤더 수집 중 알 수 없는 예외");
+                            }
+                          }
+
+                          // Check final headers state / 최종 헤더 상태 확인
+                          if (headersFound) {
+                            LOGI("Headers successfully set in responseInfo / responseInfo에 헤더 성공적으로 설정됨");
+                          } else {
+                            LOGW("No headers found in responseInfo, using headers from collectXHRResponseInfo / responseInfo에 헤더 없음, collectXHRResponseInfo의 헤더 사용");
                           }
 
                           // Store response data / 응답 데이터 저장 (thread-safe / 스레드 안전)
@@ -338,14 +412,14 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                   // load event fires after readystatechange, so it's safer for response data / load 이벤트는 readystatechange 이후에 발생하므로 응답 데이터에 더 안전함
                   // Note: This is a fallback in case readystatechange didn't capture the data / 참고: readystatechange에서 데이터를 캡처하지 못한 경우를 위한 폴백
                   facebook::jsi::Value loadListener = facebook::jsi::Function::createFromHostFunction(
-                    rt,
+                  rt,
                     facebook::jsi::PropNameID::forAscii(rt, "loadListener"),
-                    0,
-                    [requestId](facebook::jsi::Runtime& runtime,
-                                const facebook::jsi::Value& thisVal,
-                                const facebook::jsi::Value*,
-                                size_t) -> facebook::jsi::Value {
-                      if (thisVal.isObject()) {
+                  0,
+                  [requestId](facebook::jsi::Runtime& runtime,
+                              const facebook::jsi::Value& thisVal,
+                              const facebook::jsi::Value*,
+                              size_t) -> facebook::jsi::Value {
+                    if (thisVal.isObject()) {
                         facebook::jsi::Object xhrObj = thisVal.asObject(runtime);
                         ResponseInfo responseInfo = collectXHRResponseInfo(runtime, xhrObj);
 

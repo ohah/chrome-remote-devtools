@@ -11,6 +11,23 @@
 #include "NetworkUtils.h"
 #include <string>
 
+// Platform-specific log support / 플랫폼별 로그 지원
+#ifdef __ANDROID__
+#include <android/log.h>
+#define LOG_TAG "NetworkInfoCollector"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
+#elif defined(__APPLE__)
+#define LOGI(...) ((void)0)
+#define LOGE(...) ((void)0)
+#define LOGW(...) ((void)0)
+#else
+#define LOGI(...)
+#define LOGE(...)
+#define LOGW(...)
+#endif
+
 namespace chrome_remote_devtools {
 namespace network {
 
@@ -82,42 +99,116 @@ ResponseInfo collectXHRResponseInfo(facebook::jsi::Runtime& runtime,
       info.statusText = statusTextValue.asString(runtime).utf8(runtime);
     }
 
-    // Try to get responseText first / 먼저 responseText 시도
-    // Note: responseText may throw if responseType is not '' or 'text' / 참고: responseType이 '' 또는 'text'가 아니면 responseText가 에러를 던질 수 있음
+    // Get responseType first to determine how to read response / 먼저 responseType을 가져와서 응답을 읽는 방법 결정
+    // XHRInterceptor pattern: use this.response (not responseText) / XHRInterceptor 패턴: this.response 사용 (responseText 아님)
+    // Reference: XHRInterceptor.js line 182 uses this.response directly / 참조: XHRInterceptor.js 182번 줄에서 this.response를 직접 사용
+    std::string responseType = "";
     try {
-      facebook::jsi::Value responseTextValue = xhrObj.getProperty(runtime, "responseText");
-      if (responseTextValue.isString()) {
-        info.responseText = responseTextValue.asString(runtime).utf8(runtime);
+      facebook::jsi::Value responseTypeValue = xhrObj.getProperty(runtime, "responseType");
+      if (responseTypeValue.isString()) {
+        responseType = responseTypeValue.asString(runtime).utf8(runtime);
       }
     } catch (...) {
-      // responseText failed, try response instead / responseText 실패, 대신 response 시도
-      try {
-        facebook::jsi::Value responseValue = xhrObj.getProperty(runtime, "response");
+      // responseType not available, assume default (empty string) / responseType을 사용할 수 없음, 기본값(빈 문자열) 가정
+    }
+
+    // XHRInterceptor pattern: use this.response directly / XHRInterceptor 패턴: this.response를 직접 사용
+    // Handle different responseType cases explicitly / responseType 케이스를 명시적으로 처리
+    try {
+      facebook::jsi::Value responseValue = xhrObj.getProperty(runtime, "response");
+
+      // Case 1: responseType is '' or 'text' - response is a string / 케이스 1: responseType이 '' 또는 'text' - response는 문자열
+      if (responseType.empty() || responseType == "text") {
         if (responseValue.isString()) {
           info.responseText = responseValue.asString(runtime).utf8(runtime);
-        } else if (responseValue.isObject()) {
-          // Try to stringify if it's an object / 객체인 경우 문자열화 시도
+          LOGI("NetworkInfoCollector: Collected response (text): length=%zu / 응답 수집됨 (text): 길이=%zu", info.responseText.length());
+        }
+      }
+      // Case 2: responseType is 'json' - response is a parsed JSON object / 케이스 2: responseType이 'json' - response는 파싱된 JSON 객체
+      else if (responseType == "json") {
+        if (responseValue.isObject()) {
+          // Stringify the JSON object / JSON 객체를 문자열화
           facebook::jsi::Value jsonValue = runtime.global().getPropertyAsObject(runtime, "JSON")
             .getPropertyAsFunction(runtime, "stringify")
             .call(runtime, responseValue);
           if (jsonValue.isString()) {
             info.responseText = jsonValue.asString(runtime).utf8(runtime);
+            LOGI("NetworkInfoCollector: Collected response (json): length=%zu / 응답 수집됨 (json): 길이=%zu", info.responseText.length());
           }
         }
-      } catch (...) {
-        // Failed to get response / response 가져오기 실패
       }
+      // Case 3: responseType is 'blob' - response is a Blob object, use internal _response / 케이스 3: responseType이 'blob' - response는 Blob 객체, 내부 _response 사용
+      else if (responseType == "blob") {
+        if (responseValue.isObject()) {
+          // For blob, access internal _response property which contains the raw string / blob의 경우 원시 문자열을 포함하는 내부 _response 속성에 접근
+          facebook::jsi::Value internalResponseValue = xhrObj.getProperty(runtime, "_response");
+          if (internalResponseValue.isString()) {
+            info.responseText = internalResponseValue.asString(runtime).utf8(runtime);
+            LOGI("NetworkInfoCollector: Collected response (blob): length=%zu / 응답 수집됨 (blob): 길이=%zu", info.responseText.length());
+          }
+        }
+      }
+      // Case 4: responseType is 'arraybuffer' - use internal _response / 케이스 4: responseType이 'arraybuffer' - 내부 _response 사용
+      else if (responseType == "arraybuffer") {
+        // For arraybuffer, access internal _response property / arraybuffer의 경우 내부 _response 속성에 접근
+        facebook::jsi::Value internalResponseValue = xhrObj.getProperty(runtime, "_response");
+        if (internalResponseValue.isString()) {
+          info.responseText = internalResponseValue.asString(runtime).utf8(runtime);
+          LOGI("NetworkInfoCollector: Collected response (arraybuffer): length=%zu / 응답 수집됨 (arraybuffer): 길이=%zu", info.responseText.length());
+        }
+      }
+      // Case 5: Unknown responseType - try to handle as string or object / 케이스 5: 알 수 없는 responseType - 문자열 또는 객체로 처리 시도
+      else {
+        if (responseValue.isString()) {
+          info.responseText = responseValue.asString(runtime).utf8(runtime);
+          LOGI("NetworkInfoCollector: Collected response (unknown type, as string): length=%zu / 응답 수집됨 (알 수 없는 타입, 문자열로): 길이=%zu", info.responseText.length());
+        } else if (responseValue.isObject()) {
+          // Try to stringify if it's an object / 객체인 경우 문자열화 시도
+          try {
+            facebook::jsi::Value jsonValue = runtime.global().getPropertyAsObject(runtime, "JSON")
+              .getPropertyAsFunction(runtime, "stringify")
+              .call(runtime, responseValue);
+            if (jsonValue.isString()) {
+              info.responseText = jsonValue.asString(runtime).utf8(runtime);
+              LOGI("NetworkInfoCollector: Collected response (unknown type, stringified): length=%zu / 응답 수집됨 (알 수 없는 타입, 문자열화): 길이=%zu", info.responseText.length());
+            }
+          } catch (...) {
+            LOGW("NetworkInfoCollector: Failed to stringify response for unknown responseType: %s / 알 수 없는 responseType에 대해 응답 문자열화 실패: %s", responseType.c_str());
+          }
+        }
+      }
+    } catch (const std::exception& e) {
+      LOGE("NetworkInfoCollector: Exception while getting 'response' property: %s / 'response' 속성 가져오기 중 예외: %s", e.what());
+    } catch (...) {
+      LOGE("NetworkInfoCollector: Unknown exception while getting 'response' property / 'response' 속성 가져오기 중 알 수 없는 예외");
     }
 
     // Get headers / 헤더 가져오기
     std::string allHeaders;
-    facebook::jsi::Value getAllResponseHeadersValue = xhrObj.getProperty(runtime, "getAllResponseHeaders");
-    if (getAllResponseHeadersValue.isObject() && getAllResponseHeadersValue.asObject(runtime).isFunction(runtime)) {
-      facebook::jsi::Function getAllResponseHeaders = getAllResponseHeadersValue.asObject(runtime).asFunction(runtime);
-      facebook::jsi::Value headersValue = getAllResponseHeaders.call(runtime);
-      if (headersValue.isString()) {
-        allHeaders = headersValue.asString(runtime).utf8(runtime);
+    try {
+      facebook::jsi::Value getAllResponseHeadersValue = xhrObj.getProperty(runtime, "getAllResponseHeaders");
+      if (getAllResponseHeadersValue.isObject() && getAllResponseHeadersValue.asObject(runtime).isFunction(runtime)) {
+        facebook::jsi::Function getAllResponseHeaders = getAllResponseHeadersValue.asObject(runtime).asFunction(runtime);
+        facebook::jsi::Value headersValue = getAllResponseHeaders.callWithThis(runtime, xhrObj);
+        if (headersValue.isString()) {
+          allHeaders = headersValue.asString(runtime).utf8(runtime);
+          // Log headers collection in collectXHRResponseInfo / collectXHRResponseInfo에서 헤더 수집 로그
+          LOGI("collectXHRResponseInfo: Headers collected, length=%zu", allHeaders.length());
+          if (!allHeaders.empty()) {
+            LOGI("collectXHRResponseInfo: Headers (first 200 chars): %s", allHeaders.substr(0, 200).c_str());
+          } else {
+            LOGW("collectXHRResponseInfo: Headers string is empty");
+          }
+        } else {
+          LOGW("collectXHRResponseInfo: getAllResponseHeaders returned non-string");
+        }
+      } else {
+        LOGW("collectXHRResponseInfo: getAllResponseHeaders is not a function");
       }
+    } catch (const std::exception& e) {
+      LOGE("collectXHRResponseInfo: Exception while getting headers: %s", e.what());
+    } catch (...) {
+      LOGE("collectXHRResponseInfo: Unknown exception while getting headers");
     }
     info.headers = formatResponseHeaders(allHeaders);
 
