@@ -7,6 +7,7 @@ describe('filterClients', () => {
   const mockClients: Client[] = [
     {
       id: 'client-1',
+      type: 'web',
       url: 'http://example.com',
       title: 'Example Page',
       ua: 'Mozilla/5.0',
@@ -14,6 +15,7 @@ describe('filterClients', () => {
     },
     {
       id: 'client-2',
+      type: 'web',
       url: 'http://test.com',
       title: 'Test Page',
       ua: 'Chrome/120.0',
@@ -21,6 +23,7 @@ describe('filterClients', () => {
     },
     {
       id: 'client-3',
+      type: 'web',
       url: 'http://demo.org',
       title: 'Demo Page',
       ua: 'Firefox/121.0',
@@ -89,10 +92,12 @@ describe('filterClients', () => {
     const clientsWithMissingFields: Client[] = [
       {
         id: 'client-1',
+        type: 'web',
         // url, title, ua, ip 모두 없음
       },
       {
         id: 'client-2',
+        type: 'web',
         url: 'http://test.com',
         // title, ua, ip 없음
       },
