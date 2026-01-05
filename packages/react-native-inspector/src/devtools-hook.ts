@@ -9,6 +9,35 @@ declare const global: typeof globalThis;
 declare const window: any;
 declare const document: any;
 
+// Track connect calls for UI display / UI 표시를 위한 connect 호출 추적
+interface ConnectCallInfo {
+  storeName: string;
+  timestamp: number;
+  instanceId: number;
+  config: any;
+  initCalled: boolean;
+  initTimestamp?: number;
+}
+
+const connectCalls: Map<string, ConnectCallInfo> = new Map();
+
+/**
+ * Get connect call information / connect 호출 정보 가져오기
+ * @param storeName Store name / store 이름
+ * @returns Connect call information or null / connect 호출 정보 또는 null
+ */
+export function getConnectCallInfo(storeName: string): ConnectCallInfo | null {
+  return connectCalls.get(storeName) || null;
+}
+
+/**
+ * Get all connect call information / 모든 connect 호출 정보 가져오기
+ * @returns Map of store names to connect call info / store 이름에서 connect 호출 정보로의 맵
+ */
+export function getAllConnectCallInfo(): Map<string, ConnectCallInfo> {
+  return new Map(connectCalls);
+}
+
 /**
  * Setup Redux DevTools Extension for React Native / React Native용 Redux DevTools Extension 설정
  * Based on reference/redux-devtools implementation / reference/redux-devtools 구현 기반
@@ -45,6 +74,16 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
 
         console.log('[ReduxDevTools] connect() called', { instanceId, name, config });
 
+        // Track connect call / connect 호출 추적
+        const connectInfo: ConnectCallInfo = {
+          storeName: name,
+          timestamp: Date.now(),
+          instanceId,
+          config,
+          initCalled: false,
+        };
+        connectCalls.set(name, connectInfo);
+
         // Helper function to get current server info / 현재 서버 정보를 가져오는 헬퍼 함수
         const getCurrentServerInfo = () => {
           const serverInfo = getServerInfo();
@@ -64,6 +103,14 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
               state,
               liftedData,
             });
+
+            // Update connect call info / connect 호출 정보 업데이트
+            const connectInfo = connectCalls.get(name);
+            if (connectInfo) {
+              connectInfo.initCalled = true;
+              connectInfo.initTimestamp = Date.now();
+              connectCalls.set(name, connectInfo);
+            }
 
             // Get current server info dynamically / 현재 서버 정보를 동적으로 가져오기
             const currentServerInfo = getCurrentServerInfo();
