@@ -10,23 +10,9 @@ const Tab = createMaterialTopTabNavigator();
 export default function ReduxNavigator() {
   return (
     <Tab.Navigator>
-      <Tab.Screen
-        name="Counter"
-        component={ReduxCounterScreen}
-        options={{ title: 'Counter' }}
-      />
-      <Tab.Screen
-        name="Todo"
-        component={ReduxTodoScreen}
-        options={{ title: 'Todo' }}
-      />
-      <Tab.Screen
-        name="Cart"
-        component={ReduxCartScreen}
-        options={{ title: 'Cart' }}
-      />
+      <Tab.Screen name="Counter" component={ReduxCounterScreen} options={{ title: 'Counter' }} />
+      <Tab.Screen name="Todo" component={ReduxTodoScreen} options={{ title: 'Todo' }} />
+      <Tab.Screen name="Cart" component={ReduxCartScreen} options={{ title: 'Cart' }} />
     </Tab.Navigator>
   );
 }
-
-

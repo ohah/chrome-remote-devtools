@@ -12,16 +12,8 @@ const Tab = createMaterialTopTabNavigator();
 function HomeTabs() {
   return (
     <Tab.Navigator>
-      <Tab.Screen
-        name="Console"
-        component={ConsoleTestTab}
-        options={{ title: 'Console Test' }}
-      />
-      <Tab.Screen
-        name="Network"
-        component={NetworkTestTab}
-        options={{ title: 'Network Test' }}
-      />
+      <Tab.Screen name="Console" component={ConsoleTestTab} options={{ title: 'Console Test' }} />
+      <Tab.Screen name="Network" component={NetworkTestTab} options={{ title: 'Network Test' }} />
     </Tab.Navigator>
   );
 }
@@ -72,4 +64,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
