@@ -214,10 +214,15 @@
       "devDependencies": {
         "tsdown": "^0.16.8",
         "typescript": "^5.9.3",
+        "zustand": "^5.0.9",
       },
       "peerDependencies": {
         "react-native": ">=0.83.0",
+        "zustand": "^5.0.9",
       },
+      "optionalPeers": [
+        "zustand",
+      ],
     },
     "packages/server": {
       "name": "@ohah/chrome-remote-devtools-server",
