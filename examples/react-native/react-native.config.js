@@ -20,7 +20,6 @@ const config = {
       },
     },
   },
-  assets: ['./node_modules/react-native-vector-icons/fonts'],
 };
 
 module.exports = withWorkspaceModule(config, modulePackagePath);
