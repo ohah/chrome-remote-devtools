@@ -488,6 +488,32 @@ RCT_EXPORT_METHOD(disableNetworkHook:(RCTPromiseResolveBlock)resolver
 #endif
 }
 
+/**
+ * Check if console hook is enabled / console 훅이 활성화되어 있는지 확인
+ */
+RCT_EXPORT_METHOD(isConsoleHookEnabled:(RCTPromiseResolveBlock)resolver
+                  rejecter:(RCTPromiseRejectBlock)rejecter) {
+#ifdef CONSOLE_HOOK_AVAILABLE
+  bool enabled = chrome_remote_devtools::isConsoleHookEnabled();
+  resolver(@(enabled));
+#else
+  resolver(@(false));
+#endif
+}
+
+/**
+ * Check if network hook is enabled / 네트워크 훅이 활성화되어 있는지 확인
+ */
+RCT_EXPORT_METHOD(isNetworkHookEnabled:(RCTPromiseResolveBlock)resolver
+                  rejecter:(RCTPromiseRejectBlock)rejecter) {
+#ifdef NETWORK_HOOK_AVAILABLE
+  bool enabled = chrome_remote_devtools::isNetworkHookEnabled();
+  resolver(@(enabled));
+#else
+  resolver(@(false));
+#endif
+}
+
 @end
 
 #endif

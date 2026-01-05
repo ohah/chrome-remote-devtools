@@ -153,10 +153,17 @@ static void hookJSILogging(facebook::jsi::Runtime& runtime) {
     bool consoleSuccess = chrome_remote_devtools::hookConsoleMethods(runtime);
     bool networkSuccess = chrome_remote_devtools::hookNetworkMethods(runtime);
 
+    // Verify flag was updated / 플래그가 업데이트되었는지 확인
+    bool consoleFlag = chrome_remote_devtools::isConsoleHookEnabled();
+    bool networkFlag = chrome_remote_devtools::isNetworkHookEnabled();
+
     if (consoleSuccess) {
       g_is_jsi_hooked = true;
       __android_log_print(ANDROID_LOG_INFO, TAG,
                           "JSI-level console hook installed successfully using common C++ code / 공통 C++ 코드를 사용하여 JSI 레벨 console 훅이 성공적으로 설치됨");
+      __android_log_print(ANDROID_LOG_INFO, TAG,
+                          "Console hook flag after installation: %s / 설치 후 console 훅 플래그: %s",
+                          consoleFlag ? "true" : "false", consoleFlag ? "true" : "false");
     } else {
       __android_log_print(ANDROID_LOG_ERROR, TAG,
                           "Failed to hook JSI console using common C++ code / 공통 C++ 코드를 사용하여 JSI console 훅 실패");
@@ -165,6 +172,9 @@ static void hookJSILogging(facebook::jsi::Runtime& runtime) {
     if (networkSuccess) {
       __android_log_print(ANDROID_LOG_INFO, TAG,
                           "JSI-level network hook installed successfully / JSI 레벨 네트워크 훅이 성공적으로 설치됨");
+      __android_log_print(ANDROID_LOG_INFO, TAG,
+                          "Network hook flag after installation: %s / 설치 후 network 훅 플래그: %s",
+                          networkFlag ? "true" : "false", networkFlag ? "true" : "false");
     } else {
       __android_log_print(ANDROID_LOG_WARN, TAG,
                           "Failed to hook JSI network methods / JSI 네트워크 메서드 훅 실패");
@@ -471,6 +481,128 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeDisableN
   } catch (...) {
     __android_log_print(ANDROID_LOG_ERROR, TAG,
                         "Unknown exception in nativeDisableNetworkHook / nativeDisableNetworkHook에서 알 수 없는 예외");
+    return JNI_FALSE;
+  }
+#else
+  return JNI_FALSE;
+#endif
+}
+
+// JNI function to check if console hook is enabled / console 훅이 활성화되어 있는지 확인하는 JNI 함수
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeIsConsoleHookEnabled(
+    JNIEnv * /* env */,
+    jobject /* thiz */,
+    jobject runtimeExecutor) {
+#ifdef REACT_NATIVE_JSI_AVAILABLE
+  try {
+    // First check flag / 먼저 플래그 확인
+    bool enabled = chrome_remote_devtools::isConsoleHookEnabled();
+    if (enabled) {
+      return JNI_TRUE;
+    }
+
+    // If flag is false, check runtime state directly / 플래그가 false이면 런타임 상태 직접 확인
+    if (!runtimeExecutor) {
+      // No runtime executor, return flag value / RuntimeExecutor가 없으면 플래그 값 반환
+      return enabled ? JNI_TRUE : JNI_FALSE;
+    }
+
+    using namespace facebook::react;
+    using namespace facebook::jni;
+
+    alias_ref<JRuntimeExecutor::javaobject> jRuntimeExecutor =
+        wrap_alias(reinterpret_cast<JRuntimeExecutor::javaobject>(runtimeExecutor));
+
+    if (!jRuntimeExecutor) {
+      return enabled ? JNI_TRUE : JNI_FALSE;
+    }
+
+    RuntimeExecutor executor = jRuntimeExecutor->cthis()->get();
+    if (!executor) {
+      return enabled ? JNI_TRUE : JNI_FALSE;
+    }
+
+    // Use promise/future to wait for async execution / 비동기 실행을 기다리기 위해 promise/future 사용
+    auto promisePtr = std::make_shared<std::promise<bool>>();
+    std::future<bool> future = promisePtr->get_future();
+
+    executor([promisePtr](facebook::jsi::Runtime& runtime) {
+      bool success = chrome_remote_devtools::isConsoleHookEnabled(runtime);
+      promisePtr->set_value(success);
+    });
+
+    // Wait for result without timeout (blocking) / 타임아웃 없이 결과 대기 (블로킹)
+    bool result = future.get();
+    return result ? JNI_TRUE : JNI_FALSE;
+  } catch (const std::exception& e) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Exception in nativeIsConsoleHookEnabled: %s", e.what());
+    return JNI_FALSE;
+  } catch (...) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Unknown exception in nativeIsConsoleHookEnabled / nativeIsConsoleHookEnabled에서 알 수 없는 예외");
+    return JNI_FALSE;
+  }
+#else
+  return JNI_FALSE;
+#endif
+}
+
+// JNI function to check if network hook is enabled / 네트워크 훅이 활성화되어 있는지 확인하는 JNI 함수
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeIsNetworkHookEnabled(
+    JNIEnv * /* env */,
+    jobject /* thiz */,
+    jobject runtimeExecutor) {
+#ifdef REACT_NATIVE_JSI_AVAILABLE
+  try {
+    // First check flag / 먼저 플래그 확인
+    bool enabled = chrome_remote_devtools::isNetworkHookEnabled();
+    if (enabled) {
+      return JNI_TRUE;
+    }
+
+    // If flag is false, check runtime state directly / 플래그가 false이면 런타임 상태 직접 확인
+    if (!runtimeExecutor) {
+      // No runtime executor, return flag value / RuntimeExecutor가 없으면 플래그 값 반환
+      return enabled ? JNI_TRUE : JNI_FALSE;
+    }
+
+    using namespace facebook::react;
+    using namespace facebook::jni;
+
+    alias_ref<JRuntimeExecutor::javaobject> jRuntimeExecutor =
+        wrap_alias(reinterpret_cast<JRuntimeExecutor::javaobject>(runtimeExecutor));
+
+    if (!jRuntimeExecutor) {
+      return enabled ? JNI_TRUE : JNI_FALSE;
+    }
+
+    RuntimeExecutor executor = jRuntimeExecutor->cthis()->get();
+    if (!executor) {
+      return enabled ? JNI_TRUE : JNI_FALSE;
+    }
+
+    // Use promise/future to wait for async execution / 비동기 실행을 기다리기 위해 promise/future 사용
+    auto promisePtr = std::make_shared<std::promise<bool>>();
+    std::future<bool> future = promisePtr->get_future();
+
+    executor([promisePtr](facebook::jsi::Runtime& runtime) {
+      bool success = chrome_remote_devtools::isNetworkHookEnabled(runtime);
+      promisePtr->set_value(success);
+    });
+
+    // Wait for result without timeout (blocking) / 타임아웃 없이 결과 대기 (블로킹)
+    bool result = future.get();
+    return result ? JNI_TRUE : JNI_FALSE;
+  } catch (const std::exception& e) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Exception in nativeIsNetworkHookEnabled: %s", e.what());
+    return JNI_FALSE;
+  } catch (...) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Unknown exception in nativeIsNetworkHookEnabled / nativeIsNetworkHookEnabled에서 알 수 없는 예외");
     return JNI_FALSE;
   }
 #else
