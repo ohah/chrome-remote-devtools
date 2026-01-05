@@ -14,13 +14,28 @@ import { StatusBar, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
+import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-react-native';
 import { store } from './store/redux/store';
 import AppNavigator from './navigation/AppNavigator';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
-  // Note: Chrome Remote DevTools connection is auto-established on import / 참고: Chrome Remote DevTools 연결은 import 시 자동으로 설정됩니다
+  // Connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연결
+  useEffect(() => {
+    if (ChromeRemoteDevToolsInspector) {
+      ChromeRemoteDevToolsInspector.connect('localhost', 8080)
+        .then(() => {
+          console.log('[App] Chrome Remote DevTools connected');
+        })
+        .catch((error: unknown) => {
+          console.error(
+            '[App] Failed to connect to Chrome Remote DevTools:',
+            error instanceof Error ? error.message : String(error)
+          );
+        });
+    }
+  }, []);
 
   // Debug: Check if extension is available after stores are created / 디버그: store 생성 후 extension 사용 가능 여부 확인
   useEffect(() => {
