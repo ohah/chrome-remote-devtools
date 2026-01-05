@@ -25,8 +25,19 @@
   "sideEffects": true,
   "main": "dist/index.js",
   "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "types": "src/index.ts",
   "react-native": "src/index.ts",
+  "exports": {
+    ".": {
+      "react-native": "./src/index.ts"
+    },
+    "./zustand": {
+      "react-native": "./src/zustand.ts"
+    },
+    "./zustand/middleware": {
+      "react-native": "./src/zustand/middleware.ts"
+    }
+  },
   "scripts": {
     "build": "tsdown",
     "build:clean": "rm -rf dist",
@@ -37,9 +48,16 @@
   },
   "devDependencies": {
     "tsdown": "^0.16.8",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zustand": "^5.0.9"
   },
   "peerDependencies": {
-    "react-native": ">=0.83.0"
+    "react-native": ">=0.83.0",
+    "zustand": "^5.0.9"
+  },
+  "peerDependenciesMeta": {
+    "zustand": {
+      "optional": true
+    }
   }
 }
