@@ -36,6 +36,21 @@ namespace console {
 
 bool hookConsoleMethods(facebook::jsi::Runtime& runtime) {
   try {
+    // Check if already hooked by checking for backup property / 백업 속성 확인하여 이미 훅되었는지 확인
+    try {
+      facebook::jsi::Value consoleValue = runtime.global().getProperty(runtime, "console");
+      if (consoleValue.isObject()) {
+        facebook::jsi::Object consoleObj = consoleValue.asObject(runtime);
+        facebook::jsi::Value originalLogValue = consoleObj.getProperty(runtime, "__original_log");
+        if (originalLogValue.isObject() && originalLogValue.asObject(runtime).isFunction(runtime)) {
+          // Already hooked, skip / 이미 훅되었으므로 건너뜀
+          return true;
+        }
+      }
+    } catch (...) {
+      // Failed to check, continue with hooking / 확인 실패, 훅 계속 진행
+    }
+
     // Get original console object / 원본 console 객체 가져오기
     facebook::jsi::Object originalConsole(runtime);
     bool consoleExists = false;
