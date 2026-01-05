@@ -29,4 +29,3 @@ export async function sendCDPMessage(
   const messageStr = JSON.stringify(message);
   return ChromeRemoteDevToolsInspector.sendCDPMessage(serverHost, serverPort, messageStr);
 }
-
