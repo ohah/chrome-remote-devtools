@@ -181,6 +181,7 @@ export { setupReduxDevToolsExtension } from './devtools-hook';
 // Re-export from separate files to avoid circular dependency / 순환 참조를 피하기 위해 별도 파일에서 re-export
 export { sendCDPMessage } from './cdp-message';
 export { setServerInfo, getServerInfo } from './server-info';
+export { getGlobalObj, checkExtensionBeforeStore } from './utils';
 
 export default {
   connect,
