@@ -310,5 +310,67 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
       promise.reject("DISABLE_NETWORK_HOOK_ERROR", "Error disabling network hook: ${e.message}", e)
     }
   }
+
+  /**
+   * Check if console hook is enabled / console 훅이 활성화되어 있는지 확인
+   */
+  @ReactMethod
+  fun isConsoleHookEnabled(promise: Promise) {
+    try {
+      val context = reactApplicationContext
+      if (context == null) {
+        promise.reject("NO_CONTEXT", "React application context is null")
+        return
+      }
+
+      val catalystInstance = context.catalystInstance
+      if (catalystInstance == null) {
+        promise.reject("NO_CATALYST", "CatalystInstance is null")
+        return
+      }
+
+      val runtimeExecutor = catalystInstance.runtimeExecutor
+      if (runtimeExecutor == null) {
+        promise.reject("NO_RUNTIME", "RuntimeExecutor is null")
+        return
+      }
+
+      val enabled = ChromeRemoteDevToolsLogHookJNI.nativeIsConsoleHookEnabled(runtimeExecutor)
+      promise.resolve(enabled)
+    } catch (e: Exception) {
+      promise.reject("IS_CONSOLE_HOOK_ENABLED_ERROR", "Error checking console hook status: ${e.message}", e)
+    }
+  }
+
+  /**
+   * Check if network hook is enabled / 네트워크 훅이 활성화되어 있는지 확인
+   */
+  @ReactMethod
+  fun isNetworkHookEnabled(promise: Promise) {
+    try {
+      val context = reactApplicationContext
+      if (context == null) {
+        promise.reject("NO_CONTEXT", "React application context is null")
+        return
+      }
+
+      val catalystInstance = context.catalystInstance
+      if (catalystInstance == null) {
+        promise.reject("NO_CATALYST", "CatalystInstance is null")
+        return
+      }
+
+      val runtimeExecutor = catalystInstance.runtimeExecutor
+      if (runtimeExecutor == null) {
+        promise.reject("NO_RUNTIME", "RuntimeExecutor is null")
+        return
+      }
+
+      val enabled = ChromeRemoteDevToolsLogHookJNI.nativeIsNetworkHookEnabled(runtimeExecutor)
+      promise.resolve(enabled)
+    } catch (e: Exception) {
+      promise.reject("IS_NETWORK_HOOK_ENABLED_ERROR", "Error checking network hook status: ${e.message}", e)
+    }
+  }
 }
 

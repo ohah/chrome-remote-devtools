@@ -63,6 +63,19 @@ bool enableConsoleHook(facebook::jsi::Runtime& runtime);
 bool disableConsoleHook(facebook::jsi::Runtime& runtime);
 
 /**
+ * Check if console hook is enabled / console 훅이 활성화되어 있는지 확인
+ * @return true if console hook is enabled / console 훅이 활성화되어 있으면 true
+ */
+bool isConsoleHookEnabled();
+
+/**
+ * Check if console hook is enabled by checking runtime state / 런타임 상태를 확인하여 console 훅이 활성화되어 있는지 확인
+ * @param runtime JSI runtime instance / JSI 런타임 인스턴스
+ * @return true if console hook is enabled / console 훅이 활성화되어 있으면 true
+ */
+bool isConsoleHookEnabled(facebook::jsi::Runtime& runtime);
+
+/**
  * Convert JSI value to RemoteObject / JSI 값을 RemoteObject로 변환
  * @param runtime JSI runtime instance / JSI 런타임 인스턴스
  * @param value JSI value to convert / 변환할 JSI 값

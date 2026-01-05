@@ -151,6 +151,28 @@ export async function disableNetworkHook(): Promise<boolean> {
   return ChromeRemoteDevToolsInspector.disableNetworkHook();
 }
 
+/**
+ * Check if console hook is enabled / console 훅이 활성화되어 있는지 확인
+ * @returns Promise that resolves to true if enabled / 활성화되어 있으면 true로 resolve되는 Promise
+ */
+export async function isConsoleHookEnabled(): Promise<boolean> {
+  if (!ChromeRemoteDevToolsInspector) {
+    return false;
+  }
+  return ChromeRemoteDevToolsInspector.isConsoleHookEnabled();
+}
+
+/**
+ * Check if network hook is enabled / 네트워크 훅이 활성화되어 있는지 확인
+ * @returns Promise that resolves to true if enabled / 활성화되어 있으면 true로 resolve되는 Promise
+ */
+export async function isNetworkHookEnabled(): Promise<boolean> {
+  if (!ChromeRemoteDevToolsInspector) {
+    return false;
+  }
+  return ChromeRemoteDevToolsInspector.isNetworkHookEnabled();
+}
+
 // Import devtools-hook to trigger auto-initialization / devtools-hook를 import하여 자동 초기화 트리거
 // This must be imported before exporting to ensure auto-initialization runs / 자동 초기화가 실행되도록 export 전에 import해야 함
 import './devtools-hook';
@@ -158,7 +180,7 @@ export { setupReduxDevToolsExtension } from './devtools-hook';
 
 // Re-export from separate files to avoid circular dependency / 순환 참조를 피하기 위해 별도 파일에서 re-export
 export { sendCDPMessage } from './cdp-message';
-export { setServerInfo } from './server-info';
+export { setServerInfo, getServerInfo } from './server-info';
 
 export default {
   connect,
@@ -171,4 +193,6 @@ export default {
   disableConsoleHook,
   enableNetworkHook,
   disableNetworkHook,
+  isConsoleHookEnabled,
+  isNetworkHookEnabled,
 };

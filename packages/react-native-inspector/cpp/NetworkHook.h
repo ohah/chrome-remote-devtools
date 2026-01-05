@@ -37,6 +37,19 @@ bool enableNetworkHook(facebook::jsi::Runtime& runtime);
 bool disableNetworkHook(facebook::jsi::Runtime& runtime);
 
 /**
+ * Check if network hook is enabled / 네트워크 훅이 활성화되어 있는지 확인
+ * @return true if network hook is enabled / 네트워크 훅이 활성화되어 있으면 true
+ */
+bool isNetworkHookEnabled();
+
+/**
+ * Check if network hook is enabled by checking runtime state / 런타임 상태를 확인하여 네트워크 훅이 활성화되어 있는지 확인
+ * @param runtime JSI runtime instance / JSI 런타임 인스턴스
+ * @return true if network hook is enabled / 네트워크 훅이 활성화되어 있으면 true
+ */
+bool isNetworkHookEnabled(facebook::jsi::Runtime& runtime);
+
+/**
  * Get network response body by request ID / 요청 ID로 네트워크 응답 본문 가져오기
  * @param requestId Network request ID / 네트워크 요청 ID
  * @return Response body as string, or empty string if not found / 응답 본문 문자열, 없으면 빈 문자열

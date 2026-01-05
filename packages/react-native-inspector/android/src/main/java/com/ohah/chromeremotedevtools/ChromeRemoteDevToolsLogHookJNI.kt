@@ -72,6 +72,22 @@ class ChromeRemoteDevToolsLogHookJNI {
     external fun nativeDisableNetworkHook(runtimeExecutor: Any): Boolean
 
     /**
+     * Check if console hook is enabled / console 훅이 활성화되어 있는지 확인
+     * @param runtimeExecutor RuntimeExecutor from React Native / React Native의 RuntimeExecutor
+     * @return true if console hook is enabled / console 훅이 활성화되어 있으면 true
+     */
+    @JvmStatic
+    external fun nativeIsConsoleHookEnabled(runtimeExecutor: Any?): Boolean
+
+    /**
+     * Check if network hook is enabled / 네트워크 훅이 활성화되어 있는지 확인
+     * @param runtimeExecutor RuntimeExecutor from React Native / React Native의 RuntimeExecutor
+     * @return true if network hook is enabled / 네트워크 훅이 활성화되어 있으면 true
+     */
+    @JvmStatic
+    external fun nativeIsNetworkHookEnabled(runtimeExecutor: Any?): Boolean
+
+    /**
      * Get network response body by request ID / 요청 ID로 네트워크 응답 본문 가져오기
      * @param requestId Network request ID / 네트워크 요청 ID
      * @return Response body as string, or null if not found / 응답 본문 문자열, 찾지 못하면 null

@@ -72,6 +72,18 @@ export interface Spec extends TurboModule {
    * @returns Promise that resolves to true if disabling succeeded / 비활성화가 성공하면 true로 resolve되는 Promise
    */
   disableNetworkHook(): Promise<boolean>;
+
+  /**
+   * Check if console hook is enabled / console 훅이 활성화되어 있는지 확인
+   * @returns Promise that resolves to true if enabled / 활성화되어 있으면 true로 resolve되는 Promise
+   */
+  isConsoleHookEnabled(): Promise<boolean>;
+
+  /**
+   * Check if network hook is enabled / 네트워크 훅이 활성화되어 있는지 확인
+   * @returns Promise that resolves to true if enabled / 활성화되어 있으면 true로 resolve되는 Promise
+   */
+  isNetworkHookEnabled(): Promise<boolean>;
 }
 
 /**
