@@ -10,23 +10,9 @@ const Tab = createMaterialTopTabNavigator();
 export default function ZustandNavigator() {
   return (
     <Tab.Navigator>
-      <Tab.Screen
-        name="Counter"
-        component={ZustandCounterScreen}
-        options={{ title: 'Counter' }}
-      />
-      <Tab.Screen
-        name="Todo"
-        component={ZustandTodoScreen}
-        options={{ title: 'Todo' }}
-      />
-      <Tab.Screen
-        name="Cart"
-        component={ZustandCartScreen}
-        options={{ title: 'Cart' }}
-      />
+      <Tab.Screen name="Counter" component={ZustandCounterScreen} options={{ title: 'Counter' }} />
+      <Tab.Screen name="Todo" component={ZustandTodoScreen} options={{ title: 'Todo' }} />
+      <Tab.Screen name="Cart" component={ZustandCartScreen} options={{ title: 'Cart' }} />
     </Tab.Navigator>
   );
 }
-
-

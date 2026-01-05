@@ -14,11 +14,7 @@ const Stack = createStackNavigator();
 function HomeStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="HomeMain"
-        component={HomeScreen}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="HomeMain" component={HomeScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
@@ -27,11 +23,7 @@ function HomeStack() {
 function ReduxStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="ReduxMain"
-        component={ReduxNavigator}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="ReduxMain" component={ReduxNavigator} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
@@ -63,9 +55,7 @@ export default function AppNavigator() {
         component={HomeStack}
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size = 24 }) => (
-            <Icon name="home" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size = 24 }) => <Icon name="home" size={size} color={color} />,
         }}
       />
       <BottomTab.Screen
@@ -73,9 +63,7 @@ export default function AppNavigator() {
         component={ReduxStack}
         options={{
           title: 'Redux',
-          tabBarIcon: ({ color, size = 24 }) => (
-            <Icon name="storage" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size = 24 }) => <Icon name="storage" size={size} color={color} />,
         }}
       />
       <BottomTab.Screen
@@ -83,9 +71,7 @@ export default function AppNavigator() {
         component={ZustandStack}
         options={{
           title: 'Zustand',
-          tabBarIcon: ({ color, size = 24 }) => (
-            <Icon name="inventory" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size = 24 }) => <Icon name="inventory" size={size} color={color} />,
         }}
       />
     </BottomTab.Navigator>
