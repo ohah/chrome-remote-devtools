@@ -1,5 +1,5 @@
 // Counter slice / 카운터 slice
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
 interface CounterState {
   value: number;
