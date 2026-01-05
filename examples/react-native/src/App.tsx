@@ -7,9 +7,6 @@ import 'react-native-gesture-handler';
 // Note: Redux DevTools Extension is auto-initialized on import / 참고: Redux DevTools Extension은 import 시 자동 초기화됩니다
 import '@ohah/chrome-remote-devtools-react-native';
 import React, { useEffect } from 'react';
-
-// Type declarations for React Native environment / React Native 환경용 타입 선언
-declare const global: typeof globalThis;
 import { StatusBar, useColorScheme, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -35,46 +32,6 @@ function App() {
           );
         });
     }
-  }, []);
-
-  // Debug: Check if extension is available after stores are created / 디버그: store 생성 후 extension 사용 가능 여부 확인
-  useEffect(() => {
-    const checkExtension = () => {
-      const globalObj =
-        typeof global !== 'undefined'
-          ? (global as any)
-          : typeof window !== 'undefined'
-            ? window
-            : {};
-      const extension = (globalObj as any).__REDUX_DEVTOOLS_EXTENSION__;
-      const compose = (globalObj as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
-
-      const extensionInfo = {
-        exists: !!extension,
-        hasConnect: typeof extension?.connect === 'function',
-        isFunction: typeof extension === 'function',
-        hasCompose: !!compose,
-        global: typeof global !== 'undefined',
-        window: typeof window !== 'undefined',
-        extensionType: typeof extension,
-        extensionKeys: extension ? Object.keys(extension) : [],
-        timestamp: new Date().toISOString(),
-      };
-
-      console.log('[App] Checking __REDUX_DEVTOOLS_EXTENSION__:', extensionInfo);
-
-      // Also log to global for debugging / 디버깅을 위해 전역에도 저장
-      if (typeof global !== 'undefined') {
-        (global as any).__ReduxDevToolsExtensionDebugInfo = extensionInfo;
-      }
-    };
-
-    // Check immediately and after delays / 즉시 확인 및 지연 후 확인
-    checkExtension();
-    setTimeout(checkExtension, 100);
-    setTimeout(checkExtension, 500);
-    setTimeout(checkExtension, 1000);
-    setTimeout(checkExtension, 3000);
   }, []);
 
   return (
