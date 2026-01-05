@@ -1,14 +1,6 @@
 // Zustand Todo Screen / Zustand Todo 화면
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import useTodoStore from '../../store/zustand/useTodoStore';
 import type { Todo } from '../../store/zustand/useTodoStore';
 
@@ -25,22 +17,13 @@ export default function ZustandTodoScreen() {
 
   const renderTodo = ({ item }: { item: Todo }) => (
     <View style={styles.todoItem}>
-      <TouchableOpacity
-        style={styles.todoContent}
-        onPress={() => toggleTodo(item.id)}
-      >
-        <Text style={[styles.todoText, item.completed && styles.completed]}>
-          {item.text}
-        </Text>
-        <Text style={styles.todoStatus}>
-          {item.completed ? '✓' : '○'}
-        </Text>
+      <TouchableOpacity style={styles.todoContent} onPress={() => toggleTodo(item.id)}>
+        <Text style={[styles.todoText, item.completed && styles.completed]}>{item.text}</Text>
+        <Text style={styles.todoStatus}>{item.completed ? '✓' : '○'}</Text>
       </TouchableOpacity>
-      <Button
-        title="Delete"
-        onPress={() => deleteTodo(item.id)}
-        color="#ff4444"
-      />
+      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteTodo(item.id)}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -55,7 +38,9 @@ export default function ZustandTodoScreen() {
           placeholder="Enter todo..."
           onSubmitEditing={handleAddTodo}
         />
-        <Button title="Add" onPress={handleAddTodo} />
+        <TouchableOpacity style={styles.addButton} onPress={handleAddTodo}>
+          <Text style={styles.addButtonText}>Add</Text>
+        </TouchableOpacity>
       </View>
       <FlatList
         data={todos}
@@ -118,6 +103,30 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 10,
   },
+  addButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    backgroundColor: '#ff4444',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
-
-
