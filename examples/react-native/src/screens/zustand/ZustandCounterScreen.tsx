@@ -1,6 +1,6 @@
 // Zustand Counter Screen / Zustand 카운터 화면
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import useCounterStore from '../../store/zustand/useCounterStore';
 
 export default function ZustandCounterScreen() {
@@ -11,11 +11,15 @@ export default function ZustandCounterScreen() {
       <Text style={styles.title}>Zustand Counter</Text>
       <Text style={styles.count}>{value}</Text>
       <View style={styles.buttonContainer}>
-        <Button title="Increment" onPress={increment} />
-        <View style={styles.spacer} />
-        <Button title="Decrement" onPress={decrement} />
-        <View style={styles.spacer} />
-        <Button title="Reset" onPress={reset} />
+        <TouchableOpacity style={styles.button} onPress={increment}>
+          <Text style={styles.buttonText}>Increment</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={decrement}>
+          <Text style={styles.buttonText}>Decrement</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={reset}>
+          <Text style={styles.buttonText}>Reset</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -41,10 +45,20 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: '100%',
     maxWidth: 300,
+    gap: 10,
   },
-  spacer: {
-    height: 10,
+  button: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 5,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
-
-

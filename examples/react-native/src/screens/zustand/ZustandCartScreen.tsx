@@ -1,13 +1,6 @@
 // Zustand Cart Screen / Zustand 쇼핑 카트 화면
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  FlatList,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import useCartStore from '../../store/zustand/useCartStore';
 import type { CartItem } from '../../store/zustand/useCartStore';
 
@@ -35,21 +28,17 @@ export default function ZustandCartScreen() {
         <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
       </View>
       <View style={styles.quantityContainer}>
-        <Button
-          title="-"
-          onPress={() => decreaseQuantity(item.id)}
-        />
+        <TouchableOpacity style={styles.quantityButton} onPress={() => decreaseQuantity(item.id)}>
+          <Text style={styles.quantityButtonText}>-</Text>
+        </TouchableOpacity>
         <Text style={styles.quantity}>{item.quantity}</Text>
-        <Button
-          title="+"
-          onPress={() => increaseQuantity(item.id)}
-        />
+        <TouchableOpacity style={styles.quantityButton} onPress={() => increaseQuantity(item.id)}>
+          <Text style={styles.quantityButtonText}>+</Text>
+        </TouchableOpacity>
       </View>
-      <Button
-        title="Remove"
-        onPress={() => removeItem(item.id)}
-        color="#ff4444"
-      />
+      <TouchableOpacity style={styles.removeButton} onPress={() => removeItem(item.id)}>
+        <Text style={styles.removeButtonText}>Remove</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -70,7 +59,9 @@ export default function ZustandCartScreen() {
           placeholder="Price"
           keyboardType="numeric"
         />
-        <Button title="Add Item" onPress={handleAddItem} />
+        <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
+          <Text style={styles.addButtonText}>Add Item</Text>
+        </TouchableOpacity>
       </View>
       <FlatList
         data={items}
@@ -149,6 +140,44 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  addButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  quantityButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 40,
+  },
+  quantityButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  removeButton: {
+    backgroundColor: '#ff4444',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  removeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
-
-
