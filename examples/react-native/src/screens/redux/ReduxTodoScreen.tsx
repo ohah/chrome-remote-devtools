@@ -1,14 +1,6 @@
 // Redux Todo Screen / Redux Todo 화면
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTodo, toggleTodo, deleteTodo } from '../../store/redux/slices/todoSlice';
 import type { RootState } from '../../store/redux/store';
@@ -28,22 +20,13 @@ export default function ReduxTodoScreen() {
 
   const renderTodo = ({ item }: { item: Todo }) => (
     <View style={styles.todoItem}>
-      <TouchableOpacity
-        style={styles.todoContent}
-        onPress={() => dispatch(toggleTodo(item.id))}
-      >
-        <Text style={[styles.todoText, item.completed && styles.completed]}>
-          {item.text}
-        </Text>
-        <Text style={styles.todoStatus}>
-          {item.completed ? '✓' : '○'}
-        </Text>
+      <TouchableOpacity style={styles.todoContent} onPress={() => dispatch(toggleTodo(item.id))}>
+        <Text style={[styles.todoText, item.completed && styles.completed]}>{item.text}</Text>
+        <Text style={styles.todoStatus}>{item.completed ? '✓' : '○'}</Text>
       </TouchableOpacity>
-      <Button
-        title="Delete"
-        onPress={() => dispatch(deleteTodo(item.id))}
-        color="#ff4444"
-      />
+      <TouchableOpacity style={styles.deleteButton} onPress={() => dispatch(deleteTodo(item.id))}>
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -58,7 +41,9 @@ export default function ReduxTodoScreen() {
           placeholder="Enter todo..."
           onSubmitEditing={handleAddTodo}
         />
-        <Button title="Add" onPress={handleAddTodo} />
+        <TouchableOpacity style={styles.addButton} onPress={handleAddTodo}>
+          <Text style={styles.addButtonText}>Add</Text>
+        </TouchableOpacity>
       </View>
       <FlatList
         data={todos}
@@ -121,6 +106,30 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 10,
   },
+  addButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    backgroundColor: '#ff4444',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
-
-
