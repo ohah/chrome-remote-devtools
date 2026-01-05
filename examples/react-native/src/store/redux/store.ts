@@ -7,15 +7,14 @@ import todoReducer from './slices/todoSlice';
 import cartReducer from './slices/cartSlice';
 
 // Configure store with DevTools / DevTools와 함께 store 설정
-// Note: configureStore automatically includes redux-devtools-extension support in development / 참고: configureStore는 개발 환경에서 자동으로 redux-devtools-extension 지원을 포함합니다
-// This is equivalent to using composeWithDevTools with createStore / 이것은 createStore와 함께 composeWithDevTools를 사용하는 것과 동일합니다
+// Enable DevTools explicitly for production builds / 프로덕션 빌드에서도 DevTools 명시적으로 활성화
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     todo: todoReducer,
     cart: cartReducer,
   },
-  // DevTools are automatically enabled in development mode / DevTools는 개발 모드에서 자동으로 활성화됩니다
+  devTools: true, // Enable DevTools in production / 프로덕션에서도 DevTools 활성화
 });
 
 export type RootState = ReturnType<typeof store.getState>;
