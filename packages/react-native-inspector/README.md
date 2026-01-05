@@ -83,6 +83,39 @@ bun install
 react-native run-ios
 ```
 
+## Auto-initialization / 자동 초기화
+
+This package has `sideEffects: true` in `package.json`, which means it will auto-initialize when imported. / 이 패키지는 `package.json`에 `sideEffects: true`가 설정되어 있어 import 시 자동으로 초기화됩니다.
+
+### Redux DevTools Extension / Redux DevTools Extension
+
+The package automatically sets up `__REDUX_DEVTOOLS_EXTENSION__` on import with default values (localhost:8080) or from environment variables. / 패키지는 import 시 기본값(localhost:8080) 또는 환경 변수에서 값을 가져와 `__REDUX_DEVTOOLS_EXTENSION__`을 자동으로 설정합니다.
+
+**Important**: If you need to use a different host/port, call `setupReduxDevToolsExtension()` explicitly before creating your stores. / **중요**: 다른 호스트/포트를 사용해야 하는 경우, store를 생성하기 전에 `setupReduxDevToolsExtension()`을 명시적으로 호출하세요.
+
+```typescript
+import { setupReduxDevToolsExtension } from '@ohah/chrome-remote-devtools-react-native';
+
+// Setup with custom host/port / 커스텀 호스트/포트로 설정
+setupReduxDevToolsExtension('192.168.1.100', 8080);
+```
+
+### Environment Variables / 환경 변수
+
+You can configure the default host/port using environment variables: / 환경 변수를 사용하여 기본 호스트/포트를 설정할 수 있습니다:
+
+- `CHROME_REMOTE_DEVTOOLS_HOST`: Server host (default: 'localhost') / 서버 호스트 (기본값: 'localhost')
+- `CHROME_REMOTE_DEVTOOLS_PORT`: Server port (default: 8080) / 서버 포트 (기본값: 8080)
+
+Or set them on the global object: / 또는 전역 객체에 설정할 수 있습니다:
+
+```typescript
+(global as any).__ChromeRemoteDevToolsServerHost = '192.168.1.100';
+(global as any).__ChromeRemoteDevToolsServerPort = 8080;
+```
+
+**Note**: Auto-initialization uses default values if the extension is not already set. If you need specific host/port, always call `setupReduxDevToolsExtension()` explicitly. / **참고**: 자동 초기화는 extension이 아직 설정되지 않은 경우 기본값을 사용합니다. 특정 호스트/포트가 필요한 경우 항상 `setupReduxDevToolsExtension()`을 명시적으로 호출하세요.
+
 ## Requirements / 요구사항
 
 - React Native >= 0.83.0
