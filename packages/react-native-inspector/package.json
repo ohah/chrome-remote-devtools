@@ -16,9 +16,9 @@
     "directory": "packages/react-native-inspector"
   },
   "files": [
+    "babel-plugin-inject-redux-devtools.js",
     "README.md",
     "android/",
-    "babel-plugin-inject-redux-devtools.js",
     "dist/",
     "ios/",
     "src/"
