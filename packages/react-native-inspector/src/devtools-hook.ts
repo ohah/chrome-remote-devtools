@@ -50,18 +50,59 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
   const globalObj =
     typeof global !== 'undefined' ? global : typeof window !== 'undefined' ? window : {};
 
-  // Debug: Check current state / 디버그: 현재 상태 확인
-  console.log('[ReduxDevTools] Checking extension availability...', {
-    hasGlobal: typeof global !== 'undefined',
-    hasWindow: typeof window !== 'undefined',
-    globalExtension: (globalObj as any).__REDUX_DEVTOOLS_EXTENSION__,
-    windowExtension:
-      typeof window !== 'undefined' ? (window as any).__REDUX_DEVTOOLS_EXTENSION__ : undefined,
-  });
+  // Check if implementation store exists (from polyfill) / 구현 저장소가 있는지 확인 (polyfill에서)
+  const implementationStore =
+    typeof global !== 'undefined' ? (global as any).__ReduxDevToolsImplementationStore : null;
+
+  if (implementationStore) {
+    // Inject actual implementation functions / 실제 구현 함수 주입
+    implementationStore.sendCDPMessage = async (
+      serverHostParam: string,
+      serverPortParam: number,
+      message: unknown
+    ) => {
+      return sendCDPMessage(serverHostParam, serverPortParam, message);
+    };
+
+    implementationStore.getServerInfo = () => {
+      const serverInfo = getServerInfo();
+      if (serverInfo) {
+        return serverInfo;
+      }
+      return { serverHost, serverPort };
+    };
+
+    implementationStore.trackConnectCall = (storeName: string, instanceId: number, config: any) => {
+      const connectInfo: ConnectCallInfo = {
+        storeName,
+        timestamp: Date.now(),
+        instanceId,
+        config,
+        initCalled: false,
+      };
+      connectCalls.set(storeName, connectInfo);
+    };
+
+    implementationStore.updateConnectCallInfo = (
+      storeName: string,
+      updates: { initCalled?: boolean; initTimestamp?: number }
+    ) => {
+      const connectInfo = connectCalls.get(storeName);
+      if (connectInfo) {
+        if (updates.initCalled !== undefined) {
+          connectInfo.initCalled = updates.initCalled;
+        }
+        if (updates.initTimestamp !== undefined) {
+          connectInfo.initTimestamp = updates.initTimestamp;
+        }
+        connectCalls.set(storeName, connectInfo);
+      }
+    };
+
+    return; // Polyfill already set up extension, just inject implementation / Polyfill이 이미 extension을 설정했으므로 구현만 주입
+  }
 
   if (!(globalObj as any).__REDUX_DEVTOOLS_EXTENSION__) {
-    console.log('[ReduxDevTools] Setting up __REDUX_DEVTOOLS_EXTENSION__');
-
     // Create connect function (used by Zustand) / Zustand에서 사용하는 connect 함수
     function createConnect() {
       return (preConfig?: { name?: string; instanceId?: number; [key: string]: any }) => {
@@ -71,8 +112,6 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
           config.name ||
           (typeof document !== 'undefined' && document.title) ||
           `Instance ${instanceId}`;
-
-        console.log('[ReduxDevTools] connect() called', { instanceId, name, config });
 
         // Track connect call / connect 호출 추적
         const connectInfo: ConnectCallInfo = {
@@ -97,13 +136,6 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
         // Return ConnectResponse matching reference interface / 레퍼런스 인터페이스와 일치하는 ConnectResponse 반환
         return {
           init<S>(state: S, liftedData?: any) {
-            console.log('[ReduxDevTools] init() called', {
-              instanceId,
-              name,
-              state,
-              liftedData,
-            });
-
             // Update connect call info / connect 호출 정보 업데이트
             const connectInfo = connectCalls.get(name);
             if (connectInfo) {
@@ -125,53 +157,12 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
                 name,
                 timestamp: Date.now(),
               },
-            })
-              .then(() => {
-                console.log('[ReduxDevTools] init() CDP message sent successfully');
-              })
-              .catch((error) => {
-                console.warn('[ChromeRemoteDevTools] Failed to send init event:', error);
-              });
+            }).catch(() => {
+              // Failed to send init event / init 이벤트 전송 실패
+            });
           },
 
           send<S, A extends { type: string }>(action: A, state: S) {
-            // Extract action type and details / 액션 타입과 상세 정보 추출
-            const actionType = (action as any)?.type || (action as any)?.action?.type || 'unknown';
-            const actionPayload =
-              (action as any)?.payload || (action as any)?.action?.payload || null;
-
-            // Format state for logging / 로깅을 위한 상태 포맷팅
-            const stateSummary =
-              typeof state === 'object' && state !== null
-                ? Object.keys(state).reduce(
-                    (acc, key) => {
-                      const value = (state as any)[key];
-                      // For functions, just show [Function] / 함수인 경우 [Function]만 표시
-                      if (typeof value === 'function') {
-                        acc[key] = '[Function]';
-                      } else if (Array.isArray(value)) {
-                        acc[key] = `[Array(${value.length})]`;
-                      } else if (typeof value === 'object' && value !== null) {
-                        acc[key] = `[Object(${Object.keys(value).length} keys)]`;
-                      } else {
-                        acc[key] = value;
-                      }
-                      return acc;
-                    },
-                    {} as Record<string, any>
-                  )
-                : state;
-
-            console.log('[ReduxDevTools] send() called', {
-              instanceId,
-              name,
-              actionType,
-              actionPayload,
-              action: action,
-              state: stateSummary,
-              fullState: state,
-            });
-
             // Get current server info dynamically / 현재 서버 정보를 동적으로 가져오기
             const currentServerInfo = getCurrentServerInfo();
 
@@ -185,50 +176,24 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
                 name,
                 timestamp: Date.now(),
               },
-            })
-              .then(() => {
-                console.log('[ReduxDevTools] send() CDP message sent successfully', {
-                  actionType,
-                  stateKeys: typeof state === 'object' && state !== null ? Object.keys(state) : [],
-                });
-              })
-              .catch((error) => {
-                console.warn('[ChromeRemoteDevTools] Failed to send Redux event:', error);
-              });
+            }).catch(() => {
+              // Failed to send Redux event / Redux 이벤트 전송 실패
+            });
           },
 
           subscribe(_listener: (message: any) => void): (() => void) | undefined {
-            console.log('[ReduxDevTools] subscribe() called', {
-              instanceId,
-              name,
-            });
-
             // Subscribe to messages from DevTools / DevTools로부터 메시지 구독
             // For React Native, this is a no-op but returns unsubscribe function / React Native에서는 no-op이지만 unsubscribe 함수 반환
             return () => {
-              console.log('[ReduxDevTools] unsubscribe() called', {
-                instanceId,
-                name,
-              });
               // Unsubscribe / 구독 해제
             };
           },
 
           unsubscribe() {
-            console.log('[ReduxDevTools] unsubscribe() called', {
-              instanceId,
-              name,
-            });
             // Unsubscribe / 구독 해제
           },
 
           error(payload: string) {
-            console.log('[ReduxDevTools] error() called', {
-              instanceId,
-              name,
-              payload,
-            });
-
             // Get current server info dynamically / 현재 서버 정보를 동적으로 가져오기
             const currentServerInfo = getCurrentServerInfo();
 
@@ -241,13 +206,9 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
                 name,
                 timestamp: Date.now(),
               },
-            })
-              .then(() => {
-                console.log('[ReduxDevTools] error() CDP message sent successfully');
-              })
-              .catch((error) => {
-                console.warn('[ChromeRemoteDevTools] Failed to send error:', error);
-              });
+            }).catch(() => {
+              // Failed to send error / 에러 전송 실패
+            });
           },
         };
       };
@@ -259,13 +220,9 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
     // Create extension as function (used by Redux Toolkit) / Redux Toolkit에서 사용하는 함수
     function createExtensionFunction() {
       const extensionFn = (config?: any) => {
-        console.log('[ReduxDevTools] Extension called as function (for Redux Toolkit)', { config });
-
         // Return StoreEnhancer / StoreEnhancer 반환
         return (next: any) => (reducer: any, initialState?: any) => {
-          console.log('[ReduxDevTools] StoreEnhancer called, creating store...');
           const store = next(reducer, initialState);
-          console.log('[ReduxDevTools] Store created, setting up DevTools connection...');
 
           // Connect to DevTools / DevTools에 연결
           const devTools = connectFn({
@@ -274,20 +231,17 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
           });
 
           // Send initial state / 초기 상태 전송
-          console.log('[ReduxDevTools] Sending initial state...');
           devTools.init(store.getState());
 
           // Wrap dispatch to track actions / 액션 추적을 위해 dispatch 래핑
           const originalDispatch = store.dispatch;
           store.dispatch = (action: any) => {
-            console.log('[ReduxDevTools] Action dispatched:', action.type || action);
             const result = originalDispatch(action);
             const state = store.getState();
             devTools.send(action, state);
             return result;
           };
 
-          console.log('[ReduxDevTools] Store setup complete, dispatch wrapped');
           return store;
         };
       };
@@ -332,7 +286,6 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
     const extension = Object.assign(extensionFunction, {
       connect: connectFn,
       disconnect: () => {
-        console.log('[ReduxDevTools] disconnect() called');
         // Disconnect all connections / 모든 연결 해제
       },
     });
@@ -349,7 +302,6 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
     if (typeof window !== 'undefined') {
       (window as any).__REDUX_DEVTOOLS_EXTENSION__ = extension;
       (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = extensionCompose;
-      console.log('[ReduxDevTools] Also set on window object');
     } else {
       // React Native might have window as undefined initially / React Native는 초기에 window가 undefined일 수 있음
       // Create window object if it doesn't exist / window 객체가 없으면 생성
@@ -357,27 +309,10 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
         (global as any).window = global;
         (global as any).window.__REDUX_DEVTOOLS_EXTENSION__ = extension;
         (global as any).window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = extensionCompose;
-        console.log('[ReduxDevTools] Created window object on global');
-      } catch (e) {
-        console.warn('[ReduxDevTools] Failed to create window object:', e);
+      } catch {
+        // Failed to create window object / window 객체 생성 실패
       }
     }
-
-    // Verify setup / 설정 확인
-    console.log('[ReduxDevTools] __REDUX_DEVTOOLS_EXTENSION__ setup complete', {
-      globalExtension: (globalObj as any).__REDUX_DEVTOOLS_EXTENSION__,
-      globalCompose: (globalObj as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__,
-      windowExtension:
-        typeof window !== 'undefined' ? (window as any).__REDUX_DEVTOOLS_EXTENSION__ : undefined,
-      windowCompose:
-        typeof window !== 'undefined'
-          ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-          : undefined,
-      hasConnect: typeof (globalObj as any).__REDUX_DEVTOOLS_EXTENSION__?.connect === 'function',
-      isFunction: typeof (globalObj as any).__REDUX_DEVTOOLS_EXTENSION__ === 'function',
-    });
-  } else {
-    console.log('[ReduxDevTools] __REDUX_DEVTOOLS_EXTENSION__ already exists');
   }
 }
 
@@ -396,9 +331,5 @@ const DEFAULT_PORT =
 
 // Auto-setup if not already set / 아직 설정되지 않았으면 자동 설정
 if (typeof global !== 'undefined' && !(global as any).__REDUX_DEVTOOLS_EXTENSION__) {
-  console.log('[ReduxDevTools] Auto-initializing with default values', {
-    host: DEFAULT_HOST,
-    port: DEFAULT_PORT,
-  });
   setupReduxDevToolsExtension(DEFAULT_HOST, DEFAULT_PORT);
 }
