@@ -1,6 +1,6 @@
 // Shared utilities for React Native Inspector / React Native Inspector용 공유 유틸리티
 
-import { setupReduxDevToolsExtension, getConnectCallInfo } from './devtools-hook';
+import { getConnectCallInfo } from './devtools-hook';
 
 // Export getConnectCallInfo for direct access / 직접 접근을 위한 getConnectCallInfo 내보내기
 export { getConnectCallInfo } from './devtools-hook';
@@ -22,23 +22,17 @@ export function getGlobalObj(): any {
 }
 
 /**
- * Check and setup Redux DevTools Extension before store creation / store 생성 전에 Redux DevTools Extension 확인 및 설정
- * @param serverHost Server host (default: 'localhost') / 서버 호스트 (기본값: 'localhost')
- * @param serverPort Server port (default: 8080) / 서버 포트 (기본값: 8080)
- * @param storeName Store name for logging / 로깅용 store 이름
+ * Get Redux DevTools Extension polyfill path / Redux DevTools Extension polyfill 경로 가져오기
+ * @returns Path string that Metro can resolve / Metro가 resolve할 수 있는 경로 문자열
  */
-export function checkExtensionBeforeStore(
-  serverHost: string = 'localhost',
-  serverPort: number = 8080,
-  storeName: string = 'Store'
-): void {
-  const globalObj = getGlobalObj();
-  const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
-  const hasExtension = !!extension;
-  const hasConnect = typeof extension?.connect === 'function';
-
-  if (!hasExtension) {
-    setupReduxDevToolsExtension(serverHost, serverPort);
+export function getReduxDevToolsExtensionPolyfillPath(): string {
+  // In React Native, use require.resolve or return package-relative path / React Native에서는 require.resolve를 사용하거나 패키지 상대 경로 반환
+  // Metro will resolve this at build time / Metro가 빌드 타임에 이것을 resolve합니다
+  try {
+    return require.resolve('@ohah/chrome-remote-devtools-react-native/polyfills/redux-devtools-extension');
+  } catch {
+    // Return package-relative path for Metro to resolve / Metro가 resolve할 패키지 상대 경로 반환
+    return '@ohah/chrome-remote-devtools-react-native/polyfills/redux-devtools-extension';
   }
 }
 
