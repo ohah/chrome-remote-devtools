@@ -19,6 +19,7 @@ Chrome Remote DevTools는 클라이언트 사이드에서 CDP를 구현하고 We
 - **스토리지 관리**: 세션 스토리지, 로컬 스토리지, 쿠키 조회 및 관리
 - **세션 리플레이**: 사용자 상호작용 및 페이지 변경 기록 및 재생
 - **오프라인 로깅**: 로컬에서 로그를 캡처하고 저장하여 오프라인 분석
+- **Redux DevTools**: Chrome Extension과 동일한 UI를 제공하는 Redux DevTools Extension 통합
 
 ## 아키텍처
 
@@ -82,7 +83,7 @@ bash scripts/init.sh
 
 - Bun 의존성 설치
 - Rust 의존성 설치
-- 레퍼런스 저장소 클론 (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb)
+- 레퍼런스 저장소 클론 (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb, redux-devtools)
 
 ### 3. 설치 확인
 
@@ -146,6 +147,7 @@ bun run format:rust         # rustfmt로 Rust 코드 포맷팅
 
 # 빌드
 bun run build               # 전체 패키지 빌드
+bun run build:redux-extension  # Redux DevTools Extension 빌드 및 devtools-frontend로 복사
 ```
 
 ## 프로젝트 구조
@@ -164,7 +166,8 @@ chrome-remote-devtools/
     ├── chobitsu/
     ├── devtools-remote-debugger/
     ├── devtools-protocol/
-    └── rrweb/
+    ├── rrweb/
+    └── redux-devtools/  # Redux DevTools Extension 소스
 ```
 
 ## 통신 흐름
@@ -186,6 +189,36 @@ chrome-remote-devtools/
 
 MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.
 
+## Redux DevTools 통합
+
+Chrome Remote DevTools는 공식 Chrome Extension과 동일한 UI를 제공하는 Redux DevTools 패널을 포함합니다. Redux DevTools Extension은 소스에서 빌드되어 ExtensionView를 통해 devtools-frontend에 통합됩니다.
+
+### Redux DevTools Extension 빌드
+
+Redux DevTools Extension을 빌드하고 통합하려면:
+
+```bash
+bun run build:redux-extension
+```
+
+이 명령은 다음을 수행합니다:
+
+1. 모든 Redux DevTools 패키지 빌드
+2. Chrome Extension 빌드
+3. 빌드된 파일을 `devtools/devtools-frontend/front_end/panels/redux/extension/`로 복사
+
+### Redux 패널
+
+Redux 패널은 DevTools drawer view에서 사용할 수 있습니다. 다음을 사용합니다:
+
+- **ExtensionView**: iframe에서 Redux DevTools Extension HTML 로드
+- **ReduxExtensionBridge**: Chrome Extension API를 시뮬레이션하고 CDP 메시지를 Extension 형식으로 변환
+- **CDP 이벤트**: `Redux.init`, `Redux.actionDispatched`, `Redux.error` 이벤트 리스닝
+
+### 사용 방법
+
+React Native 앱(또는 다른 앱)이 DevTools Extension polyfill과 함께 Redux를 사용하면, Redux 액션과 상태 변경이 CDP 메시지로 전송됩니다. Redux 패널은 Chrome Extension과 동일한 UI를 사용하여 자동으로 표시합니다.
+
 ## 참조 프로젝트
 
 이 프로젝트는 다음 프로젝트들을 참고하여 만들어졌습니다:
@@ -194,6 +227,7 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.
 - [chii](https://github.com/liriliri/chii) - chobitsu를 사용한 원격 디버깅 도구
 - [chobitsu](https://github.com/liriliri/chobitsu) - CDP 프로토콜 JavaScript 구현 라이브러리
 - [devtools-protocol](https://github.com/ChromeDevTools/devtools-protocol) - 공식 CDP 정의
+- [redux-devtools](https://github.com/reduxjs/redux-devtools) - Redux DevTools Extension 소스 코드
 
 ## 사용 화면
 
