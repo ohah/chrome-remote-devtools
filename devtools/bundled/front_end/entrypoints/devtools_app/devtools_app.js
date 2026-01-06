@@ -3564,6 +3564,42 @@ UI14.ViewManager.registerViewExtension({
   }
 });
 
+// gen/front_end/panels/redux/redux-meta.js
+import * as i18n55 from "./..\\..\\core\\i18n\\i18n.js";
+import * as UI15 from "./..\\..\\ui\\legacy\\legacy.js";
+var UIStrings28 = {
+  /**
+   * @description Label for the Redux pane / Redux 패널 레이블
+   */
+  redux: "Redux",
+  /**
+   * @description Command for showing the 'Redux' pane / 'Redux' 패널 표시 명령
+   */
+  showRedux: "Show Redux"
+};
+var str_28 = i18n55.i18n.registerUIStrings("panels/redux/redux-meta.ts", UIStrings28);
+var i18nLazyString28 = i18n55.i18n.getLazilyComputedLocalizedString.bind(void 0, str_28);
+var loadedReduxModule;
+async function loadReduxModule() {
+  if (!loadedReduxModule) {
+    loadedReduxModule = await import("./..\\..\\panels\\redux\\redux.js");
+  }
+  return loadedReduxModule;
+}
+UI15.ViewManager.registerViewExtension({
+  location: "panel",
+  id: "redux-view",
+  title: i18nLazyString28(UIStrings28.redux),
+  commandPrompt: i18nLazyString28(UIStrings28.showRedux),
+  order: 1001,
+  persistence: "permanent",
+  hasToolbar: false,
+  async loadView() {
+    const Redux = await loadReduxModule();
+    return new Redux.ReduxPanel.ReduxPanel();
+  }
+});
+
 // gen/front_end/entrypoints/devtools_app/devtools_app.prebundle.js
 import * as Root5 from "./..\\..\\core\\root\\root.js";
 import * as Main from "./..\\main\\main.js";

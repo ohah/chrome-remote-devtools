@@ -26,3 +26,4 @@ import '../../panels/recorder/recorder-meta.js';
 import '../../panels/whats_new/whats_new-meta.js';
 import '../../panels/welcome/welcome-meta.js';
 import '../../panels/session_replay/session_replay-meta.js';
+import '../../panels/redux/redux-meta.js';

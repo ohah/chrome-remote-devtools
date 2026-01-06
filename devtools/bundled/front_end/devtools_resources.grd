@@ -737,6 +737,22 @@
       <include file="panels/recorder/recorder-meta.js" name="PANELS_RECORDER_RECORDER_META_JS" resource_path="panels/recorder/recorder-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/recorder/recorder.js" name="PANELS_RECORDER_RECORDER_JS" resource_path="panels/recorder/recorder.js" type="BINDATA" compress="false"/>
       <include file="panels/recorder/util/util.js" name="PANELS_RECORDER_UTIL_UTIL_JS" resource_path="panels/recorder/util/util.js" type="BINDATA" compress="false"/>
+      <include file="panels/redux/redux-meta.js" name="PANELS_REDUX_REDUX_META_JS" resource_path="panels/redux/redux-meta.js" type="BINDATA" compress="false"/>
+      <include file="panels/redux/redux.js" name="PANELS_REDUX_REDUX_JS" resource_path="panels/redux/redux.js" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/devpanel.html" name="PANELS_REDUX_EXTENSION_DEVPANEL_HTML" resource_path="panels/redux/extension/devpanel.html" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/devpanel.bundle.js" name="PANELS_REDUX_EXTENSION_DEVPANEL_BUNDLE_JS" resource_path="panels/redux/extension/devpanel.bundle.js" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/devpanel.bundle.css" name="PANELS_REDUX_EXTENSION_DEVPANEL_BUNDLE_CSS" resource_path="panels/redux/extension/devpanel.bundle.css" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/background.bundle.js" name="PANELS_REDUX_EXTENSION_BACKGROUND_BUNDLE_JS" resource_path="panels/redux/extension/background.bundle.js" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/content.bundle.js" name="PANELS_REDUX_EXTENSION_CONTENT_BUNDLE_JS" resource_path="panels/redux/extension/content.bundle.js" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/page.bundle.js" name="PANELS_REDUX_EXTENSION_PAGE_BUNDLE_JS" resource_path="panels/redux/extension/page.bundle.js" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/img/loading.svg" name="PANELS_REDUX_EXTENSION_IMG_LOADING_SVG" resource_path="panels/redux/extension/img/loading.svg" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/img/logo/128x128.png" name="PANELS_REDUX_EXTENSION_IMG_LOGO_128X128_PNG" resource_path="panels/redux/extension/img/logo/128x128.png" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/img/logo/16x16.png" name="PANELS_REDUX_EXTENSION_IMG_LOGO_16X16_PNG" resource_path="panels/redux/extension/img/logo/16x16.png" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/img/logo/38x38.png" name="PANELS_REDUX_EXTENSION_IMG_LOGO_38X38_PNG" resource_path="panels/redux/extension/img/logo/38x38.png" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/img/logo/48x48.png" name="PANELS_REDUX_EXTENSION_IMG_LOGO_48X48_PNG" resource_path="panels/redux/extension/img/logo/48x48.png" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/img/logo/error.png" name="PANELS_REDUX_EXTENSION_IMG_LOGO_ERROR_PNG" resource_path="panels/redux/extension/img/logo/error.png" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/img/logo/gray.png" name="PANELS_REDUX_EXTENSION_IMG_LOGO_GRAY_PNG" resource_path="panels/redux/extension/img/logo/gray.png" type="BINDATA" compress="false"/>
+      <include file="panels/redux/extension/img/logo/scalable.png" name="PANELS_REDUX_EXTENSION_IMG_LOGO_SCALABLE_PNG" resource_path="panels/redux/extension/img/logo/scalable.png" type="BINDATA" compress="false"/>
       <include file="panels/screencast/screencast-meta.js" name="PANELS_SCREENCAST_SCREENCAST_META_JS" resource_path="panels/screencast/screencast-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/screencast/screencast.js" name="PANELS_SCREENCAST_SCREENCAST_JS" resource_path="panels/screencast/screencast.js" type="BINDATA" compress="false"/>
       <include file="panels/search/search.js" name="PANELS_SEARCH_SEARCH_JS" resource_path="panels/search/search.js" type="BINDATA" compress="false"/>
