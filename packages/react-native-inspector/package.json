@@ -16,11 +16,11 @@
     "directory": "packages/react-native-inspector"
   },
   "files": [
-    "babel-plugin-inject-redux-devtools.js",
     "README.md",
     "android/",
     "dist/",
     "ios/",
+    "polyfills/",
     "src/"
   ],
   "sideEffects": true,
@@ -37,6 +37,9 @@
     },
     "./zustand/middleware": {
       "react-native": "./src/zustand/middleware.ts"
+    },
+    "./polyfills/redux-devtools-extension": {
+      "react-native": "./polyfills/redux-devtools-extension.js"
     }
   },
   "scripts": {
