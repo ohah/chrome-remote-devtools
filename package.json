@@ -34,7 +34,8 @@
     "test:e2e:integration": "playwright test tests/integration",
     "test:e2e:integration:ui": "playwright test --ui",
     "test:e2e:integration:debug": "playwright test --debug",
-    "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts"
+    "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts",
+    "build:redux-extension": "node scripts/build-redux-extension.mjs"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.0.11",
