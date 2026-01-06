@@ -1,14 +1,10 @@
 // Chrome Remote DevTools Inspector Provider / Chrome Remote DevTools Inspector Provider
 // This component injects actual implementation into the polyfill / 이 컴포넌트는 polyfill에 실제 구현을 주입합니다
 
-import React, { useEffect, useState } from 'react';
-import { sendCDPMessage } from './cdp-message';
-import { setServerInfo, getServerInfo } from './server-info';
+import React, { useEffect, useRef } from 'react';
+import { setServerInfo } from './server-info';
 import { setupReduxDevToolsExtension } from './devtools-hook';
 import { connect } from './index';
-
-// Type declarations for React Native environment / React Native 환경용 타입 선언
-declare const global: typeof globalThis;
 
 /**
  * Chrome Remote DevTools Inspector Provider Props / Chrome Remote DevTools Inspector Provider Props
@@ -34,24 +30,49 @@ export function ChromeRemoteDevToolsInspectorProvider({
   children,
   autoConnect = true,
 }: ChromeRemoteDevToolsInspectorProviderProps): React.JSX.Element {
-  const [connected, setConnected] = useState(false);
+  const initializedRef = useRef(false);
+  const connectionRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     // Setup Redux DevTools Extension with actual implementation / 실제 구현으로 Redux DevTools Extension 설정
     // This will inject implementation functions into polyfill / 이것은 polyfill에 구현 함수를 주입합니다
-    setServerInfo(serverHost, serverPort);
-    setupReduxDevToolsExtension(serverHost, serverPort);
+    // Only initialize once / 한 번만 초기화
+    if (!initializedRef.current) {
+      console.log(
+        '[ChromeRemoteDevTools] Initializing Provider and injecting implementation functions',
+        {
+          serverHost,
+          serverPort,
+        }
+      );
+      setServerInfo(serverHost, serverPort);
+      setupReduxDevToolsExtension(serverHost, serverPort);
+      initializedRef.current = true;
+    } else {
+      // Update server info if changed / 변경된 경우 서버 정보 업데이트
+      console.log('[ChromeRemoteDevTools] Updating server info', { serverHost, serverPort });
+      setServerInfo(serverHost, serverPort);
+    }
 
     // Auto-connect if enabled / 활성화된 경우 자동 연결
-    if (autoConnect) {
-      connect(serverHost, serverPort)
+    if (autoConnect && !connectionRef.current) {
+      connectionRef.current = connect(serverHost, serverPort)
         .then(() => {
-          setConnected(true);
+          // Connection successful / 연결 성공
         })
         .catch(() => {
           // Failed to connect / 연결 실패
+          connectionRef.current = null;
         });
     }
+
+    // Cleanup function / 정리 함수
+    return () => {
+      // Note: Connection cleanup is handled by the native module / 참고: 연결 정리는 네이티브 모듈에서 처리됨
+      if (!autoConnect) {
+        connectionRef.current = null;
+      }
+    };
   }, [serverHost, serverPort, autoConnect]);
 
   return <>{children}</>;
