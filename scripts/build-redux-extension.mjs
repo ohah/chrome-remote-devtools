@@ -91,19 +91,38 @@ for (const file of filesToCopy) {
   }
 }
 
-// Copy directories / 디렉토리 복사
-for (const dir of dirsToCopy) {
-  const src = path.join(distDir, dir);
-  const dest = path.join(targetDir, dir);
+    // Copy directories / 디렉토리 복사
+    for (const dir of dirsToCopy) {
+      const src = path.join(distDir, dir);
+      const dest = path.join(targetDir, dir);
 
-  if (fs.existsSync(src)) {
-    fs.cpSync(src, dest, { recursive: true });
-    console.log(`  ✓ Copied ${dir}/`);
-  } else {
-    console.warn(`  ⚠ ${dir}/ not found, skipping...`);
-  }
-}
+      if (fs.existsSync(src)) {
+        fs.cpSync(src, dest, { recursive: true });
+        console.log(`  ✓ Copied ${dir}/`);
+      } else {
+        console.warn(`  ⚠ ${dir}/ not found, skipping...`);
+      }
+    }
 
-console.log('');
-console.log('✅ Redux DevTools Extension built and copied successfully!');
-console.log(`   Target: ${targetDir}`);
+    console.log('');
+
+    // 3. Fix paths in devpanel.html / devpanel.html의 경로 수정
+    console.log('🔧 Step 3: Fixing paths in devpanel.html...');
+    const devpanelHtmlPath = path.join(targetDir, 'devpanel.html');
+    if (fs.existsSync(devpanelHtmlPath)) {
+      let htmlContent = fs.readFileSync(devpanelHtmlPath, 'utf-8');
+
+      // Replace absolute paths with relative paths / 절대 경로를 상대 경로로 변경
+      htmlContent = htmlContent.replace(/src="\/img\//g, 'src="img/');
+      htmlContent = htmlContent.replace(/href="\/devpanel\.bundle\.css"/g, 'href="devpanel.bundle.css"');
+      htmlContent = htmlContent.replace(/src="\/devpanel\.bundle\.js"/g, 'src="devpanel.bundle.js"');
+
+      fs.writeFileSync(devpanelHtmlPath, htmlContent, 'utf-8');
+      console.log('  ✓ Fixed paths in devpanel.html');
+    } else {
+      console.warn('  ⚠ devpanel.html not found, skipping path fix...');
+    }
+
+    console.log('');
+    console.log('✅ Redux DevTools Extension built and copied successfully!');
+    console.log(`   Target: ${targetDir}`);
