@@ -37,6 +37,7 @@ REFERENCE_REPOS=(
   "devtools-remote-debugger:https://github.com/Nice-PLQ/devtools-remote-debugger.git"
   "rrweb:https://github.com/rrweb-io/rrweb.git"
   "licia:https://github.com/liriliri/licia.git"
+  "redux-devtools:https://github.com/reduxjs/redux-devtools.git"
 )
 
 mkdir -p "$REFERENCE_DIR"
@@ -44,7 +45,7 @@ mkdir -p "$REFERENCE_DIR"
 for repo_info in "${REFERENCE_REPOS[@]}"; do
   IFS=':' read -r name url <<< "$repo_info"
   repo_path="$REFERENCE_DIR/$name"
-  
+
   if [ -d "$repo_path" ]; then
     echo "  ✓ $name already exists, skipping..."
   else
