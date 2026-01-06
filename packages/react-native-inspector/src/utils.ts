@@ -37,25 +37,8 @@ export function checkExtensionBeforeStore(
   const hasExtension = !!extension;
   const hasConnect = typeof extension?.connect === 'function';
 
-  console.log(`[Zustand ${storeName}] __REDUX_DEVTOOLS_EXTENSION__ check BEFORE store creation:`, {
-    exists: hasExtension,
-    hasConnect,
-    hasGlobal: typeof global !== 'undefined',
-    hasWindow: typeof window !== 'undefined',
-    extensionType: typeof extension,
-    extensionKeys: extension ? Object.keys(extension) : [],
-  });
-
   if (!hasExtension) {
-    console.log(`[Zustand ${storeName}] Extension not found, initializing...`);
     setupReduxDevToolsExtension(serverHost, serverPort);
-
-    // Check again after initialization / 초기화 후 다시 확인
-    const extensionAfter = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
-    console.log(`[Zustand ${storeName}] __REDUX_DEVTOOLS_EXTENSION__ check AFTER initialization:`, {
-      exists: !!extensionAfter,
-      hasConnect: typeof extensionAfter?.connect === 'function',
-    });
   }
 }
 

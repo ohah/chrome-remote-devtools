@@ -13,21 +13,7 @@ const TurboModule = TurboModuleRegistry.get<Spec>('ChromeRemoteDevToolsInspector
 const LegacyModule = NativeModules.ChromeRemoteDevToolsInspector;
 const ChromeRemoteDevToolsInspector = TurboModule || LegacyModule;
 
-// Debug: Log module availability / 디버그: 모듈 사용 가능성 로그
-if (__DEV__) {
-  console.log(
-    '[ChromeRemoteDevToolsInspector] TurboModule:',
-    TurboModule ? '✅ Available' : '❌ Not available'
-  );
-  console.log(
-    '[ChromeRemoteDevToolsInspector] LegacyModule:',
-    LegacyModule ? '✅ Available' : '❌ Not available'
-  );
-  console.log(
-    '[ChromeRemoteDevToolsInspector] Using:',
-    TurboModule ? 'TurboModule' : LegacyModule ? 'LegacyModule' : 'None'
-  );
-}
+// Note: Module availability is checked but not logged to avoid console issues / 참고: 모듈 사용 가능성은 확인하지만 콘솔 문제를 피하기 위해 로그하지 않음
 
 // Note: Console message interception is handled at native level (RCTSetLogFunction) and JSI level (C++ console hook) / 참고: 콘솔 메시지 가로채기는 네이티브 레벨(RCTSetLogFunction)과 JSI 레벨(C++ console 훅)에서 처리됩니다
 
@@ -187,6 +173,8 @@ export {
   getExtensionStatus,
   getConnectCallInfo,
 } from './utils';
+export { ChromeRemoteDevToolsInspectorProvider } from './Provider';
+export type { ChromeRemoteDevToolsInspectorProviderProps } from './Provider';
 
 export default {
   connect,
