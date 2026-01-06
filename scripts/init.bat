@@ -46,6 +46,7 @@ call :clone_repo chobitsu https://github.com/liriliri/chobitsu.git
 call :clone_repo devtools-remote-debugger https://github.com/Nice-PLQ/devtools-remote-debugger.git
 call :clone_repo rrweb https://github.com/rrweb-io/rrweb.git
 call :clone_repo licia https://github.com/liriliri/licia.git
+call :clone_repo redux-devtools https://github.com/reduxjs/redux-devtools.git
 
 goto :end_clone
 
