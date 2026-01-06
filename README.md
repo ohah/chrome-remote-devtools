@@ -19,6 +19,7 @@ Chrome Remote DevTools enables remote debugging of web pages by implementing CDP
 - **Storage Management**: View and manage session storage, local storage, and cookies
 - **Session Replay**: Record and replay user interactions and page changes
 - **Offline Logging**: Capture and store logs locally for offline analysis
+- **Redux DevTools**: Integrated Redux DevTools Extension with identical UI to Chrome Extension
 
 ## Architecture
 
@@ -82,7 +83,7 @@ This will:
 
 - Install Bun dependencies
 - Install Rust dependencies
-- Clone reference repositories (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb)
+- Clone reference repositories (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb, redux-devtools)
 
 ### 3. Verify installation
 
@@ -160,6 +161,7 @@ bun run format:rust         # Format Rust code with rustfmt
 
 # Build
 bun run build               # Build all packages
+bun run build:redux-extension  # Build Redux DevTools Extension and copy to devtools-frontend
 ```
 
 ## Project Structure
@@ -178,7 +180,8 @@ chrome-remote-devtools/
     ├── chobitsu/
     ├── devtools-remote-debugger/
     ├── devtools-protocol/
-    └── rrweb/
+    ├── rrweb/
+    └── redux-devtools/  # Redux DevTools Extension source
 ```
 
 ## Communication Flow
@@ -200,6 +203,36 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for deta
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
+## Redux DevTools Integration
+
+Chrome Remote DevTools includes a Redux DevTools panel that provides the same UI as the official Chrome Extension. The Redux DevTools Extension is built from source and integrated into devtools-frontend using ExtensionView.
+
+### Building Redux DevTools Extension
+
+To build and integrate the Redux DevTools Extension:
+
+```bash
+bun run build:redux-extension
+```
+
+This will:
+
+1. Build all Redux DevTools packages
+2. Build the Chrome Extension
+3. Copy the built files to `devtools/devtools-frontend/front_end/panels/redux/extension/`
+
+### Redux Panel
+
+The Redux panel is available in the DevTools drawer view. It uses:
+
+- **ExtensionView**: Loads the Redux DevTools Extension HTML in an iframe
+- **ReduxExtensionBridge**: Simulates Chrome Extension APIs and converts CDP messages to Extension format
+- **CDP Events**: Listens for `Redux.init`, `Redux.actionDispatched`, and `Redux.error` events
+
+### Usage
+
+When a React Native app (or any app) uses Redux with the DevTools Extension polyfill, Redux actions and state changes are sent as CDP messages. The Redux panel automatically displays them using the same UI as the Chrome Extension.
+
 ## References
 
 This project is inspired by and references the following projects:
@@ -208,6 +241,7 @@ This project is inspired by and references the following projects:
 - [chii](https://github.com/liriliri/chii) - Remote debugging tool using chobitsu
 - [chobitsu](https://github.com/liriliri/chobitsu) - CDP protocol JavaScript implementation library
 - [devtools-protocol](https://github.com/ChromeDevTools/devtools-protocol) - Official CDP definitions
+- [redux-devtools](https://github.com/reduxjs/redux-devtools) - Redux DevTools Extension source code
 
 ## Screenshots
 
