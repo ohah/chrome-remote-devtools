@@ -1,7 +1,5 @@
-
 import { create } from '@ohah/chrome-remote-devtools-react-native/zustand';
 import { devtools } from '@ohah/chrome-remote-devtools-react-native/zustand/middleware';
-
 
 export interface CartItem {
   id: string;
