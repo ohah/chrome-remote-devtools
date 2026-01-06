@@ -145,9 +145,45 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
           return { serverHost, serverPort };
         };
 
-        // Return ConnectResponse matching reference interface / 레퍼런스 인터페이스와 일치하는 ConnectResponse 반환
-        return {
+        // Store last state for START message handling / START 메시지 처리를 위해 마지막 상태 저장
+        let lastState: any = null;
+        let lastLiftedData: any = null;
+
+        // Helper function to send state / 상태 전송 헬퍼 함수
+        const sendState = (state: any, liftedData?: any) => {
+          const currentServerInfo = getCurrentServerInfo();
+          const liftedState = liftedData || {
+            actionsById: {},
+            computedStates: [{ state }],
+            currentStateIndex: 0,
+            nextActionId: 1,
+            skippedActionIds: [],
+            stagedActionIds: [0],
+          };
+
+          sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
+            method: 'Redux.message',
+            params: {
+              type: 'STATE',
+              payload: liftedState,
+              source: '@devtools-page',
+              instanceId,
+              libConfig: {
+                name: name || 'Redux Store',
+                type: 'redux',
+              },
+            },
+          }).catch(() => {
+            // Failed to send state event / state 이벤트 전송 실패
+          });
+        };
+
+        // Create connect response / connect 응답 생성
+        const connectResponse = {
           init<S>(state: S, liftedData?: any) {
+            // Store last state / 마지막 상태 저장
+            lastState = state;
+            lastLiftedData = liftedData;
             // Update connect call info / connect 호출 정보 업데이트
             const connectInfo = connectCalls.get(name);
             if (connectInfo) {
@@ -165,34 +201,48 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
             // Get current server info dynamically / 현재 서버 정보를 동적으로 가져오기
             const currentServerInfo = getCurrentServerInfo();
 
-            // Send initial state / 초기 상태 전송
+            // Send INIT_INSTANCE message (Redux DevTools Extension spec) / INIT_INSTANCE 메시지 전송 (Redux DevTools Extension 스펙)
             sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
-              method: 'Redux.init',
+              method: 'Redux.message',
               params: {
-                state: state,
-                liftedData: liftedData,
+                type: 'INIT_INSTANCE',
+                payload: undefined,
+                source: '@devtools-page',
                 instanceId,
-                name,
-                timestamp: Date.now(),
               },
             }).catch(() => {
               // Failed to send init event / init 이벤트 전송 실패
             });
+
+            // Send initial state / 초기 상태 전송
+            sendState(state, liftedData);
           },
 
           send<S, A extends { type: string }>(action: A, state: S) {
+            // Store last state / 마지막 상태 저장
+            lastState = state;
+
             // Get current server info dynamically / 현재 서버 정보를 동적으로 가져오기
             const currentServerInfo = getCurrentServerInfo();
 
-            // Send action and state / 액션과 상태 전송
+            // Send ACTION message (Redux DevTools Extension spec) / ACTION 메시지 전송 (Redux DevTools Extension 스펙)
+            // This matches what pageScript does in relayAction / 이것은 pageScript가 relayAction에서 하는 것과 일치
+            const timestamp = Date.now();
+            const actionId = timestamp % 1000000; // Generate action ID from timestamp / 타임스탬프에서 액션 ID 생성
+
             sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
-              method: 'Redux.actionDispatched',
+              method: 'Redux.message',
               params: {
-                action: action,
-                state: state,
+                type: 'ACTION',
+                action: JSON.stringify({
+                  action,
+                  timestamp,
+                }),
+                payload: JSON.stringify(state),
+                source: '@devtools-page',
                 instanceId,
-                name,
-                timestamp: Date.now(),
+                maxAge: 50,
+                nextActionId: actionId,
               },
             })
               .then(() => {
@@ -239,14 +289,18 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
               payload,
             });
 
-            // Send error / 에러 전송
-            sendCDPMessage(serverHost, serverPort, {
-              method: 'Redux.error',
+            // Get current server info dynamically / 현재 서버 정보를 동적으로 가져오기
+            const currentServerInfo = getCurrentServerInfo();
+
+            // Send ERROR message (Redux DevTools Extension spec) / ERROR 메시지 전송 (Redux DevTools Extension 스펙)
+            sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
+              method: 'Redux.message',
               params: {
-                error: payload,
+                type: 'ERROR',
+                payload,
+                source: '@devtools-page',
                 instanceId,
-                name,
-                timestamp: Date.now(),
+                message: payload,
               },
             })
               .then(() => {
@@ -257,6 +311,16 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
               });
           },
         };
+
+        // Expose _requestState method for DevTools to call / DevTools가 호출할 수 있도록 _requestState 메서드 노출
+        (connectResponse as any)._requestState = () => {
+          console.log('[ReduxDevTools] _requestState called, sending current state');
+          if (lastState !== null) {
+            sendState(lastState, lastLiftedData);
+          }
+        };
+
+        return connectResponse;
       };
     }
 
@@ -335,6 +399,14 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
 
     // Create compose function / compose 함수 생성
     const extensionCompose = createExtensionCompose();
+
+    // Expose _requestState method on extension object / extension 객체에 _requestState 메서드 노출
+    // This allows DevTools to request current state when it connects / 이것은 DevTools가 연결될 때 현재 상태를 요청할 수 있게 함
+    (extension as any)._requestState = () => {
+      console.log('[ReduxDevTools] Extension._requestState called');
+      // Find all connected stores and request their state / 연결된 모든 store를 찾아 상태 요청
+      // This is handled by individual connect responses / 이것은 개별 connect 응답에 의해 처리됨
+    };
 
     // Set both / 둘 다 설정
     (globalObj as any).__REDUX_DEVTOOLS_EXTENSION__ = extension;

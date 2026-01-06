@@ -91,38 +91,99 @@ for (const file of filesToCopy) {
   }
 }
 
-    // Copy directories / 디렉토리 복사
-    for (const dir of dirsToCopy) {
-      const src = path.join(distDir, dir);
-      const dest = path.join(targetDir, dir);
+// Copy directories / 디렉토리 복사
+for (const dir of dirsToCopy) {
+  const src = path.join(distDir, dir);
+  const dest = path.join(targetDir, dir);
 
-      if (fs.existsSync(src)) {
-        fs.cpSync(src, dest, { recursive: true });
-        console.log(`  ✓ Copied ${dir}/`);
-      } else {
-        console.warn(`  ⚠ ${dir}/ not found, skipping...`);
+  if (fs.existsSync(src)) {
+    fs.cpSync(src, dest, { recursive: true });
+    console.log(`  ✓ Copied ${dir}/`);
+  } else {
+    console.warn(`  ⚠ ${dir}/ not found, skipping...`);
+  }
+}
+
+console.log('');
+
+// 3. Fix paths and inject API stub in devpanel.html / devpanel.html의 경로 수정 및 API stub 주입
+console.log('🔧 Step 3: Fixing paths and injecting API stub in devpanel.html...');
+const devpanelHtmlPath = path.join(targetDir, 'devpanel.html');
+if (fs.existsSync(devpanelHtmlPath)) {
+  let htmlContent = fs.readFileSync(devpanelHtmlPath, 'utf-8');
+
+  // Replace absolute paths with relative paths / 절대 경로를 상대 경로로 변경
+  htmlContent = htmlContent.replace(/src="\/img\//g, 'src="img/');
+  htmlContent = htmlContent.replace(
+    /href="\/devpanel\.bundle\.css"/g,
+    'href="devpanel.bundle.css"'
+  );
+  htmlContent = htmlContent.replace(/src="\/devpanel\.bundle\.js"/g, 'src="devpanel.bundle.js"');
+
+  // Inject API initialization script before other scripts / 다른 스크립트 전에 API 초기화 스크립트 주입
+  // This ensures chrome API is available before devpanel.bundle.js executes / devpanel.bundle.js 실행 전에 chrome API가 사용 가능하도록 함
+  const apiInitScript = `<script>
+// Initialize chrome API stub before other scripts / 다른 스크립트 전에 chrome API stub 초기화
+(function() {
+  if (typeof window.chrome === 'undefined') {
+    window.chrome = {};
+  }
+  // The actual API will be injected by ReduxExtensionBridge / 실제 API는 ReduxExtensionBridge에서 주입됨
+  // This stub prevents "Cannot read properties of undefined" errors / 이 stub은 "Cannot read properties of undefined" 에러를 방지함
+  if (!window.chrome.runtime) {
+    window.chrome.runtime = {
+      connect: function(options) {
+        var name = (options && options.name) || 'default';
+        return {
+          name: name,
+          onMessage: { addListener: function() {}, removeListener: function() {} },
+          onDisconnect: { addListener: function() {} },
+          postMessage: function() {},
+          disconnect: function() {}
+        };
+      },
+      sendMessage: function(message, callback) {
+        if (callback) callback({ success: true });
+      },
+      onMessage: { addListener: function() {}, removeListener: function() {} },
+      onConnect: { addListener: function() {} },
+      getURL: function(path) {
+        return 'devtools://devtools/bundled/panels/redux/extension/' + path;
       }
-    }
+    };
+  }
+  if (!window.chrome.devtools) {
+    window.chrome.devtools = {
+      inspectedWindow: {
+        eval: function(expression, callback) {
+          if (callback) callback(null, { isException: true, value: 'Not initialized' });
+        },
+        getResources: function(callback) {
+          if (callback) callback([{ url: window.location.href || 'about:blank' }]);
+        },
+        get tabId() { return undefined; }
+      }
+    };
+  }
+})();
+</script>`;
 
-    console.log('');
+  // Insert API init script before the closing </head> tag or before <body> / </head> 태그 전이나 <body> 전에 API init 스크립트 삽입
+  if (htmlContent.includes('</head>')) {
+    htmlContent = htmlContent.replace('</head>', apiInitScript + '</head>');
+  } else if (htmlContent.includes('<body>')) {
+    htmlContent = htmlContent.replace('<body>', '<head>' + apiInitScript + '</head><body>');
+  } else {
+    // If no head tag, insert at the beginning / head 태그가 없으면 시작 부분에 삽입
+    htmlContent = apiInitScript + htmlContent;
+  }
 
-    // 3. Fix paths in devpanel.html / devpanel.html의 경로 수정
-    console.log('🔧 Step 3: Fixing paths in devpanel.html...');
-    const devpanelHtmlPath = path.join(targetDir, 'devpanel.html');
-    if (fs.existsSync(devpanelHtmlPath)) {
-      let htmlContent = fs.readFileSync(devpanelHtmlPath, 'utf-8');
+  fs.writeFileSync(devpanelHtmlPath, htmlContent, 'utf-8');
+  console.log('  ✓ Fixed paths and injected API stub in devpanel.html');
+} else {
+  console.warn('  ⚠ devpanel.html not found, skipping path fix...');
+}
 
-      // Replace absolute paths with relative paths / 절대 경로를 상대 경로로 변경
-      htmlContent = htmlContent.replace(/src="\/img\//g, 'src="img/');
-      htmlContent = htmlContent.replace(/href="\/devpanel\.bundle\.css"/g, 'href="devpanel.bundle.css"');
-      htmlContent = htmlContent.replace(/src="\/devpanel\.bundle\.js"/g, 'src="devpanel.bundle.js"');
-
-      fs.writeFileSync(devpanelHtmlPath, htmlContent, 'utf-8');
-      console.log('  ✓ Fixed paths in devpanel.html');
-    } else {
-      console.warn('  ⚠ devpanel.html not found, skipping path fix...');
-    }
-
-    console.log('');
-    console.log('✅ Redux DevTools Extension built and copied successfully!');
-    console.log(`   Target: ${targetDir}`);
+console.log('');
+console.log('✅ Redux DevTools Extension built and copied successfully!');
+console.log(`   Target: ${targetDir}`);

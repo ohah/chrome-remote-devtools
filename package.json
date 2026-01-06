@@ -23,6 +23,7 @@
     "build:devtools": "cd devtools/devtools-frontend && gclient sync && gn gen out/Default && autoninja -C out/Default && cd ../.. && bun run copy:devtools-bundled",
     "build:client": "bun run --filter='@ohah/chrome-remote-devtools-client' build",
     "build:docs": "bun run --filter='docs' build",
+    "build:redux-extension": "node scripts/build-redux-extension.mjs",
     "postinstall": "playwright install --with-deps chromium",
     "test:unit": "bun test packages/server && bun test packages/client && bun test packages/inspector/src",
     "test:unit:server": "bun test packages/server --coverage",
@@ -34,8 +35,7 @@
     "test:e2e:integration": "playwright test tests/integration",
     "test:e2e:integration:ui": "playwright test --ui",
     "test:e2e:integration:debug": "playwright test --debug",
-    "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts",
-    "build:redux-extension": "node scripts/build-redux-extension.mjs"
+    "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.0.11",

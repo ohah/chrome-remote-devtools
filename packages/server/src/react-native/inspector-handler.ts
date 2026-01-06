@@ -192,6 +192,15 @@ export function handleReactNativeInspectorWebSocket(
                   inspectorId,
                   `🔍 DevTools WebSocket state: ${devtoolWs.ws.readyState} (OPEN=${1}), url: ${devtoolWs.ws.url || 'N/A'}`
                 );
+              } else if (parsedMsg.method === 'Redux.message') {
+                // Log Redux.message specifically / Redux.message를 특별히 로깅
+                log(
+                  'rn-inspector',
+                  inspectorId,
+                  `✅ Sending Redux.message to devtools ${devtool.id}`,
+                  parsedMsg
+                );
+                log('rn-inspector', inspectorId, `📤 Redux.message JSON: ${messageToSend}`);
               } else if (parsedMsg.id) {
                 // This is a response message (has id field) / 이것은 응답 메시지 (id 필드가 있음)
                 log(
@@ -200,7 +209,12 @@ export function handleReactNativeInspectorWebSocket(
                   `📥 Received response from native (id: ${parsedMsg.id}), forwarding to devtools ${devtool.id}`
                 );
               } else {
-                log('rn-inspector', inspectorId, `forwarded message to devtools ${devtool.id}`);
+                log(
+                  'rn-inspector',
+                  inspectorId,
+                  `forwarded message to devtools ${devtool.id}`,
+                  parsedMsg
+                );
               }
             } catch {
               log('rn-inspector', inspectorId, `forwarded message to devtools ${devtool.id}`);
