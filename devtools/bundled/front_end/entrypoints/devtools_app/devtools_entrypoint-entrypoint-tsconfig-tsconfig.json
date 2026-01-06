@@ -123,6 +123,9 @@
       "path": "../../panels/session_replay/meta-tsconfig.json"
     },
     {
+      "path": "../../panels/redux/meta-tsconfig.json"
+    },
+    {
       "path": "../main/bundle-tsconfig.json"
     },
     {
