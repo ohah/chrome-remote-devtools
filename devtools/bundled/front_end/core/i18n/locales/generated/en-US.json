@@ -12092,6 +12092,12 @@
   "panels/recorder/RecorderController.ts | typeAllowImporting": {
     "message": "Type ''{PH1}''"
   },
+  "panels/redux/redux-meta.ts | redux": {
+    "message": "Redux"
+  },
+  "panels/redux/redux-meta.ts | showRedux": {
+    "message": "Show Redux"
+  },
   "panels/screencast/ScreencastApp.ts | toggleScreencast": {
     "message": "Toggle screencast"
   },
