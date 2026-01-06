@@ -169,9 +169,9 @@ export { sendCDPMessage } from './cdp-message';
 export { setServerInfo, getServerInfo } from './server-info';
 export {
   getGlobalObj,
-  checkExtensionBeforeStore,
   getExtensionStatus,
   getConnectCallInfo,
+  getReduxDevToolsExtensionPolyfillPath,
 } from './utils';
 export { ChromeRemoteDevToolsInspectorProvider } from './Provider';
 export type { ChromeRemoteDevToolsInspectorProviderProps } from './Provider';
