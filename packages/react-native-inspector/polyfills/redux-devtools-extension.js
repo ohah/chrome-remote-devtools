@@ -54,12 +54,63 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
         implementationStore.trackConnectCall(name, instanceId, config);
       }
 
-      // Return ConnectResponse / ConnectResponse 반환
-      return {
+      // Store last state for START message handling / START 메시지 처리를 위해 마지막 상태 저장
+      var lastState = null;
+      var lastLiftedData = null;
+
+      // Helper function to send state / 상태 전송 헬퍼 함수
+      var sendState = function (state, liftedData) {
+        if (implementationStore.sendCDPMessage && implementationStore.getServerInfo) {
+          var serverInfo = implementationStore.getServerInfo();
+          if (serverInfo) {
+            var liftedState = liftedData || {
+              actionsById: {},
+              computedStates: [{ state: state }],
+              currentStateIndex: 0,
+              nextActionId: 1,
+              skippedActionIds: [],
+              stagedActionIds: [0],
+            };
+
+            implementationStore
+              .sendCDPMessage(serverInfo.serverHost, serverInfo.serverPort, {
+                method: 'Redux.message',
+                params: {
+                  type: 'STATE',
+                  payload: liftedState,
+                  source: '@devtools-page',
+                  instanceId: instanceId,
+                  libConfig: {
+                    name: name || 'Redux Store',
+                    type: 'redux',
+                  },
+                },
+              })
+              .catch(function () {
+                // Failed to send state event / state 이벤트 전송 실패
+              });
+          }
+        }
+      };
+
+      // Create connect response / connect 응답 생성
+      var connectResponse = {
         init: function (state, liftedData) {
+          console.log('[ReduxDevTools] init() called', {
+            instanceId: instanceId,
+            name: name,
+            hasImplementation: !!(
+              implementationStore.sendCDPMessage && implementationStore.getServerInfo
+            ),
+          });
+
+          // Store last state / 마지막 상태 저장
+          lastState = state;
+          lastLiftedData = liftedData;
           // Use implementation if available / 구현이 있으면 사용
           if (implementationStore.sendCDPMessage && implementationStore.getServerInfo) {
             var serverInfo = implementationStore.getServerInfo();
+            console.log('[ReduxDevTools] init() - serverInfo:', serverInfo);
             if (serverInfo) {
               // Update connect call info / connect 호출 정보 업데이트
               if (implementationStore.updateConnectCallInfo) {
@@ -69,46 +120,97 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
                 });
               }
 
-              // Send initial state / 초기 상태 전송
+              // Send INIT_INSTANCE message (Redux DevTools Extension spec) / INIT_INSTANCE 메시지 전송 (Redux DevTools Extension 스펙)
+              var initMessage = {
+                method: 'Redux.message',
+                params: {
+                  type: 'INIT_INSTANCE',
+                  payload: undefined,
+                  source: '@devtools-page',
+                  instanceId: instanceId,
+                },
+              };
+
+              console.log(
+                '[ReduxDevTools] init() - Sending INIT_INSTANCE:',
+                JSON.stringify(initMessage, null, 2)
+              );
+
               implementationStore
-                .sendCDPMessage(serverInfo.serverHost, serverInfo.serverPort, {
-                  method: 'Redux.init',
-                  params: {
-                    state: state,
-                    liftedData: liftedData,
-                    instanceId: instanceId,
-                    name: name,
-                    timestamp: Date.now(),
-                  },
+                .sendCDPMessage(serverInfo.serverHost, serverInfo.serverPort, initMessage)
+                .then(function () {
+                  console.log('[ReduxDevTools] init() INIT_INSTANCE sent successfully');
                 })
-                .catch(function () {
-                  // Failed to send init event / init 이벤트 전송 실패
+                .catch(function (error) {
+                  console.warn('[ReduxDevTools] Failed to send init event:', error);
                 });
+
+              // Send initial state / 초기 상태 전송
+              sendState(state, liftedData);
+            } else {
+              console.warn('[ReduxDevTools] init() - No server info available');
             }
+          } else {
+            console.warn('[ReduxDevTools] init() - No implementation available');
           }
         },
 
         send: function (action, state) {
+          console.log('[ReduxDevTools] send() called', {
+            actionType: action.type || 'unknown',
+            hasImplementation: !!(
+              implementationStore.sendCDPMessage && implementationStore.getServerInfo
+            ),
+          });
+
+          // Store last state / 마지막 상태 저장
+          lastState = state;
+
           // Use implementation if available / 구현이 있으면 사용
           if (implementationStore.sendCDPMessage && implementationStore.getServerInfo) {
             var serverInfo = implementationStore.getServerInfo();
+            console.log('[ReduxDevTools] send() - serverInfo:', serverInfo);
             if (serverInfo) {
-              // Send action and state / 액션과 상태 전송
-              implementationStore
-                .sendCDPMessage(serverInfo.serverHost, serverInfo.serverPort, {
-                  method: 'Redux.actionDispatched',
-                  params: {
+              // Send ACTION message (Redux DevTools Extension spec) / ACTION 메시지 전송 (Redux DevTools Extension 스펙)
+              var timestamp = Date.now();
+              var actionId = timestamp % 1000000; // Generate action ID from timestamp / 타임스탬프에서 액션 ID 생성
+
+              var message = {
+                method: 'Redux.message',
+                params: {
+                  type: 'ACTION',
+                  action: JSON.stringify({
                     action: action,
-                    state: state,
-                    instanceId: instanceId,
-                    name: name,
-                    timestamp: Date.now(),
-                  },
+                    timestamp: timestamp,
+                  }),
+                  payload: JSON.stringify(state),
+                  source: '@devtools-page',
+                  instanceId: instanceId,
+                  maxAge: 50,
+                  nextActionId: actionId,
+                },
+              };
+
+              console.log(
+                '[ReduxDevTools] send() - Sending CDP message:',
+                JSON.stringify(message, null, 2)
+              );
+
+              implementationStore
+                .sendCDPMessage(serverInfo.serverHost, serverInfo.serverPort, message)
+                .then(function () {
+                  console.log('[ReduxDevTools] send() CDP message sent successfully', {
+                    actionType: action.type || 'unknown',
+                  });
                 })
-                .catch(function () {
-                  // Failed to send Redux event / Redux 이벤트 전송 실패
+                .catch(function (error) {
+                  console.warn('[ReduxDevTools] Failed to send Redux event:', error);
                 });
+            } else {
+              console.warn('[ReduxDevTools] send() - No server info available');
             }
+          } else {
+            console.warn('[ReduxDevTools] send() - No implementation available');
           }
         },
 
@@ -129,15 +231,16 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
           if (implementationStore.sendCDPMessage && implementationStore.getServerInfo) {
             var serverInfo = implementationStore.getServerInfo();
             if (serverInfo) {
-              // Send error / 에러 전송
+              // Send ERROR message (Redux DevTools Extension spec) / ERROR 메시지 전송 (Redux DevTools Extension 스펙)
               implementationStore
                 .sendCDPMessage(serverInfo.serverHost, serverInfo.serverPort, {
-                  method: 'Redux.error',
+                  method: 'Redux.message',
                   params: {
-                    error: payload,
+                    type: 'ERROR',
+                    payload: payload,
+                    source: '@devtools-page',
                     instanceId: instanceId,
-                    name: name,
-                    timestamp: Date.now(),
+                    message: payload,
                   },
                 })
                 .catch(function () {
@@ -147,6 +250,15 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
           }
         },
       };
+
+      // Expose _requestState method for DevTools to call / DevTools가 호출할 수 있도록 _requestState 메서드 노출
+      connectResponse._requestState = function () {
+        if (lastState !== null) {
+          sendState(lastState, lastLiftedData);
+        }
+      };
+
+      return connectResponse;
     };
   }
 
