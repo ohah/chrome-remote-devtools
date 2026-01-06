@@ -20,10 +20,10 @@ export function devtools<
   U = T,
 >(
   initializer: StateCreator<T, [...Mps, ['zustand/devtools', never]], Mcs, U>,
-  devtoolsOptions?: Omit<DevtoolsOptions, 'enabled'>
+  devtoolsOptions?: DevtoolsOptions
 ) {
   return zustandDevtools(initializer, {
     ...devtoolsOptions,
-    enabled: true,
+    enabled: devtoolsOptions?.enabled ?? true,
   });
 }
