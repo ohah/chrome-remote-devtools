@@ -32,6 +32,7 @@ export declare class ReduxExtensionBridge {
     attachToTarget(target: SDK.Target.Target, connection: ProtocolClient.CDPConnection.CDPConnection): void;
     /**
      * Convert CDP message to Extension message format / CDP 메시지를 Extension 메시지 형식으로 변환
+     * Matches Redux DevTools Extension message format exactly / Redux DevTools Extension 메시지 형식과 정확히 일치
      */
     private convertCDPToExtensionMessage;
     /**

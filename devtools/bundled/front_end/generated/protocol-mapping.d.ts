@@ -611,20 +611,9 @@ export namespace ProtocolMapping {
     'Preload.preloadingAttemptSourcesUpdated': [Protocol.Preload.PreloadingAttemptSourcesUpdatedEvent];
     /**
      * Issued when a Redux message is received from the application.
+     * Matches Redux DevTools Extension message format exactly / Redux DevTools Extension 메시지 형식과 정확히 일치
      */
     'Redux.message': [Protocol.Redux.MessageEvent];
-    /**
-     * Issued when a Redux store is initialized.
-     */
-    'Redux.init': [Protocol.Redux.InitEvent];
-    /**
-     * Issued when a Redux action is dispatched.
-     */
-    'Redux.actionDispatched': [Protocol.Redux.ActionDispatchedEvent];
-    /**
-     * Issued when a Redux error occurs.
-     */
-    'Redux.error': [Protocol.Redux.ErrorEvent];
     /**
      * There is a certificate error. If overriding certificate errors is enabled, then it should be
      * handled with the `handleCertificateError` command. Note: this event does not fire if the
@@ -4348,34 +4337,11 @@ export namespace ProtocolMapping {
     };
     /**
      * Sends a Redux message from the application to DevTools or vice versa.
-     * This is a unified method that handles all Redux message types.
+     * This is the unified method that handles all Redux message types.
+     * Matches Redux DevTools Extension message format exactly / Redux DevTools Extension 메시지 형식과 정확히 일치
      */
     'Redux.message': {
       paramsType: [Protocol.Redux.MessageRequest];
-      returnType: void;
-    };
-    /**
-     * Initializes a Redux store instance.
-     * This is a convenience method that sends an INIT message.
-     */
-    'Redux.init': {
-      paramsType: [Protocol.Redux.InitRequest];
-      returnType: void;
-    };
-    /**
-     * Sends an action dispatch event.
-     * This is a convenience method that sends an ACTION message.
-     */
-    'Redux.actionDispatched': {
-      paramsType: [Protocol.Redux.ActionDispatchedRequest];
-      returnType: void;
-    };
-    /**
-     * Sends an error event.
-     * This is a convenience method that sends an ERROR message.
-     */
-    'Redux.error': {
-      paramsType: [Protocol.Redux.ErrorRequest];
       returnType: void;
     };
     /**
