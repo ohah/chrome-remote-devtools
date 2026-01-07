@@ -610,6 +610,22 @@ export namespace ProtocolMapping {
      */
     'Preload.preloadingAttemptSourcesUpdated': [Protocol.Preload.PreloadingAttemptSourcesUpdatedEvent];
     /**
+     * Issued when a Redux message is received from the application.
+     */
+    'Redux.message': [Protocol.Redux.MessageEvent];
+    /**
+     * Issued when a Redux store is initialized.
+     */
+    'Redux.init': [Protocol.Redux.InitEvent];
+    /**
+     * Issued when a Redux action is dispatched.
+     */
+    'Redux.actionDispatched': [Protocol.Redux.ActionDispatchedEvent];
+    /**
+     * Issued when a Redux error occurs.
+     */
+    'Redux.error': [Protocol.Redux.ErrorEvent];
+    /**
      * There is a certificate error. If overriding certificate errors is enabled, then it should be
      * handled with the `handleCertificateError` command. Note: this event does not fire if the
      * certificate error has been allowed internally. Only one client per target should override
@@ -624,6 +640,10 @@ export namespace ProtocolMapping {
      * The security state of the page changed. No longer being sent.
      */
     'Security.securityStateChanged': [Protocol.Security.SecurityStateChangedEvent];
+    /**
+     * Issued when rrweb events are recorded.
+     */
+    'SessionReplay.eventRecorded': [Protocol.SessionReplay.EventRecordedEvent];
     'ServiceWorker.workerErrorReported': [Protocol.ServiceWorker.WorkerErrorReportedEvent];
     'ServiceWorker.workerRegistrationUpdated': [Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent];
     'ServiceWorker.workerVersionUpdated': [Protocol.ServiceWorker.WorkerVersionUpdatedEvent];
@@ -676,10 +696,6 @@ export namespace ProtocolMapping {
     'Storage.attributionReportingTriggerRegistered': [Protocol.Storage.AttributionReportingTriggerRegisteredEvent];
     'Storage.attributionReportingReportSent': [Protocol.Storage.AttributionReportingReportSentEvent];
     'Storage.attributionReportingVerboseDebugReportSent': [Protocol.Storage.AttributionReportingVerboseDebugReportSentEvent];
-    /**
-     * Fired when rrweb events are recorded.
-     */
-    'SessionReplay.eventRecorded': [Protocol.SessionReplay.EventRecordedEvent];
     /**
      * Issued when attached to target because of auto-attach or `attachToTarget` command.
      */
@@ -4331,6 +4347,38 @@ export namespace ProtocolMapping {
       returnType: void;
     };
     /**
+     * Sends a Redux message from the application to DevTools or vice versa.
+     * This is a unified method that handles all Redux message types.
+     */
+    'Redux.message': {
+      paramsType: [Protocol.Redux.MessageRequest];
+      returnType: void;
+    };
+    /**
+     * Initializes a Redux store instance.
+     * This is a convenience method that sends an INIT message.
+     */
+    'Redux.init': {
+      paramsType: [Protocol.Redux.InitRequest];
+      returnType: void;
+    };
+    /**
+     * Sends an action dispatch event.
+     * This is a convenience method that sends an ACTION message.
+     */
+    'Redux.actionDispatched': {
+      paramsType: [Protocol.Redux.ActionDispatchedRequest];
+      returnType: void;
+    };
+    /**
+     * Sends an error event.
+     * This is a convenience method that sends an ERROR message.
+     */
+    'Redux.error': {
+      paramsType: [Protocol.Redux.ErrorRequest];
+      returnType: void;
+    };
+    /**
      * Disables tracking security state changes.
      */
     'Security.disable': {
@@ -4364,6 +4412,27 @@ export namespace ProtocolMapping {
      */
     'Security.setOverrideCertificateErrors': {
       paramsType: [Protocol.Security.SetOverrideCertificateErrorsRequest];
+      returnType: void;
+    };
+    /**
+     * Enables the SessionReplay domain.
+     */
+    'SessionReplay.enable': {
+      paramsType: [];
+      returnType: void;
+    };
+    /**
+     * Disables the SessionReplay domain.
+     */
+    'SessionReplay.disable': {
+      paramsType: [];
+      returnType: void;
+    };
+    /**
+     * Sends rrweb events to the SessionReplay domain.
+     */
+    'SessionReplay.sendEvent': {
+      paramsType: [Protocol.SessionReplay.SendEventRequest];
       returnType: void;
     };
     'ServiceWorker.deliverPushMessage': {
