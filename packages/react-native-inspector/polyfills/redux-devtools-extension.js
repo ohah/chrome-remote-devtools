@@ -120,26 +120,47 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
                 });
               }
 
-              // Send INIT_INSTANCE message (Redux DevTools Extension spec) / INIT_INSTANCE 메시지 전송 (Redux DevTools Extension 스펙)
-              var initMessage = {
-                method: 'Redux.message',
+              // Send INIT_INSTANCE message first (required by Redux DevTools Extension) / 먼저 INIT_INSTANCE 메시지 전송 (Redux DevTools Extension에서 필요)
+              var initInstanceMessage = {
+                method: 'Redux.initInstance',
                 params: {
-                  type: 'INIT_INSTANCE',
-                  payload: undefined,
-                  source: '@devtools-page',
                   instanceId: instanceId,
+                  source: '@devtools-page',
+                },
+              };
+
+              implementationStore
+                .sendCDPMessage(serverInfo.serverHost, serverInfo.serverPort, initInstanceMessage)
+                .then(function () {
+                  console.log('[ReduxDevTools] init() INIT_INSTANCE sent successfully');
+                })
+                .catch(function (error) {
+                  console.warn('[ReduxDevTools] Failed to send initInstance event:', error);
+                });
+
+              // Send INIT message / INIT 메시지 전송
+              // Use Redux.init convenience method / Redux.init convenience 메서드 사용
+              var initMessage = {
+                method: 'Redux.init',
+                params: {
+                  instanceId: instanceId,
+                  source: '@devtools-page',
+                  name: name,
+                  payload: JSON.stringify(state),
+                  maxAge: 50,
+                  timestamp: Date.now(),
                 },
               };
 
               console.log(
-                '[ReduxDevTools] init() - Sending INIT_INSTANCE:',
+                '[ReduxDevTools] init() - Sending INIT:',
                 JSON.stringify(initMessage, null, 2)
               );
 
               implementationStore
                 .sendCDPMessage(serverInfo.serverHost, serverInfo.serverPort, initMessage)
                 .then(function () {
-                  console.log('[ReduxDevTools] init() INIT_INSTANCE sent successfully');
+                  console.log('[ReduxDevTools] init() INIT sent successfully');
                 })
                 .catch(function (error) {
                   console.warn('[ReduxDevTools] Failed to send init event:', error);
@@ -171,23 +192,17 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
             var serverInfo = implementationStore.getServerInfo();
             console.log('[ReduxDevTools] send() - serverInfo:', serverInfo);
             if (serverInfo) {
-              // Send ACTION message (Redux DevTools Extension spec) / ACTION 메시지 전송 (Redux DevTools Extension 스펙)
-              var timestamp = Date.now();
-              var actionId = timestamp % 1000000; // Generate action ID from timestamp / 타임스탬프에서 액션 ID 생성
-
+              // Send action and state / 액션과 상태 전송
+              // Use Redux.actionDispatched convenience method / Redux.actionDispatched convenience 메서드 사용
               var message = {
-                method: 'Redux.message',
+                method: 'Redux.actionDispatched',
                 params: {
-                  type: 'ACTION',
-                  action: JSON.stringify({
-                    action: action,
-                    timestamp: timestamp,
-                  }),
-                  payload: JSON.stringify(state),
-                  source: '@devtools-page',
                   instanceId: instanceId,
+                  source: '@devtools-page',
+                  action: JSON.stringify(action),
+                  payload: JSON.stringify(state),
                   maxAge: 50,
-                  nextActionId: actionId,
+                  timestamp: Date.now(),
                 },
               };
 
@@ -231,16 +246,17 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
           if (implementationStore.sendCDPMessage && implementationStore.getServerInfo) {
             var serverInfo = implementationStore.getServerInfo();
             if (serverInfo) {
-              // Send ERROR message (Redux DevTools Extension spec) / ERROR 메시지 전송 (Redux DevTools Extension 스펙)
+              // Send error / 에러 전송
+              // Use Redux.error convenience method / Redux.error convenience 메서드 사용
               implementationStore
                 .sendCDPMessage(serverInfo.serverHost, serverInfo.serverPort, {
-                  method: 'Redux.message',
+                  method: 'Redux.error',
                   params: {
-                    type: 'ERROR',
-                    payload: payload,
-                    source: '@devtools-page',
                     instanceId: instanceId,
-                    message: payload,
+                    source: '@devtools-page',
+                    error: typeof payload === 'string' ? payload : JSON.stringify(payload),
+                    name: name,
+                    timestamp: Date.now(),
                   },
                 })
                 .catch(function () {
