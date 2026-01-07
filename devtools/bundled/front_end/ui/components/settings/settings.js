@@ -9,16 +9,16 @@ var SettingCheckbox_exports = {};
 __export(SettingCheckbox_exports, {
   SettingCheckbox: () => SettingCheckbox
 });
-import "./..\\tooltips\\tooltips.js";
+import "./../tooltips/tooltips.js";
 
 // gen/front_end/ui/components/settings/SettingDeprecationWarning.js
 var SettingDeprecationWarning_exports = {};
 __export(SettingDeprecationWarning_exports, {
   SettingDeprecationWarning: () => SettingDeprecationWarning
 });
-import "./..\\..\\kit\\kit.js";
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as Lit from "./..\\..\\lit\\lit.js";
+import "./../../kit/kit.js";
+import * as Common from "./../../../core/common/common.js";
+import * as Lit from "./../../lit/lit.js";
 
 // gen/front_end/ui/components/settings/settingDeprecationWarning.css.js
 var settingDeprecationWarning_css_default = `/*
@@ -62,13 +62,13 @@ var SettingDeprecationWarning = class extends HTMLElement {
 customElements.define("devtools-setting-deprecation-warning", SettingDeprecationWarning);
 
 // gen/front_end/ui/components/settings/SettingCheckbox.js
-import "./..\\..\\kit\\kit.js";
-import * as Host from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Lit2 from "./..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\visual_logging\\visual_logging.js";
-import * as Buttons from "./..\\buttons\\buttons.js";
-import * as Input from "./..\\input\\input.js";
+import "./../../kit/kit.js";
+import * as Host from "./../../../core/host/host.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as Lit2 from "./../../lit/lit.js";
+import * as VisualLogging from "./../../visual_logging/visual_logging.js";
+import * as Buttons from "./../buttons/buttons.js";
+import * as Input from "./../input/input.js";
 
 // gen/front_end/ui/components/settings/settingCheckbox.css.js
 var settingCheckbox_css_default = `/*

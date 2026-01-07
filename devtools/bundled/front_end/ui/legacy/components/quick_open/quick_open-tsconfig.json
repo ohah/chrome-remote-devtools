@@ -24,7 +24,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\ui\\legacy\\components\\quick_open",
+    "rootDir": "../../../../../../../../front_end/ui/legacy/components/quick_open",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
@@ -35,13 +35,13 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\ui\\legacy\\components\\quick_open\\CommandMenu.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\ui\\legacy\\components\\quick_open\\FilteredListWidget.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\ui\\legacy\\components\\quick_open\\HelpQuickOpen.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\ui\\legacy\\components\\quick_open\\QuickOpen.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../../../front_end/ui/legacy/components/quick_open/CommandMenu.ts",
+    "../../../../../../../../front_end/ui/legacy/components/quick_open/FilteredListWidget.ts",
+    "../../../../../../../../front_end/ui/legacy/components/quick_open/HelpQuickOpen.ts",
+    "../../../../../../../../front_end/ui/legacy/components/quick_open/QuickOpen.ts",
+    "../../../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

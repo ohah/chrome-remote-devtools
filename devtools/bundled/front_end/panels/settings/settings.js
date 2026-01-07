@@ -14,22 +14,22 @@ __export(SettingsScreen_exports, {
   Revealer: () => Revealer,
   SettingsScreen: () => SettingsScreen
 });
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as GreenDev from "./..\\..\\models\\greendev\\greendev.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UIHelpers from "./..\\..\\ui\\helpers\\helpers.js";
-import { createIcon } from "./..\\..\\ui\\kit\\kit.js";
-import * as SettingsUI from "./..\\..\\ui\\legacy\\components\\settings_ui\\settings_ui.js";
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import { html, nothing, render } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import { PanelUtils } from "./..\\utils\\utils.js";
-import * as PanelComponents from "./components\\components.js";
+import "./../../ui/kit/kit.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as GreenDev from "./../../models/greendev/greendev.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as UIHelpers from "./../../ui/helpers/helpers.js";
+import { createIcon } from "./../../ui/kit/kit.js";
+import * as SettingsUI from "./../../ui/legacy/components/settings_ui/settings_ui.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import { html, nothing, render } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import { PanelUtils } from "./../utils/utils.js";
+import * as PanelComponents from "./components/components.js";
 
 // gen/front_end/panels/settings/settingsScreen.css.js
 var settingsScreen_css_default = `/*
@@ -840,18 +840,18 @@ __export(AISettingsTab_exports, {
   AISettingsTab: () => AISettingsTab,
   AI_SETTINGS_TAB_DEFAULT_VIEW: () => AI_SETTINGS_TAB_DEFAULT_VIEW
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as AiAssistanceModel from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Input from "./..\\..\\ui\\components\\input\\input.js";
-import * as Switch from "./..\\..\\ui\\components\\switch\\switch.js";
-import * as uiI18n from "./..\\..\\ui\\i18n\\i18n.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as AiAssistanceModel from "./../../models/ai_assistance/ai_assistance.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import * as Input from "./../../ui/components/input/input.js";
+import * as Switch from "./../../ui/components/switch/switch.js";
+import * as uiI18n from "./../../ui/i18n/i18n.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/settings/aiSettingsTab.css.js
 var aiSettingsTab_css_default = `/*
@@ -1594,11 +1594,11 @@ __export(EditFileSystemView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW,
   EditFileSystemView: () => EditFileSystemView
 });
-import "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives, html as html3, render as render3 } from "./..\\..\\ui\\lit\\lit.js";
+import "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import { Directives, html as html3, render as render3 } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/settings/editFileSystemView.css.js
 var editFileSystemView_css_default = `/*
@@ -1805,14 +1805,14 @@ var FrameworkIgnoreListSettingsTab_exports = {};
 __export(FrameworkIgnoreListSettingsTab_exports, {
   FrameworkIgnoreListSettingsTab: () => FrameworkIgnoreListSettingsTab
 });
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Buttons3 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UIHelpers2 from "./..\\..\\ui\\helpers\\helpers.js";
-import * as SettingsUI3 from "./..\\..\\ui\\legacy\\components\\settings_ui\\settings_ui.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/kit/kit.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Buttons3 from "./../../ui/components/buttons/buttons.js";
+import * as UIHelpers2 from "./../../ui/helpers/helpers.js";
+import * as SettingsUI3 from "./../../ui/legacy/components/settings_ui/settings_ui.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/settings/frameworkIgnoreListSettingsTab.css.js
 var frameworkIgnoreListSettingsTab_css_default = `/*
@@ -2163,16 +2163,16 @@ __export(KeybindsSettingsTab_exports, {
   KeybindsSettingsTab: () => KeybindsSettingsTab,
   ShortcutListItem: () => ShortcutListItem
 });
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as Buttons4 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import { createIcon as createIcon2 } from "./..\\..\\ui\\kit\\kit.js";
-import * as SettingsUI5 from "./..\\..\\ui\\legacy\\components\\settings_ui\\settings_ui.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/kit/kit.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as Buttons4 from "./../../ui/components/buttons/buttons.js";
+import { createIcon as createIcon2 } from "./../../ui/kit/kit.js";
+import * as SettingsUI5 from "./../../ui/legacy/components/settings_ui/settings_ui.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/settings/keybindsSettingsTab.css.js
 var keybindsSettingsTab_css_default = `/*
@@ -2912,16 +2912,16 @@ __export(WorkspaceSettingsTab_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW2,
   WorkspaceSettingsTab: () => WorkspaceSettingsTab
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import "./..\\..\\ui\\components\\buttons\\buttons.js";
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Persistence from "./..\\..\\models\\persistence\\persistence.js";
-import * as Buttons5 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html4, render as render4 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import "./../../ui/components/buttons/buttons.js";
+import "./../../ui/kit/kit.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as Persistence from "./../../models/persistence/persistence.js";
+import * as Buttons5 from "./../../ui/components/buttons/buttons.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
+import { html as html4, render as render4 } from "./../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/settings/workspaceSettingsTab.css.js
 var workspaceSettingsTab_css_default = `/*

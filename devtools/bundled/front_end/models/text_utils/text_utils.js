@@ -9,7 +9,7 @@ var CodeMirrorUtils_exports = {};
 __export(CodeMirrorUtils_exports, {
   createCssTokenizer: () => createCssTokenizer
 });
-import * as CodeMirror from "./..\\..\\third_party\\codemirror.next\\codemirror.next.js";
+import * as CodeMirror from "./../../third_party/codemirror.next/codemirror.next.js";
 function createCssTokenizer() {
   async function tokenize(line, callback) {
     const streamParser = await CodeMirror.cssStreamParser();
@@ -36,7 +36,7 @@ __export(ContentData_exports, {
   ContentData: () => ContentData,
   EMPTY_TEXT_CONTENT_DATA: () => EMPTY_TEXT_CONTENT_DATA
 });
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform4 from "./../../core/platform/platform.js";
 
 // gen/front_end/models/text_utils/ContentProvider.js
 var ContentProvider_exports = {};
@@ -77,14 +77,14 @@ var Text_exports = {};
 __export(Text_exports, {
   Text: () => Text
 });
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform3 from "./../../core/platform/platform.js";
 
 // gen/front_end/models/text_utils/TextCursor.js
 var TextCursor_exports = {};
 __export(TextCursor_exports, {
   TextCursor: () => TextCursor
 });
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
+import * as Platform from "./../../core/platform/platform.js";
 var TextCursor = class {
   #lineEndings;
   #offset = 0;
@@ -122,7 +122,7 @@ __export(TextRange_exports, {
   SourceRange: () => SourceRange,
   TextRange: () => TextRange
 });
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform2 from "./../../core/platform/platform.js";
 var MAX_SAFE_INT32 = 2 ** 31 - 1;
 var TextRange = class _TextRange {
   startLine;
@@ -581,7 +581,7 @@ __export(TextUtils_exports, {
   performSearchInContentData: () => performSearchInContentData,
   performSearchInSearchMatches: () => performSearchInSearchMatches
 });
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform5 from "./../../core/platform/platform.js";
 var KEY_VALUE_FILTER_REGEXP = /(?:^|\s)(\-)?([\w\-]+):([^\s]+)/;
 var REGEXP_FILTER_REGEXP = /(?:^|\s)(\-)?\/([^\/\\]+(\\.[^\/]*)*)\//;
 var TEXT_FILTER_REGEXP = /(?:^|\s)(\-)?([^\s]+)/;
@@ -905,8 +905,8 @@ __export(StreamingContentData_exports, {
   asContentDataOrError: () => asContentDataOrError,
   isError: () => isError
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Platform6 from "./..\\..\\core\\platform\\platform.js";
+import * as Common from "./../../core/common/common.js";
+import * as Platform6 from "./../../core/platform/platform.js";
 var StreamingContentData = class _StreamingContentData extends Common.ObjectWrapper.ObjectWrapper {
   mimeType;
   #charset;
@@ -984,7 +984,7 @@ var WasmDisassembly_exports = {};
 __export(WasmDisassembly_exports, {
   WasmDisassembly: () => WasmDisassembly
 });
-import * as Platform7 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform7 from "./../../core/platform/platform.js";
 var WasmDisassembly = class extends ContentData {
   lines;
   #offsets;

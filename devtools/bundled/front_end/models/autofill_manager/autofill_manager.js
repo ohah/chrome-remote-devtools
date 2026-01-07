@@ -9,9 +9,9 @@ var AutofillManager_exports = {};
 __export(AutofillManager_exports, {
   AutofillManager: () => AutofillManager
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common from "./../../core/common/common.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 var autofillManagerInstance;
 var AutofillManager = class _AutofillManager extends Common.ObjectWrapper.ObjectWrapper {
   #address = "";

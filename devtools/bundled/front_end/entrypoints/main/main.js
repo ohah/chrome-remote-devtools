@@ -9,7 +9,7 @@ var ExecutionContextSelector_exports = {};
 __export(ExecutionContextSelector_exports, {
   ExecutionContextSelector: () => ExecutionContextSelector
 });
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 var ExecutionContextSelector = class {
   #targetManager;
   #context;
@@ -179,12 +179,12 @@ __export(GlobalAiButton_exports, {
   GlobalAiButtonState: () => GlobalAiButtonState,
   GlobalAiButtonToolbarProvider: () => GlobalAiButtonToolbarProvider
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/entrypoints/main/globalAiButton.css.js
 var globalAiButton_css_default = `/*
@@ -430,35 +430,35 @@ __export(MainImpl_exports, {
   handleExternalRequestGenerator: () => handleExternalRequestGenerator,
   sendOverProtocol: () => sendOverProtocol
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as ProtocolClient from "./..\\..\\core\\protocol_client\\protocol_client.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Foundation from "./..\\..\\foundation\\foundation.js";
-import * as AiAssistanceModel from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as AutofillManager from "./..\\..\\models\\autofill_manager\\autofill_manager.js";
-import * as Badges from "./..\\..\\models\\badges\\badges.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as Breakpoints from "./..\\..\\models\\breakpoints\\breakpoints.js";
-import * as CrUXManager from "./..\\..\\models\\crux-manager\\crux-manager.js";
-import * as IssuesManager from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as LiveMetrics from "./..\\..\\models\\live-metrics\\live-metrics.js";
-import * as Logs from "./..\\..\\models\\logs\\logs.js";
-import * as Persistence from "./..\\..\\models\\persistence\\persistence.js";
-import * as ProjectSettings from "./..\\..\\models\\project_settings\\project_settings.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as PanelCommon from "./..\\..\\panels\\common\\common.js";
-import * as Snippets from "./..\\..\\panels\\snippets\\snippets.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Snackbar from "./..\\..\\ui\\components\\snackbars\\snackbars.js";
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import { html as html2, render as render2 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as ProtocolClient from "./../../core/protocol_client/protocol_client.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as Foundation from "./../../foundation/foundation.js";
+import * as AiAssistanceModel from "./../../models/ai_assistance/ai_assistance.js";
+import * as AutofillManager from "./../../models/autofill_manager/autofill_manager.js";
+import * as Badges from "./../../models/badges/badges.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as Breakpoints from "./../../models/breakpoints/breakpoints.js";
+import * as CrUXManager from "./../../models/crux-manager/crux-manager.js";
+import * as IssuesManager from "./../../models/issues_manager/issues_manager.js";
+import * as LiveMetrics from "./../../models/live-metrics/live-metrics.js";
+import * as Logs from "./../../models/logs/logs.js";
+import * as Persistence from "./../../models/persistence/persistence.js";
+import * as ProjectSettings from "./../../models/project_settings/project_settings.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as PanelCommon from "./../../panels/common/common.js";
+import * as Snippets from "./../../panels/snippets/snippets.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as Snackbar from "./../../ui/components/snackbars/snackbars.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport from "./../../ui/legacy/theme_support/theme_support.js";
+import { html as html2, render as render2 } from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 var _a;
 var UIStrings2 = {
   /**
@@ -810,7 +810,7 @@ var MainImpl = class {
       });
       void Badges.UserBadges.instance().initialize();
       Badges.UserBadges.instance().addEventListener("BadgeTriggered", async (ev) => {
-        loadedPanelCommonModule ??= await import("./..\\..\\panels\\common\\common.js");
+        loadedPanelCommonModule ??= await import("./../../panels/common/common.js");
         const badgeNotification = new loadedPanelCommonModule.BadgeNotification();
         const { badge, reason } = ev.data;
         void badgeNotification.present(badge, reason);
@@ -904,7 +904,7 @@ var MainImpl = class {
       return await runnable.run();
     });
     if (Root2.Runtime.experiments.isEnabled("live-heap-profile")) {
-      const PerfUI = await import("./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js");
+      const PerfUI = await import("./../../ui/legacy/components/perf_ui/perf_ui.js");
       const setting = "memory-live-heap-profile";
       if (Common2.Settings.Settings.instance().moduleSetting(setting).get()) {
         promises.push(PerfUI.LiveHeapProfile.LiveHeapProfile.instance().run());
@@ -1294,15 +1294,15 @@ globalThis.handleExternalRequest = handleExternalRequest;
 async function handleExternalRequestGenerator(input) {
   switch (input.kind) {
     case "PERFORMANCE_RELOAD_GATHER_INSIGHTS": {
-      const TimelinePanel = await import("./..\\..\\panels\\timeline\\timeline.js");
+      const TimelinePanel = await import("./../../panels/timeline/timeline.js");
       return TimelinePanel.TimelinePanel.TimelinePanel.handleExternalRecordRequest();
     }
     case "PERFORMANCE_ANALYZE": {
-      const TimelinePanel = await import("./..\\..\\panels\\timeline\\timeline.js");
+      const TimelinePanel = await import("./../../panels/timeline/timeline.js");
       return await TimelinePanel.TimelinePanel.TimelinePanel.handleExternalAnalyzeRequest(input.args.prompt);
     }
     case "NETWORK_DEBUGGER": {
-      const AiAssistanceModel2 = await import("./..\\..\\models\\ai_assistance\\ai_assistance.js");
+      const AiAssistanceModel2 = await import("./../../models/ai_assistance/ai_assistance.js");
       const conversationHandler = AiAssistanceModel2.ConversationHandler.ConversationHandler.instance();
       return await conversationHandler.handleExternalRequest({
         conversationType: "drjones-network-request",
@@ -1311,7 +1311,7 @@ async function handleExternalRequestGenerator(input) {
       });
     }
     case "LIVE_STYLE_DEBUGGER": {
-      const AiAssistanceModel2 = await import("./..\\..\\models\\ai_assistance\\ai_assistance.js");
+      const AiAssistanceModel2 = await import("./../../models/ai_assistance/ai_assistance.js");
       const conversationHandler = AiAssistanceModel2.ConversationHandler.ConversationHandler.instance();
       return await conversationHandler.handleExternalRequest({
         conversationType: "freestyler",
@@ -1336,7 +1336,7 @@ __export(SimpleApp_exports, {
   SimpleApp: () => SimpleApp,
   SimpleAppProvider: () => SimpleAppProvider
 });
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
 var SimpleApp = class {
   presentUI(document2) {
     const rootView = new UI3.RootView.RootView();

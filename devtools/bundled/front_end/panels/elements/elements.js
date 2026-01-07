@@ -10,11 +10,11 @@ __export(InspectElementModeController_exports, {
   InspectElementModeController: () => InspectElementModeController,
   ToggleSearchActionDelegate: () => ToggleSearchActionDelegate
 });
-import * as Common15 from "./..\\..\\core\\common\\common.js";
-import * as Root8 from "./..\\..\\core\\root\\root.js";
-import * as SDK20 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI23 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging13 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common15 from "./../../core/common/common.js";
+import * as Root8 from "./../../core/root/root.js";
+import * as SDK20 from "./../../core/sdk/sdk.js";
+import * as UI23 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging13 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/ElementsPanel.js
 var ElementsPanel_exports = {};
@@ -26,28 +26,28 @@ __export(ElementsPanel_exports, {
   ElementsPanel: () => ElementsPanel,
   PseudoStateMarkerDecorator: () => PseudoStateMarkerDecorator
 });
-import * as Common14 from "./..\\..\\core\\common\\common.js";
-import * as Host5 from "./..\\..\\core\\host\\host.js";
-import * as i18n31 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform10 from "./..\\..\\core\\platform\\platform.js";
-import * as Root7 from "./..\\..\\core\\root\\root.js";
-import * as SDK19 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Annotations from "./..\\..\\models\\annotations\\annotations.js";
-import * as PanelCommon from "./..\\common\\common.js";
-import * as Buttons4 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as TreeOutline13 from "./..\\..\\ui\\components\\tree_outline\\tree_outline.js";
-import * as UI22 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging12 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common14 from "./../../core/common/common.js";
+import * as Host5 from "./../../core/host/host.js";
+import * as i18n31 from "./../../core/i18n/i18n.js";
+import * as Platform10 from "./../../core/platform/platform.js";
+import * as Root7 from "./../../core/root/root.js";
+import * as SDK19 from "./../../core/sdk/sdk.js";
+import * as Annotations from "./../../models/annotations/annotations.js";
+import * as PanelCommon from "./../common/common.js";
+import * as Buttons4 from "./../../ui/components/buttons/buttons.js";
+import * as TreeOutline13 from "./../../ui/components/tree_outline/tree_outline.js";
+import * as UI22 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging12 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/AccessibilityTreeView.js
 var AccessibilityTreeView_exports = {};
 __export(AccessibilityTreeView_exports, {
   AccessibilityTreeView: () => AccessibilityTreeView
 });
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TreeOutline from "./..\\..\\ui\\components\\tree_outline\\tree_outline.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as TreeOutline from "./../../ui/components/tree_outline/tree_outline.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/AccessibilityTreeUtils.js
 var AccessibilityTreeUtils_exports = {};
@@ -58,9 +58,9 @@ __export(AccessibilityTreeUtils_exports, {
   getRootNode: () => getRootNode,
   sdkNodeToAXTreeNodes: () => sdkNodeToAXTreeNodes
 });
-import "./components\\components.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
+import "./components/components.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Lit from "./../../ui/lit/lit.js";
 var { html } = Lit;
 function isLeafNode(node) {
   return node.numChildren() === 0 && node.role()?.value !== "Iframe";
@@ -322,13 +322,13 @@ __export(ColorSwatchPopoverIcon_exports, {
   FontEditorSectionManager: () => FontEditorSectionManager,
   ShadowSwatchPopoverHelper: () => ShadowSwatchPopoverHelper
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as ColorPicker from "./..\\..\\ui\\legacy\\components\\color_picker\\color_picker.js";
-import * as InlineEditor from "./..\\..\\ui\\legacy\\components\\inline_editor\\inline_editor.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as ColorPicker from "./../../ui/legacy/components/color_picker/color_picker.js";
+import * as InlineEditor from "./../../ui/legacy/components/inline_editor/inline_editor.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
 var UIStrings = {
   /**
    * @description Tooltip text for an icon that opens the cubic bezier editor, which is a tool that
@@ -837,7 +837,7 @@ var FontEditorSectionManager = class {
 };
 
 // gen/front_end/panels/elements/ElementsPanel.js
-import * as ElementsComponents7 from "./components\\components.js";
+import * as ElementsComponents7 from "./components/components.js";
 
 // gen/front_end/panels/elements/ComputedStyleModel.js
 var ComputedStyleModel_exports = {};
@@ -845,27 +845,27 @@ __export(ComputedStyleModel_exports, {
   ComputedStyle: () => ComputedStyle,
   ComputedStyleModel: () => ComputedStyleModel
 });
-import * as Common8 from "./..\\..\\core\\common\\common.js";
-import * as Root5 from "./..\\..\\core\\root\\root.js";
-import * as SDK11 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI14 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common8 from "./../../core/common/common.js";
+import * as Root5 from "./../../core/root/root.js";
+import * as SDK11 from "./../../core/sdk/sdk.js";
+import * as UI14 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/elements/ComputedStyleWidget.js
 var ComputedStyleWidget_exports = {};
 __export(ComputedStyleWidget_exports, {
   ComputedStyleWidget: () => ComputedStyleWidget
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as i18n17 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform6 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK10 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TreeOutline6 from "./..\\..\\ui\\components\\tree_outline\\tree_outline.js";
-import * as InlineEditor4 from "./..\\..\\ui\\legacy\\components\\inline_editor\\inline_editor.js";
-import * as Components4 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI13 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit5 from "./..\\..\\ui\\lit\\lit.js";
-import * as ElementsComponents4 from "./components\\components.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as i18n17 from "./../../core/i18n/i18n.js";
+import * as Platform6 from "./../../core/platform/platform.js";
+import * as SDK10 from "./../../core/sdk/sdk.js";
+import * as TreeOutline6 from "./../../ui/components/tree_outline/tree_outline.js";
+import * as InlineEditor4 from "./../../ui/legacy/components/inline_editor/inline_editor.js";
+import * as Components4 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI13 from "./../../ui/legacy/legacy.js";
+import * as Lit5 from "./../../ui/lit/lit.js";
+import * as ElementsComponents4 from "./components/components.js";
 
 // gen/front_end/panels/elements/computedStyleSidebarPane.css.js
 var computedStyleSidebarPane_css_default = `/*
@@ -890,8 +890,8 @@ var computedStyleSidebarPane_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./computedStyleSidebarPane.css")} */`;
 
 // gen/front_end/panels/elements/ImagePreviewPopover.js
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
 var ImagePreviewPopover = class {
   getLinkElement;
   getDOMNode;
@@ -951,9 +951,9 @@ __export(PlatformFontsWidget_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW,
   PlatformFontsWidget: () => PlatformFontsWidget
 });
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html2, render } from "./..\\..\\ui\\lit\\lit.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import { html as html2, render } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/elements/platformFontsWidget.css.js
 var platformFontsWidget_css_default = `/**
@@ -1085,7 +1085,7 @@ var PlatformFontsWidget = class extends UI4.Widget.VBox {
 };
 
 // gen/front_end/panels/elements/PropertyNameCategories.js
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
 var DefaultCategoryOrder = [
   "Layout",
   "Text",
@@ -1314,12 +1314,12 @@ __export(PropertyRenderer_exports, {
   URLRenderer: () => URLRenderer,
   rendererBase: () => rendererBase
 });
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK9 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Components3 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI12 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging6 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as i18n15 from "./../../core/i18n/i18n.js";
+import * as SDK9 from "./../../core/sdk/sdk.js";
+import * as Components3 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI12 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging6 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/StylesSidebarPane.js
 var StylesSidebarPane_exports = {};
@@ -1337,31 +1337,31 @@ __export(StylesSidebarPane_exports, {
   quoteFamilyName: () => quoteFamilyName,
   unescapeCssString: () => unescapeCssString
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
-import { assertNotNullOrUndefined } from "./..\\..\\core\\platform\\platform.js";
-import * as Root4 from "./..\\..\\core\\root\\root.js";
-import * as SDK8 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings4 from "./..\\..\\models\\bindings\\bindings.js";
-import * as TextUtils4 from "./..\\..\\models\\text_utils\\text_utils.js";
-import { createIcon as createIcon3, Icon as Icon2 } from "./..\\..\\ui\\kit\\kit.js";
-import * as InlineEditor3 from "./..\\..\\ui\\legacy\\components\\inline_editor\\inline_editor.js";
-import * as Components2 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI11 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging5 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelsCommon2 from "./..\\common\\common.js";
-import * as ElementsComponents3 from "./components\\components.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as Platform5 from "./../../core/platform/platform.js";
+import { assertNotNullOrUndefined } from "./../../core/platform/platform.js";
+import * as Root4 from "./../../core/root/root.js";
+import * as SDK8 from "./../../core/sdk/sdk.js";
+import * as Bindings4 from "./../../models/bindings/bindings.js";
+import * as TextUtils4 from "./../../models/text_utils/text_utils.js";
+import { createIcon as createIcon3, Icon as Icon2 } from "./../../ui/kit/kit.js";
+import * as InlineEditor3 from "./../../ui/legacy/components/inline_editor/inline_editor.js";
+import * as Components2 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI11 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging5 from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelsCommon2 from "./../common/common.js";
+import * as ElementsComponents3 from "./components/components.js";
 
 // gen/front_end/panels/elements/ElementsSidebarPane.js
 var ElementsSidebarPane_exports = {};
 __export(ElementsSidebarPane_exports, {
   ElementsSidebarPane: () => ElementsSidebarPane
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
 var ElementsSidebarPane = class extends UI5.Widget.VBox {
   computedStyleModelInternal;
   updateThrottler;
@@ -1414,12 +1414,12 @@ __export(LayersWidget_exports, {
   ButtonProvider: () => ButtonProvider,
   LayersWidget: () => LayersWidget
 });
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Lit2 from "./..\\..\\third_party\\lit\\lit.js";
-import * as TreeOutline2 from "./..\\..\\ui\\components\\tree_outline\\tree_outline.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
+import * as Lit2 from "./../../third_party/lit/lit.js";
+import * as TreeOutline2 from "./../../ui/components/tree_outline/tree_outline.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/layersWidget.css.js
 var layersWidget_css_default = `/**
@@ -1592,8 +1592,8 @@ var StyleEditorWidget_exports = {};
 __export(StyleEditorWidget_exports, {
   StyleEditorWidget: () => StyleEditorWidget
 });
-import { createIcon as createIcon2 } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI9 from "./..\\..\\ui\\legacy\\legacy.js";
+import { createIcon as createIcon2 } from "./../../ui/kit/kit.js";
+import * as UI9 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/elements/StylePropertyTreeElement.js
 var StylePropertyTreeElement_exports = {};
@@ -1627,23 +1627,23 @@ __export(StylePropertyTreeElement_exports, {
   VariableRenderer: () => VariableRenderer,
   getPropertyRenderers: () => getPropertyRenderers
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK6 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Badges from "./..\\..\\models\\badges\\badges.js";
-import * as Bindings2 from "./..\\..\\models\\bindings\\bindings.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Tooltips from "./..\\..\\ui\\components\\tooltips\\tooltips.js";
-import { createIcon, Icon } from "./..\\..\\ui\\kit\\kit.js";
-import * as ColorPicker2 from "./..\\..\\ui\\legacy\\components\\color_picker\\color_picker.js";
-import * as InlineEditor2 from "./..\\..\\ui\\legacy\\components\\inline_editor\\inline_editor.js";
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit4 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ElementsComponents from "./components\\components.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK6 from "./../../core/sdk/sdk.js";
+import * as Badges from "./../../models/badges/badges.js";
+import * as Bindings2 from "./../../models/bindings/bindings.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as Tooltips from "./../../ui/components/tooltips/tooltips.js";
+import { createIcon, Icon } from "./../../ui/kit/kit.js";
+import * as ColorPicker2 from "./../../ui/legacy/components/color_picker/color_picker.js";
+import * as InlineEditor2 from "./../../ui/legacy/components/inline_editor/inline_editor.js";
+import * as UI8 from "./../../ui/legacy/legacy.js";
+import * as Lit4 from "./../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
+import * as ElementsComponents from "./components/components.js";
 
 // gen/front_end/panels/elements/CSSRuleValidator.js
 var CSSRuleValidator_exports = {};
@@ -1666,8 +1666,8 @@ __export(CSSRuleValidator_exports, {
   ZIndexValidator: () => ZIndexValidator,
   cssRuleValidatorsMap: () => cssRuleValidatorsMap
 });
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as SDK5 from "./../../core/sdk/sdk.js";
 
 // gen/front_end/panels/elements/CSSRuleValidatorHelper.js
 var buildPropertyDefinitionText = (property, value5) => {
@@ -2312,8 +2312,8 @@ var CSSValueTraceView_exports = {};
 __export(CSSValueTraceView_exports, {
   CSSValueTraceView: () => CSSValueTraceView
 });
-import * as Lit3 from "./..\\..\\third_party\\lit\\lit.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Lit3 from "./../../third_party/lit/lit.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/elements/cssValueTraceView.css.js
 var cssValueTraceView_css_default = `/*
@@ -5789,22 +5789,22 @@ __export(StylePropertiesSection_exports, {
   RegisteredPropertiesSection: () => RegisteredPropertiesSection,
   StylePropertiesSection: () => StylePropertiesSection
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as SDK7 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Badges2 from "./..\\..\\models\\badges\\badges.js";
-import * as Bindings3 from "./..\\..\\models\\bindings\\bindings.js";
-import * as TextUtils3 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Tooltips2 from "./..\\..\\ui\\components\\tooltips\\tooltips.js";
-import * as UI10 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelsCommon from "./..\\common\\common.js";
-import * as ElementsComponents2 from "./components\\components.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as SDK7 from "./../../core/sdk/sdk.js";
+import * as Badges2 from "./../../models/badges/badges.js";
+import * as Bindings3 from "./../../models/bindings/bindings.js";
+import * as TextUtils3 from "./../../models/text_utils/text_utils.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as Tooltips2 from "./../../ui/components/tooltips/tooltips.js";
+import * as UI10 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelsCommon from "./../common/common.js";
+import * as ElementsComponents2 from "./components/components.js";
 var UIStrings6 = {
   /**
    * @description Tooltip text that appears when hovering over the largeicon add button in the Styles Sidebar Pane of the Elements panel
@@ -7366,7 +7366,7 @@ var StylePropertyHighlighter_exports = {};
 __export(StylePropertyHighlighter_exports, {
   StylePropertyHighlighter: () => StylePropertyHighlighter
 });
-import { PanelUtils } from "./..\\utils\\utils.js";
+import { PanelUtils } from "./../utils/utils.js";
 var StylePropertyHighlighter = class {
   styleSidebarPane;
   constructor(ssp) {
@@ -7765,7 +7765,7 @@ var WebCustomData_exports = {};
 __export(WebCustomData_exports, {
   WebCustomData: () => WebCustomData
 });
-import * as Root3 from "./..\\..\\core\\root\\root.js";
+import * as Root3 from "./../../core/root/root.js";
 var WebCustomData = class _WebCustomData {
   #data = /* @__PURE__ */ new Map();
   /** The test actually needs to wait for the result */
@@ -10632,26 +10632,26 @@ __export(ElementsTreeOutline_exports, {
   ElementsTreeOutline: () => ElementsTreeOutline,
   MappedCharToEntity: () => MappedCharToEntity
 });
-import * as Common11 from "./..\\..\\core\\common\\common.js";
-import * as i18n27 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK16 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Badges4 from "./..\\..\\models\\badges\\badges.js";
-import * as Elements from "./..\\..\\models\\elements\\elements.js";
-import * as IssuesManager2 from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as CodeHighlighter5 from "./..\\..\\ui\\components\\code_highlighter\\code_highlighter.js";
-import * as Highlighting3 from "./..\\..\\ui\\components\\highlighting\\highlighting.js";
-import * as IssueCounter from "./..\\..\\ui\\components\\issue_counter\\issue_counter.js";
-import * as UI19 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html10, nothing as nothing3, render as render7 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging9 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common11 from "./../../core/common/common.js";
+import * as i18n27 from "./../../core/i18n/i18n.js";
+import * as SDK16 from "./../../core/sdk/sdk.js";
+import * as Badges4 from "./../../models/badges/badges.js";
+import * as Elements from "./../../models/elements/elements.js";
+import * as IssuesManager2 from "./../../models/issues_manager/issues_manager.js";
+import * as CodeHighlighter5 from "./../../ui/components/code_highlighter/code_highlighter.js";
+import * as Highlighting3 from "./../../ui/components/highlighting/highlighting.js";
+import * as IssueCounter from "./../../ui/components/issue_counter/issue_counter.js";
+import * as UI19 from "./../../ui/legacy/legacy.js";
+import { html as html10, nothing as nothing3, render as render7 } from "./../../ui/lit/lit.js";
+import * as VisualLogging9 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/AdoptedStyleSheetTreeElement.js
-import * as SDK12 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils5 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as CodeHighlighter from "./..\\..\\ui\\components\\code_highlighter\\code_highlighter.js";
-import * as Components5 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI15 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging7 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as SDK12 from "./../../core/sdk/sdk.js";
+import * as TextUtils5 from "./../../models/text_utils/text_utils.js";
+import * as CodeHighlighter from "./../../ui/components/code_highlighter/code_highlighter.js";
+import * as Components5 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI15 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging7 from "./../../ui/visual_logging/visual_logging.js";
 var AdoptedStyleSheetTreeElement = class _AdoptedStyleSheetTreeElement extends UI15.TreeOutline.TreeElement {
   adoptedStyleSheet;
   eventListener = null;
@@ -10720,8 +10720,8 @@ var AdoptedStyleSheetContentsTreeElement = class extends UI15.TreeOutline.TreeEl
 };
 
 // gen/front_end/panels/elements/ElementIssueUtils.js
-import * as i18n19 from "./..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager from "./..\\..\\models\\issues_manager\\issues_manager.js";
+import * as i18n19 from "./../../core/i18n/i18n.js";
+import * as IssuesManager from "./../../models/issues_manager/issues_manager.js";
 var UIStrings10 = {
   /**
    * @description Tooltip text shown in the Elements panel when an element has an error.
@@ -10875,30 +10875,30 @@ __export(ElementsTreeElement_exports, {
   convertUnicodeCharsToHTMLEntities: () => convertUnicodeCharsToHTMLEntities,
   isOpeningTag: () => isOpeningTag
 });
-import "./..\\..\\ui\\components\\adorners\\adorners.js";
-import * as Common9 from "./..\\..\\core\\common\\common.js";
-import * as Host4 from "./..\\..\\core\\host\\host.js";
-import * as i18n23 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform7 from "./..\\..\\core\\platform\\platform.js";
-import * as Root6 from "./..\\..\\core\\root\\root.js";
-import * as SDK14 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Badges3 from "./..\\..\\models\\badges\\badges.js";
-import * as TextUtils6 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as CodeMirror from "./..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as CodeHighlighter3 from "./..\\..\\ui\\components\\code_highlighter\\code_highlighter.js";
-import * as Highlighting2 from "./..\\..\\ui\\components\\highlighting\\highlighting.js";
-import * as TextEditor from "./..\\..\\ui\\components\\text_editor\\text_editor.js";
-import { Icon as Icon3 } from "./..\\..\\ui\\kit\\kit.js";
-import * as Components6 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI16 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit6 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging8 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelsCommon3 from "./..\\common\\common.js";
-import * as Emulation from "./..\\emulation\\emulation.js";
-import * as Media from "./..\\media\\media.js";
-import * as ElementsComponents5 from "./components\\components.js";
+import "./../../ui/components/adorners/adorners.js";
+import * as Common9 from "./../../core/common/common.js";
+import * as Host4 from "./../../core/host/host.js";
+import * as i18n23 from "./../../core/i18n/i18n.js";
+import * as Platform7 from "./../../core/platform/platform.js";
+import * as Root6 from "./../../core/root/root.js";
+import * as SDK14 from "./../../core/sdk/sdk.js";
+import * as Badges3 from "./../../models/badges/badges.js";
+import * as TextUtils6 from "./../../models/text_utils/text_utils.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as CodeMirror from "./../../third_party/codemirror.next/codemirror.next.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import * as CodeHighlighter3 from "./../../ui/components/code_highlighter/code_highlighter.js";
+import * as Highlighting2 from "./../../ui/components/highlighting/highlighting.js";
+import * as TextEditor from "./../../ui/components/text_editor/text_editor.js";
+import { Icon as Icon3 } from "./../../ui/kit/kit.js";
+import * as Components6 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI16 from "./../../ui/legacy/legacy.js";
+import * as Lit6 from "./../../ui/lit/lit.js";
+import * as VisualLogging8 from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelsCommon3 from "./../common/common.js";
+import * as Emulation from "./../emulation/emulation.js";
+import * as Media from "./../media/media.js";
+import * as ElementsComponents5 from "./components/components.js";
 
 // gen/front_end/panels/elements/DOMPath.js
 var DOMPath_exports = {};
@@ -10910,7 +10910,7 @@ __export(DOMPath_exports, {
   jsPath: () => jsPath,
   xPath: () => xPath
 });
-import * as SDK13 from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK13 from "./../../core/sdk/sdk.js";
 var fullQualifiedSelector = function(node, justSelector) {
   if (node.nodeType() !== Node.ELEMENT_NODE) {
     return node.localName() || node.nodeName().toLowerCase();
@@ -11174,7 +11174,7 @@ __export(MarkerDecorator_exports, {
   GenericDecorator: () => GenericDecorator,
   getRegisteredDecorators: () => getRegisteredDecorators
 });
-import * as i18n21 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n21 from "./../../core/i18n/i18n.js";
 var UIStrings11 = {
   /**
    * @description Title of the Marker Decorator of Elements
@@ -13998,12 +13998,12 @@ li.hovered:not(.always-parent) + ol.children:not(.shadow-root) {
 /*# sourceURL=${import.meta.resolve("./elementsTreeOutline.css")} */`;
 
 // gen/front_end/panels/elements/ShortcutTreeElement.js
-import * as Common10 from "./..\\..\\core\\common\\common.js";
-import * as i18n25 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI17 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit7 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualElements from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ElementsComponents6 from "./components\\components.js";
+import * as Common10 from "./../../core/common/common.js";
+import * as i18n25 from "./../../core/i18n/i18n.js";
+import * as UI17 from "./../../ui/legacy/legacy.js";
+import * as Lit7 from "./../../ui/lit/lit.js";
+import * as VisualElements from "./../../ui/visual_logging/visual_logging.js";
+import * as ElementsComponents6 from "./components/components.js";
 var { html: html9, render: render6 } = Lit7;
 var UIStrings13 = {
   /**
@@ -14106,8 +14106,8 @@ var TopLayerContainer_exports = {};
 __export(TopLayerContainer_exports, {
   TopLayerContainer: () => TopLayerContainer
 });
-import * as SDK15 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI18 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as SDK15 from "./../../core/sdk/sdk.js";
+import * as UI18 from "./../../ui/legacy/legacy.js";
 var TopLayerContainer = class extends UI18.TreeOutline.TreeElement {
   tree;
   document;
@@ -15751,15 +15751,15 @@ var LayoutPane_exports = {};
 __export(LayoutPane_exports, {
   LayoutPane: () => LayoutPane
 });
-import "./..\\..\\ui\\components\\node_text\\node_text.js";
-import * as Common12 from "./..\\..\\core\\common\\common.js";
-import * as i18n29 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform8 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK17 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Buttons3 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI20 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit8 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging10 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/components/node_text/node_text.js";
+import * as Common12 from "./../../core/common/common.js";
+import * as i18n29 from "./../../core/i18n/i18n.js";
+import * as Platform8 from "./../../core/platform/platform.js";
+import * as SDK17 from "./../../core/sdk/sdk.js";
+import * as Buttons3 from "./../../ui/components/buttons/buttons.js";
+import * as UI20 from "./../../ui/legacy/legacy.js";
+import * as Lit8 from "./../../ui/lit/lit.js";
+import * as VisualLogging10 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/layoutPane.css.js
 var layoutPane_css_default = `/*
@@ -16369,11 +16369,11 @@ var MetricsSidebarPane_exports = {};
 __export(MetricsSidebarPane_exports, {
   MetricsSidebarPane: () => MetricsSidebarPane
 });
-import * as Common13 from "./..\\..\\core\\common\\common.js";
-import * as Platform9 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK18 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI21 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging11 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common13 from "./../../core/common/common.js";
+import * as Platform9 from "./../../core/platform/platform.js";
+import * as SDK18 from "./../../core/sdk/sdk.js";
+import * as UI21 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging11 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/metricsSidebarPane.css.js
 var metricsSidebarPane_css_default = `/**
@@ -18172,13 +18172,13 @@ __export(EventListenersWidget_exports, {
   DispatchFilterBy: () => DispatchFilterBy,
   EventListenersWidget: () => EventListenersWidget
 });
-import * as Common16 from "./..\\..\\core\\common\\common.js";
-import * as i18n33 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK21 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI24 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html12, render as render9 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging14 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as EventListeners from "./..\\event_listeners\\event_listeners.js";
+import * as Common16 from "./../../core/common/common.js";
+import * as i18n33 from "./../../core/i18n/i18n.js";
+import * as SDK21 from "./../../core/sdk/sdk.js";
+import * as UI24 from "./../../ui/legacy/legacy.js";
+import { html as html12, render as render9 } from "./../../ui/lit/lit.js";
+import * as VisualLogging14 from "./../../ui/visual_logging/visual_logging.js";
+import * as EventListeners from "./../event_listeners/event_listeners.js";
 var { bindToAction, bindToSetting } = UI24.UIUtils;
 var UIStrings17 = {
   /**
@@ -18386,16 +18386,16 @@ __export(PropertiesWidget_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW8,
   PropertiesWidget: () => PropertiesWidget
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common17 from "./..\\..\\core\\common\\common.js";
-import * as Host6 from "./..\\..\\core\\host\\host.js";
-import * as i18n35 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform11 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK22 from "./..\\..\\core\\sdk\\sdk.js";
-import * as ObjectUI from "./..\\..\\ui\\legacy\\components\\object_ui\\object_ui.js";
-import * as UI25 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html13, nothing as nothing4, render as render10 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging15 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common17 from "./../../core/common/common.js";
+import * as Host6 from "./../../core/host/host.js";
+import * as i18n35 from "./../../core/i18n/i18n.js";
+import * as Platform11 from "./../../core/platform/platform.js";
+import * as SDK22 from "./../../core/sdk/sdk.js";
+import * as ObjectUI from "./../../ui/legacy/components/object_ui/object_ui.js";
+import * as UI25 from "./../../ui/legacy/legacy.js";
+import { html as html13, nothing as nothing4, render as render10 } from "./../../ui/lit/lit.js";
+import * as VisualLogging15 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/propertiesWidget.css.js
 var propertiesWidget_css_default = `/*
@@ -18585,12 +18585,12 @@ __export(NodeStackTraceWidget_exports, {
   MaxLengthForLinks: () => MaxLengthForLinks,
   NodeStackTraceWidget: () => NodeStackTraceWidget
 });
-import * as i18n37 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK23 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings5 from "./..\\..\\models\\bindings\\bindings.js";
-import * as Components7 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI26 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html14, render as render11 } from "./..\\..\\ui\\lit\\lit.js";
+import * as i18n37 from "./../../core/i18n/i18n.js";
+import * as SDK23 from "./../../core/sdk/sdk.js";
+import * as Bindings5 from "./../../models/bindings/bindings.js";
+import * as Components7 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI26 from "./../../ui/legacy/legacy.js";
+import { html as html14, render as render11 } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/elements/nodeStackTraceWidget.css.js
 var nodeStackTraceWidget_css_default = `/*
@@ -18663,12 +18663,12 @@ __export(ClassesPaneWidget_exports, {
   ClassNamePrompt: () => ClassNamePrompt,
   ClassesPaneWidget: () => ClassesPaneWidget
 });
-import * as Common18 from "./..\\..\\core\\common\\common.js";
-import * as i18n39 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform12 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK24 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI27 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging16 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common18 from "./../../core/common/common.js";
+import * as i18n39 from "./../../core/i18n/i18n.js";
+import * as Platform12 from "./../../core/platform/platform.js";
+import * as SDK24 from "./../../core/sdk/sdk.js";
+import * as UI27 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging16 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/classesPaneWidget.css.js
 var classesPaneWidget_css_default = `/**
@@ -19033,13 +19033,13 @@ __export(ElementStatePaneWidget_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW10,
   ElementStatePaneWidget: () => ElementStatePaneWidget
 });
-import * as i18n41 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK25 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Buttons5 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UIHelpers from "./..\\..\\ui\\helpers\\helpers.js";
-import * as UI28 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html15, render as render12 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging17 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n41 from "./../../core/i18n/i18n.js";
+import * as SDK25 from "./../../core/sdk/sdk.js";
+import * as Buttons5 from "./../../ui/components/buttons/buttons.js";
+import * as UIHelpers from "./../../ui/helpers/helpers.js";
+import * as UI28 from "./../../ui/legacy/legacy.js";
+import { html as html15, render as render12 } from "./../../ui/lit/lit.js";
+import * as VisualLogging17 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/elementStatePaneWidget.css.js
 var elementStatePaneWidget_css_default = `/**
@@ -19461,8 +19461,8 @@ var ElementsTreeOutlineRenderer_exports = {};
 __export(ElementsTreeOutlineRenderer_exports, {
   Renderer: () => Renderer2
 });
-import * as SDK26 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI29 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as SDK26 from "./../../core/sdk/sdk.js";
+import * as UI29 from "./../../ui/legacy/legacy.js";
 var rendererInstance;
 var Renderer2 = class _Renderer {
   static instance(opts = { forceNew: null }) {

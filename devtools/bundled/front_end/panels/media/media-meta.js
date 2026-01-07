@@ -1,5 +1,5 @@
 // gen/front_end/panels/media/media-meta.prebundle.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n from "./../../core/i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Text that appears on a button for the media resource type filter.

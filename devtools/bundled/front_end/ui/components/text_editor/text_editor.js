@@ -14,14 +14,14 @@ __export(AiCodeCompletionProvider_exports, {
   aiCodeCompletionTeaserModeState: () => aiCodeCompletionTeaserModeState,
   setAiCodeCompletionTeaserMode: () => setAiCodeCompletionTeaserMode
 });
-import * as Common2 from "./..\\..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as AiCodeCompletion from "./..\\..\\..\\models\\ai_code_completion\\ai_code_completion.js";
-import * as PanelCommon from "./..\\..\\..\\panels\\common\\common.js";
-import * as CodeMirror from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import * as UI2 from "./..\\..\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\visual_logging\\visual_logging.js";
+import * as Common2 from "./../../../core/common/common.js";
+import * as Host from "./../../../core/host/host.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import * as AiCodeCompletion from "./../../../models/ai_code_completion/ai_code_completion.js";
+import * as PanelCommon from "./../../../panels/common/common.js";
+import * as CodeMirror from "./../../../third_party/codemirror.next/codemirror.next.js";
+import * as UI2 from "./../../legacy/legacy.js";
+import * as VisualLogging2 from "./../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/components/text_editor/AiCodeCompletionTeaserPlaceholder.js
 var AiCodeCompletionTeaserPlaceholder_exports = {};
@@ -30,7 +30,7 @@ __export(AiCodeCompletionTeaserPlaceholder_exports, {
   aiCodeCompletionTeaserPlaceholder: () => aiCodeCompletionTeaserPlaceholder,
   flattenRect: () => flattenRect
 });
-import * as CM from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
+import * as CM from "./../../../third_party/codemirror.next/codemirror.next.js";
 function flattenRect(rect, left) {
   const x = left ? rect.left : rect.right;
   return { left: x, right: x, top: rect.top, bottom: rect.bottom };
@@ -119,17 +119,17 @@ __export(config_exports, {
   theme: () => theme,
   themeSelection: () => themeSelection
 });
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as TextUtils from "./..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as CM3 from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import { Icon } from "./..\\..\\kit\\kit.js";
-import * as UI from "./..\\..\\legacy\\legacy.js";
-import * as VisualLogging from "./..\\..\\visual_logging\\visual_logging.js";
-import * as CodeHighlighter from "./..\\code_highlighter\\code_highlighter.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as TextUtils from "./../../../models/text_utils/text_utils.js";
+import * as CM3 from "./../../../third_party/codemirror.next/codemirror.next.js";
+import { Icon } from "./../../kit/kit.js";
+import * as UI from "./../../legacy/legacy.js";
+import * as VisualLogging from "./../../visual_logging/visual_logging.js";
+import * as CodeHighlighter from "./../code_highlighter/code_highlighter.js";
 
 // gen/front_end/ui/components/text_editor/theme.js
-import * as CM2 from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
+import * as CM2 from "./../../../third_party/codemirror.next/codemirror.next.js";
 var editorTheme = CM2.EditorView.theme({
   "&.cm-editor": {
     color: "color: var(--sys-color-on-subtle)",
@@ -1225,14 +1225,14 @@ __export(AiCodeGenerationProvider_exports, {
   AiCodeGenerationTeaserMode: () => AiCodeGenerationTeaserMode,
   setAiCodeGenerationTeaserMode: () => setAiCodeGenerationTeaserMode
 });
-import * as Common3 from "./..\\..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n4 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as AiCodeGeneration from "./..\\..\\..\\models\\ai_code_generation\\ai_code_generation.js";
-import * as PanelCommon2 from "./..\\..\\..\\panels\\common\\common.js";
-import * as CodeMirror2 from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import * as UI3 from "./..\\..\\legacy\\legacy.js";
-import * as VisualLogging3 from "./..\\..\\visual_logging\\visual_logging.js";
+import * as Common3 from "./../../../core/common/common.js";
+import * as Host2 from "./../../../core/host/host.js";
+import * as i18n4 from "./../../../core/i18n/i18n.js";
+import * as AiCodeGeneration from "./../../../models/ai_code_generation/ai_code_generation.js";
+import * as PanelCommon2 from "./../../../panels/common/common.js";
+import * as CodeMirror2 from "./../../../third_party/codemirror.next/codemirror.next.js";
+import * as UI3 from "./../../legacy/legacy.js";
+import * as VisualLogging3 from "./../../visual_logging/visual_logging.js";
 var AiCodeGenerationTeaserMode;
 (function(AiCodeGenerationTeaserMode2) {
   AiCodeGenerationTeaserMode2["ACTIVE"] = "active";
@@ -1610,7 +1610,7 @@ __export(ExecutionPositionHighlighter_exports, {
   positionHighlighter: () => positionHighlighter,
   setHighlightedPosition: () => setHighlightedPosition
 });
-import * as CodeMirror3 from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
+import * as CodeMirror3 from "./../../../third_party/codemirror.next/codemirror.next.js";
 var setHighlightedPosition = CodeMirror3.StateEffect.define();
 var clearHighlightedPosition = CodeMirror3.StateEffect.define();
 function positionHighlighter(executionLineClassName, executionTokenClassName) {
@@ -1692,15 +1692,15 @@ __export(javascript_exports, {
   isExpressionComplete: () => isExpressionComplete,
   javascriptCompletionSource: () => javascriptCompletionSource
 });
-import * as SDK from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\..\\models\\bindings\\bindings.js";
-import * as JavaScriptMetaData from "./..\\..\\..\\models\\javascript_metadata\\javascript_metadata.js";
-import * as SourceMapScopes from "./..\\..\\..\\models\\source_map_scopes\\source_map_scopes.js";
-import * as CodeMirror5 from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import * as UI4 from "./..\\..\\legacy\\legacy.js";
+import * as SDK from "./../../../core/sdk/sdk.js";
+import * as Bindings from "./../../../models/bindings/bindings.js";
+import * as JavaScriptMetaData from "./../../../models/javascript_metadata/javascript_metadata.js";
+import * as SourceMapScopes from "./../../../models/source_map_scopes/source_map_scopes.js";
+import * as CodeMirror5 from "./../../../third_party/codemirror.next/codemirror.next.js";
+import * as UI4 from "./../../legacy/legacy.js";
 
 // gen/front_end/ui/components/text_editor/cursor_tooltip.js
-import * as CodeMirror4 from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
+import * as CodeMirror4 from "./../../../third_party/codemirror.next/codemirror.next.js";
 var closeTooltip = CodeMirror4.StateEffect.define();
 function cursorTooltip(source) {
   const openTooltip = CodeMirror4.StateEffect.define();
@@ -2461,11 +2461,11 @@ var TextEditor_exports = {};
 __export(TextEditor_exports, {
   TextEditor: () => TextEditor
 });
-import * as Common4 from "./..\\..\\..\\core\\common\\common.js";
-import * as CodeMirror6 from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import * as UI5 from "./..\\..\\legacy\\legacy.js";
-import * as ThemeSupport from "./..\\..\\legacy\\theme_support\\theme_support.js";
-import * as CodeHighlighter3 from "./..\\code_highlighter\\code_highlighter.js";
+import * as Common4 from "./../../../core/common/common.js";
+import * as CodeMirror6 from "./../../../third_party/codemirror.next/codemirror.next.js";
+import * as UI5 from "./../../legacy/legacy.js";
+import * as ThemeSupport from "./../../legacy/theme_support/theme_support.js";
+import * as CodeHighlighter3 from "./../code_highlighter/code_highlighter.js";
 var TextEditor = class extends HTMLElement {
   #shadow = this.attachShadow({ mode: "open" });
   #activeEditor = void 0;
@@ -2691,7 +2691,7 @@ var TextEditorHistory_exports = {};
 __export(TextEditorHistory_exports, {
   TextEditorHistory: () => TextEditorHistory
 });
-import * as CodeMirror7 from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
+import * as CodeMirror7 from "./../../../third_party/codemirror.next/codemirror.next.js";
 var TextEditorHistory = class {
   #editor;
   #history;

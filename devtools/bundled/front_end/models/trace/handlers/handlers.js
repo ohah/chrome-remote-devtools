@@ -14,8 +14,8 @@ __export(helpers_exports, {
   getNonResolvedURL: () => getNonResolvedURL,
   makeUpEntity: () => makeUpEntity
 });
-import * as ThirdPartyWeb from "./..\\..\\..\\third_party\\third-party-web\\third-party-web.js";
-import * as Types from "./..\\types\\types.js";
+import * as ThirdPartyWeb from "./../../../third_party/third-party-web/third-party-web.js";
+import * as Types from "./../types/types.js";
 function getEntityForEvent(event, entityMappings3) {
   const url = getNonResolvedURL(event);
   if (!url) {
@@ -204,8 +204,8 @@ __export(AnimationFramesHandler_exports, {
   handleUserConfig: () => handleUserConfig,
   reset: () => reset
 });
-import * as Helpers from "./..\\helpers\\helpers.js";
-import * as Types2 from "./..\\types\\types.js";
+import * as Helpers from "./../helpers/helpers.js";
+import * as Types2 from "./../types/types.js";
 function threadKey(data31) {
   return `${data31.pid}-${data31.tid}`;
 }
@@ -298,8 +298,8 @@ __export(AnimationHandler_exports, {
   handleEvent: () => handleEvent2,
   reset: () => reset2
 });
-import * as Helpers2 from "./..\\helpers\\helpers.js";
-import * as Types3 from "./..\\types\\types.js";
+import * as Helpers2 from "./../helpers/helpers.js";
+import * as Types3 from "./../types/types.js";
 var animations = [];
 var animationsSyntheticEvents = [];
 function reset2() {
@@ -331,8 +331,8 @@ __export(AsyncJSCallsHandler_exports, {
   handleEvent: () => handleEvent9,
   reset: () => reset9
 });
-import * as Platform6 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Types10 from "./..\\types\\types.js";
+import * as Platform6 from "./../../../core/platform/platform.js";
+import * as Types10 from "./../types/types.js";
 
 // gen/front_end/models/trace/handlers/FlowsHandler.js
 var FlowsHandler_exports = {};
@@ -342,8 +342,8 @@ __export(FlowsHandler_exports, {
   handleEvent: () => handleEvent3,
   reset: () => reset3
 });
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Types4 from "./..\\types\\types.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as Types4 from "./../types/types.js";
 var flowDataByGroupToken = /* @__PURE__ */ new Map();
 var boundFlowData = /* @__PURE__ */ new Map();
 var flowsById = /* @__PURE__ */ new Map();
@@ -447,9 +447,9 @@ __export(RendererHandler_exports, {
   sanitizeProcesses: () => sanitizeProcesses,
   sanitizeThreads: () => sanitizeThreads
 });
-import * as Platform5 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Helpers7 from "./..\\helpers\\helpers.js";
-import * as Types9 from "./..\\types\\types.js";
+import * as Platform5 from "./../../../core/platform/platform.js";
+import * as Helpers7 from "./../helpers/helpers.js";
+import * as Types9 from "./../types/types.js";
 
 // gen/front_end/models/trace/handlers/AuctionWorkletsHandler.js
 var AuctionWorkletsHandler_exports = {};
@@ -459,8 +459,8 @@ __export(AuctionWorkletsHandler_exports, {
   handleEvent: () => handleEvent4,
   reset: () => reset4
 });
-import * as Helpers3 from "./..\\helpers\\helpers.js";
-import * as Types5 from "./..\\types\\types.js";
+import * as Helpers3 from "./../helpers/helpers.js";
+import * as Types5 from "./../types/types.js";
 var runningInProcessEvents = /* @__PURE__ */ new Map();
 var doneWithProcessEvents = /* @__PURE__ */ new Map();
 var createdSyntheticEvents = /* @__PURE__ */ new Map();
@@ -575,9 +575,9 @@ __export(MetaHandler_exports, {
   handleEvent: () => handleEvent5,
   reset: () => reset5
 });
-import * as Platform2 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Helpers4 from "./..\\helpers\\helpers.js";
-import * as Types6 from "./..\\types\\types.js";
+import * as Platform2 from "./../../../core/platform/platform.js";
+import * as Helpers4 from "./../helpers/helpers.js";
+import * as Types6 from "./../types/types.js";
 var config;
 var rendererProcessesByFrameId = /* @__PURE__ */ new Map();
 var mainFrameId = "";
@@ -869,9 +869,9 @@ __export(NetworkRequestsHandler_exports, {
   handleEvent: () => handleEvent6,
   reset: () => reset6
 });
-import * as Platform3 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Helpers5 from "./..\\helpers\\helpers.js";
-import * as Types7 from "./..\\types\\types.js";
+import * as Platform3 from "./../../../core/platform/platform.js";
+import * as Helpers5 from "./../helpers/helpers.js";
+import * as Types7 from "./../types/types.js";
 var MILLISECONDS_TO_MICROSECONDS = 1e3;
 var SECONDS_TO_MICROSECONDS = 1e6;
 var webSocketData = /* @__PURE__ */ new Map();
@@ -1273,10 +1273,10 @@ __export(SamplesHandler_exports, {
   handleEvent: () => handleEvent7,
   reset: () => reset7
 });
-import * as Platform4 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as CPUProfile from "./..\\..\\cpu_profile\\cpu_profile.js";
-import * as Helpers6 from "./..\\helpers\\helpers.js";
-import * as Types8 from "./..\\types\\types.js";
+import * as Platform4 from "./../../../core/platform/platform.js";
+import * as CPUProfile from "./../../cpu_profile/cpu_profile.js";
+import * as Helpers6 from "./../helpers/helpers.js";
+import * as Types8 from "./../types/types.js";
 var profilesInProcess = /* @__PURE__ */ new Map();
 var entryToNode = /* @__PURE__ */ new Map();
 var preprocessedData = /* @__PURE__ */ new Map();
@@ -1819,8 +1819,8 @@ __export(DOMStatsHandler_exports, {
   handleEvent: () => handleEvent10,
   reset: () => reset10
 });
-import * as Platform7 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Types11 from "./..\\types\\types.js";
+import * as Platform7 from "./../../../core/platform/platform.js";
+import * as Types11 from "./../types/types.js";
 var domStatsByFrameId = /* @__PURE__ */ new Map();
 function reset10() {
   domStatsByFrameId = /* @__PURE__ */ new Map();
@@ -1851,8 +1851,8 @@ __export(ExtensionTraceDataHandler_exports, {
   handleEvent: () => handleEvent12,
   reset: () => reset12
 });
-import * as Helpers9 from "./..\\helpers\\helpers.js";
-import * as Types13 from "./..\\types\\types.js";
+import * as Helpers9 from "./../helpers/helpers.js";
+import * as Types13 from "./../types/types.js";
 
 // gen/front_end/models/trace/handlers/UserTimingsHandler.js
 var UserTimingsHandler_exports = {};
@@ -1863,8 +1863,8 @@ __export(UserTimingsHandler_exports, {
   reset: () => reset11,
   userTimingComparator: () => userTimingComparator
 });
-import * as Helpers8 from "./..\\helpers\\helpers.js";
-import * as Types12 from "./..\\types\\types.js";
+import * as Helpers8 from "./../helpers/helpers.js";
+import * as Types12 from "./../types/types.js";
 var syntheticEvents = [];
 var measureTraceByTraceId = /* @__PURE__ */ new Map();
 var performanceMeasureEvents = [];
@@ -2167,9 +2167,9 @@ __export(FramesHandler_exports, {
   handleEvent: () => handleEvent14,
   reset: () => reset14
 });
-import * as Platform8 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Helpers11 from "./..\\helpers\\helpers.js";
-import * as Types15 from "./..\\types\\types.js";
+import * as Platform8 from "./../../../core/platform/platform.js";
+import * as Helpers11 from "./../helpers/helpers.js";
+import * as Types15 from "./../types/types.js";
 
 // gen/front_end/models/trace/handlers/LayerTreeHandler.js
 var LayerTreeHandler_exports = {};
@@ -2180,8 +2180,8 @@ __export(LayerTreeHandler_exports, {
   handleEvent: () => handleEvent13,
   reset: () => reset13
 });
-import * as Helpers10 from "./..\\helpers\\helpers.js";
-import * as Types14 from "./..\\types\\types.js";
+import * as Helpers10 from "./../helpers/helpers.js";
+import * as Types14 from "./../types/types.js";
 var paintEvents = [];
 var snapshotEvents = [];
 var paintToSnapshotMap = /* @__PURE__ */ new Map();
@@ -2749,8 +2749,8 @@ __export(GPUHandler_exports, {
   handleEvent: () => handleEvent15,
   reset: () => reset15
 });
-import * as Helpers12 from "./..\\helpers\\helpers.js";
-import * as Types16 from "./..\\types\\types.js";
+import * as Helpers12 from "./../helpers/helpers.js";
+import * as Types16 from "./../types/types.js";
 var eventsInProcessThread = /* @__PURE__ */ new Map();
 var mainGPUThreadTasks = [];
 function reset15() {
@@ -2787,8 +2787,8 @@ __export(ImagePaintingHandler_exports, {
   handleEvent: () => handleEvent16,
   reset: () => reset16
 });
-import * as Platform9 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Types17 from "./..\\types\\types.js";
+import * as Platform9 from "./../../../core/platform/platform.js";
+import * as Types17 from "./../types/types.js";
 var paintImageEvents = /* @__PURE__ */ new Map();
 var decodeLazyPixelRefEvents = /* @__PURE__ */ new Map();
 var paintImageByLazyPixelRef = /* @__PURE__ */ new Map();
@@ -2890,8 +2890,8 @@ __export(InitiatorsHandler_exports, {
   handleEvent: () => handleEvent17,
   reset: () => reset17
 });
-import * as Helpers13 from "./..\\helpers\\helpers.js";
-import * as Types18 from "./..\\types\\types.js";
+import * as Helpers13 from "./../helpers/helpers.js";
+import * as Types18 from "./../types/types.js";
 var lastScheduleStyleRecalcByFrame = /* @__PURE__ */ new Map();
 var lastInvalidationEventForFrame = /* @__PURE__ */ new Map();
 var lastRecalcByFrame = /* @__PURE__ */ new Map();
@@ -3030,7 +3030,7 @@ __export(InvalidationsHandler_exports, {
   handleUserConfig: () => handleUserConfig3,
   reset: () => reset18
 });
-import * as Types19 from "./..\\types\\types.js";
+import * as Types19 from "./../types/types.js";
 var frameStateByFrame = /* @__PURE__ */ new Map();
 var maxInvalidationsPerEvent = null;
 function reset18() {
@@ -3146,8 +3146,8 @@ __export(LargestImagePaintHandler_exports, {
   handleEvent: () => handleEvent20,
   reset: () => reset20
 });
-import * as Platform11 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Types21 from "./..\\types\\types.js";
+import * as Platform11 from "./../../../core/platform/platform.js";
+import * as Types21 from "./../types/types.js";
 
 // gen/front_end/models/trace/handlers/PageLoadMetricsHandler.js
 var PageLoadMetricsHandler_exports = {};
@@ -3165,9 +3165,9 @@ __export(PageLoadMetricsHandler_exports, {
   scoreClassificationForTimeToInteractive: () => scoreClassificationForTimeToInteractive,
   scoreClassificationForTotalBlockingTime: () => scoreClassificationForTotalBlockingTime
 });
-import * as Platform10 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Helpers14 from "./..\\helpers\\helpers.js";
-import * as Types20 from "./..\\types\\types.js";
+import * as Platform10 from "./../../../core/platform/platform.js";
+import * as Helpers14 from "./../helpers/helpers.js";
+import * as Types20 from "./../types/types.js";
 var metricScoresByFrameId = /* @__PURE__ */ new Map();
 var allMarkerEvents = [];
 function reset19() {
@@ -3524,7 +3524,7 @@ __export(LargestTextPaintHandler_exports, {
   handleEvent: () => handleEvent21,
   reset: () => reset21
 });
-import * as Types22 from "./..\\types\\types.js";
+import * as Types22 from "./../types/types.js";
 var textPaintByDOMNodeId = /* @__PURE__ */ new Map();
 function reset21() {
   textPaintByDOMNodeId = /* @__PURE__ */ new Map();
@@ -3556,9 +3556,9 @@ __export(LayoutShiftsHandler_exports, {
   reset: () => reset23,
   scoreClassificationForLayoutShift: () => scoreClassificationForLayoutShift
 });
-import * as Platform12 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Helpers16 from "./..\\helpers\\helpers.js";
-import * as Types24 from "./..\\types\\types.js";
+import * as Platform12 from "./../../../core/platform/platform.js";
+import * as Helpers16 from "./../helpers/helpers.js";
+import * as Types24 from "./../types/types.js";
 
 // gen/front_end/models/trace/handlers/ScreenshotsHandler.js
 var ScreenshotsHandler_exports = {};
@@ -3570,8 +3570,8 @@ __export(ScreenshotsHandler_exports, {
   reset: () => reset22,
   screenshotImageDataUri: () => screenshotImageDataUri
 });
-import * as Helpers15 from "./..\\helpers\\helpers.js";
-import * as Types23 from "./..\\types\\types.js";
+import * as Helpers15 from "./../helpers/helpers.js";
+import * as Types23 from "./../types/types.js";
 var unpairedAsyncEvents = [];
 var legacyScreenshotEvents = [];
 var modernScreenshotEvents = [];
@@ -3991,8 +3991,8 @@ __export(MemoryHandler_exports, {
   handleEvent: () => handleEvent24,
   reset: () => reset24
 });
-import * as Platform13 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Types25 from "./..\\types\\types.js";
+import * as Platform13 from "./../../../core/platform/platform.js";
+import * as Types25 from "./../types/types.js";
 var updateCountersByProcess = /* @__PURE__ */ new Map();
 function reset24() {
   updateCountersByProcess = /* @__PURE__ */ new Map();
@@ -4018,7 +4018,7 @@ __export(PageFramesHandler_exports, {
   handleEvent: () => handleEvent25,
   reset: () => reset25
 });
-import * as Types26 from "./..\\types\\types.js";
+import * as Types26 from "./../types/types.js";
 var frames = /* @__PURE__ */ new Map();
 function reset25() {
   frames = /* @__PURE__ */ new Map();
@@ -4064,9 +4064,9 @@ __export(ScriptsHandler_exports, {
   handleEvent: () => handleEvent26,
   reset: () => reset26
 });
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as Platform14 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Types27 from "./..\\types\\types.js";
+import * as Common from "./../../../core/common/common.js";
+import * as Platform14 from "./../../../core/platform/platform.js";
+import * as Types27 from "./../types/types.js";
 var scriptById = /* @__PURE__ */ new Map();
 var frameIdByIsolate = /* @__PURE__ */ new Map();
 function deps14() {
@@ -4309,7 +4309,7 @@ __export(SelectorStatsHandler_exports, {
   handleEvent: () => handleEvent27,
   reset: () => reset27
 });
-import * as Types28 from "./..\\types\\types.js";
+import * as Types28 from "./../types/types.js";
 var lastRecalcStyleEvent = null;
 var lastInvalidatedNode = null;
 var selectorDataForRecalcStyle = /* @__PURE__ */ new Map();
@@ -4382,9 +4382,9 @@ __export(UserInteractionsHandler_exports, {
   reset: () => reset28,
   scoreClassificationForInteractionToNextPaint: () => scoreClassificationForInteractionToNextPaint
 });
-import * as Platform15 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Helpers17 from "./..\\helpers\\helpers.js";
-import * as Types29 from "./..\\types\\types.js";
+import * as Platform15 from "./../../../core/platform/platform.js";
+import * as Helpers17 from "./../helpers/helpers.js";
+import * as Types29 from "./../types/types.js";
 var beginCommitCompositorFrameEvents = [];
 var parseMetaViewportEvents = [];
 var LONG_INTERACTION_THRESHOLD = Helpers17.Timing.milliToMicro(Types29.Timing.Milli(200));
@@ -4599,9 +4599,9 @@ __export(WarningsHandler_exports, {
   handleEvent: () => handleEvent30,
   reset: () => reset30
 });
-import * as Platform16 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Helpers18 from "./..\\helpers\\helpers.js";
-import * as Types31 from "./..\\types\\types.js";
+import * as Platform16 from "./../../../core/platform/platform.js";
+import * as Helpers18 from "./../helpers/helpers.js";
+import * as Types31 from "./../types/types.js";
 
 // gen/front_end/models/trace/handlers/WorkersHandler.js
 var WorkersHandler_exports = {};
@@ -4611,7 +4611,7 @@ __export(WorkersHandler_exports, {
   handleEvent: () => handleEvent29,
   reset: () => reset29
 });
-import * as Types30 from "./..\\types\\types.js";
+import * as Types30 from "./../types/types.js";
 var sessionIdEvents = [];
 var workerIdByThread = /* @__PURE__ */ new Map();
 var workerURLById = /* @__PURE__ */ new Map();

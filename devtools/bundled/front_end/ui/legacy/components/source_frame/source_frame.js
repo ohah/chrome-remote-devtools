@@ -9,7 +9,7 @@ var BinaryResourceViewFactory_exports = {};
 __export(BinaryResourceViewFactory_exports, {
   BinaryResourceViewFactory: () => BinaryResourceViewFactory
 });
-import * as TextUtils5 from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
+import * as TextUtils5 from "./../../../../models/text_utils/text_utils.js";
 
 // gen/front_end/ui/legacy/components/source_frame/ResourceSourceFrame.js
 var ResourceSourceFrame_exports = {};
@@ -17,9 +17,9 @@ __export(ResourceSourceFrame_exports, {
   ResourceSourceFrame: () => ResourceSourceFrame,
   SearchableContainer: () => SearchableContainer
 });
-import "./..\\..\\legacy.js";
-import * as Common2 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
+import "./../../legacy.js";
+import * as Common2 from "./../../../../core/common/common.js";
+import * as i18n3 from "./../../../../core/i18n/i18n.js";
 
 // gen/front_end/entrypoints/formatter_worker/FormatterActions.js
 var FORMATTABLE_MEDIA_TYPES = [
@@ -32,8 +32,8 @@ var FORMATTABLE_MEDIA_TYPES = [
 ];
 
 // gen/front_end/ui/legacy/components/source_frame/ResourceSourceFrame.js
-import * as TextUtils3 from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as UI2 from "./..\\..\\legacy.js";
+import * as TextUtils3 from "./../../../../models/text_utils/text_utils.js";
+import * as UI2 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/source_frame/resourceSourceFrame.css.js
 var resourceSourceFrame_css_default = `/*
@@ -63,20 +63,20 @@ __export(SourceFrame_exports, {
   isBreakableLine: () => isBreakableLine,
   removeSourceFrameInfobar: () => removeSourceFrameInfobar
 });
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Formatter from "./..\\..\\..\\..\\models\\formatter\\formatter.js";
-import * as TextUtils from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as PanelCommon from "./..\\..\\..\\..\\panels\\common\\common.js";
-import * as CodeMirror from "./..\\..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import * as CodeHighlighter from "./..\\..\\..\\components\\code_highlighter\\code_highlighter.js";
-import * as TextEditor from "./..\\..\\..\\components\\text_editor\\text_editor.js";
-import * as VisualLogging from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI from "./..\\..\\legacy.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as Host from "./../../../../core/host/host.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as Platform from "./../../../../core/platform/platform.js";
+import * as Root from "./../../../../core/root/root.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
+import * as Formatter from "./../../../../models/formatter/formatter.js";
+import * as TextUtils from "./../../../../models/text_utils/text_utils.js";
+import * as PanelCommon from "./../../../../panels/common/common.js";
+import * as CodeMirror from "./../../../../third_party/codemirror.next/codemirror.next.js";
+import * as CodeHighlighter from "./../../../components/code_highlighter/code_highlighter.js";
+import * as TextEditor from "./../../../components/text_editor/text_editor.js";
+import * as VisualLogging from "./../../../visual_logging/visual_logging.js";
+import * as UI from "./../../legacy.js";
 var UIStrings = {
   /**
    * @description Text for the source of something
@@ -1142,9 +1142,9 @@ var StreamingContentHexView_exports = {};
 __export(StreamingContentHexView_exports, {
   StreamingContentHexView: () => StreamingContentHexView
 });
-import * as TextUtils4 from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as LinearMemoryInspectorComponents from "./..\\..\\..\\..\\panels\\linear_memory_inspector\\components\\components.js";
-import * as UI3 from "./..\\..\\legacy.js";
+import * as TextUtils4 from "./../../../../models/text_utils/text_utils.js";
+import * as LinearMemoryInspectorComponents from "./../../../../panels/linear_memory_inspector/components/components.js";
+import * as UI3 from "./../../legacy.js";
 var MEMORY_TRANSFER_MIN_CHUNK_SIZE = 1e3;
 var LinearMemoryInspectorView = class extends UI3.Widget.VBox {
   #memory = new Uint8Array([0]);
@@ -1280,11 +1280,11 @@ var FontView_exports = {};
 __export(FontView_exports, {
   FontView: () => FontView
 });
-import * as i18n5 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as TextUtils6 from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as VisualLogging2 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI4 from "./..\\..\\legacy.js";
+import * as i18n5 from "./../../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../../core/platform/platform.js";
+import * as TextUtils6 from "./../../../../models/text_utils/text_utils.js";
+import * as VisualLogging2 from "./../../../visual_logging/visual_logging.js";
+import * as UI4 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/source_frame/fontView.css.js
 var fontView_css_default = `/*
@@ -1437,14 +1437,14 @@ var ImageView_exports = {};
 __export(ImageView_exports, {
   ImageView: () => ImageView
 });
-import * as Common3 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as TextUtils7 from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\..\\..\\..\\models\\workspace\\workspace.js";
-import * as VisualLogging3 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI5 from "./..\\..\\legacy.js";
+import * as Common3 from "./../../../../core/common/common.js";
+import * as Host2 from "./../../../../core/host/host.js";
+import * as i18n7 from "./../../../../core/i18n/i18n.js";
+import * as Platform3 from "./../../../../core/platform/platform.js";
+import * as TextUtils7 from "./../../../../models/text_utils/text_utils.js";
+import * as Workspace from "./../../../../models/workspace/workspace.js";
+import * as VisualLogging3 from "./../../../visual_logging/visual_logging.js";
+import * as UI5 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/source_frame/imageView.css.js
 var imageView_css_default = `/*
@@ -1696,13 +1696,13 @@ __export(JSONView_exports, {
   ParsedJSON: () => ParsedJSON,
   SearchableJsonView: () => SearchableJsonView
 });
-import * as i18n9 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Highlighting from "./..\\..\\..\\components\\highlighting\\highlighting.js";
-import * as VisualLogging4 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI6 from "./..\\..\\legacy.js";
-import * as ObjectUI from "./..\\object_ui\\object_ui.js";
+import * as i18n9 from "./../../../../core/i18n/i18n.js";
+import * as Platform4 from "./../../../../core/platform/platform.js";
+import * as SDK2 from "./../../../../core/sdk/sdk.js";
+import * as Highlighting from "./../../../components/highlighting/highlighting.js";
+import * as VisualLogging4 from "./../../../visual_logging/visual_logging.js";
+import * as UI6 from "./../../legacy.js";
+import * as ObjectUI from "./../object_ui/object_ui.js";
 
 // gen/front_end/ui/legacy/components/source_frame/jsonView.css.js
 var jsonView_css_default = `/*
@@ -1985,10 +1985,10 @@ var PreviewFactory_exports = {};
 __export(PreviewFactory_exports, {
   PreviewFactory: () => PreviewFactory
 });
-import * as Common4 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n13 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as TextUtils9 from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as UI8 from "./..\\..\\legacy.js";
+import * as Common4 from "./../../../../core/common/common.js";
+import * as i18n13 from "./../../../../core/i18n/i18n.js";
+import * as TextUtils9 from "./../../../../models/text_utils/text_utils.js";
+import * as UI8 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/source_frame/XMLView.js
 var XMLView_exports = {};
@@ -1998,12 +1998,12 @@ __export(XMLView_exports, {
   XMLTreeViewNode: () => XMLTreeViewNode,
   XMLView: () => XMLView
 });
-import "./..\\..\\..\\components\\highlighting\\highlighting.js";
-import * as i18n11 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as TextUtils8 from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as Lit from "./..\\..\\..\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI7 from "./..\\..\\legacy.js";
+import "./../../../components/highlighting/highlighting.js";
+import * as i18n11 from "./../../../../core/i18n/i18n.js";
+import * as TextUtils8 from "./../../../../models/text_utils/text_utils.js";
+import * as Lit from "./../../../lit/lit.js";
+import * as VisualLogging5 from "./../../../visual_logging/visual_logging.js";
+import * as UI7 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/source_frame/xmlTree.css.js
 var xmlTree_css_default = `/*

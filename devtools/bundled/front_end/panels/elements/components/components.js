@@ -9,11 +9,11 @@ var AccessibilityTreeNode_exports = {};
 __export(AccessibilityTreeNode_exports, {
   AccessibilityTreeNode: () => AccessibilityTreeNode
 });
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as RenderCoordinator from "./..\\..\\..\\ui\\components\\render_coordinator\\render_coordinator.js";
-import * as UI from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html, nothing, render } from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as RenderCoordinator from "./../../../ui/components/render_coordinator/render_coordinator.js";
+import * as UI from "./../../../ui/legacy/legacy.js";
+import { html, nothing, render } from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/elements/components/accessibilityTreeNode.css.js
 var accessibilityTreeNode_css_default = `/*
@@ -182,8 +182,8 @@ __export(ComputedStyleProperty_exports, {
   ComputedStyleProperty: () => ComputedStyleProperty,
   NavigateToSourceEvent: () => NavigateToSourceEvent
 });
-import { html as html2, render as render2 } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import { html as html2, render as render2 } from "./../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/components/computedStyleProperty.css.js
 var computedStyleProperty_css_default = `/*
@@ -366,9 +366,9 @@ var ComputedStyleTrace_exports = {};
 __export(ComputedStyleTrace_exports, {
   ComputedStyleTrace: () => ComputedStyleTrace
 });
-import * as Buttons from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI2 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html as html3, render as render3 } from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as Buttons from "./../../../ui/components/buttons/buttons.js";
+import * as UI2 from "./../../../ui/legacy/legacy.js";
+import { html as html3, render as render3 } from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/elements/components/computedStyleTrace.css.js
 var computedStyleTrace_css_default = `/*
@@ -501,9 +501,9 @@ var CSSHintDetailsView_exports = {};
 __export(CSSHintDetailsView_exports, {
   CSSHintDetailsView: () => CSSHintDetailsView
 });
-import "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import { Directives, html as html4, render as render4 } from "./..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../ui/legacy/legacy.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import { Directives, html as html4, render as render4 } from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/elements/components/cssHintDetailsView.css.js
 var cssHintDetailsView_css_default = `/*
@@ -593,11 +593,11 @@ var CSSPropertyDocsView_exports = {};
 __export(CSSPropertyDocsView_exports, {
   CSSPropertyDocsView: () => CSSPropertyDocsView
 });
-import "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n5 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import { html as html5, nothing as nothing2, render as render5 } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/legacy/legacy.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n5 from "./../../../core/i18n/i18n.js";
+import { html as html5, nothing as nothing2, render as render5 } from "./../../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/components/cssPropertyDocsView.css.js
 var cssPropertyDocsView_css_default = `/*
@@ -1256,9 +1256,9 @@ var CSSQuery_exports = {};
 __export(CSSQuery_exports, {
   CSSQuery: () => CSSQuery
 });
-import * as UI3 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as UI3 from "./../../../ui/legacy/legacy.js";
+import * as Lit from "./../../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/components/cssQuery.css.js
 var cssQuery_css_default = `/*
@@ -1326,8 +1326,8 @@ __export(CSSVariableValueView_exports, {
   CSSVariableParserError: () => CSSVariableParserError,
   CSSVariableValueView: () => CSSVariableValueView
 });
-import * as i18n7 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Lit2 from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n7 from "./../../../core/i18n/i18n.js";
+import * as Lit2 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/elements/components/cssVariableValueView.css.js
 var cssVariableValueView_css_default = `/*
@@ -1478,13 +1478,13 @@ __export(ElementsBreadcrumbs_exports, {
   ElementsBreadcrumbs: () => ElementsBreadcrumbs,
   NodeSelectedEvent: () => NodeSelectedEvent
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import "./..\\..\\..\\ui\\components\\node_text\\node_text.js";
-import * as i18n11 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as ComponentHelpers from "./..\\..\\..\\ui\\components\\helpers\\helpers.js";
-import * as RenderCoordinator2 from "./..\\..\\..\\ui\\components\\render_coordinator\\render_coordinator.js";
-import * as Lit3 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import "./../../../ui/components/node_text/node_text.js";
+import * as i18n11 from "./../../../core/i18n/i18n.js";
+import * as ComponentHelpers from "./../../../ui/components/helpers/helpers.js";
+import * as RenderCoordinator2 from "./../../../ui/components/render_coordinator/render_coordinator.js";
+import * as Lit3 from "./../../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/components/elementsBreadcrumbs.css.js
 var elementsBreadcrumbs_css_default = `/*
@@ -1589,7 +1589,7 @@ __export(ElementsBreadcrumbsUtils_exports, {
   crumbsToRender: () => crumbsToRender,
   determineElementTitle: () => determineElementTitle
 });
-import * as i18n9 from "./..\\..\\..\\core\\i18n\\i18n.js";
+import * as i18n9 from "./../../../core/i18n/i18n.js";
 var UIStrings5 = {
   /**
    * @description Text in Elements Breadcrumbs of the Elements panel. Indicates that a HTML element
@@ -1911,10 +1911,10 @@ var ElementsTreeExpandButton_exports = {};
 __export(ElementsTreeExpandButton_exports, {
   ElementsTreeExpandButton: () => ElementsTreeExpandButton
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n13 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import { html as html9, render as render9 } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n13 from "./../../../core/i18n/i18n.js";
+import { html as html9, render as render9 } from "./../../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/components/elementsTreeExpandButton.css.js
 var elementsTreeExpandButton_css_default = `/*
@@ -2012,7 +2012,7 @@ var Helper_exports = {};
 __export(Helper_exports, {
   legacyNodeToElementsComponentsNode: () => legacyNodeToElementsComponentsNode
 });
-import * as SDK from "./..\\..\\..\\core\\sdk\\sdk.js";
+import * as SDK from "./../../../core/sdk/sdk.js";
 var legacyNodeToElementsComponentsNode = (node) => {
   return {
     parentNode: node.parentNode ? legacyNodeToElementsComponentsNode(node.parentNode) : null,
@@ -2035,11 +2035,11 @@ __export(QueryContainer_exports, {
   QueriedSizeRequestedEvent: () => QueriedSizeRequestedEvent,
   QueryContainer: () => QueryContainer
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import "./..\\..\\..\\ui\\components\\node_text\\node_text.js";
-import * as SDK2 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Lit4 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging6 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import "./../../../ui/components/node_text/node_text.js";
+import * as SDK2 from "./../../../core/sdk/sdk.js";
+import * as Lit4 from "./../../../ui/lit/lit.js";
+import * as VisualLogging6 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/components/queryContainer.css.js
 var queryContainer_css_default = `/*
@@ -2182,10 +2182,10 @@ __export(StylePropertyEditor_exports, {
   PropertySelectedEvent: () => PropertySelectedEvent,
   StylePropertyEditor: () => StylePropertyEditor
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n15 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Lit5 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging7 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n15 from "./../../../core/i18n/i18n.js";
+import * as Lit5 from "./../../../ui/lit/lit.js";
+import * as VisualLogging7 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/elements/components/stylePropertyEditor.css.js
 var stylePropertyEditor_css_default = `/*

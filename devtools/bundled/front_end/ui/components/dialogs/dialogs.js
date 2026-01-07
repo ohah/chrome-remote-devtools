@@ -9,8 +9,8 @@ var ButtonDialog_exports = {};
 __export(ButtonDialog_exports, {
   ButtonDialog: () => ButtonDialog
 });
-import * as ComponentHelpers from "./..\\helpers\\helpers.js";
-import { Directives, html, render } from "./..\\..\\lit\\lit.js";
+import * as ComponentHelpers from "./../helpers/helpers.js";
+import { Directives, html, render } from "./../../lit/lit.js";
 
 // gen/front_end/ui/components/dialogs/buttonDialog.css.js
 var buttonDialog_css_default = `/*
@@ -134,14 +134,14 @@ __export(Dialog_exports, {
   MODAL: () => MODAL,
   PointerLeftDialogEvent: () => PointerLeftDialogEvent
 });
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as ComponentHelpers2 from "./..\\helpers\\helpers.js";
-import * as RenderCoordinator from "./..\\render_coordinator\\render_coordinator.js";
-import * as Lit from "./..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\visual_logging\\visual_logging.js";
-import * as UI from "./..\\..\\legacy\\legacy.js";
-import * as Buttons from "./..\\buttons\\buttons.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as ComponentHelpers2 from "./../helpers/helpers.js";
+import * as RenderCoordinator from "./../render_coordinator/render_coordinator.js";
+import * as Lit from "./../../lit/lit.js";
+import * as VisualLogging from "./../../visual_logging/visual_logging.js";
+import * as UI from "./../../legacy/legacy.js";
+import * as Buttons from "./../buttons/buttons.js";
 
 // gen/front_end/ui/components/dialogs/dialog.css.js
 var dialog_css_default = `/*
@@ -755,10 +755,10 @@ var ShortcutDialog_exports = {};
 __export(ShortcutDialog_exports, {
   ShortcutDialog: () => ShortcutDialog
 });
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Buttons2 from "./..\\buttons\\buttons.js";
-import * as ComponentHelpers3 from "./..\\helpers\\helpers.js";
-import { html as html3, nothing as nothing2, render as render3 } from "./..\\..\\lit\\lit.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import * as Buttons2 from "./../buttons/buttons.js";
+import * as ComponentHelpers3 from "./../helpers/helpers.js";
+import { html as html3, nothing as nothing2, render as render3 } from "./../../lit/lit.js";
 
 // gen/front_end/ui/components/dialogs/shortcutDialog.css.js
 var shortcutDialog_css_default = `/*

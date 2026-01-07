@@ -22,13 +22,13 @@ __export(OverlaysImpl_exports, {
   timingsForOverlayEntry: () => timingsForOverlayEntry,
   traceWindowContainingOverlays: () => traceWindowContainingOverlays
 });
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as AIAssistance from "./..\\..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Trace from "./..\\..\\..\\models\\trace\\trace.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Components from "./components\\components.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as AIAssistance from "./../../../models/ai_assistance/ai_assistance.js";
+import * as Trace from "./../../../models/trace/trace.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
+import * as Components from "./components/components.js";
 var UIStrings = {
   /**
    * @description Text for showing that a metric was observed in the local environment.

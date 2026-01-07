@@ -25,15 +25,15 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\front_end\\ui\\legacy",
+    "rootDir": "../../../../../../front_end/ui/legacy",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "ES2023",
     "tsBuildInfoFile": "docs_ts-tsconfig.json.tsbuildinfo",
     "typeRoots": [
-      "..\\..\\..\\..\\..\\..\\node_modules\\@types",
-      "..\\..\\..\\..\\..\\..\\node_modules"
+      "../../../../../../node_modules/@types",
+      "../../../../../../node_modules"
     ],
     "types": [
       "mocha",
@@ -44,13 +44,13 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\front_end\\ui\\legacy\\ContextMenu.docs.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\ui\\legacy\\RadioButton.docs.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\ui\\legacy\\SelectMenu.docs.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\ui\\legacy\\Slider.docs.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../front_end/ui/legacy/ContextMenu.docs.ts",
+    "../../../../../../front_end/ui/legacy/RadioButton.docs.ts",
+    "../../../../../../front_end/ui/legacy/SelectMenu.docs.ts",
+    "../../../../../../front_end/ui/legacy/Slider.docs.ts",
+    "../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

@@ -10,8 +10,8 @@ __export(ControlButton_exports, {
   ControlButton: () => ControlButton,
   DEFAULT_VIEW: () => DEFAULT_VIEW
 });
-import * as UI from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as UI from "./../../../ui/legacy/legacy.js";
+import * as Lit from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/recorder/components/controlButton.css.js
 var controlButton_css_default = `/*
@@ -165,15 +165,15 @@ __export(CreateRecordingView_exports, {
   CreateRecordingView: () => CreateRecordingView,
   DEFAULT_VIEW: () => DEFAULT_VIEW2
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Badges from "./..\\..\\..\\models\\badges\\badges.js";
-import * as Buttons from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Input from "./..\\..\\..\\ui\\components\\input\\input.js";
-import * as UI2 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Models from "./..\\models\\models.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as Badges from "./../../../models/badges/badges.js";
+import * as Buttons from "./../../../ui/components/buttons/buttons.js";
+import * as Input from "./../../../ui/components/input/input.js";
+import * as UI2 from "./../../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
+import * as Models from "./../models/models.js";
 
 // gen/front_end/panels/recorder/components/createRecordingView.css.js
 var createRecordingView_css_default = `/*
@@ -598,13 +598,13 @@ __export(RecordingListView_exports, {
   PlayRecordingEvent: () => PlayRecordingEvent,
   RecordingListView: () => RecordingListView
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Buttons2 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI3 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Models2 from "./..\\models\\models.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import * as Buttons2 from "./../../../ui/components/buttons/buttons.js";
+import * as UI3 from "./../../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../../ui/visual_logging/visual_logging.js";
+import * as Models2 from "./../models/models.js";
 
 // gen/front_end/panels/recorder/components/recordingListView.css.js
 var recordingListView_css_default = `/*
@@ -889,16 +889,16 @@ __export(RecordingView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW8,
   RecordingView: () => RecordingView
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
+import "./../../../ui/kit/kit.js";
 
 // gen/front_end/panels/recorder/components/ExtensionView.js
-import "./..\\..\\..\\ui\\legacy\\legacy.js";
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n5 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Buttons3 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Lit4 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Extensions from "./..\\extensions\\extensions.js";
+import "./../../../ui/legacy/legacy.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n5 from "./../../../core/i18n/i18n.js";
+import * as Buttons3 from "./../../../ui/components/buttons/buttons.js";
+import * as Lit4 from "./../../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../../ui/visual_logging/visual_logging.js";
+import * as Extensions from "./../extensions/extensions.js";
 
 // gen/front_end/panels/recorder/components/extensionView.css.js
 var extensionView_css_default = `/*
@@ -1042,20 +1042,20 @@ var ExtensionView = class extends HTMLElement {
 customElements.define("devtools-recorder-extension-view", ExtensionView);
 
 // gen/front_end/panels/recorder/components/RecordingView.js
-import * as Host3 from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n15 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as CodeMirror from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import * as Buttons7 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as CodeHighlighter from "./..\\..\\..\\ui\\components\\code_highlighter\\code_highlighter.js";
-import * as Dialogs from "./..\\..\\..\\ui\\components\\dialogs\\dialogs.js";
-import * as Input2 from "./..\\..\\..\\ui\\components\\input\\input.js";
-import * as TextEditor from "./..\\..\\..\\ui\\components\\text_editor\\text_editor.js";
-import * as UI9 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit10 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging8 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Models7 from "./..\\models\\models.js";
+import * as Host3 from "./../../../core/host/host.js";
+import * as i18n15 from "./../../../core/i18n/i18n.js";
+import * as Platform5 from "./../../../core/platform/platform.js";
+import * as SDK2 from "./../../../core/sdk/sdk.js";
+import * as CodeMirror from "./../../../third_party/codemirror.next/codemirror.next.js";
+import * as Buttons7 from "./../../../ui/components/buttons/buttons.js";
+import * as CodeHighlighter from "./../../../ui/components/code_highlighter/code_highlighter.js";
+import * as Dialogs from "./../../../ui/components/dialogs/dialogs.js";
+import * as Input2 from "./../../../ui/components/input/input.js";
+import * as TextEditor from "./../../../ui/components/text_editor/text_editor.js";
+import * as UI9 from "./../../../ui/legacy/legacy.js";
+import * as Lit10 from "./../../../ui/lit/lit.js";
+import * as VisualLogging8 from "./../../../ui/visual_logging/visual_logging.js";
+import * as Models7 from "./../models/models.js";
 
 // gen/front_end/panels/recorder/components/recordingView.css.js
 var recordingView_css_default = `/*
@@ -1430,14 +1430,14 @@ __export(ReplaySection_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW4,
   ReplaySection: () => ReplaySection
 });
-import * as Host from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Buttons4 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI4 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit5 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Models3 from "./..\\models\\models.js";
+import * as Host from "./../../../core/host/host.js";
+import * as i18n7 from "./../../../core/i18n/i18n.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as Buttons4 from "./../../../ui/components/buttons/buttons.js";
+import * as UI4 from "./../../../ui/legacy/legacy.js";
+import * as Lit5 from "./../../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../../ui/visual_logging/visual_logging.js";
+import * as Models3 from "./../models/models.js";
 
 // gen/front_end/panels/recorder/components/replaySection.css.js
 var replaySection_css_default = `/*
@@ -1750,7 +1750,7 @@ __export(StepView_exports, {
   StepChanged: () => StepChanged,
   StepView: () => StepView
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
+import "./../../../ui/kit/kit.js";
 
 // gen/front_end/panels/recorder/components/StepEditor.js
 var StepEditor_exports = {};
@@ -1759,16 +1759,16 @@ __export(StepEditor_exports, {
   StepEditedEvent: () => StepEditedEvent,
   StepEditor: () => StepEditor
 });
-import * as Host2 from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n11 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Buttons6 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as SuggestionInput from "./..\\..\\..\\ui\\components\\suggestion_input\\suggestion_input.js";
-import * as UI6 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit7 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging6 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Models5 from "./..\\models\\models.js";
-import * as Util2 from "./..\\util\\util.js";
+import * as Host2 from "./../../../core/host/host.js";
+import * as i18n11 from "./../../../core/i18n/i18n.js";
+import * as Platform3 from "./../../../core/platform/platform.js";
+import * as Buttons6 from "./../../../ui/components/buttons/buttons.js";
+import * as SuggestionInput from "./../../../ui/components/suggestion_input/suggestion_input.js";
+import * as UI6 from "./../../../ui/legacy/legacy.js";
+import * as Lit7 from "./../../../ui/lit/lit.js";
+import * as VisualLogging6 from "./../../../ui/visual_logging/visual_logging.js";
+import * as Models5 from "./../models/models.js";
+import * as Util2 from "./../util/util.js";
 
 // gen/front_end/panels/recorder/components/SelectorPicker.js
 var SelectorPicker_exports = {};
@@ -1777,16 +1777,16 @@ __export(SelectorPicker_exports, {
   RequestSelectorAttributeEvent: () => RequestSelectorAttributeEvent,
   SelectorPicker: () => SelectorPicker
 });
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n9 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Buttons5 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI5 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit6 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Models4 from "./..\\models\\models.js";
-import * as Util from "./..\\util\\util.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n9 from "./../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../core/platform/platform.js";
+import * as SDK from "./../../../core/sdk/sdk.js";
+import * as Buttons5 from "./../../../ui/components/buttons/buttons.js";
+import * as UI5 from "./../../../ui/legacy/legacy.js";
+import * as Lit6 from "./../../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../../ui/visual_logging/visual_logging.js";
+import * as Models4 from "./../models/models.js";
+import * as Util from "./../util/util.js";
 
 // gen/front_end/panels/recorder/components/selectorPicker.css.js
 var selectorPicker_css_default = `/*
@@ -3152,13 +3152,13 @@ StepEditor = __decorate([
 ], StepEditor);
 
 // gen/front_end/panels/recorder/components/StepView.js
-import * as i18n13 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Menus from "./..\\..\\..\\ui\\components\\menus\\menus.js";
-import * as UI8 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit9 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging7 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Models6 from "./..\\models\\models.js";
+import * as i18n13 from "./../../../core/i18n/i18n.js";
+import * as Platform4 from "./../../../core/platform/platform.js";
+import * as Menus from "./../../../ui/components/menus/menus.js";
+import * as UI8 from "./../../../ui/legacy/legacy.js";
+import * as Lit9 from "./../../../ui/lit/lit.js";
+import * as VisualLogging7 from "./../../../ui/visual_logging/visual_logging.js";
+import * as Models6 from "./../models/models.js";
 
 // gen/front_end/panels/recorder/components/stepView.css.js
 var stepView_css_default = `/*
@@ -3417,8 +3417,8 @@ __export(TimelineSection_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW6,
   TimelineSection: () => TimelineSection
 });
-import * as UI7 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit8 from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as UI7 from "./../../../ui/legacy/legacy.js";
+import * as Lit8 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/recorder/components/timelineSection.css.js
 var timelineSection_css_default = `/*

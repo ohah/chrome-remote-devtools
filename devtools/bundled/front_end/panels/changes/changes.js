@@ -10,14 +10,14 @@ __export(ChangesView_exports, {
   ChangesView: () => ChangesView,
   DEFAULT_VIEW: () => DEFAULT_VIEW3
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as GreenDev from "./..\\..\\models\\greendev\\greendev.js";
-import * as WorkspaceDiff3 from "./..\\..\\models\\workspace_diff\\workspace_diff.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelsCommon from "./..\\common\\common.js";
+import "./../../ui/legacy/legacy.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as GreenDev from "./../../models/greendev/greendev.js";
+import * as WorkspaceDiff3 from "./../../models/workspace_diff/workspace_diff.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelsCommon from "./../common/common.js";
 
 // gen/front_end/panels/changes/ChangesSidebar.js
 var ChangesSidebar_exports = {};
@@ -25,15 +25,15 @@ __export(ChangesSidebar_exports, {
   ChangesSidebar: () => ChangesSidebar,
   DEFAULT_VIEW: () => DEFAULT_VIEW
 });
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as WorkspaceDiff from "./..\\..\\models\\workspace_diff\\workspace_diff.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Snippets from "./..\\snippets\\snippets.js";
+import "./../../ui/kit/kit.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as WorkspaceDiff from "./../../models/workspace_diff/workspace_diff.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as Snippets from "./../snippets/snippets.js";
 
 // gen/front_end/panels/changes/changesSidebar.css.js
 var changesSidebar_css_default = `/*
@@ -264,16 +264,16 @@ var CombinedDiffView_exports = {};
 __export(CombinedDiffView_exports, {
   CombinedDiffView: () => CombinedDiffView
 });
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Persistence from "./..\\..\\models\\persistence\\persistence.js";
-import * as WorkspaceDiff2 from "./..\\..\\models\\workspace_diff\\workspace_diff.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelUtils from "./..\\utils\\utils.js";
+import "./../../ui/kit/kit.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Persistence from "./../../models/persistence/persistence.js";
+import * as WorkspaceDiff2 from "./../../models/workspace_diff/workspace_diff.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelUtils from "./../utils/utils.js";
 
 // gen/front_end/panels/changes/combinedDiffView.css.js
 var combinedDiffView_css_default = `/*

@@ -10,11 +10,11 @@ __export(FunctionCodeResolver_exports, {
   getFunctionCodeFromLocation: () => getFunctionCodeFromLocation,
   getFunctionCodeFromRawLocation: () => getFunctionCodeFromRawLocation
 });
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\bindings\\bindings.js";
-import * as Formatter from "./..\\formatter\\formatter.js";
-import * as TextUtils from "./..\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\workspace\\workspace.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../bindings/bindings.js";
+import * as Formatter from "./../formatter/formatter.js";
+import * as TextUtils from "./../text_utils/text_utils.js";
+import * as Workspace from "./../workspace/workspace.js";
 var inputCache = /* @__PURE__ */ new WeakMap();
 async function prepareInput(uiSourceCode, content) {
   const formattedContent = await format(uiSourceCode, content);
@@ -203,12 +203,12 @@ __export(NamesResolver_exports, {
   scopeIdentifiers: () => scopeIdentifiers,
   setScopeResolvedForTest: () => setScopeResolvedForTest
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings2 from "./..\\bindings\\bindings.js";
-import * as Formatter2 from "./..\\formatter\\formatter.js";
-import * as TextUtils3 from "./..\\text_utils\\text_utils.js";
+import * as Common from "./../../core/common/common.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as Bindings2 from "./../bindings/bindings.js";
+import * as Formatter2 from "./../formatter/formatter.js";
+import * as TextUtils3 from "./../text_utils/text_utils.js";
 var scopeToCachedIdentifiersMap = /* @__PURE__ */ new WeakMap();
 var cachedMapByCallFrame = /* @__PURE__ */ new WeakMap();
 async function getTextFor(contentProvider) {
@@ -783,8 +783,8 @@ __export(ScopeChainModel_exports, {
   ScopeChain: () => ScopeChain,
   ScopeChainModel: () => ScopeChainModel
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
 var ScopeChainModel = class extends Common2.ObjectWrapper.ObjectWrapper {
   #callFrame;
   /** We use the `Throttler` here to make sure that `#boundUpdate` is not run multiple times simultanously */

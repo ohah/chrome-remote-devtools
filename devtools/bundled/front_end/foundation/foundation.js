@@ -9,11 +9,11 @@ var Universe_exports = {};
 __export(Universe_exports, {
   Universe: () => Universe
 });
-import * as Common from "./..\\core\\common\\common.js";
-import * as Root from "./..\\core\\root\\root.js";
-import * as SDK from "./..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\models\\bindings\\bindings.js";
-import * as Workspace from "./..\\models\\workspace\\workspace.js";
+import * as Common from "./../core/common/common.js";
+import * as Root from "./../core/root/root.js";
+import * as SDK from "./../core/sdk/sdk.js";
+import * as Bindings from "./../models/bindings/bindings.js";
+import * as Workspace from "./../models/workspace/workspace.js";
 var Universe = class {
   context = new Root.DevToolsContext.DevToolsContext();
   constructor(options) {

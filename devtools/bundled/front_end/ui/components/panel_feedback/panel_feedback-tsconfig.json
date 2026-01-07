@@ -24,7 +24,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\..\\front_end\\ui\\components\\panel_feedback",
+    "rootDir": "../../../../../../../front_end/ui/components/panel_feedback",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
@@ -35,12 +35,12 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\ui\\components\\panel_feedback\\FeedbackButton.ts",
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\ui\\components\\panel_feedback\\PanelFeedback.ts",
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\ui\\components\\panel_feedback\\PreviewToggle.ts",
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../../front_end/ui/components/panel_feedback/FeedbackButton.ts",
+    "../../../../../../../front_end/ui/components/panel_feedback/PanelFeedback.ts",
+    "../../../../../../../front_end/ui/components/panel_feedback/PreviewToggle.ts",
+    "../../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

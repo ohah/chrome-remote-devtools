@@ -14,9 +14,9 @@ __export(ReportView_exports, {
   ReportSectionHeader: () => ReportSectionHeader,
   ReportValue: () => ReportValue
 });
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Components from "./..\\..\\legacy\\components\\utils\\utils.js";
-import { html, nothing, render } from "./..\\..\\lit\\lit.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as Components from "./../../legacy/components/utils/utils.js";
+import { html, nothing, render } from "./../../lit/lit.js";
 
 // gen/front_end/ui/components/report_view/report.css.js
 var report_css_default = `/*

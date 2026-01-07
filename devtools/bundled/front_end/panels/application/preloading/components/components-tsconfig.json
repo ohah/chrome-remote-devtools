@@ -24,7 +24,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\panels\\application\\preloading\\components",
+    "rootDir": "../../../../../../../../front_end/panels/application/preloading/components",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
@@ -35,17 +35,17 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\panels\\application\\preloading\\components\\MismatchedPreloadingGrid.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\panels\\application\\preloading\\components\\PreloadingDetailsReportView.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\panels\\application\\preloading\\components\\PreloadingDisabledInfobar.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\panels\\application\\preloading\\components\\PreloadingGrid.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\panels\\application\\preloading\\components\\PreloadingString.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\panels\\application\\preloading\\components\\RuleSetDetailsView.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\panels\\application\\preloading\\components\\RuleSetGrid.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\panels\\application\\preloading\\components\\UsedPreloadingView.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../../../front_end/panels/application/preloading/components/MismatchedPreloadingGrid.ts",
+    "../../../../../../../../front_end/panels/application/preloading/components/PreloadingDetailsReportView.ts",
+    "../../../../../../../../front_end/panels/application/preloading/components/PreloadingDisabledInfobar.ts",
+    "../../../../../../../../front_end/panels/application/preloading/components/PreloadingGrid.ts",
+    "../../../../../../../../front_end/panels/application/preloading/components/PreloadingString.ts",
+    "../../../../../../../../front_end/panels/application/preloading/components/RuleSetDetailsView.ts",
+    "../../../../../../../../front_end/panels/application/preloading/components/RuleSetGrid.ts",
+    "../../../../../../../../front_end/panels/application/preloading/components/UsedPreloadingView.ts",
+    "../../../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

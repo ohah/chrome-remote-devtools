@@ -10,7 +10,7 @@ __export(FormatterWorkerPool_exports, {
   FormatterWorkerPool: () => FormatterWorkerPool,
   formatterWorkerPool: () => formatterWorkerPool
 });
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
+import * as Platform from "./../../core/platform/platform.js";
 var formatterWorkerPoolInstance;
 var FormatterWorkerPool = class _FormatterWorkerPool {
   taskQueue;
@@ -158,8 +158,8 @@ __export(ScriptFormatter_exports, {
   format: () => format,
   formatScriptContent: () => formatScriptContent
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
+import * as Common from "./../../core/common/common.js";
+import * as Platform2 from "./../../core/platform/platform.js";
 function locationToPosition(lineEndings, lineNumber, columnNumber) {
   const position = lineNumber ? lineEndings[lineNumber - 1] + 1 : 0;
   return position + columnNumber;

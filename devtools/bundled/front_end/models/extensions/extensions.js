@@ -1036,7 +1036,7 @@ var LanguageExtensionEndpoint_exports = {};
 __export(LanguageExtensionEndpoint_exports, {
   LanguageExtensionEndpoint: () => LanguageExtensionEndpoint
 });
-import * as Bindings from "./..\\bindings\\bindings.js";
+import * as Bindings from "./../bindings/bindings.js";
 var LanguageExtensionEndpointImpl = class extends ExtensionEndpoint {
   plugin;
   constructor(plugin, port) {
@@ -1174,7 +1174,7 @@ var RecorderPluginManager_exports = {};
 __export(RecorderPluginManager_exports, {
   RecorderPluginManager: () => RecorderPluginManager
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
+import * as Common from "./../../core/common/common.js";
 var instance = null;
 var RecorderPluginManager = class _RecorderPluginManager extends Common.ObjectWrapper.ObjectWrapper {
   #plugins = /* @__PURE__ */ new Set();

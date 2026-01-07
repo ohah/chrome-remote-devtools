@@ -22,15 +22,15 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\..\\front_end\\core\\platform\\node",
+    "rootDir": "../../../../../../../front_end/core/platform/node",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "es2023",
     "tsBuildInfoFile": "node-tsconfig.json.tsbuildinfo",
     "typeRoots": [
-      "..\\..\\..\\..\\..\\..\\..\\node_modules\\@types",
-      "..\\..\\..\\..\\..\\..\\..\\node_modules"
+      "../../../../../../../node_modules/@types",
+      "../../../../../../../node_modules"
     ],
     "types": [
       "node",
@@ -39,10 +39,10 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\core\\platform\\node\\HostRuntime.ts",
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../../front_end/core/platform/node/HostRuntime.ts",
+    "../../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

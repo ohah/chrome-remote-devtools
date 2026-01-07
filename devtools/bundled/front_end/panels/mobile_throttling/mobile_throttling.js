@@ -9,8 +9,8 @@ var ThrottlingPresets_exports = {};
 __export(ThrottlingPresets_exports, {
   ThrottlingPresets: () => ThrottlingPresets
 });
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 var UIStrings = {
   /**
    * @description Text for no network throttling
@@ -144,8 +144,8 @@ var MobileThrottlingSelector_exports = {};
 __export(MobileThrottlingSelector_exports, {
   MobileThrottlingSelector: () => MobileThrottlingSelector
 });
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
 
 // gen/front_end/panels/mobile_throttling/ThrottlingManager.js
 var ThrottlingManager_exports = {};
@@ -154,13 +154,13 @@ __export(ThrottlingManager_exports, {
   ThrottlingManager: () => ThrottlingManager,
   throttlingManager: () => throttlingManager
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import { Icon } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import { Icon } from "./../../ui/kit/kit.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings2 = {
   /**
    *@description Text to indicate the network connectivity is offline
@@ -614,10 +614,10 @@ var NetworkPanelIndicator_exports = {};
 __export(NetworkPanelIndicator_exports, {
   NetworkPanelIndicator: () => NetworkPanelIndicator
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
 var UIStrings4 = {
   /**
    * @description Icon title in Network Panel Indicator of the Network panel
@@ -676,13 +676,13 @@ __export(NetworkThrottlingSelector_exports, {
   NetworkThrottlingSelect: () => NetworkThrottlingSelect,
   NetworkThrottlingSelectorWidget: () => NetworkThrottlingSelectorWidget
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK5 from "./../../core/sdk/sdk.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 var { render, html, Directives, nothing } = Lit;
 var UIStrings5 = {
   /**
@@ -942,18 +942,18 @@ __export(ThrottlingSettingsTab_exports, {
   CPUThrottlingCard: () => CPUThrottlingCard,
   ThrottlingSettingsTab: () => ThrottlingSettingsTab
 });
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK7 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import { createIcon } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/kit/kit.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as SDK7 from "./../../core/sdk/sdk.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import { createIcon } from "./../../ui/kit/kit.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/mobile_throttling/CalibrationController.js
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK6 from "./..\\..\\core\\sdk\\sdk.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as SDK6 from "./../../core/sdk/sdk.js";
 var UIStrings6 = {
   /**
    * @description Text to display to user while a calibration process is running.

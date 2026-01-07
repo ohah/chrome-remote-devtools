@@ -9,19 +9,19 @@ var SyncSection_exports = {};
 __export(SyncSection_exports, {
   SyncSection: () => SyncSection
 });
-import "./..\\..\\..\\ui\\components\\settings\\settings.js";
-import "./..\\..\\..\\ui\\components\\tooltips\\tooltips.js";
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Badges from "./..\\..\\..\\models\\badges\\badges.js";
-import * as Buttons from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelCommon from "./..\\..\\common\\common.js";
-import * as PanelUtils from "./..\\..\\utils\\utils.js";
+import "./../../../ui/components/settings/settings.js";
+import "./../../../ui/components/tooltips/tooltips.js";
+import * as Common from "./../../../core/common/common.js";
+import * as Host from "./../../../core/host/host.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as SDK from "./../../../core/sdk/sdk.js";
+import * as Badges from "./../../../models/badges/badges.js";
+import * as Buttons from "./../../../ui/components/buttons/buttons.js";
+import * as UI from "./../../../ui/legacy/legacy.js";
+import * as Lit from "./../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
+import * as PanelCommon from "./../../common/common.js";
+import * as PanelUtils from "./../../utils/utils.js";
 
 // gen/front_end/panels/settings/components/syncSection.css.js
 var syncSection_css_default = `/*

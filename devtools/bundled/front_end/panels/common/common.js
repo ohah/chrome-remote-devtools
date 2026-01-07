@@ -5,11 +5,11 @@ var __export = (target, all) => {
 };
 
 // gen/front_end/panels/common/common.prebundle.js
-import * as Host9 from "./..\\..\\core\\host\\host.js";
-import * as i18n23 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Geometry2 from "./..\\..\\models\\geometry\\geometry.js";
-import * as Buttons5 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI14 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Host9 from "./../../core/host/host.js";
+import * as i18n23 from "./../../core/i18n/i18n.js";
+import * as Geometry2 from "./../../models/geometry/geometry.js";
+import * as Buttons5 from "./../../ui/components/buttons/buttons.js";
+import * as UI14 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/common/common.css.js
 var common_css_default = `/*
@@ -63,14 +63,14 @@ var common_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./common.css")} */`;
 
 // gen/front_end/panels/common/AiCodeCompletionTeaser.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as Snackbars from "./..\\..\\ui\\components\\snackbars\\snackbars.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html2, nothing, render as render2 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as Snackbars from "./../../ui/components/snackbars/snackbars.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import { html as html2, nothing, render as render2 } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/common/aiCodeCompletionTeaser.css.js
 var aiCodeCompletionTeaser_css_default = `/*
@@ -124,10 +124,10 @@ var aiCodeCompletionTeaser_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./aiCodeCompletionTeaser.css")} */`;
 
 // gen/front_end/panels/common/FreDialog.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/common/freDialog.css.js
 var freDialog_css_default = `/*
@@ -545,10 +545,10 @@ __export(AiCodeGenerationTeaser_exports, {
   AiCodeGenerationTeaserDisplayState: () => AiCodeGenerationTeaserDisplayState,
   DEFAULT_VIEW: () => DEFAULT_VIEW2
 });
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html3, nothing as nothing2, render as render3 } from "./..\\..\\ui\\lit\\lit.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import { html as html3, nothing as nothing2, render as render3 } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/common/aiCodeGenerationTeaser.css.js
 var aiCodeGenerationTeaser_css_default = `/*
@@ -649,14 +649,14 @@ var AiCodeGenerationTeaser = class extends UI3.Widget.Widget {
 };
 
 // gen/front_end/panels/common/AnnotationManager.js
-import * as Annotations2 from "./..\\..\\models\\annotations\\annotations.js";
+import * as Annotations2 from "./../../models/annotations/annotations.js";
 
 // gen/front_end/panels/common/Annotation.js
-import * as Annotations from "./..\\..\\models\\annotations\\annotations.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import { html as html4, nothing as nothing3, render as render4 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Annotations from "./../../models/annotations/annotations.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport from "./../../ui/legacy/theme_support/theme_support.js";
+import { html as html4, nothing as nothing3, render as render4 } from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/common/annotation.css.js
 var annotation_css_default = `/**
@@ -959,18 +959,18 @@ var AnnotationManager = class _AnnotationManager {
 };
 
 // gen/front_end/panels/common/GdpSignUpDialog.js
-import "./..\\..\\ui\\components\\switch\\switch.js";
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Badges from "./..\\..\\models\\badges\\badges.js";
-import * as Geometry from "./..\\..\\models\\geometry\\geometry.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Snackbars2 from "./..\\..\\ui\\components\\snackbars\\snackbars.js";
-import * as UIHelpers from "./..\\..\\ui\\helpers\\helpers.js";
-import * as uiI18n from "./..\\..\\ui\\i18n\\i18n.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html5, render as render5 } from "./..\\..\\ui\\lit\\lit.js";
+import "./../../ui/components/switch/switch.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Badges from "./../../models/badges/badges.js";
+import * as Geometry from "./../../models/geometry/geometry.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import * as Snackbars2 from "./../../ui/components/snackbars/snackbars.js";
+import * as UIHelpers from "./../../ui/helpers/helpers.js";
+import * as uiI18n from "./../../ui/i18n/i18n.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import { html as html5, render as render5 } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/common/gdpSignUpDialog.css.js
 var gdpSignUpDialog_css_default = `/*
@@ -1290,14 +1290,14 @@ var GdpSignUpDialog = class _GdpSignUpDialog extends UI5.Widget.VBox {
 };
 
 // gen/front_end/panels/common/AiCodeCompletionDisclaimer.js
-import "./..\\..\\ui\\components\\spinners\\spinners.js";
-import "./..\\..\\ui\\components\\tooltips\\tooltips.js";
-import * as Host4 from "./..\\..\\core\\host\\host.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives, html as html6, nothing as nothing4, render as render6 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/components/spinners/spinners.js";
+import "./../../ui/components/tooltips/tooltips.js";
+import * as Host4 from "./../../core/host/host.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
+import { Directives, html as html6, nothing as nothing4, render as render6 } from "./../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/common/aiCodeCompletionDisclaimer.css.js
 var aiCodeCompletionDisclaimer_css_default = `/*
@@ -1541,13 +1541,13 @@ var AiCodeCompletionDisclaimer = class extends UI6.Widget.Widget {
 };
 
 // gen/front_end/panels/common/AiCodeCompletionSummaryToolbar.js
-import "./..\\..\\ui\\components\\spinners\\spinners.js";
-import "./..\\..\\ui\\components\\tooltips\\tooltips.js";
-import * as Host5 from "./..\\..\\core\\host\\host.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives as Directives2, html as html7, nothing as nothing5, render as render7 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/components/spinners/spinners.js";
+import "./../../ui/components/tooltips/tooltips.js";
+import * as Host5 from "./../../core/host/host.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
+import { Directives as Directives2, html as html7, nothing as nothing5, render as render7 } from "./../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/common/aiCodeCompletionSummaryToolbar.css.js
 var aiCodeCompletionSummaryToolbar_css_default = `/*
@@ -1774,16 +1774,16 @@ var AiCodeCompletionSummaryToolbar = class extends UI7.Widget.Widget {
 };
 
 // gen/front_end/panels/common/BadgeNotification.js
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as Host6 from "./..\\..\\core\\host\\host.js";
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Badges2 from "./..\\..\\models\\badges\\badges.js";
-import * as Buttons3 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UIHelpers2 from "./..\\..\\ui\\helpers\\helpers.js";
-import * as uiI18n2 from "./..\\..\\ui\\i18n\\i18n.js";
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as Host6 from "./../../core/host/host.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as Badges2 from "./../../models/badges/badges.js";
+import * as Buttons3 from "./../../ui/components/buttons/buttons.js";
+import * as UIHelpers2 from "./../../ui/helpers/helpers.js";
+import * as uiI18n2 from "./../../ui/i18n/i18n.js";
+import * as UI8 from "./../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/common/badgeNotification.css.js
 var badgeNotification_css_default = `/*
@@ -2141,10 +2141,10 @@ __export(ExtensionPanel_exports, {
   ExtensionPanel: () => ExtensionPanel,
   ExtensionSidebarPane: () => ExtensionSidebarPane
 });
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Extensions from "./..\\..\\models\\extensions\\extensions.js";
-import * as UI10 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Extensions from "./../../models/extensions/extensions.js";
+import * as UI10 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/common/ExtensionView.js
 var ExtensionView_exports = {};
@@ -2153,8 +2153,8 @@ __export(ExtensionView_exports, {
   ExtensionNotifierView: () => ExtensionNotifierView,
   ExtensionView: () => ExtensionView
 });
-import * as UI9 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\ui\\lit\\lit.js";
+import * as UI9 from "./../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../ui/lit/lit.js";
 var { render: render9, html: html9, Directives: { ref } } = Lit3;
 var DEFAULT_VIEW6 = (input, output, target) => {
   render9(html9`<iframe
@@ -2449,20 +2449,20 @@ __export(ExtensionServer_exports, {
   HostsPolicy: () => HostsPolicy,
   RevealableNetworkRequestFilter: () => RevealableNetworkRequestFilter
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Host7 from "./..\\..\\core\\host\\host.js";
-import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as Extensions2 from "./..\\..\\models\\extensions\\extensions.js";
-import * as HAR from "./..\\..\\models\\har\\har.js";
-import * as Logs from "./..\\..\\models\\logs\\logs.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI11 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport3 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Host7 from "./../../core/host/host.js";
+import * as i18n15 from "./../../core/i18n/i18n.js";
+import * as Platform4 from "./../../core/platform/platform.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as Extensions2 from "./../../models/extensions/extensions.js";
+import * as HAR from "./../../models/har/har.js";
+import * as Logs from "./../../models/logs/logs.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI11 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport3 from "./../../ui/legacy/theme_support/theme_support.js";
 var extensionOrigins = /* @__PURE__ */ new WeakMap();
 var kPermittedSchemes = ["http:", "https:", "file:", "data:", "chrome-extension:", "about:"];
 var extensionServerInstance;
@@ -3776,14 +3776,14 @@ __export(PersistenceUtils_exports, {
   LinkDecorator: () => LinkDecorator,
   PersistenceUtils: () => PersistenceUtils
 });
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as i18n17 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
-import * as Persistence from "./..\\..\\models\\persistence\\persistence.js";
-import * as Workspace3 from "./..\\..\\models\\workspace\\workspace.js";
-import * as Components2 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import { html as html10 } from "./..\\..\\ui\\lit\\lit.js";
+import "./../../ui/kit/kit.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as i18n17 from "./../../core/i18n/i18n.js";
+import * as Platform5 from "./../../core/platform/platform.js";
+import * as Persistence from "./../../models/persistence/persistence.js";
+import * as Workspace3 from "./../../models/workspace/workspace.js";
+import * as Components2 from "./../../ui/legacy/components/utils/utils.js";
+import { html as html10 } from "./../../ui/lit/lit.js";
 var UIStrings4 = {
   /**
    * @description Text in Persistence Utils of the Workspace settings in Settings
@@ -3856,12 +3856,12 @@ __export(DOMLinkifier_exports, {
   DeferredDOMNodeLink: () => DeferredDOMNodeLink,
   Linkifier: () => Linkifier2
 });
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as i18n19 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI12 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives as Directives3, html as html11, nothing as nothing6, render as render10 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging6 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as i18n19 from "./../../core/i18n/i18n.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as UI12 from "./../../ui/legacy/legacy.js";
+import { Directives as Directives3, html as html11, nothing as nothing6, render as render10 } from "./../../ui/lit/lit.js";
+import * as VisualLogging6 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/common/domLinkifier.css.js
 var domLinkifier_css_default = `/*
@@ -4114,15 +4114,15 @@ var Linkifier2 = class _Linkifier {
 };
 
 // gen/front_end/panels/common/CopyChangesToPrompt.js
-import * as Host8 from "./..\\..\\core\\host\\host.js";
-import * as i18n21 from "./..\\..\\core\\i18n\\i18n.js";
-import * as GreenDev from "./..\\..\\models\\greendev\\greendev.js";
-import * as WorkspaceDiff from "./..\\..\\models\\workspace_diff\\workspace_diff.js";
-import * as Diff from "./..\\..\\third_party\\diff\\diff.js";
-import * as Buttons4 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Snackbars3 from "./..\\..\\ui\\components\\snackbars\\snackbars.js";
-import * as UI13 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit4 from "./..\\..\\ui\\lit\\lit.js";
+import * as Host8 from "./../../core/host/host.js";
+import * as i18n21 from "./../../core/i18n/i18n.js";
+import * as GreenDev from "./../../models/greendev/greendev.js";
+import * as WorkspaceDiff from "./../../models/workspace_diff/workspace_diff.js";
+import * as Diff from "./../../third_party/diff/diff.js";
+import * as Buttons4 from "./../../ui/components/buttons/buttons.js";
+import * as Snackbars3 from "./../../ui/components/snackbars/snackbars.js";
+import * as UI13 from "./../../ui/legacy/legacy.js";
+import * as Lit4 from "./../../ui/lit/lit.js";
 var { render: render11, html: html12 } = Lit4;
 var UIStrings6 = {
   /**

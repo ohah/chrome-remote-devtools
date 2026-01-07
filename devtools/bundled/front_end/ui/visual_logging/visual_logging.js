@@ -1,9 +1,9 @@
 // gen/front_end/ui/visual_logging/Debugging.js
-import { assertNotNullOrUndefined } from "./..\\..\\core\\platform\\platform.js";
+import { assertNotNullOrUndefined } from "./../../core/platform/platform.js";
 
 // gen/front_end/ui/visual_logging/LoggingConfig.js
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
+import * as Host from "./../../core/host/host.js";
+import * as Root from "./../../core/root/root.js";
 
 // gen/front_end/ui/visual_logging/KnownContextValues.js
 var knownContextValues = /* @__PURE__ */ new Set([
@@ -5136,9 +5136,9 @@ globalThis.buildStateFlow = buildStateFlow;
 globalThis.expectVeEvents = expectVeEvents;
 
 // gen/front_end/ui/visual_logging/LoggingDriver.js
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as RenderCoordinator from "./..\\components\\render_coordinator\\render_coordinator.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as RenderCoordinator from "./../components/render_coordinator/render_coordinator.js";
 
 // gen/front_end/ui/visual_logging/DomState.js
 function getDomState(documents2) {
@@ -5204,9 +5204,9 @@ function intersection(a, b) {
 }
 
 // gen/front_end/ui/visual_logging/LoggingEvents.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import { assertNotNullOrUndefined as assertNotNullOrUndefined2 } from "./..\\..\\core\\platform\\platform.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import { assertNotNullOrUndefined as assertNotNullOrUndefined2 } from "./../../core/platform/platform.js";
 async function logImpressions(loggables) {
   const impressions = await Promise.all(loggables.map(async (loggable) => {
     const loggingState = getLoggingState(loggable);

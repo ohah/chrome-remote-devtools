@@ -1,5 +1,5 @@
 // gen/front_end/models/workspace/workspace-meta.prebundle.js
-import * as Common from "./..\\..\\core\\common\\common.js";
+import * as Common from "./../../core/common/common.js";
 Common.Settings.registerSettingExtension({
   storageType: "Synced",
   settingName: "skip-stack-frames-pattern",

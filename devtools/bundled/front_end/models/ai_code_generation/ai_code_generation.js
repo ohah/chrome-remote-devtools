@@ -30,8 +30,8 @@ __export(AiCodeGeneration_exports, {
   additionalContextForConsole: () => additionalContextForConsole,
   basePreamble: () => basePreamble
 });
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
+import * as Host from "./../../core/host/host.js";
+import * as Root from "./../../core/root/root.js";
 var basePreamble = `You are a highly skilled senior software engineer with deep expertise across multiple web technologies and programming languages, including JavaScript, TypeScript, HTML, and CSS.
 Your role is to act as an expert pair programmer within the Chrome DevTools environment.
 

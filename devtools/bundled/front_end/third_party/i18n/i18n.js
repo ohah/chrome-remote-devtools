@@ -16,7 +16,7 @@ __export(localized_string_set_exports, {
   LocalizedStringSet: () => LocalizedStringSet,
   RegisteredFileStrings: () => RegisteredFileStrings
 });
-import * as IntlMessageFormat from "./..\\intl-messageformat\\intl-messageformat.js";
+import * as IntlMessageFormat from "./../intl-messageformat/intl-messageformat.js";
 var EMPTY_VALUES_OBJECT = {};
 var RegisteredFileStrings = class {
   filename;

@@ -1,6 +1,6 @@
 // gen/front_end/panels/welcome/welcome-meta.prebundle.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 var UIStrings = {
   /**
    * @description Title of the Welcome panel

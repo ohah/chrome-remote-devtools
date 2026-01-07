@@ -1,6 +1,6 @@
 // gen/front_end/panels/layer_viewer/layer_viewer-meta.prebundle.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 var UIStrings = {
   /**
    * @description Text in the Shortcuts page to explain a keyboard shortcut (reset view in Layers Panel)

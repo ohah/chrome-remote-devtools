@@ -9,12 +9,12 @@ var DevicesSettingsTab_exports = {};
 __export(DevicesSettingsTab_exports, {
   DevicesSettingsTab: () => DevicesSettingsTab
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as EmulationModel from "./..\\..\\..\\models\\emulation\\emulation.js";
-import * as UI from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as EmulationComponents from "./components\\components.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as EmulationModel from "./../../../models/emulation/emulation.js";
+import * as UI from "./../../../ui/legacy/legacy.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
+import * as EmulationComponents from "./components/components.js";
 
 // gen/front_end/panels/settings/emulation/devicesSettingsTab.css.js
 var devicesSettingsTab_css_default = `/*

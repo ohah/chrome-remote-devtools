@@ -10,14 +10,14 @@ __export(CodeBlock_exports, {
   CodeBlock: () => CodeBlock,
   languageFromToken: () => languageFromToken
 });
-import "./..\\..\\legacy\\legacy.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as CodeMirror from "./..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import * as Buttons from "./..\\buttons\\buttons.js";
-import * as TextEditor from "./..\\text_editor\\text_editor.js";
-import * as UI from "./..\\..\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\visual_logging\\visual_logging.js";
+import "./../../legacy/legacy.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as CodeMirror from "./../../../third_party/codemirror.next/codemirror.next.js";
+import * as Buttons from "./../buttons/buttons.js";
+import * as TextEditor from "./../text_editor/text_editor.js";
+import * as UI from "./../../legacy/legacy.js";
+import * as Lit from "./../../lit/lit.js";
+import * as VisualLogging from "./../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/components/markdown_view/codeBlock.css.js
 var codeBlock_css_default = `/*
@@ -358,8 +358,8 @@ var MarkdownImage_exports = {};
 __export(MarkdownImage_exports, {
   MarkdownImage: () => MarkdownImage
 });
-import "./..\\..\\kit\\kit.js";
-import * as Lit2 from "./..\\..\\lit\\lit.js";
+import "./../../kit/kit.js";
+import * as Lit2 from "./../../lit/lit.js";
 
 // gen/front_end/ui/components/markdown_view/markdownImage.css.js
 var markdownImage_css_default = `/*
@@ -439,9 +439,9 @@ var MarkdownLink_exports = {};
 __export(MarkdownLink_exports, {
   MarkdownLink: () => MarkdownLink
 });
-import "./..\\..\\legacy\\legacy.js";
-import { html as html4, render as render3 } from "./..\\..\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\visual_logging\\visual_logging.js";
+import "./../../legacy/legacy.js";
+import { html as html4, render as render3 } from "./../../lit/lit.js";
+import * as VisualLogging2 from "./../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/components/markdown_view/markdownLink.css.js
 var markdownLink_css_default = `/*
@@ -580,8 +580,8 @@ __export(MarkdownView_exports, {
   MarkdownLitRenderer: () => MarkdownLitRenderer,
   MarkdownView: () => MarkdownView
 });
-import * as Lit3 from "./..\\..\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\visual_logging\\visual_logging.js";
+import * as Lit3 from "./../../lit/lit.js";
+import * as VisualLogging3 from "./../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/components/markdown_view/markdownView.css.js
 var markdownView_css_default = `/*

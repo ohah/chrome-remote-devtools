@@ -1,8 +1,8 @@
 // gen/front_end/models/badges/AiExplorerBadge.js
-import * as Common2 from "./..\\..\\core\\common\\common.js";
+import * as Common2 from "./../../core/common/common.js";
 
 // gen/front_end/models/badges/Badge.js
-import * as Common from "./..\\..\\core\\common\\common.js";
+import * as Common from "./../../core/common/common.js";
 var BadgeAction;
 (function(BadgeAction2) {
   BadgeAction2["GDP_SIGN_UP_COMPLETE"] = "gdp-sign-up-complete";
@@ -126,8 +126,8 @@ var StarterBadge = class extends Badge {
 };
 
 // gen/front_end/models/badges/UserBadges.js
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
 
 // gen/front_end/models/badges/CodeWhispererBadge.js
 var CODE_WHISPERER_BADGE_IMAGE_URI = new URL("../../Images/code-whisperer-badge.svg", import.meta.url).toString();

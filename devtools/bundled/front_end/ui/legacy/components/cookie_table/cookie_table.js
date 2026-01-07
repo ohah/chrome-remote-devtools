@@ -9,16 +9,16 @@ var CookiesTable_exports = {};
 __export(CookiesTable_exports, {
   CookiesTable: () => CookiesTable
 });
-import "./..\\data_grid\\data_grid.js";
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as IssuesManager from "./..\\..\\..\\..\\models\\issues_manager\\issues_manager.js";
-import * as NetworkForward from "./..\\..\\..\\..\\panels\\network\\forward\\forward.js";
-import { Icon } from "./..\\..\\..\\kit\\kit.js";
-import { Directives, html, render } from "./..\\..\\..\\lit\\lit.js";
-import * as UI from "./..\\..\\legacy.js";
+import "./../data_grid/data_grid.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as Root from "./../../../../core/root/root.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
+import * as IssuesManager from "./../../../../models/issues_manager/issues_manager.js";
+import * as NetworkForward from "./../../../../panels/network/forward/forward.js";
+import { Icon } from "./../../../kit/kit.js";
+import { Directives, html, render } from "./../../../lit/lit.js";
+import * as UI from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/cookie_table/cookiesTable.css.js
 var cookiesTable_css_default = `/*

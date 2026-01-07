@@ -229,12 +229,12 @@ __export(LighthouseController_exports, {
   Presets: () => Presets,
   RuntimeSettings: () => RuntimeSettings
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as EmulationModel from "./..\\..\\models\\emulation\\emulation.js";
-import * as Emulation from "./..\\emulation\\emulation.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as EmulationModel from "./../../models/emulation/emulation.js";
+import * as Emulation from "./../emulation/emulation.js";
 var UIStrings = {
   /**
    * @description Explanation for user that Ligthhouse can only audit HTTP/HTTPS pages
@@ -967,11 +967,11 @@ var LighthousePanel_exports = {};
 __export(LighthousePanel_exports, {
   LighthousePanel: () => LighthousePanel
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as i18n12 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as i18n12 from "./../../core/i18n/i18n.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/lighthouse/lighthousePanel.css.js
 var lighthousePanel_css_default = `/*
@@ -1090,8 +1090,8 @@ var LighthouseProtocolService_exports = {};
 __export(LighthouseProtocolService_exports, {
   ProtocolService: () => ProtocolService
 });
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
 var lastId = 1;
 var ProtocolService = class {
   mainSessionId;
@@ -1282,18 +1282,18 @@ var LighthouseReportRenderer_exports = {};
 __export(LighthouseReportRenderer_exports, {
   LighthouseReportRenderer: () => LighthouseReportRenderer
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as LighthouseReport from "./..\\..\\third_party\\lighthouse\\report\\report.js";
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelsCommon from "./..\\common\\common.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as LighthouseReport from "./../../third_party/lighthouse/report/report.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport from "./../../ui/legacy/theme_support/theme_support.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelsCommon from "./../common/common.js";
 var MaxLengthForLinks = 40;
 var LighthouseReportRenderer = class _LighthouseReportRenderer {
   static renderLighthouseReport(lhr, artifacts, opts) {
@@ -1473,9 +1473,9 @@ __export(LighthouseReportSelector_exports, {
   Item: () => Item,
   ReportSelector: () => ReportSelector
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n4 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n4 from "./../../core/i18n/i18n.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
 var UIStrings2 = {
   /**
    * @description Title of combo box in audits report selector
@@ -1581,10 +1581,10 @@ var LighthouseStartView_exports = {};
 __export(LighthouseStartView_exports, {
   StartView: () => StartView
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as i18n6 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
+import "./../../ui/legacy/legacy.js";
+import * as i18n6 from "./../../core/i18n/i18n.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/lighthouse/lighthouseStartView.css.js
 var lighthouseStartView_css_default = `/*
@@ -1745,7 +1745,7 @@ var RadioSetting_exports = {};
 __export(RadioSetting_exports, {
   RadioSetting: () => RadioSetting
 });
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
 var RadioSetting = class {
   setting;
   options;
@@ -2064,12 +2064,12 @@ __export(LighthouseStatusView_exports, {
   fastFactRotationInterval: () => fastFactRotationInterval,
   minimumTextVisibilityDuration: () => minimumTextVisibilityDuration
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as i18n8 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Geometry from "./..\\..\\models\\geometry\\geometry.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as i18n8 from "./../../core/i18n/i18n.js";
+import * as Geometry from "./../../models/geometry/geometry.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/lighthouse/lighthouseDialog.css.js
 var lighthouseDialog_css_default = `/*
@@ -2631,10 +2631,10 @@ var FastFacts = [
 ];
 
 // gen/front_end/panels/lighthouse/LighthouseTimespanView.js
-import * as i18n10 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Geometry2 from "./..\\..\\models\\geometry\\geometry.js";
-import * as Buttons3 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n10 from "./../../core/i18n/i18n.js";
+import * as Geometry2 from "./../../models/geometry/geometry.js";
+import * as Buttons3 from "./../../ui/components/buttons/buttons.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
 var UIStrings5 = {
   /**
    * @description Header indicating that a Lighthouse timespan is starting. "Timespan" is a Lighthouse mode that analyzes user interactions over a period of time.

@@ -9,16 +9,16 @@ var BaseInsightComponent_exports = {};
 __export(BaseInsightComponent_exports, {
   BaseInsightComponent: () => BaseInsightComponent
 });
-import "./..\\..\\..\\..\\ui\\components\\markdown_view\\markdown_view.js";
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\..\\..\\core\\root\\root.js";
-import * as AIAssistance from "./..\\..\\..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Badges from "./..\\..\\..\\..\\models\\badges\\badges.js";
-import * as GreenDev from "./..\\..\\..\\..\\models\\greendev\\greendev.js";
-import * as Buttons from "./..\\..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../../ui/components/markdown_view/markdown_view.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as Root from "./../../../../core/root/root.js";
+import * as AIAssistance from "./../../../../models/ai_assistance/ai_assistance.js";
+import * as Badges from "./../../../../models/badges/badges.js";
+import * as GreenDev from "./../../../../models/greendev/greendev.js";
+import * as Buttons from "./../../../../ui/components/buttons/buttons.js";
+import * as UI from "./../../../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/components/insights/baseInsightComponent.css.js
 var baseInsightComponent_css_default = `/*
@@ -237,10 +237,10 @@ __export(Helpers_exports, {
   md: () => md,
   shouldRenderForCategory: () => shouldRenderForCategory
 });
-import "./..\\..\\..\\..\\ui\\components\\markdown_view\\markdown_view.js";
-import * as Trace from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as Marked from "./..\\..\\..\\..\\third_party\\marked\\marked.js";
-import * as Lit from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../../ui/components/markdown_view/markdown_view.js";
+import * as Trace from "./../../../../models/trace/trace.js";
+import * as Marked from "./../../../../third_party/marked/marked.js";
+import * as Lit from "./../../../../ui/lit/lit.js";
 var { html } = Lit;
 function shouldRenderForCategory(options) {
   return options.activeCategory === Trace.Insights.Types.InsightCategory.ALL || options.activeCategory === options.insightCategory;
@@ -706,9 +706,9 @@ __export(Table_exports, {
   i18nString: () => i18nString2,
   renderOthersLabel: () => renderOthersLabel
 });
-import * as i18n3 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI3 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit4 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n3 from "./../../../../core/i18n/i18n.js";
+import * as UI3 from "./../../../../ui/legacy/legacy.js";
+import * as Lit4 from "./../../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/insights/EventRef.js
 var EventRef_exports = {};
@@ -717,10 +717,10 @@ __export(EventRef_exports, {
   EventReferenceClick: () => EventReferenceClick,
   eventRef: () => eventRef
 });
-import * as Trace2 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI2 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
-import * as Utils from "./..\\..\\utils\\utils.js";
+import * as Trace2 from "./../../../../models/trace/trace.js";
+import * as UI2 from "./../../../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../../../ui/lit/lit.js";
+import * as Utils from "./../../utils/utils.js";
 var { html: html3, Directives: { ifDefined } } = Lit3;
 var { widgetConfig } = UI2.Widget;
 var EventReferenceClick = class _EventReferenceClick extends Event {
@@ -1053,10 +1053,10 @@ var Table = class extends UI3.Widget.Widget {
 };
 
 // gen/front_end/panels/timeline/components/insights/Cache.js
-import * as i18n5 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace3 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI4 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit5 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n5 from "./../../../../core/i18n/i18n.js";
+import * as Trace3 from "./../../../../models/trace/trace.js";
+import * as UI4 from "./../../../../ui/legacy/legacy.js";
+import * as Lit5 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings3, i18nString: i18nString3, createOverlayForRequest } = Trace3.Insights.Models.Cache;
 var { html: html5 } = Lit5;
 var { widgetConfig: widgetConfig2 } = UI4.Widget;
@@ -1108,10 +1108,10 @@ __export(Checklist_exports, {
   Checklist: () => Checklist,
   DEFAULT_VIEW: () => DEFAULT_VIEW4
 });
-import "./..\\..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n6 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI5 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit6 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../../ui/kit/kit.js";
+import * as i18n6 from "./../../../../core/i18n/i18n.js";
+import * as UI5 from "./../../../../ui/legacy/legacy.js";
+import * as Lit6 from "./../../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/insights/checklist.css.js
 var checklist_css_default = `/*
@@ -1216,9 +1216,9 @@ var CLSCulprits_exports = {};
 __export(CLSCulprits_exports, {
   CLSCulprits: () => CLSCulprits
 });
-import * as i18n8 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace4 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as Lit8 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n8 from "./../../../../core/i18n/i18n.js";
+import * as Trace4 from "./../../../../models/trace/trace.js";
+import * as Lit8 from "./../../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/insights/NodeLink.js
 var NodeLink_exports = {};
@@ -1227,12 +1227,12 @@ __export(NodeLink_exports, {
   NodeLink: () => NodeLink,
   nodeLink: () => nodeLink
 });
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Buttons2 from "./..\\..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as LegacyComponents from "./..\\..\\..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI6 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit7 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
-import * as PanelsCommon from "./..\\..\\..\\common\\common.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
+import * as Buttons2 from "./../../../../ui/components/buttons/buttons.js";
+import * as LegacyComponents from "./../../../../ui/legacy/components/utils/utils.js";
+import * as UI6 from "./../../../../ui/legacy/legacy.js";
+import * as Lit7 from "./../../../../ui/lit/lit.js";
+import * as PanelsCommon from "./../../../common/common.js";
 var { html: html7 } = Lit7;
 var { widgetConfig: widgetConfig3 } = UI6.Widget;
 var DEFAULT_VIEW5 = (input, output, target) => {
@@ -1401,8 +1401,8 @@ var DocumentLatency_exports = {};
 __export(DocumentLatency_exports, {
   DocumentLatency: () => DocumentLatency
 });
-import * as UI7 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit9 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as UI7 from "./../../../../ui/legacy/legacy.js";
+import * as Lit9 from "./../../../../ui/lit/lit.js";
 var { html: html9 } = Lit9;
 var { widgetConfig: widgetConfig4 } = UI7.Widget;
 var DocumentLatency = class extends BaseInsightComponent {
@@ -1428,11 +1428,11 @@ var DOMSize_exports = {};
 __export(DOMSize_exports, {
   DOMSize: () => DOMSize
 });
-import "./..\\..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n9 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace5 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI8 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit10 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../../ui/kit/kit.js";
+import * as i18n9 from "./../../../../core/i18n/i18n.js";
+import * as Trace5 from "./../../../../models/trace/trace.js";
+import * as UI8 from "./../../../../ui/legacy/legacy.js";
+import * as Lit10 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings6, i18nString: i18nString6 } = Trace5.Insights.Models.DOMSize;
 var { html: html10 } = Lit10;
 var { widgetConfig: widgetConfig5 } = UI8.Widget;
@@ -1535,17 +1535,17 @@ var DuplicatedJavaScript_exports = {};
 __export(DuplicatedJavaScript_exports, {
   DuplicatedJavaScript: () => DuplicatedJavaScript
 });
-import * as i18n10 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace6 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as Buttons3 from "./..\\..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI9 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit11 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Utils2 from "./..\\..\\utils\\utils.js";
+import * as i18n10 from "./../../../../core/i18n/i18n.js";
+import * as Trace6 from "./../../../../models/trace/trace.js";
+import * as Buttons3 from "./../../../../ui/components/buttons/buttons.js";
+import * as UI9 from "./../../../../ui/legacy/legacy.js";
+import * as Lit11 from "./../../../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../../../ui/visual_logging/visual_logging.js";
+import * as Utils2 from "./../../utils/utils.js";
 
 // gen/front_end/panels/timeline/components/insights/ScriptRef.js
-import * as Platform from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as TimelineUtils from "./..\\..\\utils\\utils.js";
+import * as Platform from "./../../../../core/platform/platform.js";
+import * as TimelineUtils from "./../../utils/utils.js";
 function scriptRef(script) {
   if (script.request) {
     if (script.inline) {
@@ -1660,10 +1660,10 @@ var FontDisplay_exports = {};
 __export(FontDisplay_exports, {
   FontDisplay: () => FontDisplay
 });
-import * as i18n11 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace7 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI10 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit12 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n11 from "./../../../../core/i18n/i18n.js";
+import * as Trace7 from "./../../../../models/trace/trace.js";
+import * as UI10 from "./../../../../ui/legacy/legacy.js";
+import * as Lit12 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings8, i18nString: i18nString8 } = Trace7.Insights.Models.FontDisplay;
 var { html: html12 } = Lit12;
 var { widgetConfig: widgetConfig7 } = UI10.Widget;
@@ -1730,12 +1730,12 @@ var ForcedReflow_exports = {};
 __export(ForcedReflow_exports, {
   ForcedReflow: () => ForcedReflow
 });
-import * as i18n12 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Trace8 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as LegacyComponents2 from "./..\\..\\..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI11 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit13 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n12 from "./../../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../../core/platform/platform.js";
+import * as Trace8 from "./../../../../models/trace/trace.js";
+import * as LegacyComponents2 from "./../../../../ui/legacy/components/utils/utils.js";
+import * as UI11 from "./../../../../ui/legacy/legacy.js";
+import * as Lit13 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings9, i18nString: i18nString9, createOverlayForEvents } = Trace8.Insights.Models.ForcedReflow;
 var { html: html13, nothing: nothing10 } = Lit13;
 var { widgetConfig: widgetConfig8 } = UI11.Widget;
@@ -1825,16 +1825,16 @@ var ImageDelivery_exports = {};
 __export(ImageDelivery_exports, {
   ImageDelivery: () => ImageDelivery
 });
-import "./..\\..\\..\\..\\ui\\kit\\kit.js";
-import * as Trace9 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI13 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit15 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../../ui/kit/kit.js";
+import * as Trace9 from "./../../../../models/trace/trace.js";
+import * as UI13 from "./../../../../ui/legacy/legacy.js";
+import * as Lit15 from "./../../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/insights/ImageRef.js
-import * as i18n13 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as UI12 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit14 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n13 from "./../../../../core/i18n/i18n.js";
+import * as SDK2 from "./../../../../core/sdk/sdk.js";
+import * as UI12 from "./../../../../ui/legacy/legacy.js";
+import * as Lit14 from "./../../../../ui/lit/lit.js";
 var { html: html14 } = Lit14;
 var { widgetConfig: widgetConfig9 } = UI12.Widget;
 var DEFAULT_VIEW6 = (input, output, target) => {
@@ -1957,11 +1957,11 @@ var INPBreakdown_exports = {};
 __export(INPBreakdown_exports, {
   INPBreakdown: () => INPBreakdown
 });
-import * as i18n14 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Trace10 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI14 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit16 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n14 from "./../../../../core/i18n/i18n.js";
+import * as Platform3 from "./../../../../core/platform/platform.js";
+import * as Trace10 from "./../../../../models/trace/trace.js";
+import * as UI14 from "./../../../../ui/legacy/legacy.js";
+import * as Lit16 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings11, i18nString: i18nString11, createOverlaysForSubpart } = Trace10.Insights.Models.INPBreakdown;
 var { html: html16 } = Lit16;
 var { widgetConfig: widgetConfig11 } = UI14.Widget;
@@ -2008,17 +2008,17 @@ var InsightRenderer_exports = {};
 __export(InsightRenderer_exports, {
   InsightRenderer: () => InsightRenderer
 });
-import * as UI23 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
+import * as UI23 from "./../../../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/timeline/components/insights/LCPBreakdown.js
 var LCPBreakdown_exports = {};
 __export(LCPBreakdown_exports, {
   LCPBreakdown: () => LCPBreakdown
 });
-import * as i18n15 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace11 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI15 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit17 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n15 from "./../../../../core/i18n/i18n.js";
+import * as Trace11 from "./../../../../models/trace/trace.js";
+import * as UI15 from "./../../../../ui/legacy/legacy.js";
+import * as Lit17 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings12, i18nString: i18nString12 } = Trace11.Insights.Models.LCPBreakdown;
 var { html: html17 } = Lit17;
 var { widgetConfig: widgetConfig12 } = UI15.Widget;
@@ -2122,11 +2122,11 @@ var LCPDiscovery_exports = {};
 __export(LCPDiscovery_exports, {
   LCPDiscovery: () => LCPDiscovery
 });
-import * as i18n16 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace12 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as uiI18n from "./..\\..\\..\\..\\ui\\i18n\\i18n.js";
-import * as UI16 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit18 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n16 from "./../../../../core/i18n/i18n.js";
+import * as Trace12 from "./../../../../models/trace/trace.js";
+import * as uiI18n from "./../../../../ui/i18n/i18n.js";
+import * as UI16 from "./../../../../ui/legacy/legacy.js";
+import * as Lit18 from "./../../../../ui/lit/lit.js";
 var { widgetConfig: widgetConfig13 } = UI16.Widget;
 var { UIStrings: UIStrings13, i18nString: i18nString13, getImageData } = Trace12.Insights.Models.LCPDiscovery;
 var { html: html18 } = Lit18;
@@ -2196,13 +2196,13 @@ var LegacyJavaScript_exports = {};
 __export(LegacyJavaScript_exports, {
   LegacyJavaScript: () => LegacyJavaScript
 });
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n18 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK3 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\..\\..\\models\\bindings\\bindings.js";
-import * as Trace13 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI17 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit19 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as i18n18 from "./../../../../core/i18n/i18n.js";
+import * as SDK3 from "./../../../../core/sdk/sdk.js";
+import * as Bindings from "./../../../../models/bindings/bindings.js";
+import * as Trace13 from "./../../../../models/trace/trace.js";
+import * as UI17 from "./../../../../ui/legacy/legacy.js";
+import * as Lit19 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings14, i18nString: i18nString14 } = Trace13.Insights.Models.LegacyJavaScript;
 var { html: html19 } = Lit19;
 var { widgetConfig: widgetConfig14 } = UI17.Widget;
@@ -2273,9 +2273,9 @@ var ModernHTTP_exports = {};
 __export(ModernHTTP_exports, {
   ModernHTTP: () => ModernHTTP
 });
-import * as Trace14 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI18 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit20 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as Trace14 from "./../../../../models/trace/trace.js";
+import * as UI18 from "./../../../../ui/legacy/legacy.js";
+import * as Lit20 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings15, i18nString: i18nString15, createOverlayForRequest: createOverlayForRequest3 } = Trace14.Insights.Models.ModernHTTP;
 var { html: html20 } = Lit20;
 var { widgetConfig: widgetConfig15 } = UI18.Widget;
@@ -2327,11 +2327,11 @@ __export(NetworkDependencyTree_exports, {
   MAX_CHAINS_TO_SHOW: () => MAX_CHAINS_TO_SHOW,
   NetworkDependencyTree: () => NetworkDependencyTree
 });
-import "./..\\..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n19 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace15 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI19 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit21 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../../ui/kit/kit.js";
+import * as i18n19 from "./../../../../core/i18n/i18n.js";
+import * as Trace15 from "./../../../../models/trace/trace.js";
+import * as UI19 from "./../../../../ui/legacy/legacy.js";
+import * as Lit21 from "./../../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/insights/networkDependencyTreeInsight.css.js
 var networkDependencyTreeInsight_css_default = `/*
@@ -2593,10 +2593,10 @@ var RenderBlocking_exports = {};
 __export(RenderBlocking_exports, {
   RenderBlocking: () => RenderBlocking
 });
-import * as i18n20 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace16 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI20 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit22 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n20 from "./../../../../core/i18n/i18n.js";
+import * as Trace16 from "./../../../../models/trace/trace.js";
+import * as UI20 from "./../../../../ui/legacy/legacy.js";
+import * as Lit22 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings17, i18nString: i18nString17, createOverlayForRequest: createOverlayForRequest4 } = Trace16.Insights.Models.RenderBlocking;
 var { html: html22 } = Lit22;
 var { widgetConfig: widgetConfig17 } = UI20.Widget;
@@ -2652,13 +2652,13 @@ var SlowCSSSelector_exports = {};
 __export(SlowCSSSelector_exports, {
   SlowCSSSelector: () => SlowCSSSelector
 });
-import "./..\\..\\..\\..\\ui\\components\\linkifier\\linkifier.js";
-import * as i18n21 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK4 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Trace17 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI21 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit23 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../../ui/components/linkifier/linkifier.js";
+import * as i18n21 from "./../../../../core/i18n/i18n.js";
+import * as Platform4 from "./../../../../core/platform/platform.js";
+import * as SDK4 from "./../../../../core/sdk/sdk.js";
+import * as Trace17 from "./../../../../models/trace/trace.js";
+import * as UI21 from "./../../../../ui/legacy/legacy.js";
+import * as Lit23 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings18, i18nString: i18nString18 } = Trace17.Insights.Models.SlowCSSSelector;
 var { html: html23 } = Lit23;
 var { widgetConfig: widgetConfig18 } = UI21.Widget;
@@ -2784,10 +2784,10 @@ var ThirdParties_exports = {};
 __export(ThirdParties_exports, {
   ThirdParties: () => ThirdParties
 });
-import * as i18n22 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace18 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as UI22 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit24 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n22 from "./../../../../core/i18n/i18n.js";
+import * as Trace18 from "./../../../../models/trace/trace.js";
+import * as UI22 from "./../../../../ui/legacy/legacy.js";
+import * as Lit24 from "./../../../../ui/lit/lit.js";
 var { UIStrings: UIStrings19, i18nString: i18nString19, createOverlaysForSummary } = Trace18.Insights.Models.ThirdParties;
 var { html: html24 } = Lit24;
 var { widgetConfig: widgetConfig19 } = UI22.Widget;
@@ -2876,7 +2876,7 @@ var Viewport_exports = {};
 __export(Viewport_exports, {
   Viewport: () => Viewport
 });
-import * as Lit25 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as Lit25 from "./../../../../ui/lit/lit.js";
 var { html: html25 } = Lit25;
 var Viewport = class extends BaseInsightComponent {
   internalName = "viewport";

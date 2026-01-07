@@ -25,15 +25,15 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\front_end\\panels\\network",
+    "rootDir": "../../../../../../front_end/panels/network",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "esnext",
     "tsBuildInfoFile": "unittests-tsconfig.json.tsbuildinfo",
     "typeRoots": [
-      "..\\..\\..\\..\\..\\..\\node_modules\\@types",
-      "..\\..\\..\\..\\..\\..\\node_modules"
+      "../../../../../../node_modules/@types",
+      "../../../../../../node_modules"
     ],
     "types": [
       "mocha",
@@ -44,25 +44,25 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\NetworkConfigView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\NetworkDataGridNode.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\NetworkItemView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\NetworkLogView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\NetworkOverview.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\NetworkPanel.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\NetworkSearchScope.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\RequestConditionsDrawer.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\RequestCookiesView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\RequestHTMLView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\RequestInitiatorView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\RequestPayloadView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\RequestPreviewView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\RequestResponseView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\RequestTimingView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\network\\ResourceDirectSocketChunkView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../front_end/panels/network/NetworkConfigView.test.ts",
+    "../../../../../../front_end/panels/network/NetworkDataGridNode.test.ts",
+    "../../../../../../front_end/panels/network/NetworkItemView.test.ts",
+    "../../../../../../front_end/panels/network/NetworkLogView.test.ts",
+    "../../../../../../front_end/panels/network/NetworkOverview.test.ts",
+    "../../../../../../front_end/panels/network/NetworkPanel.test.ts",
+    "../../../../../../front_end/panels/network/NetworkSearchScope.test.ts",
+    "../../../../../../front_end/panels/network/RequestConditionsDrawer.test.ts",
+    "../../../../../../front_end/panels/network/RequestCookiesView.test.ts",
+    "../../../../../../front_end/panels/network/RequestHTMLView.test.ts",
+    "../../../../../../front_end/panels/network/RequestInitiatorView.test.ts",
+    "../../../../../../front_end/panels/network/RequestPayloadView.test.ts",
+    "../../../../../../front_end/panels/network/RequestPreviewView.test.ts",
+    "../../../../../../front_end/panels/network/RequestResponseView.test.ts",
+    "../../../../../../front_end/panels/network/RequestTimingView.test.ts",
+    "../../../../../../front_end/panels/network/ResourceDirectSocketChunkView.test.ts",
+    "../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

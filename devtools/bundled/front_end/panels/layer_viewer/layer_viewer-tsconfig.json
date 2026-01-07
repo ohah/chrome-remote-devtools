@@ -24,7 +24,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\front_end\\panels\\layer_viewer",
+    "rootDir": "../../../../../../front_end/panels/layer_viewer",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
@@ -35,15 +35,15 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\layer_viewer\\LayerDetailsView.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\layer_viewer\\LayerTreeOutline.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\layer_viewer\\LayerViewHost.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\layer_viewer\\Layers3DView.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\layer_viewer\\PaintProfilerView.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\layer_viewer\\TransformController.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../front_end/panels/layer_viewer/LayerDetailsView.ts",
+    "../../../../../../front_end/panels/layer_viewer/LayerTreeOutline.ts",
+    "../../../../../../front_end/panels/layer_viewer/LayerViewHost.ts",
+    "../../../../../../front_end/panels/layer_viewer/Layers3DView.ts",
+    "../../../../../../front_end/panels/layer_viewer/PaintProfilerView.ts",
+    "../../../../../../front_end/panels/layer_viewer/TransformController.ts",
+    "../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

@@ -9,8 +9,8 @@ var PanelIntroductionSteps_exports = {};
 __export(PanelIntroductionSteps_exports, {
   PanelIntroductionSteps: () => PanelIntroductionSteps
 });
-import * as ComponentHelpers from "./..\\helpers\\helpers.js";
-import { html, render } from "./..\\..\\lit\\lit.js";
+import * as ComponentHelpers from "./../helpers/helpers.js";
+import { html, render } from "./../../lit/lit.js";
 
 // gen/front_end/ui/components/panel_introduction_steps/panelIntroductionSteps.css.js
 var panelIntroductionSteps_css_default = `/*

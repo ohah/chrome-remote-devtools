@@ -64,7 +64,7 @@ __export(Runtime_exports, {
   hostConfig: () => hostConfig,
   isNodeEntry: () => isNodeEntry
 });
-import * as Platform from "./..\\platform\\platform.js";
+import * as Platform from "./../platform/platform.js";
 var runtimePlatform = "";
 var runtimeInstance;
 var isNode;

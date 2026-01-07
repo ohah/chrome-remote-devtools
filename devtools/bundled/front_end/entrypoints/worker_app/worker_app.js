@@ -1,11 +1,11 @@
 // gen/front_end/entrypoints/worker_app/worker_app.prebundle.js
-import "./..\\shell\\shell.js";
+import "./../shell/shell.js";
 
 // gen/front_end/panels/browser_debugger/browser_debugger-meta.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 var UIStrings = {
   /**
    * @description Command for showing the 'Event Listener Breakpoints' tool
@@ -81,7 +81,7 @@ var i18nLazyString = i18n.i18n.getLazilyComputedLocalizedString.bind(void 0, str
 var loadedBrowserDebuggerModule;
 async function loadBrowserDebuggerModule() {
   if (!loadedBrowserDebuggerModule) {
-    loadedBrowserDebuggerModule = await import("./..\\..\\panels\\browser_debugger\\browser_debugger.js");
+    loadedBrowserDebuggerModule = await import("./../../panels/browser_debugger/browser_debugger.js");
   }
   return loadedBrowserDebuggerModule;
 }
@@ -94,7 +94,7 @@ function maybeRetrieveContextTypes(getClassCallBack) {
 var loadedSourcesModule;
 async function loadSourcesModule() {
   if (!loadedSourcesModule) {
-    loadedSourcesModule = await import("./..\\..\\panels\\sources\\sources.js");
+    loadedSourcesModule = await import("./../../panels/sources/sources.js");
   }
   return loadedSourcesModule;
 }
@@ -257,9 +257,9 @@ UI.Context.registerListener({
 });
 
 // gen/front_end/panels/developer_resources/developer_resources-meta.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
 var UIStrings2 = {
   /**
    * @description Title for developer resources panel
@@ -275,7 +275,7 @@ var i18nLazyString2 = i18n3.i18n.getLazilyComputedLocalizedString.bind(void 0, s
 var loadedDeveloperResourcesModule;
 async function loadDeveloperResourcesModule() {
   if (!loadedDeveloperResourcesModule) {
-    loadedDeveloperResourcesModule = await import("./..\\..\\panels\\developer_resources\\developer_resources.js");
+    loadedDeveloperResourcesModule = await import("./../../panels/developer_resources/developer_resources.js");
   }
   return loadedDeveloperResourcesModule;
 }
@@ -291,9 +291,9 @@ Common.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/issues/issues-meta.js
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager from "./..\\..\\models\\issues_manager\\issues_manager.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as IssuesManager from "./../../models/issues_manager/issues_manager.js";
 var UIStrings3 = {
   /**
    * @description Label for the issues pane
@@ -309,7 +309,7 @@ var i18nLazyString3 = i18n5.i18n.getLazilyComputedLocalizedString.bind(void 0, s
 var loadedIssuesModule;
 async function loadIssuesModule() {
   if (!loadedIssuesModule) {
-    loadedIssuesModule = await import("./..\\..\\panels\\issues\\issues.js");
+    loadedIssuesModule = await import("./../../panels/issues/issues.js");
   }
   return loadedIssuesModule;
 }
@@ -327,8 +327,8 @@ Common2.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/layer_viewer/layer_viewer-meta.js
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
 var UIStrings4 = {
   /**
    * @description Text in the Shortcuts page to explain a keyboard shortcut (reset view in Layers Panel)
@@ -479,9 +479,9 @@ UI2.ActionRegistration.registerActionExtension({
 });
 
 // gen/front_end/panels/mobile_throttling/mobile_throttling-meta.js
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
 var UIStrings5 = {
   /**
    * @description Text for throttling the network
@@ -523,7 +523,7 @@ var i18nLazyString5 = i18n9.i18n.getLazilyComputedLocalizedString.bind(void 0, s
 var loadedMobileThrottlingModule;
 async function loadMobileThrottlingModule() {
   if (!loadedMobileThrottlingModule) {
-    loadedMobileThrottlingModule = await import("./..\\..\\panels\\mobile_throttling\\mobile_throttling.js");
+    loadedMobileThrottlingModule = await import("./../../panels/mobile_throttling/mobile_throttling.js");
   }
   return loadedMobileThrottlingModule;
 }
@@ -603,14 +603,14 @@ Common3.Settings.registerSettingExtension({
 });
 
 // gen/front_end/panels/network/network-meta.js
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as PanelCommon from "./..\\..\\panels\\common\\common.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as NetworkForward from "./..\\..\\panels\\network\\forward\\forward.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as PanelCommon from "./../../panels/common/common.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as NetworkForward from "./../../panels/network/forward/forward.js";
 var UIStrings6 = {
   /**
    * @description Command for showing the 'Network' tool
@@ -759,7 +759,7 @@ var loadedNetworkModule;
 var isNode = Root2.Runtime.Runtime.isNode();
 async function loadNetworkModule() {
   if (!loadedNetworkModule) {
-    loadedNetworkModule = await import("./..\\..\\panels\\network\\network.js");
+    loadedNetworkModule = await import("./../../panels/network/network.js");
   }
   return loadedNetworkModule;
 }
@@ -1101,11 +1101,11 @@ Common4.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/application/application-meta.js
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as PreloadingHelper from "./..\\..\\panels\\application\\preloading\\helper\\helper.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import * as PreloadingHelper from "./../../panels/application/preloading/helper/helper.js";
 var UIStrings7 = {
   /**
    * @description Text in Application Panel Sidebar of the Application panel
@@ -1141,7 +1141,7 @@ var i18nLazyString7 = i18n13.i18n.getLazilyComputedLocalizedString.bind(void 0, 
 var loadedResourcesModule;
 async function loadResourcesModule() {
   if (!loadedResourcesModule) {
-    loadedResourcesModule = await import("./..\\..\\panels\\application\\application.js");
+    loadedResourcesModule = await import("./../../panels/application/application.js");
   }
   return loadedResourcesModule;
 }
@@ -1262,10 +1262,10 @@ Common5.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/timeline/timeline-meta.js
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as i18n15 from "./../../core/i18n/i18n.js";
+import * as SDK5 from "./../../core/sdk/sdk.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
 var UIStrings8 = {
   /**
    * @description Text for the performance of something
@@ -1325,7 +1325,7 @@ var i18nLazyString8 = i18n15.i18n.getLazilyComputedLocalizedString.bind(void 0, 
 var loadedTimelineModule;
 async function loadTimelineModule() {
   if (!loadedTimelineModule) {
-    loadedTimelineModule = await import("./..\\..\\panels\\timeline\\timeline.js");
+    loadedTimelineModule = await import("./../../panels/timeline/timeline.js");
   }
   return loadedTimelineModule;
 }
@@ -1594,11 +1594,11 @@ Common6.Revealer.registerRevealer({
 });
 
 // gen/front_end/entrypoints/worker_app/WorkerMain.js
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as i18n17 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK6 from "./..\\..\\core\\sdk\\sdk.js";
-import * as MobileThrottling from "./..\\..\\panels\\mobile_throttling\\mobile_throttling.js";
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as i18n17 from "./../../core/i18n/i18n.js";
+import * as SDK6 from "./../../core/sdk/sdk.js";
+import * as MobileThrottling from "./../../panels/mobile_throttling/mobile_throttling.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
 var UIStrings9 = {
   /**
    * @description Text that refers to the main target.
@@ -1642,8 +1642,8 @@ SDK6.ChildTargetManager.ChildTargetManager.install(async ({ target, waitingForDe
 });
 
 // gen/front_end/entrypoints/worker_app/worker_app.prebundle.js
-import * as Root3 from "./..\\..\\core\\root\\root.js";
-import * as Main from "./..\\main\\main.js";
+import * as Root3 from "./../../core/root/root.js";
+import * as Main from "./../main/main.js";
 self.runtime = Root3.Runtime.Runtime.instance({ forceNew: true });
 new Main.MainImpl.MainImpl();
 //# sourceMappingURL=worker_app.js.map

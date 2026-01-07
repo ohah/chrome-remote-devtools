@@ -10,12 +10,12 @@ __export(Automapping_exports, {
   Automapping: () => Automapping,
   AutomappingStatus: () => AutomappingStatus
 });
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as Host5 from "./..\\..\\core\\host\\host.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings2 from "./..\\bindings\\bindings.js";
-import * as TextUtils5 from "./..\\text_utils\\text_utils.js";
-import * as Workspace5 from "./..\\workspace\\workspace.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as Host5 from "./../../core/host/host.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as Bindings2 from "./../bindings/bindings.js";
+import * as TextUtils5 from "./../text_utils/text_utils.js";
+import * as Workspace5 from "./../workspace/workspace.js";
 
 // gen/front_end/models/persistence/FileSystemWorkspaceBinding.js
 var FileSystemWorkspaceBinding_exports = {};
@@ -23,11 +23,11 @@ __export(FileSystemWorkspaceBinding_exports, {
   FileSystem: () => FileSystem,
   FileSystemWorkspaceBinding: () => FileSystemWorkspaceBinding
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils2 from "./..\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\workspace\\workspace.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as Platform5 from "./../../core/platform/platform.js";
+import * as TextUtils2 from "./../text_utils/text_utils.js";
+import * as Workspace from "./../workspace/workspace.js";
 
 // gen/front_end/models/persistence/IsolatedFileSystemManager.js
 var IsolatedFileSystemManager_exports = {};
@@ -35,10 +35,10 @@ __export(IsolatedFileSystemManager_exports, {
   Events: () => Events,
   IsolatedFileSystemManager: () => IsolatedFileSystemManager
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Platform4 from "./../../core/platform/platform.js";
 
 // gen/front_end/models/persistence/IsolatedFileSystem.js
 var IsolatedFileSystem_exports = {};
@@ -46,11 +46,11 @@ __export(IsolatedFileSystem_exports, {
   BinaryExtensions: () => BinaryExtensions,
   IsolatedFileSystem: () => IsolatedFileSystem
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils from "./..\\text_utils\\text_utils.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as TextUtils from "./../text_utils/text_utils.js";
 
 // gen/front_end/models/persistence/PlatformFileSystem.js
 var PlatformFileSystem_exports = {};
@@ -58,8 +58,8 @@ __export(PlatformFileSystem_exports, {
   PlatformFileSystem: () => PlatformFileSystem,
   PlatformFileSystemType: () => PlatformFileSystemType
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Assertion error message when failing to load a file.
@@ -1312,14 +1312,14 @@ __export(PersistenceImpl_exports, {
   PersistenceBinding: () => PersistenceBinding,
   PersistenceImpl: () => PersistenceImpl
 });
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as Host4 from "./..\\..\\core\\host\\host.js";
-import * as Platform7 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\bindings\\bindings.js";
-import * as BreakpointManager from "./..\\breakpoints\\breakpoints.js";
-import * as TextUtils4 from "./..\\text_utils\\text_utils.js";
-import * as Workspace3 from "./..\\workspace\\workspace.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as Host4 from "./../../core/host/host.js";
+import * as Platform7 from "./../../core/platform/platform.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../bindings/bindings.js";
+import * as BreakpointManager from "./../breakpoints/breakpoints.js";
+import * as TextUtils4 from "./../text_utils/text_utils.js";
+import * as Workspace3 from "./../workspace/workspace.js";
 var persistenceInstance;
 var PersistenceImpl = class _PersistenceImpl extends Common5.ObjectWrapper.ObjectWrapper {
   #workspace;
@@ -2002,9 +2002,9 @@ var AutomaticFileSystemManager_exports = {};
 __export(AutomaticFileSystemManager_exports, {
   AutomaticFileSystemManager: () => AutomaticFileSystemManager
 });
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as Host6 from "./..\\..\\core\\host\\host.js";
-import * as ProjectSettings from "./..\\project_settings\\project_settings.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as Host6 from "./../../core/host/host.js";
+import * as ProjectSettings from "./../project_settings/project_settings.js";
 var automaticFileSystemManagerInstance;
 var AutomaticFileSystemManager = class _AutomaticFileSystemManager extends Common7.ObjectWrapper.ObjectWrapper {
   #automaticFileSystem;
@@ -2162,9 +2162,9 @@ __export(AutomaticFileSystemWorkspaceBinding_exports, {
   AutomaticFileSystemWorkspaceBinding: () => AutomaticFileSystemWorkspaceBinding,
   FileSystem: () => FileSystem2
 });
-import * as Common8 from "./..\\..\\core\\common\\common.js";
-import * as Host7 from "./..\\..\\core\\host\\host.js";
-import * as Workspace7 from "./..\\workspace\\workspace.js";
+import * as Common8 from "./../../core/common/common.js";
+import * as Host7 from "./../../core/host/host.js";
+import * as Workspace7 from "./../workspace/workspace.js";
 var FileSystem2 = class {
   automaticFileSystem;
   automaticFileSystemManager;
@@ -2338,13 +2338,13 @@ __export(NetworkPersistenceManager_exports, {
   extractDirectoryIndex: () => extractDirectoryIndex,
   isHeaderOverride: () => isHeaderOverride
 });
-import * as Common9 from "./..\\..\\core\\common\\common.js";
-import * as Host8 from "./..\\..\\core\\host\\host.js";
-import * as Platform11 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Breakpoints from "./..\\breakpoints\\breakpoints.js";
-import * as TextUtils6 from "./..\\text_utils\\text_utils.js";
-import * as Workspace9 from "./..\\workspace\\workspace.js";
+import * as Common9 from "./../../core/common/common.js";
+import * as Host8 from "./../../core/host/host.js";
+import * as Platform11 from "./../../core/platform/platform.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as Breakpoints from "./../breakpoints/breakpoints.js";
+import * as TextUtils6 from "./../text_utils/text_utils.js";
+import * as Workspace9 from "./../workspace/workspace.js";
 var networkPersistenceManagerInstance;
 var forbiddenUrls = ["chromewebstore.google.com", "chrome.google.com"];
 var NetworkPersistenceManager = class _NetworkPersistenceManager extends Common9.ObjectWrapper.ObjectWrapper {

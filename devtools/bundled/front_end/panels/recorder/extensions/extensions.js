@@ -9,9 +9,9 @@ var ExtensionManager_exports = {};
 __export(ExtensionManager_exports, {
   ExtensionManager: () => ExtensionManager
 });
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as Extensions from "./..\\..\\..\\models\\extensions\\extensions.js";
-import * as PanelCommon from "./..\\..\\common\\common.js";
+import * as Common from "./../../../core/common/common.js";
+import * as Extensions from "./../../../models/extensions/extensions.js";
+import * as PanelCommon from "./../../common/common.js";
 var instance = null;
 var ExtensionManager = class _ExtensionManager extends Common.ObjectWrapper.ObjectWrapper {
   static instance() {

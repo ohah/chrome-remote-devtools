@@ -12,7 +12,7 @@ __export(AllocationProfile_exports, {
   FunctionAllocationInfo: () => FunctionAllocationInfo,
   TopDownAllocationNode: () => TopDownAllocationNode
 });
-import * as HeapSnapshotModel from "./..\\..\\models\\heap_snapshot_model\\heap_snapshot_model.js";
+import * as HeapSnapshotModel from "./../../models/heap_snapshot_model/heap_snapshot_model.js";
 var AllocationProfile = class {
   #strings;
   #nextNodeId;
@@ -299,9 +299,9 @@ __export(HeapSnapshot_exports, {
   SecondaryInitManager: () => SecondaryInitManager,
   createJSHeapSnapshotForTesting: () => createJSHeapSnapshotForTesting
 });
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as HeapSnapshotModel3 from "./..\\..\\models\\heap_snapshot_model\\heap_snapshot_model.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as HeapSnapshotModel3 from "./../../models/heap_snapshot_model/heap_snapshot_model.js";
 var _a;
 var HeapSnapshotEdge = class _HeapSnapshotEdge {
   snapshot;
@@ -3351,8 +3351,8 @@ var HeapSnapshotLoader_exports = {};
 __export(HeapSnapshotLoader_exports, {
   HeapSnapshotLoader: () => HeapSnapshotLoader
 });
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
 var HeapSnapshotLoader = class {
   #progress;
   #buffer;
@@ -3553,7 +3553,7 @@ var HeapSnapshotWorkerDispatcher_exports = {};
 __export(HeapSnapshotWorkerDispatcher_exports, {
   HeapSnapshotWorkerDispatcher: () => HeapSnapshotWorkerDispatcher
 });
-import * as HeapSnapshotModel5 from "./..\\..\\models\\heap_snapshot_model\\heap_snapshot_model.js";
+import * as HeapSnapshotModel5 from "./../../models/heap_snapshot_model/heap_snapshot_model.js";
 var HeapSnapshotWorkerDispatcher = class {
   // TODO(crbug.com/1172300) Ignored during the jsdoc to ts migration)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

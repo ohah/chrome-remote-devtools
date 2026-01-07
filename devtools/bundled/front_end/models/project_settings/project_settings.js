@@ -9,9 +9,9 @@ var ProjectSettingsModel_exports = {};
 __export(ProjectSettingsModel_exports, {
   ProjectSettingsModel: () => ProjectSettingsModel
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common from "./../../core/common/common.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 var DEVTOOLS_SECURITY_ORIGIN = "devtools://devtools";
 var WELL_KNOWN_DEVTOOLS_JSON_PATH = "/.well-known/appspecific/com.chrome.devtools.json";
 function isDevToolsBundledURL(url) {

@@ -14,7 +14,7 @@ __export(StackTraceImpl_exports, {
   FrameImpl: () => FrameImpl,
   StackTraceImpl: () => StackTraceImpl
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
+import * as Common from "./../../core/common/common.js";
 var StackTraceImpl = class extends Common.ObjectWrapper.ObjectWrapper {
   syncFragment;
   asyncFragments;
@@ -134,8 +134,8 @@ var StackTraceModel_exports = {};
 __export(StackTraceModel_exports, {
   StackTraceModel: () => StackTraceModel
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 import * as StackTrace from "./stack_trace.js";
 
 // gen/front_end/models/stack_trace/Trie.js

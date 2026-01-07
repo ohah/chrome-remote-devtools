@@ -24,7 +24,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\front_end\\panels\\security",
+    "rootDir": "../../../../../../front_end/panels/security",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
@@ -35,18 +35,18 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\security\\CookieControlsTreeElement.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\security\\CookieControlsView.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\security\\CookieReportTreeElement.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\security\\CookieReportView.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\security\\OriginTreeElement.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\security\\SecurityModel.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\security\\SecurityPanel.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\security\\SecurityPanelSidebar.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\security\\SecurityPanelSidebarTreeElement.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../front_end/panels/security/CookieControlsTreeElement.ts",
+    "../../../../../../front_end/panels/security/CookieControlsView.ts",
+    "../../../../../../front_end/panels/security/CookieReportTreeElement.ts",
+    "../../../../../../front_end/panels/security/CookieReportView.ts",
+    "../../../../../../front_end/panels/security/OriginTreeElement.ts",
+    "../../../../../../front_end/panels/security/SecurityModel.ts",
+    "../../../../../../front_end/panels/security/SecurityPanel.ts",
+    "../../../../../../front_end/panels/security/SecurityPanelSidebar.ts",
+    "../../../../../../front_end/panels/security/SecurityPanelSidebarTreeElement.ts",
+    "../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

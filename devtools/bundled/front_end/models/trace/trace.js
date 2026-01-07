@@ -9,8 +9,8 @@ var EntityMapper_exports = {};
 __export(EntityMapper_exports, {
   EntityMapper: () => EntityMapper
 });
-import * as Handlers from "./handlers\\handlers.js";
-import * as Helpers2 from "./helpers\\helpers.js";
+import * as Handlers from "./handlers/handlers.js";
+import * as Helpers2 from "./helpers/helpers.js";
 var EntityMapper = class {
   #parsedTrace;
   #entityMappings;
@@ -122,8 +122,8 @@ var EventsSerializer_exports = {};
 __export(EventsSerializer_exports, {
   EventsSerializer: () => EventsSerializer
 });
-import * as Helpers3 from "./helpers\\helpers.js";
-import * as Types from "./types\\types.js";
+import * as Helpers3 from "./helpers/helpers.js";
+import * as Types from "./types/types.js";
 var EventsSerializer = class _EventsSerializer {
   #modifiedProfileCallByKey = /* @__PURE__ */ new Map();
   keyForEvent(event) {
@@ -204,11 +204,11 @@ var EventsSerializer = class _EventsSerializer {
 };
 
 // gen/front_end/models/trace/trace.prebundle.js
-import * as Extras from "./extras\\extras.js";
-import * as Handlers7 from "./handlers\\handlers.js";
-import * as Helpers7 from "./helpers\\helpers.js";
-import * as Insights2 from "./insights\\insights.js";
-import * as Lantern3 from "./lantern\\lantern.js";
+import * as Extras from "./extras/extras.js";
+import * as Handlers7 from "./handlers/handlers.js";
+import * as Helpers7 from "./helpers/helpers.js";
+import * as Insights2 from "./insights/insights.js";
+import * as Lantern3 from "./lantern/lantern.js";
 
 // gen/front_end/models/trace/LanternComputationData.js
 var LanternComputationData_exports = {};
@@ -217,8 +217,8 @@ __export(LanternComputationData_exports, {
   createNetworkRequests: () => createNetworkRequests,
   createProcessedNavigation: () => createProcessedNavigation
 });
-import * as Handlers2 from "./handlers\\handlers.js";
-import * as Lantern from "./lantern\\lantern.js";
+import * as Handlers2 from "./handlers/handlers.js";
+import * as Lantern from "./lantern/lantern.js";
 function createProcessedNavigation(data, frameId, navigation) {
   const scoresByNav = data.PageLoadMetrics.metricScoresByFrameId.get(frameId);
   if (!scoresByNav) {
@@ -557,9 +557,9 @@ __export(ModelImpl_exports, {
   ModelUpdateEvent: () => ModelUpdateEvent,
   isModelUpdateDataComplete: () => isModelUpdateDataComplete
 });
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as Handlers4 from "./handlers\\handlers.js";
-import * as Helpers5 from "./helpers\\helpers.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as Handlers4 from "./handlers/handlers.js";
+import * as Helpers5 from "./helpers/helpers.js";
 
 // gen/front_end/models/trace/Processor.js
 var Processor_exports = {};
@@ -568,11 +568,11 @@ __export(Processor_exports, {
   TraceProcessor: () => TraceProcessor,
   sortHandlers: () => sortHandlers
 });
-import * as Handlers3 from "./handlers\\handlers.js";
-import * as Helpers4 from "./helpers\\helpers.js";
-import * as Insights from "./insights\\insights.js";
-import * as Lantern2 from "./lantern\\lantern.js";
-import * as Types3 from "./types\\types.js";
+import * as Handlers3 from "./handlers/handlers.js";
+import * as Helpers4 from "./helpers/helpers.js";
+import * as Insights from "./insights/insights.js";
+import * as Lantern2 from "./lantern/lantern.js";
+import * as Types3 from "./types/types.js";
 var _a;
 var TraceParseProgressEvent = class _TraceParseProgressEvent extends Event {
   data;
@@ -1047,7 +1047,7 @@ function sortHandlers(traceHandlers) {
 }
 
 // gen/front_end/models/trace/ModelImpl.js
-import * as Types4 from "./types\\types.js";
+import * as Types4 from "./types/types.js";
 var Model = class _Model extends EventTarget {
   #traces = [];
   #nextNumberByDomain = /* @__PURE__ */ new Map();
@@ -1193,9 +1193,9 @@ var Name_exports = {};
 __export(Name_exports, {
   forEntry: () => forEntry
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Handlers6 from "./handlers\\handlers.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Handlers6 from "./handlers/handlers.js";
 
 // gen/front_end/models/trace/Styles.js
 var Styles_exports = {};
@@ -1214,10 +1214,10 @@ __export(Styles_exports, {
   stringIsEventCategory: () => stringIsEventCategory,
   visibleTypes: () => visibleTypes
 });
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Handlers5 from "./handlers\\handlers.js";
-import * as Helpers6 from "./helpers\\helpers.js";
-import * as Types5 from "./types\\types.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Handlers5 from "./handlers/handlers.js";
+import * as Helpers6 from "./helpers/helpers.js";
+import * as Types5 from "./types/types.js";
 var UIStrings = {
   /**
    * @description Category in the Summary view of the Performance panel to indicate time spent to load resources
@@ -2351,7 +2351,7 @@ function markerDetailsForEvent(event) {
 }
 
 // gen/front_end/models/trace/Name.js
-import * as Types6 from "./types\\types.js";
+import * as Types6 from "./types/types.js";
 var UIStrings2 = {
   /**
    * @description Text shown for an entry in the flame chart that has no explicit name.
@@ -2443,7 +2443,7 @@ function nameForInteractionEvent(event) {
 }
 
 // gen/front_end/models/trace/trace.prebundle.js
-import * as Types7 from "./types\\types.js";
+import * as Types7 from "./types/types.js";
 export {
   EntityMapper_exports as EntityMapper,
   EventsSerializer_exports as EventsSerializer,

@@ -15,14 +15,14 @@ __export(BreakpointManager_exports, {
   ModelBreakpoint: () => ModelBreakpoint,
   NEVER_PAUSE_HERE_CONDITION: () => NEVER_PAUSE_HERE_CONDITION
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import { assertNotNullOrUndefined } from "./..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\bindings\\bindings.js";
-import * as Formatter from "./..\\formatter\\formatter.js";
-import * as SourceMapScopes from "./..\\source_map_scopes\\source_map_scopes.js";
-import * as Workspace from "./..\\workspace\\workspace.js";
+import * as Common from "./../../core/common/common.js";
+import { assertNotNullOrUndefined } from "./../../core/platform/platform.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../bindings/bindings.js";
+import * as Formatter from "./../formatter/formatter.js";
+import * as SourceMapScopes from "./../source_map_scopes/source_map_scopes.js";
+import * as Workspace from "./../workspace/workspace.js";
 var _a;
 var breakpointManagerInstance;
 var INITIAL_RESTORE_BREAKPOINT_COUNT = 100;

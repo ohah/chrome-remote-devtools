@@ -10,7 +10,7 @@ __export(Breadcrumbs_exports, {
   Breadcrumbs: () => Breadcrumbs,
   flattenBreadcrumbs: () => flattenBreadcrumbs
 });
-import * as TraceBounds from "./..\\..\\..\\services\\trace_bounds\\trace_bounds.js";
+import * as TraceBounds from "./../../../services/trace_bounds/trace_bounds.js";
 function flattenBreadcrumbs(initialBreadcrumb) {
   const allBreadcrumbs = [initialBreadcrumb];
   let breadcrumbsIter = initialBreadcrumb;
@@ -90,12 +90,12 @@ __export(BreadcrumbsUI_exports, {
   BreadcrumbActivatedEvent: () => BreadcrumbActivatedEvent,
   BreadcrumbsUI: () => BreadcrumbsUI
 });
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace from "./..\\..\\..\\models\\trace\\trace.js";
-import * as ComponentHelpers from "./..\\..\\..\\ui\\components\\helpers\\helpers.js";
-import * as UI from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as Trace from "./../../../models/trace/trace.js";
+import * as ComponentHelpers from "./../../../ui/components/helpers/helpers.js";
+import * as UI from "./../../../ui/legacy/legacy.js";
+import * as Lit from "./../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/components/breadcrumbsUI.css.js
 var breadcrumbsUI_css_default = `/*
@@ -235,15 +235,15 @@ __export(CPUThrottlingSelector_exports, {
   CPUThrottlingSelector: () => CPUThrottlingSelector,
   DEFAULT_VIEW: () => DEFAULT_VIEW
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import "./..\\..\\..\\ui\\components\\menus\\menus.js";
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as UI2 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as MobileThrottling from "./..\\..\\mobile_throttling\\mobile_throttling.js";
+import "./../../../ui/kit/kit.js";
+import "./../../../ui/components/menus/menus.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import * as SDK from "./../../../core/sdk/sdk.js";
+import * as UI2 from "./../../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../../ui/visual_logging/visual_logging.js";
+import * as MobileThrottling from "./../../mobile_throttling/mobile_throttling.js";
 
 // gen/front_end/panels/timeline/components/cpuThrottlingSelector.css.js
 var cpuThrottlingSelector_css_default = `/*
@@ -459,11 +459,11 @@ __export(DetailsView_exports, {
   buildWarningElementsForEvent: () => buildWarningElementsForEvent,
   generateInvalidationsList: () => generateInvalidationsList
 });
-import * as i18n5 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Trace2 from "./..\\..\\..\\models\\trace\\trace.js";
-import * as uiI18n from "./..\\..\\..\\ui\\i18n\\i18n.js";
-import * as UI3 from "./..\\..\\..\\ui\\legacy\\legacy.js";
+import * as i18n5 from "./../../../core/i18n/i18n.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as Trace2 from "./../../../models/trace/trace.js";
+import * as uiI18n from "./../../../ui/i18n/i18n.js";
+import * as UI3 from "./../../../ui/legacy/legacy.js";
 var UIStrings3 = {
   /**
    * @description Text in the Performance panel for a forced style and layout calculation of elements
@@ -632,17 +632,17 @@ var ExportTraceOptions_exports = {};
 __export(ExportTraceOptions_exports, {
   ExportTraceOptions: () => ExportTraceOptions
 });
-import "./..\\..\\..\\ui\\components\\tooltips\\tooltips.js";
-import "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Common2 from "./..\\..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Buttons from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Dialogs from "./..\\..\\..\\ui\\components\\dialogs\\dialogs.js";
-import * as ComponentHelpers2 from "./..\\..\\..\\ui\\components\\helpers\\helpers.js";
-import * as UI4 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/components/tooltips/tooltips.js";
+import "./../../../ui/components/buttons/buttons.js";
+import * as Common2 from "./../../../core/common/common.js";
+import * as Host from "./../../../core/host/host.js";
+import * as i18n7 from "./../../../core/i18n/i18n.js";
+import * as Buttons from "./../../../ui/components/buttons/buttons.js";
+import * as Dialogs from "./../../../ui/components/dialogs/dialogs.js";
+import * as ComponentHelpers2 from "./../../../ui/components/helpers/helpers.js";
+import * as UI4 from "./../../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/components/exportTraceOptions.css.js
 var exportTraceOptions_css_default = `/*
@@ -1010,13 +1010,13 @@ var OriginMap_exports = {};
 __export(OriginMap_exports, {
   OriginMap: () => OriginMap
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n9 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as CrUXManager from "./..\\..\\..\\models\\crux-manager\\crux-manager.js";
-import * as RenderCoordinator from "./..\\..\\..\\ui\\components\\render_coordinator\\render_coordinator.js";
-import * as UI5 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit4 from "./..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n9 from "./../../../core/i18n/i18n.js";
+import * as SDK2 from "./../../../core/sdk/sdk.js";
+import * as CrUXManager from "./../../../models/crux-manager/crux-manager.js";
+import * as RenderCoordinator from "./../../../ui/components/render_coordinator/render_coordinator.js";
+import * as UI5 from "./../../../ui/legacy/legacy.js";
+import * as Lit4 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/originMap.css.js
 var originMap_css_default = `/*
@@ -1299,16 +1299,16 @@ var OriginMap = class extends UI5.Widget.WidgetElement {
 customElements.define("devtools-origin-map", OriginMap);
 
 // gen/front_end/panels/timeline/components/FieldSettingsDialog.js
-import * as i18n11 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as CrUXManager3 from "./..\\..\\..\\models\\crux-manager\\crux-manager.js";
-import * as Buttons2 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Dialogs2 from "./..\\..\\..\\ui\\components\\dialogs\\dialogs.js";
-import * as ComponentHelpers3 from "./..\\..\\..\\ui\\components\\helpers\\helpers.js";
-import * as Input from "./..\\..\\..\\ui\\components\\input\\input.js";
-import * as uiI18n2 from "./..\\..\\..\\ui\\i18n\\i18n.js";
-import * as UI6 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit5 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n11 from "./../../../core/i18n/i18n.js";
+import * as CrUXManager3 from "./../../../models/crux-manager/crux-manager.js";
+import * as Buttons2 from "./../../../ui/components/buttons/buttons.js";
+import * as Dialogs2 from "./../../../ui/components/dialogs/dialogs.js";
+import * as ComponentHelpers3 from "./../../../ui/components/helpers/helpers.js";
+import * as Input from "./../../../ui/components/input/input.js";
+import * as uiI18n2 from "./../../../ui/i18n/i18n.js";
+import * as UI6 from "./../../../ui/legacy/legacy.js";
+import * as Lit5 from "./../../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/components/fieldSettingsDialog.css.js
 var fieldSettingsDialog_css_default = `/*
@@ -1771,15 +1771,15 @@ __export(IgnoreListSetting_exports, {
   IgnoreListSetting: () => IgnoreListSetting,
   regexInputIsValid: () => regexInputIsValid
 });
-import "./..\\..\\..\\ui\\components\\menus\\menus.js";
-import * as Common3 from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n13 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Workspace from "./..\\..\\..\\models\\workspace\\workspace.js";
-import * as Buttons3 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Dialogs3 from "./..\\..\\..\\ui\\components\\dialogs\\dialogs.js";
-import * as UI7 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit6 from "./..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../ui/components/menus/menus.js";
+import * as Common3 from "./../../../core/common/common.js";
+import * as i18n13 from "./../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../core/platform/platform.js";
+import * as Workspace from "./../../../models/workspace/workspace.js";
+import * as Buttons3 from "./../../../ui/components/buttons/buttons.js";
+import * as Dialogs3 from "./../../../ui/components/dialogs/dialogs.js";
+import * as UI7 from "./../../../ui/legacy/legacy.js";
+import * as Lit6 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/ignoreListSetting.css.js
 var ignoreListSetting_css_default = `/*
@@ -2085,9 +2085,9 @@ __export(InteractionBreakdown_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW3,
   InteractionBreakdown: () => InteractionBreakdown
 });
-import * as i18n15 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI8 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit7 from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n15 from "./../../../core/i18n/i18n.js";
+import * as UI8 from "./../../../ui/legacy/legacy.js";
+import * as Lit7 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/interactionBreakdown.css.js
 var interactionBreakdown_css_default = `/*
@@ -2184,23 +2184,23 @@ __export(LayoutShiftDetails_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW5,
   LayoutShiftDetails: () => LayoutShiftDetails
 });
-import * as i18n17 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK4 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Helpers3 from "./..\\..\\..\\models\\trace\\helpers\\helpers.js";
-import * as Trace3 from "./..\\..\\..\\models\\trace\\trace.js";
-import * as Buttons5 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as LegacyComponents2 from "./..\\..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI10 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit9 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as Insights from "./insights\\insights.js";
+import * as i18n17 from "./../../../core/i18n/i18n.js";
+import * as SDK4 from "./../../../core/sdk/sdk.js";
+import * as Helpers3 from "./../../../models/trace/helpers/helpers.js";
+import * as Trace3 from "./../../../models/trace/trace.js";
+import * as Buttons5 from "./../../../ui/components/buttons/buttons.js";
+import * as LegacyComponents2 from "./../../../ui/legacy/components/utils/utils.js";
+import * as UI10 from "./../../../ui/legacy/legacy.js";
+import * as Lit9 from "./../../../ui/lit/lit.js";
+import * as Insights from "./insights/insights.js";
 
 // gen/front_end/panels/timeline/components/insights/NodeLink.js
-import * as SDK3 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Buttons4 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as LegacyComponents from "./..\\..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI9 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit8 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as PanelsCommon from "./..\\..\\common\\common.js";
+import * as SDK3 from "./../../../core/sdk/sdk.js";
+import * as Buttons4 from "./../../../ui/components/buttons/buttons.js";
+import * as LegacyComponents from "./../../../ui/legacy/components/utils/utils.js";
+import * as UI9 from "./../../../ui/legacy/legacy.js";
+import * as Lit8 from "./../../../ui/lit/lit.js";
+import * as PanelsCommon from "./../../common/common.js";
 var { html: html8 } = Lit8;
 var { widgetConfig } = UI9.Widget;
 var DEFAULT_VIEW4 = (input, output, target) => {
@@ -2757,24 +2757,24 @@ var LiveMetricsView_exports = {};
 __export(LiveMetricsView_exports, {
   LiveMetricsView: () => LiveMetricsView
 });
-import "./..\\..\\..\\ui\\components\\settings\\settings.js";
-import "./..\\..\\..\\ui\\kit\\kit.js";
+import "./../../../ui/components/settings/settings.js";
+import "./../../../ui/kit/kit.js";
 
 // gen/front_end/panels/timeline/components/NetworkThrottlingSelector.js
 var NetworkThrottlingSelector_exports = {};
 __export(NetworkThrottlingSelector_exports, {
   NetworkThrottlingSelector: () => NetworkThrottlingSelector
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import "./..\\..\\..\\ui\\components\\menus\\menus.js";
-import * as Common4 from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n19 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as SDK5 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as ComponentHelpers4 from "./..\\..\\..\\ui\\components\\helpers\\helpers.js";
-import * as Lit10 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as MobileThrottling2 from "./..\\..\\mobile_throttling\\mobile_throttling.js";
+import "./../../../ui/kit/kit.js";
+import "./../../../ui/components/menus/menus.js";
+import * as Common4 from "./../../../core/common/common.js";
+import * as i18n19 from "./../../../core/i18n/i18n.js";
+import * as Platform3 from "./../../../core/platform/platform.js";
+import * as SDK5 from "./../../../core/sdk/sdk.js";
+import * as ComponentHelpers4 from "./../../../ui/components/helpers/helpers.js";
+import * as Lit10 from "./../../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../../ui/visual_logging/visual_logging.js";
+import * as MobileThrottling2 from "./../../mobile_throttling/mobile_throttling.js";
 
 // gen/front_end/panels/timeline/components/networkThrottlingSelector.css.js
 var networkThrottlingSelector_css_default = `/*
@@ -2987,20 +2987,20 @@ var NetworkThrottlingSelector = class extends HTMLElement {
 customElements.define("devtools-network-throttling-selector", NetworkThrottlingSelector);
 
 // gen/front_end/panels/timeline/components/LiveMetricsView.js
-import "./..\\..\\..\\ui\\components\\menus\\menus.js";
+import "./../../../ui/components/menus/menus.js";
 
 // gen/front_end/panels/timeline/components/MetricCard.js
 var MetricCard_exports = {};
 __export(MetricCard_exports, {
   MetricCard: () => MetricCard
 });
-import * as i18n25 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as CrUXManager5 from "./..\\..\\..\\models\\crux-manager\\crux-manager.js";
-import * as Buttons6 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as ComponentHelpers5 from "./..\\..\\..\\ui\\components\\helpers\\helpers.js";
-import * as UIHelpers from "./..\\..\\..\\ui\\helpers\\helpers.js";
-import * as Lit11 from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n25 from "./../../../core/i18n/i18n.js";
+import * as Platform5 from "./../../../core/platform/platform.js";
+import * as CrUXManager5 from "./../../../models/crux-manager/crux-manager.js";
+import * as Buttons6 from "./../../../ui/components/buttons/buttons.js";
+import * as ComponentHelpers5 from "./../../../ui/components/helpers/helpers.js";
+import * as UIHelpers from "./../../../ui/helpers/helpers.js";
+import * as Lit11 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/metricCard.css.js
 var metricCard_css_default = `/*
@@ -3226,8 +3226,8 @@ details.environment-recs[open] > summary::before {
 /*# sourceURL=${import.meta.resolve("./metricCard.css")} */`;
 
 // gen/front_end/panels/timeline/components/MetricCompareStrings.js
-import * as i18n21 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as uiI18n3 from "./..\\..\\..\\ui\\i18n\\i18n.js";
+import * as i18n21 from "./../../../core/i18n/i18n.js";
+import * as uiI18n3 from "./../../../ui/i18n/i18n.js";
 var UIStrings11 = {
   /**
    * @description Text block that compares a local metric value to real user experiences. "local" refers to a developers local testing environment.
@@ -3527,10 +3527,10 @@ __export(Utils_exports, {
   rateMetric: () => rateMetric,
   renderMetricValue: () => renderMetricValue
 });
-import * as i18n23 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as ThemeSupport from "./..\\..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as VisualLogging6 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n23 from "./../../../core/i18n/i18n.js";
+import * as Platform4 from "./../../../core/platform/platform.js";
+import * as ThemeSupport from "./../../../ui/legacy/theme_support/theme_support.js";
+import * as VisualLogging6 from "./../../../ui/visual_logging/visual_logging.js";
 var UIStrings12 = {
   /**
    * @description ms is the short form of milli-seconds and the placeholder is a decimal number.
@@ -4294,28 +4294,28 @@ var MetricCard = class extends HTMLElement {
 customElements.define("devtools-metric-card", MetricCard);
 
 // gen/front_end/panels/timeline/components/LiveMetricsView.js
-import * as Common5 from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n27 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\..\\core\\root\\root.js";
-import * as SDK7 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as CrUXManager9 from "./..\\..\\..\\models\\crux-manager\\crux-manager.js";
-import * as EmulationModel from "./..\\..\\..\\models\\emulation\\emulation.js";
-import * as LiveMetrics from "./..\\..\\..\\models\\live-metrics\\live-metrics.js";
-import * as Trace5 from "./..\\..\\..\\models\\trace\\trace.js";
-import * as Buttons7 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as ComponentHelpers6 from "./..\\..\\..\\ui\\components\\helpers\\helpers.js";
-import * as LegacyWrapper from "./..\\..\\..\\ui\\components\\legacy_wrapper\\legacy_wrapper.js";
-import * as RenderCoordinator2 from "./..\\..\\..\\ui\\components\\render_coordinator\\render_coordinator.js";
-import * as uiI18n4 from "./..\\..\\..\\ui\\i18n\\i18n.js";
-import * as UI11 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit13 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging7 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelsCommon2 from "./..\\..\\common\\common.js";
+import * as Common5 from "./../../../core/common/common.js";
+import * as i18n27 from "./../../../core/i18n/i18n.js";
+import * as Root from "./../../../core/root/root.js";
+import * as SDK7 from "./../../../core/sdk/sdk.js";
+import * as CrUXManager9 from "./../../../models/crux-manager/crux-manager.js";
+import * as EmulationModel from "./../../../models/emulation/emulation.js";
+import * as LiveMetrics from "./../../../models/live-metrics/live-metrics.js";
+import * as Trace5 from "./../../../models/trace/trace.js";
+import * as Buttons7 from "./../../../ui/components/buttons/buttons.js";
+import * as ComponentHelpers6 from "./../../../ui/components/helpers/helpers.js";
+import * as LegacyWrapper from "./../../../ui/components/legacy_wrapper/legacy_wrapper.js";
+import * as RenderCoordinator2 from "./../../../ui/components/render_coordinator/render_coordinator.js";
+import * as uiI18n4 from "./../../../ui/i18n/i18n.js";
+import * as UI11 from "./../../../ui/legacy/legacy.js";
+import * as Lit13 from "./../../../ui/lit/lit.js";
+import * as VisualLogging7 from "./../../../ui/visual_logging/visual_logging.js";
+import * as PanelsCommon2 from "./../../common/common.js";
 
 // gen/front_end/panels/timeline/utils/Helpers.js
-import * as Platform6 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as SDK6 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as CrUXManager7 from "./..\\..\\..\\models\\crux-manager\\crux-manager.js";
+import * as Platform6 from "./../../../core/platform/platform.js";
+import * as SDK6 from "./../../../core/sdk/sdk.js";
+import * as CrUXManager7 from "./../../../models/crux-manager/crux-manager.js";
 function getThrottlingRecommendations() {
   let cpuOption = SDK6.CPUThrottlingManager.CalibratedMidTierMobileThrottlingOption;
   if (cpuOption.rate() === 0) {
@@ -4334,10 +4334,10 @@ function getThrottlingRecommendations() {
 }
 
 // gen/front_end/panels/timeline/components/insights/Helpers.js
-import "./..\\..\\..\\ui\\components\\markdown_view\\markdown_view.js";
-import * as Trace4 from "./..\\..\\..\\models\\trace\\trace.js";
-import * as Marked from "./..\\..\\..\\third_party\\marked\\marked.js";
-import * as Lit12 from "./..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../ui/components/markdown_view/markdown_view.js";
+import * as Trace4 from "./../../../models/trace/trace.js";
+import * as Marked from "./../../../third_party/marked/marked.js";
+import * as Lit12 from "./../../../ui/lit/lit.js";
 var { html: html12 } = Lit12;
 function shouldRenderForCategory(options) {
   return options.activeCategory === Trace4.Insights.Types.InsightCategory.ALL || options.activeCategory === options.insightCategory;
@@ -5790,14 +5790,14 @@ __export(NetworkRequestDetails_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW7,
   NetworkRequestDetails: () => NetworkRequestDetails
 });
-import "./..\\..\\..\\ui\\components\\request_link_icon\\request_link_icon.js";
-import * as i18n31 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK9 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Helpers6 from "./..\\..\\..\\models\\trace\\helpers\\helpers.js";
-import * as Trace7 from "./..\\..\\..\\models\\trace\\trace.js";
-import * as LegacyComponents3 from "./..\\..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI13 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit15 from "./..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../ui/components/request_link_icon/request_link_icon.js";
+import * as i18n31 from "./../../../core/i18n/i18n.js";
+import * as SDK9 from "./../../../core/sdk/sdk.js";
+import * as Helpers6 from "./../../../models/trace/helpers/helpers.js";
+import * as Trace7 from "./../../../models/trace/trace.js";
+import * as LegacyComponents3 from "./../../../ui/legacy/components/utils/utils.js";
+import * as UI13 from "./../../../ui/legacy/legacy.js";
+import * as Lit15 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/networkRequestDetails.css.js
 var networkRequestDetails_css_default = `/*
@@ -6089,15 +6089,15 @@ __export(NetworkRequestTooltip_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW6,
   NetworkRequestTooltip: () => NetworkRequestTooltip
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n29 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform7 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as SDK8 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Trace6 from "./..\\..\\..\\models\\trace\\trace.js";
-import * as PerfUI from "./..\\..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as UI12 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit14 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as TimelineUtils from "./..\\utils\\utils.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n29 from "./../../../core/i18n/i18n.js";
+import * as Platform7 from "./../../../core/platform/platform.js";
+import * as SDK8 from "./../../../core/sdk/sdk.js";
+import * as Trace6 from "./../../../models/trace/trace.js";
+import * as PerfUI from "./../../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as UI12 from "./../../../ui/legacy/legacy.js";
+import * as Lit14 from "./../../../ui/lit/lit.js";
+import * as TimelineUtils from "./../utils/utils.js";
 var { html: html14, nothing: nothing14, Directives: { classMap, ifDefined: ifDefined2 } } = Lit14;
 var MAX_URL_LENGTH2 = 60;
 var UIStrings15 = {
@@ -6680,9 +6680,9 @@ __export(RelatedInsightChips_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW8,
   RelatedInsightChips: () => RelatedInsightChips
 });
-import * as i18n33 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI14 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit16 from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n33 from "./../../../core/i18n/i18n.js";
+import * as UI14 from "./../../../ui/legacy/legacy.js";
+import * as Lit16 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/relatedInsightChips.css.js
 var relatedInsightChips_css_default = `/*
@@ -6862,7 +6862,7 @@ __export(Sidebar_exports, {
   RevealAnnotation: () => RevealAnnotation,
   SidebarWidget: () => SidebarWidget
 });
-import * as UI18 from "./..\\..\\..\\ui\\legacy\\legacy.js";
+import * as UI18 from "./../../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/timeline/components/insights/SidebarInsight.js
 var InsightActivated = class _InsightActivated extends Event {
@@ -6888,16 +6888,16 @@ __export(SidebarAnnotationsTab_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW9,
   SidebarAnnotationsTab: () => SidebarAnnotationsTab
 });
-import "./..\\..\\..\\ui\\components\\settings\\settings.js";
-import * as Common6 from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n35 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform8 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Trace8 from "./..\\..\\..\\models\\trace\\trace.js";
-import * as TraceBounds3 from "./..\\..\\..\\services\\trace_bounds\\trace_bounds.js";
-import * as UI15 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport3 from "./..\\..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as Lit17 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging8 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/components/settings/settings.js";
+import * as Common6 from "./../../../core/common/common.js";
+import * as i18n35 from "./../../../core/i18n/i18n.js";
+import * as Platform8 from "./../../../core/platform/platform.js";
+import * as Trace8 from "./../../../models/trace/trace.js";
+import * as TraceBounds3 from "./../../../services/trace_bounds/trace_bounds.js";
+import * as UI15 from "./../../../ui/legacy/legacy.js";
+import * as ThemeSupport3 from "./../../../ui/legacy/theme_support/theme_support.js";
+import * as Lit17 from "./../../../ui/lit/lit.js";
+import * as VisualLogging8 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/components/sidebarAnnotationsTab.css.js
 var sidebarAnnotationsTab_css_default = `/*
@@ -7355,12 +7355,12 @@ __export(SidebarInsightsTab_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW11,
   SidebarInsightsTab: () => SidebarInsightsTab
 });
-import * as Trace10 from "./..\\..\\..\\models\\trace\\trace.js";
-import * as Buttons9 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI17 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit19 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as Utils from "./..\\utils\\utils.js";
-import * as Insights6 from "./insights\\insights.js";
+import * as Trace10 from "./../../../models/trace/trace.js";
+import * as Buttons9 from "./../../../ui/components/buttons/buttons.js";
+import * as UI17 from "./../../../ui/legacy/legacy.js";
+import * as Lit19 from "./../../../ui/lit/lit.js";
+import * as Utils from "./../utils/utils.js";
+import * as Insights6 from "./insights/insights.js";
 
 // gen/front_end/panels/timeline/components/sidebarInsightsTab.css.js
 var sidebarInsightsTab_css_default = `/*
@@ -7447,16 +7447,16 @@ __export(SidebarSingleInsightSet_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW10,
   SidebarSingleInsightSet: () => SidebarSingleInsightSet
 });
-import * as i18n37 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform9 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as AIAssistance from "./..\\..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as CrUXManager11 from "./..\\..\\..\\models\\crux-manager\\crux-manager.js";
-import * as Trace9 from "./..\\..\\..\\models\\trace\\trace.js";
-import * as Buttons8 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI16 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit18 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging9 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Insights4 from "./insights\\insights.js";
+import * as i18n37 from "./../../../core/i18n/i18n.js";
+import * as Platform9 from "./../../../core/platform/platform.js";
+import * as AIAssistance from "./../../../models/ai_assistance/ai_assistance.js";
+import * as CrUXManager11 from "./../../../models/crux-manager/crux-manager.js";
+import * as Trace9 from "./../../../models/trace/trace.js";
+import * as Buttons8 from "./../../../ui/components/buttons/buttons.js";
+import * as UI16 from "./../../../ui/legacy/legacy.js";
+import * as Lit18 from "./../../../ui/lit/lit.js";
+import * as VisualLogging9 from "./../../../ui/visual_logging/visual_logging.js";
+import * as Insights4 from "./insights/insights.js";
 
 // gen/front_end/panels/timeline/components/sidebarSingleInsightSet.css.js
 var sidebarSingleInsightSet_css_default = `/*
@@ -8237,10 +8237,10 @@ __export(TimelineSummary_exports, {
   CATEGORY_SUMMARY_DEFAULT_VIEW: () => CATEGORY_SUMMARY_DEFAULT_VIEW,
   CategorySummary: () => CategorySummary
 });
-import * as i18n39 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Buttons10 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI19 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit20 from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n39 from "./../../../core/i18n/i18n.js";
+import * as Buttons10 from "./../../../ui/components/buttons/buttons.js";
+import * as UI19 from "./../../../ui/legacy/legacy.js";
+import * as Lit20 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/timeline/components/timelineSummary.css.js
 var timelineSummary_css_default = `/*

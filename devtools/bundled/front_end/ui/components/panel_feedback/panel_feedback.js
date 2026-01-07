@@ -9,12 +9,12 @@ var FeedbackButton_exports = {};
 __export(FeedbackButton_exports, {
   FeedbackButton: () => FeedbackButton
 });
-import * as Host from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as ComponentHelpers from "./..\\helpers\\helpers.js";
-import { html, render } from "./..\\..\\lit\\lit.js";
-import * as Buttons from "./..\\buttons\\buttons.js";
+import * as Host from "./../../../core/host/host.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as ComponentHelpers from "./../helpers/helpers.js";
+import { html, render } from "./../../lit/lit.js";
+import * as Buttons from "./../buttons/buttons.js";
 var UIStrings = {
   /**
    * @description The title of the button that leads to the feedback form.
@@ -56,12 +56,12 @@ var PanelFeedback_exports = {};
 __export(PanelFeedback_exports, {
   PanelFeedback: () => PanelFeedback
 });
-import "./..\\..\\legacy\\legacy.js";
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as ComponentHelpers2 from "./..\\helpers\\helpers.js";
-import { html as html2, render as render2 } from "./..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\visual_logging\\visual_logging.js";
+import "./../../legacy/legacy.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../core/platform/platform.js";
+import * as ComponentHelpers2 from "./../helpers/helpers.js";
+import { html as html2, render as render2 } from "./../../lit/lit.js";
+import * as VisualLogging from "./../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/components/panel_feedback/panelFeedback.css.js
 var panelFeedback_css_default = `/*
@@ -209,10 +209,10 @@ var PreviewToggle_exports = {};
 __export(PreviewToggle_exports, {
   PreviewToggle: () => PreviewToggle
 });
-import "./..\\..\\legacy\\legacy.js";
-import * as i18n5 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\..\\core\\root\\root.js";
-import { html as html3, nothing, render as render3 } from "./..\\..\\lit\\lit.js";
+import "./../../legacy/legacy.js";
+import * as i18n5 from "./../../../core/i18n/i18n.js";
+import * as Root from "./../../../core/root/root.js";
+import { html as html3, nothing, render as render3 } from "./../../lit/lit.js";
 
 // gen/front_end/ui/components/panel_feedback/previewToggle.css.js
 var previewToggle_css_default = `/*

@@ -10,11 +10,11 @@ __export(DiffView_exports, {
   DiffView: () => DiffView,
   buildDiffRows: () => buildDiffRows
 });
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Diff from "./..\\..\\..\\third_party\\diff\\diff.js";
-import * as VisualLogging from "./..\\..\\visual_logging\\visual_logging.js";
-import * as Lit from "./..\\..\\lit\\lit.js";
-import * as CodeHighlighter from "./..\\code_highlighter\\code_highlighter.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as Diff from "./../../../third_party/diff/diff.js";
+import * as VisualLogging from "./../../visual_logging/visual_logging.js";
+import * as Lit from "./../../lit/lit.js";
+import * as CodeHighlighter from "./../code_highlighter/code_highlighter.js";
 
 // gen/front_end/ui/components/diff_view/diffView.css.js
 var diffView_css_default = `/*

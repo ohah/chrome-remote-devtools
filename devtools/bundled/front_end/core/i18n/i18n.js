@@ -189,8 +189,8 @@ __export(i18nImpl_exports, {
   resetLocaleDataForTest: () => resetLocaleDataForTest,
   serializeUIString: () => serializeUIString
 });
-import * as I18n from "./..\\..\\third_party\\i18n\\i18n.js";
-import * as Root from "./..\\root\\root.js";
+import * as I18n from "./../../third_party/i18n/i18n.js";
+import * as Root from "./../root/root.js";
 
 // gen/front_end/core/i18n/locales.js
 var LOCALES = [
@@ -372,7 +372,7 @@ __export(time_utilities_exports, {
   preciseSecondsToString: () => preciseSecondsToString,
   secondsToString: () => secondsToString
 });
-import * as Platform from "./..\\platform\\platform.js";
+import * as Platform from "./../platform/platform.js";
 var narrowMillisecondsInteger = defineFormatter({
   style: "unit",
   unit: "millisecond",

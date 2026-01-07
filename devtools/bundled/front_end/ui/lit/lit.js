@@ -1,9 +1,9 @@
 // gen/front_end/ui/lit/lit.prebundle.js
-import { Decorators, Directive, Directives, LitElement, noChange, nothing as nothing2, render, StaticHtml as StaticHtml2, svg } from "./..\\..\\third_party\\lit\\lit.js";
+import { Decorators, Directive, Directives, LitElement, noChange, nothing as nothing2, render, StaticHtml as StaticHtml2, svg } from "./../../third_party/lit/lit.js";
 
 // gen/front_end/ui/lit/i18n-template.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Lit from "./..\\..\\third_party\\lit\\lit.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Lit from "./../../third_party/lit/lit.js";
 var { html } = Lit.StaticHtml;
 function i18nTemplate(registeredStrings, stringId, placeholders) {
   const formatter = registeredStrings.getLocalizedStringSetFor(i18n.DevToolsLocale.DevToolsLocale.instance().locale).getMessageFormatterFor(stringId);
@@ -23,7 +23,7 @@ function i18nTemplate(registeredStrings, stringId, placeholders) {
 }
 
 // gen/front_end/ui/lit/strip-whitespace.js
-import * as Lit2 from "./..\\..\\third_party\\lit\\lit.js";
+import * as Lit2 from "./../../third_party/lit/lit.js";
 var templates = /* @__PURE__ */ new WeakMap();
 function html3(strings, ...values) {
   let stripped = templates.get(strings);

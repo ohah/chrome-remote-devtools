@@ -12,15 +12,15 @@ __export(CommandMenu_exports, {
   CommandMenuProvider: () => CommandMenuProvider,
   ShowActionDelegate: () => ShowActionDelegate2
 });
-import "./..\\..\\..\\kit\\kit.js";
-import "./..\\..\\..\\components\\highlighting\\highlighting.js";
-import * as Common2 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as i18n5 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Diff3 from "./..\\..\\..\\..\\third_party\\diff\\diff.js";
-import { html, nothing as nothing2 } from "./..\\..\\..\\lit\\lit.js";
-import * as UI2 from "./..\\..\\legacy.js";
+import "./../../../kit/kit.js";
+import "./../../../components/highlighting/highlighting.js";
+import * as Common2 from "./../../../../core/common/common.js";
+import * as Host from "./../../../../core/host/host.js";
+import * as i18n5 from "./../../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../../core/platform/platform.js";
+import * as Diff3 from "./../../../../third_party/diff/diff.js";
+import { html, nothing as nothing2 } from "./../../../lit/lit.js";
+import * as UI2 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/quick_open/FilteredListWidget.js
 var FilteredListWidget_exports = {};
@@ -30,16 +30,16 @@ __export(FilteredListWidget_exports, {
   getRegisteredProviders: () => getRegisteredProviders,
   registerProvider: () => registerProvider
 });
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Geometry from "./..\\..\\..\\..\\models\\geometry\\geometry.js";
-import * as TextUtils from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as Diff from "./..\\..\\..\\..\\third_party\\diff\\diff.js";
-import * as TextPrompt from "./..\\..\\..\\components\\text_prompt\\text_prompt.js";
-import { nothing, render } from "./..\\..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI from "./..\\..\\legacy.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as Platform from "./../../../../core/platform/platform.js";
+import * as Geometry from "./../../../../models/geometry/geometry.js";
+import * as TextUtils from "./../../../../models/text_utils/text_utils.js";
+import * as Diff from "./../../../../third_party/diff/diff.js";
+import * as TextPrompt from "./../../../components/text_prompt/text_prompt.js";
+import { nothing, render } from "./../../../lit/lit.js";
+import * as VisualLogging from "./../../../visual_logging/visual_logging.js";
+import * as UI from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/quick_open/filteredListWidget.css.js
 var filteredListWidget_css_default = `/*
@@ -746,7 +746,7 @@ __export(QuickOpen_exports, {
   ShowActionDelegate: () => ShowActionDelegate,
   history: () => history
 });
-import * as i18n3 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
+import * as i18n3 from "./../../../../core/i18n/i18n.js";
 var UIStrings2 = {
   /**
    * @description Text of the hint shows under Quick Open input box
@@ -1179,8 +1179,8 @@ var HelpQuickOpen_exports = {};
 __export(HelpQuickOpen_exports, {
   HelpQuickOpen: () => HelpQuickOpen
 });
-import "./..\\..\\..\\kit\\kit.js";
-import { html as html2 } from "./..\\..\\..\\lit\\lit.js";
+import "./../../../kit/kit.js";
+import { html as html2 } from "./../../../lit/lit.js";
 var HelpQuickOpen = class extends Provider {
   providers;
   constructor(jslogContext) {

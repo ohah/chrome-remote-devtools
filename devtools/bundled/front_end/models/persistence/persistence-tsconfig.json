@@ -24,7 +24,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\front_end\\models\\persistence",
+    "rootDir": "../../../../../../front_end/models/persistence",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
@@ -35,18 +35,18 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\persistence\\Automapping.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\persistence\\AutomaticFileSystemManager.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\persistence\\AutomaticFileSystemWorkspaceBinding.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\persistence\\FileSystemWorkspaceBinding.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\persistence\\IsolatedFileSystem.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\persistence\\IsolatedFileSystemManager.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\persistence\\NetworkPersistenceManager.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\persistence\\PersistenceImpl.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\persistence\\PlatformFileSystem.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../front_end/models/persistence/Automapping.ts",
+    "../../../../../../front_end/models/persistence/AutomaticFileSystemManager.ts",
+    "../../../../../../front_end/models/persistence/AutomaticFileSystemWorkspaceBinding.ts",
+    "../../../../../../front_end/models/persistence/FileSystemWorkspaceBinding.ts",
+    "../../../../../../front_end/models/persistence/IsolatedFileSystem.ts",
+    "../../../../../../front_end/models/persistence/IsolatedFileSystemManager.ts",
+    "../../../../../../front_end/models/persistence/NetworkPersistenceManager.ts",
+    "../../../../../../front_end/models/persistence/PersistenceImpl.ts",
+    "../../../../../../front_end/models/persistence/PlatformFileSystem.ts",
+    "../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

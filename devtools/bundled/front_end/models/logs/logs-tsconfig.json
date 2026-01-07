@@ -24,7 +24,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\front_end\\models\\logs",
+    "rootDir": "../../../../../../front_end/models/logs",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
@@ -35,12 +35,12 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\logs\\LogManager.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\logs\\NetworkLog.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\models\\logs\\RequestResolver.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../front_end/models/logs/LogManager.ts",
+    "../../../../../../front_end/models/logs/NetworkLog.ts",
+    "../../../../../../front_end/models/logs/RequestResolver.ts",
+    "../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

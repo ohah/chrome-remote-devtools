@@ -9,9 +9,9 @@ var BrickBreaker_exports = {};
 __export(BrickBreaker_exports, {
   BrickBreaker: () => BrickBreaker
 });
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI from "./..\\..\\legacy.js";
-import * as ThemeSupport from "./..\\..\\theme_support\\theme_support.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as UI from "./../../legacy.js";
+import * as ThemeSupport from "./../../theme_support/theme_support.js";
 var UIStrings = {
   /**
    * @description Message congratulating the user for having won a game.
@@ -494,10 +494,10 @@ var ChartViewport_exports = {};
 __export(ChartViewport_exports, {
   ChartViewport: () => ChartViewport
 });
-import * as Common2 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Platform3 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as RenderCoordinator from "./..\\..\\..\\components\\render_coordinator\\render_coordinator.js";
-import * as UI4 from "./..\\..\\legacy.js";
+import * as Common2 from "./../../../../core/common/common.js";
+import * as Platform3 from "./../../../../core/platform/platform.js";
+import * as RenderCoordinator from "./../../../components/render_coordinator/render_coordinator.js";
+import * as UI4 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/perf_ui/chartViewport.css.js
 var chartViewport_css_default = `/*
@@ -587,17 +587,17 @@ __export(FlameChart_exports, {
   RulerHeight: () => RulerHeight,
   sortDecorationsForRenderingOrder: () => sortDecorationsForRenderingOrder
 });
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Trace from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as VisualLogging from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as Buttons from "./..\\..\\..\\components\\buttons\\buttons.js";
-import * as UI3 from "./..\\..\\legacy.js";
-import * as ThemeSupport7 from "./..\\..\\theme_support\\theme_support.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as i18n3 from "./../../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../../core/platform/platform.js";
+import * as Trace from "./../../../../models/trace/trace.js";
+import * as VisualLogging from "./../../../visual_logging/visual_logging.js";
+import * as Buttons from "./../../../components/buttons/buttons.js";
+import * as UI3 from "./../../legacy.js";
+import * as ThemeSupport7 from "./../../theme_support/theme_support.js";
 
 // gen/front_end/ui/legacy/components/perf_ui/CanvasHelper.js
-import * as ThemeSupport3 from "./..\\..\\theme_support\\theme_support.js";
+import * as ThemeSupport3 from "./../../theme_support/theme_support.js";
 function horizontalLine(context, width, y) {
   context.moveTo(0, y);
   context.lineTo(width, y);
@@ -732,7 +732,7 @@ __export(Font_exports, {
   DEFAULT_FONT_SIZE: () => DEFAULT_FONT_SIZE,
   getFontFamilyForCanvas: () => getFontFamilyForCanvas
 });
-import * as Host from "./..\\..\\..\\..\\core\\host\\host.js";
+import * as Host from "./../../../../core/host/host.js";
 function getFontFamilyForCanvas() {
   return Host.Platform.fontFamily();
 }
@@ -743,8 +743,8 @@ var TimelineGrid_exports = {};
 __export(TimelineGrid_exports, {
   TimelineGrid: () => TimelineGrid
 });
-import * as UI2 from "./..\\..\\legacy.js";
-import * as ThemeSupport5 from "./..\\..\\theme_support\\theme_support.js";
+import * as UI2 from "./../../legacy.js";
+import * as ThemeSupport5 from "./../../theme_support/theme_support.js";
 
 // gen/front_end/ui/legacy/components/perf_ui/timelineGrid.css.js
 var timelineGrid_css_default = `/*
@@ -4684,12 +4684,12 @@ __export(FilmStripView_exports, {
   Dialog: () => Dialog2,
   FilmStripView: () => FilmStripView
 });
-import * as Common3 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as i18n5 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace2 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as VisualLogging2 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI5 from "./..\\..\\legacy.js";
+import * as Common3 from "./../../../../core/common/common.js";
+import * as Host2 from "./../../../../core/host/host.js";
+import * as i18n5 from "./../../../../core/i18n/i18n.js";
+import * as Trace2 from "./../../../../models/trace/trace.js";
+import * as VisualLogging2 from "./../../../visual_logging/visual_logging.js";
+import * as UI5 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/perf_ui/filmStripView.css.js
 var filmStripView_css_default = `/*
@@ -5022,7 +5022,7 @@ var GCActionDelegate_exports = {};
 __export(GCActionDelegate_exports, {
   GCActionDelegate: () => GCActionDelegate
 });
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
 var GCActionDelegate = class {
   handleAction(_context, _actionId) {
     for (const heapProfilerModel of SDK.TargetManager.TargetManager.instance().models(SDK.HeapProfilerModel.HeapProfilerModel)) {
@@ -5039,9 +5039,9 @@ __export(LineLevelProfile_exports, {
   Memory: () => Memory,
   Performance: () => Performance
 });
-import * as SDK2 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\..\\..\\models\\bindings\\bindings.js";
-import * as Workspace from "./..\\..\\..\\..\\models\\workspace\\workspace.js";
+import * as SDK2 from "./../../../../core/sdk/sdk.js";
+import * as Bindings from "./../../../../models/bindings/bindings.js";
+import * as Workspace from "./../../../../models/workspace/workspace.js";
 var performanceInstance;
 var Performance = class _Performance {
   helper;
@@ -5265,9 +5265,9 @@ var LiveHeapProfile_exports = {};
 __export(LiveHeapProfile_exports, {
   LiveHeapProfile: () => LiveHeapProfile
 });
-import * as Common4 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as SDK3 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
+import * as Common4 from "./../../../../core/common/common.js";
+import * as Host3 from "./../../../../core/host/host.js";
+import * as SDK3 from "./../../../../core/sdk/sdk.js";
 var liveHeapProfileInstance;
 var LiveHeapProfile = class _LiveHeapProfile {
   running;
@@ -5358,7 +5358,7 @@ __export(NetworkPriorities_exports, {
   uiLabelForNetworkPriority: () => uiLabelForNetworkPriority,
   uiLabelToNetworkPriority: () => uiLabelToNetworkPriority
 });
-import * as i18n7 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
+import * as i18n7 from "./../../../../core/i18n/i18n.js";
 var UIStrings4 = {
   /**
    * @description Text in Network Priorities of the Performance panel
@@ -5427,12 +5427,12 @@ __export(OverviewGrid_exports, {
   Window: () => Window,
   WindowSelector: () => WindowSelector
 });
-import * as Common5 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n9 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import { createIcon } from "./..\\..\\..\\kit\\kit.js";
-import * as VisualLogging3 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI6 from "./..\\..\\legacy.js";
+import * as Common5 from "./../../../../core/common/common.js";
+import * as i18n9 from "./../../../../core/i18n/i18n.js";
+import * as Platform5 from "./../../../../core/platform/platform.js";
+import { createIcon } from "./../../../kit/kit.js";
+import * as VisualLogging3 from "./../../../visual_logging/visual_logging.js";
+import * as UI6 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/perf_ui/overviewGrid.css.js
 var overviewGrid_css_default = `/*
@@ -6174,9 +6174,9 @@ var PieChart_exports = {};
 __export(PieChart_exports, {
   PieChart: () => PieChart
 });
-import * as i18n11 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import { html, render, svg } from "./..\\..\\..\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\..\\visual_logging\\visual_logging.js";
+import * as i18n11 from "./../../../../core/i18n/i18n.js";
+import { html, render, svg } from "./../../../lit/lit.js";
+import * as VisualLogging4 from "./../../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/components/perf_ui/pieChart.css.js
 var pieChart_css_default = `/*
@@ -6463,8 +6463,8 @@ var TimelineOverviewCalculator_exports = {};
 __export(TimelineOverviewCalculator_exports, {
   TimelineOverviewCalculator: () => TimelineOverviewCalculator
 });
-import * as i18n13 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Trace3 from "./..\\..\\..\\..\\models\\trace\\trace.js";
+import * as i18n13 from "./../../../../core/i18n/i18n.js";
+import * as Trace3 from "./../../../../models/trace/trace.js";
 var TimelineOverviewCalculator = class {
   #minimumBoundary = Trace3.Types.Timing.Milli(0);
   #maximumBoundary = Trace3.Types.Timing.Milli(100);
@@ -6536,12 +6536,12 @@ __export(TimelineOverviewPane_exports, {
   TimelineOverviewBase: () => TimelineOverviewBase,
   TimelineOverviewPane: () => TimelineOverviewPane
 });
-import * as Common6 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Trace4 from "./..\\..\\..\\..\\models\\trace\\trace.js";
-import * as TraceBounds from "./..\\..\\..\\..\\services\\trace_bounds\\trace_bounds.js";
-import * as VisualLoggging from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI7 from "./..\\..\\legacy.js";
-import * as ThemeSupport9 from "./..\\..\\theme_support\\theme_support.js";
+import * as Common6 from "./../../../../core/common/common.js";
+import * as Trace4 from "./../../../../models/trace/trace.js";
+import * as TraceBounds from "./../../../../services/trace_bounds/trace_bounds.js";
+import * as VisualLoggging from "./../../../visual_logging/visual_logging.js";
+import * as UI7 from "./../../legacy.js";
+import * as ThemeSupport9 from "./../../theme_support/theme_support.js";
 
 // gen/front_end/ui/legacy/components/perf_ui/timelineOverviewInfo.css.js
 var timelineOverviewInfo_css_default = `/*

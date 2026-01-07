@@ -18,11 +18,11 @@ __export(DeviceModeModel_exports, {
   Type: () => Type2,
   defaultMobileScaleFactor: () => defaultMobileScaleFactor
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Geometry from "./..\\geometry\\geometry.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as Geometry from "./../geometry/geometry.js";
 
 // gen/front_end/models/emulation/EmulatedDevices.js
 var EmulatedDevices_exports = {};
@@ -35,9 +35,9 @@ __export(EmulatedDevices_exports, {
   VerticalSpanned: () => VerticalSpanned,
   computeRelativeImageURL: () => computeRelativeImageURL
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 var UIStrings = {
   /**
    * @description Title of the Laptop with touch device

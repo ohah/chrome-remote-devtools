@@ -11,18 +11,18 @@ __export(JSONEditor_exports, {
   JSONEditor: () => JSONEditor,
   suggestionFilter: () => suggestionFilter
 });
-import "./..\\..\\ui\\kit\\kit.js";
-import "./..\\..\\ui\\components\\menus\\menus.js";
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as SuggestionInput from "./..\\..\\ui\\components\\suggestion_input\\suggestion_input.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ElementsComponents from "./..\\elements\\components\\components.js";
+import "./../../ui/kit/kit.js";
+import "./../../ui/components/menus/menus.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as SuggestionInput from "./../../ui/components/suggestion_input/suggestion_input.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as ElementsComponents from "./../elements/components/components.js";
 
 // gen/front_end/panels/protocol_monitor/JSONEditor.css.js
 var JSONEditor_css_default = `/*
@@ -1155,20 +1155,20 @@ __export(ProtocolMonitor_exports, {
   buildProtocolMetadata: () => buildProtocolMetadata,
   parseCommandInput: () => parseCommandInput
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as ProtocolClient from "./..\\..\\core\\protocol_client\\protocol_client.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as SourceFrame from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives as Directives2, html as html2, render as render2 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as ProtocolClient from "./../../core/protocol_client/protocol_client.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import * as SourceFrame from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import { Directives as Directives2, html as html2, render as render2 } from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/protocol_monitor/protocolMonitor.css.js
 var protocolMonitor_css_default = `/*

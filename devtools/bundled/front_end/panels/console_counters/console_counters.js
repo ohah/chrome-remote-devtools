@@ -10,16 +10,16 @@ __export(WarningErrorCounter_exports, {
   WarningErrorCounter: () => WarningErrorCounter,
   WarningErrorCounterWidget: () => WarningErrorCounterWidget
 });
-import "./..\\..\\ui\\components\\icon_button\\icon_button.js";
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as IssuesManager from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as IssueCounter from "./..\\..\\ui\\components\\issue_counter\\issue_counter.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import { html, nothing, render } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/components/icon_button/icon_button.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as IssuesManager from "./../../models/issues_manager/issues_manager.js";
+import * as IssueCounter from "./../../ui/components/issue_counter/issue_counter.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import { html, nothing, render } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings = {
   /**
    * @description The console error count in the Warning Error Counter shown in the main toolbar (top-left in DevTools). The error count refers to the number of errors currently present in the JavaScript console.

@@ -9,7 +9,7 @@ var SDKModel_exports = {};
 __export(SDKModel_exports, {
   SDKModel: () => SDKModel
 });
-import * as Common from "./..\\common\\common.js";
+import * as Common from "./../common/common.js";
 var registeredModels = /* @__PURE__ */ new Map();
 var SDKModel = class extends Common.ObjectWrapper.ObjectWrapper {
   #target;
@@ -7729,7 +7729,7 @@ var generatedAliasesFor = /* @__PURE__ */ new Map([
 ]);
 
 // gen/front_end/core/sdk/CSSMetadata.js
-import * as Common2 from "./..\\common\\common.js";
+import * as Common2 from "./../common/common.js";
 var CSSMetadata = class _CSSMetadata {
   #values = [];
   #longhands = /* @__PURE__ */ new Map();
@@ -9271,19 +9271,19 @@ __export(NetworkRequest_exports, {
   setCookieBlockedReasonToAttribute: () => setCookieBlockedReasonToAttribute,
   setCookieBlockedReasonToUiString: () => setCookieBlockedReasonToUiString
 });
-import * as TextUtils23 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Common27 from "./..\\common\\common.js";
-import * as i18n21 from "./..\\i18n\\i18n.js";
-import * as Platform17 from "./..\\platform\\platform.js";
+import * as TextUtils23 from "./../../models/text_utils/text_utils.js";
+import * as Common27 from "./../common/common.js";
+import * as i18n21 from "./../i18n/i18n.js";
+import * as Platform17 from "./../platform/platform.js";
 
 // gen/front_end/core/sdk/CookieModel.js
 var CookieModel_exports = {};
 __export(CookieModel_exports, {
   CookieModel: () => CookieModel
 });
-import * as Common25 from "./..\\common\\common.js";
-import * as Platform16 from "./..\\platform\\platform.js";
-import * as Root10 from "./..\\root\\root.js";
+import * as Common25 from "./../common/common.js";
+import * as Platform16 from "./../platform/platform.js";
+import * as Root10 from "./../root/root.js";
 
 // gen/front_end/core/sdk/Cookie.js
 var Cookie_exports = {};
@@ -9575,11 +9575,11 @@ __export(NetworkManager_exports, {
   keyIsCustomUser: () => keyIsCustomUser,
   networkConditionsEqual: () => networkConditionsEqual
 });
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Common5 from "./..\\common\\common.js";
-import * as i18n from "./..\\i18n\\i18n.js";
-import * as Platform3 from "./..\\platform\\platform.js";
-import * as Root2 from "./..\\root\\root.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as Common5 from "./../common/common.js";
+import * as i18n from "./../i18n/i18n.js";
+import * as Platform3 from "./../platform/platform.js";
+import * as Root2 from "./../root/root.js";
 
 // gen/front_end/core/sdk/TargetManager.js
 var TargetManager_exports = {};
@@ -9588,11 +9588,11 @@ __export(TargetManager_exports, {
   SDKModelObserver: () => SDKModelObserver,
   TargetManager: () => TargetManager
 });
-import * as Common4 from "./..\\common\\common.js";
-import * as Host from "./..\\host\\host.js";
-import * as Platform2 from "./..\\platform\\platform.js";
-import { assertNotNullOrUndefined } from "./..\\platform\\platform.js";
-import * as Root from "./..\\root\\root.js";
+import * as Common4 from "./../common/common.js";
+import * as Host from "./../host/host.js";
+import * as Platform2 from "./../platform/platform.js";
+import { assertNotNullOrUndefined } from "./../platform/platform.js";
+import * as Root from "./../root/root.js";
 
 // gen/front_end/core/sdk/Target.js
 var Target_exports = {};
@@ -9600,9 +9600,9 @@ __export(Target_exports, {
   Target: () => Target,
   Type: () => Type
 });
-import * as Common3 from "./..\\common\\common.js";
-import * as Platform from "./..\\platform\\platform.js";
-import * as ProtocolClient from "./..\\protocol_client\\protocol_client.js";
+import * as Common3 from "./../common/common.js";
+import * as Platform from "./../platform/platform.js";
+import * as ProtocolClient from "./../protocol_client/protocol_client.js";
 var Target = class extends ProtocolClient.InspectorBackend.TargetBase {
   #targetManager;
   #name;
@@ -12355,9 +12355,9 @@ __export(ResourceTreeModel_exports, {
   ResourceTreeFrame: () => ResourceTreeFrame,
   ResourceTreeModel: () => ResourceTreeModel
 });
-import * as Common24 from "./..\\common\\common.js";
-import * as i18n15 from "./..\\i18n\\i18n.js";
-import * as Platform15 from "./..\\platform\\platform.js";
+import * as Common24 from "./../common/common.js";
+import * as i18n15 from "./../i18n/i18n.js";
+import * as Platform15 from "./../platform/platform.js";
 
 // gen/front_end/core/sdk/DOMModel.js
 var DOMModel_exports = {};
@@ -12373,9 +12373,9 @@ __export(DOMModel_exports, {
   DeferredDOMNode: () => DeferredDOMNode,
   Events: () => Events8
 });
-import * as Common21 from "./..\\common\\common.js";
-import * as Platform13 from "./..\\platform\\platform.js";
-import * as Root9 from "./..\\root\\root.js";
+import * as Common21 from "./../common/common.js";
+import * as Platform13 from "./../platform/platform.js";
+import * as Root9 from "./../root/root.js";
 
 // gen/front_end/core/sdk/CSSModel.js
 var CSSModel_exports = {};
@@ -12387,11 +12387,11 @@ __export(CSSModel_exports, {
   Events: () => Events5,
   InlineStyleResult: () => InlineStyleResult
 });
-import * as TextUtils17 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Common13 from "./..\\common\\common.js";
-import * as Host3 from "./..\\host\\host.js";
-import * as Platform10 from "./..\\platform\\platform.js";
-import * as Root6 from "./..\\root\\root.js";
+import * as TextUtils17 from "./../../models/text_utils/text_utils.js";
+import * as Common13 from "./../common/common.js";
+import * as Host3 from "./../host/host.js";
+import * as Platform10 from "./../platform/platform.js";
+import * as Root6 from "./../root/root.js";
 
 // gen/front_end/core/sdk/CSSFontFace.js
 var CSSFontFace_exports = {};
@@ -12434,18 +12434,18 @@ __export(CSSMatchedStyles_exports, {
   CSSRegisteredProperty: () => CSSRegisteredProperty,
   CSSValueSource: () => CSSValueSource
 });
-import * as Platform6 from "./..\\platform\\platform.js";
+import * as Platform6 from "./../platform/platform.js";
 
 // gen/front_end/core/sdk/CSSProperty.js
 var CSSProperty_exports = {};
 __export(CSSProperty_exports, {
   CSSProperty: () => CSSProperty
 });
-import * as TextUtils3 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Common7 from "./..\\common\\common.js";
-import * as HostModule from "./..\\host\\host.js";
-import * as Platform4 from "./..\\platform\\platform.js";
-import * as Root3 from "./..\\root\\root.js";
+import * as TextUtils3 from "./../../models/text_utils/text_utils.js";
+import * as Common7 from "./../common/common.js";
+import * as HostModule from "./../host/host.js";
+import * as Platform4 from "./../platform/platform.js";
+import * as Root3 from "./../root/root.js";
 
 // gen/front_end/core/sdk/CSSPropertyParser.js
 var CSSPropertyParser_exports = {};
@@ -12467,7 +12467,7 @@ __export(CSSPropertyParser_exports, {
   tokenizeDeclaration: () => tokenizeDeclaration,
   tokenizePropertyName: () => tokenizePropertyName
 });
-import * as CodeMirror from "./..\\..\\third_party\\codemirror.next\\codemirror.next.js";
+import * as CodeMirror from "./../../third_party/codemirror.next/codemirror.next.js";
 
 // gen/front_end/core/sdk/CSSPropertyParserMatchers.js
 var CSSPropertyParserMatchers_exports = {};
@@ -12534,7 +12534,7 @@ __export(CSSPropertyParserMatchers_exports, {
   isValidCSSType: () => isValidCSSType,
   localEvalCSS: () => localEvalCSS
 });
-import * as Common6 from "./..\\common\\common.js";
+import * as Common6 from "./../common/common.js";
 var BaseVariableMatch = class {
   text;
   node;
@@ -14637,8 +14637,8 @@ __export(CSSRule_exports, {
   CSSRule: () => CSSRule,
   CSSStyleRule: () => CSSStyleRule
 });
-import * as TextUtils12 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Platform5 from "./..\\platform\\platform.js";
+import * as TextUtils12 from "./../../models/text_utils/text_utils.js";
+import * as Platform5 from "./../platform/platform.js";
 
 // gen/front_end/core/sdk/CSSContainerQuery.js
 var CSSContainerQuery_exports = {};
@@ -14648,7 +14648,7 @@ __export(CSSContainerQuery_exports, {
   getPhysicalAxisFromQueryAxis: () => getPhysicalAxisFromQueryAxis,
   getQueryAxisFromContainerType: () => getQueryAxisFromContainerType
 });
-import * as TextUtils5 from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as TextUtils5 from "./../../models/text_utils/text_utils.js";
 
 // gen/front_end/core/sdk/CSSQuery.js
 var CSSQuery_exports = {};
@@ -14804,7 +14804,7 @@ var CSSLayer_exports = {};
 __export(CSSLayer_exports, {
   CSSLayer: () => CSSLayer
 });
-import * as TextUtils6 from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as TextUtils6 from "./../../models/text_utils/text_utils.js";
 var CSSLayer = class _CSSLayer extends CSSQuery {
   static parseLayerPayload(cssModel, payload) {
     return payload.map((supports) => new _CSSLayer(cssModel, supports));
@@ -14831,7 +14831,7 @@ __export(CSSMedia_exports, {
   CSSMediaQueryExpression: () => CSSMediaQueryExpression,
   Source: () => Source
 });
-import * as TextUtils7 from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as TextUtils7 from "./../../models/text_utils/text_utils.js";
 var CSSMediaQuery = class _CSSMediaQuery {
   #active;
   #expressions;
@@ -14933,7 +14933,7 @@ var CSSScope_exports = {};
 __export(CSSScope_exports, {
   CSSScope: () => CSSScope
 });
-import * as TextUtils8 from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as TextUtils8 from "./../../models/text_utils/text_utils.js";
 var CSSScope = class _CSSScope extends CSSQuery {
   static parseScopesPayload(cssModel, payload) {
     return payload.map((scope) => new _CSSScope(cssModel, scope));
@@ -14957,7 +14957,7 @@ var CSSStartingStyle_exports = {};
 __export(CSSStartingStyle_exports, {
   CSSStartingStyle: () => CSSStartingStyle
 });
-import * as TextUtils9 from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as TextUtils9 from "./../../models/text_utils/text_utils.js";
 var CSSStartingStyle = class _CSSStartingStyle extends CSSQuery {
   static parseStartingStylePayload(cssModel, payload) {
     return payload.map((p) => new _CSSStartingStyle(cssModel, p));
@@ -14981,7 +14981,7 @@ __export(CSSStyleDeclaration_exports, {
   CSSStyleDeclaration: () => CSSStyleDeclaration,
   Type: () => Type2
 });
-import * as TextUtils10 from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as TextUtils10 from "./../../models/text_utils/text_utils.js";
 var CSSStyleDeclaration = class {
   #cssModel;
   parentRule;
@@ -15240,7 +15240,7 @@ var CSSSupports_exports = {};
 __export(CSSSupports_exports, {
   CSSSupports: () => CSSSupports
 });
-import * as TextUtils11 from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as TextUtils11 from "./../../models/text_utils/text_utils.js";
 var CSSSupports = class _CSSSupports extends CSSQuery {
   static parseSupportsPayload(cssModel, payload) {
     return payload.map((supports) => new _CSSSupports(cssModel, supports));
@@ -16930,10 +16930,10 @@ var CSSStyleSheetHeader_exports = {};
 __export(CSSStyleSheetHeader_exports, {
   CSSStyleSheetHeader: () => CSSStyleSheetHeader
 });
-import * as TextUtils13 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Common8 from "./..\\common\\common.js";
-import * as i18n3 from "./..\\i18n\\i18n.js";
-import * as Platform7 from "./..\\platform\\platform.js";
+import * as TextUtils13 from "./../../models/text_utils/text_utils.js";
+import * as Common8 from "./../common/common.js";
+import * as i18n3 from "./../i18n/i18n.js";
+import * as Platform7 from "./../platform/platform.js";
 var UIStrings2 = {
   /**
    * @description Error message for when a CSS file can't be loaded
@@ -17108,8 +17108,8 @@ __export(SourceMapManager_exports, {
   SourceMapManager: () => SourceMapManager,
   tryLoadSourceMap: () => tryLoadSourceMap
 });
-import * as Common12 from "./..\\common\\common.js";
-import * as Platform9 from "./..\\platform\\platform.js";
+import * as Common12 from "./../common/common.js";
+import * as Platform9 from "./../platform/platform.js";
 
 // gen/front_end/core/sdk/PageResourceLoader.js
 var PageResourceLoader_exports = {};
@@ -17117,17 +17117,17 @@ __export(PageResourceLoader_exports, {
   PageResourceLoader: () => PageResourceLoader,
   ResourceKey: () => ResourceKey
 });
-import * as Common10 from "./..\\common\\common.js";
-import * as Host2 from "./..\\host\\host.js";
-import * as i18n5 from "./..\\i18n\\i18n.js";
-import * as Root4 from "./..\\root\\root.js";
+import * as Common10 from "./../common/common.js";
+import * as Host2 from "./../host/host.js";
+import * as i18n5 from "./../i18n/i18n.js";
+import * as Root4 from "./../root/root.js";
 
 // gen/front_end/core/sdk/IOModel.js
 var IOModel_exports = {};
 __export(IOModel_exports, {
   IOModel: () => IOModel
 });
-import * as Common9 from "./..\\common\\common.js";
+import * as Common9 from "./../common/common.js";
 
 // gen/front_end/core/sdk/RemoteObject.js
 var RemoteObject_exports = {};
@@ -18399,19 +18399,19 @@ __export(SourceMap_exports, {
   TokenIterator: () => TokenIterator,
   parseSourceMap: () => parseSourceMap
 });
-import * as TextUtils16 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as ScopesCodec from "./..\\..\\third_party\\source-map-scopes-codec\\source-map-scopes-codec.js";
-import * as Common11 from "./..\\common\\common.js";
-import * as Platform8 from "./..\\platform\\platform.js";
-import * as Root5 from "./..\\root\\root.js";
+import * as TextUtils16 from "./../../models/text_utils/text_utils.js";
+import * as ScopesCodec from "./../../third_party/source-map-scopes-codec/source-map-scopes-codec.js";
+import * as Common11 from "./../common/common.js";
+import * as Platform8 from "./../platform/platform.js";
+import * as Root5 from "./../root/root.js";
 
 // gen/front_end/core/sdk/ScopeTreeCache.js
 var ScopeTreeCache_exports = {};
 __export(ScopeTreeCache_exports, {
   scopeTreeForScript: () => scopeTreeForScript
 });
-import * as Formatter from "./..\\..\\models\\formatter\\formatter.js";
-import * as TextUtils15 from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as Formatter from "./../../models/formatter/formatter.js";
+import * as TextUtils15 from "./../../models/text_utils/text_utils.js";
 var scopeTrees = /* @__PURE__ */ new WeakMap();
 function scopeTreeForScript(script) {
   let promise = scopeTrees.get(script);
@@ -18529,14 +18529,14 @@ __export(SourceMapScopesInfo_exports, {
   SourceMapScopesInfo: () => SourceMapScopesInfo,
   contains: () => contains
 });
-import * as Formatter2 from "./..\\..\\models\\formatter\\formatter.js";
+import * as Formatter2 from "./../../models/formatter/formatter.js";
 
 // gen/front_end/core/sdk/SourceMapScopeChainEntry.js
 var SourceMapScopeChainEntry_exports = {};
 __export(SourceMapScopeChainEntry_exports, {
   SourceMapScopeChainEntry: () => SourceMapScopeChainEntry
 });
-import * as i18n7 from "./..\\i18n\\i18n.js";
+import * as i18n7 from "./../i18n/i18n.js";
 var UIStrings4 = {
   /**
    * @description Title of a section in the debugger showing local JavaScript variables.
@@ -20887,7 +20887,7 @@ var FrameManager_exports = {};
 __export(FrameManager_exports, {
   FrameManager: () => FrameManager
 });
-import * as Common14 from "./..\\common\\common.js";
+import * as Common14 from "./../common/common.js";
 var frameManagerInstance = null;
 var FrameManager = class _FrameManager extends Common14.ObjectWrapper.ObjectWrapper {
   #eventListeners = /* @__PURE__ */ new WeakMap();
@@ -21066,9 +21066,9 @@ __export(OverlayModel_exports, {
   SourceOrderHighlighter: () => SourceOrderHighlighter,
   WindowControls: () => WindowControls
 });
-import * as Common20 from "./..\\common\\common.js";
-import * as i18n13 from "./..\\i18n\\i18n.js";
-import * as Root8 from "./..\\root\\root.js";
+import * as Common20 from "./../common/common.js";
+import * as i18n13 from "./../i18n/i18n.js";
+import * as Root8 from "./../root/root.js";
 
 // gen/front_end/core/sdk/DebuggerModel.js
 var DebuggerModel_exports = {};
@@ -21086,9 +21086,9 @@ __export(DebuggerModel_exports, {
   WASM_SYMBOLS_PRIORITY: () => WASM_SYMBOLS_PRIORITY,
   sortAndMergeRanges: () => sortAndMergeRanges
 });
-import * as Common17 from "./..\\common\\common.js";
-import * as i18n11 from "./..\\i18n\\i18n.js";
-import * as Root7 from "./..\\root\\root.js";
+import * as Common17 from "./../common/common.js";
+import * as i18n11 from "./../i18n/i18n.js";
+import * as Root7 from "./../root/root.js";
 
 // gen/front_end/core/sdk/RuntimeModel.js
 var RuntimeModel_exports = {};
@@ -21097,8 +21097,8 @@ __export(RuntimeModel_exports, {
   ExecutionContext: () => ExecutionContext,
   RuntimeModel: () => RuntimeModel
 });
-import * as Common15 from "./..\\common\\common.js";
-import * as Host4 from "./..\\host\\host.js";
+import * as Common15 from "./../common/common.js";
+import * as Host4 from "./../host/host.js";
 
 // gen/front_end/core/sdk/HeapProfilerModel.js
 var HeapProfilerModel_exports = {};
@@ -21753,10 +21753,10 @@ __export(Script_exports, {
   disassembleWasm: () => disassembleWasm,
   sourceURLRegex: () => sourceURLRegex
 });
-import * as Platform11 from "./..\\platform\\platform.js";
-import * as TextUtils18 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Common16 from "./..\\common\\common.js";
-import * as i18n9 from "./..\\i18n\\i18n.js";
+import * as Platform11 from "./../platform/platform.js";
+import * as TextUtils18 from "./../../models/text_utils/text_utils.js";
+import * as Common16 from "./../common/common.js";
+import * as i18n9 from "./../i18n/i18n.js";
 var UIStrings5 = {
   /**
    * @description Error message for when a script can't be loaded which had been previously
@@ -23315,15 +23315,15 @@ var OverlayPersistentHighlighter_exports = {};
 __export(OverlayPersistentHighlighter_exports, {
   OverlayPersistentHighlighter: () => OverlayPersistentHighlighter
 });
-import * as Common19 from "./..\\common\\common.js";
-import * as Platform12 from "./..\\platform\\platform.js";
+import * as Common19 from "./../common/common.js";
+import * as Platform12 from "./../platform/platform.js";
 
 // gen/front_end/core/sdk/OverlayColorGenerator.js
 var OverlayColorGenerator_exports = {};
 __export(OverlayColorGenerator_exports, {
   OverlayColorGenerator: () => OverlayColorGenerator
 });
-import * as Common18 from "./..\\common\\common.js";
+import * as Common18 from "./../common/common.js";
 var OverlayColorGenerator = class {
   #colors;
   #index;
@@ -26279,9 +26279,9 @@ var Resource_exports = {};
 __export(Resource_exports, {
   Resource: () => Resource
 });
-import * as TextUtils20 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Common22 from "./..\\common\\common.js";
-import * as Platform14 from "./..\\platform\\platform.js";
+import * as TextUtils20 from "./../../models/text_utils/text_utils.js";
+import * as Common22 from "./../common/common.js";
+import * as Platform14 from "./../platform/platform.js";
 var Resource = class {
   #resourceTreeModel;
   #request;
@@ -26496,7 +26496,7 @@ __export(StorageKeyManager_exports, {
   StorageKeyManager: () => StorageKeyManager,
   parseStorageKey: () => parseStorageKey
 });
-import * as Common23 from "./..\\common\\common.js";
+import * as Common23 from "./../common/common.js";
 var StorageKeyManager = class extends SDKModel {
   #mainStorageKey;
   #storageKeys;
@@ -27775,7 +27775,7 @@ var KeyValue = class {
 };
 
 // gen/front_end/core/sdk/HttpReasonPhraseStrings.js
-import * as i18n17 from "./..\\i18n\\i18n.js";
+import * as i18n17 from "./../i18n/i18n.js";
 function getStatusText(statusCode) {
   const statusTextLookup = {
     100: "Continue",
@@ -27845,7 +27845,7 @@ function getStatusText(statusCode) {
 }
 
 // gen/front_end/core/sdk/ServerSentEvents.js
-import * as TextUtils22 from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as TextUtils22 from "./../../models/text_utils/text_utils.js";
 
 // gen/front_end/core/sdk/ServerSentEventsProtocol.js
 var ServerSentEventsProtocol_exports = {};
@@ -27998,8 +27998,8 @@ __export(ServerTiming_exports, {
   cloudflarePrefix: () => cloudflarePrefix,
   cloudinaryPrefix: () => cloudinaryPrefix
 });
-import * as Common26 from "./..\\common\\common.js";
-import * as i18n19 from "./..\\i18n\\i18n.js";
+import * as Common26 from "./../common/common.js";
+import * as i18n19 from "./../i18n/i18n.js";
 var UIStrings8 = {
   /**
    * @description Text in Server Timing
@@ -30102,7 +30102,7 @@ __export(AnimationModel_exports, {
   KeyframeStyle: () => KeyframeStyle,
   KeyframesRule: () => KeyframesRule
 });
-import * as Common28 from "./..\\common\\common.js";
+import * as Common28 from "./../common/common.js";
 var DEVTOOLS_ANIMATIONS_WORLD_NAME = "devtools_animations";
 var REPORT_SCROLL_POSITION_BINDING_NAME = "__devtools_report_scroll_position__";
 var getScrollListenerNameInPage = (id) => `__devtools_scroll_listener_${id}__`;
@@ -30881,8 +30881,8 @@ var AutofillModel_exports = {};
 __export(AutofillModel_exports, {
   AutofillModel: () => AutofillModel
 });
-import * as Common29 from "./..\\common\\common.js";
-import * as Host5 from "./..\\host\\host.js";
+import * as Common29 from "./../common/common.js";
+import * as Host5 from "./../host/host.js";
 var AutofillModel = class extends SDKModel {
   agent;
   #enabled;
@@ -31067,9 +31067,9 @@ var ChildTargetManager_exports = {};
 __export(ChildTargetManager_exports, {
   ChildTargetManager: () => ChildTargetManager
 });
-import * as i18n23 from "./..\\i18n\\i18n.js";
-import * as Common30 from "./..\\common\\common.js";
-import * as Host6 from "./..\\host\\host.js";
+import * as i18n23 from "./../i18n/i18n.js";
+import * as Common30 from "./../common/common.js";
+import * as Host6 from "./../host/host.js";
 var UIStrings10 = {
   /**
    * @description Text that refers to the main target. The main target is the primary webpage that
@@ -31284,8 +31284,8 @@ var CompilerSourceMappingContentProvider_exports = {};
 __export(CompilerSourceMappingContentProvider_exports, {
   CompilerSourceMappingContentProvider: () => CompilerSourceMappingContentProvider
 });
-import * as TextUtils25 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as i18n25 from "./..\\i18n\\i18n.js";
+import * as TextUtils25 from "./../../models/text_utils/text_utils.js";
+import * as i18n25 from "./../i18n/i18n.js";
 var UIStrings11 = {
   /**
    * @description Error message when failing to fetch a resource referenced in a source map
@@ -31340,11 +31340,11 @@ __export(Connections_exports, {
   WebSocketTransport: () => WebSocketTransport,
   initMainConnection: () => initMainConnection
 });
-import * as i18n31 from "./..\\i18n\\i18n.js";
-import * as Common34 from "./..\\common\\common.js";
-import * as Host7 from "./..\\host\\host.js";
-import * as ProtocolClient3 from "./..\\protocol_client\\protocol_client.js";
-import * as Root12 from "./..\\root\\root.js";
+import * as i18n31 from "./../i18n/i18n.js";
+import * as Common34 from "./../common/common.js";
+import * as Host7 from "./../host/host.js";
+import * as ProtocolClient3 from "./../protocol_client/protocol_client.js";
+import * as Root12 from "./../root/root.js";
 
 // gen/front_end/core/sdk/RehydratingConnection.js
 var RehydratingConnection_exports = {};
@@ -31352,18 +31352,18 @@ __export(RehydratingConnection_exports, {
   RehydratingConnectionTransport: () => RehydratingConnectionTransport,
   RehydratingSession: () => RehydratingSession
 });
-import * as Common33 from "./..\\common\\common.js";
-import * as i18n27 from "./..\\i18n\\i18n.js";
-import * as ProtocolClient2 from "./..\\protocol_client\\protocol_client.js";
-import * as Root11 from "./..\\root\\root.js";
+import * as Common33 from "./../common/common.js";
+import * as i18n27 from "./../i18n/i18n.js";
+import * as ProtocolClient2 from "./../protocol_client/protocol_client.js";
+import * as Root11 from "./../root/root.js";
 
 // gen/front_end/core/sdk/EnhancedTracesParser.js
 var EnhancedTracesParser_exports = {};
 __export(EnhancedTracesParser_exports, {
   EnhancedTracesParser: () => EnhancedTracesParser
 });
-import * as Common31 from "./..\\common\\common.js";
-import { UserVisibleError } from "./..\\platform\\platform.js";
+import * as Common31 from "./../common/common.js";
+import { UserVisibleError } from "./../platform/platform.js";
 var EnhancedTracesParser = class {
   #trace;
   #scriptRundownEvents = [];
@@ -31683,7 +31683,7 @@ __export(TraceObject_exports, {
   RevealableNetworkRequest: () => RevealableNetworkRequest,
   TraceObject: () => TraceObject
 });
-import * as Common32 from "./..\\common\\common.js";
+import * as Common32 from "./../common/common.js";
 var TraceObject = class {
   traceEvents;
   metadata;
@@ -32112,7 +32112,7 @@ var RehydratingSession = class extends RehydratingSessionBase {
 };
 
 // gen/front_end/core/sdk/PostMessageTransport.js
-import * as i18n29 from "./..\\i18n\\i18n.js";
+import * as i18n29 from "./../i18n/i18n.js";
 var UIStrings13 = {
   /**
    * @description Text to indicate postMessage connection cannot find host window / postMessage 연결이 호스트 창을 찾을 수 없음을 나타내는 텍스트
@@ -32391,10 +32391,10 @@ __export(ConsoleModel_exports, {
   FrontendMessageType: () => FrontendMessageType,
   MessageSourceDisplayName: () => MessageSourceDisplayName
 });
-import * as Common35 from "./..\\common\\common.js";
-import * as Host9 from "./..\\host\\host.js";
-import * as i18n35 from "./..\\i18n\\i18n.js";
-import * as Platform18 from "./..\\platform\\platform.js";
+import * as Common35 from "./../common/common.js";
+import * as Host9 from "./../host/host.js";
+import * as i18n35 from "./../i18n/i18n.js";
+import * as Platform18 from "./../platform/platform.js";
 
 // gen/front_end/core/sdk/ConsoleModelTypes.js
 var FrontendMessageType;
@@ -32410,7 +32410,7 @@ var CPUProfilerModel_exports = {};
 __export(CPUProfilerModel_exports, {
   CPUProfilerModel: () => CPUProfilerModel
 });
-import * as i18n33 from "./..\\i18n\\i18n.js";
+import * as i18n33 from "./../i18n/i18n.js";
 var UIStrings15 = {
   /**
    * @description Name of a profile. Placeholder is either a user-supplied name or a number automatically assigned to the profile.
@@ -32510,7 +32510,7 @@ var LogModel_exports = {};
 __export(LogModel_exports, {
   LogModel: () => LogModel
 });
-import * as Host8 from "./..\\host\\host.js";
+import * as Host8 from "./../host/host.js";
 var LogModel = class extends SDKModel {
   #logAgent;
   constructor(target) {
@@ -33138,8 +33138,8 @@ __export(CPUThrottlingManager_exports, {
   NoThrottlingOption: () => NoThrottlingOption,
   calibrationErrorToString: () => calibrationErrorToString
 });
-import * as Common37 from "./..\\common\\common.js";
-import * as i18n37 from "./..\\i18n\\i18n.js";
+import * as Common37 from "./../common/common.js";
+import * as i18n37 from "./../i18n/i18n.js";
 
 // gen/front_end/core/sdk/EmulationModel.js
 var EmulationModel_exports = {};
@@ -33148,7 +33148,7 @@ __export(EmulationModel_exports, {
   EmulationModel: () => EmulationModel,
   Location: () => Location2
 });
-import * as Common36 from "./..\\common\\common.js";
+import * as Common36 from "./../common/common.js";
 var EmulationModel = class extends SDKModel {
   #emulationAgent;
   #deviceOrientationAgent;
@@ -33856,8 +33856,8 @@ __export(DOMDebuggerModel_exports, {
   DOMEventListenerBreakpoint: () => DOMEventListenerBreakpoint,
   EventListener: () => EventListener
 });
-import * as Common38 from "./..\\common\\common.js";
-import * as Platform19 from "./..\\platform\\platform.js";
+import * as Common38 from "./../common/common.js";
+import * as Platform19 from "./../platform/platform.js";
 var DOMDebuggerModel = class extends SDKModel {
   agent;
   #runtimeModel;
@@ -34583,7 +34583,7 @@ __export(IsolateManager_exports, {
   MemoryTrend: () => MemoryTrend,
   MemoryTrendWindowMs: () => MemoryTrendWindowMs
 });
-import * as Common39 from "./..\\common\\common.js";
+import * as Common39 from "./../common/common.js";
 var isolateManagerInstance;
 var IsolateManager = class _IsolateManager extends Common39.ObjectWrapper.ObjectWrapper {
   #isolates = /* @__PURE__ */ new Map();
@@ -35027,7 +35027,7 @@ var PerformanceMetricsModel_exports = {};
 __export(PerformanceMetricsModel_exports, {
   PerformanceMetricsModel: () => PerformanceMetricsModel
 });
-import * as Platform20 from "./..\\platform\\platform.js";
+import * as Platform20 from "./../platform/platform.js";
 var PerformanceMetricsModel = class extends SDKModel {
   #agent;
   #metricModes = /* @__PURE__ */ new Map([
@@ -35130,7 +35130,7 @@ var MapWithDefault = class extends Map {
 };
 
 // gen/front_end/core/sdk/PreloadingModel.js
-import { assertNotNullOrUndefined as assertNotNullOrUndefined3 } from "./..\\platform\\platform.js";
+import { assertNotNullOrUndefined as assertNotNullOrUndefined3 } from "./../platform/platform.js";
 var PreloadingModel = class _PreloadingModel extends SDKModel {
   agent;
   loaderIds = [];
@@ -35891,8 +35891,8 @@ __export(ServiceWorkerCacheModel_exports, {
   Cache: () => Cache,
   ServiceWorkerCacheModel: () => ServiceWorkerCacheModel
 });
-import * as Common40 from "./..\\common\\common.js";
-import * as i18n39 from "./..\\i18n\\i18n.js";
+import * as Common40 from "./../common/common.js";
+import * as i18n39 from "./../i18n/i18n.js";
 
 // gen/front_end/core/sdk/StorageBucketsModel.js
 var StorageBucketsModel_exports = {};
@@ -36310,8 +36310,8 @@ __export(ServiceWorkerManager_exports, {
   ServiceWorkerVersion: () => ServiceWorkerVersion,
   ServiceWorkerVersionState: () => ServiceWorkerVersionState
 });
-import * as Common41 from "./..\\common\\common.js";
-import * as i18n41 from "./..\\i18n\\i18n.js";
+import * as Common41 from "./../common/common.js";
+import * as i18n41 from "./../i18n/i18n.js";
 var UIStrings19 = {
   /**
    * @description Service worker running status displayed in the Service Workers view in the Application panel

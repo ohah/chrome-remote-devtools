@@ -1,7 +1,7 @@
 // gen/front_end/panels/sensors/sensors-meta.prebundle.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 var UIStrings = {
   /**
    * @description Title of the Sensors tool. The sensors tool contains GPS, orientation sensors, touch

@@ -10,12 +10,12 @@ __export(BinaryResourceView_exports, {
   BinaryResourceView: () => BinaryResourceView,
   BinaryViewObject: () => BinaryViewObject
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SourceFrame from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SourceFrame from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/network/binaryResourceView.css.js
 var binaryResourceView_css_default = `/*
@@ -229,20 +229,20 @@ __export(RequestConditionsDrawer_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW,
   RequestConditionsDrawer: () => RequestConditionsDrawer
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import "./..\\..\\ui\\components\\tooltips\\tooltips.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Logs from "./..\\..\\models\\logs\\logs.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as uiI18n from "./..\\..\\ui\\i18n\\i18n.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives, html, nothing, render } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as MobileThrottling from "./..\\mobile_throttling\\mobile_throttling.js";
-import * as PanelUtils from "./..\\utils\\utils.js";
+import "./../../ui/legacy/legacy.js";
+import "./../../ui/components/tooltips/tooltips.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Logs from "./../../models/logs/logs.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as uiI18n from "./../../ui/i18n/i18n.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import { Directives, html, nothing, render } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as MobileThrottling from "./../mobile_throttling/mobile_throttling.js";
+import * as PanelUtils from "./../utils/utils.js";
 
 // gen/front_end/panels/network/requestConditionsDrawer.css.js
 var requestConditionsDrawer_css_default = `/*
@@ -943,14 +943,14 @@ __export(EventSourceMessagesView_exports, {
   EventSourceMessageNode: () => EventSourceMessageNode,
   EventSourceMessagesView: () => EventSourceMessagesView
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as DataGrid from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as DataGrid from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/eventSourceMessagesView.css.js
 var eventSourceMessagesView_css_default = `/*
@@ -1143,15 +1143,15 @@ __export(NetworkConfigView_exports, {
   NetworkConfigView: () => NetworkConfigView,
   userAgentGroups: () => userAgentGroups
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as SettingsUI from "./..\\..\\ui\\legacy\\components\\settings_ui\\settings_ui.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as MobileThrottling2 from "./..\\mobile_throttling\\mobile_throttling.js";
-import * as EmulationComponents from "./..\\settings\\emulation\\components\\components.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as SettingsUI from "./../../ui/legacy/components/settings_ui/settings_ui.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
+import * as MobileThrottling2 from "./../mobile_throttling/mobile_throttling.js";
+import * as EmulationComponents from "./../settings/emulation/components/components.js";
 
 // gen/front_end/panels/network/networkConfigView.css.js
 var networkConfigView_css_default = `/*
@@ -2017,22 +2017,22 @@ __export(NetworkDataGridNode_exports, {
   NetworkRequestNode: () => NetworkRequestNode,
   _backgroundColors: () => _backgroundColors
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as Logs2 from "./..\\..\\models\\logs\\logs.js";
-import * as NetworkForward from "./forward\\forward.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import { createIcon } from "./..\\..\\ui\\kit\\kit.js";
-import * as DataGrid3 from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as PerfUI from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import { render as render2 } from "./..\\..\\ui\\lit\\lit.js";
-import { PanelUtils as PanelUtils3 } from "./..\\utils\\utils.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as Logs2 from "./../../models/logs/logs.js";
+import * as NetworkForward from "./forward/forward.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import { createIcon } from "./../../ui/kit/kit.js";
+import * as DataGrid3 from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as PerfUI from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import { render as render2 } from "./../../ui/lit/lit.js";
+import { PanelUtils as PanelUtils3 } from "./../utils/utils.js";
 var UIStrings5 = {
   /**
    * @description Text in Network Data Grid Node of the Network panel
@@ -3399,18 +3399,18 @@ var NetworkItemView_exports = {};
 __export(NetworkItemView_exports, {
   NetworkItemView: () => NetworkItemView
 });
-import * as Common12 from "./..\\..\\core\\common\\common.js";
-import * as i18n31 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform8 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK11 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Annotations from "./..\\..\\models\\annotations\\annotations.js";
-import * as PanelCommon from "./..\\common\\common.js";
-import * as NetworkForward2 from "./forward\\forward.js";
-import * as LegacyWrapper from "./..\\..\\ui\\components\\legacy_wrapper\\legacy_wrapper.js";
-import { Icon as Icon2 } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI17 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging11 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as NetworkComponents from "./components\\components.js";
+import * as Common12 from "./../../core/common/common.js";
+import * as i18n31 from "./../../core/i18n/i18n.js";
+import * as Platform8 from "./../../core/platform/platform.js";
+import * as SDK11 from "./../../core/sdk/sdk.js";
+import * as Annotations from "./../../models/annotations/annotations.js";
+import * as PanelCommon from "./../common/common.js";
+import * as NetworkForward2 from "./forward/forward.js";
+import * as LegacyWrapper from "./../../ui/components/legacy_wrapper/legacy_wrapper.js";
+import { Icon as Icon2 } from "./../../ui/kit/kit.js";
+import * as UI17 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging11 from "./../../ui/visual_logging/visual_logging.js";
+import * as NetworkComponents from "./components/components.js";
 
 // gen/front_end/panels/network/RequestCookiesView.js
 var RequestCookiesView_exports = {};
@@ -3418,14 +3418,14 @@ __export(RequestCookiesView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW2,
   RequestCookiesView: () => RequestCookiesView
 });
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
-import * as uiI18n2 from "./..\\..\\ui\\i18n\\i18n.js";
-import * as CookieTable from "./..\\..\\ui\\legacy\\components\\cookie_table\\cookie_table.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as SDK5 from "./../../core/sdk/sdk.js";
+import * as uiI18n2 from "./../../ui/i18n/i18n.js";
+import * as CookieTable from "./../../ui/legacy/components/cookie_table/cookie_table.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/requestCookiesView.css.js
 var requestCookiesView_css_default = `/*
@@ -3729,13 +3729,13 @@ __export(RequestInitiatorView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW3,
   RequestInitiatorView: () => RequestInitiatorView
 });
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK6 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Logs3 from "./..\\..\\models\\logs\\logs.js";
-import * as Components2 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as SDK6 from "./../../core/sdk/sdk.js";
+import * as Logs3 from "./../../models/logs/logs.js";
+import * as Components2 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/requestInitiatorView.css.js
 var requestInitiatorView_css_default = `/*
@@ -3945,12 +3945,12 @@ __export(RequestPayloadView_exports, {
   Category: () => Category,
   RequestPayloadView: () => RequestPayloadView
 });
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as Host4 from "./..\\..\\core\\host\\host.js";
-import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK7 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Buttons3 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as ObjectUI from "./..\\..\\ui\\legacy\\components\\object_ui\\object_ui.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as Host4 from "./../../core/host/host.js";
+import * as i18n15 from "./../../core/i18n/i18n.js";
+import * as SDK7 from "./../../core/sdk/sdk.js";
+import * as Buttons3 from "./../../ui/components/buttons/buttons.js";
+import * as ObjectUI from "./../../ui/legacy/components/object_ui/object_ui.js";
 
 // gen/front_end/ui/legacy/components/object_ui/objectPropertiesSection.css.js
 var objectPropertiesSection_css_default = `/*
@@ -4190,8 +4190,8 @@ var objectValue_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./objectValue.css")} */`;
 
 // gen/front_end/panels/network/RequestPayloadView.js
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging6 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as UI8 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging6 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/requestPayloadTree.css.js
 var requestPayloadTree_css_default = `/*
@@ -4736,12 +4736,12 @@ var RequestPreviewView_exports = {};
 __export(RequestPreviewView_exports, {
   RequestPreviewView: () => RequestPreviewView
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as i18n19 from "./..\\..\\core\\i18n\\i18n.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as SourceFrame2 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI11 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging7 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as i18n19 from "./../../core/i18n/i18n.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as SourceFrame2 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI11 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging7 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/RequestHTMLView.js
 var RequestHTMLView_exports = {};
@@ -4749,8 +4749,8 @@ __export(RequestHTMLView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW4,
   RequestHTMLView: () => RequestHTMLView
 });
-import * as UI9 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html4, nothing as nothing5, render as render5 } from "./..\\..\\ui\\lit\\lit.js";
+import * as UI9 from "./../../ui/legacy/legacy.js";
+import { html as html4, nothing as nothing5, render as render5 } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/network/requestHTMLView.css.js
 var requestHTMLView_css_default = `/*
@@ -4814,11 +4814,11 @@ __export(SignedExchangeInfoView_exports, {
   Category: () => Category2,
   SignedExchangeInfoView: () => SignedExchangeInfoView
 });
-import * as Host5 from "./..\\..\\core\\host\\host.js";
-import * as i18n17 from "./..\\..\\core\\i18n\\i18n.js";
-import { Icon } from "./..\\..\\ui\\kit\\kit.js";
-import * as Components3 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI10 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Host5 from "./../../core/host/host.js";
+import * as i18n17 from "./../../core/i18n/i18n.js";
+import { Icon } from "./../../ui/kit/kit.js";
+import * as Components3 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI10 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/network/signedExchangeInfoTree.css.js
 var signedExchangeInfoTree_css_default = `/*
@@ -5270,13 +5270,13 @@ __export(RequestResponseView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW5,
   RequestResponseView: () => RequestResponseView
 });
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as Host6 from "./..\\..\\core\\host\\host.js";
-import * as i18n21 from "./..\\..\\core\\i18n\\i18n.js";
-import * as TextUtils2 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Lit3 from "./..\\..\\third_party\\lit\\lit.js";
-import * as SourceFrame3 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI12 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as Host6 from "./../../core/host/host.js";
+import * as i18n21 from "./../../core/i18n/i18n.js";
+import * as TextUtils2 from "./../../models/text_utils/text_utils.js";
+import * as Lit3 from "./../../third_party/lit/lit.js";
+import * as SourceFrame3 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI12 from "./../../ui/legacy/legacy.js";
 var { html: html5, render: render6 } = Lit3;
 var UIStrings11 = {
   /**
@@ -5368,18 +5368,18 @@ __export(RequestTimingView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW6,
   RequestTimingView: () => RequestTimingView
 });
-import * as Common8 from "./..\\..\\core\\common\\common.js";
-import * as Host7 from "./..\\..\\core\\host\\host.js";
-import * as i18n23 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK8 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Logs4 from "./..\\..\\models\\logs\\logs.js";
-import * as NetworkTimeCalculator from "./..\\..\\models\\network_time_calculator\\network_time_calculator.js";
-import * as uiI18n3 from "./..\\..\\ui\\i18n\\i18n.js";
-import * as ObjectUI2 from "./..\\..\\ui\\legacy\\components\\object_ui\\object_ui.js";
-import * as UI13 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives as Directives2, html as html6, nothing as nothing6, render as render7 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging8 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common8 from "./../../core/common/common.js";
+import * as Host7 from "./../../core/host/host.js";
+import * as i18n23 from "./../../core/i18n/i18n.js";
+import * as Platform4 from "./../../core/platform/platform.js";
+import * as SDK8 from "./../../core/sdk/sdk.js";
+import * as Logs4 from "./../../models/logs/logs.js";
+import * as NetworkTimeCalculator from "./../../models/network_time_calculator/network_time_calculator.js";
+import * as uiI18n3 from "./../../ui/i18n/i18n.js";
+import * as ObjectUI2 from "./../../ui/legacy/components/object_ui/object_ui.js";
+import * as UI13 from "./../../ui/legacy/legacy.js";
+import { Directives as Directives2, html as html6, nothing as nothing6, render as render7 } from "./../../ui/lit/lit.js";
+import * as VisualLogging8 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/networkTimingTable.css.js
 var networkTimingTable_css_default = `/*
@@ -6304,24 +6304,24 @@ var ResourceDirectSocketChunkView_exports = {};
 __export(ResourceDirectSocketChunkView_exports, {
   ResourceDirectSocketChunkView: () => ResourceDirectSocketChunkView
 });
-import * as Common10 from "./..\\..\\core\\common\\common.js";
-import * as i18n27 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform6 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK9 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils5 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as DataGrid6 from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as UI15 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging9 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common10 from "./../../core/common/common.js";
+import * as i18n27 from "./../../core/i18n/i18n.js";
+import * as Platform6 from "./../../core/platform/platform.js";
+import * as SDK9 from "./../../core/sdk/sdk.js";
+import * as TextUtils5 from "./../../models/text_utils/text_utils.js";
+import * as DataGrid6 from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as UI15 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging9 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/ResourceChunkView.js
-import * as Common9 from "./..\\..\\core\\common\\common.js";
-import * as Host8 from "./..\\..\\core\\host\\host.js";
-import * as i18n25 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils4 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as DataGrid4 from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as SourceFrame4 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI14 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common9 from "./../../core/common/common.js";
+import * as Host8 from "./../../core/host/host.js";
+import * as i18n25 from "./../../core/i18n/i18n.js";
+import * as Platform5 from "./../../core/platform/platform.js";
+import * as TextUtils4 from "./../../models/text_utils/text_utils.js";
+import * as DataGrid4 from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as SourceFrame4 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI14 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/network/resourceChunkView.css.js
 var resourceChunkView_css_default = `/*
@@ -6771,13 +6771,13 @@ var ResourceWebSocketFrameView_exports = {};
 __export(ResourceWebSocketFrameView_exports, {
   ResourceWebSocketFrameView: () => ResourceWebSocketFrameView
 });
-import * as Common11 from "./..\\..\\core\\common\\common.js";
-import * as i18n29 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform7 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK10 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils6 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as UI16 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging10 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common11 from "./../../core/common/common.js";
+import * as i18n29 from "./../../core/i18n/i18n.js";
+import * as Platform7 from "./../../core/platform/platform.js";
+import * as SDK10 from "./../../core/sdk/sdk.js";
+import * as TextUtils6 from "./../../models/text_utils/text_utils.js";
+import * as UI16 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging10 from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings15 = {
   /**
    * @description Text in Resource Web Socket Frame View of the Network panel. Displays which Opcode
@@ -7270,7 +7270,7 @@ var NetworkItemView = class extends UI17.TabbedPane.TabbedPane {
 };
 
 // gen/front_end/panels/network/network.prebundle.js
-import "./..\\..\\models\\network_time_calculator\\network_time_calculator.js";
+import "./../../models/network_time_calculator/network_time_calculator.js";
 
 // gen/front_end/panels/network/NetworkLogView.js
 var NetworkLogView_exports = {};
@@ -7282,30 +7282,30 @@ __export(NetworkLogView_exports, {
   isRequestFilteredOut: () => isRequestFilteredOut,
   overrideFilter: () => overrideFilter
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common16 from "./..\\..\\core\\common\\common.js";
-import * as Host9 from "./..\\..\\core\\host\\host.js";
-import * as i18n37 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform10 from "./..\\..\\core\\platform\\platform.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as SDK14 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Annotations2 from "./..\\..\\models\\annotations\\annotations.js";
-import * as Bindings2 from "./..\\..\\models\\bindings\\bindings.js";
-import * as HAR from "./..\\..\\models\\har\\har.js";
-import * as Logs5 from "./..\\..\\models\\logs\\logs.js";
-import * as NetworkTimeCalculator4 from "./..\\..\\models\\network_time_calculator\\network_time_calculator.js";
-import * as Persistence from "./..\\..\\models\\persistence\\persistence.js";
-import * as TextUtils7 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as NetworkForward3 from "./forward\\forward.js";
-import * as Sources from "./..\\sources\\sources.js";
-import * as Adorners from "./..\\..\\ui\\components\\adorners\\adorners.js";
-import * as Buttons4 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as RenderCoordinator3 from "./..\\..\\ui\\components\\render_coordinator\\render_coordinator.js";
-import * as DataGrid9 from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as PerfUI4 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as Components5 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI22 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging13 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common16 from "./../../core/common/common.js";
+import * as Host9 from "./../../core/host/host.js";
+import * as i18n37 from "./../../core/i18n/i18n.js";
+import * as Platform10 from "./../../core/platform/platform.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as SDK14 from "./../../core/sdk/sdk.js";
+import * as Annotations2 from "./../../models/annotations/annotations.js";
+import * as Bindings2 from "./../../models/bindings/bindings.js";
+import * as HAR from "./../../models/har/har.js";
+import * as Logs5 from "./../../models/logs/logs.js";
+import * as NetworkTimeCalculator4 from "./../../models/network_time_calculator/network_time_calculator.js";
+import * as Persistence from "./../../models/persistence/persistence.js";
+import * as TextUtils7 from "./../../models/text_utils/text_utils.js";
+import * as NetworkForward3 from "./forward/forward.js";
+import * as Sources from "./../sources/sources.js";
+import * as Adorners from "./../../ui/components/adorners/adorners.js";
+import * as Buttons4 from "./../../ui/components/buttons/buttons.js";
+import * as RenderCoordinator3 from "./../../ui/components/render_coordinator/render_coordinator.js";
+import * as DataGrid9 from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as PerfUI4 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as Components5 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI22 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging13 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/NetworkFrameGrouper.js
 var NetworkFrameGrouper_exports = {};
@@ -7313,10 +7313,10 @@ __export(NetworkFrameGrouper_exports, {
   FrameGroupNode: () => FrameGroupNode,
   NetworkFrameGrouper: () => NetworkFrameGrouper
 });
-import * as Common13 from "./..\\..\\core\\common\\common.js";
-import * as SDK12 from "./..\\..\\core\\sdk\\sdk.js";
-import { createIcon as createIcon2 } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI18 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common13 from "./../../core/common/common.js";
+import * as SDK12 from "./../../core/sdk/sdk.js";
+import { createIcon as createIcon2 } from "./../../ui/kit/kit.js";
+import * as UI18 from "./../../ui/legacy/legacy.js";
 var NetworkFrameGrouper = class {
   parentView;
   activeGroups;
@@ -7853,22 +7853,22 @@ var NetworkLogViewColumns_exports = {};
 __export(NetworkLogViewColumns_exports, {
   NetworkLogViewColumns: () => NetworkLogViewColumns
 });
-import * as Common15 from "./..\\..\\core\\common\\common.js";
-import * as i18n35 from "./..\\..\\core\\i18n\\i18n.js";
-import { Icon as Icon3 } from "./..\\..\\ui\\kit\\kit.js";
-import * as DataGrid7 from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as Components4 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI21 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport5 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as VisualLogging12 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common15 from "./../../core/common/common.js";
+import * as i18n35 from "./../../core/i18n/i18n.js";
+import { Icon as Icon3 } from "./../../ui/kit/kit.js";
+import * as DataGrid7 from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as Components4 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI21 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport5 from "./../../ui/legacy/theme_support/theme_support.js";
+import * as VisualLogging12 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/NetworkManageCustomHeadersView.js
 var NetworkManageCustomHeadersView_exports = {};
 __export(NetworkManageCustomHeadersView_exports, {
   NetworkManageCustomHeadersView: () => NetworkManageCustomHeadersView
 });
-import * as i18n33 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI19 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n33 from "./../../core/i18n/i18n.js";
+import * as UI19 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/network/networkManageCustomHeadersView.css.js
 var networkManageCustomHeadersView_css_default = `/*
@@ -8033,12 +8033,12 @@ var NetworkWaterfallColumn_exports = {};
 __export(NetworkWaterfallColumn_exports, {
   NetworkWaterfallColumn: () => NetworkWaterfallColumn
 });
-import * as Common14 from "./..\\..\\core\\common\\common.js";
-import * as NetworkTimeCalculator3 from "./..\\..\\models\\network_time_calculator\\network_time_calculator.js";
-import * as RenderCoordinator2 from "./..\\..\\ui\\components\\render_coordinator\\render_coordinator.js";
-import * as PerfUI3 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as UI20 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport3 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
+import * as Common14 from "./../../core/common/common.js";
+import * as NetworkTimeCalculator3 from "./../../models/network_time_calculator/network_time_calculator.js";
+import * as RenderCoordinator2 from "./../../ui/components/render_coordinator/render_coordinator.js";
+import * as PerfUI3 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as UI20 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport3 from "./../../ui/legacy/theme_support/theme_support.js";
 
 // gen/front_end/panels/network/NetworkOverview.js
 var NetworkOverview_exports = {};
@@ -8046,12 +8046,12 @@ __export(NetworkOverview_exports, {
   NetworkOverview: () => NetworkOverview,
   RequestTimeRangeNameToColor: () => RequestTimeRangeNameToColor
 });
-import * as SDK13 from "./..\\..\\core\\sdk\\sdk.js";
-import * as NetworkTimeCalculator2 from "./..\\..\\models\\network_time_calculator\\network_time_calculator.js";
-import * as Trace from "./..\\..\\models\\trace\\trace.js";
-import * as RenderCoordinator from "./..\\..\\ui\\components\\render_coordinator\\render_coordinator.js";
-import * as PerfUI2 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as ThemeSupport from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
+import * as SDK13 from "./../../core/sdk/sdk.js";
+import * as NetworkTimeCalculator2 from "./../../models/network_time_calculator/network_time_calculator.js";
+import * as Trace from "./../../models/trace/trace.js";
+import * as RenderCoordinator from "./../../ui/components/render_coordinator/render_coordinator.js";
+import * as PerfUI2 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as ThemeSupport from "./../../ui/legacy/theme_support/theme_support.js";
 var NetworkOverview = class extends PerfUI2.TimelineOverviewPane.TimelineOverviewBase {
   selectedFilmStripTime;
   numBands;
@@ -12258,10 +12258,10 @@ __export(NetworkSearchScope_exports, {
   NetworkSearchResult: () => NetworkSearchResult,
   NetworkSearchScope: () => NetworkSearchScope
 });
-import * as i18n39 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform11 from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils9 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as NetworkForward4 from "./forward\\forward.js";
+import * as i18n39 from "./../../core/i18n/i18n.js";
+import * as Platform11 from "./../../core/platform/platform.js";
+import * as TextUtils9 from "./../../models/text_utils/text_utils.js";
+import * as NetworkForward4 from "./forward/forward.js";
 var UIStrings20 = {
   /**
    * @description Text for web URLs
@@ -12427,26 +12427,26 @@ __export(NetworkPanel_exports, {
   RequestRevealer: () => RequestRevealer,
   SearchNetworkView: () => SearchNetworkView
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common17 from "./..\\..\\core\\common\\common.js";
-import * as Host10 from "./..\\..\\core\\host\\host.js";
-import * as i18n41 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform12 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK15 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Annotations3 from "./..\\..\\models\\annotations\\annotations.js";
-import * as Logs6 from "./..\\..\\models\\logs\\logs.js";
-import * as NetworkTimeCalculator5 from "./..\\..\\models\\network_time_calculator\\network_time_calculator.js";
-import * as Trace2 from "./..\\..\\models\\trace\\trace.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as PanelCommon2 from "./..\\common\\common.js";
-import * as NetworkForward5 from "./forward\\forward.js";
-import * as Tracing from "./..\\..\\services\\tracing\\tracing.js";
-import * as PerfUI5 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as SettingsUI3 from "./..\\..\\ui\\legacy\\components\\settings_ui\\settings_ui.js";
-import * as UI23 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging14 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as MobileThrottling3 from "./..\\mobile_throttling\\mobile_throttling.js";
-import * as Search from "./..\\search\\search.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common17 from "./../../core/common/common.js";
+import * as Host10 from "./../../core/host/host.js";
+import * as i18n41 from "./../../core/i18n/i18n.js";
+import * as Platform12 from "./../../core/platform/platform.js";
+import * as SDK15 from "./../../core/sdk/sdk.js";
+import * as Annotations3 from "./../../models/annotations/annotations.js";
+import * as Logs6 from "./../../models/logs/logs.js";
+import * as NetworkTimeCalculator5 from "./../../models/network_time_calculator/network_time_calculator.js";
+import * as Trace2 from "./../../models/trace/trace.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as PanelCommon2 from "./../common/common.js";
+import * as NetworkForward5 from "./forward/forward.js";
+import * as Tracing from "./../../services/tracing/tracing.js";
+import * as PerfUI5 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as SettingsUI3 from "./../../ui/legacy/components/settings_ui/settings_ui.js";
+import * as UI23 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging14 from "./../../ui/visual_logging/visual_logging.js";
+import * as MobileThrottling3 from "./../mobile_throttling/mobile_throttling.js";
+import * as Search from "./../search/search.js";
 
 // gen/front_end/panels/network/networkPanel.css.js
 var networkPanel_css_default = `/*

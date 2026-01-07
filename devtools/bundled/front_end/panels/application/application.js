@@ -25,20 +25,20 @@ __export(ApplicationPanelSidebar_exports, {
   ServiceWorkersTreeElement: () => ServiceWorkersTreeElement,
   StorageCategoryView: () => StorageCategoryView
 });
-import * as Common16 from "./..\\..\\core\\common\\common.js";
-import * as Host9 from "./..\\..\\core\\host\\host.js";
-import * as i18n55 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform8 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK23 from "./..\\..\\core\\sdk\\sdk.js";
-import * as IssuesManager from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as LegacyWrapper5 from "./..\\..\\ui\\components\\legacy_wrapper\\legacy_wrapper.js";
-import { createIcon as createIcon12 } from "./..\\..\\ui\\kit\\kit.js";
-import * as SourceFrame5 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI21 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common16 from "./../../core/common/common.js";
+import * as Host9 from "./../../core/host/host.js";
+import * as i18n55 from "./../../core/i18n/i18n.js";
+import * as Platform8 from "./../../core/platform/platform.js";
+import * as SDK23 from "./../../core/sdk/sdk.js";
+import * as IssuesManager from "./../../models/issues_manager/issues_manager.js";
+import * as LegacyWrapper5 from "./../../ui/components/legacy_wrapper/legacy_wrapper.js";
+import { createIcon as createIcon12 } from "./../../ui/kit/kit.js";
+import * as SourceFrame5 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI21 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/application/ApplicationPanelTreeElement.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common from "./../../core/common/common.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 var ApplicationPanelTreeElement = class _ApplicationPanelTreeElement extends UI.TreeOutline.TreeElement {
   resourcesPanel;
   constructor(resourcesPanel, title, expandable, jslogContext) {
@@ -136,18 +136,18 @@ __export(AppManifestView_exports, {
   AppManifestView: () => AppManifestView,
   DEFAULT_VIEW: () => DEFAULT_VIEW
 });
-import "./..\\..\\ui\\legacy\\components\\inline_editor\\inline_editor.js";
-import "./..\\..\\ui\\components\\report_view\\report_view.js";
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives, html, i18nTemplate, nothing, render } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/components/inline_editor/inline_editor.js";
+import "./../../ui/components/report_view/report_view.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import { Directives, html, i18nTemplate, nothing, render } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/appManifestView.css.js
 var appManifestView_css_default = `/*
@@ -243,7 +243,7 @@ devtools-report .report-section {
 /*# sourceURL=${import.meta.resolve("./appManifestView.css")} */`;
 
 // gen/front_end/panels/application/AppManifestView.js
-import * as ApplicationComponents from "./components\\components.js";
+import * as ApplicationComponents from "./components/components.js";
 var { styleMap, classMap, ref } = Directives;
 var { linkifyURL } = Components.Linkifier.Linkifier;
 var { widgetConfig } = UI2.Widget;
@@ -1571,10 +1571,10 @@ var AppManifestView = class extends Common2.ObjectWrapper.eventMixin(UI2.Widget.
 };
 
 // gen/front_end/panels/application/BackForwardCacheTreeElement.js
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import { createIcon } from "./..\\..\\ui\\kit\\kit.js";
-import * as ApplicationComponents2 from "./components\\components.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import { createIcon } from "./../../ui/kit/kit.js";
+import * as ApplicationComponents2 from "./components/components.js";
 var UIStrings2 = {
   /**
    * @description Text in Application Panel Sidebar of the Application panel
@@ -1610,7 +1610,7 @@ __export(BackgroundServiceModel_exports, {
   BackgroundServiceModel: () => BackgroundServiceModel,
   Events: () => Events
 });
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
 var BackgroundServiceModel = class extends SDK2.SDKModel.SDKModel {
   backgroundServiceAgent;
   events;
@@ -1656,13 +1656,13 @@ __export(BackgroundServiceView_exports, {
   BackgroundServiceView: () => BackgroundServiceView,
   EventDataNode: () => EventDataNode
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as DataGrid from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
+import "./../../ui/legacy/legacy.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import * as DataGrid from "./../../ui/legacy/components/data_grid/data_grid.js";
 
 // gen/front_end/ui/legacy/emptyWidget.css.js
 var emptyWidget_css_default = `/*
@@ -1678,8 +1678,8 @@ var emptyWidget_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./emptyWidget.css")} */`;
 
 // gen/front_end/panels/application/BackgroundServiceView.js
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/backgroundServiceView.css.js
 var backgroundServiceView_css_default = `/*
@@ -2252,10 +2252,10 @@ __export(BounceTrackingMitigationsTreeElement_exports, {
   BounceTrackingMitigationsTreeElement: () => BounceTrackingMitigationsTreeElement,
   i18nString: () => i18nString4
 });
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import { createIcon as createIcon2 } from "./..\\..\\ui\\kit\\kit.js";
-import * as ApplicationComponents3 from "./components\\components.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import { createIcon as createIcon2 } from "./../../ui/kit/kit.js";
+import * as ApplicationComponents3 from "./components/components.js";
 var UIStrings4 = {
   /**
    * @description Hover text for the Bounce Tracking Mitigations element in the Application Panel sidebar.
@@ -2292,8 +2292,8 @@ __export(DOMStorageModel_exports, {
   DOMStorageDispatcher: () => DOMStorageDispatcher,
   DOMStorageModel: () => DOMStorageModel
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
 var DOMStorage = class _DOMStorage extends Common3.ObjectWrapper.ObjectWrapper {
   model;
   #storageKey;
@@ -2471,8 +2471,8 @@ __export(ExtensionStorageModel_exports, {
   ExtensionStorage: () => ExtensionStorage,
   ExtensionStorageModel: () => ExtensionStorageModel
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as SDK5 from "./../../core/sdk/sdk.js";
 var ExtensionStorage = class extends Common4.ObjectWrapper.ObjectWrapper {
   #model;
   #extensionId;
@@ -2653,23 +2653,23 @@ var FrameDetailsView_exports = {};
 __export(FrameDetailsView_exports, {
   FrameDetailsReportView: () => FrameDetailsReportView
 });
-import "./..\\..\\ui\\components\\expandable_list\\expandable_list.js";
-import "./..\\..\\ui\\components\\report_view\\report_view.js";
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK6 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings2 from "./..\\..\\models\\bindings\\bindings.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as PanelCommon from "./..\\common\\common.js";
-import * as NetworkForward from "./..\\network\\forward\\forward.js";
-import * as CspEvaluator from "./..\\..\\third_party\\csp_evaluator\\csp_evaluator.js";
-import * as Buttons3 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Components2 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html3, nothing as nothing3, render as render3 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ApplicationComponents4 from "./components\\components.js";
+import "./../../ui/components/expandable_list/expandable_list.js";
+import "./../../ui/components/report_view/report_view.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK6 from "./../../core/sdk/sdk.js";
+import * as Bindings2 from "./../../models/bindings/bindings.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as PanelCommon from "./../common/common.js";
+import * as NetworkForward from "./../network/forward/forward.js";
+import * as CspEvaluator from "./../../third_party/csp_evaluator/csp_evaluator.js";
+import * as Buttons3 from "./../../ui/components/buttons/buttons.js";
+import * as Components2 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import { html as html3, nothing as nothing3, render as render3 } from "./../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
+import * as ApplicationComponents4 from "./components/components.js";
 
 // gen/front_end/panels/application/frameDetailsReportView.css.js
 var frameDetailsReportView_css_default = `/*
@@ -2798,12 +2798,12 @@ __export(OriginTrialTreeView_exports, {
   OriginTrialTokenRows: () => OriginTrialTokenRows,
   OriginTrialTreeView: () => OriginTrialTreeView
 });
-import "./..\\..\\ui\\kit\\kit.js";
-import "./..\\..\\ui\\legacy\\legacy.js";
-import "./..\\..\\ui\\components\\adorners\\adorners.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives as Directives2, html as html2, nothing as nothing2, render as render2 } from "./..\\..\\ui\\lit\\lit.js";
+import "./../../ui/kit/kit.js";
+import "./../../ui/legacy/legacy.js";
+import "./../../ui/components/adorners/adorners.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import { Directives as Directives2, html as html2, nothing as nothing2, render as render2 } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/application/originTrialTokenRows.css.js
 var originTrialTokenRows_css_default = `/*
@@ -3925,8 +3925,8 @@ __export(IndexedDBModel_exports, {
   IndexedDBModel: () => IndexedDBModel,
   ObjectStore: () => ObjectStore
 });
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as SDK7 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as SDK7 from "./../../core/sdk/sdk.js";
 var DEFAULT_BUCKET = "";
 var IndexedDBModel = class _IndexedDBModel extends SDK7.SDKModel.SDKModel {
   storageBucketModel;
@@ -4405,17 +4405,17 @@ __export(IndexedDBViews_exports, {
   IDBDataView: () => IDBDataView,
   IDBDatabaseView: () => IDBDatabaseView
 });
-import "./..\\..\\ui\\components\\report_view\\report_view.js";
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK8 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Buttons4 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as DataGrid3 from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as ObjectUI from "./..\\..\\ui\\legacy\\components\\object_ui\\object_ui.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ApplicationComponents5 from "./components\\components.js";
+import "./../../ui/components/report_view/report_view.js";
+import "./../../ui/legacy/legacy.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as SDK8 from "./../../core/sdk/sdk.js";
+import * as Buttons4 from "./../../ui/components/buttons/buttons.js";
+import * as DataGrid3 from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as ObjectUI from "./../../ui/legacy/components/object_ui/object_ui.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
+import * as ApplicationComponents5 from "./components/components.js";
 
 // gen/front_end/panels/application/indexedDBViews.css.js
 var indexedDBViews_css_default = `/*
@@ -5098,7 +5098,7 @@ var InterestGroupStorageModel_exports = {};
 __export(InterestGroupStorageModel_exports, {
   InterestGroupStorageModel: () => InterestGroupStorageModel
 });
-import * as SDK9 from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK9 from "./../../core/sdk/sdk.js";
 var InterestGroupStorageModel = class extends SDK9.SDKModel.SDKModel {
   storageAgent;
   enabled;
@@ -5160,21 +5160,21 @@ __export(InterestGroupTreeElement_exports, {
   InterestGroupTreeElement: () => InterestGroupTreeElement,
   i18nString: () => i18nString9
 });
-import * as Host4 from "./..\\..\\core\\host\\host.js";
-import * as i18n17 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK10 from "./..\\..\\core\\sdk\\sdk.js";
-import { createIcon as createIcon3 } from "./..\\..\\ui\\kit\\kit.js";
+import * as Host4 from "./../../core/host/host.js";
+import * as i18n17 from "./../../core/i18n/i18n.js";
+import * as SDK10 from "./../../core/sdk/sdk.js";
+import { createIcon as createIcon3 } from "./../../ui/kit/kit.js";
 
 // gen/front_end/panels/application/InterestGroupStorageView.js
 var InterestGroupStorageView_exports = {};
 __export(InterestGroupStorageView_exports, {
   InterestGroupStorageView: () => InterestGroupStorageView
 });
-import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SourceFrame from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging5 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ApplicationComponents6 from "./components\\components.js";
+import * as i18n15 from "./../../core/i18n/i18n.js";
+import * as SourceFrame from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging5 from "./../../ui/visual_logging/visual_logging.js";
+import * as ApplicationComponents6 from "./components/components.js";
 
 // gen/front_end/panels/application/interestGroupStorageView.css.js
 var interestGroupStorageView_css_default = `/*
@@ -5358,11 +5358,11 @@ __export(OpenedWindowDetailsView_exports, {
   OpenedWindowDetailsView: () => OpenedWindowDetailsView,
   WorkerDetailsView: () => WorkerDetailsView
 });
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as i18n19 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK11 from "./..\\..\\core\\sdk\\sdk.js";
-import { createIcon as createIcon4 } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as i18n19 from "./../../core/i18n/i18n.js";
+import * as SDK11 from "./../../core/sdk/sdk.js";
+import { createIcon as createIcon4 } from "./../../ui/kit/kit.js";
+import * as UI8 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/application/openedWindowDetailsView.css.js
 var openedWindowDetailsView_css_default = `/*
@@ -5696,9 +5696,9 @@ __export(PreloadingTreeElement_exports, {
   PreloadingRuleSetTreeElement: () => PreloadingRuleSetTreeElement,
   PreloadingSummaryTreeElement: () => PreloadingSummaryTreeElement
 });
-import * as i18n25 from "./..\\..\\core\\i18n\\i18n.js";
-import { createIcon as createIcon5 } from "./..\\..\\ui\\kit\\kit.js";
-import * as PreloadingHelper from "./preloading\\helper\\helper.js";
+import * as i18n25 from "./../../core/i18n/i18n.js";
+import { createIcon as createIcon5 } from "./../../ui/kit/kit.js";
+import * as PreloadingHelper from "./preloading/helper/helper.js";
 
 // gen/front_end/panels/application/preloading/PreloadingView.js
 var PreloadingView_exports = {};
@@ -5707,24 +5707,24 @@ __export(PreloadingView_exports, {
   PreloadingRuleSetView: () => PreloadingRuleSetView,
   PreloadingSummaryView: () => PreloadingSummaryView
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common8 from "./..\\..\\core\\common\\common.js";
-import * as i18n23 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
-import { assertNotNullOrUndefined as assertNotNullOrUndefined2 } from "./..\\..\\core\\platform\\platform.js";
-import * as SDK13 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Buttons5 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI9 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives as Directives3, html as html5, render as render4 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging6 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PreloadingComponents from "./preloading\\components\\components.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common8 from "./../../core/common/common.js";
+import * as i18n23 from "./../../core/i18n/i18n.js";
+import * as Platform4 from "./../../core/platform/platform.js";
+import { assertNotNullOrUndefined as assertNotNullOrUndefined2 } from "./../../core/platform/platform.js";
+import * as SDK13 from "./../../core/sdk/sdk.js";
+import * as Buttons5 from "./../../ui/components/buttons/buttons.js";
+import * as UI9 from "./../../ui/legacy/legacy.js";
+import { Directives as Directives3, html as html5, render as render4 } from "./../../ui/lit/lit.js";
+import * as VisualLogging6 from "./../../ui/visual_logging/visual_logging.js";
+import * as PreloadingComponents from "./preloading/components/components.js";
 
 // gen/front_end/panels/application/preloading/components/PreloadingString.js
-import * as i18n21 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import { assertNotNullOrUndefined } from "./..\\..\\core\\platform\\platform.js";
-import * as SDK12 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings3 from "./..\\..\\models\\bindings\\bindings.js";
+import * as i18n21 from "./../../core/i18n/i18n.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import { assertNotNullOrUndefined } from "./../../core/platform/platform.js";
+import * as SDK12 from "./../../core/sdk/sdk.js";
+import * as Bindings3 from "./../../models/bindings/bindings.js";
 var UIStrings11 = {
   /**
    * @description  Description text for Prefetch status PrefetchFailedIneligibleRedirect.
@@ -6867,9 +6867,9 @@ var PreloadingAttemptTreeElement = class extends PreloadingTreeElementBase {
 };
 
 // gen/front_end/panels/application/ReportingApiTreeElement.js
-import * as Host5 from "./..\\..\\core\\host\\host.js";
-import * as i18n29 from "./..\\..\\core\\i18n\\i18n.js";
-import { createIcon as createIcon6 } from "./..\\..\\ui\\kit\\kit.js";
+import * as Host5 from "./../../core/host/host.js";
+import * as i18n29 from "./../../core/i18n/i18n.js";
+import { createIcon as createIcon6 } from "./../../ui/kit/kit.js";
 
 // gen/front_end/panels/application/ReportingApiView.js
 var ReportingApiView_exports = {};
@@ -6878,13 +6878,13 @@ __export(ReportingApiView_exports, {
   ReportingApiView: () => ReportingApiView,
   i18nString: () => i18nString14
 });
-import * as i18n27 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK14 from "./..\\..\\core\\sdk\\sdk.js";
-import * as SourceFrame2 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI10 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html6, render as render5 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging7 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ApplicationComponents7 from "./components\\components.js";
+import * as i18n27 from "./../../core/i18n/i18n.js";
+import * as SDK14 from "./../../core/sdk/sdk.js";
+import * as SourceFrame2 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI10 from "./../../ui/legacy/legacy.js";
+import { html as html6, render as render5 } from "./../../ui/lit/lit.js";
+import * as VisualLogging7 from "./../../ui/visual_logging/visual_logging.js";
+import * as ApplicationComponents7 from "./components/components.js";
 var { widgetConfig: widgetConfig4 } = UI10.Widget;
 var UIStrings14 = {
   /**
@@ -7125,11 +7125,11 @@ devtools-icon.navigator-font-tree-item {
 /*# sourceURL=${import.meta.resolve("./resourcesSidebar.css")} */`;
 
 // gen/front_end/panels/application/ServiceWorkerCacheTreeElement.js
-import * as Host6 from "./..\\..\\core\\host\\host.js";
-import * as i18n33 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK16 from "./..\\..\\core\\sdk\\sdk.js";
-import { createIcon as createIcon7 } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI12 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Host6 from "./../../core/host/host.js";
+import * as i18n33 from "./../../core/i18n/i18n.js";
+import * as SDK16 from "./../../core/sdk/sdk.js";
+import { createIcon as createIcon7 } from "./../../ui/kit/kit.js";
+import * as UI12 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/application/ServiceWorkerCacheViews.js
 var ServiceWorkerCacheViews_exports = {};
@@ -7138,19 +7138,19 @@ __export(ServiceWorkerCacheViews_exports, {
   RequestView: () => RequestView,
   ServiceWorkerCacheView: () => ServiceWorkerCacheView
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common9 from "./..\\..\\core\\common\\common.js";
-import * as i18n31 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK15 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as LegacyWrapper from "./..\\..\\ui\\components\\legacy_wrapper\\legacy_wrapper.js";
-import * as DataGrid5 from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as UI11 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging8 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as NetworkComponents from "./..\\network\\components\\components.js";
-import * as Network from "./..\\network\\network.js";
-import * as ApplicationComponents8 from "./components\\components.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common9 from "./../../core/common/common.js";
+import * as i18n31 from "./../../core/i18n/i18n.js";
+import * as Platform5 from "./../../core/platform/platform.js";
+import * as SDK15 from "./../../core/sdk/sdk.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as LegacyWrapper from "./../../ui/components/legacy_wrapper/legacy_wrapper.js";
+import * as DataGrid5 from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as UI11 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging8 from "./../../ui/visual_logging/visual_logging.js";
+import * as NetworkComponents from "./../network/components/components.js";
+import * as Network from "./../network/network.js";
+import * as ApplicationComponents8 from "./components/components.js";
 
 // gen/front_end/panels/application/serviceWorkerCacheViews.css.js
 var serviceWorkerCacheViews_css_default = `/*
@@ -7885,17 +7885,17 @@ __export(ServiceWorkersView_exports, {
   ServiceWorkersView: () => ServiceWorkersView,
   setThrottleDisabledForDebugging: () => setThrottleDisabledForDebugging
 });
-import * as Common10 from "./..\\..\\core\\common\\common.js";
-import * as Host7 from "./..\\..\\core\\host\\host.js";
-import * as i18n37 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK18 from "./..\\..\\core\\sdk\\sdk.js";
-import * as NetworkForward2 from "./..\\network\\forward\\forward.js";
-import * as Buttons6 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Components3 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI14 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging10 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as MobileThrottling from "./..\\mobile_throttling\\mobile_throttling.js";
-import * as ApplicationComponents9 from "./components\\components.js";
+import * as Common10 from "./../../core/common/common.js";
+import * as Host7 from "./../../core/host/host.js";
+import * as i18n37 from "./../../core/i18n/i18n.js";
+import * as SDK18 from "./../../core/sdk/sdk.js";
+import * as NetworkForward2 from "./../network/forward/forward.js";
+import * as Buttons6 from "./../../ui/components/buttons/buttons.js";
+import * as Components3 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI14 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging10 from "./../../ui/visual_logging/visual_logging.js";
+import * as MobileThrottling from "./../mobile_throttling/mobile_throttling.js";
+import * as ApplicationComponents9 from "./components/components.js";
 
 // gen/front_end/panels/application/serviceWorkersView.css.js
 var serviceWorkersView_css_default = `/*
@@ -8175,10 +8175,10 @@ var ServiceWorkerUpdateCycleView_exports = {};
 __export(ServiceWorkerUpdateCycleView_exports, {
   ServiceWorkerUpdateCycleView: () => ServiceWorkerUpdateCycleView
 });
-import * as i18n35 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK17 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI13 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging9 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n35 from "./../../core/i18n/i18n.js";
+import * as SDK17 from "./../../core/sdk/sdk.js";
+import * as UI13 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging9 from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings18 = {
   /**
    * @description Text in Indexed DBViews of the Application panel
@@ -9171,21 +9171,21 @@ var SharedStorageListTreeElement_exports = {};
 __export(SharedStorageListTreeElement_exports, {
   SharedStorageListTreeElement: () => SharedStorageListTreeElement
 });
-import * as Common11 from "./..\\..\\core\\common\\common.js";
-import * as i18n41 from "./..\\..\\core\\i18n\\i18n.js";
-import { createIcon as createIcon8 } from "./..\\..\\ui\\kit\\kit.js";
+import * as Common11 from "./../../core/common/common.js";
+import * as i18n41 from "./../../core/i18n/i18n.js";
+import { createIcon as createIcon8 } from "./../../ui/kit/kit.js";
 
 // gen/front_end/panels/application/SharedStorageEventsView.js
 var SharedStorageEventsView_exports = {};
 __export(SharedStorageEventsView_exports, {
   SharedStorageEventsView: () => SharedStorageEventsView
 });
-import * as i18n39 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK19 from "./..\\..\\core\\sdk\\sdk.js";
-import * as SourceFrame3 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI15 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging11 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ApplicationComponents10 from "./components\\components.js";
+import * as i18n39 from "./../../core/i18n/i18n.js";
+import * as SDK19 from "./../../core/sdk/sdk.js";
+import * as SourceFrame3 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI15 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging11 from "./../../ui/visual_logging/visual_logging.js";
+import * as ApplicationComponents10 from "./components/components.js";
 
 // gen/front_end/panels/application/sharedStorageEventsView.css.js
 var sharedStorageEventsView_css_default = `/*
@@ -9345,8 +9345,8 @@ __export(SharedStorageModel_exports, {
   SharedStorageForOrigin: () => SharedStorageForOrigin,
   SharedStorageModel: () => SharedStorageModel
 });
-import * as Common12 from "./..\\..\\core\\common\\common.js";
-import * as SDK20 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common12 from "./../../core/common/common.js";
+import * as SDK20 from "./../../core/sdk/sdk.js";
 var SharedStorageForOrigin = class extends Common12.ObjectWrapper.ObjectWrapper {
   #model;
   #securityOrigin;
@@ -9521,31 +9521,31 @@ var SharedStorageTreeElement_exports = {};
 __export(SharedStorageTreeElement_exports, {
   SharedStorageTreeElement: () => SharedStorageTreeElement
 });
-import { createIcon as createIcon9 } from "./..\\..\\ui\\kit\\kit.js";
-import * as VisualLogging14 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import { createIcon as createIcon9 } from "./../../ui/kit/kit.js";
+import * as VisualLogging14 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/SharedStorageItemsView.js
 var SharedStorageItemsView_exports = {};
 __export(SharedStorageItemsView_exports, {
   SharedStorageItemsView: () => SharedStorageItemsView
 });
-import * as Common14 from "./..\\..\\core\\common\\common.js";
-import * as i18n47 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SourceFrame4 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI18 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ApplicationComponents13 from "./components\\components.js";
+import * as Common14 from "./../../core/common/common.js";
+import * as i18n47 from "./../../core/i18n/i18n.js";
+import * as SourceFrame4 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI18 from "./../../ui/legacy/legacy.js";
+import * as ApplicationComponents13 from "./components/components.js";
 
 // gen/front_end/panels/application/KeyValueStorageItemsView.js
 var KeyValueStorageItemsView_exports = {};
 __export(KeyValueStorageItemsView_exports, {
   KeyValueStorageItemsView: () => KeyValueStorageItemsView
 });
-import * as i18n45 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Geometry from "./..\\..\\models\\geometry\\geometry.js";
-import * as UI17 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives as LitDirectives, html as html8, nothing as nothing5, render as render7 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging13 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ApplicationComponents12 from "./components\\components.js";
+import * as i18n45 from "./../../core/i18n/i18n.js";
+import * as Geometry from "./../../models/geometry/geometry.js";
+import * as UI17 from "./../../ui/legacy/legacy.js";
+import { Directives as LitDirectives, html as html8, nothing as nothing5, render as render7 } from "./../../ui/lit/lit.js";
+import * as VisualLogging13 from "./../../ui/visual_logging/visual_logging.js";
+import * as ApplicationComponents12 from "./components/components.js";
 
 // gen/front_end/panels/application/StorageItemsToolbar.js
 var StorageItemsToolbar_exports = {};
@@ -9553,15 +9553,15 @@ __export(StorageItemsToolbar_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW5,
   StorageItemsToolbar: () => StorageItemsToolbar
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common13 from "./..\\..\\core\\common\\common.js";
-import * as i18n43 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform6 from "./..\\..\\core\\platform\\platform.js";
-import * as Buttons7 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI16 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging12 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ApplicationComponents11 from "./components\\components.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common13 from "./../../core/common/common.js";
+import * as i18n43 from "./../../core/i18n/i18n.js";
+import * as Platform6 from "./../../core/platform/platform.js";
+import * as Buttons7 from "./../../ui/components/buttons/buttons.js";
+import * as UI16 from "./../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../ui/lit/lit.js";
+import * as VisualLogging12 from "./../../ui/visual_logging/visual_logging.js";
+import * as ApplicationComponents11 from "./components/components.js";
 var UIStrings22 = {
   /**
    * @description Text to refresh the page
@@ -10167,12 +10167,12 @@ __export(StorageBucketsTreeElement_exports, {
   StorageBucketsTreeParentElement: () => StorageBucketsTreeParentElement,
   i18nString: () => i18nString25
 });
-import * as i18n49 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK21 from "./..\\..\\core\\sdk\\sdk.js";
-import * as LegacyWrapper3 from "./..\\..\\ui\\components\\legacy_wrapper\\legacy_wrapper.js";
-import { createIcon as createIcon10 } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI19 from "./..\\..\\ui\\legacy\\legacy.js";
-import { StorageMetadataView as StorageMetadataView5 } from "./components\\components.js";
+import * as i18n49 from "./../../core/i18n/i18n.js";
+import * as SDK21 from "./../../core/sdk/sdk.js";
+import * as LegacyWrapper3 from "./../../ui/components/legacy_wrapper/legacy_wrapper.js";
+import { createIcon as createIcon10 } from "./../../ui/kit/kit.js";
+import * as UI19 from "./../../ui/legacy/legacy.js";
+import { StorageMetadataView as StorageMetadataView5 } from "./components/components.js";
 var UIStrings25 = {
   /**
    * @description Label for an item in the Application Panel Sidebar of the Application panel
@@ -10321,16 +10321,16 @@ __export(StorageView_exports, {
   AllStorageTypes: () => AllStorageTypes,
   StorageView: () => StorageView
 });
-import * as Common15 from "./..\\..\\core\\common\\common.js";
-import * as i18n51 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform7 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK22 from "./..\\..\\core\\sdk\\sdk.js";
-import * as uiI18n from "./..\\..\\ui\\i18n\\i18n.js";
-import { Icon } from "./..\\..\\ui\\kit\\kit.js";
-import * as PerfUI from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as SettingsUI from "./..\\..\\ui\\legacy\\components\\settings_ui\\settings_ui.js";
-import * as UI20 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging15 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common15 from "./../../core/common/common.js";
+import * as i18n51 from "./../../core/i18n/i18n.js";
+import * as Platform7 from "./../../core/platform/platform.js";
+import * as SDK22 from "./../../core/sdk/sdk.js";
+import * as uiI18n from "./../../ui/i18n/i18n.js";
+import { Icon } from "./../../ui/kit/kit.js";
+import * as PerfUI from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as SettingsUI from "./../../ui/legacy/components/settings_ui/settings_ui.js";
+import * as UI20 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging15 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/storageView.css.js
 var storageView_css_default = `/*
@@ -10978,10 +10978,10 @@ __export(TrustTokensTreeElement_exports, {
   TrustTokensTreeElement: () => TrustTokensTreeElement,
   i18nString: () => i18nString27
 });
-import * as Host8 from "./..\\..\\core\\host\\host.js";
-import * as i18n53 from "./..\\..\\core\\i18n\\i18n.js";
-import { createIcon as createIcon11 } from "./..\\..\\ui\\kit\\kit.js";
-import * as ApplicationComponents14 from "./components\\components.js";
+import * as Host8 from "./../../core/host/host.js";
+import * as i18n53 from "./../../core/i18n/i18n.js";
+import { createIcon as createIcon11 } from "./../../ui/kit/kit.js";
+import * as ApplicationComponents14 from "./components/components.js";
 var UIStrings27 = {
   /**
    * @description Hover text for an info icon in the Private State Token panel.
@@ -12971,13 +12971,13 @@ var CookieItemsView_exports = {};
 __export(CookieItemsView_exports, {
   CookieItemsView: () => CookieItemsView
 });
-import * as Common17 from "./..\\..\\core\\common\\common.js";
-import * as i18n57 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK24 from "./..\\..\\core\\sdk\\sdk.js";
-import * as IssuesManager2 from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as CookieTable from "./..\\..\\ui\\legacy\\components\\cookie_table\\cookie_table.js";
-import * as UI22 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging16 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common17 from "./../../core/common/common.js";
+import * as i18n57 from "./../../core/i18n/i18n.js";
+import * as SDK24 from "./../../core/sdk/sdk.js";
+import * as IssuesManager2 from "./../../models/issues_manager/issues_manager.js";
+import * as CookieTable from "./../../ui/legacy/components/cookie_table/cookie_table.js";
+import * as UI22 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging16 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/cookieItemsView.css.js
 var cookieItemsView_css_default = `/*
@@ -13284,12 +13284,12 @@ var DOMStorageItemsView_exports = {};
 __export(DOMStorageItemsView_exports, {
   DOMStorageItemsView: () => DOMStorageItemsView
 });
-import * as Common18 from "./..\\..\\core\\common\\common.js";
-import * as i18n59 from "./..\\..\\core\\i18n\\i18n.js";
-import * as TextUtils2 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as SourceFrame6 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI23 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging17 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common18 from "./../../core/common/common.js";
+import * as i18n59 from "./../../core/i18n/i18n.js";
+import * as TextUtils2 from "./../../models/text_utils/text_utils.js";
+import * as SourceFrame6 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI23 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging17 from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings30 = {
   /**
    * @description Name for the "DOM Storage Items" table that shows the content of the DOM Storage.
@@ -13404,13 +13404,13 @@ var ExtensionStorageItemsView_exports = {};
 __export(ExtensionStorageItemsView_exports, {
   ExtensionStorageItemsView: () => ExtensionStorageItemsView
 });
-import * as Common19 from "./..\\..\\core\\common\\common.js";
-import * as i18n61 from "./..\\..\\core\\i18n\\i18n.js";
-import * as TextUtils3 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as JSON5 from "./..\\..\\third_party\\json5\\json5.js";
-import * as SourceFrame7 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI24 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging18 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common19 from "./../../core/common/common.js";
+import * as i18n61 from "./../../core/i18n/i18n.js";
+import * as TextUtils3 from "./../../models/text_utils/text_utils.js";
+import * as JSON5 from "./../../third_party/json5/json5.js";
+import * as SourceFrame7 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI24 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging18 from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings31 = {
   /**
    * @description Name for the "Extension Storage Items" table that shows the content of the extension Storage.
@@ -13519,13 +13519,13 @@ __export(ResourcesPanel_exports, {
   ResourcesPanel: () => ResourcesPanel,
   RuleSetViewRevealer: () => RuleSetViewRevealer
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common20 from "./..\\..\\core\\common\\common.js";
-import * as Platform9 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK25 from "./..\\..\\core\\sdk\\sdk.js";
-import * as SourceFrame8 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI25 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging19 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common20 from "./../../core/common/common.js";
+import * as Platform9 from "./../../core/platform/platform.js";
+import * as SDK25 from "./../../core/sdk/sdk.js";
+import * as SourceFrame8 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI25 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging19 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/resourcesPanel.css.js
 var resourcesPanel_css_default = `/*
