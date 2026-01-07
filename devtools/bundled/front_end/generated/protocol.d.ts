@@ -15269,6 +15269,242 @@ export declare namespace Preload {
         preloadingAttemptSources: PreloadingAttemptSource[];
     }
 }
+/**
+ * Redux domain allows tracking Redux state changes and actions in the application.
+ * It provides integration with Redux DevTools Extension for debugging Redux applications.
+ */
+export declare namespace Redux {
+    /**
+     * Redux message type.
+     */
+    const enum MessageType {
+        INIT = "INIT",
+        ACTION = "ACTION",
+        STATE = "STATE",
+        ERROR = "ERROR"
+    }
+    /**
+     * Redux message sent from the application or DevTools.
+     */
+    interface ReduxMessage {
+        /**
+         * Message type (INIT, ACTION, STATE, ERROR).
+         */
+        type: MessageType;
+        /**
+         * Action payload (for ACTION type).
+         */
+        action?: string;
+        /**
+         * State payload (for STATE type).
+         */
+        payload?: string;
+        /**
+         * Source of the message (e.g., "@devtools-page", "@redux-devtools").
+         */
+        source?: string;
+        /**
+         * Instance ID of the Redux store.
+         */
+        instanceId?: integer;
+        /**
+         * Store name.
+         */
+        name?: string;
+        /**
+         * Maximum age of actions to keep.
+         */
+        maxAge?: integer;
+        /**
+         * Next action ID.
+         */
+        nextActionId?: integer;
+        /**
+         * Error message (for ERROR type).
+         */
+        error?: string;
+        /**
+         * Timestamp when the message was created.
+         */
+        timestamp?: Runtime.Timestamp;
+    }
+    interface MessageRequest {
+        /**
+         * Message type.
+         */
+        type: MessageType;
+        /**
+         * Action payload (JSON string, for ACTION type).
+         */
+        action?: string;
+        /**
+         * State payload (JSON string, for STATE type).
+         */
+        payload?: string;
+        /**
+         * Source of the message.
+         */
+        source?: string;
+        /**
+         * Instance ID of the Redux store.
+         */
+        instanceId?: integer;
+        /**
+         * Store name.
+         */
+        name?: string;
+        /**
+         * Maximum age of actions to keep.
+         */
+        maxAge?: integer;
+        /**
+         * Next action ID.
+         */
+        nextActionId?: integer;
+        /**
+         * Error message (for ERROR type).
+         */
+        error?: string;
+        /**
+         * Timestamp when the message was created.
+         */
+        timestamp?: Runtime.Timestamp;
+    }
+    interface InitRequest {
+        /**
+         * Instance ID of the Redux store.
+         */
+        instanceId: integer;
+        /**
+         * Store name.
+         */
+        name?: string;
+        /**
+         * Initial state (JSON string).
+         */
+        state?: string;
+        /**
+         * Maximum age of actions to keep.
+         */
+        maxAge?: integer;
+        /**
+         * Timestamp when the store was initialized.
+         */
+        timestamp?: Runtime.Timestamp;
+    }
+    interface ActionDispatchedRequest {
+        /**
+         * Instance ID of the Redux store.
+         */
+        instanceId: integer;
+        /**
+         * Action payload (JSON string).
+         */
+        action: string;
+        /**
+         * Current state (JSON string).
+         */
+        payload?: string;
+        /**
+         * Timestamp when the action was dispatched.
+         */
+        timestamp?: Runtime.Timestamp;
+    }
+    interface ErrorRequest {
+        /**
+         * Instance ID of the Redux store.
+         */
+        instanceId: integer;
+        /**
+         * Error message.
+         */
+        error: string;
+        /**
+         * Store name.
+         */
+        name?: string;
+        /**
+         * Timestamp when the error occurred.
+         */
+        timestamp?: Runtime.Timestamp;
+    }
+    /**
+     * Issued when a Redux message is received from the application.
+     */
+    interface MessageEvent {
+        /**
+         * The Redux message.
+         */
+        message: ReduxMessage;
+    }
+    /**
+     * Issued when a Redux store is initialized.
+     */
+    interface InitEvent {
+        /**
+         * Instance ID of the Redux store.
+         */
+        instanceId: integer;
+        /**
+         * Store name.
+         */
+        name?: string;
+        /**
+         * Initial state (JSON string).
+         */
+        state?: string;
+        /**
+         * Maximum age of actions to keep.
+         */
+        maxAge?: integer;
+        /**
+         * Timestamp when the store was initialized.
+         */
+        timestamp?: Runtime.Timestamp;
+    }
+    /**
+     * Issued when a Redux action is dispatched.
+     */
+    interface ActionDispatchedEvent {
+        /**
+         * Instance ID of the Redux store.
+         */
+        instanceId: integer;
+        /**
+         * Action payload (JSON string).
+         */
+        action: string;
+        /**
+         * Current state (JSON string).
+         */
+        payload?: string;
+        /**
+         * Timestamp when the action was dispatched.
+         */
+        timestamp?: Runtime.Timestamp;
+    }
+    /**
+     * Issued when a Redux error occurs.
+     */
+    interface ErrorEvent {
+        /**
+         * Instance ID of the Redux store.
+         */
+        instanceId: integer;
+        /**
+         * Error message.
+         */
+        error: string;
+        /**
+         * Store name.
+         */
+        name?: string;
+        /**
+         * Timestamp when the error occurred.
+         */
+        timestamp?: Runtime.Timestamp;
+    }
+}
 export declare namespace Security {
     /**
      * An internal certificate ID value.
@@ -15563,6 +15799,45 @@ export declare namespace Security {
          * @deprecated
          */
         summary?: string;
+    }
+}
+/**
+ * SessionReplay domain allows recording and replaying user sessions using rrweb.
+ * It provides integration with rrweb for session replay functionality.
+ */
+export declare namespace SessionReplay {
+    /**
+     * Request for sending rrweb events.
+     */
+    interface SendEventRequest {
+        /**
+         * Array of rrweb events.
+         */
+        events: unknown[];
+    }
+    /**
+     * Fired when rrweb events are recorded.
+     */
+    interface EventRecordedEvent {
+        /**
+         * Array of rrweb events.
+         */
+        events: unknown[];
+    }
+    interface SendEventRequest {
+        /**
+         * Array of rrweb events.
+         */
+        events: unknown[];
+    }
+    /**
+     * Issued when rrweb events are recorded.
+     */
+    interface EventRecordedEvent {
+        /**
+         * Array of rrweb events.
+         */
+        events: unknown[];
     }
 }
 export declare namespace ServiceWorker {
@@ -20480,26 +20755,6 @@ export declare namespace Runtime {
          * Identifier of the context where the call was made.
          */
         executionContextId?: ExecutionContextId;
-    }
-}
-export declare namespace SessionReplay {
-    /**
-     * Request for sending rrweb events.
-     */
-    interface SendEventRequest {
-        /**
-         * Array of rrweb events.
-         */
-        events: unknown[];
-    }
-    /**
-     * Fired when rrweb events are recorded.
-     */
-    interface EventRecordedEvent {
-        /**
-         * Array of rrweb events.
-         */
-        events: unknown[];
     }
 }
 /**

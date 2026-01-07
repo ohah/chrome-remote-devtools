@@ -94,13 +94,15 @@ declare namespace ProtocolProxyApi {
 
     Preload: PreloadApi;
 
+    Redux: ReduxApi;
+
     Security: SecurityApi;
+
+    SessionReplay: SessionReplayApi;
 
     ServiceWorker: ServiceWorkerApi;
 
     Storage: StorageApi;
-
-    SessionReplay: SessionReplayApi;
 
     SystemInfo: SystemInfoApi;
 
@@ -203,13 +205,15 @@ declare namespace ProtocolProxyApi {
 
     Preload: PreloadDispatcher;
 
+    Redux: ReduxDispatcher;
+
     Security: SecurityDispatcher;
+
+    SessionReplay: SessionReplayDispatcher;
 
     ServiceWorker: ServiceWorkerDispatcher;
 
     Storage: StorageDispatcher;
-
-    SessionReplay: SessionReplayDispatcher;
 
     SystemInfo: SystemInfoDispatcher;
 
@@ -3735,6 +3739,55 @@ declare namespace ProtocolProxyApi {
 
   }
 
+  export interface ReduxApi {
+    /**
+     * Sends a Redux message from the application to DevTools or vice versa.
+     * This is a unified method that handles all Redux message types.
+     */
+    invoke_message(params: Protocol.Redux.MessageRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+    /**
+     * Initializes a Redux store instance.
+     * This is a convenience method that sends an INIT message.
+     */
+    invoke_init(params: Protocol.Redux.InitRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+    /**
+     * Sends an action dispatch event.
+     * This is a convenience method that sends an ACTION message.
+     */
+    invoke_actionDispatched(params: Protocol.Redux.ActionDispatchedRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+    /**
+     * Sends an error event.
+     * This is a convenience method that sends an ERROR message.
+     */
+    invoke_error(params: Protocol.Redux.ErrorRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+  }
+  export interface ReduxDispatcher {
+    /**
+     * Issued when a Redux message is received from the application.
+     */
+    message(params: Protocol.Redux.MessageEvent): void;
+
+    /**
+     * Issued when a Redux store is initialized.
+     */
+    init(params: Protocol.Redux.InitEvent): void;
+
+    /**
+     * Issued when a Redux action is dispatched.
+     */
+    actionDispatched(params: Protocol.Redux.ActionDispatchedEvent): void;
+
+    /**
+     * Issued when a Redux error occurs.
+     */
+    error(params: Protocol.Redux.ErrorEvent): void;
+
+  }
+
   export interface SecurityApi {
     /**
      * Disables tracking security state changes.
@@ -3785,6 +3838,31 @@ declare namespace ProtocolProxyApi {
      * @deprecated
      */
     securityStateChanged(params: Protocol.Security.SecurityStateChangedEvent): void;
+
+  }
+
+  export interface SessionReplayApi {
+    /**
+     * Enables the SessionReplay domain.
+     */
+    invoke_enable(): Promise<Protocol.ProtocolResponseWithError>;
+
+    /**
+     * Disables the SessionReplay domain.
+     */
+    invoke_disable(): Promise<Protocol.ProtocolResponseWithError>;
+
+    /**
+     * Sends rrweb events to the SessionReplay domain.
+     */
+    invoke_sendEvent(params: Protocol.SessionReplay.SendEventRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+  }
+  export interface SessionReplayDispatcher {
+    /**
+     * Issued when rrweb events are recorded.
+     */
+    eventRecorded(params: Protocol.SessionReplay.EventRecordedEvent): void;
 
   }
 
@@ -4086,31 +4164,6 @@ declare namespace ProtocolProxyApi {
     attributionReportingReportSent(params: Protocol.Storage.AttributionReportingReportSentEvent): void;
 
     attributionReportingVerboseDebugReportSent(params: Protocol.Storage.AttributionReportingVerboseDebugReportSentEvent): void;
-
-  }
-
-  export interface SessionReplayApi {
-    /**
-     * Enables the SessionReplay domain.
-     */
-    invoke_enable(): Promise<Protocol.ProtocolResponseWithError>;
-
-    /**
-     * Disables the SessionReplay domain.
-     */
-    invoke_disable(): Promise<Protocol.ProtocolResponseWithError>;
-
-    /**
-     * Sends rrweb events to the SessionReplay domain.
-     */
-    invoke_sendEvent(params: Protocol.SessionReplay.SendEventRequest): Promise<Protocol.ProtocolResponseWithError>;
-
-  }
-  export interface SessionReplayDispatcher {
-    /**
-     * Issued when rrweb events are recorded.
-     */
-    eventRecorded(params: Protocol.SessionReplay.EventRecordedEvent): void;
 
   }
 
