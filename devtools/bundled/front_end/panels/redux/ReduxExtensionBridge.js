@@ -34,10 +34,11 @@ export class ReduxExtensionBridge {
             this.handleExtensionMessage(event.data);
         };
         // Redux DevTools Extension이 사용하는 chrome.runtime API 시뮬레이션 / Redux DevTools Extension이 사용하는 chrome.runtime API 시뮬레이션
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.iframeWindow.chrome = {
             runtime: {
                 // Connect to background script / background script에 연결
-                connect: (options) => {
+                connect: (_options) => {
                     // MessagePort를 반환하여 Extension이 통신할 수 있도록 함 / MessagePort를 반환하여 Extension이 통신할 수 있도록 함
                     return this.messagePort;
                 },
@@ -86,10 +87,10 @@ export class ReduxExtensionBridge {
     /**
      * Handle messages from Redux DevTools Extension / Redux DevTools Extension으로부터 메시지 처리
      */
-    handleExtensionMessage(message) {
+    handleExtensionMessage(_message) {
         // Redux DevTools Extension의 메시지를 처리 / Redux DevTools Extension의 메시지를 처리
         // 여기서는 CDP 메시지로 변환하거나 필요한 작업 수행 / 여기서는 CDP 메시지로 변환하거나 필요한 작업 수행
-        console.log('[ReduxExtensionBridge] Received message from extension:', message);
+        // Currently no-op, but can be extended to handle extension-to-page messages / 현재는 no-op이지만 extension-to-page 메시지 처리로 확장 가능
     }
     /**
      * Send message to Redux DevTools Extension iframe / Redux DevTools Extension iframe으로 메시지 전송
@@ -112,9 +113,7 @@ export class ReduxExtensionBridge {
             onEvent: (event) => {
                 // Redux CDP 이벤트를 Redux DevTools Extension 형식으로 변환 / Redux CDP 이벤트를 Redux DevTools Extension 형식으로 변환
                 const method = event.method;
-                if (method === 'Redux.init' ||
-                    method === 'Redux.actionDispatched' ||
-                    method === 'Redux.error') {
+                if (method === 'Redux.message') {
                     this.convertCDPToExtensionMessage(event);
                 }
             },
@@ -126,16 +125,24 @@ export class ReduxExtensionBridge {
     }
     /**
      * Convert CDP message to Extension message format / CDP 메시지를 Extension 메시지 형식으로 변환
+     * Matches Redux DevTools Extension message format exactly / Redux DevTools Extension 메시지 형식과 정확히 일치
      */
     convertCDPToExtensionMessage(event) {
         const params = event.params;
+        // Redux.message 이벤트는 params에 직접 메시지 정보가 있음 / Redux.message event has message info directly in params
         // Redux DevTools Extension이 기대하는 메시지 형식으로 변환 / Redux DevTools Extension이 기대하는 메시지 형식으로 변환
         const extensionMessage = {
-            type: 'REDUX_MESSAGE',
-            method: event.method,
-            params,
-            timestamp: Date.now(),
+            type: params.type,
+            instanceId: params.instanceId,
+            source: params.source,
+            payload: params.payload,
+            action: params.action,
+            name: params.name,
+            maxAge: params.maxAge,
+            nextActionId: params.nextActionId,
         };
+        // Send to extension via MessagePort (simulating chrome.runtime.Port) / MessagePort를 통해 extension으로 전송 (chrome.runtime.Port 시뮬레이션)
+        // Redux DevTools Extension expects messages via chrome.runtime.Port.postMessage / Redux DevTools Extension은 chrome.runtime.Port.postMessage를 통해 메시지를 기대함
         this.sendToExtension(extensionMessage);
     }
     /**

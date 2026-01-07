@@ -3742,49 +3742,18 @@ declare namespace ProtocolProxyApi {
   export interface ReduxApi {
     /**
      * Sends a Redux message from the application to DevTools or vice versa.
-     * This is a unified method that handles all Redux message types.
+     * This is the unified method that handles all Redux message types.
+     * Matches Redux DevTools Extension message format exactly / Redux DevTools Extension 메시지 형식과 정확히 일치
      */
     invoke_message(params: Protocol.Redux.MessageRequest): Promise<Protocol.ProtocolResponseWithError>;
-
-    /**
-     * Initializes a Redux store instance.
-     * This is a convenience method that sends an INIT message.
-     */
-    invoke_init(params: Protocol.Redux.InitRequest): Promise<Protocol.ProtocolResponseWithError>;
-
-    /**
-     * Sends an action dispatch event.
-     * This is a convenience method that sends an ACTION message.
-     */
-    invoke_actionDispatched(params: Protocol.Redux.ActionDispatchedRequest): Promise<Protocol.ProtocolResponseWithError>;
-
-    /**
-     * Sends an error event.
-     * This is a convenience method that sends an ERROR message.
-     */
-    invoke_error(params: Protocol.Redux.ErrorRequest): Promise<Protocol.ProtocolResponseWithError>;
 
   }
   export interface ReduxDispatcher {
     /**
      * Issued when a Redux message is received from the application.
+     * Matches Redux DevTools Extension message format exactly / Redux DevTools Extension 메시지 형식과 정확히 일치
      */
     message(params: Protocol.Redux.MessageEvent): void;
-
-    /**
-     * Issued when a Redux store is initialized.
-     */
-    init(params: Protocol.Redux.InitEvent): void;
-
-    /**
-     * Issued when a Redux action is dispatched.
-     */
-    actionDispatched(params: Protocol.Redux.ActionDispatchedEvent): void;
-
-    /**
-     * Issued when a Redux error occurs.
-     */
-    error(params: Protocol.Redux.ErrorEvent): void;
 
   }
 

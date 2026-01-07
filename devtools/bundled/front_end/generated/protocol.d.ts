@@ -15275,58 +15275,14 @@ export declare namespace Preload {
  */
 export declare namespace Redux {
     /**
-     * Redux message type.
+     * Redux message type matching Redux DevTools Extension format / Redux DevTools Extension 형식과 일치하는 Redux 메시지 타입
      */
     const enum MessageType {
+        INIT_INSTANCE = "INIT_INSTANCE",
         INIT = "INIT",
         ACTION = "ACTION",
         STATE = "STATE",
         ERROR = "ERROR"
-    }
-    /**
-     * Redux message sent from the application or DevTools.
-     */
-    interface ReduxMessage {
-        /**
-         * Message type (INIT, ACTION, STATE, ERROR).
-         */
-        type: MessageType;
-        /**
-         * Action payload (for ACTION type).
-         */
-        action?: string;
-        /**
-         * State payload (for STATE type).
-         */
-        payload?: string;
-        /**
-         * Source of the message (e.g., "@devtools-page", "@redux-devtools").
-         */
-        source?: string;
-        /**
-         * Instance ID of the Redux store.
-         */
-        instanceId?: integer;
-        /**
-         * Store name.
-         */
-        name?: string;
-        /**
-         * Maximum age of actions to keep.
-         */
-        maxAge?: integer;
-        /**
-         * Next action ID.
-         */
-        nextActionId?: integer;
-        /**
-         * Error message (for ERROR type).
-         */
-        error?: string;
-        /**
-         * Timestamp when the message was created.
-         */
-        timestamp?: Runtime.Timestamp;
     }
     interface MessageRequest {
         /**
@@ -15338,27 +15294,27 @@ export declare namespace Redux {
          */
         action?: string;
         /**
-         * State payload (JSON string, for STATE type).
+         * State payload (JSON string, for INIT and ACTION types).
          */
         payload?: string;
         /**
-         * Source of the message.
+         * Source of the message (e.g., "@devtools-page", "@devtools-extension").
          */
-        source?: string;
+        source: string;
         /**
          * Instance ID of the Redux store.
          */
-        instanceId?: integer;
+        instanceId: integer;
         /**
-         * Store name.
+         * Store name (for INIT type).
          */
         name?: string;
         /**
-         * Maximum age of actions to keep.
+         * Maximum age of actions to keep (for ACTION type).
          */
         maxAge?: integer;
         /**
-         * Next action ID.
+         * Next action ID (for ACTION type).
          */
         nextActionId?: integer;
         /**
@@ -15370,137 +15326,49 @@ export declare namespace Redux {
          */
         timestamp?: Runtime.Timestamp;
     }
-    interface InitRequest {
-        /**
-         * Instance ID of the Redux store.
-         */
-        instanceId: integer;
-        /**
-         * Store name.
-         */
-        name?: string;
-        /**
-         * Initial state (JSON string).
-         */
-        state?: string;
-        /**
-         * Maximum age of actions to keep.
-         */
-        maxAge?: integer;
-        /**
-         * Timestamp when the store was initialized.
-         */
-        timestamp?: Runtime.Timestamp;
-    }
-    interface ActionDispatchedRequest {
-        /**
-         * Instance ID of the Redux store.
-         */
-        instanceId: integer;
-        /**
-         * Action payload (JSON string).
-         */
-        action: string;
-        /**
-         * Current state (JSON string).
-         */
-        payload?: string;
-        /**
-         * Timestamp when the action was dispatched.
-         */
-        timestamp?: Runtime.Timestamp;
-    }
-    interface ErrorRequest {
-        /**
-         * Instance ID of the Redux store.
-         */
-        instanceId: integer;
-        /**
-         * Error message.
-         */
-        error: string;
-        /**
-         * Store name.
-         */
-        name?: string;
-        /**
-         * Timestamp when the error occurred.
-         */
-        timestamp?: Runtime.Timestamp;
-    }
     /**
      * Issued when a Redux message is received from the application.
+     * Matches Redux DevTools Extension message format exactly / Redux DevTools Extension 메시지 형식과 정확히 일치
      */
     interface MessageEvent {
         /**
-         * The Redux message.
+         * Message type.
          */
-        message: ReduxMessage;
-    }
-    /**
-     * Issued when a Redux store is initialized.
-     */
-    interface InitEvent {
+        type: MessageType;
         /**
-         * Instance ID of the Redux store.
+         * Action payload (JSON string, for ACTION type).
          */
-        instanceId: integer;
+        action?: string;
         /**
-         * Store name.
-         */
-        name?: string;
-        /**
-         * Initial state (JSON string).
-         */
-        state?: string;
-        /**
-         * Maximum age of actions to keep.
-         */
-        maxAge?: integer;
-        /**
-         * Timestamp when the store was initialized.
-         */
-        timestamp?: Runtime.Timestamp;
-    }
-    /**
-     * Issued when a Redux action is dispatched.
-     */
-    interface ActionDispatchedEvent {
-        /**
-         * Instance ID of the Redux store.
-         */
-        instanceId: integer;
-        /**
-         * Action payload (JSON string).
-         */
-        action: string;
-        /**
-         * Current state (JSON string).
+         * State payload (JSON string, for INIT and ACTION types).
          */
         payload?: string;
         /**
-         * Timestamp when the action was dispatched.
+         * Source of the message (e.g., "@devtools-page", "@devtools-extension").
          */
-        timestamp?: Runtime.Timestamp;
-    }
-    /**
-     * Issued when a Redux error occurs.
-     */
-    interface ErrorEvent {
+        source: string;
         /**
          * Instance ID of the Redux store.
          */
         instanceId: integer;
         /**
-         * Error message.
-         */
-        error: string;
-        /**
-         * Store name.
+         * Store name (for INIT type).
          */
         name?: string;
         /**
-         * Timestamp when the error occurred.
+         * Maximum age of actions to keep (for ACTION type).
+         */
+        maxAge?: integer;
+        /**
+         * Next action ID (for ACTION type).
+         */
+        nextActionId?: integer;
+        /**
+         * Error message (for ERROR type).
+         */
+        error?: string;
+        /**
+         * Timestamp when the message was created.
          */
         timestamp?: Runtime.Timestamp;
     }

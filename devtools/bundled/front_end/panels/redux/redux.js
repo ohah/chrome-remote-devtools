@@ -43,7 +43,7 @@ var ReduxExtensionBridge = class {
     this.iframeWindow.chrome = {
       runtime: {
         // Connect to background script / background script에 연결
-        connect: (options) => {
+        connect: (_options) => {
           return this.messagePort;
         },
         // Send message to background script / background script로 메시지 전송
@@ -91,8 +91,7 @@ var ReduxExtensionBridge = class {
   /**
    * Handle messages from Redux DevTools Extension / Redux DevTools Extension으로부터 메시지 처리
    */
-  handleExtensionMessage(message) {
-    console.log("[ReduxExtensionBridge] Received message from extension:", message);
+  handleExtensionMessage(_message) {
   }
   /**
    * Send message to Redux DevTools Extension iframe / Redux DevTools Extension iframe으로 메시지 전송
@@ -112,7 +111,7 @@ var ReduxExtensionBridge = class {
     this.observer = {
       onEvent: (event) => {
         const method = event.method;
-        if (method === "Redux.init" || method === "Redux.actionDispatched" || method === "Redux.error") {
+        if (method === "Redux.message") {
           this.convertCDPToExtensionMessage(event);
         }
       },
@@ -124,14 +123,19 @@ var ReduxExtensionBridge = class {
   }
   /**
    * Convert CDP message to Extension message format / CDP 메시지를 Extension 메시지 형식으로 변환
+   * Matches Redux DevTools Extension message format exactly / Redux DevTools Extension 메시지 형식과 정확히 일치
    */
   convertCDPToExtensionMessage(event) {
     const params = event.params;
     const extensionMessage = {
-      type: "REDUX_MESSAGE",
-      method: event.method,
-      params,
-      timestamp: Date.now()
+      type: params.type,
+      instanceId: params.instanceId,
+      source: params.source,
+      payload: params.payload,
+      action: params.action,
+      name: params.name,
+      maxAge: params.maxAge,
+      nextActionId: params.nextActionId
     };
     this.sendToExtension(extensionMessage);
   }
