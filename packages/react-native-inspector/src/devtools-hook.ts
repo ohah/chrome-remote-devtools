@@ -203,8 +203,9 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
 
             // Send INIT_INSTANCE message first (required by Redux DevTools Extension) / 먼저 INIT_INSTANCE 메시지 전송 (Redux DevTools Extension에서 필요)
             sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
-              method: 'Redux.initInstance',
+              method: 'Redux.message',
               params: {
+                type: 'INIT_INSTANCE',
                 instanceId,
                 source: '@devtools-page',
               },
@@ -213,10 +214,10 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
             });
 
             // Send INIT message / INIT 메시지 전송
-            // Use Redux.init convenience method / Redux.init convenience 메서드 사용
             sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
-              method: 'Redux.init',
+              method: 'Redux.message',
               params: {
+                type: 'INIT',
                 instanceId,
                 source: '@devtools-page',
                 name,
@@ -240,10 +241,10 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
             const currentServerInfo = getCurrentServerInfo();
 
             // Send action and state / 액션과 상태 전송
-            // Use Redux.actionDispatched convenience method / Redux.actionDispatched convenience 메서드 사용
             sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
-              method: 'Redux.actionDispatched',
+              method: 'Redux.message',
               params: {
+                type: 'ACTION',
                 instanceId,
                 source: '@devtools-page',
                 action: JSON.stringify(action),
@@ -300,10 +301,10 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
             const currentServerInfo = getCurrentServerInfo();
 
             // Send error / 에러 전송
-            // Use Redux.error convenience method / Redux.error convenience 메서드 사용
             sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
-              method: 'Redux.error',
+              method: 'Redux.message',
               params: {
+                type: 'ERROR',
                 instanceId,
                 source: '@devtools-page',
                 error: typeof payload === 'string' ? payload : JSON.stringify(payload),

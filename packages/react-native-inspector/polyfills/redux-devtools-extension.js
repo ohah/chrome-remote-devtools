@@ -122,8 +122,9 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
 
               // Send INIT_INSTANCE message first (required by Redux DevTools Extension) / 먼저 INIT_INSTANCE 메시지 전송 (Redux DevTools Extension에서 필요)
               var initInstanceMessage = {
-                method: 'Redux.initInstance',
+                method: 'Redux.message',
                 params: {
+                  type: 'INIT_INSTANCE',
                   instanceId: instanceId,
                   source: '@devtools-page',
                 },
@@ -139,10 +140,10 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
                 });
 
               // Send INIT message / INIT 메시지 전송
-              // Use Redux.init convenience method / Redux.init convenience 메서드 사용
               var initMessage = {
-                method: 'Redux.init',
+                method: 'Redux.message',
                 params: {
+                  type: 'INIT',
                   instanceId: instanceId,
                   source: '@devtools-page',
                   name: name,
@@ -193,10 +194,10 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
             console.log('[ReduxDevTools] send() - serverInfo:', serverInfo);
             if (serverInfo) {
               // Send action and state / 액션과 상태 전송
-              // Use Redux.actionDispatched convenience method / Redux.actionDispatched convenience 메서드 사용
               var message = {
-                method: 'Redux.actionDispatched',
+                method: 'Redux.message',
                 params: {
+                  type: 'ACTION',
                   instanceId: instanceId,
                   source: '@devtools-page',
                   action: JSON.stringify(action),
@@ -247,11 +248,11 @@ if (!globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
             var serverInfo = implementationStore.getServerInfo();
             if (serverInfo) {
               // Send error / 에러 전송
-              // Use Redux.error convenience method / Redux.error convenience 메서드 사용
               implementationStore
                 .sendCDPMessage(serverInfo.serverHost, serverInfo.serverPort, {
-                  method: 'Redux.error',
+                  method: 'Redux.message',
                   params: {
+                    type: 'ERROR',
                     instanceId: instanceId,
                     source: '@devtools-page',
                     error: typeof payload === 'string' ? payload : JSON.stringify(payload),
