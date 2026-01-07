@@ -120,9 +120,13 @@ if (fs.existsSync(devpanelHtmlPath)) {
   );
   htmlContent = htmlContent.replace(/src="\/devpanel\.bundle\.js"/g, 'src="devpanel.bundle.js"');
 
-  // Inject API initialization script before other scripts / 다른 스크립트 전에 API 초기화 스크립트 주입
-  // This ensures chrome API is available before devpanel.bundle.js executes / devpanel.bundle.js 실행 전에 chrome API가 사용 가능하도록 함
-  const apiInitScript = `<script>
+  // Check if API init script is already injected / API init 스크립트가 이미 주입되었는지 확인
+  if (htmlContent.includes('window.chrome.runtime')) {
+    console.log('  ⚠ API stub already exists, skipping injection...');
+  } else {
+    // Inject API initialization script before other scripts / 다른 스크립트 전에 API 초기화 스크립트 주입
+    // This ensures chrome API is available before devpanel.bundle.js executes / devpanel.bundle.js 실행 전에 chrome API가 사용 가능하도록 함
+    const apiInitScript = `<script>
 // Initialize chrome API stub before other scripts / 다른 스크립트 전에 chrome API stub 초기화
 (function() {
   if (typeof window.chrome === 'undefined') {
@@ -168,14 +172,42 @@ if (fs.existsSync(devpanelHtmlPath)) {
 })();
 </script>`;
 
-  // Insert API init script before the closing </head> tag or before <body> / </head> 태그 전이나 <body> 전에 API init 스크립트 삽입
-  if (htmlContent.includes('</head>')) {
-    htmlContent = htmlContent.replace('</head>', apiInitScript + '</head>');
-  } else if (htmlContent.includes('<body>')) {
-    htmlContent = htmlContent.replace('<body>', '<head>' + apiInitScript + '</head><body>');
-  } else {
-    // If no head tag, insert at the beginning / head 태그가 없으면 시작 부분에 삽입
-    htmlContent = apiInitScript + htmlContent;
+    // Try multiple insertion strategies / 여러 삽입 전략 시도
+    let inserted = false;
+
+    // Strategy 1: Insert before first <script> tag (most reliable) / 첫 번째 <script> 태그 전에 삽입 (가장 안전)
+    if (htmlContent.includes('<script')) {
+      htmlContent = htmlContent.replace(/<script/i, apiInitScript + '<script');
+      inserted = true;
+      console.log('  ✓ Inserted API stub before first <script> tag');
+    }
+    // Strategy 2: Insert before </head> tag / </head> 태그 전에 삽입
+    else if (htmlContent.includes('</head>')) {
+      // Use lastIndexOf to find the last </head> tag / 마지막 </head> 태그 찾기
+      const lastHeadIndex = htmlContent.lastIndexOf('</head>');
+      if (lastHeadIndex !== -1) {
+        htmlContent = htmlContent.slice(0, lastHeadIndex) + apiInitScript + htmlContent.slice(lastHeadIndex);
+        inserted = true;
+        console.log('  ✓ Inserted API stub before </head> tag');
+      }
+    }
+    // Strategy 3: Insert before <body> tag / <body> 태그 전에 삽입
+    else if (htmlContent.includes('<body>')) {
+      htmlContent = htmlContent.replace('<body>', apiInitScript + '<body>');
+      inserted = true;
+      console.log('  ✓ Inserted API stub before <body> tag');
+    }
+    // Strategy 4: Insert at the beginning / 시작 부분에 삽입
+    else {
+      htmlContent = apiInitScript + htmlContent;
+      inserted = true;
+      console.log('  ✓ Inserted API stub at the beginning');
+    }
+
+    if (!inserted) {
+      console.warn('  ⚠ Could not find insertion point, appending to end');
+      htmlContent = htmlContent + apiInitScript;
+    }
   }
 
   fs.writeFileSync(devpanelHtmlPath, htmlContent, 'utf-8');
