@@ -201,14 +201,28 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
             // Get current server info dynamically / 현재 서버 정보를 동적으로 가져오기
             const currentServerInfo = getCurrentServerInfo();
 
-            // Send INIT_INSTANCE message (Redux DevTools Extension spec) / INIT_INSTANCE 메시지 전송 (Redux DevTools Extension 스펙)
+            // Send INIT_INSTANCE message first (required by Redux DevTools Extension) / 먼저 INIT_INSTANCE 메시지 전송 (Redux DevTools Extension에서 필요)
             sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
-              method: 'Redux.message',
+              method: 'Redux.initInstance',
               params: {
-                type: 'INIT_INSTANCE',
-                payload: undefined,
-                source: '@devtools-page',
                 instanceId,
+                source: '@devtools-page',
+              },
+            }).catch(() => {
+              // Failed to send initInstance event / initInstance 이벤트 전송 실패
+            });
+
+            // Send INIT message / INIT 메시지 전송
+            // Use Redux.init convenience method / Redux.init convenience 메서드 사용
+            sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
+              method: 'Redux.init',
+              params: {
+                instanceId,
+                source: '@devtools-page',
+                name,
+                payload: JSON.stringify(state),
+                maxAge: 50,
+                timestamp: Date.now(),
               },
             }).catch(() => {
               // Failed to send init event / init 이벤트 전송 실패
@@ -225,24 +239,17 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
             // Get current server info dynamically / 현재 서버 정보를 동적으로 가져오기
             const currentServerInfo = getCurrentServerInfo();
 
-            // Send ACTION message (Redux DevTools Extension spec) / ACTION 메시지 전송 (Redux DevTools Extension 스펙)
-            // This matches what pageScript does in relayAction / 이것은 pageScript가 relayAction에서 하는 것과 일치
-            const timestamp = Date.now();
-            const actionId = timestamp % 1000000; // Generate action ID from timestamp / 타임스탬프에서 액션 ID 생성
-
+            // Send action and state / 액션과 상태 전송
+            // Use Redux.actionDispatched convenience method / Redux.actionDispatched convenience 메서드 사용
             sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
-              method: 'Redux.message',
+              method: 'Redux.actionDispatched',
               params: {
-                type: 'ACTION',
-                action: JSON.stringify({
-                  action,
-                  timestamp,
-                }),
-                payload: JSON.stringify(state),
-                source: '@devtools-page',
                 instanceId,
+                source: '@devtools-page',
+                action: JSON.stringify(action),
+                payload: JSON.stringify(state),
                 maxAge: 50,
-                nextActionId: actionId,
+                timestamp: Date.now(),
               },
             })
               .then(() => {
@@ -292,15 +299,16 @@ export function setupReduxDevToolsExtension(serverHost: string, serverPort: numb
             // Get current server info dynamically / 현재 서버 정보를 동적으로 가져오기
             const currentServerInfo = getCurrentServerInfo();
 
-            // Send ERROR message (Redux DevTools Extension spec) / ERROR 메시지 전송 (Redux DevTools Extension 스펙)
+            // Send error / 에러 전송
+            // Use Redux.error convenience method / Redux.error convenience 메서드 사용
             sendCDPMessage(currentServerInfo.serverHost, currentServerInfo.serverPort, {
-              method: 'Redux.message',
+              method: 'Redux.error',
               params: {
-                type: 'ERROR',
-                payload,
-                source: '@devtools-page',
                 instanceId,
-                message: payload,
+                source: '@devtools-page',
+                error: typeof payload === 'string' ? payload : JSON.stringify(payload),
+                name,
+                timestamp: Date.now(),
               },
             })
               .then(() => {
