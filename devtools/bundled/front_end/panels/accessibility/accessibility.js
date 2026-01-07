@@ -17,13 +17,13 @@ __export(AccessibilityNodeView_exports, {
   StringProperties: () => StringProperties,
   TypeStyles: () => TypeStyles
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as uiI18n from "./..\\..\\ui\\i18n\\i18n.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelsCommon from "./..\\common\\common.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as uiI18n from "./../../ui/i18n/i18n.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelsCommon from "./../common/common.js";
 
 // gen/front_end/panels/accessibility/accessibilityNode.css.js
 var accessibilityNode_css_default = `/*
@@ -119,7 +119,7 @@ __export(AccessibilityStrings_exports, {
   AXNativeSourceTypes: () => AXNativeSourceTypes,
   AXSourceTypes: () => AXSourceTypes
 });
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n from "./../../core/i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Text to indicate something is not enabled
@@ -907,7 +907,7 @@ var objectValue_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./objectValue.css")} */`;
 
 // gen/front_end/panels/accessibility/AccessibilitySubPane.js
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/accessibility/accessibilityProperties.css.js
 var accessibilityProperties_css_default = `/*
@@ -1587,9 +1587,9 @@ var AccessibilitySidebarView_exports = {};
 __export(AccessibilitySidebarView_exports, {
   AccessibilitySidebarView: () => AccessibilitySidebarView
 });
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/accessibility/ARIAAttributesView.js
 var ARIAAttributesView_exports = {};
@@ -1597,12 +1597,12 @@ __export(ARIAAttributesView_exports, {
   ARIAAttributesPane: () => ARIAAttributesPane,
   DEFAULT_VIEW: () => DEFAULT_VIEW
 });
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/accessibility/ARIAMetadata.js
 var ARIAMetadata_exports = {};
@@ -4428,14 +4428,14 @@ __export(AXBreadcrumbsPane_exports, {
   AXBreadcrumbsPane: () => AXBreadcrumbsPane,
   RoleStyles: () => RoleStyles
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Feedback from "./..\\..\\ui\\components\\panel_feedback\\panel_feedback.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as Feedback from "./../../ui/components/panel_feedback/panel_feedback.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/accessibility/axBreadcrumbs.css.js
 var axBreadcrumbs_css_default = `/*
@@ -5149,10 +5149,10 @@ var RoleStyles = {
 };
 
 // gen/front_end/panels/accessibility/SourceOrderView.js
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import { html as html2, nothing as nothing2, render as render2 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import { html as html2, nothing as nothing2, render as render2 } from "./../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings5 = {
   /**
    * @description Name of a tool which allows the developer to view the contents of the page in the

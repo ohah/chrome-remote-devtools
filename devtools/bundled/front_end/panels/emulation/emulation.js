@@ -10,9 +10,9 @@ __export(AdvancedApp_exports, {
   AdvancedApp: () => AdvancedApp,
   AdvancedAppProvider: () => AdvancedAppProvider
 });
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport from "./../../ui/legacy/theme_support/theme_support.js";
 
 // gen/front_end/panels/emulation/DeviceModeWrapper.js
 var DeviceModeWrapper_exports = {};
@@ -20,10 +20,10 @@ __export(DeviceModeWrapper_exports, {
   ActionDelegate: () => ActionDelegate,
   DeviceModeWrapper: () => DeviceModeWrapper
 });
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as EmulationModel3 from "./..\\..\\models\\emulation\\emulation.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as EmulationModel3 from "./../../models/emulation/emulation.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/emulation/DeviceModeView.js
 var DeviceModeView_exports = {};
@@ -31,30 +31,30 @@ __export(DeviceModeView_exports, {
   DeviceModeView: () => DeviceModeView,
   Ruler: () => Ruler
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as EmulationModel2 from "./..\\..\\models\\emulation\\emulation.js";
-import * as Geometry from "./..\\..\\models\\geometry\\geometry.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as EmulationModel2 from "./../../models/emulation/emulation.js";
+import * as Geometry from "./../../models/geometry/geometry.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/emulation/DeviceModeToolbar.js
 var DeviceModeToolbar_exports = {};
 __export(DeviceModeToolbar_exports, {
   DeviceModeToolbar: () => DeviceModeToolbar
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as EmulationModel from "./..\\..\\models\\emulation\\emulation.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as MobileThrottling from "./..\\mobile_throttling\\mobile_throttling.js";
-import * as EmulationComponents from "./components\\components.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as EmulationModel from "./../../models/emulation/emulation.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as MobileThrottling from "./../mobile_throttling/mobile_throttling.js";
+import * as EmulationComponents from "./components/components.js";
 var UIStrings = {
   /**
    * @description Title of the device dimensions selection item in the Device Mode Toolbar.
@@ -1105,14 +1105,14 @@ __export(MediaQueryInspector_exports, {
   MediaQueryInspector: () => MediaQueryInspector,
   MediaQueryUIModel: () => MediaQueryUIModel
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import { Directives, html, nothing, render } from "./..\\..\\third_party\\lit\\lit.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import { Directives, html, nothing, render } from "./../../third_party/lit/lit.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/emulation/mediaQueryInspector.css.js
 var mediaQueryInspector_css_default = `/*
@@ -2391,8 +2391,8 @@ var InspectedPagePlaceholder_exports = {};
 __export(InspectedPagePlaceholder_exports, {
   InspectedPagePlaceholder: () => InspectedPagePlaceholder
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/emulation/inspectedPagePlaceholder.css.js
 var inspectedPagePlaceholder_css_default = `/*

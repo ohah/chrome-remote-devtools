@@ -1,8 +1,8 @@
 // gen/front_end/testing/TraceLoader.js
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Trace from "./..\\..\\trace.js";
-import * as TraceBounds from "./..\\..\\..\\..\\services\\trace_bounds\\trace_bounds.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
+import * as Trace from "./../../trace.js";
+import * as TraceBounds from "./../../../../services/trace_bounds/trace_bounds.js";
 var fileContentsCache = /* @__PURE__ */ new Map();
 var traceEngineCache = /* @__PURE__ */ new Map();
 var TraceLoader = class _TraceLoader {
@@ -93,7 +93,7 @@ var TraceLoader = class _TraceLoader {
     }
     let timelineModule;
     if (opts.withTimelinePanel) {
-      timelineModule = await import("./..\\..\\..\\..\\panels\\timeline\\timeline.js");
+      timelineModule = await import("./../../../../panels/timeline/timeline.js");
     }
     TraceBounds.TraceBounds.BoundsManager.instance({ forceNew: true });
     const configCacheKey = Trace.Types.Configuration.configToCacheKey(config);
@@ -246,8 +246,8 @@ function isMochaContext(arg) {
 }
 
 // gen/front_end/models/trace/lantern/testing/MetricTestUtils.js
-import * as Trace2 from "./..\\..\\trace.js";
-import * as Lantern from "./..\\lantern.js";
+import * as Trace2 from "./../../trace.js";
+import * as Lantern from "./../lantern.js";
 function toLanternTrace(traceEvents) {
   return {
     traceEvents

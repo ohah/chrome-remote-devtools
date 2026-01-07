@@ -9,15 +9,15 @@ var CompilerScriptMapping_exports = {};
 __export(CompilerScriptMapping_exports, {
   CompilerScriptMapping: () => CompilerScriptMapping
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
 
 // gen/front_end/models/stack_trace/stack_trace_impl.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as StackTrace from "./..\\stack_trace\\stack_trace.js";
+import * as Common from "./../../core/common/common.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as StackTrace from "./../stack_trace/stack_trace.js";
 var __defProp2 = Object.defineProperty;
 var __export2 = (target, all) => {
   for (var name in all)
@@ -382,18 +382,18 @@ _a = StackTraceModel;
 SDK.SDKModel.SDKModel.register(StackTraceModel, { capabilities: 0, autostart: false });
 
 // gen/front_end/models/bindings/CompilerScriptMapping.js
-import * as TextUtils2 from "./..\\text_utils\\text_utils.js";
-import * as Workspace3 from "./..\\workspace\\workspace.js";
+import * as TextUtils2 from "./../text_utils/text_utils.js";
+import * as Workspace3 from "./../workspace/workspace.js";
 
 // gen/front_end/models/bindings/ContentProviderBasedProject.js
 var ContentProviderBasedProject_exports = {};
 __export(ContentProviderBasedProject_exports, {
   ContentProviderBasedProject: () => ContentProviderBasedProject
 });
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils from "./..\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\workspace\\workspace.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as TextUtils from "./../text_utils/text_utils.js";
+import * as Workspace from "./../workspace/workspace.js";
 var UIStrings = {
   /**
    * @description Error message that is displayed in the Sources panel when can't be loaded.
@@ -521,8 +521,8 @@ __export(NetworkProject_exports, {
   NetworkProject: () => NetworkProject,
   NetworkProjectManager: () => NetworkProjectManager
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
 var uiSourceCodeToAttributionMap = /* @__PURE__ */ new WeakMap();
 var projectToTargetMap = /* @__PURE__ */ new WeakMap();
 var networkProjectManagerInstance;
@@ -1070,10 +1070,10 @@ __export(CSSWorkspaceBinding_exports, {
   LiveLocation: () => LiveLocation,
   ModelInfo: () => ModelInfo
 });
-import * as Common8 from "./..\\..\\core\\common\\common.js";
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK7 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common8 from "./../../core/common/common.js";
+import * as Platform4 from "./../../core/platform/platform.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK7 from "./../../core/sdk/sdk.js";
 
 // gen/front_end/models/bindings/LiveLocation.js
 var LiveLocation_exports = {};
@@ -1140,10 +1140,10 @@ var SASSSourceMapping_exports = {};
 __export(SASSSourceMapping_exports, {
   SASSSourceMapping: () => SASSSourceMapping
 });
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils3 from "./..\\text_utils\\text_utils.js";
-import * as Workspace5 from "./..\\workspace\\workspace.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
+import * as TextUtils3 from "./../text_utils/text_utils.js";
+import * as Workspace5 from "./../workspace/workspace.js";
 var SASSSourceMapping = class {
   #sourceMapManager;
   #project;
@@ -1322,10 +1322,10 @@ __export(StylesSourceMapping_exports, {
   StyleFile: () => StyleFile,
   StylesSourceMapping: () => StylesSourceMapping
 });
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as SDK6 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils4 from "./..\\text_utils\\text_utils.js";
-import * as Workspace9 from "./..\\workspace\\workspace.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as SDK6 from "./../../core/sdk/sdk.js";
+import * as TextUtils4 from "./../text_utils/text_utils.js";
+import * as Workspace9 from "./../workspace/workspace.js";
 
 // gen/front_end/models/bindings/ResourceUtils.js
 var ResourceUtils_exports = {};
@@ -1335,10 +1335,10 @@ __export(ResourceUtils_exports, {
   resourceForURL: () => resourceForURL,
   resourceMetadata: () => resourceMetadata
 });
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Workspace7 from "./..\\workspace\\workspace.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as SDK5 from "./../../core/sdk/sdk.js";
+import * as Workspace7 from "./../workspace/workspace.js";
 function resourceForURL(url) {
   return SDK5.ResourceTreeModel.ResourceTreeModel.resourceForURL(url);
 }
@@ -1920,13 +1920,13 @@ __export(DebuggerLanguagePlugins_exports, {
   ExtensionRemoteObject: () => ExtensionRemoteObject,
   SourceScope: () => SourceScope
 });
-import * as Common9 from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import { assertNotNullOrUndefined } from "./..\\..\\core\\platform\\platform.js";
-import * as SDK8 from "./..\\..\\core\\sdk\\sdk.js";
-import * as StackTrace2 from "./..\\stack_trace\\stack_trace.js";
-import * as TextUtils5 from "./..\\text_utils\\text_utils.js";
-import * as Workspace11 from "./..\\workspace\\workspace.js";
+import * as Common9 from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import { assertNotNullOrUndefined } from "./../../core/platform/platform.js";
+import * as SDK8 from "./../../core/sdk/sdk.js";
+import * as StackTrace2 from "./../stack_trace/stack_trace.js";
+import * as TextUtils5 from "./../text_utils/text_utils.js";
+import * as Workspace11 from "./../workspace/workspace.js";
 var UIStrings2 = {
   /**
    * @description Error message that is displayed in the Console when language #plugins report errors
@@ -2894,20 +2894,20 @@ __export(DebuggerWorkspaceBinding_exports, {
   DebuggerWorkspaceBinding: () => DebuggerWorkspaceBinding,
   Location: () => Location
 });
-import * as Common12 from "./..\\..\\core\\common\\common.js";
-import * as Platform6 from "./..\\..\\core\\platform\\platform.js";
-import * as Root3 from "./..\\..\\core\\root\\root.js";
-import * as SDK11 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Workspace17 from "./..\\workspace\\workspace.js";
+import * as Common12 from "./../../core/common/common.js";
+import * as Platform6 from "./../../core/platform/platform.js";
+import * as Root3 from "./../../core/root/root.js";
+import * as SDK11 from "./../../core/sdk/sdk.js";
+import * as Workspace17 from "./../workspace/workspace.js";
 
 // gen/front_end/models/bindings/DefaultScriptMapping.js
 var DefaultScriptMapping_exports = {};
 __export(DefaultScriptMapping_exports, {
   DefaultScriptMapping: () => DefaultScriptMapping
 });
-import * as Common10 from "./..\\..\\core\\common\\common.js";
-import * as SDK9 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Workspace13 from "./..\\workspace\\workspace.js";
+import * as Common10 from "./../../core/common/common.js";
+import * as SDK9 from "./../../core/sdk/sdk.js";
+import * as Workspace13 from "./../workspace/workspace.js";
 var DefaultScriptMapping = class _DefaultScriptMapping {
   #debuggerWorkspaceBinding;
   #project;
@@ -3023,14 +3023,14 @@ __export(ResourceScriptMapping_exports, {
   ResourceScriptFile: () => ResourceScriptFile,
   ResourceScriptMapping: () => ResourceScriptMapping
 });
-import * as Common11 from "./..\\..\\core\\common\\common.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as SDK10 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Formatter from "./..\\formatter\\formatter.js";
-import * as TextUtils6 from "./..\\text_utils\\text_utils.js";
-import * as Workspace15 from "./..\\workspace\\workspace.js";
+import * as Common11 from "./../../core/common/common.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Platform5 from "./../../core/platform/platform.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as SDK10 from "./../../core/sdk/sdk.js";
+import * as Formatter from "./../formatter/formatter.js";
+import * as TextUtils6 from "./../text_utils/text_utils.js";
+import * as Workspace15 from "./../workspace/workspace.js";
 var UIStrings3 = {
   /**
    * @description Error text displayed in the console when editing a live script fails. LiveEdit is
@@ -4011,9 +4011,9 @@ __export(FileUtils_exports, {
   ChunkedFileReader: () => ChunkedFileReader,
   FileOutputStream: () => FileOutputStream
 });
-import * as Common13 from "./..\\..\\core\\common\\common.js";
-import * as TextUtils7 from "./..\\text_utils\\text_utils.js";
-import * as Workspace19 from "./..\\workspace\\workspace.js";
+import * as Common13 from "./../../core/common/common.js";
+import * as TextUtils7 from "./../text_utils/text_utils.js";
+import * as Workspace19 from "./../workspace/workspace.js";
 var ChunkedFileReader = class {
   #file;
   #fileSize;
@@ -4206,9 +4206,9 @@ __export(PresentationConsoleMessageHelper_exports, {
   PresentationSourceFrameMessageHelper: () => PresentationSourceFrameMessageHelper,
   PresentationSourceFrameMessageManager: () => PresentationSourceFrameMessageManager
 });
-import * as SDK12 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils8 from "./..\\text_utils\\text_utils.js";
-import * as Workspace20 from "./..\\workspace\\workspace.js";
+import * as SDK12 from "./../../core/sdk/sdk.js";
+import * as TextUtils8 from "./../text_utils/text_utils.js";
+import * as Workspace20 from "./../workspace/workspace.js";
 var PresentationSourceFrameMessageManager = class {
   #targetToMessageHelperMap = /* @__PURE__ */ new WeakMap();
   constructor() {
@@ -4442,11 +4442,11 @@ var ResourceMapping_exports = {};
 __export(ResourceMapping_exports, {
   ResourceMapping: () => ResourceMapping
 });
-import * as Common14 from "./..\\..\\core\\common\\common.js";
-import * as SDK13 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Formatter2 from "./..\\formatter\\formatter.js";
-import * as TextUtils9 from "./..\\text_utils\\text_utils.js";
-import * as Workspace22 from "./..\\workspace\\workspace.js";
+import * as Common14 from "./../../core/common/common.js";
+import * as SDK13 from "./../../core/sdk/sdk.js";
+import * as Formatter2 from "./../formatter/formatter.js";
+import * as TextUtils9 from "./../text_utils/text_utils.js";
+import * as Workspace22 from "./../workspace/workspace.js";
 var styleSheetRangeMap = /* @__PURE__ */ new WeakMap();
 var scriptRangeMap = /* @__PURE__ */ new WeakMap();
 var boundUISourceCodes = /* @__PURE__ */ new WeakSet();
@@ -4994,7 +4994,7 @@ var TempFile_exports = {};
 __export(TempFile_exports, {
   TempFile: () => TempFile
 });
-import * as Common15 from "./..\\..\\core\\common\\common.js";
+import * as Common15 from "./../../core/common/common.js";
 var TempFile = class {
   #lastBlob;
   constructor() {

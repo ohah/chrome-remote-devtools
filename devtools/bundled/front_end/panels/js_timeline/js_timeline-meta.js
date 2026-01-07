@@ -1,8 +1,8 @@
 // gen/front_end/panels/js_timeline/js_timeline-meta.prebundle.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 var UIStrings = {
   /**
    * @description Text for the performance of something
@@ -34,7 +34,7 @@ var i18nLazyString = i18n.i18n.getLazilyComputedLocalizedString.bind(void 0, str
 var loadedTimelineModule;
 async function loadTimelineModule() {
   if (!loadedTimelineModule) {
-    loadedTimelineModule = await import("./..\\timeline\\timeline.js");
+    loadedTimelineModule = await import("./../timeline/timeline.js");
   }
   return loadedTimelineModule;
 }

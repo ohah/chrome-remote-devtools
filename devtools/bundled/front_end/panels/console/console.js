@@ -10,12 +10,12 @@ __export(ConsoleContextSelector_exports, {
   ConsoleContextSelector: () => ConsoleContextSelector,
   ConsoleContextSelectorElement: () => ConsoleContextSelectorElement
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/console/consoleContextSelector.css.js
 var consoleContextSelector_css_default = `/*
@@ -345,8 +345,8 @@ __export(ConsoleFilter_exports, {
   ConsoleFilter: () => ConsoleFilter,
   FilterType: () => FilterType
 });
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
 var ConsoleFilter = class _ConsoleFilter {
   name;
   parsedFilters;
@@ -491,7 +491,7 @@ __export(ConsoleFormat_exports, {
   format: () => format,
   updateStyle: () => updateStyle
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
+import * as Common2 from "./../../core/common/common.js";
 var ANSI_COLORS = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "gray"];
 var ANSI_BRIGHT_COLORS = ["darkgray", "lightred", "lightgreen", "lightyellow", "lightblue", "lightmagenta", "lightcyan", "white"];
 var format = (fmt, args) => {
@@ -682,17 +682,17 @@ __export(ConsoleInsightTeaser_exports, {
   ConsoleInsightTeaser: () => ConsoleInsightTeaser,
   DEFAULT_VIEW: () => DEFAULT_VIEW2
 });
-import "./..\\..\\ui\\components\\tooltips\\tooltips.js";
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as AiAssistanceModel3 from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelCommon from "./..\\common\\common.js";
+import "./../../ui/components/tooltips/tooltips.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as AiAssistanceModel3 from "./../../models/ai_assistance/ai_assistance.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelCommon from "./../common/common.js";
 
 // gen/front_end/panels/console/consoleInsightTeaser.css.js
 var consoleInsightTeaser_css_default = `/*
@@ -834,25 +834,25 @@ __export(ConsoleViewMessage_exports, {
   setLongStringVisibleLength: () => setLongStringVisibleLength,
   setMaxTokenizableStringLength: () => setMaxTokenizableStringLength
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as AiAssistanceModel from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as Logs from "./..\\..\\models\\logs\\logs.js";
-import * as TextUtils3 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as CodeHighlighter from "./..\\..\\ui\\components\\code_highlighter\\code_highlighter.js";
-import * as Highlighting from "./..\\..\\ui\\components\\highlighting\\highlighting.js";
-import * as IssueCounter from "./..\\..\\ui\\components\\issue_counter\\issue_counter.js";
-import * as RequestLinkIcon from "./..\\..\\ui\\components\\request_link_icon\\request_link_icon.js";
-import { createIcon, Icon } from "./..\\..\\ui\\kit\\kit.js";
-import * as DataGrid from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as ObjectUI from "./..\\..\\ui\\legacy\\components\\object_ui\\object_ui.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as AiAssistanceModel from "./../../models/ai_assistance/ai_assistance.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as Logs from "./../../models/logs/logs.js";
+import * as TextUtils3 from "./../../models/text_utils/text_utils.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as CodeHighlighter from "./../../ui/components/code_highlighter/code_highlighter.js";
+import * as Highlighting from "./../../ui/components/highlighting/highlighting.js";
+import * as IssueCounter from "./../../ui/components/issue_counter/issue_counter.js";
+import * as RequestLinkIcon from "./../../ui/components/request_link_icon/request_link_icon.js";
+import { createIcon, Icon } from "./../../ui/kit/kit.js";
+import * as DataGrid from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as ObjectUI from "./../../ui/legacy/components/object_ui/object_ui.js";
 
 // gen/front_end/ui/legacy/components/object_ui/objectValue.css.js
 var objectValue_css_default = `/*
@@ -963,11 +963,11 @@ var objectValue_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./objectValue.css")} */`;
 
 // gen/front_end/panels/console/ConsoleViewMessage.js
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import { render as render2 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Security from "./..\\security\\security.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import { render as render2 } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as Security from "./../security/security.js";
 
 // gen/front_end/panels/console/consoleView.css.js
 var consoleView_css_default = `/* Copyright 2021 The Chromium Authors
@@ -1656,7 +1656,7 @@ __export(ErrorStackParser_exports, {
   augmentErrorStackWithScriptIds: () => augmentErrorStackWithScriptIds,
   parseSourcePositionsFromErrorStack: () => parseSourcePositionsFromErrorStack
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
+import * as Common3 from "./../../core/common/common.js";
 function parseSourcePositionsFromErrorStack(runtimeModel, stack) {
   if (!(/\n\s*at\s/.test(stack) || stack.startsWith("SyntaxError:"))) {
     return null;
@@ -3758,13 +3758,13 @@ __export(PromptBuilder_exports, {
   formatStackTrace: () => formatStackTrace,
   lineWhitespace: () => lineWhitespace
 });
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as AiAssistanceModel2 from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Bindings2 from "./..\\..\\models\\bindings\\bindings.js";
-import * as Formatter from "./..\\..\\models\\formatter\\formatter.js";
-import * as Logs2 from "./..\\..\\models\\logs\\logs.js";
-import * as TextUtils5 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Components2 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
+import * as AiAssistanceModel2 from "./../../models/ai_assistance/ai_assistance.js";
+import * as Bindings2 from "./../../models/bindings/bindings.js";
+import * as Formatter from "./../../models/formatter/formatter.js";
+import * as Logs2 from "./../../models/logs/logs.js";
+import * as TextUtils5 from "./../../models/text_utils/text_utils.js";
+import * as Components2 from "./../../ui/legacy/components/utils/utils.js";
 var MAX_MESSAGE_SIZE = 1e3;
 var MAX_STACK_TRACE_SIZE = 1e3;
 var MAX_CODE_SIZE = 1e3;
@@ -4580,18 +4580,18 @@ __export(ConsolePinPane_exports, {
   DEFAULT_PANE_VIEW: () => DEFAULT_PANE_VIEW,
   DEFAULT_VIEW: () => DEFAULT_VIEW3
 });
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as Root3 from "./..\\..\\core\\root\\root.js";
-import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
-import * as CodeMirror from "./..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import { Directives, html as html3, nothing as nothing3, render as render4 } from "./..\\..\\third_party\\lit\\lit.js";
-import * as Buttons3 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as TextEditor from "./..\\..\\ui\\components\\text_editor\\text_editor.js";
-import * as ObjectUI2 from "./..\\..\\ui\\legacy\\components\\object_ui\\object_ui.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as Root3 from "./../../core/root/root.js";
+import * as SDK5 from "./../../core/sdk/sdk.js";
+import * as CodeMirror from "./../../third_party/codemirror.next/codemirror.next.js";
+import { Directives, html as html3, nothing as nothing3, render as render4 } from "./../../third_party/lit/lit.js";
+import * as Buttons3 from "./../../ui/components/buttons/buttons.js";
+import * as TextEditor from "./../../ui/components/text_editor/text_editor.js";
+import * as ObjectUI2 from "./../../ui/legacy/components/object_ui/object_ui.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/console/consolePinPane.css.js
 var consolePinPane_css_default = `/*
@@ -5172,12 +5172,12 @@ __export(ConsoleSidebar_exports, {
   ConsoleSidebar: () => ConsoleSidebar,
   DEFAULT_VIEW: () => DEFAULT_VIEW4
 });
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK6 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as SDK6 from "./../../core/sdk/sdk.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/console/consoleSidebar.css.js
 var consoleSidebar_css_default = `/*
@@ -5438,9 +5438,9 @@ var ConsoleViewport_exports = {};
 __export(ConsoleViewport_exports, {
   ConsoleViewport: () => ConsoleViewport
 });
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
-import * as Components3 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Platform4 from "./../../core/platform/platform.js";
+import * as Components3 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
 var ConsoleViewport = class {
   element;
   topGapElement;
@@ -6040,20 +6040,20 @@ var ConsolePrompt_exports = {};
 __export(ConsolePrompt_exports, {
   ConsolePrompt: () => ConsolePrompt
 });
-import * as Common9 from "./..\\..\\core\\common\\common.js";
-import * as Host4 from "./..\\..\\core\\host\\host.js";
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root5 from "./..\\..\\core\\root\\root.js";
-import * as SDK8 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Badges from "./..\\..\\models\\badges\\badges.js";
-import * as Formatter2 from "./..\\..\\models\\formatter\\formatter.js";
-import * as SourceMapScopes from "./..\\..\\models\\source_map_scopes\\source_map_scopes.js";
-import * as CodeMirror2 from "./..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import * as TextEditor2 from "./..\\..\\ui\\components\\text_editor\\text_editor.js";
-import { Icon as Icon2 } from "./..\\..\\ui\\kit\\kit.js";
-import * as ObjectUI3 from "./..\\..\\ui\\legacy\\components\\object_ui\\object_ui.js";
-import * as UI9 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging7 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common9 from "./../../core/common/common.js";
+import * as Host4 from "./../../core/host/host.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as Root5 from "./../../core/root/root.js";
+import * as SDK8 from "./../../core/sdk/sdk.js";
+import * as Badges from "./../../models/badges/badges.js";
+import * as Formatter2 from "./../../models/formatter/formatter.js";
+import * as SourceMapScopes from "./../../models/source_map_scopes/source_map_scopes.js";
+import * as CodeMirror2 from "./../../third_party/codemirror.next/codemirror.next.js";
+import * as TextEditor2 from "./../../ui/components/text_editor/text_editor.js";
+import { Icon as Icon2 } from "./../../ui/kit/kit.js";
+import * as ObjectUI3 from "./../../ui/legacy/components/object_ui/object_ui.js";
+import * as UI9 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging7 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/console/ConsolePanel.js
 var ConsolePanel_exports = {};
@@ -6062,8 +6062,8 @@ __export(ConsolePanel_exports, {
   ConsoleRevealer: () => ConsoleRevealer,
   WrapperView: () => WrapperView
 });
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging6 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as UI8 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging6 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/console/ConsoleView.js
 var ConsoleView_exports = {};
@@ -6072,27 +6072,27 @@ __export(ConsoleView_exports, {
   ConsoleView: () => ConsoleView,
   ConsoleViewFilter: () => ConsoleViewFilter
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common8 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
-import * as Root4 from "./..\\..\\core\\root\\root.js";
-import * as SDK7 from "./..\\..\\core\\sdk\\sdk.js";
-import * as AiCodeCompletion from "./..\\..\\models\\ai_code_completion\\ai_code_completion.js";
-import * as Bindings3 from "./..\\..\\models\\bindings\\bindings.js";
-import * as IssuesManager from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as Logs3 from "./..\\..\\models\\logs\\logs.js";
-import * as TextUtils6 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as CodeHighlighter3 from "./..\\..\\ui\\components\\code_highlighter\\code_highlighter.js";
-import * as Highlighting2 from "./..\\..\\ui\\components\\highlighting\\highlighting.js";
-import * as IssueCounter2 from "./..\\..\\ui\\components\\issue_counter\\issue_counter.js";
-import { createIcon as createIcon2 } from "./..\\..\\ui\\kit\\kit.js";
-import * as SettingsUI from "./..\\..\\ui\\legacy\\components\\settings_ui\\settings_ui.js";
-import * as Components4 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging5 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import { AiCodeCompletionSummaryToolbar } from "./..\\common\\common.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common8 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as Platform5 from "./../../core/platform/platform.js";
+import * as Root4 from "./../../core/root/root.js";
+import * as SDK7 from "./../../core/sdk/sdk.js";
+import * as AiCodeCompletion from "./../../models/ai_code_completion/ai_code_completion.js";
+import * as Bindings3 from "./../../models/bindings/bindings.js";
+import * as IssuesManager from "./../../models/issues_manager/issues_manager.js";
+import * as Logs3 from "./../../models/logs/logs.js";
+import * as TextUtils6 from "./../../models/text_utils/text_utils.js";
+import * as CodeHighlighter3 from "./../../ui/components/code_highlighter/code_highlighter.js";
+import * as Highlighting2 from "./../../ui/components/highlighting/highlighting.js";
+import * as IssueCounter2 from "./../../ui/components/issue_counter/issue_counter.js";
+import { createIcon as createIcon2 } from "./../../ui/kit/kit.js";
+import * as SettingsUI from "./../../ui/legacy/components/settings_ui/settings_ui.js";
+import * as Components4 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging5 from "./../../ui/visual_logging/visual_logging.js";
+import { AiCodeCompletionSummaryToolbar } from "./../common/common.js";
 var UIStrings5 = {
   /**
    * @description Label for button which links to Issues tab, specifying how many issues there are.

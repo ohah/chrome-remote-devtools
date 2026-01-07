@@ -41,7 +41,7 @@ var TracingManager_exports = {};
 __export(TracingManager_exports, {
   TracingManager: () => TracingManager
 });
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 var TracingManager = class extends SDK.SDKModel.SDKModel {
   #tracingAgent;
   #activeClient;

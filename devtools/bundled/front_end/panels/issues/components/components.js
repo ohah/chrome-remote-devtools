@@ -9,8 +9,8 @@ var ElementsPanelLink_exports = {};
 __export(ElementsPanelLink_exports, {
   ElementsPanelLink: () => ElementsPanelLink
 });
-import { html, render } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import { html, render } from "./../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/issues/components/elementsPanelLink.css.js
 var elementsPanelLink_css_default = `/*
@@ -66,11 +66,11 @@ var HideIssuesMenu_exports = {};
 __export(HideIssuesMenu_exports, {
   HideIssuesMenu: () => HideIssuesMenu
 });
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Buttons from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html as html2, render as render2 } from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as Buttons from "./../../../ui/components/buttons/buttons.js";
+import * as UI from "./../../../ui/legacy/legacy.js";
+import { html as html2, render as render2 } from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/issues/components/hideIssuesMenu.css.js
 var hideIssuesMenu_css_default = `/*

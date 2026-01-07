@@ -16,12 +16,12 @@ __export(DataGrid_exports, {
   DataGridWidget: () => DataGridWidget,
   Order: () => Order
 });
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as VisualLogging from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI from "./..\\..\\legacy.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as Host from "./../../../../core/host/host.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../../core/platform/platform.js";
+import * as VisualLogging from "./../../../visual_logging/visual_logging.js";
+import * as UI from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/data_grid/dataGrid.css.js
 var dataGrid_css_default = `/*
@@ -2469,9 +2469,9 @@ __export(ViewportDataGrid_exports, {
   ViewportDataGrid: () => ViewportDataGrid,
   ViewportDataGridNode: () => ViewportDataGridNode
 });
-import * as Common2 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Platform3 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as RenderCoordinator from "./..\\..\\..\\components\\render_coordinator\\render_coordinator.js";
+import * as Common2 from "./../../../../core/common/common.js";
+import * as Platform3 from "./../../../../core/platform/platform.js";
+import * as RenderCoordinator from "./../../../components/render_coordinator/render_coordinator.js";
 var nextId = 0;
 var ViewportDataGrid = class extends Common2.ObjectWrapper.eventMixin(DataGridImpl) {
   onScrollBound;
@@ -2918,7 +2918,7 @@ __export(SortableDataGrid_exports, {
   SortableDataGrid: () => SortableDataGrid,
   SortableDataGridNode: () => SortableDataGridNode
 });
-import * as Platform4 from "./..\\..\\..\\..\\core\\platform\\platform.js";
+import * as Platform4 from "./../../../../core/platform/platform.js";
 var SortableDataGrid = class _SortableDataGrid extends ViewportDataGrid {
   sortingFunction;
   constructor(dataGridParameters) {
@@ -3045,8 +3045,8 @@ var ShowMoreDataGridNode_exports = {};
 __export(ShowMoreDataGridNode_exports, {
   ShowMoreDataGridNode: () => ShowMoreDataGridNode
 });
-import * as i18n3 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI2 from "./..\\..\\legacy.js";
+import * as i18n3 from "./../../../../core/i18n/i18n.js";
+import * as UI2 from "./../../legacy.js";
 var UIStrings2 = {
   /**
    * @description Shown in a table when there are too many results to show directly. The user can
@@ -3149,7 +3149,7 @@ var ShowMoreDataGridNode = class extends DataGridNode {
 };
 
 // gen/front_end/ui/legacy/components/data_grid/DataGridElement.js
-import * as UI3 from "./..\\..\\legacy.js";
+import * as UI3 from "./../../legacy.js";
 var DUMMY_COLUMN_ID = "dummy";
 var DataGridElement = class extends UI3.UIUtils.HTMLElementWithLightDOMTemplate {
   static observedAttributes = ["striped", "name", "inline", "resize"];

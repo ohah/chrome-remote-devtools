@@ -10,14 +10,14 @@ __export(AnimationTimingModel_exports, {
   AnimationTimingModel: () => AnimationTimingModel,
   LINEAR_BEZIER: () => LINEAR_BEZIER2
 });
-import * as Geometry from "./..\\..\\..\\..\\models\\geometry\\geometry.js";
+import * as Geometry from "./../../../../models/geometry/geometry.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/CSSLinearEasingModel.js
 var CSSLinearEasingModel_exports = {};
 __export(CSSLinearEasingModel_exports, {
   CSSLinearEasingModel: () => CSSLinearEasingModel
 });
-import * as CodeMirror from "./..\\..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
+import * as CodeMirror from "./../../../../third_party/codemirror.next/codemirror.next.js";
 var cssParser = CodeMirror.css.cssLanguage.parser;
 var numberFormatter = new Intl.NumberFormat("en", {
   maximumFractionDigits: 2
@@ -176,10 +176,10 @@ __export(AnimationTimingUI_exports, {
   AnimationTimingUI: () => AnimationTimingUI,
   PresetUI: () => PresetUI
 });
-import * as Platform from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Geometry3 from "./..\\..\\..\\..\\models\\geometry\\geometry.js";
-import * as VisualLogging2 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI2 from "./..\\..\\legacy.js";
+import * as Platform from "./../../../../core/platform/platform.js";
+import * as Geometry3 from "./../../../../models/geometry/geometry.js";
+import * as VisualLogging2 from "./../../../visual_logging/visual_logging.js";
+import * as UI2 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/BezierUI.js
 var BezierUI_exports = {};
@@ -187,9 +187,9 @@ __export(BezierUI_exports, {
   BezierUI: () => BezierUI,
   Height: () => Height
 });
-import * as Geometry2 from "./..\\..\\..\\..\\models\\geometry\\geometry.js";
-import * as VisualLogging from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI from "./..\\..\\legacy.js";
+import * as Geometry2 from "./../../../../models/geometry/geometry.js";
+import * as VisualLogging from "./../../../visual_logging/visual_logging.js";
+import * as UI from "./../../legacy.js";
 var BezierUI = class {
   width;
   height;
@@ -568,9 +568,9 @@ __export(BezierEditor_exports, {
   BezierEditor: () => BezierEditor,
   Presets: () => Presets
 });
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as VisualLogging3 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI3 from "./..\\..\\legacy.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as VisualLogging3 from "./../../../visual_logging/visual_logging.js";
+import * as UI3 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/bezierEditor.css.js
 var bezierEditor_css_default = `/*
@@ -1016,10 +1016,10 @@ __export(ColorMixSwatch_exports, {
   ColorMixChangedEvent: () => ColorMixChangedEvent,
   ColorMixSwatch: () => ColorMixSwatch
 });
-import * as Common2 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Platform2 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Lit from "./..\\..\\..\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\..\\visual_logging\\visual_logging.js";
+import * as Common2 from "./../../../../core/common/common.js";
+import * as Platform2 from "./../../../../core/platform/platform.js";
+import * as Lit from "./../../../lit/lit.js";
+import * as VisualLogging4 from "./../../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/colorMixSwatch.css.js
 var colorMixSwatch_css_default = `/*
@@ -1139,10 +1139,10 @@ __export(ColorSwatch_exports, {
   ColorFormatChangedEvent: () => ColorFormatChangedEvent,
   ColorSwatch: () => ColorSwatch
 });
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as ColorPicker from "./..\\color_picker\\color_picker.js";
-import * as Lit2 from "./..\\..\\..\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\..\\visual_logging\\visual_logging.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as ColorPicker from "./../color_picker/color_picker.js";
+import * as Lit2 from "./../../../lit/lit.js";
+import * as VisualLogging5 from "./../../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/colorSwatch.css.js
 var colorSwatch_css_default = `/*
@@ -1324,9 +1324,9 @@ __export(CSSAngle_exports, {
 });
 
 // gen/front_end/ui/legacy/components/inline_editor/CSSAngleEditor.js
-import * as Common3 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Lit3 from "./..\\..\\..\\lit\\lit.js";
-import * as VisualLogging6 from "./..\\..\\..\\visual_logging\\visual_logging.js";
+import * as Common3 from "./../../../../core/common/common.js";
+import * as Lit3 from "./../../../lit/lit.js";
+import * as VisualLogging6 from "./../../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/cssAngleEditor.css.js
 var cssAngleEditor_css_default = `/*
@@ -1453,9 +1453,9 @@ __export(CSSAngleUtils_exports, {
   parseText: () => parseText,
   roundAngleByUnit: () => roundAngleByUnit
 });
-import * as Platform3 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Geometry4 from "./..\\..\\..\\..\\models\\geometry\\geometry.js";
-import * as UI4 from "./..\\..\\legacy.js";
+import * as Platform3 from "./../../../../core/platform/platform.js";
+import * as Geometry4 from "./../../../../models/geometry/geometry.js";
+import * as UI4 from "./../../legacy.js";
 var CSSAngleRegex = /(?<value>[+-]?\d*\.?\d+)(?<unit>deg|grad|rad|turn)/;
 var parseText = (text) => {
   const result = text.match(CSSAngleRegex);
@@ -1687,7 +1687,7 @@ var CSSAngleEditor = class extends HTMLElement {
 customElements.define("devtools-css-angle-editor", CSSAngleEditor);
 
 // gen/front_end/ui/legacy/components/inline_editor/CSSAngleSwatch.js
-import * as Lit4 from "./..\\..\\..\\lit\\lit.js";
+import * as Lit4 from "./../../../lit/lit.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/cssAngleSwatch.css.js
 var cssAngleSwatch_css_default = `/*
@@ -1753,8 +1753,8 @@ var CSSAngleSwatch = class extends HTMLElement {
 customElements.define("devtools-css-angle-swatch", CSSAngleSwatch);
 
 // gen/front_end/ui/legacy/components/inline_editor/CSSAngle.js
-import * as Platform4 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Lit5 from "./..\\..\\..\\lit\\lit.js";
+import * as Platform4 from "./../../../../core/platform/platform.js";
+import * as Lit5 from "./../../../lit/lit.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/cssAngle.css.js
 var cssAngle_css_default = `/*
@@ -2002,12 +2002,12 @@ __export(CSSShadowEditor_exports, {
   CSSLength: () => CSSLength,
   CSSShadowEditor: () => CSSShadowEditor
 });
-import * as Common4 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Geometry5 from "./..\\..\\..\\..\\models\\geometry\\geometry.js";
-import * as VisualLogging7 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI5 from "./..\\..\\legacy.js";
+import * as Common4 from "./../../../../core/common/common.js";
+import * as i18n3 from "./../../../../core/i18n/i18n.js";
+import * as Platform5 from "./../../../../core/platform/platform.js";
+import * as Geometry5 from "./../../../../models/geometry/geometry.js";
+import * as VisualLogging7 from "./../../../visual_logging/visual_logging.js";
+import * as UI5 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/cssShadowEditor.css.js
 var cssShadowEditor_css_default = `/*
@@ -2547,13 +2547,13 @@ var FontEditor_exports = {};
 __export(FontEditor_exports, {
   FontEditor: () => FontEditor
 });
-import "./..\\..\\legacy.js";
-import * as Common5 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n5 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform6 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import { Icon } from "./..\\..\\..\\kit\\kit.js";
-import * as VisualLogging8 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI7 from "./..\\..\\legacy.js";
+import "./../../legacy.js";
+import * as Common5 from "./../../../../core/common/common.js";
+import * as i18n5 from "./../../../../core/i18n/i18n.js";
+import * as Platform6 from "./../../../../core/platform/platform.js";
+import { Icon } from "./../../../kit/kit.js";
+import * as VisualLogging8 from "./../../../visual_logging/visual_logging.js";
+import * as UI7 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/fontEditor.css.js
 var fontEditor_css_default = `/*
@@ -2749,9 +2749,9 @@ var FontEditorUnitConverter_exports = {};
 __export(FontEditorUnitConverter_exports, {
   getUnitConversionMultiplier: () => getUnitConversionMultiplier
 });
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as CssOverviewModule from "./..\\..\\..\\..\\panels\\css_overview\\css_overview.js";
-import * as UI6 from "./..\\..\\legacy.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
+import * as CssOverviewModule from "./../../../../panels/css_overview/css_overview.js";
+import * as UI6 from "./../../legacy.js";
 var computedArrayFontSizeIndex = 6;
 function getPxMultiplier() {
   return 1;
@@ -2974,8 +2974,8 @@ __export(FontEditorUtils_exports, {
   generateComputedFontArray: () => generateComputedFontArray,
   getRoundingPrecision: () => getRoundingPrecision
 });
-import * as SDK2 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as CssOverviewModule2 from "./..\\..\\..\\..\\panels\\css_overview\\css_overview.js";
+import * as SDK2 from "./../../../../core/sdk/sdk.js";
+import * as CssOverviewModule2 from "./../../../../panels/css_overview/css_overview.js";
 var fontSizeRegex = /(^[\+\d\.]+)([a-zA-Z%]+)/;
 var lineHeightRegex = /(^[\+\d\.]+)([a-zA-Z%]*)/;
 var fontWeightRegex = /(^[\+\d\.]+)/;
@@ -3854,10 +3854,10 @@ var LinkSwatch_exports = {};
 __export(LinkSwatch_exports, {
   LinkSwatch: () => LinkSwatch
 });
-import * as Platform7 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Buttons from "./..\\..\\..\\components\\buttons\\buttons.js";
-import * as Lit6 from "./..\\..\\..\\lit\\lit.js";
-import * as VisualLogging9 from "./..\\..\\..\\visual_logging\\visual_logging.js";
+import * as Platform7 from "./../../../../core/platform/platform.js";
+import * as Buttons from "./../../../components/buttons/buttons.js";
+import * as Lit6 from "./../../../lit/lit.js";
+import * as VisualLogging9 from "./../../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/linkSwatch.css.js
 var linkSwatch_css_default = `/*
@@ -3947,8 +3947,8 @@ var Swatches_exports = {};
 __export(Swatches_exports, {
   CSSShadowSwatch: () => CSSShadowSwatch
 });
-import "./..\\..\\..\\kit\\kit.js";
-import { html as html7, render as render7 } from "./..\\..\\..\\lit\\lit.js";
+import "./../../../kit/kit.js";
+import { html as html7, render as render7 } from "./../../../lit/lit.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/cssShadowSwatch.css.js
 var cssShadowSwatch_css_default = `/*
@@ -3999,10 +3999,10 @@ var SwatchPopoverHelper_exports = {};
 __export(SwatchPopoverHelper_exports, {
   SwatchPopoverHelper: () => SwatchPopoverHelper
 });
-import * as Common6 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Platform8 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as VisualLogging10 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI8 from "./..\\..\\legacy.js";
+import * as Common6 from "./../../../../core/common/common.js";
+import * as Platform8 from "./../../../../core/platform/platform.js";
+import * as VisualLogging10 from "./../../../visual_logging/visual_logging.js";
+import * as UI8 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/inline_editor/swatchPopover.css.js
 var swatchPopover_css_default = `/*

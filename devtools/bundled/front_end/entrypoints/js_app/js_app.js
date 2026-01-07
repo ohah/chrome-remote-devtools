@@ -1,11 +1,11 @@
 // gen/front_end/entrypoints/js_app/js_app.prebundle.js
-import "./..\\shell\\shell.js";
+import "./../shell/shell.js";
 
 // gen/front_end/panels/js_timeline/js_timeline-meta.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 var UIStrings = {
   /**
    * @description Text for the performance of something
@@ -37,7 +37,7 @@ var i18nLazyString = i18n.i18n.getLazilyComputedLocalizedString.bind(void 0, str
 var loadedTimelineModule;
 async function loadTimelineModule() {
   if (!loadedTimelineModule) {
-    loadedTimelineModule = await import("./..\\..\\panels\\timeline\\timeline.js");
+    loadedTimelineModule = await import("./../../panels/timeline/timeline.js");
   }
   return loadedTimelineModule;
 }
@@ -150,9 +150,9 @@ Common.Settings.registerSettingExtension({
 });
 
 // gen/front_end/panels/mobile_throttling/mobile_throttling-meta.js
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
 var UIStrings2 = {
   /**
    * @description Text for throttling the network
@@ -194,7 +194,7 @@ var i18nLazyString2 = i18n3.i18n.getLazilyComputedLocalizedString.bind(void 0, s
 var loadedMobileThrottlingModule;
 async function loadMobileThrottlingModule() {
   if (!loadedMobileThrottlingModule) {
-    loadedMobileThrottlingModule = await import("./..\\..\\panels\\mobile_throttling\\mobile_throttling.js");
+    loadedMobileThrottlingModule = await import("./../../panels/mobile_throttling/mobile_throttling.js");
   }
   return loadedMobileThrottlingModule;
 }
@@ -274,14 +274,14 @@ Common2.Settings.registerSettingExtension({
 });
 
 // gen/front_end/panels/network/network-meta.js
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as PanelCommon from "./..\\..\\panels\\common\\common.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as NetworkForward from "./..\\..\\panels\\network\\forward\\forward.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as PanelCommon from "./../../panels/common/common.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as NetworkForward from "./../../panels/network/forward/forward.js";
 var UIStrings3 = {
   /**
    * @description Command for showing the 'Network' tool
@@ -430,7 +430,7 @@ var loadedNetworkModule;
 var isNode = Root.Runtime.Runtime.isNode();
 async function loadNetworkModule() {
   if (!loadedNetworkModule) {
-    loadedNetworkModule = await import("./..\\..\\panels\\network\\network.js");
+    loadedNetworkModule = await import("./../../panels/network/network.js");
   }
   return loadedNetworkModule;
 }
@@ -772,13 +772,13 @@ Common3.Revealer.registerRevealer({
 });
 
 // gen/front_end/entrypoints/js_app/js_app.prebundle.js
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Main from "./..\\main\\main.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as Main from "./../main/main.js";
 var UIStrings4 = {
   /**
    * @description Text that refers to the main target.
@@ -800,7 +800,7 @@ var jsMainImplInstance;
 var loadedSourcesModule;
 async function loadSourcesModule() {
   if (!loadedSourcesModule) {
-    loadedSourcesModule = await import("./..\\..\\panels\\sources\\sources.js");
+    loadedSourcesModule = await import("./../../panels/sources/sources.js");
   }
   return loadedSourcesModule;
 }

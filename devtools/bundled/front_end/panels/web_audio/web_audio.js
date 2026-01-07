@@ -9,7 +9,7 @@ var WebAudioModel_exports = {};
 __export(WebAudioModel_exports, {
   WebAudioModel: () => WebAudioModel
 });
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 var WebAudioModel = class extends SDK.SDKModel.SDKModel {
   enabled;
   agent;
@@ -98,13 +98,13 @@ __export(WebAudioView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW,
   WebAudioView: () => WebAudioView
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import { html, render } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import { html, render } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/web_audio/webAudio.css.js
 var webAudio_css_default = `/*

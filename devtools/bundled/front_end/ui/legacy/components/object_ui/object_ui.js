@@ -10,10 +10,10 @@ __export(CustomPreviewComponent_exports, {
   CustomPreviewComponent: () => CustomPreviewComponent,
   CustomPreviewSection: () => CustomPreviewSection
 });
-import * as Common2 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n5 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import { createIcon } from "./..\\..\\..\\kit\\kit.js";
-import * as UI3 from "./..\\..\\legacy.js";
+import * as Common2 from "./../../../../core/common/common.js";
+import * as i18n5 from "./../../../../core/i18n/i18n.js";
+import { createIcon } from "./../../../kit/kit.js";
+import * as UI3 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/object_ui/customPreviewComponent.css.js
 var customPreviewComponent_css_default = `/*
@@ -61,29 +61,29 @@ __export(ObjectPropertiesSection_exports, {
   TREE_ELEMENT_DEFAULT_VIEW: () => TREE_ELEMENT_DEFAULT_VIEW,
   getObjectPropertiesSectionFrom: () => getObjectPropertiesSectionFrom
 });
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK3 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as uiI18n from "./..\\..\\..\\i18n\\i18n.js";
-import * as Highlighting from "./..\\..\\..\\components\\highlighting\\highlighting.js";
-import * as TextEditor from "./..\\..\\..\\components\\text_editor\\text_editor.js";
-import { Directives as Directives2, html as html2, nothing as nothing2, render as render2 } from "./..\\..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI2 from "./..\\..\\legacy.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as Host from "./../../../../core/host/host.js";
+import * as i18n3 from "./../../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../../core/platform/platform.js";
+import * as SDK3 from "./../../../../core/sdk/sdk.js";
+import * as TextUtils from "./../../../../models/text_utils/text_utils.js";
+import * as uiI18n from "./../../../i18n/i18n.js";
+import * as Highlighting from "./../../../components/highlighting/highlighting.js";
+import * as TextEditor from "./../../../components/text_editor/text_editor.js";
+import { Directives as Directives2, html as html2, nothing as nothing2, render as render2 } from "./../../../lit/lit.js";
+import * as VisualLogging from "./../../../visual_logging/visual_logging.js";
+import * as UI2 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/object_ui/JavaScriptREPL.js
 var JavaScriptREPL_exports = {};
 __export(JavaScriptREPL_exports, {
   JavaScriptREPL: () => JavaScriptREPL
 });
-import * as SDK2 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Formatter from "./..\\..\\..\\..\\models\\formatter\\formatter.js";
-import * as SourceMapScopes from "./..\\..\\..\\..\\models\\source_map_scopes\\source_map_scopes.js";
-import * as Acorn from "./..\\..\\..\\..\\third_party\\acorn\\acorn.js";
-import * as UI from "./..\\..\\legacy.js";
+import * as SDK2 from "./../../../../core/sdk/sdk.js";
+import * as Formatter from "./../../../../models/formatter/formatter.js";
+import * as SourceMapScopes from "./../../../../models/source_map_scopes/source_map_scopes.js";
+import * as Acorn from "./../../../../third_party/acorn/acorn.js";
+import * as UI from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/object_ui/RemoteObjectPreviewFormatter.js
 var RemoteObjectPreviewFormatter_exports = {};
@@ -92,10 +92,10 @@ __export(RemoteObjectPreviewFormatter_exports, {
   renderNodeTitle: () => renderNodeTitle,
   renderTrustedType: () => renderTrustedType
 });
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import { Directives, html, nothing, render } from "./..\\..\\..\\lit\\lit.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as Platform from "./../../../../core/platform/platform.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
+import { Directives, html, nothing, render } from "./../../../lit/lit.js";
 var { ifDefined, repeat } = Directives;
 var UIStrings = {
   /**
@@ -2206,13 +2206,13 @@ var ObjectPopoverHelper_exports = {};
 __export(ObjectPopoverHelper_exports, {
   ObjectPopoverHelper: () => ObjectPopoverHelper
 });
-import * as i18n7 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK4 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Geometry from "./..\\..\\..\\..\\models\\geometry\\geometry.js";
-import { render as render3 } from "./..\\..\\..\\lit\\lit.js";
-import * as UI4 from "./..\\..\\legacy.js";
-import * as Components from "./..\\utils\\utils.js";
+import * as i18n7 from "./../../../../core/i18n/i18n.js";
+import * as Platform3 from "./../../../../core/platform/platform.js";
+import * as SDK4 from "./../../../../core/sdk/sdk.js";
+import * as Geometry from "./../../../../models/geometry/geometry.js";
+import { render as render3 } from "./../../../lit/lit.js";
+import * as UI4 from "./../../legacy.js";
+import * as Components from "./../utils/utils.js";
 
 // gen/front_end/ui/legacy/components/object_ui/objectPopover.css.js
 var objectPopover_css_default = `/*

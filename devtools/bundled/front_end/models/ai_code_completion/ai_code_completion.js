@@ -31,9 +31,9 @@ __export(AiCodeCompletion_exports, {
   DELAY_BEFORE_SHOWING_RESPONSE_MS: () => DELAY_BEFORE_SHOWING_RESPONSE_MS,
   consoleAdditionalContextFileContent: () => consoleAdditionalContextFileContent
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as Root from "./../../core/root/root.js";
 var DELAY_BEFORE_SHOWING_RESPONSE_MS = 500;
 var AIDA_REQUEST_DEBOUNCE_TIMEOUT_MS = 200;
 var consoleAdditionalContextFileContent = `/**

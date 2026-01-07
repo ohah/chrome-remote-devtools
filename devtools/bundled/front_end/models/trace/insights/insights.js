@@ -18,8 +18,8 @@ __export(Cache_exports, {
   isCacheInsight: () => isCacheInsight,
   isCacheable: () => isCacheable
 });
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Helpers2 from "./..\\helpers\\helpers.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as Helpers2 from "./../helpers/helpers.js";
 
 // gen/front_end/models/trace/insights/Common.js
 var Common_exports = {};
@@ -41,8 +41,8 @@ __export(Common_exports, {
   isRequestServedFromBrowserCache: () => isRequestServedFromBrowserCache,
   metricSavingsForWastedBytes: () => metricSavingsForWastedBytes
 });
-import * as Helpers from "./..\\helpers\\helpers.js";
-import * as Types from "./..\\types\\types.js";
+import * as Helpers from "./../helpers/helpers.js";
+import * as Types from "./../types/types.js";
 
 // gen/front_end/models/trace/insights/Statistics.js
 var Statistics_exports = {};
@@ -591,11 +591,11 @@ __export(CLSCulprits_exports, {
   i18nString: () => i18nString2,
   isCLSCulpritsInsight: () => isCLSCulpritsInsight
 });
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Handlers from "./..\\handlers\\handlers.js";
-import * as Helpers3 from "./..\\helpers\\helpers.js";
-import * as Types2 from "./..\\types\\types.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as Handlers from "./../handlers/handlers.js";
+import * as Helpers3 from "./../helpers/helpers.js";
+import * as Types2 from "./../types/types.js";
 var UIStrings2 = {
   /** Title of an insight that provides details about why elements shift/move on the page. The causes for these shifts are referred to as culprits ("reasons"). */
   title: "Layout shift culprits",
@@ -1018,9 +1018,9 @@ __export(DocumentLatency_exports, {
   i18nString: () => i18nString3,
   isDocumentLatencyInsight: () => isDocumentLatencyInsight
 });
-import * as i18n5 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Helpers4 from "./..\\helpers\\helpers.js";
-import * as Types3 from "./..\\types\\types.js";
+import * as i18n5 from "./../../../core/i18n/i18n.js";
+import * as Helpers4 from "./../helpers/helpers.js";
+import * as Types3 from "./../types/types.js";
 var UIStrings3 = {
   /**
    * @description Title of an insight that provides a breakdown for how long it took to download the main document.
@@ -1258,10 +1258,10 @@ __export(DOMSize_exports, {
   i18nString: () => i18nString4,
   isDomSizeInsight: () => isDomSizeInsight
 });
-import * as i18n7 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Handlers2 from "./..\\handlers\\handlers.js";
-import * as Helpers5 from "./..\\helpers\\helpers.js";
-import * as Types4 from "./..\\types\\types.js";
+import * as i18n7 from "./../../../core/i18n/i18n.js";
+import * as Handlers2 from "./../handlers/handlers.js";
+import * as Helpers5 from "./../helpers/helpers.js";
+import * as Types4 from "./../types/types.js";
 var UIStrings4 = {
   /**
    * @description Title of an insight that recommends reducing the size of the DOM tree as a means to improve page responsiveness. "DOM" is an acronym and should not be translated.
@@ -1436,9 +1436,9 @@ __export(DuplicatedJavaScript_exports, {
   i18nString: () => i18nString5,
   isDuplicatedJavaScriptInsight: () => isDuplicatedJavaScriptInsight
 });
-import * as i18n9 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Extras from "./..\\extras\\extras.js";
-import * as Helpers6 from "./..\\helpers\\helpers.js";
+import * as i18n9 from "./../../../core/i18n/i18n.js";
+import * as Extras from "./../extras/extras.js";
+import * as Helpers6 from "./../helpers/helpers.js";
 var UIStrings5 = {
   /**
    * @description Title of an insight that identifies multiple copies of the same JavaScript sources, and recommends removing the duplication.
@@ -1531,10 +1531,10 @@ __export(FontDisplay_exports, {
   i18nString: () => i18nString6,
   isFontDisplayInsight: () => isFontDisplayInsight
 });
-import * as i18n11 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Helpers7 from "./..\\helpers\\helpers.js";
-import * as Types5 from "./..\\types\\types.js";
+import * as i18n11 from "./../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../core/platform/platform.js";
+import * as Helpers7 from "./../helpers/helpers.js";
+import * as Types5 from "./../types/types.js";
 var UIStrings6 = {
   /** Title of an insight that provides details about the fonts used on the page, and the value of their `font-display` properties. */
   title: "Font display",
@@ -1618,11 +1618,11 @@ __export(ForcedReflow_exports, {
   i18nString: () => i18nString7,
   isForcedReflowInsight: () => isForcedReflowInsight
 });
-import * as i18n13 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Extras2 from "./..\\extras\\extras.js";
-import * as Helpers8 from "./..\\helpers\\helpers.js";
-import * as Types6 from "./..\\types\\types.js";
+import * as i18n13 from "./../../../core/i18n/i18n.js";
+import * as Platform3 from "./../../../core/platform/platform.js";
+import * as Extras2 from "./../extras/extras.js";
+import * as Helpers8 from "./../helpers/helpers.js";
+import * as Types6 from "./../types/types.js";
 var UIStrings7 = {
   /**
    * @description Title of an insight that provides details about Forced reflow.
@@ -1785,8 +1785,8 @@ __export(ImageDelivery_exports, {
   i18nString: () => i18nString8,
   isImageDeliveryInsight: () => isImageDeliveryInsight
 });
-import * as i18n15 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Helpers9 from "./..\\helpers\\helpers.js";
+import * as i18n15 from "./../../../core/i18n/i18n.js";
+import * as Helpers9 from "./../helpers/helpers.js";
 var UIStrings8 = {
   /**
    * @description Title of an insight that recommends ways to reduce the size of images downloaded and used on the page.
@@ -2009,9 +2009,9 @@ __export(INPBreakdown_exports, {
   i18nString: () => i18nString9,
   isINPBreakdownInsight: () => isINPBreakdownInsight
 });
-import * as i18n17 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Handlers3 from "./..\\handlers\\handlers.js";
-import * as Helpers10 from "./..\\helpers\\helpers.js";
+import * as i18n17 from "./../../../core/i18n/i18n.js";
+import * as Handlers3 from "./../handlers/handlers.js";
+import * as Helpers10 from "./../helpers/helpers.js";
 var UIStrings9 = {
   /**
    * @description Text to tell the user about the longest user interaction.
@@ -2135,10 +2135,10 @@ __export(LCPBreakdown_exports, {
   i18nString: () => i18nString10,
   isLCPBreakdownInsight: () => isLCPBreakdownInsight
 });
-import * as i18n19 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Handlers4 from "./..\\handlers\\handlers.js";
-import * as Helpers11 from "./..\\helpers\\helpers.js";
-import * as Types7 from "./..\\types\\types.js";
+import * as i18n19 from "./../../../core/i18n/i18n.js";
+import * as Handlers4 from "./../handlers/handlers.js";
+import * as Helpers11 from "./../helpers/helpers.js";
+import * as Types7 from "./../types/types.js";
 var UIStrings10 = {
   /**
    * @description Title of an insight that provides details about the LCP metric, broken down by parts.
@@ -2314,10 +2314,10 @@ __export(LCPDiscovery_exports, {
   i18nString: () => i18nString11,
   isLCPDiscoveryInsight: () => isLCPDiscoveryInsight
 });
-import * as i18n21 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Handlers5 from "./..\\handlers\\handlers.js";
-import * as Helpers12 from "./..\\helpers\\helpers.js";
-import * as Types8 from "./..\\types\\types.js";
+import * as i18n21 from "./../../../core/i18n/i18n.js";
+import * as Handlers5 from "./../handlers/handlers.js";
+import * as Helpers12 from "./../helpers/helpers.js";
+import * as Types8 from "./../types/types.js";
 var UIStrings11 = {
   /**
    * @description Title of an insight that provides details about the LCP metric, and the network requests necessary to load it. Details how the LCP request was discoverable - in other words, the path necessary to load it (ex: network requests, JavaScript)
@@ -2492,9 +2492,9 @@ __export(LegacyJavaScript_exports, {
   i18nString: () => i18nString12,
   isLegacyJavaScript: () => isLegacyJavaScript
 });
-import * as i18n23 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as LegacyJavaScriptLib from "./..\\..\\..\\third_party\\legacy-javascript\\legacy-javascript.js";
-import * as Helpers13 from "./..\\helpers\\helpers.js";
+import * as i18n23 from "./../../../core/i18n/i18n.js";
+import * as LegacyJavaScriptLib from "./../../../third_party/legacy-javascript/legacy-javascript.js";
+import * as Helpers13 from "./../helpers/helpers.js";
 var { detectLegacyJavaScript } = LegacyJavaScriptLib.LegacyJavaScript;
 var UIStrings12 = {
   /**
@@ -2587,10 +2587,10 @@ __export(ModernHTTP_exports, {
   i18nString: () => i18nString13,
   isModernHTTPInsight: () => isModernHTTPInsight
 });
-import * as i18n25 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Handlers6 from "./..\\handlers\\handlers.js";
-import * as Helpers15 from "./..\\helpers\\helpers.js";
+import * as i18n25 from "./../../../core/i18n/i18n.js";
+import * as Platform4 from "./../../../core/platform/platform.js";
+import * as Handlers6 from "./../handlers/handlers.js";
+import * as Helpers15 from "./../helpers/helpers.js";
 var UIStrings13 = {
   /**
    * @description Title of an insight that recommends using HTTP/2 over HTTP/1.1 because of the performance benefits. "HTTP" should not be translated.
@@ -2759,11 +2759,11 @@ __export(NetworkDependencyTree_exports, {
   i18nString: () => i18nString14,
   isNetworkDependencyTreeInsight: () => isNetworkDependencyTreeInsight
 });
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n27 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Helpers16 from "./..\\helpers\\helpers.js";
-import * as Types9 from "./..\\types\\types.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n27 from "./../../../core/i18n/i18n.js";
+import * as Platform5 from "./../../../core/platform/platform.js";
+import * as Helpers16 from "./../helpers/helpers.js";
+import * as Types9 from "./../types/types.js";
 var UIStrings14 = {
   /**
    * @description Title of an insight that recommends avoiding chaining critical requests.
@@ -3250,9 +3250,9 @@ __export(RenderBlocking_exports, {
   i18nString: () => i18nString15,
   isRenderBlockingInsight: () => isRenderBlockingInsight
 });
-import * as i18n29 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Handlers7 from "./..\\handlers\\handlers.js";
-import * as Helpers17 from "./..\\helpers\\helpers.js";
+import * as i18n29 from "./../../../core/i18n/i18n.js";
+import * as Handlers7 from "./../handlers/handlers.js";
+import * as Helpers17 from "./../helpers/helpers.js";
 var UIStrings15 = {
   /**
    * @description Title of an insight that provides the user with the list of network requests that blocked and therefore slowed down the page rendering and becoming visible to the user.
@@ -3426,8 +3426,8 @@ __export(SlowCSSSelector_exports, {
   i18nString: () => i18nString16,
   isSlowCSSSelectorInsight: () => isSlowCSSSelectorInsight
 });
-import * as i18n31 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Helpers18 from "./..\\helpers\\helpers.js";
+import * as i18n31 from "./../../../core/i18n/i18n.js";
+import * as Helpers18 from "./../helpers/helpers.js";
 
 // gen/front_end/models/trace/types/TraceEvents.js
 function isSoftNavigationStart(event) {
@@ -3480,7 +3480,7 @@ function isNavigationStart(event) {
 }
 
 // gen/front_end/models/trace/insights/SlowCSSSelector.js
-import * as Types10 from "./..\\types\\types.js";
+import * as Types10 from "./../types/types.js";
 var UIStrings16 = {
   /**
    * @description Title of an insight that provides details about slow CSS selectors.
@@ -3616,10 +3616,10 @@ __export(ThirdParties_exports, {
   i18nString: () => i18nString17,
   isThirdPartyInsight: () => isThirdPartyInsight
 });
-import * as i18n33 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as ThirdPartyWeb from "./..\\..\\..\\third_party\\third-party-web\\third-party-web.js";
-import * as Extras3 from "./..\\extras\\extras.js";
-import * as Handlers8 from "./..\\handlers\\handlers.js";
+import * as i18n33 from "./../../../core/i18n/i18n.js";
+import * as ThirdPartyWeb from "./../../../third_party/third-party-web/third-party-web.js";
+import * as Extras3 from "./../extras/extras.js";
+import * as Handlers8 from "./../handlers/handlers.js";
 var UIStrings17 = {
   /** Title of an insight that provides details about the code on a web page that the user doesn't control (referred to as "third-party code"). */
   title: "3rd parties",
@@ -3712,11 +3712,11 @@ __export(Viewport_exports, {
   i18nString: () => i18nString18,
   isViewportInsight: () => isViewportInsight
 });
-import * as i18n35 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform6 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Handlers9 from "./..\\handlers\\handlers.js";
-import * as Helpers20 from "./..\\helpers\\helpers.js";
-import * as Types11 from "./..\\types\\types.js";
+import * as i18n35 from "./../../../core/i18n/i18n.js";
+import * as Platform6 from "./../../../core/platform/platform.js";
+import * as Handlers9 from "./../handlers/handlers.js";
+import * as Helpers20 from "./../helpers/helpers.js";
+import * as Types11 from "./../types/types.js";
 var UIStrings18 = {
   /** Title of an insight that provides details about if the page's viewport is optimized for mobile viewing. */
   title: "Optimize viewport for mobile",

@@ -23,15 +23,15 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\front_end\\foundation",
+    "rootDir": "../../../../../front_end/foundation",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "es2023",
     "tsBuildInfoFile": "foundation_node_typecheck-tsconfig.json.tsbuildinfo",
     "typeRoots": [
-      "..\\..\\..\\..\\..\\node_modules\\@types",
-      "..\\..\\..\\..\\..\\node_modules"
+      "../../../../../node_modules/@types",
+      "../../../../../node_modules"
     ],
     "types": [
       "node",
@@ -40,10 +40,10 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\front_end\\foundation\\Universe.ts",
-    "..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../front_end/foundation/Universe.ts",
+    "../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

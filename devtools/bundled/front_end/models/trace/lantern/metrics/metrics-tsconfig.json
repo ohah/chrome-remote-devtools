@@ -24,7 +24,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\models\\trace\\lantern\\metrics",
+    "rootDir": "../../../../../../../../front_end/models/trace/lantern/metrics",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
@@ -35,17 +35,17 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\models\\trace\\lantern\\metrics\\FirstContentfulPaint.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\models\\trace\\lantern\\metrics\\Interactive.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\models\\trace\\lantern\\metrics\\LargestContentfulPaint.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\models\\trace\\lantern\\metrics\\MaxPotentialFID.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\models\\trace\\lantern\\metrics\\Metric.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\models\\trace\\lantern\\metrics\\SpeedIndex.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\models\\trace\\lantern\\metrics\\TBTUtils.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\models\\trace\\lantern\\metrics\\TotalBlockingTime.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../../../front_end/models/trace/lantern/metrics/FirstContentfulPaint.ts",
+    "../../../../../../../../front_end/models/trace/lantern/metrics/Interactive.ts",
+    "../../../../../../../../front_end/models/trace/lantern/metrics/LargestContentfulPaint.ts",
+    "../../../../../../../../front_end/models/trace/lantern/metrics/MaxPotentialFID.ts",
+    "../../../../../../../../front_end/models/trace/lantern/metrics/Metric.ts",
+    "../../../../../../../../front_end/models/trace/lantern/metrics/SpeedIndex.ts",
+    "../../../../../../../../front_end/models/trace/lantern/metrics/TBTUtils.ts",
+    "../../../../../../../../front_end/models/trace/lantern/metrics/TotalBlockingTime.ts",
+    "../../../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

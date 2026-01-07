@@ -10,11 +10,11 @@ __export(EventDisplayTable_exports, {
   EventNode: () => EventNode,
   PlayerEventsView: () => PlayerEventsView
 });
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as DataGrid from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as SourceFrame from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as DataGrid from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as SourceFrame from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/media/eventDisplayTable.css.js
 var eventDisplayTable_css_default = `/*
@@ -169,16 +169,16 @@ __export(MainView_exports, {
   MainView: () => MainView,
   PlayerDataDownloadManager: () => PlayerDataDownloadManager
 });
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/media/MediaModel.js
 var MediaModel_exports = {};
 __export(MediaModel_exports, {
   MediaModel: () => MediaModel
 });
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 var MediaModel = class extends SDK.SDKModel.SDKModel {
   enabled;
   agent;
@@ -221,12 +221,12 @@ var PlayerDetailView_exports = {};
 __export(PlayerDetailView_exports, {
   PlayerDetailView: () => PlayerDetailView
 });
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/media/EventTimelineView.js
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/media/TickingFlameChart.js
 var TickingFlameChart_exports = {};
@@ -236,11 +236,11 @@ __export(TickingFlameChart_exports, {
   HotColorScheme: () => HotColorScheme,
   TickingFlameChart: () => TickingFlameChart
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as PerfUI from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as PerfUI from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport from "./../../ui/legacy/theme_support/theme_support.js";
 
 // gen/front_end/panels/media/TickingFlameChartHelpers.js
 var TickingFlameChartHelpers_exports = {};
@@ -880,10 +880,10 @@ var PlayerEventsTimeline = class extends TickingFlameChart {
 };
 
 // gen/front_end/panels/media/PlayerMessagesView.js
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/media/playerMessagesView.css.js
 var playerMessagesView_css_default = `/*
@@ -1300,11 +1300,11 @@ __export(PlayerPropertiesView_exports, {
   TrackManager: () => TrackManager,
   VideoTrackManager: () => VideoTrackManager
 });
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as SourceFrame2 from "./..\\..\\ui\\legacy\\components\\source_frame\\source_frame.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as SourceFrame2 from "./../../ui/legacy/components/source_frame/source_frame.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/media/playerPropertiesView.css.js
 var playerPropertiesView_css_default = `/*
@@ -1968,11 +1968,11 @@ var PlayerListView_exports = {};
 __export(PlayerListView_exports, {
   PlayerListView: () => PlayerListView
 });
-import "./..\\..\\ui\\kit\\kit.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives, html, render } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/kit/kit.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
+import { Directives, html, render } from "./../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/media/playerListView.css.js
 var playerListView_css_default = `/*

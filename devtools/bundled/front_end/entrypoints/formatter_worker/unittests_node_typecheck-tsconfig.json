@@ -24,15 +24,15 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\formatter_worker",
+    "rootDir": "../../../../../../front_end/entrypoints/formatter_worker",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "es2023",
     "tsBuildInfoFile": "unittests_node_typecheck-tsconfig.json.tsbuildinfo",
     "typeRoots": [
-      "..\\..\\..\\..\\..\\..\\node_modules\\@types",
-      "..\\..\\..\\..\\..\\..\\node_modules"
+      "../../../../../../node_modules/@types",
+      "../../../../../../node_modules"
     ],
     "types": [
       "mocha",
@@ -45,17 +45,17 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\formatter_worker\\CSSFormatter.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\formatter_worker\\FormattedContentBuilder.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\formatter_worker\\FormatterWorker.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\formatter_worker\\HTMLFormatter.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\formatter_worker\\JSONFormatter.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\formatter_worker\\JavaScriptFormatter.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\formatter_worker\\ScopeParser.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\formatter_worker\\Substitute.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../front_end/entrypoints/formatter_worker/CSSFormatter.test.ts",
+    "../../../../../../front_end/entrypoints/formatter_worker/FormattedContentBuilder.test.ts",
+    "../../../../../../front_end/entrypoints/formatter_worker/FormatterWorker.test.ts",
+    "../../../../../../front_end/entrypoints/formatter_worker/HTMLFormatter.test.ts",
+    "../../../../../../front_end/entrypoints/formatter_worker/JSONFormatter.test.ts",
+    "../../../../../../front_end/entrypoints/formatter_worker/JavaScriptFormatter.test.ts",
+    "../../../../../../front_end/entrypoints/formatter_worker/ScopeParser.test.ts",
+    "../../../../../../front_end/entrypoints/formatter_worker/Substitute.test.ts",
+    "../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

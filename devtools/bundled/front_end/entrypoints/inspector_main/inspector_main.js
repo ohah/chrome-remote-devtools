@@ -10,12 +10,12 @@ __export(RenderingOptions_exports, {
   ReloadActionDelegate: () => ReloadActionDelegate,
   RenderingOptionsView: () => RenderingOptionsView
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SettingsUI from "./..\\..\\ui\\legacy\\components\\settings_ui\\settings_ui.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SettingsUI from "./../../ui/legacy/components/settings_ui/settings_ui.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/entrypoints/inspector_main/renderingOptions.css.js
 var renderingOptions_css_default = `/*
@@ -286,16 +286,16 @@ __export(InspectorMain_exports, {
   ReloadActionDelegate: () => ReloadActionDelegate2,
   SourcesPanelIndicator: () => SourcesPanelIndicator
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as MobileThrottling from "./..\\..\\panels\\mobile_throttling\\mobile_throttling.js";
-import * as Security from "./..\\..\\panels\\security\\security.js";
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as MobileThrottling from "./../../panels/mobile_throttling/mobile_throttling.js";
+import * as Security from "./../../panels/security/security.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
 
 // gen/front_end/entrypoints/inspector_main/nodeIcon.css.js
 var nodeIcon_css_default = `/*
@@ -578,11 +578,11 @@ var OutermostTargetSelector_exports = {};
 __export(OutermostTargetSelector_exports, {
   OutermostTargetSelector: () => OutermostTargetSelector
 });
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/entrypoints/inspector_main/outermostTargetSelector.css.js
 var outermostTargetSelector_css_default = `/*

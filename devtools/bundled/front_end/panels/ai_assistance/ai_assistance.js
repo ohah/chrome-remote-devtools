@@ -5,28 +5,28 @@ var __export = (target, all) => {
 };
 
 // gen/front_end/panels/ai_assistance/AiAssistancePanel.js
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as Host6 from "./..\\..\\core\\host\\host.js";
-import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
-import * as Root5 from "./..\\..\\core\\root\\root.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as AiAssistanceModel5 from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Annotations from "./..\\..\\models\\annotations\\annotations.js";
-import * as Badges from "./..\\..\\models\\badges\\badges.js";
-import * as GreenDev4 from "./..\\..\\models\\greendev\\greendev.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Workspace6 from "./..\\..\\models\\workspace\\workspace.js";
-import * as Buttons7 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Snackbars2 from "./..\\..\\ui\\components\\snackbars\\snackbars.js";
-import * as UIHelpers2 from "./..\\..\\ui\\helpers\\helpers.js";
-import * as UI10 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit8 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging7 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as NetworkForward from "./..\\network\\forward\\forward.js";
-import * as NetworkPanel from "./..\\network\\network.js";
-import * as TimelinePanel from "./..\\timeline\\timeline.js";
+import "./../../ui/kit/kit.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as Host6 from "./../../core/host/host.js";
+import * as i18n15 from "./../../core/i18n/i18n.js";
+import * as Platform4 from "./../../core/platform/platform.js";
+import * as Root5 from "./../../core/root/root.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as AiAssistanceModel5 from "./../../models/ai_assistance/ai_assistance.js";
+import * as Annotations from "./../../models/annotations/annotations.js";
+import * as Badges from "./../../models/badges/badges.js";
+import * as GreenDev4 from "./../../models/greendev/greendev.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as Workspace6 from "./../../models/workspace/workspace.js";
+import * as Buttons7 from "./../../ui/components/buttons/buttons.js";
+import * as Snackbars2 from "./../../ui/components/snackbars/snackbars.js";
+import * as UIHelpers2 from "./../../ui/helpers/helpers.js";
+import * as UI10 from "./../../ui/legacy/legacy.js";
+import * as Lit8 from "./../../ui/lit/lit.js";
+import * as VisualLogging7 from "./../../ui/visual_logging/visual_logging.js";
+import * as NetworkForward from "./../network/forward/forward.js";
+import * as NetworkPanel from "./../network/network.js";
+import * as TimelinePanel from "./../timeline/timeline.js";
 
 // gen/front_end/panels/ai_assistance/aiAssistancePanel.css.js
 var aiAssistancePanel_css_default = `/*
@@ -88,8 +88,8 @@ var aiAssistancePanel_css_default = `/*
 /*# sourceURL=${import.meta.resolve("././aiAssistancePanel.css")} */`;
 
 // gen/front_end/panels/ai_assistance/components/CollapsibleAssistanceContentWidget.js
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as Lit from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/ai_assistance/components/collapsibleAssistanceContentWidget.css.js
 var collapsibleAssistanceContentWidget_css_default = `/*
@@ -173,10 +173,10 @@ var CollapsibleAssistanceContentWidget = class extends HTMLElement {
 customElements.define("devtools-collapsible-assistance-content-widget", CollapsibleAssistanceContentWidget);
 
 // gen/front_end/panels/ai_assistance/components/PerformanceAgentFlameChart.js
-import * as Trace from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as Lit2 from "./..\\..\\ui\\lit\\lit.js";
-import * as Timeline from "./..\\timeline\\timeline.js";
+import * as Trace from "./../../models/trace/trace.js";
+import * as PerfUI from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as Lit2 from "./../../ui/lit/lit.js";
+import * as Timeline from "./../timeline/timeline.js";
 var { html: html2 } = Lit2;
 var PerformanceAgentFlameChart = class extends HTMLElement {
   #shadow = this.attachShadow({ mode: "open" });
@@ -273,14 +273,14 @@ var PerformanceAgentFlameChart = class extends HTMLElement {
 customElements.define("devtools-performance-agent-flame-chart", PerformanceAgentFlameChart);
 
 // gen/front_end/panels/ai_assistance/components/ArtifactsViewer.js
-import * as AiAssistanceModel from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Logs from "./..\\..\\models\\logs\\logs.js";
-import * as NetworkTimeCalculator from "./..\\..\\models\\network_time_calculator\\network_time_calculator.js";
-import * as Trace2 from "./..\\..\\models\\trace\\trace.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\ui\\lit\\lit.js";
-import * as Network from "./..\\network\\network.js";
-import * as Insights from "./..\\timeline\\components\\insights\\insights.js";
+import * as AiAssistanceModel from "./../../models/ai_assistance/ai_assistance.js";
+import * as Logs from "./../../models/logs/logs.js";
+import * as NetworkTimeCalculator from "./../../models/network_time_calculator/network_time_calculator.js";
+import * as Trace2 from "./../../models/trace/trace.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../ui/lit/lit.js";
+import * as Network from "./../network/network.js";
+import * as Insights from "./../timeline/components/insights/insights.js";
 
 // gen/front_end/panels/ai_assistance/components/artifactsViewer.css.js
 var artifactsViewer_css_default = `/*
@@ -403,12 +403,12 @@ var ArtifactsViewer = class extends UI.Widget.Widget {
 };
 
 // gen/front_end/panels/ai_assistance/components/ChatView.js
-import "./..\\..\\ui\\components\\spinners\\spinners.js";
-import * as Host4 from "./..\\..\\core\\host\\host.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Buttons6 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit6 from "./..\\..\\ui\\lit\\lit.js";
+import "./../../ui/components/spinners/spinners.js";
+import * as Host4 from "./../../core/host/host.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Buttons6 from "./../../ui/components/buttons/buttons.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
+import * as Lit6 from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/ai_assistance/PatchWidget.js
 var PatchWidget_exports = {};
@@ -417,38 +417,38 @@ __export(PatchWidget_exports, {
   PatchWidget: () => PatchWidget,
   isAiAssistancePatchingEnabled: () => isAiAssistancePatchingEnabled
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import "./..\\..\\ui\\components\\markdown_view\\markdown_view.js";
-import "./..\\..\\ui\\components\\spinners\\spinners.js";
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as AiAssistanceModel2 from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as GreenDev from "./..\\..\\models\\greendev\\greendev.js";
-import * as Persistence2 from "./..\\..\\models\\persistence\\persistence.js";
-import * as Workspace3 from "./..\\..\\models\\workspace\\workspace.js";
-import * as WorkspaceDiff from "./..\\..\\models\\workspace_diff\\workspace_diff.js";
-import * as Buttons3 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives, html as html5, nothing as nothing3, render as render5 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as ChangesPanel from "./..\\changes\\changes.js";
-import * as PanelCommon from "./..\\common\\common.js";
+import "./../../ui/legacy/legacy.js";
+import "./../../ui/components/markdown_view/markdown_view.js";
+import "./../../ui/components/spinners/spinners.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as AiAssistanceModel2 from "./../../models/ai_assistance/ai_assistance.js";
+import * as GreenDev from "./../../models/greendev/greendev.js";
+import * as Persistence2 from "./../../models/persistence/persistence.js";
+import * as Workspace3 from "./../../models/workspace/workspace.js";
+import * as WorkspaceDiff from "./../../models/workspace_diff/workspace_diff.js";
+import * as Buttons3 from "./../../ui/components/buttons/buttons.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import { Directives, html as html5, nothing as nothing3, render as render5 } from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
+import * as ChangesPanel from "./../changes/changes.js";
+import * as PanelCommon from "./../common/common.js";
 
 // gen/front_end/panels/ai_assistance/SelectWorkspaceDialog.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as Geometry from "./..\\..\\models\\geometry\\geometry.js";
-import * as Persistence from "./..\\..\\models\\persistence\\persistence.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html4, nothing as nothing2, render as render4 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as Geometry from "./../../models/geometry/geometry.js";
+import * as Persistence from "./../../models/persistence/persistence.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import { html as html4, nothing as nothing2, render as render4 } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/ai_assistance/selectWorkspaceDialog.css.js
 var selectWorkspaceDialog_css_default = `/*
@@ -1498,21 +1498,21 @@ __export(ChatInput_exports, {
   ChatInput: () => ChatInput,
   DEFAULT_VIEW: () => DEFAULT_VIEW3
 });
-import "./..\\..\\ui\\components\\tooltips\\tooltips.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as AiAssistanceModel3 from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as GreenDev2 from "./..\\..\\models\\greendev\\greendev.js";
-import * as Trace3 from "./..\\..\\models\\trace\\trace.js";
-import * as Workspace5 from "./..\\..\\models\\workspace\\workspace.js";
-import * as PanelsCommon from "./..\\common\\common.js";
-import * as PanelUtils from "./..\\utils\\utils.js";
-import * as Buttons4 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Input from "./..\\..\\ui\\components\\input\\input.js";
-import * as Snackbars from "./..\\..\\ui\\components\\snackbars\\snackbars.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit4 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/components/tooltips/tooltips.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as AiAssistanceModel3 from "./../../models/ai_assistance/ai_assistance.js";
+import * as GreenDev2 from "./../../models/greendev/greendev.js";
+import * as Trace3 from "./../../models/trace/trace.js";
+import * as Workspace5 from "./../../models/workspace/workspace.js";
+import * as PanelsCommon from "./../common/common.js";
+import * as PanelUtils from "./../utils/utils.js";
+import * as Buttons4 from "./../../ui/components/buttons/buttons.js";
+import * as Input from "./../../ui/components/input/input.js";
+import * as Snackbars from "./../../ui/components/snackbars/snackbars.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as Lit4 from "./../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/ai_assistance/components/chatInput.css.js
 var chatInput_css_default = `/*
@@ -2845,18 +2845,18 @@ __export(UserActionRow_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW4,
   UserActionRow: () => UserActionRow
 });
-import "./..\\..\\ui\\components\\markdown_view\\markdown_view.js";
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as AiAssistanceModel4 from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Marked from "./..\\..\\third_party\\marked\\marked.js";
-import * as Buttons5 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Input2 from "./..\\..\\ui\\components\\input\\input.js";
-import * as UIHelpers from "./..\\..\\ui\\helpers\\helpers.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit5 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/components/markdown_view/markdown_view.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as AiAssistanceModel4 from "./../../models/ai_assistance/ai_assistance.js";
+import * as Marked from "./../../third_party/marked/marked.js";
+import * as Buttons5 from "./../../ui/components/buttons/buttons.js";
+import * as Input2 from "./../../ui/components/input/input.js";
+import * as UIHelpers from "./../../ui/helpers/helpers.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import * as Lit5 from "./../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/ai_assistance/components/userActionRow.css.js
 var userActionRow_css_default = `/*
@@ -4125,13 +4125,13 @@ __export(DisabledWidget_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW5,
   DisabledWidget: () => DisabledWidget
 });
-import * as Host5 from "./..\\..\\core\\host\\host.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root3 from "./..\\..\\core\\root\\root.js";
-import * as uiI18n from "./..\\..\\ui\\i18n\\i18n.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html9, render as render9 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Host5 from "./../../core/host/host.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as Root3 from "./../../core/root/root.js";
+import * as uiI18n from "./../../ui/i18n/i18n.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
+import { html as html9, render as render9 } from "./../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/ai_assistance/components/disabledWidget.css.js
 var disabledWidget_css_default = `/*
@@ -4299,11 +4299,11 @@ __export(ExploreWidget_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW6,
   ExploreWidget: () => ExploreWidget
 });
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root4 from "./..\\..\\core\\root\\root.js";
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html10, render as render10 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging6 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as Root4 from "./../../core/root/root.js";
+import * as UI8 from "./../../ui/legacy/legacy.js";
+import { html as html10, render as render10 } from "./../../ui/lit/lit.js";
+import * as VisualLogging6 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/ai_assistance/components/exploreWidget.css.js
 var exploreWidget_css_default = `/*
@@ -4577,7 +4577,7 @@ var ExploreWidget = class extends UI8.Widget.Widget {
 };
 
 // gen/front_end/panels/ai_assistance/components/MarkdownRendererWithCodeBlock.js
-import * as MarkdownView from "./..\\..\\ui\\components\\markdown_view\\markdown_view.js";
+import * as MarkdownView from "./../../ui/components/markdown_view/markdown_view.js";
 var MarkdownRendererWithCodeBlock = class extends MarkdownView.MarkdownView.MarkdownInsightRenderer {
   templateForToken(token) {
     if (token.type === "code") {
@@ -4592,21 +4592,21 @@ var MarkdownRendererWithCodeBlock = class extends MarkdownView.MarkdownView.Mark
 };
 
 // gen/front_end/panels/ai_assistance/components/PerformanceAgentMarkdownRenderer.js
-import "./..\\..\\models\\trace\\insights\\insights.js";
-import "./..\\timeline\\components\\components.js";
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as GreenDev3 from "./..\\..\\models\\greendev\\greendev.js";
-import * as Logs2 from "./..\\..\\models\\logs\\logs.js";
-import * as NetworkTimeCalculator3 from "./..\\..\\models\\network_time_calculator\\network_time_calculator.js";
-import * as Helpers2 from "./..\\..\\models\\trace\\helpers\\helpers.js";
-import * as Trace4 from "./..\\..\\models\\trace\\trace.js";
-import * as UI9 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit7 from "./..\\..\\ui\\lit\\lit.js";
-import * as PanelsCommon2 from "./..\\common\\common.js";
-import * as Network2 from "./..\\network\\network.js";
-import * as TimelineComponents from "./..\\timeline\\components\\components.js";
-import * as Insights2 from "./..\\timeline\\components\\insights\\insights.js";
+import "./../../models/trace/insights/insights.js";
+import "./../timeline/components/components.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as GreenDev3 from "./../../models/greendev/greendev.js";
+import * as Logs2 from "./../../models/logs/logs.js";
+import * as NetworkTimeCalculator3 from "./../../models/network_time_calculator/network_time_calculator.js";
+import * as Helpers2 from "./../../models/trace/helpers/helpers.js";
+import * as Trace4 from "./../../models/trace/trace.js";
+import * as UI9 from "./../../ui/legacy/legacy.js";
+import * as Lit7 from "./../../ui/lit/lit.js";
+import * as PanelsCommon2 from "./../common/common.js";
+import * as Network2 from "./../network/network.js";
+import * as TimelineComponents from "./../timeline/components/components.js";
+import * as Insights2 from "./../timeline/components/insights/insights.js";
 var { html: html11 } = Lit7.StaticHtml;
 var { ref: ref4, createRef: createRef3 } = Lit7.Directives;
 var { widgetConfig } = UI9.Widget;

@@ -12,8 +12,8 @@ var RecorderSettings_exports = {};
 __export(RecorderSettings_exports, {
   RecorderSettings: () => RecorderSettings
 });
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
 
 // gen/front_end/panels/recorder/models/Schema.js
 var Schema_exports = {};
@@ -22,7 +22,7 @@ __export(Schema_exports, {
   SelectorType: () => SelectorType,
   StepType: () => StepType
 });
-import { AssertedEventType, SelectorType, StepType } from "./..\\..\\..\\third_party\\puppeteer-replay\\puppeteer-replay.js";
+import { AssertedEventType, SelectorType, StepType } from "./../../../third_party/puppeteer-replay/puppeteer-replay.js";
 
 // gen/front_end/panels/recorder/models/RecorderSettings.js
 var UIStrings = {
@@ -103,7 +103,7 @@ var RecorderShortcutHelper_exports = {};
 __export(RecorderShortcutHelper_exports, {
   RecorderShortcutHelper: () => RecorderShortcutHelper
 });
-import * as UI from "./..\\..\\..\\ui\\legacy\\legacy.js";
+import * as UI from "./../../../ui/legacy/legacy.js";
 var RecorderShortcutHelper = class {
   #abortController;
   #timeoutId = null;
@@ -140,10 +140,10 @@ __export(RecordingPlayer_exports, {
   RecordingPlayer: () => RecordingPlayer,
   defaultTimeout: () => defaultTimeout
 });
-import * as Common2 from "./..\\..\\..\\core\\common\\common.js";
-import * as SDK from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as PuppeteerService from "./..\\..\\..\\services\\puppeteer\\puppeteer.js";
-import * as PuppeteerReplay from "./..\\..\\..\\third_party\\puppeteer-replay\\puppeteer-replay.js";
+import * as Common2 from "./../../../core/common/common.js";
+import * as SDK from "./../../../core/sdk/sdk.js";
+import * as PuppeteerService from "./../../../services/puppeteer/puppeteer.js";
+import * as PuppeteerReplay from "./../../../third_party/puppeteer-replay/puppeteer-replay.js";
 var speedDelayMap = {
   [
     "normal"
@@ -382,11 +382,11 @@ var RecordingSession_exports = {};
 __export(RecordingSession_exports, {
   RecordingSession: () => RecordingSession
 });
-import * as Common3 from "./..\\..\\..\\core\\common\\common.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as SDK3 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as UI2 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Util from "./..\\util\\util.js";
+import * as Common3 from "./../../../core/common/common.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as SDK3 from "./../../../core/sdk/sdk.js";
+import * as UI2 from "./../../../ui/legacy/legacy.js";
+import * as Util from "./../util/util.js";
 
 // gen/front_end/panels/recorder/models/SchemaUtils.js
 var SchemaUtils_exports = {};
@@ -399,7 +399,7 @@ __export(SchemaUtils_exports, {
   parse: () => parse2,
   parseStep: () => parseStep2
 });
-import * as PuppeteerReplay2 from "./..\\..\\..\\third_party\\puppeteer-replay\\puppeteer-replay.js";
+import * as PuppeteerReplay2 from "./../../../third_party/puppeteer-replay/puppeteer-replay.js";
 function createViewportStep(viewport) {
   return {
     type: StepType.SetViewport,
@@ -441,7 +441,7 @@ __export(SDKUtils_exports, {
   getTargetName: () => getTargetName,
   isFrameTargetInfo: () => isFrameTargetInfo
 });
-import * as SDK2 from "./..\\..\\..\\core\\sdk\\sdk.js";
+import * as SDK2 from "./../../../core/sdk/sdk.js";
 function getTargetName(target) {
   if (SDK2.TargetManager.TargetManager.instance().primaryPageTarget() === target) {
     return "main";
@@ -1075,7 +1075,7 @@ var RecordingStorage_exports = {};
 __export(RecordingStorage_exports, {
   RecordingStorage: () => RecordingStorage
 });
-import * as Common4 from "./..\\..\\..\\core\\common\\common.js";
+import * as Common4 from "./../../../core/common/common.js";
 var instance = null;
 var UUIDGenerator = class {
   next() {
@@ -1153,7 +1153,7 @@ var ScreenshotStorage_exports = {};
 __export(ScreenshotStorage_exports, {
   ScreenshotStorage: () => ScreenshotStorage
 });
-import * as Common5 from "./..\\..\\..\\core\\common\\common.js";
+import * as Common5 from "./../../../core/common/common.js";
 var instance2 = null;
 var DEFAULT_MAX_STORAGE_SIZE = 50 * 1024 * 1024;
 var ScreenshotStorage = class _ScreenshotStorage {
@@ -1234,7 +1234,7 @@ __export(ScreenshotUtils_exports, {
   resizeScreenshot: () => resizeScreenshot,
   takeScreenshot: () => takeScreenshot
 });
-import * as SDK4 from "./..\\..\\..\\core\\sdk\\sdk.js";
+import * as SDK4 from "./../../../core/sdk/sdk.js";
 var SCREENSHOT_WIDTH = 160;
 var SCREENSHOT_MAX_HEIGHT = 240;
 async function captureScreenshot() {
@@ -1335,7 +1335,7 @@ var Tooltip_exports = {};
 __export(Tooltip_exports, {
   getTooltipForActions: () => getTooltipForActions
 });
-import * as UI3 from "./..\\..\\..\\ui\\legacy\\legacy.js";
+import * as UI3 from "./../../../ui/legacy/legacy.js";
 function getTooltipForActions(translation, action) {
   let title = translation;
   const shortcuts = UI3.ShortcutRegistry.ShortcutRegistry.instance().shortcutsForAction(action);

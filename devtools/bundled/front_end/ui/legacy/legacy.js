@@ -14,10 +14,10 @@ __export(ActionRegistration_exports, {
   registerActionExtension: () => registerActionExtension,
   reset: () => reset
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as Root from "./../../core/root/root.js";
 
 // gen/front_end/ui/legacy/Context.js
 var Context_exports = {};
@@ -25,7 +25,7 @@ __export(Context_exports, {
   Context: () => Context,
   registerListener: () => registerListener
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
+import * as Common from "./../../core/common/common.js";
 var contextInstance;
 var Context = class _Context {
   #flavors = /* @__PURE__ */ new Map();
@@ -535,15 +535,15 @@ __export(ARIAUtils_exports, {
   setValueText: () => setValueText,
   unsetExpandable: () => unsetExpandable
 });
-import * as Platform17 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform17 from "./../../core/platform/platform.js";
 
 // gen/front_end/ui/legacy/Dialog.js
 var Dialog_exports = {};
 __export(Dialog_exports, {
   Dialog: () => Dialog
 });
-import * as Common15 from "./..\\..\\core\\common\\common.js";
-import * as VisualLogging15 from "./..\\visual_logging\\visual_logging.js";
+import * as Common15 from "./../../core/common/common.js";
+import * as VisualLogging15 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/dialog.css.js
 var dialog_css_default = `/*
@@ -717,13 +717,13 @@ __export(Toolbar_exports, {
   ToolbarToggle: () => ToolbarToggle,
   registerToolbarItem: () => registerToolbarItem
 });
-import * as Common13 from "./..\\..\\core\\common\\common.js";
-import * as i18n20 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform14 from "./..\\..\\core\\platform\\platform.js";
-import * as Root5 from "./..\\..\\core\\root\\root.js";
-import * as Buttons6 from "./..\\components\\buttons\\buttons.js";
-import * as VisualLogging13 from "./..\\visual_logging\\visual_logging.js";
-import { createIcon as createIcon6 } from "./..\\kit\\kit.js";
+import * as Common13 from "./../../core/common/common.js";
+import * as i18n20 from "./../../core/i18n/i18n.js";
+import * as Platform14 from "./../../core/platform/platform.js";
+import * as Root5 from "./../../core/root/root.js";
+import * as Buttons6 from "./../components/buttons/buttons.js";
+import * as VisualLogging13 from "./../visual_logging/visual_logging.js";
+import { createIcon as createIcon6 } from "./../kit/kit.js";
 
 // gen/front_end/ui/legacy/ContextMenu.js
 var ContextMenu_exports = {};
@@ -737,11 +737,11 @@ __export(ContextMenu_exports, {
   registerItem: () => registerItem,
   registerProvider: () => registerProvider
 });
-import * as Host6 from "./..\\..\\core\\host\\host.js";
-import * as Root4 from "./..\\..\\core\\root\\root.js";
-import * as Buttons5 from "./..\\components\\buttons\\buttons.js";
-import { html as html2, render as render3 } from "./..\\lit\\lit.js";
-import * as VisualLogging9 from "./..\\visual_logging\\visual_logging.js";
+import * as Host6 from "./../../core/host/host.js";
+import * as Root4 from "./../../core/root/root.js";
+import * as Buttons5 from "./../components/buttons/buttons.js";
+import { html as html2, render as render3 } from "./../lit/lit.js";
+import * as VisualLogging9 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/ShortcutRegistry.js
 var ShortcutRegistry_exports = {};
@@ -753,10 +753,10 @@ __export(ShortcutRegistry_exports, {
   ShortcutRegistry: () => ShortcutRegistry,
   ShortcutTreeNode: () => ShortcutTreeNode
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
-import * as VisualLogging from "./..\\visual_logging\\visual_logging.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as Platform4 from "./../../core/platform/platform.js";
+import * as VisualLogging from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/KeyboardShortcut.js
 var KeyboardShortcut_exports = {};
@@ -766,7 +766,7 @@ __export(KeyboardShortcut_exports, {
   Keys: () => Keys,
   Modifiers: () => Modifiers
 });
-import * as Host from "./..\\..\\core\\host\\host.js";
+import * as Host from "./../../core/host/host.js";
 var KeyboardShortcut = class _KeyboardShortcut {
   descriptors;
   action;
@@ -1503,9 +1503,9 @@ var SoftContextMenu_exports = {};
 __export(SoftContextMenu_exports, {
   SoftContextMenu: () => SoftContextMenu
 });
-import * as i18n16 from "./..\\..\\core\\i18n\\i18n.js";
-import { createIcon as createIcon5 } from "./..\\kit\\kit.js";
-import * as VisualLogging8 from "./..\\visual_logging\\visual_logging.js";
+import * as i18n16 from "./../../core/i18n/i18n.js";
+import { createIcon as createIcon5 } from "./../kit/kit.js";
+import * as VisualLogging8 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/InspectorView.js
 var InspectorView_exports = {};
@@ -1516,15 +1516,15 @@ __export(InspectorView_exports, {
   InspectorView: () => InspectorView,
   InspectorViewTabDelegate: () => InspectorViewTabDelegate
 });
-import * as Common10 from "./..\\..\\core\\common\\common.js";
-import * as Host5 from "./..\\..\\core\\host\\host.js";
-import * as i18n14 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root3 from "./..\\..\\core\\root\\root.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as GreenDev2 from "./..\\..\\models\\greendev\\greendev.js";
-import * as Buttons4 from "./..\\components\\buttons\\buttons.js";
-import { createIcon as createIcon4 } from "./..\\kit\\kit.js";
-import * as VisualLogging7 from "./..\\visual_logging\\visual_logging.js";
+import * as Common10 from "./../../core/common/common.js";
+import * as Host5 from "./../../core/host/host.js";
+import * as i18n14 from "./../../core/i18n/i18n.js";
+import * as Root3 from "./../../core/root/root.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as GreenDev2 from "./../../models/greendev/greendev.js";
+import * as Buttons4 from "./../components/buttons/buttons.js";
+import { createIcon as createIcon4 } from "./../kit/kit.js";
+import * as VisualLogging7 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/DockController.js
 var DockController_exports = {};
@@ -1533,10 +1533,10 @@ __export(DockController_exports, {
   DockController: () => DockController,
   ToggleDockActionDelegate: () => ToggleDockActionDelegate
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as VisualLogging2 from "./..\\visual_logging\\visual_logging.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as VisualLogging2 from "./../visual_logging/visual_logging.js";
 var UIStrings2 = {
   /**
    * @description Text to close something
@@ -1706,14 +1706,14 @@ __export(Floaty_exports, {
   onFloatyContextDelete: () => onFloatyContextDelete,
   onFloatyOpen: () => onFloatyOpen
 });
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform6 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as GreenDev from "./..\\..\\models\\greendev\\greendev.js";
-import * as Logs from "./..\\..\\models\\logs\\logs.js";
-import * as Trace from "./..\\..\\models\\trace\\trace.js";
-import * as Buttons from "./..\\components\\buttons\\buttons.js";
-import { html, render } from "./..\\lit\\lit.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Platform6 from "./../../core/platform/platform.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as GreenDev from "./../../models/greendev/greendev.js";
+import * as Logs from "./../../models/logs/logs.js";
+import * as Trace from "./../../models/trace/trace.js";
+import * as Buttons from "./../components/buttons/buttons.js";
+import { html, render } from "./../lit/lit.js";
 
 // gen/front_end/ui/legacy/floaty.css.js
 var floaty_css_default = `/*
@@ -1809,10 +1809,10 @@ __export(Widget_exports, {
   widgetConfig: () => widgetConfig,
   widgetRef: () => widgetRef
 });
-import "./..\\..\\core\\dom_extension\\dom_extension.js";
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
-import * as Geometry from "./..\\..\\models\\geometry\\geometry.js";
-import * as Lit from "./..\\lit\\lit.js";
+import "./../../core/dom_extension/dom_extension.js";
+import * as Platform5 from "./../../core/platform/platform.js";
+import * as Geometry from "./../../models/geometry/geometry.js";
+import * as Lit from "./../lit/lit.js";
 
 // gen/front_end/ui/legacy/DOMUtilities.js
 var DOMUtilities_exports = {};
@@ -3122,10 +3122,10 @@ var Infobar_exports = {};
 __export(Infobar_exports, {
   Infobar: () => Infobar
 });
-import * as i18n6 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Buttons2 from "./..\\components\\buttons\\buttons.js";
-import * as VisualLogging3 from "./..\\visual_logging\\visual_logging.js";
-import { createIcon } from "./..\\kit\\kit.js";
+import * as i18n6 from "./../../core/i18n/i18n.js";
+import * as Buttons2 from "./../components/buttons/buttons.js";
+import * as VisualLogging3 from "./../visual_logging/visual_logging.js";
+import { createIcon } from "./../kit/kit.js";
 
 // gen/front_end/ui/legacy/infobar.css.js
 var infobar_css_default = `/*
@@ -3480,10 +3480,10 @@ __export(SplitWidget_exports, {
   SplitWidget: () => SplitWidget,
   SplitWidgetElement: () => SplitWidgetElement
 });
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as Platform7 from "./..\\..\\core\\platform\\platform.js";
-import * as Geometry2 from "./..\\..\\models\\geometry\\geometry.js";
-import * as VisualLogging4 from "./..\\visual_logging\\visual_logging.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as Platform7 from "./../../core/platform/platform.js";
+import * as Geometry2 from "./../../models/geometry/geometry.js";
+import * as VisualLogging4 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/ResizerWidget.js
 var ResizerWidget_exports = {};
@@ -3491,7 +3491,7 @@ __export(ResizerWidget_exports, {
   ResizerWidget: () => ResizerWidget,
   SimpleResizerWidget: () => SimpleResizerWidget
 });
-import * as Common5 from "./..\\..\\core\\common\\common.js";
+import * as Common5 from "./../../core/common/common.js";
 var ResizerWidget = class extends Common5.ObjectWrapper.ObjectWrapper {
   #isEnabled = true;
   #elements = /* @__PURE__ */ new Set();
@@ -3722,7 +3722,7 @@ var ZoomManager_exports = {};
 __export(ZoomManager_exports, {
   ZoomManager: () => ZoomManager
 });
-import * as Common6 from "./..\\..\\core\\common\\common.js";
+import * as Common6 from "./../../core/common/common.js";
 var zoomManagerInstance;
 var ZoomManager = class _ZoomManager extends Common6.ObjectWrapper.ObjectWrapper {
   frontendHost;
@@ -4529,15 +4529,15 @@ __export(TabbedPane_exports, {
   TabbedPane: () => TabbedPane,
   TabbedPaneTab: () => TabbedPaneTab
 });
-import * as Common8 from "./..\\..\\core\\common\\common.js";
-import * as i18n8 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform8 from "./..\\..\\core\\platform\\platform.js";
-import * as Annotations from "./..\\..\\models\\annotations\\annotations.js";
-import * as Geometry3 from "./..\\..\\models\\geometry\\geometry.js";
-import * as Buttons3 from "./..\\components\\buttons\\buttons.js";
-import { render as render2 } from "./..\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\visual_logging\\visual_logging.js";
-import { createIcon as createIcon2, Icon } from "./..\\kit\\kit.js";
+import * as Common8 from "./../../core/common/common.js";
+import * as i18n8 from "./../../core/i18n/i18n.js";
+import * as Platform8 from "./../../core/platform/platform.js";
+import * as Annotations from "./../../models/annotations/annotations.js";
+import * as Geometry3 from "./../../models/geometry/geometry.js";
+import * as Buttons3 from "./../components/buttons/buttons.js";
+import { render as render2 } from "./../lit/lit.js";
+import * as VisualLogging5 from "./../visual_logging/visual_logging.js";
+import { createIcon as createIcon2, Icon } from "./../kit/kit.js";
 
 // gen/front_end/ui/legacy/tabbedPane.css.js
 var tabbedPane_css_default = `/*
@@ -6443,12 +6443,12 @@ __export(ViewManager_exports, {
   registerViewExtension: () => registerViewExtension,
   resetViewRegistration: () => resetViewRegistration
 });
-import * as Common9 from "./..\\..\\core\\common\\common.js";
-import * as Host4 from "./..\\..\\core\\host\\host.js";
-import * as i18n12 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform9 from "./..\\..\\core\\platform\\platform.js";
-import { createIcon as createIcon3 } from "./..\\kit\\kit.js";
-import * as VisualLogging6 from "./..\\visual_logging\\visual_logging.js";
+import * as Common9 from "./../../core/common/common.js";
+import * as Host4 from "./../../core/host/host.js";
+import * as i18n12 from "./../../core/i18n/i18n.js";
+import * as Platform9 from "./../../core/platform/platform.js";
+import { createIcon as createIcon3 } from "./../kit/kit.js";
+import * as VisualLogging6 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/viewContainers.css.js
 var viewContainers_css_default = `/* Copyright 2025 The Chromium Authors
@@ -6544,8 +6544,8 @@ found in the LICENSE file. */
 /*# sourceURL=${import.meta.resolve("./viewContainers.css")} */`;
 
 // gen/front_end/ui/legacy/ViewRegistration.js
-import * as i18n10 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
+import * as i18n10 from "./../../core/i18n/i18n.js";
+import * as Root2 from "./../../core/root/root.js";
 var UIStrings5 = {
   /**
    * @description Badge label for an entry in the Quick Open menu. Selecting the entry opens the 'Elements' panel.
@@ -9695,20 +9695,20 @@ __export(TextPrompt_exports, {
   TextPrompt: () => TextPrompt,
   TextPromptElement: () => TextPromptElement
 });
-import * as Common12 from "./..\\..\\core\\common\\common.js";
-import * as Platform13 from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as VisualLogging12 from "./..\\visual_logging\\visual_logging.js";
+import * as Common12 from "./../../core/common/common.js";
+import * as Platform13 from "./../../core/platform/platform.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as VisualLogging12 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/SuggestBox.js
 var SuggestBox_exports = {};
 __export(SuggestBox_exports, {
   SuggestBox: () => SuggestBox
 });
-import * as i18n18 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform12 from "./..\\..\\core\\platform\\platform.js";
-import * as Geometry4 from "./..\\..\\models\\geometry\\geometry.js";
-import * as VisualLogging11 from "./..\\visual_logging\\visual_logging.js";
+import * as i18n18 from "./../../core/i18n/i18n.js";
+import * as Platform12 from "./../../core/platform/platform.js";
+import * as Geometry4 from "./../../models/geometry/geometry.js";
+import * as VisualLogging11 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/ListControl.js
 var ListControl_exports = {};
@@ -9716,8 +9716,8 @@ __export(ListControl_exports, {
   ListControl: () => ListControl,
   ListMode: () => ListMode
 });
-import * as Platform10 from "./..\\..\\core\\platform\\platform.js";
-import * as VisualLogging10 from "./..\\visual_logging\\visual_logging.js";
+import * as Platform10 from "./../../core/platform/platform.js";
+import * as VisualLogging10 from "./../visual_logging/visual_logging.js";
 var ListMode;
 (function(ListMode2) {
   ListMode2["NonViewport"] = "UI.ListMode.NonViewport";
@@ -10252,8 +10252,8 @@ var ListModel_exports = {};
 __export(ListModel_exports, {
   ListModel: () => ListModel
 });
-import * as Common11 from "./..\\..\\core\\common\\common.js";
-import * as Platform11 from "./..\\..\\core\\platform\\platform.js";
+import * as Common11 from "./../../core/common/common.js";
+import * as Platform11 from "./../../core/platform/platform.js";
 var ListModel = class extends Common11.ObjectWrapper.ObjectWrapper {
   items;
   constructor(items) {
@@ -12729,15 +12729,15 @@ function getRegisteredToolbarItems() {
 }
 
 // gen/front_end/ui/legacy/UIUtils.js
-import * as Common14 from "./..\\..\\core\\common\\common.js";
-import * as Host7 from "./..\\..\\core\\host\\host.js";
-import * as i18n22 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform16 from "./..\\..\\core\\platform\\platform.js";
-import * as Geometry5 from "./..\\..\\models\\geometry\\geometry.js";
-import * as Buttons7 from "./..\\components\\buttons\\buttons.js";
-import { Icon as Icon2 } from "./..\\kit\\kit.js";
-import * as Lit2 from "./..\\lit\\lit.js";
-import * as VisualLogging14 from "./..\\visual_logging\\visual_logging.js";
+import * as Common14 from "./../../core/common/common.js";
+import * as Host7 from "./../../core/host/host.js";
+import * as i18n22 from "./../../core/i18n/i18n.js";
+import * as Platform16 from "./../../core/platform/platform.js";
+import * as Geometry5 from "./../../models/geometry/geometry.js";
+import * as Buttons7 from "./../components/buttons/buttons.js";
+import { Icon as Icon2 } from "./../kit/kit.js";
+import * as Lit2 from "./../lit/lit.js";
+import * as VisualLogging14 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/checkboxTextLabel.css.js
 var checkboxTextLabel_css_default = `/*
@@ -16900,9 +16900,9 @@ var EmptyWidget_exports = {};
 __export(EmptyWidget_exports, {
   EmptyWidget: () => EmptyWidget
 });
-import * as i18n24 from "./..\\..\\core\\i18n\\i18n.js";
-import { Directives as Directives3, html as html4, render as render5 } from "./..\\lit\\lit.js";
-import * as VisualLogging17 from "./..\\visual_logging\\visual_logging.js";
+import * as i18n24 from "./../../core/i18n/i18n.js";
+import { Directives as Directives3, html as html4, render as render5 } from "./../lit/lit.js";
+import * as VisualLogging17 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/emptyWidget.css.js
 var emptyWidget_css_default = `/*
@@ -16923,10 +16923,10 @@ __export(XLink_exports, {
   ContextMenuProvider: () => ContextMenuProvider,
   XLink: () => XLink
 });
-import * as Host8 from "./..\\..\\core\\host\\host.js";
-import * as Platform18 from "./..\\..\\core\\platform\\platform.js";
-import * as UIHelpers from "./..\\helpers\\helpers.js";
-import * as VisualLogging16 from "./..\\visual_logging\\visual_logging.js";
+import * as Host8 from "./../../core/host/host.js";
+import * as Platform18 from "./../../core/platform/platform.js";
+import * as UIHelpers from "./../helpers/helpers.js";
+import * as VisualLogging16 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/Fragment.js
 var Fragment_exports = {};
@@ -17379,11 +17379,11 @@ __export(FilterBar_exports, {
   NamedBitSetFilterUIElement: () => NamedBitSetFilterUIElement,
   TextFilterUI: () => TextFilterUI
 });
-import * as Common16 from "./..\\..\\core\\common\\common.js";
-import * as Host9 from "./..\\..\\core\\host\\host.js";
-import * as i18n26 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform20 from "./..\\..\\core\\platform\\platform.js";
-import * as VisualLogging18 from "./..\\visual_logging\\visual_logging.js";
+import * as Common16 from "./../../core/common/common.js";
+import * as Host9 from "./../../core/host/host.js";
+import * as i18n26 from "./../../core/i18n/i18n.js";
+import * as Platform20 from "./../../core/platform/platform.js";
+import * as VisualLogging18 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/filter.css.js
 var filter_css_default = `/*
@@ -17990,7 +17990,7 @@ var FilterSuggestionBuilder_exports = {};
 __export(FilterSuggestionBuilder_exports, {
   FilterSuggestionBuilder: () => FilterSuggestionBuilder
 });
-import * as Platform21 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform21 from "./../../core/platform/platform.js";
 var FilterSuggestionBuilder = class {
   keys;
   valueSorter;
@@ -18052,7 +18052,7 @@ var ForwardedInputEventHandler_exports = {};
 __export(ForwardedInputEventHandler_exports, {
   ForwardedInputEventHandler: () => ForwardedInputEventHandler
 });
-import * as Host10 from "./..\\..\\core\\host\\host.js";
+import * as Host10 from "./../../core/host/host.js";
 var ForwardedInputEventHandler = class {
   constructor() {
     Host10.InspectorFrontendHost.InspectorFrontendHostInstance.events.addEventListener(Host10.InspectorFrontendHostAPI.Events.KeyEventUnhandled, this.onKeyEventUnhandled, this);
@@ -18077,7 +18077,7 @@ __export(InplaceEditor_exports, {
   Config: () => Config,
   InplaceEditor: () => InplaceEditor
 });
-import * as Platform22 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform22 from "./../../core/platform/platform.js";
 var inplaceEditorInstance = null;
 var InplaceEditor = class _InplaceEditor {
   focusRestorer;
@@ -18251,11 +18251,11 @@ __export(ListWidget_exports, {
   Editor: () => Editor,
   ListWidget: () => ListWidget
 });
-import * as i18n28 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform23 from "./..\\..\\core\\platform\\platform.js";
-import * as Buttons8 from "./..\\components\\buttons\\buttons.js";
-import { html as html5, render as render6 } from "./..\\lit\\lit.js";
-import * as VisualLogging19 from "./..\\visual_logging\\visual_logging.js";
+import * as i18n28 from "./../../core/i18n/i18n.js";
+import * as Platform23 from "./../../core/platform/platform.js";
+import * as Buttons8 from "./../components/buttons/buttons.js";
+import { html as html5, render as render6 } from "./../lit/lit.js";
+import * as VisualLogging19 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/listWidget.css.js
 var listWidget_css_default = `/*
@@ -18855,7 +18855,7 @@ __export(Panel_exports, {
   Panel: () => Panel,
   PanelWithSidebar: () => PanelWithSidebar
 });
-import * as VisualLogging20 from "./..\\visual_logging\\visual_logging.js";
+import * as VisualLogging20 from "./../visual_logging/visual_logging.js";
 var Panel = class extends VBox {
   panelName;
   constructor(name, useShadowDom) {
@@ -18911,7 +18911,7 @@ var PopoverHelper_exports = {};
 __export(PopoverHelper_exports, {
   PopoverHelper: () => PopoverHelper
 });
-import * as VisualLogging21 from "./..\\visual_logging\\visual_logging.js";
+import * as VisualLogging21 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/popover.css.js
 var popover_css_default = `/*
@@ -19281,9 +19281,9 @@ __export(RemoteDebuggingTerminatedScreen_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW2,
   RemoteDebuggingTerminatedScreen: () => RemoteDebuggingTerminatedScreen
 });
-import * as i18n30 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Buttons9 from "./..\\components\\buttons\\buttons.js";
-import { html as html6, render as render7 } from "./..\\lit\\lit.js";
+import * as i18n30 from "./../../core/i18n/i18n.js";
+import * as Buttons9 from "./../components/buttons/buttons.js";
+import { html as html6, render as render7 } from "./../lit/lit.js";
 
 // gen/front_end/ui/legacy/remoteDebuggingTerminatedScreen.css.js
 var remoteDebuggingTerminatedScreen_css_default = `/*
@@ -19392,7 +19392,7 @@ __export(ReportView_exports, {
   ReportView: () => ReportView,
   Section: () => Section2
 });
-import * as VisualLogging22 from "./..\\visual_logging\\visual_logging.js";
+import * as VisualLogging22 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/reportView.css.js
 var reportView_css_default = `/*
@@ -19779,12 +19779,12 @@ __export(SearchableView_exports, {
   SearchConfig: () => SearchConfig,
   SearchableView: () => SearchableView
 });
-import * as Common17 from "./..\\..\\core\\common\\common.js";
-import * as i18n32 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform24 from "./..\\..\\core\\platform\\platform.js";
-import * as VisualLogging23 from "./..\\visual_logging\\visual_logging.js";
-import * as Buttons10 from "./..\\components\\buttons\\buttons.js";
-import { createIcon as createIcon7 } from "./..\\kit\\kit.js";
+import * as Common17 from "./../../core/common/common.js";
+import * as i18n32 from "./../../core/i18n/i18n.js";
+import * as Platform24 from "./../../core/platform/platform.js";
+import * as VisualLogging23 from "./../visual_logging/visual_logging.js";
+import * as Buttons10 from "./../components/buttons/buttons.js";
+import { createIcon as createIcon7 } from "./../kit/kit.js";
 
 // gen/front_end/ui/legacy/searchableView.css.js
 var searchableView_css_default = `/*
@@ -20549,10 +20549,10 @@ var SoftDropDown_exports = {};
 __export(SoftDropDown_exports, {
   SoftDropDown: () => SoftDropDown
 });
-import * as i18n34 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Geometry6 from "./..\\..\\models\\geometry\\geometry.js";
-import { createIcon as createIcon8 } from "./..\\kit\\kit.js";
-import * as VisualLogging24 from "./..\\visual_logging\\visual_logging.js";
+import * as i18n34 from "./../../core/i18n/i18n.js";
+import * as Geometry6 from "./../../models/geometry/geometry.js";
+import { createIcon as createIcon8 } from "./../kit/kit.js";
+import * as VisualLogging24 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/softDropDown.css.js
 var softDropDown_css_default = `/*
@@ -20923,8 +20923,8 @@ __export(TargetCrashedScreen_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW3,
   TargetCrashedScreen: () => TargetCrashedScreen
 });
-import * as i18n36 from "./..\\..\\core\\i18n\\i18n.js";
-import { html as html7, render as render8 } from "./..\\lit\\lit.js";
+import * as i18n36 from "./../../core/i18n/i18n.js";
+import { html as html7, render as render8 } from "./../lit/lit.js";
 
 // gen/front_end/ui/legacy/targetCrashedScreen.css.js
 var targetCrashedScreen_css_default = `/*
@@ -20989,12 +20989,12 @@ __export(Treeoutline_exports, {
   TreeViewElement: () => TreeViewElement,
   treeElementBylistItemNode: () => treeElementBylistItemNode
 });
-import * as Common18 from "./..\\..\\core\\common\\common.js";
-import * as Platform25 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Highlighting from "./..\\components\\highlighting\\highlighting.js";
-import * as Lit3 from "./..\\lit\\lit.js";
-import * as VisualLogging25 from "./..\\visual_logging\\visual_logging.js";
+import * as Common18 from "./../../core/common/common.js";
+import * as Platform25 from "./../../core/platform/platform.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as Highlighting from "./../components/highlighting/highlighting.js";
+import * as Lit3 from "./../lit/lit.js";
+import * as VisualLogging25 from "./../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/legacy/treeoutline.css.js
 var treeoutline_css_default = `/*
@@ -22751,7 +22751,7 @@ var View_exports = {};
 __export(View_exports, {
   SimpleView: () => SimpleView
 });
-import * as Platform26 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform26 from "./../../core/platform/platform.js";
 var SimpleView = class extends VBox {
   #title;
   #viewId;

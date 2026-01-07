@@ -10,12 +10,12 @@ __export(LinearMemoryInspectorController_exports, {
   LinearMemoryInspectorController: () => LinearMemoryInspectorController,
   RemoteArrayBufferWrapper: () => RemoteArrayBufferWrapper
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as LinearMemoryInspectorComponents2 from "./components\\components.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as LinearMemoryInspectorComponents2 from "./components/components.js";
 
 // gen/front_end/panels/linear_memory_inspector/LinearMemoryInspectorPane.js
 var LinearMemoryInspectorPane_exports = {};
@@ -23,11 +23,11 @@ __export(LinearMemoryInspectorPane_exports, {
   LinearMemoryInspectorPane: () => LinearMemoryInspectorPane,
   LinearMemoryInspectorView: () => LinearMemoryInspectorView
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as LinearMemoryInspectorComponents from "./components\\components.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as LinearMemoryInspectorComponents from "./components/components.js";
 var UIStrings = {
   /**
    * @description Label in the Linear Memory inspector tool that serves as a placeholder if no inspections are open (i.e. nothing to see here).

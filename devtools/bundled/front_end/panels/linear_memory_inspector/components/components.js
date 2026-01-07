@@ -9,11 +9,11 @@ var LinearMemoryHighlightChipList_exports = {};
 __export(LinearMemoryHighlightChipList_exports, {
   LinearMemoryHighlightChipList: () => LinearMemoryHighlightChipList
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { Directives, html, render } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as UI from "./../../../ui/legacy/legacy.js";
+import { Directives, html, render } from "./../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/linear_memory_inspector/components/linearMemoryHighlightChipList.css.js
 var linearMemoryHighlightChipList_css_default = `/*
@@ -262,8 +262,8 @@ __export(LinearMemoryViewer_exports, {
   LinearMemoryViewer: () => LinearMemoryViewer,
   ResizeEvent: () => ResizeEvent
 });
-import * as Lit from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Lit from "./../../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/linear_memory_inspector/components/LinearMemoryInspectorUtils.js
 var LinearMemoryInspectorUtils_exports = {};
@@ -610,10 +610,10 @@ var LinearMemoryViewer = class extends HTMLElement {
 customElements.define("devtools-linear-memory-inspector-viewer", LinearMemoryViewer);
 
 // gen/front_end/panels/linear_memory_inspector/components/LinearMemoryInspector.js
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n11 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI5 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html as html6, nothing as nothing2, render as render6 } from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n11 from "./../../../core/i18n/i18n.js";
+import * as UI5 from "./../../../ui/legacy/legacy.js";
+import { html as html6, nothing as nothing2, render as render6 } from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/linear_memory_inspector/components/linearMemoryInspector.css.js
 var linearMemoryInspector_css_default = `/*
@@ -664,13 +664,13 @@ __export(LinearMemoryValueInterpreter_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW4,
   LinearMemoryValueInterpreter: () => LinearMemoryValueInterpreter
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n9 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Buttons2 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI4 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit4 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n9 from "./../../../core/i18n/i18n.js";
+import * as Platform3 from "./../../../core/platform/platform.js";
+import * as Buttons2 from "./../../../ui/components/buttons/buttons.js";
+import * as UI4 from "./../../../ui/legacy/legacy.js";
+import * as Lit4 from "./../../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/linear_memory_inspector/components/linearMemoryValueInterpreter.css.js
 var linearMemoryValueInterpreter_css_default = `/*
@@ -731,12 +731,12 @@ __export(ValueInterpreterDisplay_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW2,
   ValueInterpreterDisplay: () => ValueInterpreterDisplay
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n5 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Buttons from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI2 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n5 from "./../../../core/i18n/i18n.js";
+import * as Buttons from "./../../../ui/components/buttons/buttons.js";
+import * as UI2 from "./../../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/linear_memory_inspector/components/valueInterpreterDisplay.css.js
 var valueInterpreterDisplay_css_default = `/*
@@ -813,8 +813,8 @@ __export(ValueInterpreterDisplayUtils_exports, {
   isValidMode: () => isValidMode,
   valueTypeToLocalizedString: () => valueTypeToLocalizedString
 });
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import * as Platform from "./../../../core/platform/platform.js";
 var UIStrings2 = {
   /**
    * @description Text that is shown in the LinearMemoryInspector if a value could not be correctly formatted
@@ -1199,11 +1199,11 @@ __export(ValueInterpreterSettings_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW3,
   ValueInterpreterSettings: () => ValueInterpreterSettings
 });
-import * as i18n7 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as UI3 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n7 from "./../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../core/platform/platform.js";
+import * as UI3 from "./../../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/linear_memory_inspector/components/valueInterpreterSettings.css.js
 var valueInterpreterSettings_css_default = `/*
@@ -1822,11 +1822,11 @@ __export(LinearMemoryNavigator_exports, {
   PageNavigationEvent: () => PageNavigationEvent,
   RefreshRequestedEvent: () => RefreshRequestedEvent
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n13 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Buttons3 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Lit5 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging6 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n13 from "./../../../core/i18n/i18n.js";
+import * as Buttons3 from "./../../../ui/components/buttons/buttons.js";
+import * as Lit5 from "./../../../ui/lit/lit.js";
+import * as VisualLogging6 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/linear_memory_inspector/components/linearMemoryNavigator.css.js
 var linearMemoryNavigator_css_default = `/*

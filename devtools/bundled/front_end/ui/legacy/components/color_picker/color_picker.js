@@ -9,8 +9,8 @@ var ColorFormatSpec_exports = {};
 __export(ColorFormatSpec_exports, {
   colorFormatSpec: () => colorFormatSpec
 });
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Platform from "./..\\..\\..\\..\\core\\platform\\platform.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as Platform from "./../../../../core/platform/platform.js";
 var roundAndStringify = (arr) => arr.map((el) => Platform.StringUtilities.stringifyWithPrecision(el, 2));
 var functionParamsText = (values) => {
   return `${values[0]} ${values[1]} ${values[2]} / ${values[3]}`;
@@ -283,15 +283,15 @@ __export(ContrastDetails_exports, {
   ContrastDetails: () => ContrastDetails,
   Swatch: () => Swatch
 });
-import "./..\\..\\legacy.js";
-import * as Common2 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\..\\..\\core\\root\\root.js";
-import { createIcon, Icon } from "./..\\..\\..\\kit\\kit.js";
-import * as UIHelpers from "./..\\..\\..\\helpers\\helpers.js";
-import * as UI from "./..\\..\\legacy.js";
+import "./../../legacy.js";
+import * as Common2 from "./../../../../core/common/common.js";
+import * as Host from "./../../../../core/host/host.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../../core/platform/platform.js";
+import * as Root from "./../../../../core/root/root.js";
+import { createIcon, Icon } from "./../../../kit/kit.js";
+import * as UIHelpers from "./../../../helpers/helpers.js";
+import * as UI from "./../../legacy.js";
 var UIStrings = {
   /**
    * @description Label for when no contrast information is available in the color picker
@@ -703,7 +703,7 @@ var ContrastInfo_exports = {};
 __export(ContrastInfo_exports, {
   ContrastInfo: () => ContrastInfo
 });
-import * as Common3 from "./..\\..\\..\\..\\core\\common\\common.js";
+import * as Common3 from "./../../../../core/common/common.js";
 var ContrastInfo = class extends Common3.ObjectWrapper.ObjectWrapper {
   #isNull;
   #contrastRatio;
@@ -815,9 +815,9 @@ __export(ContrastOverlay_exports, {
   ContrastOverlay: () => ContrastOverlay,
   ContrastRatioLineBuilder: () => ContrastRatioLineBuilder
 });
-import * as Common4 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Root2 from "./..\\..\\..\\..\\core\\root\\root.js";
-import * as UI2 from "./..\\..\\legacy.js";
+import * as Common4 from "./../../../../core/common/common.js";
+import * as Root2 from "./../../../../core/root/root.js";
+import * as UI2 from "./../../legacy.js";
 var ContrastOverlay = class {
   contrastInfo;
   visible;
@@ -963,9 +963,9 @@ var FormatPickerContextMenu_exports = {};
 __export(FormatPickerContextMenu_exports, {
   FormatPickerContextMenu: () => FormatPickerContextMenu
 });
-import * as Common5 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI3 from "./..\\..\\legacy.js";
+import * as Common5 from "./../../../../core/common/common.js";
+import * as i18n3 from "./../../../../core/i18n/i18n.js";
+import * as UI3 from "./../../legacy.js";
 var UIStrings2 = {
   /**
    * @description Menu warning that some color will be clipped after conversion to match the target gamut
@@ -1063,17 +1063,17 @@ __export(Spectrum_exports, {
   Spectrum: () => Spectrum,
   Swatch: () => Swatch2
 });
-import "./..\\..\\legacy.js";
-import * as Common6 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as i18n5 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as SrgbOverlay from "./..\\..\\..\\components\\srgb_overlay\\srgb_overlay.js";
-import { createIcon as createIcon2, Icon as Icon2 } from "./..\\..\\..\\kit\\kit.js";
-import * as VisualLogging from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI4 from "./..\\..\\legacy.js";
+import "./../../legacy.js";
+import * as Common6 from "./../../../../core/common/common.js";
+import * as Host2 from "./../../../../core/host/host.js";
+import * as i18n5 from "./../../../../core/i18n/i18n.js";
+import * as Platform3 from "./../../../../core/platform/platform.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
+import * as TextUtils from "./../../../../models/text_utils/text_utils.js";
+import * as SrgbOverlay from "./../../../components/srgb_overlay/srgb_overlay.js";
+import { createIcon as createIcon2, Icon as Icon2 } from "./../../../kit/kit.js";
+import * as VisualLogging from "./../../../visual_logging/visual_logging.js";
+import * as UI4 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/color_picker/spectrum.css.js
 var spectrum_css_default = `/*

@@ -1,6 +1,6 @@
 // gen/front_end/ui/legacy/components/object_ui/object_ui-meta.prebundle.js
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\legacy.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
+import * as UI from "./../../legacy.js";
 var loadedObjectUIModule;
 async function loadObjectUIModule() {
   if (!loadedObjectUIModule) {

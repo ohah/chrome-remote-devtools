@@ -18,7 +18,7 @@ __export(HARFormat_exports, {
   HARStack: () => HARStack,
   HARTimings: () => HARTimings
 });
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 var HARBase = class _HARBase {
   custom;
   constructor(data) {
@@ -444,10 +444,10 @@ var Importer_exports = {};
 __export(Importer_exports, {
   Importer: () => Importer
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as TextUtils from "./..\\text_utils\\text_utils.js";
+import * as Common from "./../../core/common/common.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as TextUtils from "./../text_utils/text_utils.js";
 var Importer = class _Importer {
   static requestsFromHARLog(log) {
     const pages = /* @__PURE__ */ new Map();
@@ -713,8 +713,8 @@ __export(Log_exports, {
   Entry: () => Entry,
   Log: () => Log
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
 var Log = class _Log {
   static pseudoWallTime(request, monotonicTime) {
     return new Date(request.pseudoWallTime(monotonicTime) * 1e3);
@@ -1062,10 +1062,10 @@ __export(Writer_exports, {
   chunkSize: () => chunkSize,
   jsonIndent: () => jsonIndent
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils2 from "./..\\text_utils\\text_utils.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as TextUtils2 from "./../text_utils/text_utils.js";
 var UIStrings = {
   /**
    * @description Title of progress in harwriter of the network panel

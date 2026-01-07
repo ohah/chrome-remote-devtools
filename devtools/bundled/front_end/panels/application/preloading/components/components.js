@@ -11,19 +11,19 @@ __export(MismatchedPreloadingGrid_exports, {
   MismatchedPreloadingGrid: () => MismatchedPreloadingGrid,
   i18nString: () => i18nString2
 });
-import "./..\\..\\..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as i18n3 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Diff from "./..\\..\\..\\..\\third_party\\diff\\diff.js";
-import * as UI from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../../ui/legacy/components/data_grid/data_grid.js";
+import * as i18n3 from "./../../../../core/i18n/i18n.js";
+import * as SDK2 from "./../../../../core/sdk/sdk.js";
+import * as Diff from "./../../../../third_party/diff/diff.js";
+import * as UI from "./../../../../ui/legacy/legacy.js";
+import * as Lit from "./../../../../ui/lit/lit.js";
 
 // gen/front_end/panels/application/preloading/components/PreloadingString.js
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import { assertNotNullOrUndefined } from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\..\\..\\models\\bindings\\bindings.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as Platform from "./../../../../core/platform/platform.js";
+import { assertNotNullOrUndefined } from "./../../../../core/platform/platform.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
+import * as Bindings from "./../../../../models/bindings/bindings.js";
 var UIStrings = {
   /**
    * @description  Description text for Prefetch status PrefetchFailedIneligibleRedirect.
@@ -867,19 +867,19 @@ var PreloadingDetailsReportView_exports = {};
 __export(PreloadingDetailsReportView_exports, {
   PreloadingDetailsReportView: () => PreloadingDetailsReportView
 });
-import "./..\\..\\..\\..\\ui\\components\\report_view\\report_view.js";
-import "./..\\..\\..\\..\\ui\\components\\request_link_icon\\request_link_icon.js";
-import "./..\\..\\..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n5 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import { assertNotNullOrUndefined as assertNotNullOrUndefined2 } from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK3 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Logs from "./..\\..\\..\\..\\models\\logs\\logs.js";
-import * as Buttons from "./..\\..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI2 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PreloadingHelper from "./..\\helper\\helper.js";
+import "./../../../../ui/components/report_view/report_view.js";
+import "./../../../../ui/components/request_link_icon/request_link_icon.js";
+import "./../../../../ui/legacy/components/utils/utils.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as i18n5 from "./../../../../core/i18n/i18n.js";
+import { assertNotNullOrUndefined as assertNotNullOrUndefined2 } from "./../../../../core/platform/platform.js";
+import * as SDK3 from "./../../../../core/sdk/sdk.js";
+import * as Logs from "./../../../../models/logs/logs.js";
+import * as Buttons from "./../../../../ui/components/buttons/buttons.js";
+import * as UI2 from "./../../../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../../ui/visual_logging/visual_logging.js";
+import * as PreloadingHelper from "./../helper/helper.js";
 
 // gen/front_end/panels/application/preloading/components/preloadingDetailsReportView.css.js
 var preloadingDetailsReportView_css_default = `/*
@@ -1254,15 +1254,15 @@ __export(PreloadingDisabledInfobar_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW3,
   PreloadingDisabledInfobar: () => PreloadingDisabledInfobar
 });
-import "./..\\..\\..\\..\\ui\\components\\report_view\\report_view.js";
-import "./..\\..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n7 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as Buttons2 from "./..\\..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Dialogs from "./..\\..\\..\\..\\ui\\components\\dialogs\\dialogs.js";
-import * as UI3 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import { html as html3, i18nTemplate, nothing as nothing2, render as render3 } from "./..\\..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../../ui/components/report_view/report_view.js";
+import "./../../../../ui/kit/kit.js";
+import * as i18n7 from "./../../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../../core/platform/platform.js";
+import * as Buttons2 from "./../../../../ui/components/buttons/buttons.js";
+import * as Dialogs from "./../../../../ui/components/dialogs/dialogs.js";
+import * as UI3 from "./../../../../ui/legacy/legacy.js";
+import { html as html3, i18nTemplate, nothing as nothing2, render as render3 } from "./../../../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/preloading/components/preloadingDisabledInfobar.css.js
 var preloadingDisabledInfobar_css_default = `/*
@@ -1540,13 +1540,13 @@ __export(PreloadingGrid_exports, {
   PreloadingGrid: () => PreloadingGrid,
   i18nString: () => i18nString5
 });
-import "./..\\..\\..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import "./..\\..\\..\\..\\ui\\kit\\kit.js";
-import * as Common2 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n9 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK4 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as UI4 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../../ui/legacy/components/data_grid/data_grid.js";
+import "./../../../../ui/kit/kit.js";
+import * as Common2 from "./../../../../core/common/common.js";
+import * as i18n9 from "./../../../../core/i18n/i18n.js";
+import * as SDK4 from "./../../../../core/sdk/sdk.js";
+import * as UI4 from "./../../../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../../../ui/lit/lit.js";
 
 // gen/front_end/panels/application/preloading/components/preloadingGrid.css.js
 var preloadingGrid_css_default = `/*
@@ -1701,14 +1701,14 @@ __export(RuleSetDetailsView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW4,
   RuleSetDetailsView: () => RuleSetDetailsView
 });
-import * as i18n11 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK5 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Formatter from "./..\\..\\..\\..\\models\\formatter\\formatter.js";
-import * as CodeMirror from "./..\\..\\..\\..\\third_party\\codemirror.next\\codemirror.next.js";
-import * as CodeHighlighter from "./..\\..\\..\\..\\ui\\components\\code_highlighter\\code_highlighter.js";
-import * as TextEditor from "./..\\..\\..\\..\\ui\\components\\text_editor\\text_editor.js";
-import * as UI5 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import { html as html5, nothing as nothing4, render as render5 } from "./..\\..\\..\\..\\ui\\lit\\lit.js";
+import * as i18n11 from "./../../../../core/i18n/i18n.js";
+import * as SDK5 from "./../../../../core/sdk/sdk.js";
+import * as Formatter from "./../../../../models/formatter/formatter.js";
+import * as CodeMirror from "./../../../../third_party/codemirror.next/codemirror.next.js";
+import * as CodeHighlighter from "./../../../../ui/components/code_highlighter/code_highlighter.js";
+import * as TextEditor from "./../../../../ui/components/text_editor/text_editor.js";
+import * as UI5 from "./../../../../ui/legacy/legacy.js";
+import { html as html5, nothing as nothing4, render as render5 } from "./../../../../ui/lit/lit.js";
 
 // gen/front_end/panels/application/preloading/components/RuleSetDetailsView.css.js
 var RuleSetDetailsView_css_default = `/*
@@ -1844,17 +1844,17 @@ __export(RuleSetGrid_exports, {
   RuleSetGrid: () => RuleSetGrid,
   i18nString: () => i18nString7
 });
-import "./..\\..\\..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import "./..\\..\\..\\..\\ui\\kit\\kit.js";
-import * as Common3 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n13 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import { assertNotNullOrUndefined as assertNotNullOrUndefined3 } from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK6 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as UI6 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import { Directives as Directives2, html as html6, nothing as nothing5, render as render6 } from "./..\\..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as NetworkForward from "./..\\..\\..\\network\\forward\\forward.js";
-import * as PreloadingHelper2 from "./..\\helper\\helper.js";
+import "./../../../../ui/legacy/components/data_grid/data_grid.js";
+import "./../../../../ui/kit/kit.js";
+import * as Common3 from "./../../../../core/common/common.js";
+import * as i18n13 from "./../../../../core/i18n/i18n.js";
+import { assertNotNullOrUndefined as assertNotNullOrUndefined3 } from "./../../../../core/platform/platform.js";
+import * as SDK6 from "./../../../../core/sdk/sdk.js";
+import * as UI6 from "./../../../../ui/legacy/legacy.js";
+import { Directives as Directives2, html as html6, nothing as nothing5, render as render6 } from "./../../../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../../../ui/visual_logging/visual_logging.js";
+import * as NetworkForward from "./../../../network/forward/forward.js";
+import * as PreloadingHelper2 from "./../helper/helper.js";
 
 // gen/front_end/panels/application/preloading/components/ruleSetGrid.css.js
 var ruleSetGrid_css_default = `/*
@@ -2054,18 +2054,18 @@ var UsedPreloadingView_exports = {};
 __export(UsedPreloadingView_exports, {
   UsedPreloadingView: () => UsedPreloadingView
 });
-import "./..\\..\\..\\..\\ui\\kit\\kit.js";
-import "./..\\..\\..\\..\\ui\\components\\report_view\\report_view.js";
-import * as Common4 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n15 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import { assertNotNullOrUndefined as assertNotNullOrUndefined4 } from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK7 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as LegacyWrapper from "./..\\..\\..\\..\\ui\\components\\legacy_wrapper\\legacy_wrapper.js";
-import * as RenderCoordinator from "./..\\..\\..\\..\\ui\\components\\render_coordinator\\render_coordinator.js";
-import * as UI7 from "./..\\..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit4 from "./..\\..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PreloadingHelper3 from "./..\\helper\\helper.js";
+import "./../../../../ui/kit/kit.js";
+import "./../../../../ui/components/report_view/report_view.js";
+import * as Common4 from "./../../../../core/common/common.js";
+import * as i18n15 from "./../../../../core/i18n/i18n.js";
+import { assertNotNullOrUndefined as assertNotNullOrUndefined4 } from "./../../../../core/platform/platform.js";
+import * as SDK7 from "./../../../../core/sdk/sdk.js";
+import * as LegacyWrapper from "./../../../../ui/components/legacy_wrapper/legacy_wrapper.js";
+import * as RenderCoordinator from "./../../../../ui/components/render_coordinator/render_coordinator.js";
+import * as UI7 from "./../../../../ui/legacy/legacy.js";
+import * as Lit4 from "./../../../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../../../ui/visual_logging/visual_logging.js";
+import * as PreloadingHelper3 from "./../helper/helper.js";
 
 // gen/front_end/panels/application/preloading/components/usedPreloadingView.css.js
 var usedPreloadingView_css_default = `/*

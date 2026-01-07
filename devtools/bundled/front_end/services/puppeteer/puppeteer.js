@@ -9,7 +9,7 @@ var PuppeteerConnection_exports = {};
 __export(PuppeteerConnection_exports, {
   PuppeteerConnectionHelper: () => PuppeteerConnectionHelper
 });
-import * as puppeteer from "./..\\..\\third_party\\puppeteer\\puppeteer.js";
+import * as puppeteer from "./../../third_party/puppeteer/puppeteer.js";
 var PuppeteerConnectionAdapter = class extends puppeteer.Connection {
   #connection;
   #sessionId;

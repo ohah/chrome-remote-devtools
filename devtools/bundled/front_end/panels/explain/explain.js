@@ -1,17 +1,17 @@
 // gen/front_end/panels/explain/components/ConsoleInsight.js
-import "./..\\..\\ui\\components\\spinners\\spinners.js";
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as Marked from "./..\\..\\third_party\\marked\\marked.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Input from "./..\\..\\ui\\components\\input\\input.js";
-import * as MarkdownView from "./..\\..\\ui\\components\\markdown_view\\markdown_view.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Console from "./..\\console\\console.js";
+import "./../../ui/components/spinners/spinners.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as Marked from "./../../third_party/marked/marked.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as Input from "./../../ui/components/input/input.js";
+import * as MarkdownView from "./../../ui/components/markdown_view/markdown_view.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as Console from "./../console/console.js";
 
 // gen/front_end/panels/explain/components/consoleInsight.css.js
 var consoleInsight_css_default = `/*
@@ -1443,8 +1443,8 @@ var ConsoleInsight = class _ConsoleInsight extends UI.Widget.Widget {
 };
 
 // gen/front_end/panels/explain/ActionDelegate.js
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as Console2 from "./..\\console\\console.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as Console2 from "./../console/console.js";
 var ActionDelegate = class {
   handleAction(context, actionId) {
     switch (actionId) {

@@ -25,15 +25,15 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\front_end\\panels\\web_audio",
+    "rootDir": "../../../../../../front_end/panels/web_audio",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "esnext",
     "tsBuildInfoFile": "unittests-tsconfig.json.tsbuildinfo",
     "typeRoots": [
-      "..\\..\\..\\..\\..\\..\\node_modules\\@types",
-      "..\\..\\..\\..\\..\\..\\node_modules"
+      "../../../../../../node_modules/@types",
+      "../../../../../../node_modules"
     ],
     "types": [
       "mocha",
@@ -44,11 +44,11 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\web_audio\\WebAudioView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\web_audio\\web_audio.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../front_end/panels/web_audio/WebAudioView.test.ts",
+    "../../../../../../front_end/panels/web_audio/web_audio.test.ts",
+    "../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

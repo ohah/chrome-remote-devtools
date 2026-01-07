@@ -9,25 +9,25 @@ var RecorderController_exports = {};
 __export(RecorderController_exports, {
   RecorderController: () => RecorderController
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as PublicExtensions from "./..\\..\\models\\extensions\\extensions.js";
-import * as PanelCommon from "./..\\common\\common.js";
-import * as Emulation from "./..\\emulation\\emulation.js";
-import * as Tracing from "./..\\..\\services\\tracing\\tracing.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Components from "./components\\components.js";
-import * as Converters from "./converters\\converters.js";
-import * as Extensions from "./extensions\\extensions.js";
-import * as Models from "./models\\models.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as PublicExtensions from "./../../models/extensions/extensions.js";
+import * as PanelCommon from "./../common/common.js";
+import * as Emulation from "./../emulation/emulation.js";
+import * as Tracing from "./../../services/tracing/tracing.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as Components from "./components/components.js";
+import * as Converters from "./converters/converters.js";
+import * as Extensions from "./extensions/extensions.js";
+import * as Models from "./models/models.js";
 
 // gen/front_end/panels/recorder/recorderController.css.js
 var recorderController_css_default = `/*
@@ -1565,8 +1565,8 @@ __export(RecorderPanel_exports, {
   ActionDelegate: () => ActionDelegate,
   RecorderPanel: () => RecorderPanel
 });
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 var recorderPanelInstance;
 var RecorderPanel = class _RecorderPanel extends UI2.Panel.Panel {
   static panelName = "chrome-recorder";

@@ -9,7 +9,7 @@ var IssueRevealer_exports = {};
 __export(IssueRevealer_exports, {
   IssueRevealer: () => IssueRevealer
 });
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI8 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/issues/IssuesPane.js
 var IssuesPane_exports = {};
@@ -17,22 +17,22 @@ __export(IssuesPane_exports, {
   IssuesPane: () => IssuesPane,
   getGroupIssuesByCategorySetting: () => getGroupIssuesByCategorySetting
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as i18n43 from "./..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager12 from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as IssueCounter5 from "./..\\..\\ui\\components\\issue_counter\\issue_counter.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging6 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as i18n43 from "./../../core/i18n/i18n.js";
+import * as IssuesManager12 from "./../../models/issues_manager/issues_manager.js";
+import * as IssueCounter5 from "./../../ui/components/issue_counter/issue_counter.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging6 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/issues/HiddenIssuesRow.js
-import "./..\\..\\ui\\components\\adorners\\adorners.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import { html, render } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/components/adorners/adorners.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as IssuesManager from "./../../models/issues_manager/issues_manager.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import { html, render } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings = {
   /**
    * @description Title for the hidden issues row
@@ -87,14 +87,14 @@ var HiddenIssuesRow = class extends UI.TreeOutline.TreeElement {
 };
 
 // gen/front_end/panels/issues/IssueKindView.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager3 from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as Adorners from "./..\\..\\ui\\components\\adorners\\adorners.js";
-import * as IssueCounter from "./..\\..\\ui\\components\\issue_counter\\issue_counter.js";
-import { Icon } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Components from "./components\\components.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as IssuesManager3 from "./../../models/issues_manager/issues_manager.js";
+import * as Adorners from "./../../ui/components/adorners/adorners.js";
+import * as IssueCounter from "./../../ui/components/issue_counter/issue_counter.js";
+import { Icon } from "./../../ui/kit/kit.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as Components from "./components/components.js";
 var UIStrings2 = {
   /**
    * @description Menu entry for hiding all current Page Errors.
@@ -720,35 +720,35 @@ var IssueView_exports = {};
 __export(IssueView_exports, {
   IssueView: () => IssueView
 });
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as Host7 from "./..\\..\\core\\host\\host.js";
-import * as i18n41 from "./..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager10 from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as NetworkForward3 from "./..\\network\\forward\\forward.js";
-import * as Adorners2 from "./..\\..\\ui\\components\\adorners\\adorners.js";
-import * as IssueCounter3 from "./..\\..\\ui\\components\\issue_counter\\issue_counter.js";
-import * as MarkdownView from "./..\\..\\ui\\components\\markdown_view\\markdown_view.js";
-import { Icon as Icon3 } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging5 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as Host7 from "./../../core/host/host.js";
+import * as i18n41 from "./../../core/i18n/i18n.js";
+import * as IssuesManager10 from "./../../models/issues_manager/issues_manager.js";
+import * as NetworkForward3 from "./../network/forward/forward.js";
+import * as Adorners2 from "./../../ui/components/adorners/adorners.js";
+import * as IssueCounter3 from "./../../ui/components/issue_counter/issue_counter.js";
+import * as MarkdownView from "./../../ui/components/markdown_view/markdown_view.js";
+import { Icon as Icon3 } from "./../../ui/kit/kit.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging5 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/issues/AffectedBlockedByResponseView.js
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager5 from "./..\\..\\models\\issues_manager\\issues_manager.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as IssuesManager5 from "./../../models/issues_manager/issues_manager.js";
 
 // gen/front_end/panels/issues/AffectedResourcesView.js
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Logs from "./..\\..\\models\\logs\\logs.js";
-import * as RequestLinkIcon from "./..\\..\\ui\\components\\request_link_icon\\request_link_icon.js";
-import { Icon as Icon2 } from "./..\\..\\ui\\kit\\kit.js";
-import * as Components2 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelsCommon from "./..\\common\\common.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Logs from "./../../models/logs/logs.js";
+import * as RequestLinkIcon from "./../../ui/components/request_link_icon/request_link_icon.js";
+import { Icon as Icon2 } from "./../../ui/kit/kit.js";
+import * as Components2 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelsCommon from "./../common/common.js";
 var UIStrings3 = {
   /**
    * @description Text in Object Properties Section
@@ -1048,11 +1048,11 @@ var AffectedBlockedByResponseView = class extends AffectedResourcesView {
 };
 
 // gen/front_end/panels/issues/AffectedCookiesView.js
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as NetworkForward from "./..\\network\\forward\\forward.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as NetworkForward from "./../network/forward/forward.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings5 = {
   /**
    * @description Noun, singular or plural. Label for the kind and number of affected resources associated with a DevTools issue. A cookie is a small piece of data that a server sends to the user's web browser. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies.
@@ -1181,10 +1181,10 @@ var AffectedRawCookieLinesView = class extends AffectedResourcesView {
 };
 
 // gen/front_end/panels/issues/AffectedDescendantsWithinSelectElementView.js
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
 
 // gen/front_end/panels/issues/AffectedElementsView.js
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
 var UIStrings6 = {
   /**
    * @description Noun for singular or plural number of affected element resource indication in issue view.
@@ -1261,13 +1261,13 @@ var AffectedDescendantsWithinSelectElementView = class extends AffectedElementsV
 };
 
 // gen/front_end/panels/issues/AffectedDirectivesView.js
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Host4 from "./..\\..\\core\\host\\host.js";
-import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as IssuesManager6 from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as IssuesComponents from "./components\\components.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Host4 from "./../../core/host/host.js";
+import * as i18n15 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as IssuesManager6 from "./../../models/issues_manager/issues_manager.js";
+import * as IssuesComponents from "./components/components.js";
 var UIStrings8 = {
   /**
    * @description Singular or plural label for number of affected CSP (content security policy,
@@ -1447,8 +1447,8 @@ var AffectedDirectivesView = class extends AffectedResourcesView {
 };
 
 // gen/front_end/panels/issues/AffectedDocumentsInQuirksModeView.js
-import * as i18n17 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
+import * as i18n17 from "./../../core/i18n/i18n.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
 var UIStrings9 = {
   /**
    * @description Noun for singular or plural number of affected document nodes indication in issue view.
@@ -1507,8 +1507,8 @@ var AffectedDocumentsInQuirksModeView = class extends AffectedElementsView {
 };
 
 // gen/front_end/panels/issues/AffectedElementsWithLowContrastView.js
-import * as i18n19 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
+import * as i18n19 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
 var AffectedElementsWithLowContrastView = class extends AffectedElementsView {
   #runningUpdatePromise = Promise.resolve();
   update() {
@@ -1578,7 +1578,7 @@ var str_10 = i18n19.i18n.registerUIStrings("panels/issues/AffectedElementsWithLo
 var i18nString10 = i18n19.i18n.getLocalizedString.bind(void 0, str_10);
 
 // gen/front_end/panels/issues/AffectedHeavyAdView.js
-import * as i18n21 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n21 from "./../../core/i18n/i18n.js";
 var UIStrings11 = {
   /**
    * @description Label for number of affected resources indication in issue view
@@ -1683,8 +1683,8 @@ var AffectedHeavyAdView = class extends AffectedResourcesView {
 };
 
 // gen/front_end/panels/issues/AffectedMetadataAllowedSitesView.js
-import * as i18n23 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n23 from "./../../core/i18n/i18n.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
 var UIStrings12 = {
   /**
    * @description Label for the the number of affected `Allowed Sites` associated with a
@@ -1731,7 +1731,7 @@ var AffectedMetadataAllowedSitesView = class extends AffectedResourcesView {
 };
 
 // gen/front_end/panels/issues/AffectedPartitioningBlobURLView.js
-import * as i18n25 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n25 from "./../../core/i18n/i18n.js";
 var UIStrings13 = {
   /**
    * @description Description for Partitioning BlobURL issue when PartitioningBlobURLInfo is BlockedCrossPartitionFetching.
@@ -1791,8 +1791,8 @@ var AffectedPartitioningBlobURLView = class extends AffectedResourcesView {
 };
 
 // gen/front_end/panels/issues/AffectedPermissionElementsView.js
-import * as i18n27 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n27 from "./../../core/i18n/i18n.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
 var UIStrings14 = {
   /**
    * @description Noun for singular or plural number of affected element resource indication in issue view.
@@ -1826,8 +1826,8 @@ var AffectedPermissionElementsView = class extends AffectedElementsView {
 };
 
 // gen/front_end/panels/issues/AffectedSharedArrayBufferIssueDetailsView.js
-import * as i18n29 from "./..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager7 from "./..\\..\\models\\issues_manager\\issues_manager.js";
+import * as i18n29 from "./../../core/i18n/i18n.js";
+import * as IssuesManager7 from "./../../models/issues_manager/issues_manager.js";
 var UIStrings15 = {
   /**
    * @description Label for number of affected resources indication in issue view
@@ -1931,9 +1931,9 @@ var AffectedSharedArrayBufferIssueDetailsView = class extends AffectedResourcesV
 };
 
 // gen/front_end/panels/issues/AffectedSourcesView.js
-import * as i18n31 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Components3 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n31 from "./../../core/i18n/i18n.js";
+import * as Components3 from "./../../ui/legacy/components/utils/utils.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings16 = {
   /**
    * @description Singular or Plural label for number of affected sources (consisting of (source) file name + line number) in issue view
@@ -1972,7 +1972,7 @@ var AffectedSourcesView = class extends AffectedResourcesView {
 };
 
 // gen/front_end/panels/issues/AffectedTrackingSitesView.js
-import * as i18n33 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n33 from "./../../core/i18n/i18n.js";
 var UIStrings17 = {
   /**
    * @description Label for the the number of affected `Potentially-tracking Sites` associated with a
@@ -2005,9 +2005,9 @@ var AffectedTrackingSitesView = class extends AffectedResourcesView {
 };
 
 // gen/front_end/panels/issues/AttributionReportingIssueDetailsView.js
-import * as Host5 from "./..\\..\\core\\host\\host.js";
-import * as i18n35 from "./..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager8 from "./..\\..\\models\\issues_manager\\issues_manager.js";
+import * as Host5 from "./../../core/host/host.js";
+import * as i18n35 from "./../../core/i18n/i18n.js";
+import * as IssuesManager8 from "./../../models/issues_manager/issues_manager.js";
 var UIStrings18 = {
   /**
    * @description Label for number of rows in the issue details table.
@@ -2165,14 +2165,14 @@ var AttributionReportingIssueDetailsView = class extends AffectedResourcesView {
 };
 
 // gen/front_end/panels/issues/IssueView.js
-import * as Components4 from "./components\\components.js";
+import * as Components4 from "./components/components.js";
 
 // gen/front_end/panels/issues/CorsIssueDetailsView.js
-import * as Host6 from "./..\\..\\core\\host\\host.js";
-import * as i18n37 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as IssuesManager9 from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as NetworkForward2 from "./..\\network\\forward\\forward.js";
+import * as Host6 from "./../../core/host/host.js";
+import * as i18n37 from "./../../core/i18n/i18n.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as IssuesManager9 from "./../../models/issues_manager/issues_manager.js";
+import * as NetworkForward2 from "./../network/forward/forward.js";
 var UIStrings19 = {
   /**
    * @description Label for number of affected resources indication in issue view
@@ -2627,7 +2627,7 @@ var CorsIssueDetailsView = class _CorsIssueDetailsView extends AffectedResources
 };
 
 // gen/front_end/panels/issues/GenericIssueDetailsView.js
-import * as i18n39 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n39 from "./../../core/i18n/i18n.js";
 var UIStrings20 = {
   /**
    * @description Label for number of affected resources indication in issue view

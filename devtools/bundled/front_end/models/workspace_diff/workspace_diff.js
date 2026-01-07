@@ -11,13 +11,13 @@ __export(WorkspaceDiff_exports, {
   WorkspaceDiffImpl: () => WorkspaceDiffImpl,
   workspaceDiff: () => workspaceDiff
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as Diff from "./..\\..\\third_party\\diff\\diff.js";
-import * as FormatterModule from "./..\\formatter\\formatter.js";
-import * as Persistence from "./..\\persistence\\persistence.js";
-import * as TextUtils from "./..\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\workspace\\workspace.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as Diff from "./../../third_party/diff/diff.js";
+import * as FormatterModule from "./../formatter/formatter.js";
+import * as Persistence from "./../persistence/persistence.js";
+import * as TextUtils from "./../text_utils/text_utils.js";
+import * as Workspace from "./../workspace/workspace.js";
 var WorkspaceDiffImpl = class extends Common.ObjectWrapper.ObjectWrapper {
   #persistence = Persistence.Persistence.PersistenceImpl.instance();
   #diffs = /* @__PURE__ */ new WeakMap();

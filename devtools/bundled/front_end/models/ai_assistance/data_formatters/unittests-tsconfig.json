@@ -25,15 +25,15 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\..\\front_end\\models\\ai_assistance\\data_formatters",
+    "rootDir": "../../../../../../../front_end/models/ai_assistance/data_formatters",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "ES2023",
     "tsBuildInfoFile": "unittests-tsconfig.json.tsbuildinfo",
     "typeRoots": [
-      "..\\..\\..\\..\\..\\..\\..\\node_modules\\@types",
-      "..\\..\\..\\..\\..\\..\\..\\node_modules"
+      "../../../../../../../node_modules/@types",
+      "../../../../../../../node_modules"
     ],
     "types": [
       "mocha",
@@ -44,12 +44,12 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\models\\ai_assistance\\data_formatters\\FileFormatter.test.ts",
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\models\\ai_assistance\\data_formatters\\NetworkRequestFormatter.test.ts",
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\models\\ai_assistance\\data_formatters\\UnitFormatters.test.ts",
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../../front_end/models/ai_assistance/data_formatters/FileFormatter.test.ts",
+    "../../../../../../../front_end/models/ai_assistance/data_formatters/NetworkRequestFormatter.test.ts",
+    "../../../../../../../front_end/models/ai_assistance/data_formatters/UnitFormatters.test.ts",
+    "../../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

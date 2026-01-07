@@ -1,5 +1,5 @@
 // gen/front_end/panels/accessibility/accessibility-meta.prebundle.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n from "./../../core/i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Text for accessibility of the web page

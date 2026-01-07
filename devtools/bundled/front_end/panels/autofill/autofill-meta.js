@@ -1,5 +1,5 @@
 // gen/front_end/panels/autofill/autofill-meta.prebundle.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n from "./../../core/i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Label for the autofill pane

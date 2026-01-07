@@ -10,9 +10,9 @@ __export(LinkifierImpl_exports, {
   Linkifier: () => Linkifier,
   LinkifierClick: () => LinkifierClick
 });
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Lit from "./..\\..\\lit\\lit.js";
-import * as RenderCoordinator from "./..\\render_coordinator\\render_coordinator.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as Lit from "./../../lit/lit.js";
+import * as RenderCoordinator from "./../render_coordinator/render_coordinator.js";
 
 // gen/front_end/ui/components/linkifier/linkifierImpl.css.js
 var linkifierImpl_css_default = `/*
@@ -32,7 +32,7 @@ var linkifierImpl_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./linkifierImpl.css")} */`;
 
 // gen/front_end/ui/components/linkifier/LinkifierUtils.js
-import * as Bindings from "./..\\..\\..\\models\\bindings\\bindings.js";
+import * as Bindings from "./../../../models/bindings/bindings.js";
 function linkText(url, lineNumber) {
   if (url) {
     const displayName = Bindings.ResourceUtils.displayNameForURL(url);

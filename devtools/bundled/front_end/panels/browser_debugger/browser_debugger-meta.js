@@ -1,8 +1,8 @@
 // gen/front_end/panels/browser_debugger/browser_debugger-meta.prebundle.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 var UIStrings = {
   /**
    * @description Command for showing the 'Event Listener Breakpoints' tool
@@ -91,7 +91,7 @@ function maybeRetrieveContextTypes(getClassCallBack) {
 var loadedSourcesModule;
 async function loadSourcesModule() {
   if (!loadedSourcesModule) {
-    loadedSourcesModule = await import("./..\\sources\\sources.js");
+    loadedSourcesModule = await import("./../sources/sources.js");
   }
   return loadedSourcesModule;
 }

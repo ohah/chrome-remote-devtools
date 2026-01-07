@@ -9,21 +9,21 @@ var BackForwardCacheView_exports = {};
 __export(BackForwardCacheView_exports, {
   BackForwardCacheView: () => BackForwardCacheView
 });
-import "./..\\..\\..\\ui\\components\\expandable_list\\expandable_list.js";
-import "./..\\..\\..\\ui\\components\\report_view\\report_view.js";
-import "./..\\..\\..\\ui\\legacy\\legacy.js";
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Buttons from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Components from "./..\\..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html, nothing, render } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/components/expandable_list/expandable_list.js";
+import "./../../../ui/components/report_view/report_view.js";
+import "./../../../ui/legacy/legacy.js";
+import "./../../../ui/kit/kit.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import * as SDK from "./../../../core/sdk/sdk.js";
+import * as Buttons from "./../../../ui/components/buttons/buttons.js";
+import * as Components from "./../../../ui/legacy/components/utils/utils.js";
+import * as UI from "./../../../ui/legacy/legacy.js";
+import { html, nothing, render } from "./../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/components/BackForwardCacheStrings.js
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Description text for not restored reason NotMainFrame.
@@ -1265,14 +1265,14 @@ __export(BounceTrackingMitigationsView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW2,
   i18nString: () => i18nString2
 });
-import "./..\\..\\..\\ui\\components\\report_view\\report_view.js";
-import "./..\\..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as i18n5 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Buttons2 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI2 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/components/report_view/report_view.js";
+import "./../../../ui/legacy/components/data_grid/data_grid.js";
+import * as i18n5 from "./../../../core/i18n/i18n.js";
+import * as SDK2 from "./../../../core/sdk/sdk.js";
+import * as Buttons2 from "./../../../ui/components/buttons/buttons.js";
+import * as UI2 from "./../../../ui/legacy/legacy.js";
+import * as Lit from "./../../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/components/bounceTrackingMitigationsView.css.js
 var bounceTrackingMitigationsView_css_default = `/*
@@ -1483,11 +1483,11 @@ __export(EndpointsGrid_exports, {
   EndpointsGrid: () => EndpointsGrid,
   i18nString: () => i18nString3
 });
-import "./..\\..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as i18n7 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI3 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/legacy/components/data_grid/data_grid.js";
+import * as i18n7 from "./../../../core/i18n/i18n.js";
+import * as UI3 from "./../../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/components/endpointsGrid.css.js
 var endpointsGrid_css_default = `/*
@@ -1590,10 +1590,10 @@ __export(InterestGroupAccessGrid_exports, {
   InterestGroupAccessGrid: () => InterestGroupAccessGrid,
   i18nString: () => i18nString4
 });
-import "./..\\..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as i18n9 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI4 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../ui/legacy/components/data_grid/data_grid.js";
+import * as i18n9 from "./../../../core/i18n/i18n.js";
+import * as UI4 from "./../../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/application/components/interestGroupAccessGrid.css.js
 var interestGroupAccessGrid_css_default = `/*
@@ -1736,16 +1736,16 @@ __export(PermissionsPolicySection_exports, {
   PermissionsPolicySection: () => PermissionsPolicySection,
   renderIconLink: () => renderIconLink
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import "./..\\..\\..\\ui\\components\\report_view\\report_view.js";
-import * as Common2 from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n11 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK3 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as NetworkForward from "./..\\..\\network\\forward\\forward.js";
-import * as Buttons3 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI5 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html as html5, nothing as nothing3, render as render5 } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import "./../../../ui/components/report_view/report_view.js";
+import * as Common2 from "./../../../core/common/common.js";
+import * as i18n11 from "./../../../core/i18n/i18n.js";
+import * as SDK3 from "./../../../core/sdk/sdk.js";
+import * as NetworkForward from "./../../network/forward/forward.js";
+import * as Buttons3 from "./../../../ui/components/buttons/buttons.js";
+import * as UI5 from "./../../../ui/legacy/legacy.js";
+import { html as html5, nothing as nothing3, render as render5 } from "./../../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/components/permissionsPolicySection.css.js
 var permissionsPolicySection_css_default = `/*
@@ -2009,16 +2009,16 @@ var ProtocolHandlersView_exports = {};
 __export(ProtocolHandlersView_exports, {
   ProtocolHandlersView: () => ProtocolHandlersView
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as Host from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n13 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Buttons4 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Input from "./..\\..\\..\\ui\\components\\input\\input.js";
-import * as uiI18n from "./..\\..\\..\\ui\\i18n\\i18n.js";
-import * as UI6 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html as html6, i18nTemplate as unboundI18nTemplate, nothing as nothing4, render as render6 } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import * as Host from "./../../../core/host/host.js";
+import * as i18n13 from "./../../../core/i18n/i18n.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as Buttons4 from "./../../../ui/components/buttons/buttons.js";
+import * as Input from "./../../../ui/components/input/input.js";
+import * as uiI18n from "./../../../ui/i18n/i18n.js";
+import * as UI6 from "./../../../ui/legacy/legacy.js";
+import { html as html6, i18nTemplate as unboundI18nTemplate, nothing as nothing4, render as render6 } from "./../../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/components/protocolHandlersView.css.js
 var protocolHandlersView_css_default = `/*
@@ -2234,12 +2234,12 @@ __export(ReportsGrid_exports, {
   ReportsGrid: () => ReportsGrid,
   i18nString: () => i18nString7
 });
-import "./..\\..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as i18n15 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\..\\core\\root\\root.js";
-import * as UI7 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit4 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging6 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/legacy/components/data_grid/data_grid.js";
+import * as i18n15 from "./../../../core/i18n/i18n.js";
+import * as Root from "./../../../core/root/root.js";
+import * as UI7 from "./../../../ui/legacy/legacy.js";
+import * as Lit4 from "./../../../ui/lit/lit.js";
+import * as VisualLogging6 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/components/reportsGrid.css.js
 var reportsGrid_css_default = `/*
@@ -2399,8 +2399,8 @@ var ServiceWorkerRouterView_exports = {};
 __export(ServiceWorkerRouterView_exports, {
   ServiceWorkerRouterView: () => ServiceWorkerRouterView
 });
-import * as UI8 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html as html8, render as render8 } from "./..\\..\\..\\ui\\lit\\lit.js";
+import * as UI8 from "./../../../ui/legacy/legacy.js";
+import { html as html8, render as render8 } from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/application/components/serviceWorkerRouterView.css.js
 var serviceWorkerRouterView_css_default = `/*
@@ -2513,11 +2513,11 @@ __export(SharedStorageAccessGrid_exports, {
   SharedStorageAccessGrid: () => SharedStorageAccessGrid,
   i18nString: () => i18nString8
 });
-import "./..\\..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as i18n17 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as UI9 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit5 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging7 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/legacy/components/data_grid/data_grid.js";
+import * as i18n17 from "./../../../core/i18n/i18n.js";
+import * as UI9 from "./../../../ui/legacy/legacy.js";
+import * as Lit5 from "./../../../ui/lit/lit.js";
+import * as VisualLogging7 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/components/sharedStorageAccessGrid.css.js
 var sharedStorageAccessGrid_css_default = `/*
@@ -2712,10 +2712,10 @@ var SharedStorageMetadataView_exports = {};
 __export(SharedStorageMetadataView_exports, {
   SharedStorageMetadataView: () => SharedStorageMetadataView
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n21 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Buttons6 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Lit6 from "./..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n21 from "./../../../core/i18n/i18n.js";
+import * as Buttons6 from "./../../../ui/components/buttons/buttons.js";
+import * as Lit6 from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/application/components/sharedStorageMetadataView.css.js
 var sharedStorageMetadataView_css_default = `/*
@@ -2755,14 +2755,14 @@ var StorageMetadataView_exports = {};
 __export(StorageMetadataView_exports, {
   StorageMetadataView: () => StorageMetadataView
 });
-import "./..\\..\\..\\ui\\components\\report_view\\report_view.js";
-import * as i18n19 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK4 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Buttons5 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as LegacyWrapper from "./..\\..\\..\\ui\\components\\legacy_wrapper\\legacy_wrapper.js";
-import * as RenderCoordinator from "./..\\..\\..\\ui\\components\\render_coordinator\\render_coordinator.js";
-import * as UI10 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html as html10, nothing as nothing5, render as render10 } from "./..\\..\\..\\ui\\lit\\lit.js";
+import "./../../../ui/components/report_view/report_view.js";
+import * as i18n19 from "./../../../core/i18n/i18n.js";
+import * as SDK4 from "./../../../core/sdk/sdk.js";
+import * as Buttons5 from "./../../../ui/components/buttons/buttons.js";
+import * as LegacyWrapper from "./../../../ui/components/legacy_wrapper/legacy_wrapper.js";
+import * as RenderCoordinator from "./../../../ui/components/render_coordinator/render_coordinator.js";
+import * as UI10 from "./../../../ui/legacy/legacy.js";
+import { html as html10, nothing as nothing5, render as render10 } from "./../../../ui/lit/lit.js";
 
 // gen/front_end/panels/application/components/storageMetadataView.css.js
 var storageMetadataView_css_default = `/*
@@ -3118,14 +3118,14 @@ __export(TrustTokensView_exports, {
   TrustTokensView: () => TrustTokensView,
   i18nString: () => i18nString11
 });
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import "./..\\..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as i18n23 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK5 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Buttons7 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI11 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit7 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging8 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/kit/kit.js";
+import "./../../../ui/legacy/components/data_grid/data_grid.js";
+import * as i18n23 from "./../../../core/i18n/i18n.js";
+import * as SDK5 from "./../../../core/sdk/sdk.js";
+import * as Buttons7 from "./../../../ui/components/buttons/buttons.js";
+import * as UI11 from "./../../../ui/legacy/legacy.js";
+import * as Lit7 from "./../../../ui/lit/lit.js";
+import * as VisualLogging8 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/application/components/trustTokensView.css.js
 var trustTokensView_css_default = `/*

@@ -13,12 +13,12 @@ __export(SearchResultsPane_exports, {
   matchesExpandedByDefault: () => matchesExpandedByDefault,
   matchesShownAtOnce: () => matchesShownAtOnce
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import { html, render } from "./..\\..\\ui\\lit\\lit.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import { html, render } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/search/searchResultsPane.css.js
 var searchResultsPane_css_default = `/*
@@ -415,16 +415,16 @@ __export(SearchView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW2,
   SearchView: () => SearchView
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives, html as html2, render as render2 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import "./../../ui/kit/kit.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import { Directives, html as html2, render as render2 } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/search/searchView.css.js
 var searchView_css_default = `/*

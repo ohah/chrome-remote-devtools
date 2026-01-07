@@ -25,15 +25,15 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\front_end\\panels\\ai_assistance",
+    "rootDir": "../../../../../../front_end/panels/ai_assistance",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "esnext",
     "tsBuildInfoFile": "unittests-tsconfig.json.tsbuildinfo",
     "typeRoots": [
-      "..\\..\\..\\..\\..\\..\\node_modules\\@types",
-      "..\\..\\..\\..\\..\\..\\node_modules"
+      "../../../../../../node_modules/@types",
+      "../../../../../../node_modules"
     ],
     "types": [
       "mocha",
@@ -44,18 +44,18 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\ai_assistance\\AiAssistancePanel.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\ai_assistance\\PatchWidget.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\ai_assistance\\SelectWorkspaceDialog.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\ai_assistance\\components\\ChatInput.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\ai_assistance\\components\\ChatView.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\ai_assistance\\components\\DisabledWidget.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\ai_assistance\\components\\ExploreWidget.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\ai_assistance\\components\\MarkdownRendererWithCodeBlock.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\panels\\ai_assistance\\components\\UserActionRow.test.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../front_end/panels/ai_assistance/AiAssistancePanel.test.ts",
+    "../../../../../../front_end/panels/ai_assistance/PatchWidget.test.ts",
+    "../../../../../../front_end/panels/ai_assistance/SelectWorkspaceDialog.test.ts",
+    "../../../../../../front_end/panels/ai_assistance/components/ChatInput.test.ts",
+    "../../../../../../front_end/panels/ai_assistance/components/ChatView.test.ts",
+    "../../../../../../front_end/panels/ai_assistance/components/DisabledWidget.test.ts",
+    "../../../../../../front_end/panels/ai_assistance/components/ExploreWidget.test.ts",
+    "../../../../../../front_end/panels/ai_assistance/components/MarkdownRendererWithCodeBlock.test.ts",
+    "../../../../../../front_end/panels/ai_assistance/components/UserActionRow.test.ts",
+    "../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

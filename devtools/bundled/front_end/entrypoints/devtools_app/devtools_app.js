@@ -1,8 +1,8 @@
 // gen/front_end/entrypoints/devtools_app/devtools_app.prebundle.js
-import "./..\\shell\\shell.js";
+import "./../shell/shell.js";
 
 // gen/front_end/panels/css_overview/css_overview-meta.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n from "./../../core/i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Title of the CSS overview panel
@@ -17,11 +17,11 @@ var str_ = i18n.i18n.registerUIStrings("panels/css_overview/css_overview-meta.ts
 var i18nLazyString = i18n.i18n.getLazilyComputedLocalizedString.bind(void 0, str_);
 
 // gen/front_end/panels/elements/elements-meta.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 var UIStrings2 = {
   /**
    * @description Command for showing the 'Elements' panel. Elements refers to HTML elements.
@@ -177,7 +177,7 @@ var i18nLazyString2 = i18n3.i18n.getLazilyComputedLocalizedString.bind(void 0, s
 var loadedElementsModule;
 async function loadElementsModule() {
   if (!loadedElementsModule) {
-    loadedElementsModule = await import("./..\\..\\panels\\elements\\elements.js");
+    loadedElementsModule = await import("./../../panels/elements/elements.js");
   }
   return loadedElementsModule;
 }
@@ -668,10 +668,10 @@ UI.UIUtils.registerRenderer({
 });
 
 // gen/front_end/panels/browser_debugger/browser_debugger-meta.js
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
 var UIStrings3 = {
   /**
    * @description Command for showing the 'Event Listener Breakpoints' tool
@@ -747,7 +747,7 @@ var i18nLazyString3 = i18n5.i18n.getLazilyComputedLocalizedString.bind(void 0, s
 var loadedBrowserDebuggerModule;
 async function loadBrowserDebuggerModule() {
   if (!loadedBrowserDebuggerModule) {
-    loadedBrowserDebuggerModule = await import("./..\\..\\panels\\browser_debugger\\browser_debugger.js");
+    loadedBrowserDebuggerModule = await import("./../../panels/browser_debugger/browser_debugger.js");
   }
   return loadedBrowserDebuggerModule;
 }
@@ -760,7 +760,7 @@ function maybeRetrieveContextTypes2(getClassCallBack) {
 var loadedSourcesModule;
 async function loadSourcesModule() {
   if (!loadedSourcesModule) {
-    loadedSourcesModule = await import("./..\\..\\panels\\sources\\sources.js");
+    loadedSourcesModule = await import("./../../panels/sources/sources.js");
   }
   return loadedSourcesModule;
 }
@@ -923,14 +923,14 @@ UI2.Context.registerListener({
 });
 
 // gen/front_end/panels/network/network-meta.js
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root3 from "./..\\..\\core\\root\\root.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as PanelCommon from "./..\\..\\panels\\common\\common.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as NetworkForward from "./..\\..\\panels\\network\\forward\\forward.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Root3 from "./../../core/root/root.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as PanelCommon from "./../../panels/common/common.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as NetworkForward from "./../../panels/network/forward/forward.js";
 var UIStrings4 = {
   /**
    * @description Command for showing the 'Network' tool
@@ -1079,7 +1079,7 @@ var loadedNetworkModule;
 var isNode = Root3.Runtime.Runtime.isNode();
 async function loadNetworkModule() {
   if (!loadedNetworkModule) {
-    loadedNetworkModule = await import("./..\\..\\panels\\network\\network.js");
+    loadedNetworkModule = await import("./../../panels/network/network.js");
   }
   return loadedNetworkModule;
 }
@@ -1421,9 +1421,9 @@ Common2.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/security/security-meta.js
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Security from "./..\\..\\panels\\security\\security.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Security from "./../../panels/security/security.js";
 var UIStrings5 = {
   /**
    * @description Default Title of the security panel
@@ -1447,7 +1447,7 @@ var i18nLazyString5 = i18n9.i18n.getLazilyComputedLocalizedString.bind(void 0, s
 var loadedSecurityModule;
 async function loadSecurityModule() {
   if (!loadedSecurityModule) {
-    loadedSecurityModule = await import("./..\\..\\panels\\security\\security.js");
+    loadedSecurityModule = await import("./../../panels/security/security.js");
   }
   return loadedSecurityModule;
 }
@@ -1465,10 +1465,10 @@ Common3.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/emulation/emulation-meta.js
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root4 from "./..\\..\\core\\root\\root.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as Root4 from "./../../core/root/root.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
 var UIStrings6 = {
   /**
    * @description Title of an action in the emulation tool to toggle device mode
@@ -1525,7 +1525,7 @@ var i18nLazyString6 = i18n11.i18n.getLazilyComputedLocalizedString.bind(void 0, 
 var loadedEmulationModule;
 async function loadEmulationModule() {
   if (!loadedEmulationModule) {
-    loadedEmulationModule = await import("./..\\..\\panels\\emulation\\emulation.js");
+    loadedEmulationModule = await import("./../../panels/emulation/emulation.js");
   }
   return loadedEmulationModule;
 }
@@ -1660,9 +1660,9 @@ UI4.ContextMenu.registerItem({
 });
 
 // gen/front_end/panels/sensors/sensors-meta.js
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
 var UIStrings7 = {
   /**
    * @description Title of the Sensors tool. The sensors tool contains GPS, orientation sensors, touch
@@ -1778,7 +1778,7 @@ var i18nLazyString7 = i18n13.i18n.getLazilyComputedLocalizedString.bind(void 0, 
 var loadedSensorsModule;
 async function loadEmulationModule2() {
   if (!loadedSensorsModule) {
-    loadedSensorsModule = await import("./..\\..\\panels\\sensors\\sensors.js");
+    loadedSensorsModule = await import("./../../panels/sensors/sensors.js");
   }
   return loadedSensorsModule;
 }
@@ -1966,7 +1966,7 @@ Common5.Settings.registerSettingExtension({
 });
 
 // gen/front_end/panels/accessibility/accessibility-meta.js
-import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n15 from "./../../core/i18n/i18n.js";
 var UIStrings8 = {
   /**
    * @description Text for accessibility of the web page
@@ -1981,9 +1981,9 @@ var str_8 = i18n15.i18n.registerUIStrings("panels/accessibility/accessibility-me
 var i18nLazyString8 = i18n15.i18n.getLazilyComputedLocalizedString.bind(void 0, str_8);
 
 // gen/front_end/panels/animation/animation-meta.js
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as i18n17 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as i18n17 from "./../../core/i18n/i18n.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
 var loadedAnimationModule;
 var UIStrings9 = {
   /**
@@ -1999,7 +1999,7 @@ var str_9 = i18n17.i18n.registerUIStrings("panels/animation/animation-meta.ts", 
 var i18nLazyString9 = i18n17.i18n.getLazilyComputedLocalizedString.bind(void 0, str_9);
 async function loadAnimationModule() {
   if (!loadedAnimationModule) {
-    loadedAnimationModule = await import("./..\\..\\panels\\animation\\animation.js");
+    loadedAnimationModule = await import("./../../panels/animation/animation.js");
   }
   return loadedAnimationModule;
 }
@@ -2017,9 +2017,9 @@ Common6.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/developer_resources/developer_resources-meta.js
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as i18n19 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as i18n19 from "./../../core/i18n/i18n.js";
+import * as SDK5 from "./../../core/sdk/sdk.js";
 var UIStrings10 = {
   /**
    * @description Title for developer resources panel
@@ -2035,7 +2035,7 @@ var i18nLazyString10 = i18n19.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedDeveloperResourcesModule;
 async function loadDeveloperResourcesModule() {
   if (!loadedDeveloperResourcesModule) {
-    loadedDeveloperResourcesModule = await import("./..\\..\\panels\\developer_resources\\developer_resources.js");
+    loadedDeveloperResourcesModule = await import("./../../panels/developer_resources/developer_resources.js");
   }
   return loadedDeveloperResourcesModule;
 }
@@ -2051,7 +2051,7 @@ Common7.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/autofill/autofill-meta.js
-import * as i18n21 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n21 from "./../../core/i18n/i18n.js";
 var UIStrings11 = {
   /**
    * @description Label for the autofill pane
@@ -2066,9 +2066,9 @@ var str_11 = i18n21.i18n.registerUIStrings("panels/autofill/autofill-meta.ts", U
 var i18nLazyString11 = i18n21.i18n.getLazilyComputedLocalizedString.bind(void 0, str_11);
 
 // gen/front_end/entrypoints/inspector_main/inspector_main-meta.js
-import * as Common8 from "./..\\..\\core\\common\\common.js";
-import * as i18n23 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common8 from "./../../core/common/common.js";
+import * as i18n23 from "./../../core/i18n/i18n.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
 var UIStrings12 = {
   /**
    * @description Title of the Rendering tool. The rendering tool is a collection of settings that
@@ -2171,7 +2171,7 @@ var i18nLazyString12 = i18n23.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedInspectorMainModule;
 async function loadInspectorMainModule() {
   if (!loadedInspectorMainModule) {
-    loadedInspectorMainModule = await import("./..\\inspector_main\\inspector_main.js");
+    loadedInspectorMainModule = await import("./../inspector_main/inspector_main.js");
   }
   return loadedInspectorMainModule;
 }
@@ -2323,11 +2323,11 @@ UI6.Toolbar.registerToolbarItem({
 });
 
 // gen/front_end/panels/application/application-meta.js
-import * as Common9 from "./..\\..\\core\\common\\common.js";
-import * as i18n25 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK6 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as PreloadingHelper from "./..\\..\\panels\\application\\preloading\\helper\\helper.js";
+import * as Common9 from "./../../core/common/common.js";
+import * as i18n25 from "./../../core/i18n/i18n.js";
+import * as SDK6 from "./../../core/sdk/sdk.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
+import * as PreloadingHelper from "./../../panels/application/preloading/helper/helper.js";
 var UIStrings13 = {
   /**
    * @description Text in Application Panel Sidebar of the Application panel
@@ -2363,7 +2363,7 @@ var i18nLazyString13 = i18n25.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedResourcesModule;
 async function loadResourcesModule() {
   if (!loadedResourcesModule) {
-    loadedResourcesModule = await import("./..\\..\\panels\\application\\application.js");
+    loadedResourcesModule = await import("./../../panels/application/application.js");
   }
   return loadedResourcesModule;
 }
@@ -2484,9 +2484,9 @@ Common9.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/issues/issues-meta.js
-import * as Common10 from "./..\\..\\core\\common\\common.js";
-import * as i18n27 from "./..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager from "./..\\..\\models\\issues_manager\\issues_manager.js";
+import * as Common10 from "./../../core/common/common.js";
+import * as i18n27 from "./../../core/i18n/i18n.js";
+import * as IssuesManager from "./../../models/issues_manager/issues_manager.js";
 var UIStrings14 = {
   /**
    * @description Label for the issues pane
@@ -2502,7 +2502,7 @@ var i18nLazyString14 = i18n27.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedIssuesModule;
 async function loadIssuesModule() {
   if (!loadedIssuesModule) {
-    loadedIssuesModule = await import("./..\\..\\panels\\issues\\issues.js");
+    loadedIssuesModule = await import("./../../panels/issues/issues.js");
   }
   return loadedIssuesModule;
 }
@@ -2520,7 +2520,7 @@ Common10.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/layers/layers-meta.js
-import * as i18n29 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n29 from "./../../core/i18n/i18n.js";
 var UIStrings15 = {
   /**
    * @description Title of the Layers tool
@@ -2535,7 +2535,7 @@ var str_15 = i18n29.i18n.registerUIStrings("panels/layers/layers-meta.ts", UIStr
 var i18nLazyString15 = i18n29.i18n.getLazilyComputedLocalizedString.bind(void 0, str_15);
 
 // gen/front_end/panels/lighthouse/lighthouse-meta.js
-import * as i18n31 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n31 from "./../../core/i18n/i18n.js";
 var UIStrings16 = {
   /**
    * @description Command for showing the 'Lighthouse' tool
@@ -2546,7 +2546,7 @@ var str_16 = i18n31.i18n.registerUIStrings("panels/lighthouse/lighthouse-meta.ts
 var i18nLazyString16 = i18n31.i18n.getLazilyComputedLocalizedString.bind(void 0, str_16);
 
 // gen/front_end/panels/media/media-meta.js
-import * as i18n33 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n33 from "./../../core/i18n/i18n.js";
 var UIStrings17 = {
   /**
    * @description Text that appears on a button for the media resource type filter.
@@ -2565,9 +2565,9 @@ var str_17 = i18n33.i18n.registerUIStrings("panels/media/media-meta.ts", UIStrin
 var i18nLazyString17 = i18n33.i18n.getLazilyComputedLocalizedString.bind(void 0, str_17);
 
 // gen/front_end/panels/mobile_throttling/mobile_throttling-meta.js
-import * as Common11 from "./..\\..\\core\\common\\common.js";
-import * as i18n35 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common11 from "./../../core/common/common.js";
+import * as i18n35 from "./../../core/i18n/i18n.js";
+import * as UI8 from "./../../ui/legacy/legacy.js";
 var UIStrings18 = {
   /**
    * @description Text for throttling the network
@@ -2609,7 +2609,7 @@ var i18nLazyString18 = i18n35.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedMobileThrottlingModule;
 async function loadMobileThrottlingModule() {
   if (!loadedMobileThrottlingModule) {
-    loadedMobileThrottlingModule = await import("./..\\..\\panels\\mobile_throttling\\mobile_throttling.js");
+    loadedMobileThrottlingModule = await import("./../../panels/mobile_throttling/mobile_throttling.js");
   }
   return loadedMobileThrottlingModule;
 }
@@ -2689,7 +2689,7 @@ Common11.Settings.registerSettingExtension({
 });
 
 // gen/front_end/panels/performance_monitor/performance_monitor-meta.js
-import * as i18n37 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n37 from "./../../core/i18n/i18n.js";
 var UIStrings19 = {
   /**
    * @description Title of the 'Performance monitor' tool in the bottom drawer
@@ -2724,10 +2724,10 @@ var str_19 = i18n37.i18n.registerUIStrings("panels/performance_monitor/performan
 var i18nLazyString19 = i18n37.i18n.getLazilyComputedLocalizedString.bind(void 0, str_19);
 
 // gen/front_end/panels/timeline/timeline-meta.js
-import * as Common12 from "./..\\..\\core\\common\\common.js";
-import * as i18n39 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK7 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI9 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common12 from "./../../core/common/common.js";
+import * as i18n39 from "./../../core/i18n/i18n.js";
+import * as SDK7 from "./../../core/sdk/sdk.js";
+import * as UI9 from "./../../ui/legacy/legacy.js";
 var UIStrings20 = {
   /**
    * @description Text for the performance of something
@@ -2787,7 +2787,7 @@ var i18nLazyString20 = i18n39.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedTimelineModule;
 async function loadTimelineModule() {
   if (!loadedTimelineModule) {
-    loadedTimelineModule = await import("./..\\..\\panels\\timeline\\timeline.js");
+    loadedTimelineModule = await import("./../../panels/timeline/timeline.js");
   }
   return loadedTimelineModule;
 }
@@ -3056,7 +3056,7 @@ Common12.Revealer.registerRevealer({
 });
 
 // gen/front_end/panels/web_audio/web_audio-meta.js
-import * as i18n41 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n41 from "./../../core/i18n/i18n.js";
 var UIStrings21 = {
   /**
    * @description Title of the WebAudio tool
@@ -3075,7 +3075,7 @@ var str_21 = i18n41.i18n.registerUIStrings("panels/web_audio/web_audio-meta.ts",
 var i18nLazyString21 = i18n41.i18n.getLazilyComputedLocalizedString.bind(void 0, str_21);
 
 // gen/front_end/panels/webauthn/webauthn-meta.js
-import * as i18n43 from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n43 from "./../../core/i18n/i18n.js";
 var UIStrings22 = {
   /**
    * @description Title of WebAuthn tab in bottom drawer.
@@ -3090,8 +3090,8 @@ var str_22 = i18n43.i18n.registerUIStrings("panels/webauthn/webauthn-meta.ts", U
 var i18nLazyString22 = i18n43.i18n.getLazilyComputedLocalizedString.bind(void 0, str_22);
 
 // gen/front_end/panels/layer_viewer/layer_viewer-meta.js
-import * as i18n45 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI10 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n45 from "./../../core/i18n/i18n.js";
+import * as UI10 from "./../../ui/legacy/legacy.js";
 var UIStrings23 = {
   /**
    * @description Text in the Shortcuts page to explain a keyboard shortcut (reset view in Layers Panel)
@@ -3242,8 +3242,8 @@ UI10.ActionRegistration.registerActionExtension({
 });
 
 // gen/front_end/panels/recorder/recorder-meta.js
-import * as i18n47 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI11 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n47 from "./../../core/i18n/i18n.js";
+import * as UI11 from "./../../ui/legacy/legacy.js";
 var UIStrings24 = {
   /**
    * @description Title of the Recorder Panel
@@ -3275,7 +3275,7 @@ var i18nLazyString24 = i18n47.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedRecorderModule;
 async function loadRecorderModule() {
   if (!loadedRecorderModule) {
-    loadedRecorderModule = await import("./..\\..\\panels\\recorder\\recorder.js");
+    loadedRecorderModule = await import("./../../panels/recorder/recorder.js");
   }
   return loadedRecorderModule;
 }
@@ -3380,9 +3380,9 @@ UI11.ActionRegistration.registerActionExtension({
 });
 
 // gen/front_end/panels/whats_new/whats_new-meta.js
-import * as Common13 from "./..\\..\\core\\common\\common.js";
-import * as i18n49 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI12 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common13 from "./../../core/common/common.js";
+import * as i18n49 from "./../../core/i18n/i18n.js";
+import * as UI12 from "./../../ui/legacy/legacy.js";
 var UIStrings25 = {
   /**
    * @description Title of the 'What's New' tool in the bottom drawer
@@ -3418,7 +3418,7 @@ var i18nLazyString25 = i18n49.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedHelpModule;
 async function loadWhatsNewModule() {
   if (!loadedHelpModule) {
-    loadedHelpModule = await import("./..\\..\\panels\\whats_new\\whats_new.js");
+    loadedHelpModule = await import("./../../panels/whats_new/whats_new.js");
   }
   return loadedHelpModule;
 }
@@ -3492,8 +3492,8 @@ Common13.Runnable.registerLateInitializationRunnable({
 });
 
 // gen/front_end/panels/welcome/welcome-meta.js
-import * as i18n51 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI13 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n51 from "./../../core/i18n/i18n.js";
+import * as UI13 from "./../../ui/legacy/legacy.js";
 var UIStrings26 = {
   /**
    * @description Title of the Welcome panel
@@ -3509,7 +3509,7 @@ var i18nLazyString26 = i18n51.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedWelcomeModule;
 async function loadWelcomeModule() {
   if (!loadedWelcomeModule) {
-    loadedWelcomeModule = await import("./..\\..\\panels\\welcome\\welcome.js");
+    loadedWelcomeModule = await import("./../../panels/welcome/welcome.js");
   }
   return loadedWelcomeModule;
 }
@@ -3529,8 +3529,8 @@ UI13.ViewManager.registerViewExtension({
 });
 
 // gen/front_end/panels/session_replay/session_replay-meta.js
-import * as i18n53 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI14 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n53 from "./../../core/i18n/i18n.js";
+import * as UI14 from "./../../ui/legacy/legacy.js";
 var UIStrings27 = {
   /**
    * @description Title of the Session Replay panel
@@ -3546,7 +3546,7 @@ var i18nLazyString27 = i18n53.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedSessionReplayModule;
 async function loadSessionReplayModule() {
   if (!loadedSessionReplayModule) {
-    loadedSessionReplayModule = await import("./..\\..\\panels\\session_replay\\session_replay.js");
+    loadedSessionReplayModule = await import("./../../panels/session_replay/session_replay.js");
   }
   return loadedSessionReplayModule;
 }
@@ -3565,8 +3565,8 @@ UI14.ViewManager.registerViewExtension({
 });
 
 // gen/front_end/panels/redux/redux-meta.js
-import * as i18n55 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI15 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n55 from "./../../core/i18n/i18n.js";
+import * as UI15 from "./../../ui/legacy/legacy.js";
 var UIStrings28 = {
   /**
    * @description Label for the Redux pane / Redux 패널 레이블
@@ -3582,7 +3582,7 @@ var i18nLazyString28 = i18n55.i18n.getLazilyComputedLocalizedString.bind(void 0,
 var loadedReduxModule;
 async function loadReduxModule() {
   if (!loadedReduxModule) {
-    loadedReduxModule = await import("./..\\..\\panels\\redux\\redux.js");
+    loadedReduxModule = await import("./../../panels/redux/redux.js");
   }
   return loadedReduxModule;
 }
@@ -3601,8 +3601,8 @@ UI15.ViewManager.registerViewExtension({
 });
 
 // gen/front_end/entrypoints/devtools_app/devtools_app.prebundle.js
-import * as Root5 from "./..\\..\\core\\root\\root.js";
-import * as Main from "./..\\main\\main.js";
+import * as Root5 from "./../../core/root/root.js";
+import * as Main from "./../main/main.js";
 self.runtime = Root5.Runtime.Runtime.instance({ forceNew: true });
 new Main.MainImpl.MainImpl();
 //# sourceMappingURL=devtools_app.js.map

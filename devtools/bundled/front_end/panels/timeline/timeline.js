@@ -9,10 +9,10 @@ var AnimationsTrackAppender_exports = {};
 __export(AnimationsTrackAppender_exports, {
   AnimationsTrackAppender: () => AnimationsTrackAppender
 });
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Trace2 from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI2 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as ThemeSupport3 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Trace2 from "./../../models/trace/trace.js";
+import * as PerfUI2 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as ThemeSupport3 from "./../../ui/legacy/theme_support/theme_support.js";
 
 // gen/front_end/panels/timeline/AppenderUtils.js
 var AppenderUtils_exports = {};
@@ -23,10 +23,10 @@ __export(AppenderUtils_exports, {
   getDurationString: () => getDurationString,
   getEventLevel: () => getEventLevel
 });
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Trace from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as ThemeSupport from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Trace from "./../../models/trace/trace.js";
+import * as PerfUI from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as ThemeSupport from "./../../ui/legacy/theme_support/theme_support.js";
 var UIStrings = {
   /**
    * @description Text in the Performance panel to show how long was spent in a particular part of the code.
@@ -162,10 +162,10 @@ __export(AnnotationHelpers_exports, {
   isEntryLabel: () => isEntryLabel,
   isTimeRangeLabel: () => isTimeRangeLabel
 });
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as Trace3 from "./..\\..\\models\\trace\\trace.js";
-import * as TraceBounds from "./..\\..\\services\\trace_bounds\\trace_bounds.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as Trace3 from "./../../models/trace/trace.js";
+import * as TraceBounds from "./../../services/trace_bounds/trace_bounds.js";
 var UIStrings3 = {
   /**
    * @description text used to announce to a screen reader that they have entered the mode to edit the label
@@ -373,25 +373,25 @@ __export(CompatibilityTracksAppender_exports, {
   TrackNames: () => TrackNames,
   entryIsVisibleInTimeline: () => entryIsVisibleInTimeline
 });
-import * as Common17 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as Platform16 from "./..\\..\\core\\platform\\platform.js";
-import * as Root7 from "./..\\..\\core\\root\\root.js";
-import * as Trace35 from "./..\\..\\models\\trace\\trace.js";
-import * as SourceMapsResolver7 from "./..\\..\\models\\trace_source_maps_resolver\\trace_source_maps_resolver.js";
-import * as ThemeSupport27 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as TimelineComponents7 from "./components\\components.js";
+import * as Common17 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as Platform16 from "./../../core/platform/platform.js";
+import * as Root7 from "./../../core/root/root.js";
+import * as Trace35 from "./../../models/trace/trace.js";
+import * as SourceMapsResolver7 from "./../../models/trace_source_maps_resolver/trace_source_maps_resolver.js";
+import * as ThemeSupport27 from "./../../ui/legacy/theme_support/theme_support.js";
+import * as TimelineComponents7 from "./components/components.js";
 
 // gen/front_end/panels/timeline/ExtensionTrackAppender.js
 var ExtensionTrackAppender_exports = {};
 __export(ExtensionTrackAppender_exports, {
   ExtensionTrackAppender: () => ExtensionTrackAppender
 });
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Trace4 from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI3 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as ThemeSupport5 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as Extensions from "./extensions\\extensions.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Trace4 from "./../../models/trace/trace.js";
+import * as PerfUI3 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as ThemeSupport5 from "./../../ui/legacy/theme_support/theme_support.js";
+import * as Extensions from "./extensions/extensions.js";
 var UIStrings4 = {
   /**
    * @description The subtitle to show (by the side of the track name).
@@ -500,10 +500,10 @@ var GPUTrackAppender_exports = {};
 __export(GPUTrackAppender_exports, {
   GPUTrackAppender: () => GPUTrackAppender
 });
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Trace5 from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI4 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as ThemeSupport7 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Trace5 from "./../../models/trace/trace.js";
+import * as PerfUI4 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as ThemeSupport7 from "./../../ui/legacy/theme_support/theme_support.js";
 var UIStrings5 = {
   /**
    * @description Text in Timeline Flame Chart Data Provider of the Performance panel
@@ -585,10 +585,10 @@ var InteractionsTrackAppender_exports = {};
 __export(InteractionsTrackAppender_exports, {
   InteractionsTrackAppender: () => InteractionsTrackAppender
 });
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Trace6 from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI5 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as Components from "./components\\components.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as Trace6 from "./../../models/trace/trace.js";
+import * as PerfUI5 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as Components from "./components/components.js";
 var UIStrings6 = {
   /**
    * @description Text in Timeline Flame Chart Data Provider of the Performance panel
@@ -716,14 +716,14 @@ __export(LayoutShiftsTrackAppender_exports, {
   LAYOUT_SHIFT_SYNTHETIC_DURATION: () => LAYOUT_SHIFT_SYNTHETIC_DURATION,
   LayoutShiftsTrackAppender: () => LayoutShiftsTrackAppender
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Geometry from "./..\\..\\models\\geometry\\geometry.js";
-import * as Trace7 from "./..\\..\\models\\trace\\trace.js";
-import * as ComponentHelpers from "./..\\..\\ui\\components\\helpers\\helpers.js";
-import * as PerfUI6 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as ThemeSupport9 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as Utils from "./utils\\utils.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as Geometry from "./../../models/geometry/geometry.js";
+import * as Trace7 from "./../../models/trace/trace.js";
+import * as ComponentHelpers from "./../../ui/components/helpers/helpers.js";
+import * as PerfUI6 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as ThemeSupport9 from "./../../ui/legacy/theme_support/theme_support.js";
+import * as Utils from "./utils/utils.js";
 var UIStrings7 = {
   /**
    * @description Text in Timeline Flame Chart Data Provider of the Performance panel
@@ -962,15 +962,15 @@ var ThreadAppender_exports = {};
 __export(ThreadAppender_exports, {
   ThreadAppender: () => ThreadAppender
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n15 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\models\\bindings\\bindings.js";
-import * as Trace10 from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI8 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as ThemeSupport11 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n15 from "./../../core/i18n/i18n.js";
+import * as Platform4 from "./../../core/platform/platform.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Bindings from "./../../models/bindings/bindings.js";
+import * as Trace10 from "./../../models/trace/trace.js";
+import * as PerfUI8 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as ThemeSupport11 from "./../../ui/legacy/theme_support/theme_support.js";
 
 // gen/front_end/panels/timeline/ModificationsManager.js
 var ModificationsManager_exports = {};
@@ -978,19 +978,19 @@ __export(ModificationsManager_exports, {
   AnnotationModifiedEvent: () => AnnotationModifiedEvent,
   ModificationsManager: () => ModificationsManager
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as Trace9 from "./..\\..\\models\\trace\\trace.js";
-import * as TimelineComponents from "./components\\components.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as Trace9 from "./../../models/trace/trace.js";
+import * as TimelineComponents from "./components/components.js";
 
 // gen/front_end/panels/timeline/EntriesFilter.js
 var EntriesFilter_exports = {};
 __export(EntriesFilter_exports, {
   EntriesFilter: () => EntriesFilter
 });
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as Trace8 from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI7 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as Trace8 from "./../../models/trace/trace.js";
+import * as PerfUI7 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
 var EntriesFilter = class {
   #parsedTrace;
   // Track the set of invisible entries.
@@ -1631,7 +1631,7 @@ var ModificationsManager = class _ModificationsManager extends EventTarget {
 };
 
 // gen/front_end/panels/timeline/ThreadAppender.js
-import * as Utils2 from "./utils\\utils.js";
+import * as Utils2 from "./utils/utils.js";
 var UIStrings8 = {
   /**
    * @description Text shown for an entry in the flame chart that is ignored because it matches
@@ -2114,16 +2114,16 @@ __export(TimelineFlameChartDataProvider_exports, {
   InstantEventVisibleDurationMs: () => InstantEventVisibleDurationMs,
   TimelineFlameChartDataProvider: () => TimelineFlameChartDataProvider
 });
-import * as Common16 from "./..\\..\\core\\common\\common.js";
-import * as i18n54 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root6 from "./..\\..\\core\\root\\root.js";
-import * as AIAssistance2 from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Trace33 from "./..\\..\\models\\trace\\trace.js";
-import * as SourceMapsResolver5 from "./..\\..\\models\\trace_source_maps_resolver\\trace_source_maps_resolver.js";
-import * as Workspace4 from "./..\\..\\models\\workspace\\workspace.js";
-import * as PerfUI17 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as UI19 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport25 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
+import * as Common16 from "./../../core/common/common.js";
+import * as i18n54 from "./../../core/i18n/i18n.js";
+import * as Root6 from "./../../core/root/root.js";
+import * as AIAssistance2 from "./../../models/ai_assistance/ai_assistance.js";
+import * as Trace33 from "./../../models/trace/trace.js";
+import * as SourceMapsResolver5 from "./../../models/trace_source_maps_resolver/trace_source_maps_resolver.js";
+import * as Workspace4 from "./../../models/workspace/workspace.js";
+import * as PerfUI17 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as UI19 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport25 from "./../../ui/legacy/theme_support/theme_support.js";
 
 // gen/front_end/panels/timeline/Initiators.js
 var Initiators_exports = {};
@@ -2277,19 +2277,19 @@ __export(TimelineFlameChartView_exports, {
   TimelineFlameChartView: () => TimelineFlameChartView,
   groupForLevel: () => groupForLevel
 });
-import * as Common15 from "./..\\..\\core\\common\\common.js";
-import * as i18n52 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform15 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK14 from "./..\\..\\core\\sdk\\sdk.js";
-import * as AIAssistance from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as CrUXManager5 from "./..\\..\\models\\crux-manager\\crux-manager.js";
-import * as Trace32 from "./..\\..\\models\\trace\\trace.js";
-import * as Workspace3 from "./..\\..\\models\\workspace\\workspace.js";
-import * as TraceBounds15 from "./..\\..\\services\\trace_bounds\\trace_bounds.js";
-import * as PerfUI16 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as UI18 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging10 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as TimelineInsights2 from "./components\\insights\\insights.js";
+import * as Common15 from "./../../core/common/common.js";
+import * as i18n52 from "./../../core/i18n/i18n.js";
+import * as Platform15 from "./../../core/platform/platform.js";
+import * as SDK14 from "./../../core/sdk/sdk.js";
+import * as AIAssistance from "./../../models/ai_assistance/ai_assistance.js";
+import * as CrUXManager5 from "./../../models/crux-manager/crux-manager.js";
+import * as Trace32 from "./../../models/trace/trace.js";
+import * as Workspace3 from "./../../models/workspace/workspace.js";
+import * as TraceBounds15 from "./../../services/trace_bounds/trace_bounds.js";
+import * as PerfUI16 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as UI18 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging10 from "./../../ui/visual_logging/visual_logging.js";
+import * as TimelineInsights2 from "./components/insights/insights.js";
 
 // gen/front_end/panels/timeline/CountersGraph.js
 var CountersGraph_exports = {};
@@ -2299,14 +2299,14 @@ __export(CountersGraph_exports, {
   CounterUI: () => CounterUI,
   CountersGraph: () => CountersGraph
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as i18n17 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
-import * as Trace11 from "./..\\..\\models\\trace\\trace.js";
-import * as TraceBounds3 from "./..\\..\\services\\trace_bounds\\trace_bounds.js";
-import * as PerfUI9 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as i18n17 from "./../../core/i18n/i18n.js";
+import * as Platform5 from "./../../core/platform/platform.js";
+import * as Trace11 from "./../../models/trace/trace.js";
+import * as TraceBounds3 from "./../../services/trace_bounds/trace_bounds.js";
+import * as PerfUI9 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 var UIStrings9 = {
   /**
    * @description Text for a heap profile type
@@ -2817,15 +2817,15 @@ var Calculator = class {
 var SHOULD_SHOW_EASTER_EGG = false;
 
 // gen/front_end/panels/timeline/TimelineFlameChartView.js
-import * as OverlayComponents from "./overlays\\components\\components.js";
-import * as Overlays3 from "./overlays\\overlays.js";
+import * as OverlayComponents from "./overlays/components/components.js";
+import * as Overlays3 from "./overlays/overlays.js";
 
 // gen/front_end/panels/timeline/TargetForEvent.js
 var TargetForEvent_exports = {};
 __export(TargetForEvent_exports, {
   targetForEvent: () => targetForEvent
 });
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
 function targetForEvent(parsedTrace, event) {
   const targetManager = SDK2.TargetManager.TargetManager.instance();
   const workerId = parsedTrace.data.Workers.workerIdByThread.get(event.tid);
@@ -2841,18 +2841,18 @@ __export(TimelineDetailsView_exports, {
   Tab: () => Tab,
   TimelineDetailsPane: () => TimelineDetailsPane
 });
-import * as Common14 from "./..\\..\\core\\common\\common.js";
-import * as i18n47 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform13 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK12 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Trace29 from "./..\\..\\models\\trace\\trace.js";
-import * as TraceBounds13 from "./..\\..\\services\\trace_bounds\\trace_bounds.js";
-import * as Tracing5 from "./..\\..\\services\\tracing\\tracing.js";
-import * as Components3 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI16 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives as Directives2, html as html3, nothing, render as render3 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging9 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as TimelineComponents5 from "./components\\components.js";
+import * as Common14 from "./../../core/common/common.js";
+import * as i18n47 from "./../../core/i18n/i18n.js";
+import * as Platform13 from "./../../core/platform/platform.js";
+import * as SDK12 from "./../../core/sdk/sdk.js";
+import * as Trace29 from "./../../models/trace/trace.js";
+import * as TraceBounds13 from "./../../services/trace_bounds/trace_bounds.js";
+import * as Tracing5 from "./../../services/tracing/tracing.js";
+import * as Components3 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI16 from "./../../ui/legacy/legacy.js";
+import { Directives as Directives2, html as html3, nothing, render as render3 } from "./../../ui/lit/lit.js";
+import * as VisualLogging9 from "./../../ui/visual_logging/visual_logging.js";
+import * as TimelineComponents5 from "./components/components.js";
 
 // gen/front_end/panels/timeline/EventsTimelineTreeView.js
 var EventsTimelineTreeView_exports = {};
@@ -2860,12 +2860,12 @@ __export(EventsTimelineTreeView_exports, {
   EventsTimelineTreeView: () => EventsTimelineTreeView,
   Filters: () => Filters
 });
-import * as Common12 from "./..\\..\\core\\common\\common.js";
-import * as i18n43 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Trace26 from "./..\\..\\models\\trace\\trace.js";
-import * as DataGrid5 from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as UI12 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging7 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common12 from "./../../core/common/common.js";
+import * as i18n43 from "./../../core/i18n/i18n.js";
+import * as Trace26 from "./../../models/trace/trace.js";
+import * as DataGrid5 from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as UI12 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging7 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/TimelineFilters.js
 var TimelineFilters_exports = {};
@@ -2874,7 +2874,7 @@ __export(TimelineFilters_exports, {
   IsLong: () => IsLong,
   TimelineRegExp: () => TimelineRegExp
 });
-import * as Trace25 from "./..\\..\\models\\trace\\trace.js";
+import * as Trace25 from "./../../models/trace/trace.js";
 
 // gen/front_end/panels/timeline/TimelineUIUtils.js
 var TimelineUIUtils_exports = {};
@@ -2889,18 +2889,18 @@ __export(TimelineUIUtils_exports, {
   previewElementSymbol: () => previewElementSymbol,
   timeStampForEventAdjustedForClosestNavigationIfPossible: () => timeStampForEventAdjustedForClosestNavigationIfPossible
 });
-import * as Common11 from "./..\\..\\core\\common\\common.js";
-import * as i18n41 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform12 from "./..\\..\\core\\platform\\platform.js";
-import * as Root5 from "./..\\..\\core\\root\\root.js";
-import * as SDK8 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings2 from "./..\\..\\models\\bindings\\bindings.js";
-import * as TextUtils3 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Trace24 from "./..\\..\\models\\trace\\trace.js";
-import * as SourceMapsResolver3 from "./..\\..\\models\\trace_source_maps_resolver\\trace_source_maps_resolver.js";
-import * as TraceBounds11 from "./..\\..\\services\\trace_bounds\\trace_bounds.js";
-import * as Tracing4 from "./..\\..\\services\\tracing\\tracing.js";
-import * as CodeHighlighter from "./..\\..\\ui\\components\\code_highlighter\\code_highlighter.js";
+import * as Common11 from "./../../core/common/common.js";
+import * as i18n41 from "./../../core/i18n/i18n.js";
+import * as Platform12 from "./../../core/platform/platform.js";
+import * as Root5 from "./../../core/root/root.js";
+import * as SDK8 from "./../../core/sdk/sdk.js";
+import * as Bindings2 from "./../../models/bindings/bindings.js";
+import * as TextUtils3 from "./../../models/text_utils/text_utils.js";
+import * as Trace24 from "./../../models/trace/trace.js";
+import * as SourceMapsResolver3 from "./../../models/trace_source_maps_resolver/trace_source_maps_resolver.js";
+import * as TraceBounds11 from "./../../services/trace_bounds/trace_bounds.js";
+import * as Tracing4 from "./../../services/tracing/tracing.js";
+import * as CodeHighlighter from "./../../ui/components/code_highlighter/code_highlighter.js";
 
 // gen/front_end/ui/components/code_highlighter/codeHighlighter.css.js
 var codeHighlighter_css_default = `/*
@@ -3010,8 +3010,8 @@ var codeHighlighter_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./codeHighlighter.css")} */`;
 
 // gen/front_end/panels/timeline/TimelineUIUtils.js
-import * as uiI18n from "./..\\..\\ui\\i18n\\i18n.js";
-import * as PerfUI13 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
+import * as uiI18n from "./../../ui/i18n/i18n.js";
+import * as PerfUI13 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
 
 // gen/front_end/ui/legacy/components/utils/imagePreview.css.js
 var imagePreview_css_default = `/*
@@ -3091,12 +3091,12 @@ var imagePreview_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./imagePreview.css")} */`;
 
 // gen/front_end/panels/timeline/TimelineUIUtils.js
-import * as LegacyComponents from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI11 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport19 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as PanelsCommon from "./..\\common\\common.js";
-import * as TimelineComponents4 from "./components\\components.js";
-import * as Extensions3 from "./extensions\\extensions.js";
+import * as LegacyComponents from "./../../ui/legacy/components/utils/utils.js";
+import * as UI11 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport19 from "./../../ui/legacy/theme_support/theme_support.js";
+import * as PanelsCommon from "./../common/common.js";
+import * as TimelineComponents4 from "./components/components.js";
+import * as Extensions3 from "./extensions/extensions.js";
 
 // gen/front_end/panels/timeline/ThirdPartyTreeView.js
 var ThirdPartyTreeView_exports = {};
@@ -3104,11 +3104,11 @@ __export(ThirdPartyTreeView_exports, {
   ThirdPartyTreeElement: () => ThirdPartyTreeElement,
   ThirdPartyTreeViewWidget: () => ThirdPartyTreeViewWidget
 });
-import * as i18n21 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Trace14 from "./..\\..\\models\\trace\\trace.js";
-import * as DataGrid3 from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n21 from "./../../core/i18n/i18n.js";
+import * as Trace14 from "./../../models/trace/trace.js";
+import * as DataGrid3 from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/thirdPartyTreeView.css.js
 var thirdPartyTreeView_css_default = `/*
@@ -3243,18 +3243,18 @@ __export(TimelineTreeView_exports, {
   TimelineTreeView: () => TimelineTreeView,
   TreeGridNode: () => TreeGridNode
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as i18n19 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform7 from "./..\\..\\core\\platform\\platform.js";
-import * as Trace13 from "./..\\..\\models\\trace\\trace.js";
-import * as Tracing from "./..\\..\\services\\tracing\\tracing.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as DataGrid from "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as Components2 from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport13 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as i18n19 from "./../../core/i18n/i18n.js";
+import * as Platform7 from "./../../core/platform/platform.js";
+import * as Trace13 from "./../../models/trace/trace.js";
+import * as Tracing from "./../../services/tracing/tracing.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as DataGrid from "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as Components2 from "./../../ui/legacy/components/utils/utils.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport13 from "./../../ui/legacy/theme_support/theme_support.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/ActiveFilters.js
 var instance = null;
@@ -3282,7 +3282,7 @@ var ActiveFilters = class _ActiveFilters {
 };
 
 // gen/front_end/panels/timeline/TimelineTreeView.js
-import * as Extensions2 from "./extensions\\extensions.js";
+import * as Extensions2 from "./extensions/extensions.js";
 
 // gen/front_end/panels/timeline/TimelineSelection.js
 var TimelineSelection_exports = {};
@@ -3295,8 +3295,8 @@ __export(TimelineSelection_exports, {
   selectionIsRange: () => selectionIsRange,
   selectionsEqual: () => selectionsEqual
 });
-import * as Platform6 from "./..\\..\\core\\platform\\platform.js";
-import * as Trace12 from "./..\\..\\models\\trace\\trace.js";
+import * as Platform6 from "./../../core/platform/platform.js";
+import * as Trace12 from "./../../models/trace/trace.js";
 function selectionFromEvent(event) {
   return {
     event
@@ -4835,41 +4835,41 @@ __export(TimelinePanel_exports, {
   headerHeight: () => headerHeight,
   rowHeight: () => rowHeight
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common10 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n39 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform11 from "./..\\..\\core\\platform\\platform.js";
-import * as Root4 from "./..\\..\\core\\root\\root.js";
-import * as SDK7 from "./..\\..\\core\\sdk\\sdk.js";
-import * as AiAssistanceModel from "./..\\..\\models\\ai_assistance\\ai_assistance.js";
-import * as Badges from "./..\\..\\models\\badges\\badges.js";
-import * as CrUXManager3 from "./..\\..\\models\\crux-manager\\crux-manager.js";
-import * as TextUtils2 from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Trace23 from "./..\\..\\models\\trace\\trace.js";
-import * as SourceMapsResolver from "./..\\..\\models\\trace_source_maps_resolver\\trace_source_maps_resolver.js";
-import * as Workspace2 from "./..\\..\\models\\workspace\\workspace.js";
-import * as TraceBounds9 from "./..\\..\\services\\trace_bounds\\trace_bounds.js";
-import * as Tracing3 from "./..\\..\\services\\tracing\\tracing.js";
-import * as Adorners from "./..\\..\\ui\\components\\adorners\\adorners.js";
-import * as Dialogs from "./..\\..\\ui\\components\\dialogs\\dialogs.js";
-import * as LegacyWrapper from "./..\\..\\ui\\components\\legacy_wrapper\\legacy_wrapper.js";
-import * as Snackbars from "./..\\..\\ui\\components\\snackbars\\snackbars.js";
-import * as PerfUI12 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as SettingsUI from "./..\\..\\ui\\legacy\\components\\settings_ui\\settings_ui.js";
-import * as UI10 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport17 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as VisualLogging6 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as MobileThrottling from "./..\\mobile_throttling\\mobile_throttling.js";
-import * as TimelineComponents3 from "./components\\components.js";
-import * as TimelineInsights from "./components\\insights\\insights.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common10 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n39 from "./../../core/i18n/i18n.js";
+import * as Platform11 from "./../../core/platform/platform.js";
+import * as Root4 from "./../../core/root/root.js";
+import * as SDK7 from "./../../core/sdk/sdk.js";
+import * as AiAssistanceModel from "./../../models/ai_assistance/ai_assistance.js";
+import * as Badges from "./../../models/badges/badges.js";
+import * as CrUXManager3 from "./../../models/crux-manager/crux-manager.js";
+import * as TextUtils2 from "./../../models/text_utils/text_utils.js";
+import * as Trace23 from "./../../models/trace/trace.js";
+import * as SourceMapsResolver from "./../../models/trace_source_maps_resolver/trace_source_maps_resolver.js";
+import * as Workspace2 from "./../../models/workspace/workspace.js";
+import * as TraceBounds9 from "./../../services/trace_bounds/trace_bounds.js";
+import * as Tracing3 from "./../../services/tracing/tracing.js";
+import * as Adorners from "./../../ui/components/adorners/adorners.js";
+import * as Dialogs from "./../../ui/components/dialogs/dialogs.js";
+import * as LegacyWrapper from "./../../ui/components/legacy_wrapper/legacy_wrapper.js";
+import * as Snackbars from "./../../ui/components/snackbars/snackbars.js";
+import * as PerfUI12 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as SettingsUI from "./../../ui/legacy/components/settings_ui/settings_ui.js";
+import * as UI10 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport17 from "./../../ui/legacy/theme_support/theme_support.js";
+import * as VisualLogging6 from "./../../ui/visual_logging/visual_logging.js";
+import * as MobileThrottling from "./../mobile_throttling/mobile_throttling.js";
+import * as TimelineComponents3 from "./components/components.js";
+import * as TimelineInsights from "./components/insights/insights.js";
 
 // gen/front_end/panels/timeline/IsolateSelector.js
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as i18n23 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Menus from "./..\\..\\ui\\components\\menus\\menus.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as i18n23 from "./../../core/i18n/i18n.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as Menus from "./../../ui/components/menus/menus.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
 var UIStrings12 = {
   /**
    * @description Text to show an item is empty
@@ -4964,7 +4964,7 @@ var IsolateSelector = class extends UI4.Toolbar.ToolbarItem {
 };
 
 // gen/front_end/panels/timeline/TimelinePanel.js
-import * as Overlays from "./overlays\\overlays.js";
+import * as Overlays from "./overlays/overlays.js";
 
 // gen/front_end/panels/timeline/SaveFileFormatter.js
 var SaveFileFormatter_exports = {};
@@ -5009,13 +5009,13 @@ function* traceJsonGenerator(traceEvents, metadata) {
 }
 
 // gen/front_end/panels/timeline/StatusDialog.js
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as i18n25 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform8 from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\..\\models\\workspace\\workspace.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as i18n25 from "./../../core/i18n/i18n.js";
+import * as Platform8 from "./../../core/platform/platform.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as Workspace from "./../../models/workspace/workspace.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/timelineStatusDialog.css.js
 var timelineStatusDialog_css_default = `/*
@@ -5281,14 +5281,14 @@ var TimelineController_exports = {};
 __export(TimelineController_exports, {
   TimelineController: () => TimelineController
 });
-import * as i18n27 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
-import * as CrUXManager from "./..\\..\\models\\crux-manager\\crux-manager.js";
-import * as LiveMetrics from "./..\\..\\models\\live-metrics\\live-metrics.js";
-import * as Trace16 from "./..\\..\\models\\trace\\trace.js";
-import * as PanelCommon from "./..\\common\\common.js";
-import * as Tracing2 from "./..\\..\\services\\tracing\\tracing.js";
+import * as i18n27 from "./../../core/i18n/i18n.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as SDK5 from "./../../core/sdk/sdk.js";
+import * as CrUXManager from "./../../models/crux-manager/crux-manager.js";
+import * as LiveMetrics from "./../../models/live-metrics/live-metrics.js";
+import * as Trace16 from "./../../models/trace/trace.js";
+import * as PanelCommon from "./../common/common.js";
+import * as Tracing2 from "./../../services/tracing/tracing.js";
 
 // gen/front_end/panels/timeline/RecordingMetadata.js
 var RecordingMetadata_exports = {};
@@ -5296,9 +5296,9 @@ __export(RecordingMetadata_exports, {
   forCPUProfile: () => forCPUProfile,
   forTrace: () => forTrace
 });
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as EmulationModel from "./..\\..\\models\\emulation\\emulation.js";
-import * as Trace15 from "./..\\..\\models\\trace\\trace.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
+import * as EmulationModel from "./../../models/emulation/emulation.js";
+import * as Trace15 from "./../../models/trace/trace.js";
 function forCPUProfile() {
   return {
     dataOrigin: "CPUProfile"
@@ -5689,13 +5689,13 @@ __export(TimelineHistoryManager_exports, {
   maxRecordings: () => maxRecordings,
   previewWidth: () => previewWidth
 });
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as i18n31 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform9 from "./..\\..\\core\\platform\\platform.js";
-import * as Trace18 from "./..\\..\\models\\trace\\trace.js";
-import { createIcon } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI7 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging5 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as i18n31 from "./../../core/i18n/i18n.js";
+import * as Platform9 from "./../../core/platform/platform.js";
+import * as Trace18 from "./../../models/trace/trace.js";
+import { createIcon } from "./../../ui/kit/kit.js";
+import * as UI7 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging5 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/TimelineEventOverview.js
 var TimelineEventOverview_exports = {};
@@ -5708,13 +5708,13 @@ __export(TimelineEventOverview_exports, {
   TimelineEventOverviewResponsiveness: () => TimelineEventOverviewResponsiveness,
   TimelineFilmStripOverview: () => TimelineFilmStripOverview
 });
-import * as i18n29 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Trace17 from "./..\\..\\models\\trace\\trace.js";
-import * as TraceBounds5 from "./..\\..\\services\\trace_bounds\\trace_bounds.js";
-import * as PerfUI10 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as UI6 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport15 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as VisualLogging4 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as i18n29 from "./../../core/i18n/i18n.js";
+import * as Trace17 from "./../../models/trace/trace.js";
+import * as TraceBounds5 from "./../../services/trace_bounds/trace_bounds.js";
+import * as PerfUI10 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as UI6 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport15 from "./../../ui/legacy/theme_support/theme_support.js";
+import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings15 = {
   /**
    * @description Short for Network. Label for the network requests section of the Performance panel.
@@ -6833,11 +6833,11 @@ var TimelineLoader_exports = {};
 __export(TimelineLoader_exports, {
   TimelineLoader: () => TimelineLoader
 });
-import * as Common8 from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n33 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK6 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Trace19 from "./..\\..\\models\\trace\\trace.js";
+import * as Common8 from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n33 from "./../../core/i18n/i18n.js";
+import * as SDK6 from "./../../core/sdk/sdk.js";
+import * as Trace19 from "./../../models/trace/trace.js";
 var UIStrings17 = {
   /**
    * @description Text in Timeline Loader of the Performance panel
@@ -7018,12 +7018,12 @@ var TimelineMiniMap_exports = {};
 __export(TimelineMiniMap_exports, {
   TimelineMiniMap: () => TimelineMiniMap
 });
-import * as Common9 from "./..\\..\\core\\common\\common.js";
-import * as Trace20 from "./..\\..\\models\\trace\\trace.js";
-import * as TraceBounds7 from "./..\\..\\services\\trace_bounds\\trace_bounds.js";
-import * as PerfUI11 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as UI8 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as TimelineComponents2 from "./components\\components.js";
+import * as Common9 from "./../../core/common/common.js";
+import * as Trace20 from "./../../models/trace/trace.js";
+import * as TraceBounds7 from "./../../services/trace_bounds/trace_bounds.js";
+import * as PerfUI11 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as UI8 from "./../../ui/legacy/legacy.js";
+import * as TimelineComponents2 from "./components/components.js";
 
 // gen/front_end/panels/timeline/timelineMiniMap.css.js
 var timelineMiniMap_css_default = `/*
@@ -7744,9 +7744,9 @@ var TrackConfigBanner_exports = {};
 __export(TrackConfigBanner_exports, {
   createHiddenTracksOverlay: () => createHiddenTracksOverlay
 });
-import * as i18n35 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI9 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as i18n35 from "./../../core/i18n/i18n.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import * as UI9 from "./../../ui/legacy/legacy.js";
 var UIStrings18 = {
   /**
    * @description Message shown in a banner when some tracks are hidden in the timeline.
@@ -7801,7 +7801,7 @@ var UIDevtoolsController_exports = {};
 __export(UIDevtoolsController_exports, {
   UIDevtoolsController: () => UIDevtoolsController
 });
-import * as Trace22 from "./..\\..\\models\\trace\\trace.js";
+import * as Trace22 from "./../../models/trace/trace.js";
 
 // gen/front_end/panels/timeline/UIDevtoolsUtils.js
 var UIDevtoolsUtils_exports = {};
@@ -7809,9 +7809,9 @@ __export(UIDevtoolsUtils_exports, {
   RecordType: () => RecordType,
   UIDevtoolsUtils: () => UIDevtoolsUtils
 });
-import * as i18n37 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root3 from "./..\\..\\core\\root\\root.js";
-import * as Trace21 from "./..\\..\\models\\trace\\trace.js";
+import * as i18n37 from "./../../core/i18n/i18n.js";
+import * as Root3 from "./../../core/root/root.js";
+import * as Trace21 from "./../../models/trace/trace.js";
 var UIStrings19 = {
   /**
    * @description Text in Timeline UIUtils of the Performance panel
@@ -7969,7 +7969,7 @@ var UIDevtoolsController = class extends TimelineController {
 };
 
 // gen/front_end/panels/timeline/TimelinePanel.js
-import * as Utils3 from "./utils\\utils.js";
+import * as Utils3 from "./utils/utils.js";
 var UIStrings20 = {
   /**
    * @description Text that appears when user drag and drop something (for example, a file) in Timeline Panel of the Performance panel
@@ -10543,7 +10543,7 @@ var SelectedInsight = class {
 };
 
 // gen/front_end/panels/timeline/TimelineUIUtils.js
-import * as Utils4 from "./utils\\utils.js";
+import * as Utils4 from "./utils/utils.js";
 var UIStrings21 = {
   /**
    * @description Text that only contain a placeholder
@@ -12862,8 +12862,8 @@ var TimelineLayersView_exports = {};
 __export(TimelineLayersView_exports, {
   TimelineLayersView: () => TimelineLayersView
 });
-import * as UI13 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as LayerViewer from "./..\\layer_viewer\\layer_viewer.js";
+import * as UI13 from "./../../ui/legacy/legacy.js";
+import * as LayerViewer from "./../layer_viewer/layer_viewer.js";
 var TimelineLayersView = class extends UI13.SplitWidget.SplitWidget {
   showPaintProfilerCallback;
   rightSplitWidget;
@@ -12926,12 +12926,12 @@ __export(TimelinePaintProfilerView_exports, {
   TimelinePaintImageView: () => TimelinePaintImageView,
   TimelinePaintProfilerView: () => TimelinePaintProfilerView
 });
-import * as SDK10 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Geometry2 from "./..\\..\\models\\geometry\\geometry.js";
-import * as Trace27 from "./..\\..\\models\\trace\\trace.js";
-import * as UI14 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as LayerViewer2 from "./..\\layer_viewer\\layer_viewer.js";
+import * as SDK10 from "./../../core/sdk/sdk.js";
+import * as Geometry2 from "./../../models/geometry/geometry.js";
+import * as Trace27 from "./../../models/trace/trace.js";
+import * as UI14 from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as LayerViewer2 from "./../layer_viewer/layer_viewer.js";
 
 // gen/front_end/panels/timeline/timelinePaintProfiler.css.js
 var timelinePaintProfiler_css_default = `/*
@@ -12964,8 +12964,8 @@ var timelinePaintProfiler_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./timelinePaintProfiler.css")} */`;
 
 // gen/front_end/panels/timeline/TracingLayerTree.js
-import * as Common13 from "./..\\..\\core\\common\\common.js";
-import * as SDK9 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common13 from "./../../core/common/common.js";
+import * as SDK9 from "./../../core/sdk/sdk.js";
 var TracingLayerTree = class extends SDK9.LayerTreeBase.LayerTreeBase {
   tileById = /* @__PURE__ */ new Map();
   paintProfilerModel;
@@ -13555,14 +13555,14 @@ var TimelinePaintImageView = class extends UI14.Widget.Widget {
 };
 
 // gen/front_end/panels/timeline/TimelineSelectorStatsView.js
-import "./..\\..\\ui\\components\\linkifier\\linkifier.js";
-import "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as i18n45 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK11 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Trace28 from "./..\\..\\models\\trace\\trace.js";
-import * as UI15 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html2, render as render2 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging8 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/components/linkifier/linkifier.js";
+import "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as i18n45 from "./../../core/i18n/i18n.js";
+import * as SDK11 from "./../../core/sdk/sdk.js";
+import * as Trace28 from "./../../models/trace/trace.js";
+import * as UI15 from "./../../ui/legacy/legacy.js";
+import { html as html2, render as render2 } from "./../../ui/lit/lit.js";
+import * as VisualLogging8 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/timeline/timelineSelectorStatsView.css.js
 var timelineSelectorStatsView_css_default = `/*
@@ -13578,7 +13578,7 @@ devtools-data-grid {
 /*# sourceURL=${import.meta.resolve("./timelineSelectorStatsView.css")} */`;
 
 // gen/front_end/panels/timeline/TimelineSelectorStatsView.js
-import * as Utils5 from "./utils\\utils.js";
+import * as Utils5 from "./utils/utils.js";
 var UIStrings23 = {
   /**
    * @description Label for selector stats data table
@@ -14544,25 +14544,25 @@ var TimelineFlameChartNetworkDataProvider_exports = {};
 __export(TimelineFlameChartNetworkDataProvider_exports, {
   TimelineFlameChartNetworkDataProvider: () => TimelineFlameChartNetworkDataProvider
 });
-import * as i18n51 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform14 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK13 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Trace31 from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI15 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as UI17 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as ThemeSupport23 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as TimelineComponents6 from "./components\\components.js";
+import * as i18n51 from "./../../core/i18n/i18n.js";
+import * as Platform14 from "./../../core/platform/platform.js";
+import * as SDK13 from "./../../core/sdk/sdk.js";
+import * as Trace31 from "./../../models/trace/trace.js";
+import * as PerfUI15 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as UI17 from "./../../ui/legacy/legacy.js";
+import * as ThemeSupport23 from "./../../ui/legacy/theme_support/theme_support.js";
+import * as TimelineComponents6 from "./components/components.js";
 
 // gen/front_end/panels/timeline/NetworkTrackAppender.js
 var NetworkTrackAppender_exports = {};
 __export(NetworkTrackAppender_exports, {
   NetworkTrackAppender: () => NetworkTrackAppender
 });
-import * as i18n49 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Trace30 from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI14 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as ThemeSupport21 from "./..\\..\\ui\\legacy\\theme_support\\theme_support.js";
-import * as Components4 from "./components\\components.js";
+import * as i18n49 from "./../../core/i18n/i18n.js";
+import * as Trace30 from "./../../models/trace/trace.js";
+import * as PerfUI14 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as ThemeSupport21 from "./../../ui/legacy/theme_support/theme_support.js";
+import * as Components4 from "./components/components.js";
 var UIStrings25 = {
   /**
    * @description Text in Timeline Flame Chart Data Provider of the Performance panel
@@ -15461,7 +15461,7 @@ var timelineFlameChartView_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./timelineFlameChartView.css")} */`;
 
 // gen/front_end/panels/timeline/TimelineFlameChartView.js
-import * as Utils7 from "./utils\\utils.js";
+import * as Utils7 from "./utils/utils.js";
 var UIStrings26 = {
   /**
    * @description Text in Timeline Flame Chart View of the Performance panel
@@ -16950,7 +16950,7 @@ function groupForLevel(groups, level) {
 }
 
 // gen/front_end/panels/timeline/TimelineFlameChartDataProvider.js
-import * as Utils8 from "./utils\\utils.js";
+import * as Utils8 from "./utils/utils.js";
 var UIStrings27 = {
   /**
    * @description Text for rendering frames
@@ -18037,10 +18037,10 @@ __export(TimingsTrackAppender_exports, {
   SORT_ORDER_PAGE_LOAD_MARKERS: () => SORT_ORDER_PAGE_LOAD_MARKERS2,
   TimingsTrackAppender: () => TimingsTrackAppender
 });
-import * as i18n56 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Trace34 from "./..\\..\\models\\trace\\trace.js";
-import * as PerfUI18 from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as Extensions4 from "./extensions\\extensions.js";
+import * as i18n56 from "./../../core/i18n/i18n.js";
+import * as Trace34 from "./../../models/trace/trace.js";
+import * as PerfUI18 from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as Extensions4 from "./extensions/extensions.js";
 var UIStrings28 = {
   /**
    * @description Text in Timeline Flame Chart Data Provider of the Performance panel
@@ -18281,7 +18281,7 @@ var TimingsTrackAppender = class {
 };
 
 // gen/front_end/panels/timeline/CompatibilityTracksAppender.js
-import * as TimelineUtils from "./utils\\utils.js";
+import * as TimelineUtils from "./utils/utils.js";
 var showPostMessageEvents;
 function isShowPostMessageEventsEnabled() {
   if (showPostMessageEvents === void 0) {
@@ -18713,7 +18713,7 @@ var CompatibilityTracksAppender = class {
 };
 
 // gen/front_end/panels/timeline/timeline.prebundle.js
-import * as Utils9 from "./utils\\utils.js";
+import * as Utils9 from "./utils/utils.js";
 export {
   AnimationsTrackAppender_exports as AnimationsTrackAppender,
   AnnotationHelpers_exports as AnnotationHelpers,

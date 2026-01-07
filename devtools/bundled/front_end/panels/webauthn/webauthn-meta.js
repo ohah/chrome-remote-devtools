@@ -1,5 +1,5 @@
 // gen/front_end/panels/webauthn/webauthn-meta.prebundle.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n from "./../../core/i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Title of WebAuthn tab in bottom drawer.

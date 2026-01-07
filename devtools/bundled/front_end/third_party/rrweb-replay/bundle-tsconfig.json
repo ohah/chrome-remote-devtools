@@ -1,1 +1,1 @@
-{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"..\\..\\..\\..\\..\\..\\front_end\\third_party\\rrweb-replay"},"files":["..\\..\\..\\..\\..\\..\\front_end\\third_party\\rrweb-replay\\rrweb-replay.ts"],"references":[{"path":"./rrweb-replay-tsconfig.json"}]}
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/third_party/rrweb-replay"},"files":["../../../../../../front_end/third_party/rrweb-replay/rrweb-replay.ts"],"references":[{"path":"./rrweb-replay-tsconfig.json"}]}

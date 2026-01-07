@@ -9,9 +9,9 @@ var Button_exports = {};
 __export(Button_exports, {
   Button: () => Button
 });
-import "./..\\..\\kit\\kit.js";
-import * as Lit from "./..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\visual_logging\\visual_logging.js";
+import "./../../kit/kit.js";
+import * as Lit from "./../../lit/lit.js";
+import * as VisualLogging from "./../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/components/buttons/button.css.js
 var button_css_default = `/*
@@ -661,9 +661,9 @@ __export(FloatingButton_exports, {
   FloatingButton: () => FloatingButton,
   create: () => create
 });
-import "./..\\..\\kit\\kit.js";
-import * as VisualLogging2 from "./..\\..\\visual_logging\\visual_logging.js";
-import * as Lit2 from "./..\\..\\lit\\lit.js";
+import "./../../kit/kit.js";
+import * as VisualLogging2 from "./../../visual_logging/visual_logging.js";
+import * as Lit2 from "./../../lit/lit.js";
 
 // gen/front_end/ui/components/buttons/floatingButton.css.js
 var floatingButton_css_default = `/*

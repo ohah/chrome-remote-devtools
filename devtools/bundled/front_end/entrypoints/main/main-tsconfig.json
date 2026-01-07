@@ -24,7 +24,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "outDir": ".",
-    "rootDir": "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\main",
+    "rootDir": "../../../../../../front_end/entrypoints/main",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
@@ -35,13 +35,13 @@
     "useUnknownInCatchVariables": false
   },
   "files": [
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\main\\ExecutionContextSelector.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\main\\GlobalAiButton.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\main\\MainImpl.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\entrypoints\\main\\SimpleApp.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\legacy\\legacy-defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\front_end\\global_typings\\global_defs.d.ts",
-    "..\\..\\..\\..\\..\\..\\node_modules\\@types\\filesystem\\index.d.ts"
+    "../../../../../../front_end/entrypoints/main/ExecutionContextSelector.ts",
+    "../../../../../../front_end/entrypoints/main/GlobalAiButton.ts",
+    "../../../../../../front_end/entrypoints/main/MainImpl.ts",
+    "../../../../../../front_end/entrypoints/main/SimpleApp.ts",
+    "../../../../../../front_end/legacy/legacy-defs.d.ts",
+    "../../../../../../front_end/global_typings/global_defs.d.ts",
+    "../../../../../../node_modules/@types/filesystem/index.d.ts"
   ],
   "references": [
     {

@@ -9,9 +9,9 @@ var SessionReplayPanel_exports = {};
 __export(SessionReplayPanel_exports, {
   SessionReplayPanel: () => SessionReplayPanel
 });
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import { Replayer, cssStyles } from "./..\\..\\third_party\\rrweb-replay\\rrweb-replay.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import { Replayer, cssStyles } from "./../../third_party/rrweb-replay/rrweb-replay.js";
 var sessionReplayPanelInstance;
 var SessionReplayPanel = class _SessionReplayPanel extends UI.Panel.Panel {
   #rrwebEvents = [];

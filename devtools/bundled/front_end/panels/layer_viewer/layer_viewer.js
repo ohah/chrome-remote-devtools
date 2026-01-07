@@ -11,12 +11,12 @@ __export(LayerDetailsView_exports, {
   LayerDetailsView: () => LayerDetailsView,
   slowScrollRectNames: () => slowScrollRectNames
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/layer_viewer/layerDetailsView.css.js
 var layerDetailsView_css_default = `/*
@@ -74,9 +74,9 @@ __export(LayerViewHost_exports, {
   Selection: () => Selection,
   SnapshotSelection: () => SnapshotSelection
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 var UIStrings = {
   /**
    * @description Text in Layer View Host of the Layers panel
@@ -536,9 +536,9 @@ __export(LayerTreeOutline_exports, {
   LayerTreeOutline: () => LayerTreeOutline,
   layerToTreeElement: () => layerToTreeElement
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/layer_viewer/layerTreeOutline.css.js
 var layerTreeOutline_css_default = `/*
@@ -819,14 +819,14 @@ __export(Layers3DView_exports, {
   ViewportBorderColor: () => ViewportBorderColor,
   ViewportBorderWidth: () => ViewportBorderWidth
 });
-import * as Common5 from "./..\\..\\core\\common\\common.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as Geometry from "./..\\..\\models\\geometry\\geometry.js";
-import * as uiI18n from "./..\\..\\ui\\i18n\\i18n.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common5 from "./../../core/common/common.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as Geometry from "./../../models/geometry/geometry.js";
+import * as uiI18n from "./../../ui/i18n/i18n.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/layer_viewer/layers3DView.css.js
 var layers3DView_css_default = `/*
@@ -866,12 +866,12 @@ var TransformController_exports = {};
 __export(TransformController_exports, {
   TransformController: () => TransformController
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 var UIStrings4 = {
   /**
    * @description Tooltip text that appears when hovering over largeicon pan button in Transform Controller of the Layers panel
@@ -2183,11 +2183,11 @@ __export(PaintProfilerView_exports, {
   PaintProfilerCommandLogView: () => PaintProfilerCommandLogView,
   PaintProfilerView: () => PaintProfilerView
 });
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as PerfUI from "./..\\..\\ui\\legacy\\components\\perf_ui\\perf_ui.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as PerfUI from "./../../ui/legacy/components/perf_ui/perf_ui.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/layer_viewer/paintProfiler.css.js
 var paintProfiler_css_default = `/*

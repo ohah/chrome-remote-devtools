@@ -9,10 +9,10 @@ var DeviceSizeInputElement_exports = {};
 __export(DeviceSizeInputElement_exports, {
   SizeInputElement: () => SizeInputElement
 });
-import * as EmulationModel from "./..\\..\\..\\models\\emulation\\emulation.js";
-import * as UILegacy from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html, render } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as EmulationModel from "./../../../models/emulation/emulation.js";
+import * as UILegacy from "./../../../ui/legacy/legacy.js";
+import { html, render } from "./../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
 var SizeChangedEvent = class _SizeChangedEvent extends Event {
   size;
   static eventName = "sizechanged";

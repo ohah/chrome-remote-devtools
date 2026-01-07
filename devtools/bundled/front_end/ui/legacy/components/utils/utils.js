@@ -9,11 +9,11 @@ var ImagePreview_exports = {};
 __export(ImagePreview_exports, {
   ImagePreview: () => ImagePreview
 });
-import * as Common from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
+import * as Common from "./../../../../core/common/common.js";
+import * as Host from "./../../../../core/host/host.js";
+import * as i18n from "./../../../../core/i18n/i18n.js";
+import * as Platform from "./../../../../core/platform/platform.js";
+import * as SDK from "./../../../../core/sdk/sdk.js";
 
 // gen/front_end/ui/legacy/components/utils/imagePreview.css.js
 var imagePreview_css_default = `/*
@@ -249,13 +249,13 @@ __export(JSPresentationUtils_exports, {
   buildStackTraceRows: () => buildStackTraceRows,
   buildStackTraceRowsForLegacyRuntimeStackTrace: () => buildStackTraceRowsForLegacyRuntimeStackTrace
 });
-import * as Common3 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as i18n5 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK3 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as StackTrace from "./..\\..\\..\\..\\models\\stack_trace\\stack_trace.js";
-import * as Workspace3 from "./..\\..\\..\\..\\models\\workspace\\workspace.js";
-import * as VisualLogging2 from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI2 from "./..\\..\\legacy.js";
+import * as Common3 from "./../../../../core/common/common.js";
+import * as i18n5 from "./../../../../core/i18n/i18n.js";
+import * as SDK3 from "./../../../../core/sdk/sdk.js";
+import * as StackTrace from "./../../../../models/stack_trace/stack_trace.js";
+import * as Workspace3 from "./../../../../models/workspace/workspace.js";
+import * as VisualLogging2 from "./../../../visual_logging/visual_logging.js";
+import * as UI2 from "./../../legacy.js";
 
 // gen/front_end/ui/legacy/components/utils/jsUtils.css.js
 var jsUtils_css_default = `/*
@@ -408,19 +408,19 @@ __export(Linkifier_exports, {
   Linkifier: () => Linkifier,
   ScriptLocationLink: () => ScriptLocationLink
 });
-import * as Common2 from "./..\\..\\..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as Bindings from "./..\\..\\..\\..\\models\\bindings\\bindings.js";
-import * as Breakpoints from "./..\\..\\..\\..\\models\\breakpoints\\breakpoints.js";
-import * as TextUtils from "./..\\..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as Workspace from "./..\\..\\..\\..\\models\\workspace\\workspace.js";
-import * as UIHelpers from "./..\\..\\..\\helpers\\helpers.js";
-import { html, render } from "./..\\..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\visual_logging\\visual_logging.js";
-import * as UI from "./..\\..\\legacy.js";
+import * as Common2 from "./../../../../core/common/common.js";
+import * as Host2 from "./../../../../core/host/host.js";
+import * as i18n3 from "./../../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../../core/platform/platform.js";
+import * as SDK2 from "./../../../../core/sdk/sdk.js";
+import * as Bindings from "./../../../../models/bindings/bindings.js";
+import * as Breakpoints from "./../../../../models/breakpoints/breakpoints.js";
+import * as TextUtils from "./../../../../models/text_utils/text_utils.js";
+import * as Workspace from "./../../../../models/workspace/workspace.js";
+import * as UIHelpers from "./../../../helpers/helpers.js";
+import { html, render } from "./../../../lit/lit.js";
+import * as VisualLogging from "./../../../visual_logging/visual_logging.js";
+import * as UI from "./../../legacy.js";
 var UIStrings2 = {
   /**
    * @description Text in Linkifier
@@ -1559,8 +1559,8 @@ var Reload_exports = {};
 __export(Reload_exports, {
   reload: () => reload
 });
-import * as Host3 from "./..\\..\\..\\..\\core\\host\\host.js";
-import * as UI3 from "./..\\..\\legacy.js";
+import * as Host3 from "./../../../../core/host/host.js";
+import * as UI3 from "./../../legacy.js";
 function reload() {
   if (UI3.DockController.DockController.instance().canDock() && UI3.DockController.DockController.instance().dockSide() === "undocked") {
     Host3.InspectorFrontendHost.InspectorFrontendHostInstance.setIsDocked(true, function() {
@@ -1574,8 +1574,8 @@ var TargetDetachedDialog_exports = {};
 __export(TargetDetachedDialog_exports, {
   TargetDetachedDialog: () => TargetDetachedDialog
 });
-import * as SDK4 from "./..\\..\\..\\..\\core\\sdk\\sdk.js";
-import * as UI4 from "./..\\..\\legacy.js";
+import * as SDK4 from "./../../../../core/sdk/sdk.js";
+import * as UI4 from "./../../legacy.js";
 var TargetDetachedDialog = class _TargetDetachedDialog extends SDK4.SDKModel.SDKModel {
   static hideCrashedDialog;
   constructor(target) {

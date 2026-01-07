@@ -24,8 +24,8 @@ __export(AidaClient_exports, {
   UserTier: () => UserTier,
   convertToUserTierEnum: () => convertToUserTierEnum
 });
-import * as Common4 from "./..\\common\\common.js";
-import * as Root2 from "./..\\root\\root.js";
+import * as Common4 from "./../common/common.js";
+import * as Root2 from "./../root/root.js";
 
 // gen/front_end/core/host/DispatchHttpRequestClient.js
 var DispatchHttpRequestClient_exports = {};
@@ -43,8 +43,8 @@ __export(InspectorFrontendHost_exports, {
   installInspectorFrontendHost: () => installInspectorFrontendHost,
   isUnderTest: () => isUnderTest
 });
-import * as Common3 from "./..\\common\\common.js";
-import * as Root from "./..\\root\\root.js";
+import * as Common3 from "./../common/common.js";
+import * as Root from "./../root/root.js";
 
 // gen/front_end/core/host/InspectorFrontendHostAPI.js
 var InspectorFrontendHostAPI_exports = {};
@@ -115,9 +115,9 @@ var EventDescriptors = [
 ];
 
 // gen/front_end/core/host/InspectorFrontendHostStub.js
-import * as Common2 from "./..\\common\\common.js";
-import * as i18n3 from "./..\\i18n\\i18n.js";
-import * as Platform from "./..\\platform\\platform.js";
+import * as Common2 from "./../common/common.js";
+import * as i18n3 from "./../i18n/i18n.js";
+import * as Platform from "./../platform/platform.js";
 
 // gen/front_end/core/host/ResourceLoader.js
 var ResourceLoader_exports = {};
@@ -130,8 +130,8 @@ __export(ResourceLoader_exports, {
   netErrorToMessage: () => netErrorToMessage,
   streamWrite: () => streamWrite
 });
-import * as Common from "./..\\common\\common.js";
-import * as i18n from "./..\\i18n\\i18n.js";
+import * as Common from "./../common/common.js";
+import * as i18n from "./../i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Name of an error category used in error messages
@@ -1239,7 +1239,7 @@ __export(GdpClient_exports, {
   isGdpProfilesAvailable: () => isGdpProfilesAvailable,
   isStarterBadgeEnabled: () => isStarterBadgeEnabled
 });
-import * as Root3 from "./..\\root\\root.js";
+import * as Root3 from "./../root/root.js";
 var SubscriptionStatus;
 (function(SubscriptionStatus2) {
   SubscriptionStatus2["ENABLED"] = "SUBSCRIPTION_STATE_ENABLED";

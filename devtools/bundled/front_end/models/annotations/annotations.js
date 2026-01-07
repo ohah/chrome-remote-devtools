@@ -1,6 +1,6 @@
 // gen/front_end/models/annotations/AnnotationRepository.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as GreenDev from "./..\\greendev\\greendev.js";
+import * as Common from "./../../core/common/common.js";
+import * as GreenDev from "./../greendev/greendev.js";
 
 // gen/front_end/models/annotations/AnnotationType.js
 var AnnotationType;

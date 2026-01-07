@@ -13,7 +13,7 @@ __export(AppProvider_exports, {
   getRegisteredAppProviders: () => getRegisteredAppProviders,
   registerAppProvider: () => registerAppProvider
 });
-import * as Root from "./..\\root\\root.js";
+import * as Root from "./../root/root.js";
 var registeredAppProvider = [];
 function registerAppProvider(registration) {
   registeredAppProvider.push(registration);
@@ -132,7 +132,7 @@ __export(Color_exports, {
   parseHueNumeric: () => parseHueNumeric,
   rgb2hsv: () => rgb2hsv
 });
-import * as Platform from "./..\\platform\\platform.js";
+import * as Platform from "./../platform/platform.js";
 
 // gen/front_end/core/common/ColorConverter.js
 var ColorConverter_exports = {};
@@ -3552,7 +3552,7 @@ __export(Revealer_exports, {
   reveal: () => reveal,
   revealDestination: () => revealDestination
 });
-import * as i18n from "./..\\i18n\\i18n.js";
+import * as i18n from "./../i18n/i18n.js";
 var UIStrings = {
   /**
    * @description The UI destination when right clicking an item that can be revealed
@@ -3979,7 +3979,7 @@ __export(ParsedURL_exports, {
   normalizePath: () => normalizePath,
   schemeIs: () => schemeIs
 });
-import * as Platform2 from "./..\\platform\\platform.js";
+import * as Platform2 from "./../platform/platform.js";
 function normalizePath(path) {
   if (path.indexOf("..") === -1 && path.indexOf(".") === -1) {
     return path;
@@ -4618,7 +4618,7 @@ __export(ResourceType_exports, {
   resourceTypeByExtension: () => resourceTypeByExtension,
   resourceTypes: () => resourceTypes
 });
-import * as i18n3 from "./..\\i18n\\i18n.js";
+import * as i18n3 from "./../i18n/i18n.js";
 var UIStrings2 = {
   /**
    * @description Text that appears in a tooltip the fetch and xhr resource types filter.
@@ -5121,7 +5121,7 @@ __export(SegmentedRange_exports, {
   Segment: () => Segment,
   SegmentedRange: () => SegmentedRange
 });
-import * as Platform3 from "./..\\platform\\platform.js";
+import * as Platform3 from "./../platform/platform.js";
 var Segment = class {
   begin;
   end;
@@ -5199,8 +5199,8 @@ __export(SettingRegistration_exports, {
   registerSettingsForTest: () => registerSettingsForTest,
   resetSettings: () => resetSettings
 });
-import * as i18n5 from "./..\\i18n\\i18n.js";
-import * as Root2 from "./..\\root\\root.js";
+import * as i18n5 from "./../i18n/i18n.js";
+import * as Root2 from "./../root/root.js";
 var UIStrings3 = {
   /**
    * @description Title of the Elements Panel
@@ -5379,8 +5379,8 @@ __export(Settings_exports, {
   resetSettings: () => resetSettings,
   settingForTest: () => settingForTest
 });
-import * as Platform4 from "./..\\platform\\platform.js";
-import * as Root3 from "./..\\root\\root.js";
+import * as Platform4 from "./../platform/platform.js";
+import * as Root3 from "./../root/root.js";
 var settingsInstance;
 var Settings = class _Settings {
   syncedStorage;
@@ -6914,7 +6914,7 @@ var Throttler = class {
 };
 
 // gen/front_end/core/common/common.prebundle.js
-import { UIString } from "./..\\platform\\platform.js";
+import { UIString } from "./../platform/platform.js";
 export {
   App_exports as App,
   AppProvider_exports as AppProvider,

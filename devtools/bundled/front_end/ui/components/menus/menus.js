@@ -13,12 +13,12 @@ __export(Menu_exports, {
   MenuItem: () => MenuItem,
   MenuItemSelectedEvent: () => MenuItemSelectedEvent
 });
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as ComponentHelpers from "./..\\helpers\\helpers.js";
-import * as RenderCoordinator from "./..\\render_coordinator\\render_coordinator.js";
-import * as Lit from "./..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\visual_logging\\visual_logging.js";
-import * as Dialogs from "./..\\dialogs\\dialogs.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as ComponentHelpers from "./../helpers/helpers.js";
+import * as RenderCoordinator from "./../render_coordinator/render_coordinator.js";
+import * as Lit from "./../../lit/lit.js";
+import * as VisualLogging from "./../../visual_logging/visual_logging.js";
+import * as Dialogs from "./../dialogs/dialogs.js";
 
 // gen/front_end/ui/components/menus/menu.css.js
 var menu_css_default = `/*
@@ -561,12 +561,12 @@ __export(SelectMenu_exports, {
   SelectMenuItemSelectedEvent: () => SelectMenuItemSelectedEvent,
   SelectMenuSideButtonClickEvent: () => SelectMenuSideButtonClickEvent
 });
-import * as Platform2 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as ComponentHelpers2 from "./..\\helpers\\helpers.js";
-import * as RenderCoordinator2 from "./..\\render_coordinator\\render_coordinator.js";
-import * as Lit2 from "./..\\..\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\visual_logging\\visual_logging.js";
-import * as Dialogs2 from "./..\\dialogs\\dialogs.js";
+import * as Platform2 from "./../../../core/platform/platform.js";
+import * as ComponentHelpers2 from "./../helpers/helpers.js";
+import * as RenderCoordinator2 from "./../render_coordinator/render_coordinator.js";
+import * as Lit2 from "./../../lit/lit.js";
+import * as VisualLogging2 from "./../../visual_logging/visual_logging.js";
+import * as Dialogs2 from "./../dialogs/dialogs.js";
 
 // gen/front_end/ui/components/menus/selectMenu.css.js
 var selectMenu_css_default = `/*

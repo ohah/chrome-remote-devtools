@@ -9,9 +9,9 @@ var AgentProject_exports = {};
 __export(AgentProject_exports, {
   AgentProject: () => AgentProject
 });
-import * as Diff from "./..\\..\\third_party\\diff\\diff.js";
-import * as Persistence from "./..\\persistence\\persistence.js";
-import * as TextUtils from "./..\\text_utils\\text_utils.js";
+import * as Diff from "./../../third_party/diff/diff.js";
+import * as Persistence from "./../persistence/persistence.js";
+import * as TextUtils from "./../text_utils/text_utils.js";
 
 // gen/front_end/models/ai_assistance/debug.js
 var debug_exports = {};
@@ -257,8 +257,8 @@ __export(AiAgent_exports, {
   ConversationContext: () => ConversationContext,
   MAX_STEPS: () => MAX_STEPS
 });
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
+import * as Host from "./../../core/host/host.js";
+import * as Root from "./../../core/root/root.js";
 var MAX_STEPS = 10;
 var ConversationContext = class {
   isOriginAllowed(agentOrigin) {
@@ -713,27 +713,27 @@ __export(FileAgent_exports, {
   FileAgent: () => FileAgent,
   FileContext: () => FileContext
 });
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Root2 from "./../../core/root/root.js";
 
 // gen/front_end/models/ai_assistance/data_formatters/FileFormatter.js
 var FileFormatter_exports = {};
 __export(FileFormatter_exports, {
   FileFormatter: () => FileFormatter
 });
-import * as Bindings from "./..\\bindings\\bindings.js";
-import * as NetworkTimeCalculator2 from "./..\\network_time_calculator\\network_time_calculator.js";
+import * as Bindings from "./../bindings/bindings.js";
+import * as NetworkTimeCalculator2 from "./../network_time_calculator/network_time_calculator.js";
 
 // gen/front_end/models/ai_assistance/data_formatters/NetworkRequestFormatter.js
 var NetworkRequestFormatter_exports = {};
 __export(NetworkRequestFormatter_exports, {
   NetworkRequestFormatter: () => NetworkRequestFormatter
 });
-import * as Annotations from "./..\\annotations\\annotations.js";
-import * as Logs from "./..\\logs\\logs.js";
-import * as NetworkTimeCalculator from "./..\\network_time_calculator\\network_time_calculator.js";
-import * as TextUtils3 from "./..\\text_utils\\text_utils.js";
+import * as Annotations from "./../annotations/annotations.js";
+import * as Logs from "./../logs/logs.js";
+import * as NetworkTimeCalculator from "./../network_time_calculator/network_time_calculator.js";
+import * as TextUtils3 from "./../text_utils/text_utils.js";
 
 // gen/front_end/models/ai_assistance/data_formatters/UnitFormatters.js
 var UnitFormatters_exports = {};
@@ -1333,9 +1333,9 @@ __export(NetworkAgent_exports, {
   NetworkAgent: () => NetworkAgent,
   RequestContext: () => RequestContext
 });
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root3 from "./..\\..\\core\\root\\root.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Root3 from "./../../core/root/root.js";
 var preamble2 = `You are the most advanced network request debugging assistant integrated into Chrome DevTools.
 The user selected a network request in the browser's DevTools Network Panel and sends a query to understand the request.
 Provide a comprehensive analysis of the network request, focusing on areas crucial for a software engineer. Your analysis should include:
@@ -1491,8 +1491,8 @@ __export(PatchAgent_exports, {
   FileUpdateAgent: () => FileUpdateAgent,
   PatchAgent: () => PatchAgent
 });
-import * as Host4 from "./..\\..\\core\\host\\host.js";
-import * as Root4 from "./..\\..\\core\\root\\root.js";
+import * as Host4 from "./../../core/host/host.js";
+import * as Root4 from "./../../core/root/root.js";
 var preamble3 = `You are a highly skilled software engineer with expertise in web development.
 The user asks you to apply changes to a source code folder.
 
@@ -1727,17 +1727,17 @@ __export(PerformanceAgent_exports, {
   PerformanceAgent: () => PerformanceAgent,
   PerformanceTraceContext: () => PerformanceTraceContext
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host5 from "./..\\..\\core\\host\\host.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as Root5 from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Tracing from "./..\\..\\services\\tracing\\tracing.js";
-import * as Annotations3 from "./..\\annotations\\annotations.js";
-import * as Logs2 from "./..\\logs\\logs.js";
-import * as SourceMapScopes from "./..\\source_map_scopes\\source_map_scopes.js";
-import * as Trace6 from "./..\\trace\\trace.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host5 from "./../../core/host/host.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as Root5 from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Tracing from "./../../services/tracing/tracing.js";
+import * as Annotations3 from "./../annotations/annotations.js";
+import * as Logs2 from "./../logs/logs.js";
+import * as SourceMapScopes from "./../source_map_scopes/source_map_scopes.js";
+import * as Trace6 from "./../trace/trace.js";
 
 // gen/front_end/models/ai_assistance/ArtifactsManager.js
 var ArtifactsManager_exports = {};
@@ -1785,24 +1785,24 @@ var PerformanceInsightFormatter_exports = {};
 __export(PerformanceInsightFormatter_exports, {
   PerformanceInsightFormatter: () => PerformanceInsightFormatter
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Trace4 from "./..\\trace\\trace.js";
+import * as Common from "./../../core/common/common.js";
+import * as Trace4 from "./../trace/trace.js";
 
 // gen/front_end/models/ai_assistance/data_formatters/PerformanceTraceFormatter.js
 var PerformanceTraceFormatter_exports = {};
 __export(PerformanceTraceFormatter_exports, {
   PerformanceTraceFormatter: () => PerformanceTraceFormatter
 });
-import * as Annotations2 from "./..\\annotations\\annotations.js";
-import * as CrUXManager from "./..\\crux-manager\\crux-manager.js";
-import * as Trace3 from "./..\\trace\\trace.js";
+import * as Annotations2 from "./../annotations/annotations.js";
+import * as CrUXManager from "./../crux-manager/crux-manager.js";
+import * as Trace3 from "./../trace/trace.js";
 
 // gen/front_end/models/ai_assistance/performance/AIQueries.js
 var AIQueries_exports = {};
 __export(AIQueries_exports, {
   AIQueries: () => AIQueries
 });
-import * as Trace2 from "./..\\trace\\trace.js";
+import * as Trace2 from "./../trace/trace.js";
 
 // gen/front_end/models/ai_assistance/performance/AICallTree.js
 var AICallTree_exports = {};
@@ -1812,8 +1812,8 @@ __export(AICallTree_exports, {
   MinDurationFilter: () => MinDurationFilter,
   SelectedEventDurationFilter: () => SelectedEventDurationFilter
 });
-import * as Trace from "./..\\trace\\trace.js";
-import * as SourceMapsResolver from "./..\\trace_source_maps_resolver\\trace_source_maps_resolver.js";
+import * as Trace from "./../trace/trace.js";
+import * as SourceMapsResolver from "./../trace_source_maps_resolver/trace_source_maps_resolver.js";
 function depthFirstWalk(nodes, callback) {
   for (const node of nodes) {
     if (callback?.(node)) {
@@ -3987,7 +3987,7 @@ __export(AIContext_exports, {
   AgentFocus: () => AgentFocus,
   getPerformanceAgentFocusFromModel: () => getPerformanceAgentFocusFromModel
 });
-import * as Trace5 from "./..\\trace\\trace.js";
+import * as Trace5 from "./../trace/trace.js";
 function getPrimaryInsightSet(insights) {
   const insightSets = Array.from(insights.values());
   if (insightSets.length === 0) {
@@ -5221,9 +5221,9 @@ var PerformanceAnnotationsAgent_exports = {};
 __export(PerformanceAnnotationsAgent_exports, {
   PerformanceAnnotationsAgent: () => PerformanceAnnotationsAgent
 });
-import * as Host6 from "./..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root6 from "./..\\..\\core\\root\\root.js";
+import * as Host6 from "./../../core/host/host.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Root6 from "./../../core/root/root.js";
 var UIStringsNotTranslated2 = {
   analyzingCallTree: "Analyzing call tree"
   /**
@@ -5379,21 +5379,21 @@ __export(StylingAgent_exports, {
   NodeContext: () => NodeContext,
   StylingAgent: () => StylingAgent
 });
-import * as Host7 from "./..\\..\\core\\host\\host.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
-import * as Root7 from "./..\\..\\core\\root\\root.js";
-import * as SDK5 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Annotations4 from "./..\\annotations\\annotations.js";
+import * as Host7 from "./../../core/host/host.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Platform4 from "./../../core/platform/platform.js";
+import * as Root7 from "./../../core/root/root.js";
+import * as SDK5 from "./../../core/sdk/sdk.js";
+import * as Annotations4 from "./../annotations/annotations.js";
 
 // gen/front_end/models/ai_assistance/ChangeManager.js
 var ChangeManager_exports = {};
 __export(ChangeManager_exports, {
   ChangeManager: () => ChangeManager
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
 function formatStyles(styles, indent = 2) {
   const lines = Object.entries(styles).map(([key, value]) => `${" ".repeat(indent)}${key}: ${value};`);
   return lines.join("\n");
@@ -5536,7 +5536,7 @@ __export(EvaluateAction_exports, {
   stringifyObjectOnThePage: () => stringifyObjectOnThePage,
   stringifyRemoteObject: () => stringifyRemoteObject
 });
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
 
 // gen/front_end/models/ai_assistance/injected.js
 var injected_exports = {};
@@ -5808,10 +5808,10 @@ var ExtensionScope_exports = {};
 __export(ExtensionScope_exports, {
   ExtensionScope: () => ExtensionScope
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Bindings2 from "./..\\bindings\\bindings.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
+import * as Bindings2 from "./../bindings/bindings.js";
 var _a2;
 var ExtensionScope = class {
   #listeners = [];
@@ -6715,18 +6715,18 @@ __export(AiConversation_exports, {
   NOT_FOUND_IMAGE_DATA: () => NOT_FOUND_IMAGE_DATA,
   generateContextDetailsMarkdown: () => generateContextDetailsMarkdown
 });
-import * as Host8 from "./..\\..\\core\\host\\host.js";
-import * as Root8 from "./..\\..\\core\\root\\root.js";
-import * as SDK6 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Trace7 from "./..\\trace\\trace.js";
-import * as NetworkTimeCalculator3 from "./..\\network_time_calculator\\network_time_calculator.js";
+import * as Host8 from "./../../core/host/host.js";
+import * as Root8 from "./../../core/root/root.js";
+import * as SDK6 from "./../../core/sdk/sdk.js";
+import * as Trace7 from "./../trace/trace.js";
+import * as NetworkTimeCalculator3 from "./../network_time_calculator/network_time_calculator.js";
 
 // gen/front_end/models/ai_assistance/AiHistoryStorage.js
 var AiHistoryStorage_exports = {};
 __export(AiHistoryStorage_exports, {
   AiHistoryStorage: () => AiHistoryStorage
 });
-import * as Common5 from "./..\\..\\core\\common\\common.js";
+import * as Common5 from "./../../core/common/common.js";
 var instance2 = null;
 var DEFAULT_MAX_STORAGE_SIZE = 50 * 1024 * 1024;
 var AiHistoryStorage = class _AiHistoryStorage extends Common5.ObjectWrapper.ObjectWrapper {
@@ -7164,10 +7164,10 @@ var AiUtils_exports = {};
 __export(AiUtils_exports, {
   getDisabledReasons: () => getDisabledReasons
 });
-import * as Common6 from "./..\\..\\core\\common\\common.js";
-import * as Host9 from "./..\\..\\core\\host\\host.js";
-import * as i18n11 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root9 from "./..\\..\\core\\root\\root.js";
+import * as Common6 from "./../../core/common/common.js";
+import * as Host9 from "./../../core/host/host.js";
+import * as i18n11 from "./../../core/i18n/i18n.js";
+import * as Root9 from "./../../core/root/root.js";
 var UIStrings = {
   /**
    * @description Message shown to the user if the age check is not successful.
@@ -7216,9 +7216,9 @@ var BuiltInAi_exports = {};
 __export(BuiltInAi_exports, {
   BuiltInAi: () => BuiltInAi
 });
-import * as Common7 from "./..\\..\\core\\common\\common.js";
-import * as Host10 from "./..\\..\\core\\host\\host.js";
-import * as Root10 from "./..\\..\\core\\root\\root.js";
+import * as Common7 from "./../../core/common/common.js";
+import * as Host10 from "./../../core/host/host.js";
+import * as Root10 from "./../../core/root/root.js";
 var builtInAiInstance;
 var BuiltInAi = class _BuiltInAi extends Common7.ObjectWrapper.ObjectWrapper {
   #availability = null;
@@ -7470,13 +7470,13 @@ var ConversationHandler_exports = {};
 __export(ConversationHandler_exports, {
   ConversationHandler: () => ConversationHandler
 });
-import * as Common8 from "./..\\..\\core\\common\\common.js";
-import * as Host11 from "./..\\..\\core\\host\\host.js";
-import * as i18n13 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform5 from "./..\\..\\core\\platform\\platform.js";
-import * as Root11 from "./..\\..\\core\\root\\root.js";
-import * as SDK7 from "./..\\..\\core\\sdk\\sdk.js";
-import * as NetworkTimeCalculator4 from "./..\\network_time_calculator\\network_time_calculator.js";
+import * as Common8 from "./../../core/common/common.js";
+import * as Host11 from "./../../core/host/host.js";
+import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as Platform5 from "./../../core/platform/platform.js";
+import * as Root11 from "./../../core/root/root.js";
+import * as SDK7 from "./../../core/sdk/sdk.js";
+import * as NetworkTimeCalculator4 from "./../network_time_calculator/network_time_calculator.js";
 var UIStringsNotTranslate4 = {
   /**
    * @description Error message shown when AI assistance is not enabled in DevTools settings.

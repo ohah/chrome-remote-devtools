@@ -10,7 +10,7 @@ __export(FilmStrip_exports, {
   frameClosestToTimestamp: () => frameClosestToTimestamp,
   fromHandlerData: () => fromHandlerData
 });
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
+import * as Platform from "./../../../core/platform/platform.js";
 var filmStripCache = /* @__PURE__ */ new WeakMap();
 function fromHandlerData(data, customZeroTime) {
   const frames = [];
@@ -53,8 +53,8 @@ var MainThreadActivity_exports = {};
 __export(MainThreadActivity_exports, {
   calculateWindow: () => calculateWindow
 });
-import * as Helpers from "./..\\helpers\\helpers.js";
-import * as Types from "./..\\types\\types.js";
+import * as Helpers from "./../helpers/helpers.js";
+import * as Types from "./../types/types.js";
 var IDLE_FUNCTION_CALL_NAMES = /* @__PURE__ */ new Set([
   "(program)",
   "(idle)",
@@ -122,7 +122,7 @@ __export(ScriptDuplication_exports, {
   normalizeDuplication: () => normalizeDuplication,
   normalizeSource: () => normalizeSource
 });
-import * as Handlers from "./..\\handlers\\handlers.js";
+import * as Handlers from "./../handlers/handlers.js";
 var ABSOLUTE_SIZE_THRESHOLD_BYTES = 1024 * 0.5;
 var RELATIVE_SIZE_THRESHOLD = 0.1;
 function normalizeSource(source) {
@@ -264,8 +264,8 @@ __export(StackTraceForEvent_exports, {
   get: () => get,
   stackTraceForEventInTrace: () => stackTraceForEventInTrace
 });
-import * as Helpers2 from "./..\\helpers\\helpers.js";
-import * as Types2 from "./..\\types\\types.js";
+import * as Helpers2 from "./../helpers/helpers.js";
+import * as Types2 from "./../types/types.js";
 var stackTraceForEventInTrace = /* @__PURE__ */ new Map();
 function clearCacheForTrace(data) {
   stackTraceForEventInTrace.delete(data);
@@ -390,9 +390,9 @@ __export(ThirdParties_exports, {
   summarizeByThirdParty: () => summarizeByThirdParty,
   summarizeByURL: () => summarizeByURL
 });
-import * as Handlers2 from "./..\\handlers\\handlers.js";
-import * as Helpers5 from "./..\\helpers\\helpers.js";
-import * as Types8 from "./..\\types\\types.js";
+import * as Handlers2 from "./../handlers/handlers.js";
+import * as Helpers5 from "./../helpers/helpers.js";
+import * as Types8 from "./../types/types.js";
 
 // gen/front_end/models/trace/extras/TraceFilter.js
 var TraceFilter_exports = {};
@@ -402,7 +402,7 @@ __export(TraceFilter_exports, {
   TraceFilter: () => TraceFilter,
   VisibleEventsFilter: () => VisibleEventsFilter
 });
-import * as Types3 from "./..\\types\\types.js";
+import * as Types3 from "./../types/types.js";
 var TraceFilter = class {
 };
 var VisibleEventsFilter = class _VisibleEventsFilter extends TraceFilter {
@@ -460,19 +460,19 @@ __export(TraceTree_exports, {
   eventStackFrame: () => eventStackFrame,
   generateEventID: () => generateEventID
 });
-import * as Helpers3 from "./..\\helpers\\helpers.js";
+import * as Helpers3 from "./../helpers/helpers.js";
 
 // gen/front_end/models/trace/helpers/SamplesIntegrator.js
-import * as Types6 from "./..\\types\\types.js";
+import * as Types6 from "./../types/types.js";
 
 // gen/front_end/models/trace/helpers/Timing.js
-import * as Platform3 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Types5 from "./..\\types\\types.js";
+import * as Platform3 from "./../../../core/platform/platform.js";
+import * as Types5 from "./../types/types.js";
 
 // gen/front_end/models/trace/helpers/Trace.js
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as Platform2 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as Types4 from "./..\\types\\types.js";
+import * as Common from "./../../../core/common/common.js";
+import * as Platform2 from "./../../../core/platform/platform.js";
+import * as Types4 from "./../types/types.js";
 function compareBeginAndEnd(aBeginTime, bBeginTime, aEndTime, bEndTime) {
   if (aBeginTime < bBeginTime) {
     return -1;
@@ -943,7 +943,7 @@ var SamplesIntegrator = class {
 _a = SamplesIntegrator;
 
 // gen/front_end/models/trace/extras/TraceTree.js
-import * as Types7 from "./..\\types\\types.js";
+import * as Types7 from "./../types/types.js";
 var Node = class {
   /** ms */
   totalTime;

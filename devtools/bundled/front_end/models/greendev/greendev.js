@@ -1,6 +1,6 @@
 // gen/front_end/models/greendev/Prototypes.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
+import * as Common from "./../../core/common/common.js";
+import * as Root from "./../../core/root/root.js";
 var instance = null;
 var Prototypes = class _Prototypes {
   constructor() {

@@ -9,8 +9,8 @@ var FileManager_exports = {};
 __export(FileManager_exports, {
   FileManager: () => FileManager
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
 var fileManagerInstance;
 var FileManager = class _FileManager extends Common.ObjectWrapper.ObjectWrapper {
   #saveCallbacks = /* @__PURE__ */ new Map();
@@ -75,11 +75,11 @@ var IgnoreListManager_exports = {};
 __export(IgnoreListManager_exports, {
   IgnoreListManager: () => IgnoreListManager
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
 
 // gen/front_end/models/workspace/WorkspaceImpl.js
 var WorkspaceImpl_exports = {};
@@ -89,8 +89,8 @@ __export(WorkspaceImpl_exports, {
   WorkspaceImpl: () => WorkspaceImpl,
   projectTypes: () => projectTypes
 });
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as Root from "./../../core/root/root.js";
 
 // gen/front_end/models/workspace/UISourceCode.js
 var UISourceCode_exports = {};
@@ -104,10 +104,10 @@ __export(UISourceCode_exports, {
   UISourceCodeMetadata: () => UISourceCodeMetadata,
   createMappedProfileData: () => createMappedProfileData
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils from "./..\\text_utils\\text_utils.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as TextUtils from "./../text_utils/text_utils.js";
 var UIStrings = {
   /**
    * @description Text for the index of something
@@ -1341,7 +1341,7 @@ var SearchConfig_exports = {};
 __export(SearchConfig_exports, {
   SearchConfig: () => SearchConfig
 });
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform3 from "./../../core/platform/platform.js";
 var SearchConfig = class _SearchConfig {
   #query;
   #ignoreCase;

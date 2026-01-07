@@ -1,5 +1,5 @@
 // gen/front_end/panels/css_overview/css_overview-meta.prebundle.js
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n from "./../../core/i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Title of the CSS overview panel

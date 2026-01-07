@@ -9,9 +9,9 @@ var AnimationGroupPreviewUI_exports = {};
 __export(AnimationGroupPreviewUI_exports, {
   AnimationGroupPreviewUI: () => AnimationGroupPreviewUI
 });
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit2 from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import * as Lit2 from "./../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/animation/AnimationUI.js
 var AnimationUI_exports = {};
@@ -20,13 +20,13 @@ __export(AnimationUI_exports, {
   Colors: () => Colors,
   Options: () => Options
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as Geometry from "./..\\..\\models\\geometry\\geometry.js";
-import * as InlineEditor from "./..\\..\\ui\\legacy\\components\\inline_editor\\inline_editor.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as Geometry from "./../../models/geometry/geometry.js";
+import * as InlineEditor from "./../../ui/legacy/components/inline_editor/inline_editor.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/animation/AnimationTimeline.js
 var AnimationTimeline_exports = {};
@@ -37,17 +37,17 @@ __export(AnimationTimeline_exports, {
   NodeUI: () => NodeUI,
   StepTimingFunction: () => StepTimingFunction
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelsCommon from "./..\\common\\common.js";
+import "./../../ui/legacy/legacy.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelsCommon from "./../common/common.js";
 
 // gen/front_end/panels/animation/animationTimeline.css.js
 var animationTimeline_css_default = `/*

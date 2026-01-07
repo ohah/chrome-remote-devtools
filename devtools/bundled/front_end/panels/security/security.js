@@ -13,19 +13,19 @@ __export(CookieControlsView_exports, {
   i18nString: () => i18nString,
   showInfobar: () => showInfobar
 });
-import "./..\\..\\ui\\components\\switch\\switch.js";
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Input from "./..\\..\\ui\\components\\input\\input.js";
-import * as uiI18n from "./..\\..\\ui\\i18n\\i18n.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives, html, nothing, render } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/components/switch/switch.js";
+import "./../../ui/kit/kit.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as Input from "./../../ui/components/input/input.js";
+import * as uiI18n from "./../../ui/i18n/i18n.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import { Directives, html, nothing, render } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/security/cookieControlsView.css.js
 var cookieControlsView_css_default = `/*
@@ -541,17 +541,17 @@ __export(CookieReportView_exports, {
   i18nFormatString: () => i18nFormatString2,
   i18nString: () => i18nString2
 });
-import "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as IssuesManager from "./..\\..\\models\\issues_manager\\issues_manager.js";
-import * as uiI18n2 from "./..\\..\\ui\\i18n\\i18n.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as NetworkForward from "./..\\network\\forward\\forward.js";
+import "./../../ui/legacy/components/data_grid/data_grid.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as IssuesManager from "./../../models/issues_manager/issues_manager.js";
+import * as uiI18n2 from "./../../ui/i18n/i18n.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import * as Lit from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
+import * as NetworkForward from "./../network/forward/forward.js";
 
 // gen/front_end/panels/security/cookieReportView.css.js
 var cookieReportView_css_default = `/*
@@ -1123,8 +1123,8 @@ __export(SecurityModel_exports, {
   SummaryMessages: () => SummaryMessages,
   securityStateCompare: () => securityStateCompare
 });
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
 var UIStrings3 = {
   /**
    * @description Text in Security Panel of the Security panel
@@ -1332,15 +1332,15 @@ __export(SecurityPanel_exports, {
   getSecurityStateIconForDetailedView: () => getSecurityStateIconForDetailedView,
   getSecurityStateIconForOverview: () => getSecurityStateIconForOverview
 });
-import * as Common4 from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as SDK4 from "./..\\..\\core\\sdk\\sdk.js";
-import * as NetworkForward2 from "./..\\network\\forward\\forward.js";
-import { createIcon as createIcon3 } from "./..\\..\\ui\\kit\\kit.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html3, render as render3 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common4 from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as SDK4 from "./../../core/sdk/sdk.js";
+import * as NetworkForward2 from "./../network/forward/forward.js";
+import { createIcon as createIcon3 } from "./../../ui/kit/kit.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import { html as html3, render as render3 } from "./../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/security/lockIcon.css.js
 var lockIcon_css_default = `/*
@@ -1595,7 +1595,7 @@ var mainView_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./mainView.css")} */`;
 
 // gen/front_end/panels/security/SecurityPanelSidebarTreeElement.js
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
 var SecurityPanelSidebarTreeElement = class extends UI3.TreeOutline.TreeElement {
   constructor(title = "", expandable = false, jslogContext) {
     super(title, expandable, jslogContext);
@@ -1787,14 +1787,14 @@ var originView_css_default = `/*
 /*# sourceURL=${import.meta.resolve("./originView.css")} */`;
 
 // gen/front_end/panels/security/SecurityPanelSidebar.js
-import * as Common3 from "./..\\..\\core\\common\\common.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
+import * as Common3 from "./../../core/common/common.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Platform2 from "./../../core/platform/platform.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/security/CookieControlsTreeElement.js
-import { createIcon } from "./..\\..\\ui\\kit\\kit.js";
+import { createIcon } from "./../../ui/kit/kit.js";
 var CookieControlsTreeElement = class extends SecurityPanelSidebarTreeElement {
   constructor(title, jslogContext) {
     super(title, false, jslogContext);
@@ -1809,7 +1809,7 @@ var CookieControlsTreeElement = class extends SecurityPanelSidebarTreeElement {
 };
 
 // gen/front_end/panels/security/CookieReportTreeElement.js
-import { createIcon as createIcon2 } from "./..\\..\\ui\\kit\\kit.js";
+import { createIcon as createIcon2 } from "./../../ui/kit/kit.js";
 var CookieReportTreeElement = class extends SecurityPanelSidebarTreeElement {
   constructor(title, jslogContext) {
     super(title, false, jslogContext);

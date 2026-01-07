@@ -11,11 +11,11 @@ __export(IssueCounter_exports, {
   getIssueCountsEnumeration: () => getIssueCountsEnumeration,
   getIssueKindIconName: () => getIssueKindIconName
 });
-import "./..\\icon_button\\icon_button.js";
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager from "./..\\..\\..\\models\\issues_manager\\issues_manager.js";
-import { html, render } from "./..\\..\\lit\\lit.js";
+import "./../icon_button/icon_button.js";
+import * as Common from "./../../../core/common/common.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as IssuesManager from "./../../../models/issues_manager/issues_manager.js";
+import { html, render } from "./../../lit/lit.js";
 
 // gen/front_end/ui/components/issue_counter/issueCounter.css.js
 var issueCounter_css_default = `/*
@@ -228,13 +228,13 @@ __export(IssueLinkIcon_exports, {
   IssueLinkIcon: () => IssueLinkIcon,
   extractShortPath: () => extractShortPath
 });
-import "./..\\..\\kit\\kit.js";
-import * as Common2 from "./..\\..\\..\\core\\common\\common.js";
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as IssuesManager2 from "./..\\..\\..\\models\\issues_manager\\issues_manager.js";
-import * as RenderCoordinator from "./..\\render_coordinator\\render_coordinator.js";
-import * as Lit from "./..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\visual_logging\\visual_logging.js";
+import "./../../kit/kit.js";
+import * as Common2 from "./../../../core/common/common.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import * as IssuesManager2 from "./../../../models/issues_manager/issues_manager.js";
+import * as RenderCoordinator from "./../render_coordinator/render_coordinator.js";
+import * as Lit from "./../../lit/lit.js";
+import * as VisualLogging from "./../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/components/issue_counter/issueLinkIcon.css.js
 var issueLinkIcon_css_default = `/*

@@ -20,7 +20,7 @@ __export(Debugging_exports, {
   setVeDebugLoggingEnabled: () => setVeDebugLoggingEnabled,
   setVeDebuggingEnabled: () => setVeDebuggingEnabled
 });
-import { assertNotNullOrUndefined } from "./..\\..\\core\\platform\\platform.js";
+import { assertNotNullOrUndefined } from "./../../core/platform/platform.js";
 
 // gen/front_end/ui/visual_logging/LoggingConfig.js
 var LoggingConfig_exports = {};
@@ -31,8 +31,8 @@ __export(LoggingConfig_exports, {
   needsLogging: () => needsLogging,
   parseJsLog: () => parseJsLog
 });
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
+import * as Host from "./../../core/host/host.js";
+import * as Root from "./../../core/root/root.js";
 
 // gen/front_end/ui/visual_logging/KnownContextValues.js
 var knownContextValues = /* @__PURE__ */ new Set([
@@ -5252,9 +5252,9 @@ __export(LoggingDriver_exports, {
   startLogging: () => startLogging,
   stopLogging: () => stopLogging
 });
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\core\\host\\host.js";
-import * as RenderCoordinator from "./..\\components\\render_coordinator\\render_coordinator.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as Host3 from "./../../core/host/host.js";
+import * as RenderCoordinator from "./../components/render_coordinator/render_coordinator.js";
 
 // gen/front_end/ui/visual_logging/LoggingEvents.js
 var LoggingEvents_exports = {};
@@ -5270,9 +5270,9 @@ __export(LoggingEvents_exports, {
   logResize: () => logResize,
   logSettingAccess: () => logSettingAccess
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host2 from "./..\\..\\core\\host\\host.js";
-import { assertNotNullOrUndefined as assertNotNullOrUndefined2 } from "./..\\..\\core\\platform\\platform.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host2 from "./../../core/host/host.js";
+import { assertNotNullOrUndefined as assertNotNullOrUndefined2 } from "./../../core/platform/platform.js";
 async function logImpressions(loggables) {
   const impressions = await Promise.all(loggables.map(async (loggable) => {
     const loggingState = getLoggingState(loggable);

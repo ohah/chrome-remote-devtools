@@ -13,13 +13,13 @@ __export(DirectSocketConnectionView_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW,
   DirectSocketConnectionView: () => DirectSocketConnectionView
 });
-import * as Common from "./..\\..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as UI from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common from "./../../../core/common/common.js";
+import * as Host from "./../../../core/host/host.js";
+import * as i18n from "./../../../core/i18n/i18n.js";
+import * as SDK from "./../../../core/sdk/sdk.js";
+import * as UI from "./../../../ui/legacy/legacy.js";
+import * as Lit from "./../../../ui/lit/lit.js";
+import * as VisualLogging from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/components/RequestHeadersView.css.js
 var RequestHeadersView_css_default = `/*
@@ -458,9 +458,9 @@ var EditableSpan_exports = {};
 __export(EditableSpan_exports, {
   EditableSpan: () => EditableSpan
 });
-import * as ComponentHelpers from "./..\\..\\..\\ui\\components\\helpers\\helpers.js";
-import { html as html2, render as render2 } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as ComponentHelpers from "./../../../ui/components/helpers/helpers.js";
+import { html as html2, render as render2 } from "./../../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/components/EditableSpan.css.js
 var EditableSpan_css_default = `/*
@@ -576,16 +576,16 @@ __export(HeaderSectionRow_exports, {
   compareHeaders: () => compareHeaders,
   isValidHeaderName: () => isValidHeaderName
 });
-import "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Host2 from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n3 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\..\\core\\platform\\platform.js";
-import * as SDK2 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as ClientVariations from "./..\\..\\..\\third_party\\chromium\\client-variations\\client-variations.js";
-import * as Buttons from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as ComponentHelpers2 from "./..\\..\\..\\ui\\components\\helpers\\helpers.js";
-import * as Lit2 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging3 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/legacy/legacy.js";
+import * as Host2 from "./../../../core/host/host.js";
+import * as i18n3 from "./../../../core/i18n/i18n.js";
+import * as Platform from "./../../../core/platform/platform.js";
+import * as SDK2 from "./../../../core/sdk/sdk.js";
+import * as ClientVariations from "./../../../third_party/chromium/client-variations/client-variations.js";
+import * as Buttons from "./../../../ui/components/buttons/buttons.js";
+import * as ComponentHelpers2 from "./../../../ui/components/helpers/helpers.js";
+import * as Lit2 from "./../../../ui/lit/lit.js";
+import * as VisualLogging3 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/components/HeaderSectionRow.css.js
 var HeaderSectionRow_css_default = `/*
@@ -1153,12 +1153,12 @@ __export(RequestHeaderSection_exports, {
   DEFAULT_VIEW: () => DEFAULT_VIEW2,
   RequestHeaderSection: () => RequestHeaderSection
 });
-import * as i18n5 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform2 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as UI2 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit3 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging4 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as NetworkForward from "./..\\forward\\forward.js";
+import * as i18n5 from "./../../../core/i18n/i18n.js";
+import * as Platform2 from "./../../../core/platform/platform.js";
+import * as UI2 from "./../../../ui/legacy/legacy.js";
+import * as Lit3 from "./../../../ui/lit/lit.js";
+import * as VisualLogging4 from "./../../../ui/visual_logging/visual_logging.js";
+import * as NetworkForward from "./../forward/forward.js";
 
 // gen/front_end/panels/network/components/RequestHeaderSection.css.js
 var RequestHeaderSection_css_default = `/*
@@ -1337,22 +1337,22 @@ __export(RequestHeadersView_exports, {
   RequestHeadersView: () => RequestHeadersView,
   ToggleRawHeadersEvent: () => ToggleRawHeadersEvent
 });
-import * as Common3 from "./..\\..\\..\\core\\common\\common.js";
-import * as Host4 from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n9 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform4 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as SDK3 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as Persistence2 from "./..\\..\\..\\models\\persistence\\persistence.js";
-import * as Workspace from "./..\\..\\..\\models\\workspace\\workspace.js";
-import * as NetworkForward3 from "./..\\forward\\forward.js";
-import * as Buttons3 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as Input from "./..\\..\\..\\ui\\components\\input\\input.js";
-import * as LegacyWrapper from "./..\\..\\..\\ui\\components\\legacy_wrapper\\legacy_wrapper.js";
-import * as RenderCoordinator from "./..\\..\\..\\ui\\components\\render_coordinator\\render_coordinator.js";
-import * as UI4 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit4 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging6 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as Sources2 from "./..\\..\\sources\\sources.js";
+import * as Common3 from "./../../../core/common/common.js";
+import * as Host4 from "./../../../core/host/host.js";
+import * as i18n9 from "./../../../core/i18n/i18n.js";
+import * as Platform4 from "./../../../core/platform/platform.js";
+import * as SDK3 from "./../../../core/sdk/sdk.js";
+import * as Persistence2 from "./../../../models/persistence/persistence.js";
+import * as Workspace from "./../../../models/workspace/workspace.js";
+import * as NetworkForward3 from "./../forward/forward.js";
+import * as Buttons3 from "./../../../ui/components/buttons/buttons.js";
+import * as Input from "./../../../ui/components/input/input.js";
+import * as LegacyWrapper from "./../../../ui/components/legacy_wrapper/legacy_wrapper.js";
+import * as RenderCoordinator from "./../../../ui/components/render_coordinator/render_coordinator.js";
+import * as UI4 from "./../../../ui/legacy/legacy.js";
+import * as Lit4 from "./../../../ui/lit/lit.js";
+import * as VisualLogging6 from "./../../../ui/visual_logging/visual_logging.js";
+import * as Sources2 from "./../../sources/sources.js";
 
 // gen/front_end/panels/network/components/ResponseHeaderSection.js
 var ResponseHeaderSection_exports = {};
@@ -1361,19 +1361,19 @@ __export(ResponseHeaderSection_exports, {
   RESPONSE_HEADER_SECTION_DATA_KEY: () => RESPONSE_HEADER_SECTION_DATA_KEY,
   ResponseHeaderSection: () => ResponseHeaderSection
 });
-import * as Common2 from "./..\\..\\..\\core\\common\\common.js";
-import * as Host3 from "./..\\..\\..\\core\\host\\host.js";
-import * as i18n7 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as Platform3 from "./..\\..\\..\\core\\platform\\platform.js";
-import * as IssuesManager from "./..\\..\\..\\models\\issues_manager\\issues_manager.js";
-import * as Persistence from "./..\\..\\..\\models\\persistence\\persistence.js";
-import * as TextUtils from "./..\\..\\..\\models\\text_utils\\text_utils.js";
-import * as NetworkForward2 from "./..\\forward\\forward.js";
-import * as Sources from "./..\\..\\sources\\sources.js";
-import * as Buttons2 from "./..\\..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI3 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import { html as html5, nothing as nothing4, render as render5 } from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging5 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import * as Common2 from "./../../../core/common/common.js";
+import * as Host3 from "./../../../core/host/host.js";
+import * as i18n7 from "./../../../core/i18n/i18n.js";
+import * as Platform3 from "./../../../core/platform/platform.js";
+import * as IssuesManager from "./../../../models/issues_manager/issues_manager.js";
+import * as Persistence from "./../../../models/persistence/persistence.js";
+import * as TextUtils from "./../../../models/text_utils/text_utils.js";
+import * as NetworkForward2 from "./../forward/forward.js";
+import * as Sources from "./../../sources/sources.js";
+import * as Buttons2 from "./../../../ui/components/buttons/buttons.js";
+import * as UI3 from "./../../../ui/legacy/legacy.js";
+import { html as html5, nothing as nothing4, render as render5 } from "./../../../ui/lit/lit.js";
+import * as VisualLogging5 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/components/ResponseHeaderSection.css.js
 var ResponseHeaderSection_css_default = `/*
@@ -2416,13 +2416,13 @@ __export(RequestTrustTokensView_exports, {
   RequestTrustTokensView: () => RequestTrustTokensView,
   statusConsideredSuccess: () => statusConsideredSuccess
 });
-import "./..\\..\\..\\ui\\components\\report_view\\report_view.js";
-import "./..\\..\\..\\ui\\kit\\kit.js";
-import * as i18n11 from "./..\\..\\..\\core\\i18n\\i18n.js";
-import * as SDK4 from "./..\\..\\..\\core\\sdk\\sdk.js";
-import * as UI5 from "./..\\..\\..\\ui\\legacy\\legacy.js";
-import * as Lit5 from "./..\\..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging7 from "./..\\..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../../ui/components/report_view/report_view.js";
+import "./../../../ui/kit/kit.js";
+import * as i18n11 from "./../../../core/i18n/i18n.js";
+import * as SDK4 from "./../../../core/sdk/sdk.js";
+import * as UI5 from "./../../../ui/legacy/legacy.js";
+import * as Lit5 from "./../../../ui/lit/lit.js";
+import * as VisualLogging7 from "./../../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/network/components/RequestTrustTokensView.css.js
 var RequestTrustTokensView_css_default = `/*

@@ -1,11 +1,11 @@
 // gen/front_end/models/live-metrics/LiveMetrics.js
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as EmulationModel from "./..\\emulation\\emulation.js";
-import * as Spec from "./web-vitals-injected\\spec\\spec.js";
+import * as Common from "./../../core/common/common.js";
+import * as Host from "./../../core/host/host.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as EmulationModel from "./../emulation/emulation.js";
+import * as Spec from "./web-vitals-injected/spec/spec.js";
 var UIStrings = {
   /**
    * @description Warning text indicating that the Largest Contentful Paint (LCP) performance metric was affected by the user changing the simulated device.

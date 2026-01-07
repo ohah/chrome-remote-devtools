@@ -9,8 +9,8 @@ var ExpandableList_exports = {};
 __export(ExpandableList_exports, {
   ExpandableList: () => ExpandableList
 });
-import * as Lit from "./..\\..\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\visual_logging\\visual_logging.js";
+import * as Lit from "./../../lit/lit.js";
+import * as VisualLogging from "./../../visual_logging/visual_logging.js";
 
 // gen/front_end/ui/components/expandable_list/expandableList.css.js
 var expandableList_css_default = `/*

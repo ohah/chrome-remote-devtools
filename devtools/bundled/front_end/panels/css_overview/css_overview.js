@@ -9,7 +9,7 @@ var CSSOverviewUnusedDeclarations_exports = {};
 __export(CSSOverviewUnusedDeclarations_exports, {
   CSSOverviewUnusedDeclarations: () => CSSOverviewUnusedDeclarations
 });
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
+import * as i18n from "./../../core/i18n/i18n.js";
 var UIStrings = {
   /**
    * @description Label to explain why top values are ignored
@@ -119,10 +119,10 @@ var CSSOverviewModel_exports = {};
 __export(CSSOverviewModel_exports, {
   CSSOverviewModel: () => CSSOverviewModel
 });
-import * as Common from "./..\\..\\core\\common\\common.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
-import * as SDK from "./..\\..\\core\\sdk\\sdk.js";
-import * as ColorPicker from "./..\\..\\ui\\legacy\\components\\color_picker\\color_picker.js";
+import * as Common from "./../../core/common/common.js";
+import * as Root from "./../../core/root/root.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+import * as ColorPicker from "./../../ui/legacy/components/color_picker/color_picker.js";
 var CSSOverviewModel = class extends SDK.SDKModel.SDKModel {
   #runtimeAgent;
   #cssAgent;
@@ -491,10 +491,10 @@ __export(CSSOverviewProcessingView_exports, {
   CSSOverviewProcessingView: () => CSSOverviewProcessingView,
   DEFAULT_VIEW: () => DEFAULT_VIEW
 });
-import * as i18n3 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Buttons from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import { html, render } from "./..\\..\\ui\\lit\\lit.js";
+import * as i18n3 from "./../../core/i18n/i18n.js";
+import * as Buttons from "./../../ui/components/buttons/buttons.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import { html, render } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/css_overview/cssOverviewProcessingView.css.js
 var cssOverviewProcessingView_css_default = `/**
@@ -579,20 +579,20 @@ __export(CSSOverviewCompletedView_exports, {
   ELEMENT_DETAILS_DEFAULT_VIEW: () => ELEMENT_DETAILS_DEFAULT_VIEW,
   ElementDetailsView: () => ElementDetailsView
 });
-import "./..\\..\\ui\\legacy\\components\\data_grid\\data_grid.js";
-import "./..\\..\\ui\\kit\\kit.js";
-import * as Common2 from "./..\\..\\core\\common\\common.js";
-import * as i18n7 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as Root2 from "./..\\..\\core\\root\\root.js";
-import * as SDK2 from "./..\\..\\core\\sdk\\sdk.js";
-import * as Geometry from "./..\\..\\models\\geometry\\geometry.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Components from "./..\\..\\ui\\legacy\\components\\utils\\utils.js";
-import * as UI3 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives as Directives2, html as html3, nothing, render as render3 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging2 from "./..\\..\\ui\\visual_logging\\visual_logging.js";
-import * as PanelsCommon from "./..\\common\\common.js";
+import "./../../ui/legacy/components/data_grid/data_grid.js";
+import "./../../ui/kit/kit.js";
+import * as Common2 from "./../../core/common/common.js";
+import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as Root2 from "./../../core/root/root.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as Geometry from "./../../models/geometry/geometry.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as Components from "./../../ui/legacy/components/utils/utils.js";
+import * as UI3 from "./../../ui/legacy/legacy.js";
+import { Directives as Directives2, html as html3, nothing, render as render3 } from "./../../ui/lit/lit.js";
+import * as VisualLogging2 from "./../../ui/visual_logging/visual_logging.js";
+import * as PanelsCommon from "./../common/common.js";
 
 // gen/front_end/panels/css_overview/cssOverviewCompletedView.css.js
 var cssOverviewCompletedView_css_default = `/**
@@ -959,12 +959,12 @@ __export(CSSOverviewSidebarPanel_exports, {
   CSSOverviewSidebarPanel: () => CSSOverviewSidebarPanel,
   DEFAULT_VIEW: () => DEFAULT_VIEW2
 });
-import "./..\\..\\ui\\legacy\\legacy.js";
-import * as i18n5 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Buttons2 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI2 from "./..\\..\\ui\\legacy\\legacy.js";
-import { Directives, html as html2, render as render2 } from "./..\\..\\ui\\lit\\lit.js";
-import * as VisualLogging from "./..\\..\\ui\\visual_logging\\visual_logging.js";
+import "./../../ui/legacy/legacy.js";
+import * as i18n5 from "./../../core/i18n/i18n.js";
+import * as Buttons2 from "./../../ui/components/buttons/buttons.js";
+import * as UI2 from "./../../ui/legacy/legacy.js";
+import { Directives, html as html2, render as render2 } from "./../../ui/lit/lit.js";
+import * as VisualLogging from "./../../ui/visual_logging/visual_logging.js";
 
 // gen/front_end/panels/css_overview/cssOverviewSidebarPanel.css.js
 var cssOverviewSidebarPanel_css_default = `/**
@@ -2024,18 +2024,18 @@ __export(CSSOverviewPanel_exports, {
   CSSOverviewPanel: () => CSSOverviewPanel,
   DEFAULT_VIEW: () => DEFAULT_VIEW5
 });
-import * as Host from "./..\\..\\core\\host\\host.js";
-import * as SDK3 from "./..\\..\\core\\sdk\\sdk.js";
-import * as UI5 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html5, render as render5 } from "./..\\..\\ui\\lit\\lit.js";
+import * as Host from "./../../core/host/host.js";
+import * as SDK3 from "./../../core/sdk/sdk.js";
+import * as UI5 from "./../../ui/legacy/legacy.js";
+import { html as html5, render as render5 } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/css_overview/CSSOverviewStartView.js
-import "./..\\..\\ui\\components\\panel_feedback\\panel_feedback.js";
-import "./..\\..\\ui\\components\\panel_introduction_steps\\panel_introduction_steps.js";
-import * as i18n9 from "./..\\..\\core\\i18n\\i18n.js";
-import * as Buttons3 from "./..\\..\\ui\\components\\buttons\\buttons.js";
-import * as UI4 from "./..\\..\\ui\\legacy\\legacy.js";
-import { html as html4, render as render4 } from "./..\\..\\ui\\lit\\lit.js";
+import "./../../ui/components/panel_feedback/panel_feedback.js";
+import "./../../ui/components/panel_introduction_steps/panel_introduction_steps.js";
+import * as i18n9 from "./../../core/i18n/i18n.js";
+import * as Buttons3 from "./../../ui/components/buttons/buttons.js";
+import * as UI4 from "./../../ui/legacy/legacy.js";
+import { html as html4, render as render4 } from "./../../ui/lit/lit.js";
 
 // gen/front_end/panels/css_overview/cssOverviewStartView.css.js
 var cssOverviewStartView_css_default = `/**

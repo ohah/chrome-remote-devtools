@@ -9,11 +9,11 @@ var WelcomePanel_exports = {};
 __export(WelcomePanel_exports, {
   WelcomePanel: () => WelcomePanel
 });
-import * as UI from "./..\\..\\ui\\legacy\\legacy.js";
-import * as i18n from "./..\\..\\core\\i18n\\i18n.js";
-import * as UIHelpers from "./..\\..\\ui\\helpers\\helpers.js";
-import { html, render } from "./..\\..\\ui\\lit\\lit.js";
-import "./..\\..\\ui\\kit\\kit.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as UIHelpers from "./../../ui/helpers/helpers.js";
+import { html, render } from "./../../ui/lit/lit.js";
+import "./../../ui/kit/kit.js";
 var UIStrings = {
   /**
    * @description Title of the Welcome panel

@@ -3593,7 +3593,7 @@ var CSSFormatter_exports = {};
 __export(CSSFormatter_exports, {
   CSSFormatter: () => CSSFormatter
 });
-import * as Platform4 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform4 from "./../../core/platform/platform.js";
 
 // gen/front_end/entrypoints/formatter_worker/FormatterWorker.js
 var FormatterWorker_exports = {};
@@ -3603,8 +3603,8 @@ __export(FormatterWorker_exports, {
   format: () => format,
   substituteExpression: () => substituteExpression
 });
-import * as Platform3 from "./..\\..\\core\\platform\\platform.js";
-import * as Root from "./..\\..\\core\\root\\root.js";
+import * as Platform3 from "./../../core/platform/platform.js";
+import * as Root from "./../../core/root/root.js";
 
 // gen/front_end/entrypoints/formatter_worker/FormattedContentBuilder.js
 var FormattedContentBuilder_exports = {};
@@ -3727,19 +3727,19 @@ __export(HTMLFormatter_exports, {
   HTMLFormatter: () => HTMLFormatter,
   HTMLModel: () => HTMLModel
 });
-import * as Platform2 from "./..\\..\\core\\platform\\platform.js";
+import * as Platform2 from "./../../core/platform/platform.js";
 
 // gen/front_end/entrypoints/formatter_worker/JavaScriptFormatter.js
 var JavaScriptFormatter_exports = {};
 __export(JavaScriptFormatter_exports, {
   JavaScriptFormatter: () => JavaScriptFormatter
 });
-import * as Acorn2 from "./..\\..\\third_party\\acorn\\acorn.js";
+import * as Acorn2 from "./../../third_party/acorn/acorn.js";
 
 // gen/front_end/entrypoints/formatter_worker/AcornTokenizer.js
-import * as Platform from "./..\\..\\core\\platform\\platform.js";
-import * as TextUtils from "./..\\..\\models\\text_utils\\text_utils.js";
-import * as Acorn from "./..\\..\\third_party\\acorn\\acorn.js";
+import * as Platform from "./../../core/platform/platform.js";
+import * as TextUtils from "./../../models/text_utils/text_utils.js";
+import * as Acorn from "./../../third_party/acorn/acorn.js";
 var AcornTokenizer = class {
   #textCursor;
   #tokenLineStart;
@@ -4903,7 +4903,7 @@ var Substitute_exports = {};
 __export(Substitute_exports, {
   substituteExpression: () => substituteExpression
 });
-import * as Acorn4 from "./..\\..\\third_party\\acorn\\acorn.js";
+import * as Acorn4 from "./../../third_party/acorn/acorn.js";
 
 // gen/front_end/entrypoints/formatter_worker/ScopeParser.js
 var ScopeParser_exports = {};
@@ -4912,7 +4912,7 @@ __export(ScopeParser_exports, {
   ScopeVariableAnalysis: () => ScopeVariableAnalysis,
   parseScopes: () => parseScopes
 });
-import * as Acorn3 from "./..\\..\\third_party\\acorn\\acorn.js";
+import * as Acorn3 from "./../../third_party/acorn/acorn.js";
 function parseScopes(expression, sourceType = "script") {
   let root = null;
   try {
