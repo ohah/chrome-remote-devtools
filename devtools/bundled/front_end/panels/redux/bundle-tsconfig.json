@@ -1,0 +1,1 @@
+{"compilerOptions":{"composite":true,"outDir":".","baseUrl":".","rootDir":"../../../../../../front_end/panels/redux"},"files":["../../../../../../front_end/panels/redux/redux.ts"],"references":[{"path":"./redux-tsconfig.json"}]}

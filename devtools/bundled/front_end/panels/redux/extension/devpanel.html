@@ -1,0 +1,104 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"></head><title>Redux DevTools</title><style>html {
+  height: 100%;
+  width: 100%;
+}
+body {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  min-width: 350px;
+  min-height: 400px;
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica Neue", "Lucida Grande", sans-serif;
+  font-size: 11px;
+  background-color: rgb(53, 59, 70);
+  color: #fff;
+}
+#root {
+  height: 100%;
+}
+#root > div {
+  height: 100%;
+}
+#root > div > div:nth-child(2) {
+  min-height: 0;
+}
+.ReactCodeMirror {
+  overflow: auto;
+  height: 100%;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: initial !important;
+}
+
+@media print {
+  @page {
+    size: auto;
+    margin: 0;
+  }
+
+  body {
+    position: static;
+  }
+
+  #root > div > div:not(:nth-child(2)) {
+    display: none !important;
+  }
+
+  #root > div > div:nth-child(2) {
+    overflow: visible !important;
+    position: absolute !important;
+    z-index: 2147483647;
+    page-break-after: avoid;
+  }
+
+  #root > div > div:nth-child(2) * {
+    overflow: visible !important;
+  }
+}</style><body><div id="root"><div style="display: flex; justify-content: center; align-items: center"><img src="img/loading.svg" height="300" width="350"></div></div><link href="devpanel.bundle.css" rel="stylesheet"><script>
+// Initialize chrome API stub before other scripts / 다른 스크립트 전에 chrome API stub 초기화
+(function() {
+  if (typeof window.chrome === 'undefined') {
+    window.chrome = {};
+  }
+  // The actual API will be injected by ReduxExtensionBridge / 실제 API는 ReduxExtensionBridge에서 주입됨
+  // This stub prevents "Cannot read properties of undefined" errors / 이 stub은 "Cannot read properties of undefined" 에러를 방지함
+  if (!window.chrome.runtime) {
+    window.chrome.runtime = {
+      connect: function(options) {
+        var name = (options && options.name) || 'default';
+        return {
+          name: name,
+          onMessage: { addListener: function() {}, removeListener: function() {} },
+          onDisconnect: { addListener: function() {} },
+          postMessage: function() {},
+          disconnect: function() {}
+        };
+      },
+      sendMessage: function(message, callback) {
+        if (callback) callback({ success: true });
+      },
+      onMessage: { addListener: function() {}, removeListener: function() {} },
+      onConnect: { addListener: function() {} },
+      getURL: function(path) {
+        return 'devtools://devtools/bundled/panels/redux/extension/' + path;
+      }
+    };
+  }
+  if (!window.chrome.devtools) {
+    window.chrome.devtools = {
+      inspectedWindow: {
+        eval: function(expression, callback) {
+          if (callback) callback(null, { isException: true, value: 'Not initialized' });
+        },
+        getResources: function(callback) {
+          if (callback) callback([{ url: window.location.href || 'about:blank' }]);
+        },
+        get tabId() { return undefined; }
+      }
+    };
+  }
+})();
+</script><script src="devpanel.bundle.js"></script></body></html>
