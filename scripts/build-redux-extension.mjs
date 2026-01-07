@@ -186,7 +186,8 @@ if (fs.existsSync(devpanelHtmlPath)) {
       // Use lastIndexOf to find the last </head> tag / 마지막 </head> 태그 찾기
       const lastHeadIndex = htmlContent.lastIndexOf('</head>');
       if (lastHeadIndex !== -1) {
-        htmlContent = htmlContent.slice(0, lastHeadIndex) + apiInitScript + htmlContent.slice(lastHeadIndex);
+        htmlContent =
+          htmlContent.slice(0, lastHeadIndex) + apiInitScript + htmlContent.slice(lastHeadIndex);
         inserted = true;
         console.log('  ✓ Inserted API stub before </head> tag');
       }
