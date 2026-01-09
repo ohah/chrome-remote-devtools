@@ -4,6 +4,7 @@ import { View, StyleSheet } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { ConsoleTestTab } from '../components/ConsoleTestTab';
 import { NetworkTestTab } from '../components/NetworkTestTab';
+import { ReduxDevToolsStatus } from '../components/ReduxDevToolsStatus';
 import { HookControls } from '../components/HookControls';
 import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-react-native';
 
@@ -14,6 +15,11 @@ function HomeTabs() {
     <Tab.Navigator>
       <Tab.Screen name="Console" component={ConsoleTestTab} options={{ title: 'Console Test' }} />
       <Tab.Screen name="Network" component={NetworkTestTab} options={{ title: 'Network Test' }} />
+      <Tab.Screen
+        name="ReduxDevTools"
+        component={ReduxDevToolsStatus}
+        options={{ title: 'Redux DevTools' }}
+      />
     </Tab.Navigator>
   );
 }
