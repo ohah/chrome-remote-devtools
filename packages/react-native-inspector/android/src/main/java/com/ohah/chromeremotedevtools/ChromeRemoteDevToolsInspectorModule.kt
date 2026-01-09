@@ -20,8 +20,8 @@ import com.facebook.react.bridge.Arguments
  * TurboModule for Chrome Remote DevTools Inspector / Chrome Remote DevTools Inspector용 TurboModule
  * This allows JavaScript to call native Inspector methods / JavaScript에서 네이티브 Inspector 메서드를 호출할 수 있게 합니다
  */
-class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext) :
-  ReactContextBaseJavaModule(reactContext) {
+class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicationContext) :
+  ReactContextBaseJavaModule(reactApplicationContext) {
 
   private var connection: ChromeRemoteDevToolsInspectorPackagerConnection? = null
 
@@ -41,12 +41,12 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
   @ReactMethod
   fun connect(serverHost: String, serverPort: Int, promise: Promise) {
     try {
-      val context = reactApplicationContext
-      if (context == null) {
-        android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "React application context is null / React 애플리케이션 컨텍스트가 null입니다")
-        promise.reject("NO_CONTEXT", "React application context is null / React 애플리케이션 컨텍스트가 null입니다")
-        return
-      }
+      val context: ReactApplicationContext = reactApplicationContext
+        ?: run {
+          android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "React application context is null / React 애플리케이션 컨텍스트가 null입니다")
+          promise.reject("NO_CONTEXT", "React application context is null / React 애플리케이션 컨텍스트가 null입니다")
+          return
+        }
 
       android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "connect() called / connect() 호출됨")
       android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "serverHost: $serverHost, serverPort: $serverPort")
@@ -72,7 +72,104 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
         // Capture variables for lambda / 람다를 위한 변수 캡처
         val capturedHost = serverHost
         val capturedPort = serverPort
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+        // Install JSI-level console and network hooks immediately / JSI 레벨 console 및 network 훅을 즉시 설치
+        // JSI hook installation should not depend on WebSocket connection / JSI 훅 설치는 WebSocket 연결에 의존하지 않아야 합니다
+        // JSI hook is installed directly via JNI, and JSI code will send messages via TurboModule / JSI 훅은 JNI를 통해 직접 설치되며, JSI 코드가 TurboModule을 통해 메시지를 전송합니다
+        android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Attempting to install JSI hooks / JSI 훅 설치 시도 중")
+        try {
+          // Try to get RuntimeExecutor from CatalystInstance (Old Architecture) / CatalystInstance에서 RuntimeExecutor 가져오기 시도 (Old Architecture)
+          var runtimeExecutor: Any? = null
+
+          try {
+            val catalystInstance = context.catalystInstance
+            android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "CatalystInstance: ${if (catalystInstance != null) "not null" else "null"}")
+            if (catalystInstance != null) {
+              runtimeExecutor = catalystInstance.runtimeExecutor
+              android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "RuntimeExecutor from CatalystInstance: ${if (runtimeExecutor != null) "not null" else "null"}")
+            }
+          } catch (e: Exception) {
+            android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "CatalystInstance not available (Bridgeless mode?) / CatalystInstance를 사용할 수 없음 (Bridgeless 모드?): ${e.message}")
+          }
+
+          // If CatalystInstance failed, try ReactHost (Bridgeless/New Architecture) / CatalystInstance가 실패하면 ReactHost 시도 (Bridgeless/New Architecture)
+          if (runtimeExecutor == null) {
+            try {
+              // Try to get ReactHost using reflection / 리플렉션을 사용하여 ReactHost 가져오기 시도
+              // React Native 0.83+ Bridgeless uses ReactHost instead of CatalystInstance / React Native 0.83+ Bridgeless는 CatalystInstance 대신 ReactHost를 사용합니다
+              var reactHost: Any? = null
+
+              // Try getReactHost() method first / 먼저 getReactHost() 메서드 시도
+              try {
+                val getReactHostMethod = context.javaClass.getMethod("getReactHost")
+                reactHost = getReactHostMethod.invoke(context)
+                android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "ReactHost from getReactHost(): ${if (reactHost != null) "not null" else "null"}")
+              } catch (e: NoSuchMethodException) {
+                // Try reactHost field / reactHost 필드 시도
+                try {
+                  val reactHostField = context.javaClass.getDeclaredField("reactHost")
+                  reactHostField.isAccessible = true
+                  reactHost = reactHostField.get(context)
+                  android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "ReactHost from field: ${if (reactHost != null) "not null" else "null"}")
+                } catch (e2: Exception) {
+                  android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "ReactHost field not found / ReactHost 필드를 찾을 수 없음: ${e2.message}")
+                }
+              }
+
+              if (reactHost != null) {
+                // Get RuntimeExecutor from ReactHost / ReactHost에서 RuntimeExecutor 가져오기
+                try {
+                  val runtimeExecutorMethod = reactHost.javaClass.getMethod("getRuntimeExecutor")
+                  runtimeExecutor = runtimeExecutorMethod.invoke(reactHost)
+                  android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "RuntimeExecutor from ReactHost: ${if (runtimeExecutor != null) "not null" else "null"}")
+                } catch (e: Exception) {
+                  android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Failed to get RuntimeExecutor from ReactHost / ReactHost에서 RuntimeExecutor를 가져오지 못함: ${e.message}")
+                }
+              } else {
+                android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "ReactHost is null / ReactHost가 null입니다")
+              }
+            } catch (e: Exception) {
+              android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Failed to get ReactHost / ReactHost를 가져오지 못함: ${e.message}")
+            }
+          }
+
+          if (runtimeExecutor != null) {
+            // Call JNI directly to install JSI hook / JSI 훅을 설치하기 위해 JNI를 직접 호출
+            // Install hooks first, then set server info / 훅을 먼저 설치하고 나중에 서버 정보 설정
+            android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Calling nativeHookJSILog / nativeHookJSILog 호출 중")
+            try {
+              val jsiHooked = ChromeRemoteDevToolsLogHookJNI.nativeHookJSILog(runtimeExecutor)
+              android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "nativeHookJSILog returned: $jsiHooked")
+              if (jsiHooked) {
+                android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "JSI-level logging hook installed successfully / JSI 레벨 로깅 훅이 성공적으로 설치됨")
+              } else {
+                android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Failed to install JSI-level logging hook / JSI 레벨 로깅 훅 설치 실패")
+              }
+            } catch (e: Exception) {
+              android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Exception while calling nativeHookJSILog / nativeHookJSILog 호출 중 예외 발생: ${e.message}", e)
+            }
+
+            // Set server info for Redux DevTools Extension / Redux DevTools Extension을 위한 서버 정보 설정
+            // This can be called after hooks are installed / 훅이 설치된 후 호출할 수 있습니다
+            // NOTE: Temporarily disabled due to crash in nativeSetReduxDevToolsServerInfo / 참고: nativeSetReduxDevToolsServerInfo에서 크래시가 발생하여 일시적으로 비활성화됨
+            // Server info can be set later when needed / 서버 정보는 필요할 때 나중에 설정할 수 있습니다
+            // android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Setting Redux DevTools Extension server info / Redux DevTools Extension 서버 정보 설정 중")
+            // try {
+            //   ChromeRemoteDevToolsLogHookJNI.nativeSetReduxDevToolsServerInfo(capturedHost, capturedPort)
+            //   android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Redux DevTools Extension server info set / Redux DevTools Extension 서버 정보 설정됨")
+            // } catch (e: Exception) {
+            //   android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Exception while setting Redux DevTools server info / Redux DevTools 서버 정보 설정 중 예외 발생: ${e.message}", e)
+            //   // Continue even if server info setting fails / 서버 정보 설정이 실패해도 계속 진행
+            // }
+          } else {
+            android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "RuntimeExecutor is null, cannot hook JSI log / RuntimeExecutor가 null입니다, JSI 로그를 훅할 수 없습니다")
+            android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Tried both CatalystInstance and ReactHost / CatalystInstance와 ReactHost 모두 시도했지만 실패")
+          }
+        } catch (e: Exception) {
+          android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Exception while hooking JSI log / JSI 로그 훅 중 예외 발생: ${e.message}", e)
+        }
+
+        // Check WebSocket connection status after delay / 지연 후 WebSocket 연결 상태 확인
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(Runnable {
           val isConnected = connection?.isConnected() ?: false
           android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Connection status after delay / 지연 후 연결 상태: $isConnected")
 
@@ -85,33 +182,6 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
             android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Server should be running on $serverAddress")
           } else {
             android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "✅ WebSocket connected successfully / WebSocket 연결 성공")
-
-            // Note: Network interception is now handled by C++ network hook (JSI level) / 참고: 네트워크 인터셉션은 이제 C++ network 훅(JSI 레벨)에서 처리됩니다
-            // Native OkHttp interceptor is disabled when JSI hook is available / JSI 훅을 사용할 수 있을 때 네이티브 OkHttp 인터셉터는 비활성화됩니다
-
-            // Install JSI-level console and network hooks / JSI 레벨 console 및 network 훅 설치
-            // JSI hook is installed directly via JNI, and JSI code will send messages via TurboModule / JSI 훅은 JNI를 통해 직접 설치되며, JSI 코드가 TurboModule을 통해 메시지를 전송합니다
-            try {
-              val catalystInstance = context.catalystInstance
-              if (catalystInstance != null) {
-                val runtimeExecutor = catalystInstance.runtimeExecutor
-                if (runtimeExecutor != null) {
-                  // Call JNI directly to install JSI hook / JSI 훅을 설치하기 위해 JNI를 직접 호출
-                  val jsiHooked = ChromeRemoteDevToolsLogHookJNI.nativeHookJSILog(runtimeExecutor)
-                  if (jsiHooked) {
-                    android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "JSI-level logging hook installed successfully / JSI 레벨 로깅 훅이 성공적으로 설치됨")
-                  } else {
-                    android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Failed to install JSI-level logging hook / JSI 레벨 로깅 훅 설치 실패")
-                  }
-                } else {
-                  android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "RuntimeExecutor is null, cannot hook JSI log / RuntimeExecutor가 null입니다, JSI 로그를 훅할 수 없습니다")
-                }
-              } else {
-                android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "CatalystInstance is null, cannot hook JSI log / CatalystInstance가 null입니다, JSI 로그를 훅할 수 없습니다")
-              }
-            } catch (e: Exception) {
-              android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Exception while hooking JSI log / JSI 로그 훅 중 예외 발생: ${e.message}", e)
-            }
           }
 
           val result: WritableMap = Arguments.createMap()
@@ -169,11 +239,11 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
   @ReactMethod
   fun sendCDPMessage(serverHost: String, serverPort: Int, message: String, promise: Promise) {
     try {
-      val context = reactApplicationContext
-      if (context == null) {
-        promise.reject("NO_CONTEXT", "React application context is null")
-        return
-      }
+      val context: ReactApplicationContext = reactApplicationContext
+        ?: run {
+          promise.reject("NO_CONTEXT", "React application context is null")
+          return
+        }
 
       ChromeRemoteDevToolsInspector.sendCDPMessage(
         context = context,
@@ -193,11 +263,11 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
   @ReactMethod
   fun enableConsoleHook(promise: Promise) {
     try {
-      val context = reactApplicationContext
-      if (context == null) {
-        promise.reject("NO_CONTEXT", "React application context is null")
-        return
-      }
+      val context: ReactApplicationContext = reactApplicationContext
+        ?: run {
+          promise.reject("NO_CONTEXT", "React application context is null")
+          return
+        }
 
       val catalystInstance = context.catalystInstance
       if (catalystInstance == null) {
@@ -224,11 +294,11 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
   @ReactMethod
   fun disableConsoleHook(promise: Promise) {
     try {
-      val context = reactApplicationContext
-      if (context == null) {
-        promise.reject("NO_CONTEXT", "React application context is null")
-        return
-      }
+      val context: ReactApplicationContext = reactApplicationContext
+        ?: run {
+          promise.reject("NO_CONTEXT", "React application context is null")
+          return
+        }
 
       val catalystInstance = context.catalystInstance
       if (catalystInstance == null) {
@@ -255,11 +325,11 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
   @ReactMethod
   fun enableNetworkHook(promise: Promise) {
     try {
-      val context = reactApplicationContext
-      if (context == null) {
-        promise.reject("NO_CONTEXT", "React application context is null")
-        return
-      }
+      val context: ReactApplicationContext = reactApplicationContext
+        ?: run {
+          promise.reject("NO_CONTEXT", "React application context is null")
+          return
+        }
 
       val catalystInstance = context.catalystInstance
       if (catalystInstance == null) {
@@ -286,11 +356,11 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
   @ReactMethod
   fun disableNetworkHook(promise: Promise) {
     try {
-      val context = reactApplicationContext
-      if (context == null) {
-        promise.reject("NO_CONTEXT", "React application context is null")
-        return
-      }
+      val context: ReactApplicationContext = reactApplicationContext
+        ?: run {
+          promise.reject("NO_CONTEXT", "React application context is null")
+          return
+        }
 
       val catalystInstance = context.catalystInstance
       if (catalystInstance == null) {
@@ -317,11 +387,11 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
   @ReactMethod
   fun isConsoleHookEnabled(promise: Promise) {
     try {
-      val context = reactApplicationContext
-      if (context == null) {
-        promise.reject("NO_CONTEXT", "React application context is null")
-        return
-      }
+      val context: ReactApplicationContext = reactApplicationContext
+        ?: run {
+          promise.reject("NO_CONTEXT", "React application context is null")
+          return
+        }
 
       val catalystInstance = context.catalystInstance
       if (catalystInstance == null) {
@@ -348,11 +418,11 @@ class ChromeRemoteDevToolsInspectorModule(reactContext: ReactApplicationContext)
   @ReactMethod
   fun isNetworkHookEnabled(promise: Promise) {
     try {
-      val context = reactApplicationContext
-      if (context == null) {
-        promise.reject("NO_CONTEXT", "React application context is null")
-        return
-      }
+      val context: ReactApplicationContext = reactApplicationContext
+        ?: run {
+          promise.reject("NO_CONTEXT", "React application context is null")
+          return
+        }
 
       val catalystInstance = context.catalystInstance
       if (catalystInstance == null) {

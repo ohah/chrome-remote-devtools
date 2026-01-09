@@ -29,6 +29,8 @@
 #include "ConsoleHook.h"
 // Include network hook / 네트워크 훅 포함
 #include "NetworkHook.h"
+// Include Redux DevTools Extension / Redux DevTools Extension 포함
+#include "ReduxDevToolsExtension.h"
 
 #define TAG "ChromeRemoteDevToolsLogHookJNI"
 
@@ -179,6 +181,30 @@ static void hookJSILogging(facebook::jsi::Runtime& runtime) {
       __android_log_print(ANDROID_LOG_WARN, TAG,
                           "Failed to hook JSI network methods / JSI 네트워크 메서드 훅 실패");
     }
+
+    // Install Redux DevTools Extension / Redux DevTools Extension 설치
+    __android_log_print(ANDROID_LOG_INFO, TAG,
+                        "========================================");
+    __android_log_print(ANDROID_LOG_INFO, TAG,
+                        "Installing Redux DevTools Extension via JSI / JSI를 통해 Redux DevTools Extension 설치 중");
+    __android_log_print(ANDROID_LOG_INFO, TAG,
+                        "This will inject __REDUX_DEVTOOLS_EXTENSION__ to global object / 이것은 전역 객체에 __REDUX_DEVTOOLS_EXTENSION__를 주입합니다");
+    bool reduxExtensionSuccess = chrome_remote_devtools::installReduxDevToolsExtension(runtime);
+    if (reduxExtensionSuccess) {
+      __android_log_print(ANDROID_LOG_INFO, TAG,
+                          "✅ Redux DevTools Extension installed successfully / Redux DevTools Extension이 성공적으로 설치됨");
+      __android_log_print(ANDROID_LOG_INFO, TAG,
+                          "   - global.__REDUX_DEVTOOLS_EXTENSION__ is now available / global.__REDUX_DEVTOOLS_EXTENSION__가 이제 사용 가능합니다");
+      __android_log_print(ANDROID_LOG_INFO, TAG,
+                          "   - global.__REDUX_DEVTOOLS_EXTENSION_JSI_INJECTED__ flag is set / global.__REDUX_DEVTOOLS_EXTENSION_JSI_INJECTED__ 플래그가 설정되었습니다");
+    } else {
+      __android_log_print(ANDROID_LOG_ERROR, TAG,
+                          "❌ Failed to install Redux DevTools Extension / Redux DevTools Extension 설치 실패");
+      __android_log_print(ANDROID_LOG_ERROR, TAG,
+                          "   - Check logs above for details / 자세한 내용은 위의 로그를 확인하세요");
+    }
+    __android_log_print(ANDROID_LOG_INFO, TAG,
+                        "========================================");
   } catch (const std::exception& e) {
     __android_log_print(ANDROID_LOG_ERROR, TAG,
                         "Failed to hook JSI console: %s", e.what());
@@ -202,6 +228,8 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHookJSIL
     JNIEnv *env,
     jobject /* thiz */,
     jobject runtimeExecutor) {
+  __android_log_print(ANDROID_LOG_INFO, TAG,
+                      "nativeHookJSILog called / nativeHookJSILog 호출됨");
   try {
     // Store JVM reference / JVM 참조 저장
     if (env->GetJavaVM(&g_jvm) != JNI_OK) {
@@ -244,12 +272,18 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHookJSIL
 
     // Call RuntimeExecutor to access JSI runtime and install hook /
     // RuntimeExecutor를 호출하여 JSI 런타임에 접근하고 훅 설치
+    __android_log_print(ANDROID_LOG_INFO, TAG,
+                        "Calling RuntimeExecutor to install JSI hooks / JSI 훅을 설치하기 위해 RuntimeExecutor 호출 중");
     executor([](facebook::jsi::Runtime& runtime) {
+      __android_log_print(ANDROID_LOG_INFO, TAG,
+                          "RuntimeExecutor callback called, installing hooks / RuntimeExecutor 콜백 호출됨, 훅 설치 중");
       hookJSILogging(runtime);
+      __android_log_print(ANDROID_LOG_INFO, TAG,
+                          "RuntimeExecutor callback completed / RuntimeExecutor 콜백 완료");
     });
 
     __android_log_print(ANDROID_LOG_INFO, TAG,
-                            "JSI-level logging hook installed");
+                            "JSI-level logging hook installation initiated / JSI 레벨 로깅 훅 설치 시작됨");
     return JNI_TRUE;
 #else
     // JSI not available / JSI를 사용할 수 없음
@@ -731,6 +765,43 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeGetObjec
     __android_log_print(ANDROID_LOG_ERROR, TAG,
                         "Unknown exception in nativeGetObjectProperties");
     return nullptr;
+  }
+}
+
+// JNI function to set server info for Redux DevTools Extension / Redux DevTools Extension을 위한 서버 정보 설정 JNI 함수
+extern "C" JNIEXPORT void JNICALL
+Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeSetReduxDevToolsServerInfo(
+    JNIEnv *env,
+    jobject /* thiz */,
+    jstring serverHost,
+    jint serverPort) {
+  try {
+    if (!serverHost) {
+      __android_log_print(ANDROID_LOG_ERROR, TAG,
+                          "Server host is null / 서버 호스트가 null입니다");
+      return;
+    }
+
+    const char* hostStr = env->GetStringUTFChars(serverHost, nullptr);
+    if (!hostStr) {
+      __android_log_print(ANDROID_LOG_ERROR, TAG,
+                          "Failed to get server host string / 서버 호스트 문자열을 가져오지 못했습니다");
+      return;
+    }
+
+    std::string host(hostStr);
+    env->ReleaseStringUTFChars(serverHost, hostStr);
+
+    chrome_remote_devtools::setReduxDevToolsServerInfo(host, serverPort);
+    __android_log_print(ANDROID_LOG_INFO, TAG,
+                        "Redux DevTools Extension server info set: %s:%d / Redux DevTools Extension 서버 정보 설정됨: %s:%d",
+                        host.c_str(), serverPort);
+  } catch (const std::exception& e) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Exception in nativeSetReduxDevToolsServerInfo: %s", e.what());
+  } catch (...) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "Unknown exception in nativeSetReduxDevToolsServerInfo");
   }
 }
 

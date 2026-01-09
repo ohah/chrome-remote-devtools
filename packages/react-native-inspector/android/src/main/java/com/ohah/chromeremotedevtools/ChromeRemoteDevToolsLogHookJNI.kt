@@ -104,6 +104,14 @@ class ChromeRemoteDevToolsLogHookJNI {
     external fun nativeGetObjectProperties(objectId: String): String?
 
     /**
+     * Set server info for Redux DevTools Extension / Redux DevTools Extension을 위한 서버 정보 설정
+     * @param serverHost Server host / 서버 호스트
+     * @param serverPort Server port / 서버 포트
+     */
+    @JvmStatic
+    external fun nativeSetReduxDevToolsServerInfo(serverHost: String, serverPort: Int)
+
+    /**
      * Send CDP message directly from C++ / C++에서 직접 CDP 메시지 전송
      * This bypasses JavaScript/TurboModule layer / JavaScript/TurboModule 레이어를 우회합니다
      * Called from native C++ code via JNI / JNI를 통해 네이티브 C++ 코드에서 호출됨
