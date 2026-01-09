@@ -159,19 +159,12 @@ export async function isNetworkHookEnabled(): Promise<boolean> {
   return ChromeRemoteDevToolsInspector.isNetworkHookEnabled();
 }
 
-// Import devtools-hook to trigger auto-initialization / devtools-hook를 import하여 자동 초기화 트리거
-// This must be imported before exporting to ensure auto-initialization runs / 자동 초기화가 실행되도록 export 전에 import해야 함
-import './devtools-hook';
-export { setupReduxDevToolsExtension } from './devtools-hook';
-
 // Re-export from separate files to avoid circular dependency / 순환 참조를 피하기 위해 별도 파일에서 re-export
 export { sendCDPMessage } from './cdp-message';
 export { setServerInfo, getServerInfo } from './server-info';
 export {
   getGlobalObj,
   getExtensionStatus,
-  getConnectCallInfo,
-  getReduxDevToolsExtensionPolyfillPath,
 } from './utils';
 export { ChromeRemoteDevToolsInspectorProvider } from './Provider';
 export type { ChromeRemoteDevToolsInspectorProviderProps } from './Provider';

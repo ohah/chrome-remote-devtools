@@ -1,10 +1,5 @@
 // Shared utilities for React Native Inspector / React Native Inspector용 공유 유틸리티
 
-import { getConnectCallInfo } from './devtools-hook';
-
-// Export getConnectCallInfo for direct access / 직접 접근을 위한 getConnectCallInfo 내보내기
-export { getConnectCallInfo } from './devtools-hook';
-
 // Type declarations for React Native environment / React Native 환경용 타입 선언
 declare const global: typeof globalThis;
 declare const window: any;
@@ -19,21 +14,6 @@ export function getGlobalObj(): any {
     : typeof window !== 'undefined'
       ? window
       : {};
-}
-
-/**
- * Get Redux DevTools Extension polyfill path / Redux DevTools Extension polyfill 경로 가져오기
- * @returns Path string that Metro can resolve / Metro가 resolve할 수 있는 경로 문자열
- */
-export function getReduxDevToolsExtensionPolyfillPath(): string {
-  // In React Native, use require.resolve or return package-relative path / React Native에서는 require.resolve를 사용하거나 패키지 상대 경로 반환
-  // Metro will resolve this at build time / Metro가 빌드 타임에 이것을 resolve합니다
-  try {
-    return require.resolve('@ohah/chrome-remote-devtools-react-native/polyfills/redux-devtools-extension');
-  } catch {
-    // Return package-relative path for Metro to resolve / Metro가 resolve할 패키지 상대 경로 반환
-    return '@ohah/chrome-remote-devtools-react-native/polyfills/redux-devtools-extension';
-  }
 }
 
 /**
@@ -64,9 +44,6 @@ export function getExtensionStatus(storeName?: string) {
       }
     })();
 
-  // Get connect call info if store name provided / store 이름이 제공되면 connect 호출 정보 가져오기
-  const connectInfo = storeName ? getConnectCallInfo(storeName) : null;
-
   return {
     extensionExists: !!extension,
     hasConnect: typeof extension?.connect === 'function',
@@ -78,15 +55,5 @@ export function getExtensionStatus(storeName?: string) {
     zustandCanDetect,
     hasGlobal: typeof global !== 'undefined',
     hasWindow: typeof window !== 'undefined',
-    connectCalled: !!connectInfo,
-    connectInfo: connectInfo
-      ? {
-          storeName: connectInfo.storeName,
-          timestamp: connectInfo.timestamp,
-          instanceId: connectInfo.instanceId,
-          initCalled: connectInfo.initCalled,
-          initTimestamp: connectInfo.initTimestamp,
-        }
-      : null,
   };
 }
