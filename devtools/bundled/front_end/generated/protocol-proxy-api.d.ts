@@ -80,6 +80,8 @@ declare namespace ProtocolProxyApi {
 
     Memory: MemoryApi;
 
+    MMKVStorage: MMKVStorageApi;
+
     Network: NetworkApi;
 
     Overlay: OverlayApi;
@@ -190,6 +192,8 @@ declare namespace ProtocolProxyApi {
     Media: MediaDispatcher;
 
     Memory: MemoryDispatcher;
+
+    MMKVStorage: MMKVStorageDispatcher;
 
     Network: NetworkDispatcher;
 
@@ -2461,6 +2465,34 @@ declare namespace ProtocolProxyApi {
 
   }
   export interface MemoryDispatcher {
+  }
+
+  export interface MMKVStorageApi {
+    /**
+     * Enables storage tracking, storage events will now be delivered to the client.
+     */
+    invoke_enable(): Promise<Protocol.ProtocolResponseWithError>;
+
+    invoke_getMMKVItems(params: Protocol.MMKVStorage.GetMMKVItemsRequest): Promise<Protocol.MMKVStorage.GetMMKVItemsResponse>;
+
+    invoke_setMMKVItem(params: Protocol.MMKVStorage.SetMMKVItemRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+    invoke_removeMMKVItem(params: Protocol.MMKVStorage.RemoveMMKVItemRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+    invoke_clear(params: Protocol.MMKVStorage.ClearRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+  }
+  export interface MMKVStorageDispatcher {
+    mmkvItemsCleared(params: Protocol.MMKVStorage.MmkvItemsClearedEvent): void;
+
+    mmkvItemRemoved(params: Protocol.MMKVStorage.MmkvItemRemovedEvent): void;
+
+    mmkvItemAdded(params: Protocol.MMKVStorage.MmkvItemAddedEvent): void;
+
+    mmkvItemUpdated(params: Protocol.MMKVStorage.MmkvItemUpdatedEvent): void;
+
+    mmkvInstanceCreated(params: Protocol.MMKVStorage.MmkvInstanceCreatedEvent): void;
+
   }
 
   export interface NetworkApi {

@@ -740,6 +740,8 @@
       <include file="panels/redux/redux-meta.js" name="PANELS_REDUX_REDUX_META_JS" resource_path="panels/redux/redux-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/redux/redux.js" name="PANELS_REDUX_REDUX_JS" resource_path="panels/redux/redux.js" type="BINDATA" compress="false"/>
       <include file="panels/redux/extension/devpanel.html" name="PANELS_REDUX_EXTENSION_DEVPANEL_HTML" resource_path="panels/redux/extension/devpanel.html" type="BINDATA" compress="false"/>
+      <include file="panels/storage/storage-meta.js" name="PANELS_STORAGE_STORAGE_META_JS" resource_path="panels/storage/storage-meta.js" type="BINDATA" compress="false"/>
+      <include file="panels/storage/storage.js" name="PANELS_STORAGE_STORAGE_JS" resource_path="panels/storage/storage.js" type="BINDATA" compress="false"/>
       <include file="panels/redux/extension/devpanel.bundle.js" name="PANELS_REDUX_EXTENSION_DEVPANEL_BUNDLE_JS" resource_path="panels/redux/extension/devpanel.bundle.js" type="BINDATA" compress="false"/>
       <include file="panels/redux/extension/devpanel.bundle.css" name="PANELS_REDUX_EXTENSION_DEVPANEL_BUNDLE_CSS" resource_path="panels/redux/extension/devpanel.bundle.css" type="BINDATA" compress="false"/>
       <include file="panels/redux/extension/background.bundle.js" name="PANELS_REDUX_EXTENSION_BACKGROUND_BUNDLE_JS" resource_path="panels/redux/extension/background.bundle.js" type="BINDATA" compress="false"/>

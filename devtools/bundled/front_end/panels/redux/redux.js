@@ -21,12 +21,22 @@ var ReduxExtensionBridge = class {
   observer = null;
   messagePort = null;
   messageListeners = [];
+  connectCalled = false;
+  // Track if connect was called / connect 호출 여부 추적
+  startSent = false;
+  // Track if START message was sent / START 메시지 전송 여부 추적
   /**
    * Initialize bridge with iframe window / iframe window로 브릿지 초기화
    */
   initialize(iframeWindow) {
     this.iframeWindow = iframeWindow;
     this.injectExtensionAPI();
+    setTimeout(() => {
+      if (!this.connectCalled && this.target && !this.startSent) {
+        console.log("[ReduxExtensionBridge] Extension did not call connect, sending START anyway");
+        this.sendStartMessageToPage();
+      }
+    }, 2e3);
   }
   /**
    * Inject chrome.runtime API into iframe / iframe에 chrome.runtime API 주입
@@ -44,7 +54,14 @@ var ReduxExtensionBridge = class {
       runtime: {
         // Connect to background script / background script에 연결
         connect: (_options) => {
-          return this.messagePort;
+          this.connectCalled = true;
+          const port = this.messagePort;
+          if (port && this.target) {
+            setTimeout(() => {
+              this.sendStartMessageToPage();
+            }, 100);
+          }
+          return port;
         },
         // Send message to background script / background script로 메시지 전송
         sendMessage: (message, callback) => {
@@ -91,7 +108,60 @@ var ReduxExtensionBridge = class {
   /**
    * Handle messages from Redux DevTools Extension / Redux DevTools Extension으로부터 메시지 처리
    */
-  handleExtensionMessage(_message) {
+  handleExtensionMessage(message) {
+    const extMessage = message;
+    if (this.target && extMessage.type && (extMessage.type === "START" || extMessage.type === "UPDATE" || extMessage.type === "DISPATCH" || extMessage.type === "ACTION" || extMessage.type === "IMPORT" || extMessage.type === "EXPORT")) {
+      this.sendMessageToPage({ type: extMessage.type, ...extMessage });
+    }
+  }
+  /**
+   * Send START message to page to request initial state / 초기 상태를 요청하기 위해 페이지에 START 메시지 전송
+   * This matches the original Redux DevTools Extension behavior / 이것은 원래 Redux DevTools Extension 동작과 일치
+   */
+  sendStartMessageToPage() {
+    if (!this.target || this.startSent) {
+      return;
+    }
+    this.startSent = true;
+    this.sendMessageToPage({ type: "START" });
+  }
+  /**
+   * Send START message to page if not already sent / 아직 전송되지 않았다면 페이지에 START 메시지 전송
+   */
+  sendStartMessageToPageIfNeeded() {
+    if (this.target && !this.startSent) {
+      this.sendStartMessageToPage();
+    }
+  }
+  /**
+   * Send message to page via Runtime.evaluate / Runtime.evaluate를 통해 페이지로 메시지 전송
+   * This simulates the original Redux DevTools Extension message passing / 이것은 원래 Redux DevTools Extension 메시지 전달을 시뮬레이션
+   */
+  sendMessageToPage(message) {
+    if (!this.target) {
+      return;
+    }
+    const messageStr = JSON.stringify(message);
+    this.target.runtimeAgent().invoke_evaluate({
+      expression: `
+        (function() {
+          if (window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION_LISTENERS__) {
+            const message = ${messageStr};
+            // Trigger message listeners / \uBA54\uC2DC\uC9C0 \uB9AC\uC2A4\uB108 \uD2B8\uB9AC\uAC70
+            window.__REDUX_DEVTOOLS_EXTENSION_LISTENERS__.forEach(listener => {
+              try {
+                listener(message);
+              } catch (e) {
+                console.warn('[ReduxDevTools] Error in message listener:', e);
+              }
+            });
+          }
+        })();
+      `,
+      returnByValue: false
+    }).catch((error) => {
+      console.warn("[ReduxExtensionBridge] Failed to send message to page:", error);
+    });
   }
   /**
    * Send message to Redux DevTools Extension iframe / Redux DevTools Extension iframe으로 메시지 전송
@@ -261,6 +331,11 @@ var ReduxPanel = class extends UI.Panel.Panel {
   wasShown() {
     super.wasShown();
     this.setupCDPListener();
+    if (this.#iframe?.contentWindow && this.#target) {
+      setTimeout(() => {
+        this.#bridge.sendStartMessageToPageIfNeeded();
+      }, 500);
+    }
   }
   willHide() {
     super.willHide();

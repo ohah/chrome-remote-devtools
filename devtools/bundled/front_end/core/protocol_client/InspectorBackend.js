@@ -286,6 +286,9 @@ export class TargetBase {
     memoryAgent() {
         return this.getAgent('Memory');
     }
+    mmkvStorageAgent() {
+        return this.getAgent('MMKVStorage');
+    }
     networkAgent() {
         return this.getAgent('Network');
     }
@@ -404,6 +407,9 @@ export class TargetBase {
     }
     registerMediaDispatcher(dispatcher) {
         this.registerDispatcher('Media', dispatcher);
+    }
+    registerMMKVStorageDispatcher(dispatcher) {
+        this.registerDispatcher('MMKVStorage', dispatcher);
     }
     registerNetworkDispatcher(dispatcher) {
         this.registerDispatcher('Network', dispatcher);

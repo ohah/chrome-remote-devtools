@@ -46,6 +46,13 @@ export class ReduxPanel extends UI.Panel.Panel {
     wasShown() {
         super.wasShown();
         this.setupCDPListener();
+        // When panel is shown, ensure START message is sent / 패널이 표시될 때 START 메시지가 전송되도록 보장
+        // This handles the case where Extension didn't call connect / Extension이 connect를 호출하지 않은 경우 처리
+        if (this.#iframe?.contentWindow && this.#target) {
+            setTimeout(() => {
+                this.#bridge.sendStartMessageToPageIfNeeded();
+            }, 500);
+        }
     }
     willHide() {
         super.willHide();

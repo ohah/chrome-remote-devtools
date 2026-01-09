@@ -9013,6 +9013,54 @@ export declare namespace Memory {
     }
 }
 /**
+ * Query and modify MMKV storage.
+ */
+export declare namespace MMKVStorage {
+    /**
+     * MMKV Storage item (key-value pair).
+     */
+    type Item = string[];
+    interface GetMMKVItemsRequest {
+        instanceId: string;
+    }
+    interface GetMMKVItemsResponse extends ProtocolResponseWithError {
+        entries: Item[];
+    }
+    interface SetMMKVItemRequest {
+        instanceId: string;
+        key: string;
+        value: string;
+    }
+    interface RemoveMMKVItemRequest {
+        instanceId: string;
+        key: string;
+    }
+    interface ClearRequest {
+        instanceId: string;
+    }
+    interface MmkvItemsClearedEvent {
+        instanceId: string;
+    }
+    interface MmkvItemRemovedEvent {
+        instanceId: string;
+        key: string;
+    }
+    interface MmkvItemAddedEvent {
+        instanceId: string;
+        key: string;
+        newValue: string;
+    }
+    interface MmkvItemUpdatedEvent {
+        instanceId: string;
+        key: string;
+        oldValue: string;
+        newValue: string;
+    }
+    interface MmkvInstanceCreatedEvent {
+        instanceId: string;
+    }
+}
+/**
  * Network domain allows tracking network activities of the page. It exposes information about http,
  * file, data and other requests and responses, their headers, bodies, timing, etc.
  */
