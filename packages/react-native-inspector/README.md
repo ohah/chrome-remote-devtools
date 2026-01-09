@@ -89,32 +89,11 @@ This package has `sideEffects: true` in `package.json`, which means it will auto
 
 ### Redux DevTools Extension / Redux DevTools Extension
 
-The package automatically sets up `__REDUX_DEVTOOLS_EXTENSION__` on import with default values (localhost:8080) or from environment variables. / 패키지는 import 시 기본값(localhost:8080) 또는 환경 변수에서 값을 가져와 `__REDUX_DEVTOOLS_EXTENSION__`을 자동으로 설정합니다.
+The package automatically injects `__REDUX_DEVTOOLS_EXTENSION__` via JSI (JavaScript Interface) before any JavaScript code runs. This ensures the extension is always available, similar to browser extensions. / 패키지는 JSI(JavaScript Interface)를 통해 JavaScript 코드가 실행되기 전에 `__REDUX_DEVTOOLS_EXTENSION__`을 자동으로 주입합니다. 이를 통해 브라우저 확장 프로그램과 유사하게 extension이 항상 사용 가능합니다.
 
-**Important**: If you need to use a different host/port, call `setupReduxDevToolsExtension()` explicitly before creating your stores. / **중요**: 다른 호스트/포트를 사용해야 하는 경우, store를 생성하기 전에 `setupReduxDevToolsExtension()`을 명시적으로 호출하세요.
+**Important**: The extension is injected at the native level, so it's available immediately when your app starts. You don't need to call any setup function. / **중요**: Extension은 네이티브 레벨에서 주입되므로 앱이 시작되면 즉시 사용 가능합니다. 설정 함수를 호출할 필요가 없습니다.
 
-```typescript
-import { setupReduxDevToolsExtension } from '@ohah/chrome-remote-devtools-react-native';
-
-// Setup with custom host/port / 커스텀 호스트/포트로 설정
-setupReduxDevToolsExtension('192.168.1.100', 8080);
-```
-
-### Environment Variables / 환경 변수
-
-You can configure the default host/port using environment variables: / 환경 변수를 사용하여 기본 호스트/포트를 설정할 수 있습니다:
-
-- `CHROME_REMOTE_DEVTOOLS_HOST`: Server host (default: 'localhost') / 서버 호스트 (기본값: 'localhost')
-- `CHROME_REMOTE_DEVTOOLS_PORT`: Server port (default: 8080) / 서버 포트 (기본값: 8080)
-
-Or set them on the global object: / 또는 전역 객체에 설정할 수 있습니다:
-
-```typescript
-(global as any).__ChromeRemoteDevToolsServerHost = '192.168.1.100';
-(global as any).__ChromeRemoteDevToolsServerPort = 8080;
-```
-
-**Note**: Auto-initialization uses default values if the extension is not already set. If you need specific host/port, always call `setupReduxDevToolsExtension()` explicitly. / **참고**: 자동 초기화는 extension이 아직 설정되지 않은 경우 기본값을 사용합니다. 특정 호스트/포트가 필요한 경우 항상 `setupReduxDevToolsExtension()`을 명시적으로 호출하세요.
+The server host and port are set when you call `connect()`. / 서버 호스트와 포트는 `connect()`를 호출할 때 설정됩니다.
 
 ## Requirements / 요구사항
 
