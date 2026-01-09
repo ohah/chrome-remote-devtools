@@ -54,6 +54,8 @@
     "../../../../../../front_end/panels/application/InterestGroupStorageView.ts",
     "../../../../../../front_end/panels/application/InterestGroupTreeElement.ts",
     "../../../../../../front_end/panels/application/KeyValueStorageItemsView.ts",
+    "../../../../../../front_end/panels/application/MMKVStorageItemsView.ts",
+    "../../../../../../front_end/panels/application/MMKVStorageModel.ts",
     "../../../../../../front_end/panels/application/OpenedWindowDetailsView.ts",
     "../../../../../../front_end/panels/application/OriginTrialTreeView.ts",
     "../../../../../../front_end/panels/application/PreloadingTreeElement.ts",

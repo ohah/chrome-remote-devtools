@@ -4715,6 +4715,15 @@
   "panels/application/KeyValueStorageItemsView.ts | value": {
     "message": "Value"
   },
+  "panels/application/MMKVStorageItemsView.ts | mmkvStorageItemDeleted": {
+    "message": "The storage item was deleted."
+  },
+  "panels/application/MMKVStorageItemsView.ts | mmkvStorageItems": {
+    "message": "MMKV Storage Items"
+  },
+  "panels/application/MMKVStorageItemsView.ts | mmkvStorageItemsCleared": {
+    "message": "MMKV Storage Items cleared"
+  },
   "panels/application/OpenedWindowDetailsView.ts | accessToOpener": {
     "message": "Access to opener"
   },
@@ -14599,6 +14608,12 @@
   },
   "panels/sources/WatchExpressionsSidebarPane.ts | watchExpressionDeleted": {
     "message": "Watch expression deleted"
+  },
+  "panels/storage/storage-meta.ts | showStorage": {
+    "message": "Show Storage"
+  },
+  "panels/storage/storage-meta.ts | storage": {
+    "message": "Storage"
   },
   "panels/timeline/AnimationsTrackAppender.ts | animations": {
     "message": "Animations"

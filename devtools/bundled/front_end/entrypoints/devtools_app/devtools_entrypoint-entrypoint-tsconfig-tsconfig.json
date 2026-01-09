@@ -126,6 +126,9 @@
       "path": "../../panels/redux/meta-tsconfig.json"
     },
     {
+      "path": "../../panels/storage/meta-tsconfig.json"
+    },
+    {
       "path": "../main/bundle-tsconfig.json"
     },
     {

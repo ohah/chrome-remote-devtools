@@ -10,6 +10,8 @@ export declare class ReduxExtensionBridge {
     private observer;
     private messagePort;
     private messageListeners;
+    private connectCalled;
+    private startSent;
     /**
      * Initialize bridge with iframe window / iframe window로 브릿지 초기화
      */
@@ -22,6 +24,20 @@ export declare class ReduxExtensionBridge {
      * Handle messages from Redux DevTools Extension / Redux DevTools Extension으로부터 메시지 처리
      */
     private handleExtensionMessage;
+    /**
+     * Send START message to page to request initial state / 초기 상태를 요청하기 위해 페이지에 START 메시지 전송
+     * This matches the original Redux DevTools Extension behavior / 이것은 원래 Redux DevTools Extension 동작과 일치
+     */
+    private sendStartMessageToPage;
+    /**
+     * Send START message to page if not already sent / 아직 전송되지 않았다면 페이지에 START 메시지 전송
+     */
+    sendStartMessageToPageIfNeeded(): void;
+    /**
+     * Send message to page via Runtime.evaluate / Runtime.evaluate를 통해 페이지로 메시지 전송
+     * This simulates the original Redux DevTools Extension message passing / 이것은 원래 Redux DevTools Extension 메시지 전달을 시뮬레이션
+     */
+    private sendMessageToPage;
     /**
      * Send message to Redux DevTools Extension iframe / Redux DevTools Extension iframe으로 메시지 전송
      */

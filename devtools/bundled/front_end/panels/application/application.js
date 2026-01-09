@@ -11050,6 +11050,12 @@ var UIStrings28 = {
   /**
    * @description Text in Application Panel Sidebar of the Application panel
    */
+  /**
+   * @description Text in Application Panel Sidebar of the Application panel
+   */
+  /**
+   * @description Text in Application Panel Sidebar of the Application panel
+   */
   extensionStorage: "Extension storage",
   /**
    * @description Text in Application Panel if no extension storage can be shown

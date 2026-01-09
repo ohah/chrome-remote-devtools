@@ -12,12 +12,23 @@ export class ReduxExtensionBridge {
     observer = null;
     messagePort = null;
     messageListeners = [];
+    connectCalled = false; // Track if connect was called / connect 호출 여부 추적
+    startSent = false; // Track if START message was sent / START 메시지 전송 여부 추적
     /**
      * Initialize bridge with iframe window / iframe window로 브릿지 초기화
      */
     initialize(iframeWindow) {
         this.iframeWindow = iframeWindow;
         this.injectExtensionAPI();
+        // Wait for Extension to load and call chrome.runtime.connect / Extension이 로드되고 chrome.runtime.connect를 호출할 때까지 대기
+        // If connect is not called within a reasonable time, send START anyway / 합리적인 시간 내에 connect가 호출되지 않으면 START를 보냄
+        setTimeout(() => {
+            if (!this.connectCalled && this.target && !this.startSent) {
+                // Extension didn't call connect, send START anyway / Extension이 connect를 호출하지 않았으므로 START를 보냄
+                console.log('[ReduxExtensionBridge] Extension did not call connect, sending START anyway');
+                this.sendStartMessageToPage();
+            }
+        }, 2000);
     }
     /**
      * Inject chrome.runtime API into iframe / iframe에 chrome.runtime API 주입
@@ -39,8 +50,20 @@ export class ReduxExtensionBridge {
             runtime: {
                 // Connect to background script / background script에 연결
                 connect: (_options) => {
+                    // Mark that connect was called / connect가 호출되었음을 표시
+                    this.connectCalled = true;
                     // MessagePort를 반환하여 Extension이 통신할 수 있도록 함 / MessagePort를 반환하여 Extension이 통신할 수 있도록 함
-                    return this.messagePort;
+                    const port = this.messagePort;
+                    // When Extension connects, send START message / Extension이 연결되면 START 메시지 전송
+                    // This matches the original Redux DevTools Extension behavior / 이것은 원래 Redux DevTools Extension 동작과 일치
+                    // Original Extension sends START when panel connects (apiMiddleware.ts:588) / 원래 Extension은 panel이 연결될 때 START를 보냄
+                    if (port && this.target) {
+                        // Wait a bit for Extension to fully initialize / Extension이 완전히 초기화될 시간 대기
+                        setTimeout(() => {
+                            this.sendStartMessageToPage();
+                        }, 100);
+                    }
+                    return port;
                 },
                 // Send message to background script / background script로 메시지 전송
                 sendMessage: (message, callback) => {
@@ -87,10 +110,68 @@ export class ReduxExtensionBridge {
     /**
      * Handle messages from Redux DevTools Extension / Redux DevTools Extension으로부터 메시지 처리
      */
-    handleExtensionMessage(_message) {
-        // Redux DevTools Extension의 메시지를 처리 / Redux DevTools Extension의 메시지를 처리
-        // 여기서는 CDP 메시지로 변환하거나 필요한 작업 수행 / 여기서는 CDP 메시지로 변환하거나 필요한 작업 수행
-        // Currently no-op, but can be extended to handle extension-to-page messages / 현재는 no-op이지만 extension-to-page 메시지 처리로 확장 가능
+    handleExtensionMessage(message) {
+        // Handle messages from Extension to page / Extension에서 페이지로의 메시지 처리
+        const extMessage = message;
+        // Forward message to page via Runtime.evaluate / Runtime.evaluate를 통해 페이지로 메시지 전달
+        // This matches the original Redux DevTools Extension behavior / 이것은 원래 Redux DevTools Extension 동작과 일치
+        if (this.target && extMessage.type && (extMessage.type === 'START' || extMessage.type === 'UPDATE' || extMessage.type === 'DISPATCH' || extMessage.type === 'ACTION' || extMessage.type === 'IMPORT' || extMessage.type === 'EXPORT')) {
+            this.sendMessageToPage({ type: extMessage.type, ...extMessage });
+        }
+    }
+    /**
+     * Send START message to page to request initial state / 초기 상태를 요청하기 위해 페이지에 START 메시지 전송
+     * This matches the original Redux DevTools Extension behavior / 이것은 원래 Redux DevTools Extension 동작과 일치
+     */
+    sendStartMessageToPage() {
+        if (!this.target || this.startSent) {
+            return;
+        }
+        // Mark that START was sent / START가 전송되었음을 표시
+        this.startSent = true;
+        // Send START message to page / 페이지에 START 메시지 전송
+        this.sendMessageToPage({ type: 'START' });
+    }
+    /**
+     * Send START message to page if not already sent / 아직 전송되지 않았다면 페이지에 START 메시지 전송
+     */
+    sendStartMessageToPageIfNeeded() {
+        if (this.target && !this.startSent) {
+            this.sendStartMessageToPage();
+        }
+    }
+    /**
+     * Send message to page via Runtime.evaluate / Runtime.evaluate를 통해 페이지로 메시지 전송
+     * This simulates the original Redux DevTools Extension message passing / 이것은 원래 Redux DevTools Extension 메시지 전달을 시뮬레이션
+     */
+    sendMessageToPage(message) {
+        if (!this.target) {
+            return;
+        }
+        // Convert message to string for evaluation / 평가를 위해 메시지를 문자열로 변환
+        const messageStr = JSON.stringify(message);
+        // Send message to page via postMessage simulation / postMessage 시뮬레이션을 통해 페이지로 메시지 전송
+        // The page's subscribe listener will receive this / 페이지의 subscribe 리스너가 이를 받음
+        this.target.runtimeAgent().invoke_evaluate({
+            expression: `
+        (function() {
+          if (window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION_LISTENERS__) {
+            const message = ${messageStr};
+            // Trigger message listeners / 메시지 리스너 트리거
+            window.__REDUX_DEVTOOLS_EXTENSION_LISTENERS__.forEach(listener => {
+              try {
+                listener(message);
+              } catch (e) {
+                console.warn('[ReduxDevTools] Error in message listener:', e);
+              }
+            });
+          }
+        })();
+      `,
+            returnByValue: false,
+        }).catch((error) => {
+            console.warn('[ReduxExtensionBridge] Failed to send message to page:', error);
+        });
     }
     /**
      * Send message to Redux DevTools Extension iframe / Redux DevTools Extension iframe으로 메시지 전송

@@ -3600,6 +3600,42 @@ UI15.ViewManager.registerViewExtension({
   }
 });
 
+// gen/front_end/panels/storage/storage-meta.js
+import * as i18n57 from "./../../core/i18n/i18n.js";
+import * as UI16 from "./../../ui/legacy/legacy.js";
+var UIStrings29 = {
+  /**
+   * @description Label for the Storage pane / Storage 패널 레이블
+   */
+  storage: "Storage",
+  /**
+   * @description Command for showing the 'Storage' pane / 'Storage' 패널 표시 명령
+   */
+  showStorage: "Show Storage"
+};
+var str_29 = i18n57.i18n.registerUIStrings("panels/storage/storage-meta.ts", UIStrings29);
+var i18nLazyString29 = i18n57.i18n.getLazilyComputedLocalizedString.bind(void 0, str_29);
+var loadedStorageModule;
+async function loadStorageModule() {
+  if (!loadedStorageModule) {
+    loadedStorageModule = await import("./../../panels/storage/storage.js");
+  }
+  return loadedStorageModule;
+}
+UI16.ViewManager.registerViewExtension({
+  location: "panel",
+  id: "storage-view",
+  title: i18nLazyString29(UIStrings29.storage),
+  commandPrompt: i18nLazyString29(UIStrings29.showStorage),
+  order: 1003,
+  persistence: "permanent",
+  hasToolbar: false,
+  async loadView() {
+    const Storage = await loadStorageModule();
+    return Storage.StoragePanel.StoragePanel.instance();
+  }
+});
+
 // gen/front_end/entrypoints/devtools_app/devtools_app.prebundle.js
 import * as Root5 from "./../../core/root/root.js";
 import * as Main from "./../main/main.js";

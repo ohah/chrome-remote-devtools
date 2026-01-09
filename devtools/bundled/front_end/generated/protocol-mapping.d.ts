@@ -274,6 +274,11 @@ export namespace ProtocolMapping {
      * event for each active player.
      */
     'Media.playerCreated': [Protocol.Media.PlayerCreatedEvent];
+    'MMKVStorage.mmkvItemsCleared': [Protocol.MMKVStorage.MmkvItemsClearedEvent];
+    'MMKVStorage.mmkvItemRemoved': [Protocol.MMKVStorage.MmkvItemRemovedEvent];
+    'MMKVStorage.mmkvItemAdded': [Protocol.MMKVStorage.MmkvItemAddedEvent];
+    'MMKVStorage.mmkvItemUpdated': [Protocol.MMKVStorage.MmkvItemUpdatedEvent];
+    'MMKVStorage.mmkvInstanceCreated': [Protocol.MMKVStorage.MmkvInstanceCreatedEvent];
     /**
      * Fired when data chunk was received over the network.
      */
@@ -3254,6 +3259,29 @@ export namespace ProtocolMapping {
     'Memory.getSamplingProfile': {
       paramsType: [];
       returnType: Protocol.Memory.GetSamplingProfileResponse;
+    };
+    /**
+     * Enables storage tracking, storage events will now be delivered to the client.
+     */
+    'MMKVStorage.enable': {
+      paramsType: [];
+      returnType: void;
+    };
+    'MMKVStorage.getMMKVItems': {
+      paramsType: [Protocol.MMKVStorage.GetMMKVItemsRequest];
+      returnType: Protocol.MMKVStorage.GetMMKVItemsResponse;
+    };
+    'MMKVStorage.setMMKVItem': {
+      paramsType: [Protocol.MMKVStorage.SetMMKVItemRequest];
+      returnType: void;
+    };
+    'MMKVStorage.removeMMKVItem': {
+      paramsType: [Protocol.MMKVStorage.RemoveMMKVItemRequest];
+      returnType: void;
+    };
+    'MMKVStorage.clear': {
+      paramsType: [Protocol.MMKVStorage.ClearRequest];
+      returnType: void;
     };
     /**
      * Sets a list of content encodings that will be accepted. Empty list means no encoding is accepted.
