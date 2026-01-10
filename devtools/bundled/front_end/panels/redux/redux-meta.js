@@ -5,25 +5,25 @@ import * as SDK2 from "./../../core/sdk/sdk.js";
 
 // gen/front_end/panels/redux/ReduxExtensionBridge.js
 import * as SDK from "./../../core/sdk/sdk.js";
-var globalBridgeInstance = null;
-var bridgeInitialized = false;
 function getReduxExtensionBridge() {
-  if (!globalBridgeInstance) {
-    globalBridgeInstance = new ReduxExtensionBridge();
+  const win = window;
+  if (!win.__DEVTOOLS_REDUX_BRIDGE__) {
+    win.__DEVTOOLS_REDUX_BRIDGE__ = new ReduxExtensionBridge();
   }
-  return globalBridgeInstance;
+  return win.__DEVTOOLS_REDUX_BRIDGE__;
 }
 function initializeReduxBridge() {
-  if (bridgeInitialized) {
-    return;
-  }
-  bridgeInitialized = true;
+  const win = window;
   const bridge = getReduxExtensionBridge();
   const targetManager = SDK.TargetManager.TargetManager.instance();
   const primaryTarget = targetManager.primaryPageTarget();
   if (primaryTarget) {
     bridge.attachToTargetIfNeeded(primaryTarget);
   }
+  if (win.__DEVTOOLS_REDUX_BRIDGE_INITIALIZED__) {
+    return;
+  }
+  win.__DEVTOOLS_REDUX_BRIDGE_INITIALIZED__ = true;
   targetManager.addEventListener("AvailableTargetsChanged", () => {
     const newTarget = targetManager.primaryPageTarget();
     if (newTarget) {
@@ -53,15 +53,30 @@ var ReduxExtensionBridge = class {
     console.log("[ReduxExtensionBridge] Initializing bridge with iframe window");
     this.iframeWindow = iframeWindow;
     this.injectExtensionAPI();
-    this.panelReady = true;
-    console.log("[ReduxExtensionBridge] Panel marked as ready, flushing buffered messages");
-    this.flushMessageBuffer();
     setTimeout(() => {
-      if (!this.connectCalled && this.target && !this.startSent) {
-        console.log("[ReduxExtensionBridge] Extension did not call connect, sending START anyway");
-        this.sendStartMessageToPage();
+      if (this.messagePort) {
+        this.panelReady = true;
+        console.log("[ReduxExtensionBridge] Panel marked as ready, flushing buffered messages");
+        this.flushMessageBuffer();
+        setTimeout(() => {
+          if (!this.connectCalled && this.target && !this.startSent) {
+            console.log("[ReduxExtensionBridge] Extension did not call connect, sending START anyway");
+            this.sendStartMessageToPage();
+          }
+        }, 2e3);
+      } else {
+        console.warn("[ReduxExtensionBridge] messagePort not ready after injection, retrying...");
+        setTimeout(() => {
+          if (this.messagePort) {
+            this.panelReady = true;
+            console.log("[ReduxExtensionBridge] Panel marked as ready (retry), flushing buffered messages");
+            this.flushMessageBuffer();
+          } else {
+            console.error("[ReduxExtensionBridge] messagePort still not ready after retry");
+          }
+        }, 500);
       }
-    }, 2e3);
+    }, 100);
   }
   /**
    * Flush buffered messages to extension / 버퍼된 메시지를 extension으로 전송
@@ -177,6 +192,7 @@ var ReduxExtensionBridge = class {
   /**
    * Send message to page via Runtime.evaluate / Runtime.evaluate를 통해 페이지로 메시지 전송
    * This simulates the original Redux DevTools Extension message passing / 이것은 원래 Redux DevTools Extension 메시지 전달을 시뮬레이션
+   * Supports both web (window) and React Native (global) environments / 웹(window)과 React Native(global) 환경 모두 지원
    */
   sendMessageToPage(message) {
     if (!this.target) {
@@ -186,20 +202,29 @@ var ReduxExtensionBridge = class {
     this.target.runtimeAgent().invoke_evaluate({
       expression: `
         (function() {
-          if (window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION_LISTENERS__) {
+          // Try window first (web), then global (React Native) / \uBA3C\uC800 window(\uC6F9) \uC2DC\uB3C4, \uADF8 \uB2E4\uC74C global(React Native)
+          const globalObj = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {};
+          const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+          const listeners = globalObj.__REDUX_DEVTOOLS_EXTENSION_LISTENERS__;
+
+          if (extension && listeners) {
             const message = ${messageStr};
             // Trigger message listeners / \uBA54\uC2DC\uC9C0 \uB9AC\uC2A4\uB108 \uD2B8\uB9AC\uAC70
-            window.__REDUX_DEVTOOLS_EXTENSION_LISTENERS__.forEach(listener => {
+            listeners.forEach(listener => {
               try {
                 listener(message);
               } catch (e) {
                 console.warn('[ReduxDevTools] Error in message listener:', e);
               }
             });
+            return 'message sent';
           }
+          return 'no extension or listeners';
         })();
       `,
-      returnByValue: false
+      returnByValue: true
+    }).then((response) => {
+      console.log("[ReduxExtensionBridge] Message sent result:", response.result?.value);
     }).catch((error) => {
       console.warn("[ReduxExtensionBridge] Failed to send message to page:", error);
     });
@@ -275,6 +300,7 @@ var ReduxExtensionBridge = class {
    * Request Redux stores to re-initialize / Redux store들에게 재초기화 요청
    * This sends a message to the page that triggers the app to send INIT messages again
    * 페이지에 메시지를 보내서 앱이 다시 INIT 메시지를 보내도록 함
+   * Supports both web (window) and React Native (global) environments / 웹(window)과 React Native(global) 환경 모두 지원
    */
   requestReduxReInitialization() {
     if (!this.target) {
@@ -283,12 +309,16 @@ var ReduxExtensionBridge = class {
     this.target.runtimeAgent().invoke_evaluate({
       expression: `
         (function() {
+          // Try window first (web), then global (React Native) / \uBA3C\uC800 window(\uC6F9) \uC2DC\uB3C4, \uADF8 \uB2E4\uC74C global(React Native)
+          const globalObj = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {};
+          const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+
           // Trigger all connected Redux stores to re-send their state
           // \uC5F0\uACB0\uB41C \uBAA8\uB4E0 Redux store\uB4E4\uC774 \uC0C1\uD0DC\uB97C \uB2E4\uC2DC \uBCF4\uB0B4\uB3C4\uB85D \uD2B8\uB9AC\uAC70
-          if (window.__REDUX_DEVTOOLS_EXTENSION__ && typeof window.__REDUX_DEVTOOLS_EXTENSION__.notifyExtensionReady === 'function') {
-            window.__REDUX_DEVTOOLS_EXTENSION__.notifyExtensionReady();
+          if (extension && typeof extension.notifyExtensionReady === 'function') {
+            extension.notifyExtensionReady();
             return 'notifyExtensionReady called';
-          } else if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+          } else if (extension) {
             // Fallback: trigger re-initialization by dispatching a synthetic message
             // \uD3F4\uBC31: \uD569\uC131 \uBA54\uC2DC\uC9C0\uB97C \uB514\uC2A4\uD328\uCE58\uD558\uC5EC \uC7AC\uCD08\uAE30\uD654 \uD2B8\uB9AC\uAC70
             return '__REDUX_DEVTOOLS_EXTENSION__ exists but no notifyExtensionReady';

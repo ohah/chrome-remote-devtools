@@ -3,11 +3,14 @@ import * as SDK from '../../core/sdk/sdk.js';
 /**
  * Get global ReduxExtensionBridge instance / 전역 ReduxExtensionBridge 인스턴스 가져오기
  * Creates instance if not exists / 인스턴스가 없으면 생성
+ * Uses window object to ensure true singleton across all module scopes / 모든 모듈 스코프에서 진정한 싱글톤을 보장하기 위해 window 객체 사용
  */
 export declare function getReduxExtensionBridge(): ReduxExtensionBridge;
 /**
  * Initialize Redux bridge with TargetManager / TargetManager로 Redux bridge 초기화
  * Should be called once when DevTools starts / DevTools 시작 시 한 번 호출해야 함
+ * Uses window object to ensure initialization happens only once across all module scopes
+ * 모든 모듈 스코프에서 초기화가 한 번만 발생하도록 window 객체 사용
  */
 export declare function initializeReduxBridge(): void;
 /**
@@ -53,6 +56,7 @@ export declare class ReduxExtensionBridge {
     /**
      * Send message to page via Runtime.evaluate / Runtime.evaluate를 통해 페이지로 메시지 전송
      * This simulates the original Redux DevTools Extension message passing / 이것은 원래 Redux DevTools Extension 메시지 전달을 시뮬레이션
+     * Supports both web (window) and React Native (global) environments / 웹(window)과 React Native(global) 환경 모두 지원
      */
     private sendMessageToPage;
     /**
@@ -77,6 +81,7 @@ export declare class ReduxExtensionBridge {
      * Request Redux stores to re-initialize / Redux store들에게 재초기화 요청
      * This sends a message to the page that triggers the app to send INIT messages again
      * 페이지에 메시지를 보내서 앱이 다시 INIT 메시지를 보내도록 함
+     * Supports both web (window) and React Native (global) environments / 웹(window)과 React Native(global) 환경 모두 지원
      */
     private requestReduxReInitialization;
     /**
