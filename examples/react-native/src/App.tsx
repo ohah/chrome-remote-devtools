@@ -11,12 +11,32 @@ import { StatusBar, useColorScheme, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
-import { ChromeRemoteDevToolsInspectorProvider } from '@ohah/chrome-remote-devtools-react-native';
+import {
+  ChromeRemoteDevToolsInspectorProvider,
+  registerMMKVDevTools,
+} from '@ohah/chrome-remote-devtools-react-native';
 import { store } from './store/redux/store';
+import { userStorage, cacheStorage, defaultStorage, legacyStorage } from './store/mmkv/storage';
 import AppNavigator from './navigation/AppNavigator';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+
+  // Register MMKV DevTools / MMKV DevTools 등록
+  // v4 is default, v3 is for legacy support / v4가 기본, v3는 하위 호환용
+  React.useEffect(() => {
+    try {
+      registerMMKVDevTools({
+        user: userStorage, // v4
+        cache: cacheStorage, // v4
+        default: defaultStorage, // v4
+        legacy: legacyStorage, // v3 (legacy support)
+      });
+    } catch (error) {
+      console.error('[App] Error registering MMKV DevTools:', error);
+      // Don't block app startup / 앱 시작을 막지 않음
+    }
+  }, []);
 
   return (
     <ChromeRemoteDevToolsInspectorProvider serverHost="localhost" serverPort={8080}>
