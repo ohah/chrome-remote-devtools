@@ -200,9 +200,10 @@ export const chromeDevtools: DevToolsMiddleware = (initializer, config) => (set,
   // Wrap set function to track state changes / state 변경을 추적하도록 set 함수 래핑
   const wrappedSet = ((partial: any, replace?: any) => {
     // Determine action name from partial / partial에서 액션 이름 결정
+    // Prefer function name, fallback to currentActionName / 함수 이름을 우선하고, 없으면 currentActionName 사용
     let actionName = currentActionName;
-    if (typeof partial === 'function') {
-      actionName = partial.name || 'anonymous';
+    if (typeof partial === 'function' && partial.name) {
+      actionName = partial.name;
     }
 
     console.log('[ZustandMiddleware] wrappedSet called:', { actionName, storeName: name });
@@ -232,6 +233,53 @@ export const chromeDevtools: DevToolsMiddleware = (initializer, config) => (set,
   // Initialize store / store 초기화
   const initialState = initializer(wrappedSet, get, store);
 
+  // Wrap store methods to track action names / 액션 이름을 추적하도록 store 메서드 래핑
+  // Zustand internal methods that should not be wrapped / 래핑하지 않아야 하는 Zustand 내부 메서드
+  const internalMethods = new Set([
+    'getState',
+    'setState',
+    'subscribe',
+    'destroy',
+    'getInitialState',
+  ]);
+  const wrappedState = { ...initialState };
+
+  for (const key in wrappedState) {
+    const value = wrappedState[key];
+    // Only wrap function properties that are not internal methods / 내부 메서드가 아닌 함수 속성만 래핑
+    if (
+      typeof value === 'function' &&
+      !internalMethods.has(key) &&
+      key !== 'toString' &&
+      key !== 'valueOf' &&
+      key !== 'toJSON'
+    ) {
+      const originalMethod = value;
+      wrappedState[key] = ((...args: any[]) => {
+        // Set current action name before calling method / 메서드 호출 전 액션 이름 설정
+        const previousActionName = currentActionName;
+        currentActionName = key;
+        try {
+          const result = originalMethod.apply(wrappedState, args);
+          // Handle async methods / 비동기 메서드 처리
+          if (result && typeof result.then === 'function') {
+            return result.finally(() => {
+              // Reset action name after async method completes / 비동기 메서드 완료 후 액션 이름 리셋
+              currentActionName = previousActionName;
+            });
+          }
+          return result;
+        } catch (error) {
+          // Re-throw error after resetting action name / 액션 이름 리셋 후 에러 재발생
+          throw error;
+        } finally {
+          // Reset action name after method call / 메서드 호출 후 액션 이름 리셋
+          currentActionName = previousActionName;
+        }
+      }) as typeof value;
+    }
+  }
+
   // Send INIT with initial state / 초기 state와 함께 INIT 전송
   // Use setTimeout to ensure state is set / state가 설정되도록 setTimeout 사용
   setTimeout(() => {
@@ -250,7 +298,7 @@ export const chromeDevtools: DevToolsMiddleware = (initializer, config) => (set,
     });
   }, 0);
 
-  return initialState;
+  return wrappedState;
 };
 
 /**

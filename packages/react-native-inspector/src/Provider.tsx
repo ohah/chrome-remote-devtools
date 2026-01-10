@@ -5,8 +5,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { setServerInfo } from './server-info';
 import { connect } from './index';
-
 // Import polyfill to ensure it's installed / polyfill이 설치되도록 import
+// The polyfill is auto-installed when this module is imported / 이 모듈이 import될 때 polyfill이 자동으로 설치됨
 import './redux-devtools-extension';
 
 /**

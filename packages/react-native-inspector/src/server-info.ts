@@ -16,16 +16,16 @@ export function setServerInfo(serverHost: string, serverPort: number): void {
 
 /**
  * Get server connection info from global / 전역에서 서버 연결 정보 가져오기
- * @returns Object with serverHost and serverPort, or null if not set / serverHost와 serverPort를 포함한 객체, 설정되지 않았으면 null
+ * @returns Object with host and port, or null if not set / host와 port를 포함한 객체, 설정되지 않았으면 null
  */
-export function getServerInfo(): { serverHost: string; serverPort: number } | null {
+export function getServerInfo(): { host: string; port: number } | null {
   if (typeof global === 'undefined') {
     return null;
   }
   const serverHost = (global as any).__ChromeRemoteDevToolsServerHost;
   const serverPort = (global as any).__ChromeRemoteDevToolsServerPort;
   if (serverHost && serverPort) {
-    return { serverHost, serverPort };
+    return { host: serverHost, port: serverPort };
   }
   return null;
 }

@@ -43,18 +43,19 @@
       "react-native": "./src/zustand/middleware.ts",
       "default": "./src/zustand/middleware.ts"
     },
-    "./metro": {
-      "react-native": "./src/metro.js",
-      "require": "./src/metro.js",
-      "import": "./src/metro.js",
-      "default": "./src/metro.js"
+    "./redux": {
+      "types": "./src/redux.ts",
+      "react-native": "./src/redux.ts",
+      "default": "./src/redux.ts"
     },
     "./redux-devtools-extension": {
       "types": "./src/redux-devtools-extension.ts",
       "react-native": "./src/redux-devtools-extension.ts",
-      "require": "./src/redux-devtools-extension.ts",
-      "import": "./src/redux-devtools-extension.ts",
       "default": "./src/redux-devtools-extension.ts"
+    },
+    "./metro": {
+      "require": "./src/metro-config.cjs",
+      "default": "./src/metro-config.cjs"
     }
   },
   "scripts": {
