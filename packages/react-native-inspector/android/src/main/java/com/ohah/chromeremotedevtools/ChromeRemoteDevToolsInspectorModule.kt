@@ -72,9 +72,8 @@ class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicat
         // Capture variables for lambda / 람다를 위한 변수 캡처
         val capturedHost = serverHost
         val capturedPort = serverPort
-        // Install JSI-level console and network hooks immediately / JSI 레벨 console 및 network 훅을 즉시 설치
-        // JSI hook installation should not depend on WebSocket connection / JSI 훅 설치는 WebSocket 연결에 의존하지 않아야 합니다
-        // JSI hook is installed directly via JNI, and JSI code will send messages via TurboModule / JSI 훅은 JNI를 통해 직접 설치되며, JSI 코드가 TurboModule을 통해 메시지를 전송합니다
+
+        // Install JSI-level console and network hooks / JSI 레벨 console 및 network 훅 설치
         android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Attempting to install JSI hooks / JSI 훅 설치 시도 중")
         try {
           // Try to get RuntimeExecutor from CatalystInstance (Old Architecture) / CatalystInstance에서 RuntimeExecutor 가져오기 시도 (Old Architecture)
@@ -95,7 +94,6 @@ class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicat
           if (runtimeExecutor == null) {
             try {
               // Try to get ReactHost using reflection / 리플렉션을 사용하여 ReactHost 가져오기 시도
-              // React Native 0.83+ Bridgeless uses ReactHost instead of CatalystInstance / React Native 0.83+ Bridgeless는 CatalystInstance 대신 ReactHost를 사용합니다
               var reactHost: Any? = null
 
               // Try getReactHost() method first / 먼저 getReactHost() 메서드 시도
@@ -134,7 +132,6 @@ class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicat
 
           if (runtimeExecutor != null) {
             // Call JNI directly to install JSI hook / JSI 훅을 설치하기 위해 JNI를 직접 호출
-            // Install hooks first, then set server info / 훅을 먼저 설치하고 나중에 서버 정보 설정
             android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Calling nativeHookJSILog / nativeHookJSILog 호출 중")
             try {
               val jsiHooked = ChromeRemoteDevToolsLogHookJNI.nativeHookJSILog(runtimeExecutor)
@@ -148,48 +145,41 @@ class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicat
               android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Exception while calling nativeHookJSILog / nativeHookJSILog 호출 중 예외 발생: ${e.message}", e)
             }
 
-            // Set server info for Redux DevTools Extension / Redux DevTools Extension을 위한 서버 정보 설정
-            // This can be called after hooks are installed / 훅이 설치된 후 호출할 수 있습니다
-            // NOTE: Temporarily disabled due to crash in nativeSetReduxDevToolsServerInfo / 참고: nativeSetReduxDevToolsServerInfo에서 크래시가 발생하여 일시적으로 비활성화됨
-            // Server info can be set later when needed / 서버 정보는 필요할 때 나중에 설정할 수 있습니다
-            // android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Setting Redux DevTools Extension server info / Redux DevTools Extension 서버 정보 설정 중")
-            // try {
-            //   ChromeRemoteDevToolsLogHookJNI.nativeSetReduxDevToolsServerInfo(capturedHost, capturedPort)
-            //   android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Redux DevTools Extension server info set / Redux DevTools Extension 서버 정보 설정됨")
-            // } catch (e: Exception) {
-            //   android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Exception while setting Redux DevTools server info / Redux DevTools 서버 정보 설정 중 예외 발생: ${e.message}", e)
-            //   // Continue even if server info setting fails / 서버 정보 설정이 실패해도 계속 진행
-            // }
+            // Note: Redux DevTools server info is now set via JavaScript polyfill
+            // C++ nativeSetReduxDevToolsServerInfo removed to avoid race condition crash
+            // 참고: Redux DevTools 서버 정보는 이제 JavaScript polyfill을 통해 설정됩니다
+            // race condition 크래시를 피하기 위해 C++ nativeSetReduxDevToolsServerInfo 제거됨
+            android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Redux DevTools will use JS polyfill for server info")
           } else {
             android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "RuntimeExecutor is null, cannot hook JSI log / RuntimeExecutor가 null입니다, JSI 로그를 훅할 수 없습니다")
-            android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Tried both CatalystInstance and ReactHost / CatalystInstance와 ReactHost 모두 시도했지만 실패")
           }
         } catch (e: Exception) {
           android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Exception while hooking JSI log / JSI 로그 훅 중 예외 발생: ${e.message}", e)
         }
 
-        // Check WebSocket connection status after delay / 지연 후 WebSocket 연결 상태 확인
+        // Check WebSocket connection status after delay with longer timeout / 더 긴 타임아웃으로 지연 후 WebSocket 연결 상태 확인
+        // Increase delay to 2 seconds to allow more time for connection / 연결에 더 많은 시간을 주기 위해 지연을 2초로 증가
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(Runnable {
           val isConnected = connection?.isConnected() ?: false
           android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "Connection status after delay / 지연 후 연결 상태: $isConnected")
 
-          // 연결 실패 시 경고 로그 추가 / 연결 실패 시 경고 로그 추가
+          // 연결 실패 시 Promise reject / 연결 실패 시 Promise reject
           if (!isConnected) {
-            android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "⚠️ WebSocket not connected after 500ms delay / 500ms 지연 후에도 WebSocket이 연결되지 않음")
+            android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "⚠️ WebSocket not connected after 2000ms delay / 2000ms 지연 후에도 WebSocket이 연결되지 않음")
             android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Check Android logcat for WebSocket errors / WebSocket 에러를 확인하려면 Android logcat을 확인하세요")
             android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Command: adb logcat | grep ChromeRemoteDevTools")
-            val serverAddress = "$capturedHost:$capturedPort"
+            val serverAddress = "${capturedHost}:${capturedPort}"
             android.util.Log.w("ChromeRemoteDevToolsInspectorModule", "Server should be running on $serverAddress")
-          } else {
-            android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "✅ WebSocket connected successfully / WebSocket 연결 성공")
+            promise.reject(
+              "WEBSOCKET_NOT_CONNECTED",
+              "WebSocket connection failed. Please ensure the server is running on ${serverAddress} / WebSocket 연결 실패. 서버가 ${serverAddress}에서 실행 중인지 확인하세요"
+            )
+            return@Runnable
           }
 
-          val result: WritableMap = Arguments.createMap()
-          result.putBoolean("connected", isConnected)
-          result.putString("host", capturedHost)
-          result.putInt("port", capturedPort)
-          promise.resolve(result)
-        }, 500) // Wait 500ms for connection to establish / 연결이 설정될 때까지 500ms 대기
+          android.util.Log.d("ChromeRemoteDevToolsInspectorModule", "✅ WebSocket connected successfully / WebSocket 연결 성공")
+          promise.resolve(null)
+        }, 2000) // Wait 2 seconds for connection to establish / 연결이 설정될 때까지 2초 대기
       } else {
         android.util.Log.e("ChromeRemoteDevToolsInspectorModule", "Failed to create connection object / 연결 객체 생성 실패")
         promise.reject("CONNECTION_FAILED", "Failed to connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연결하지 못했습니다")
@@ -244,6 +234,23 @@ class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicat
           promise.reject("NO_CONTEXT", "React application context is null")
           return
         }
+
+      // Check connection status before sending / 전송 전 연결 상태 확인
+      val normalizedHost = ChromeRemoteDevToolsInspector.normalizeServerHost(serverHost)
+      val deviceName = android.os.Build.MODEL
+      val appName = context.packageName
+      val deviceId = ChromeRemoteDevToolsInspector.getDeviceId(context)
+      val url = ChromeRemoteDevToolsInspector.getInspectorDeviceUrl(normalizedHost, serverPort, deviceName, appName, deviceId)
+
+      // Check connection status / 연결 상태 확인
+      val connection = ChromeRemoteDevToolsInspector.getConnection(url)
+      if (connection == null || !connection.isConnected()) {
+        promise.reject(
+          "NOT_CONNECTED",
+          "WebSocket is not connected. Please ensure the server is running on ${serverHost}:${serverPort} / WebSocket이 연결되지 않았습니다. 서버가 ${serverHost}:${serverPort}에서 실행 중인지 확인하세요"
+        )
+        return
+      }
 
       ChromeRemoteDevToolsInspector.sendCDPMessage(
         context = context,

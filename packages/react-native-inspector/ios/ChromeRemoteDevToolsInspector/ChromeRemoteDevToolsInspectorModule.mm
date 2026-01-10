@@ -32,11 +32,8 @@
 #define NETWORK_HOOK_AVAILABLE
 #endif
 
-// Include Redux DevTools Extension / Redux DevTools Extension 포함
-#if __has_include("ReduxDevToolsExtension.h")
-#include "ReduxDevToolsExtension.h"
-#define REDUX_DEVTOOLS_EXTENSION_AVAILABLE
-#endif
+// Note: Redux DevTools Extension is handled by JavaScript polyfill, not C++ / 참고: Redux DevTools Extension은 C++가 아닌 JavaScript polyfill로 처리됩니다
+// C++ version was removed because it doesn't fully support Redux Toolkit's .apply() pattern / C++ 버전은 Redux Toolkit의 .apply() 패턴을 완전히 지원하지 않아 제거되었습니다
 
 #if RCT_DEV || RCT_REMOTE_PROFILE
 
@@ -265,41 +262,15 @@ RCT_EXPORT_MODULE(ChromeRemoteDevToolsInspector)
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] ⚠️ Network hook not available - NetworkHook.h not included / 네트워크 훅을 사용할 수 없음 - NetworkHook.h가 포함되지 않음");
 #endif
 
-  // Install Redux DevTools Extension / Redux DevTools Extension 설치
-  bool reduxExtensionSuccess = false;
-#ifdef REDUX_DEVTOOLS_EXTENSION_AVAILABLE
-  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ========================================");
-  NSLog(@"[ChromeRemoteDevToolsInspectorModule] Installing Redux DevTools Extension via JSI / JSI를 통해 Redux DevTools Extension 설치 중...");
-  NSLog(@"[ChromeRemoteDevToolsInspectorModule] This will inject __REDUX_DEVTOOLS_EXTENSION__ to global object / 이것은 전역 객체에 __REDUX_DEVTOOLS_EXTENSION__를 주입합니다");
-  @try {
-    reduxExtensionSuccess = chrome_remote_devtools::installReduxDevToolsExtension(runtime);
-    if (reduxExtensionSuccess) {
-      NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Redux DevTools Extension installed successfully / Redux DevTools Extension이 성공적으로 설치됨");
-      NSLog(@"[ChromeRemoteDevToolsInspectorModule]   - global.__REDUX_DEVTOOLS_EXTENSION__ is now available / global.__REDUX_DEVTOOLS_EXTENSION__가 이제 사용 가능합니다");
-      NSLog(@"[ChromeRemoteDevToolsInspectorModule]   - global.__REDUX_DEVTOOLS_EXTENSION_JSI_INJECTED__ flag is set / global.__REDUX_DEVTOOLS_EXTENSION_JSI_INJECTED__ 플래그가 설정되었습니다");
-    } else {
-      NSLog(@"[ChromeRemoteDevToolsInspectorModule] ❌ Failed to install Redux DevTools Extension / Redux DevTools Extension 설치 실패");
-      NSLog(@"[ChromeRemoteDevToolsInspectorModule]   - Check logs above for details / 자세한 내용은 위의 로그를 확인하세요");
-    }
-    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ========================================");
-  } @catch (NSException *exception) {
-    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ❌ Exception while installing Redux DevTools Extension: %@ / Redux DevTools Extension 설치 중 예외 발생: %@", exception);
-    NSLog(@"[ChromeRemoteDevToolsInspectorModule]   - Exception name: %@", exception.name);
-    NSLog(@"[ChromeRemoteDevToolsInspectorModule]   - Exception reason: %@", exception.reason);
-    NSLog(@"[ChromeRemoteDevToolsInspectorModule] ========================================");
-  }
-#else
-  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ⚠️ Redux DevTools Extension not available - ReduxDevToolsExtension.h not included / Redux DevTools Extension을 사용할 수 없음 - ReduxDevToolsExtension.h가 포함되지 않음");
-  NSLog(@"[ChromeRemoteDevToolsInspectorModule]   - Make sure ReduxDevToolsExtension.h is in the include path / ReduxDevToolsExtension.h가 include 경로에 있는지 확인하세요");
-#endif
+  // Note: Redux DevTools Extension is handled by JavaScript polyfill / 참고: Redux DevTools Extension은 JavaScript polyfill로 처리됩니다
 
   // Summary / 요약
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] ========================================");
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] JSI Hooks Installation Summary / JSI 훅 설치 요약:");
   NSLog(@"[ChromeRemoteDevToolsInspectorModule]   Console Hook: %@", consoleSuccess ? @"✅ Success" : @"❌ Failed");
   NSLog(@"[ChromeRemoteDevToolsInspectorModule]   Network Hook: %@", networkSuccess ? @"✅ Success" : @"❌ Failed");
-  NSLog(@"[ChromeRemoteDevToolsInspectorModule]   Redux DevTools Extension: %@", reduxExtensionSuccess ? @"✅ Success" : @"❌ Failed");
-  if (consoleSuccess && networkSuccess && reduxExtensionSuccess) {
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule]   Redux DevTools: JS polyfill (not C++)");
+  if (consoleSuccess && networkSuccess) {
     NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ All JSI hooks installed successfully / 모든 JSI 훅이 성공적으로 설치됨");
   } else {
     NSLog(@"[ChromeRemoteDevToolsInspectorModule] ⚠️ Some JSI hooks failed to install / 일부 JSI 훅 설치 실패");
@@ -339,12 +310,6 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
   chrome_remote_devtools::setSendCDPMessageCallback(sendCDPMessageIOS);
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Platform callback set / 플랫폼 콜백 설정됨");
 
-  // Set server info for Redux DevTools Extension / Redux DevTools Extension을 위한 서버 정보 설정
-#ifdef REDUX_DEVTOOLS_EXTENSION_AVAILABLE
-  std::string hostStr = [serverHost UTF8String];
-  chrome_remote_devtools::setReduxDevToolsServerInfo(hostStr, [serverPort integerValue]);
-  NSLog(@"[ChromeRemoteDevToolsInspectorModule] ✅ Redux DevTools Extension server info set / Redux DevTools Extension 서버 정보 설정됨");
-#endif
 
   // Note: JSI hooks will be installed automatically via installJSIBindingsWithRuntime / 참고: JSI 훅은 installJSIBindingsWithRuntime을 통해 자동으로 설치됩니다
   // This method is called when TurboModule is created / 이 메서드는 TurboModule이 생성될 때 호출됩니다
