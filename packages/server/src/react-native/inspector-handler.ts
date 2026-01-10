@@ -143,6 +143,33 @@ export function handleReactNativeInspectorWebSocket(
       } else {
         log('rn-inspector', inspectorId, 'received:', data);
       }
+
+      // Cache Redux store information / Redux store 정보 캐시
+      if (parsed.method === 'Redux.message' && parsed.params) {
+        const params = parsed.params;
+        if (params.type === 'INIT' && params.instanceId !== undefined) {
+          // Store INIT message for later replay / INIT 메시지를 나중에 재생하기 위해 저장
+          inspectorManager.storeReduxInstance(inspectorId, {
+            instanceId: params.instanceId,
+            name: params.name || 'Store',
+            payload: params.payload || '{}',
+            timestamp: params.timestamp || Date.now(),
+          });
+          log(
+            'rn-inspector',
+            inspectorId,
+            `📦 Cached Redux store INIT for instance ${params.instanceId}`
+          );
+        } else if (params.type === 'ACTION' && params.instanceId !== undefined) {
+          // Update cached state / 캐시된 상태 업데이트
+          inspectorManager.updateReduxState(
+            inspectorId,
+            params.instanceId,
+            params.payload || '{}',
+            params.timestamp || Date.now()
+          );
+        }
+      }
     } catch {
       log('rn-inspector', inspectorId, 'received (raw):', data);
     }
