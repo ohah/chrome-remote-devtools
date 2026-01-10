@@ -91,7 +91,7 @@ function flushPendingMessages(): void {
  *
  * Usage / 사용법:
  * ```typescript
- * import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-react-native';
+ * import { createReduxDevToolsMiddleware } from '@ohah/redux-devtools-plugin';
  *
  * const store = configureStore({
  *   reducer: rootReducer,
@@ -171,7 +171,7 @@ export function createReduxDevToolsMiddleware(config?: DevToolsConfig): Middlewa
  *
  * Usage / 사용법:
  * ```typescript
- * import { createReduxDevToolsEnhancer } from '@ohah/chrome-remote-devtools-react-native';
+ * import { createReduxDevToolsEnhancer } from '@ohah/redux-devtools-plugin';
  *
  * const store = configureStore({
  *   reducer: rootReducer,

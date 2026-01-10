@@ -3,7 +3,7 @@
 // It provides Redux DevTools functionality before JSI hooks are ready / JSI 훅이 준비되기 전에 Redux DevTools 기능을 제공합니다
 // Works with both Redux Toolkit and Zustand / Redux Toolkit과 Zustand 모두에서 작동합니다
 
-import { getGlobalObj } from './utils';
+import { getGlobalObj } from './redux-utils';
 
 // Type declarations / 타입 선언
 type Action = { type: string; [key: string]: unknown };
@@ -25,6 +25,7 @@ interface ConnectConfig {
 
 interface DevToolsExtension {
   connect: (config?: ConnectConfig) => DevToolsConnection;
+  notifyExtensionReady: () => void;
 }
 
 // Pending actions queue - stores actions before server connection is ready
@@ -36,6 +37,7 @@ interface PendingAction {
   action?: Action | null;
   state: State;
   timestamp: number;
+  nextActionId?: number; // Action ID for ACTION type messages / ACTION 타입 메시지의 액션 ID
 }
 
 const pendingActions: PendingAction[] = [];
@@ -43,6 +45,17 @@ let serverHost = '';
 let serverPort = 0;
 let isConnected = false;
 let nextInstanceId = 1;
+// Track next action ID for each instance / 각 instance별 다음 액션 ID 추적
+const nextActionIds: Map<number, number> = new Map();
+
+// Active connections - used to re-send INIT when DevTools reconnects
+// 활성 연결들 - DevTools가 재연결할 때 INIT을 다시 보내기 위해 사용
+interface ActiveConnection {
+  instanceId: number;
+  name: string;
+  getState: () => State;
+}
+const activeConnections: Map<number, ActiveConnection> = new Map();
 
 // CDP message sender function / CDP 메시지 전송 함수
 // May return void or Promise<void> / void 또는 Promise<void>를 반환할 수 있음
@@ -79,18 +92,30 @@ export function setServerConnection(host: string, port: number): void {
  */
 function sendCDPMessage(message: object): void {
   if (!isConnected || !sendCDPMessageFn) {
+    console.log('[ReduxDevToolsPolyfill] sendCDPMessage: not ready, skipping');
     return;
   }
   try {
-    const result = sendCDPMessageFn(serverHost, serverPort, JSON.stringify(message));
+    const messageStr = JSON.stringify(message);
+    const params = (message as { params?: { type?: string } }).params;
+    const messageType = params?.type || 'unknown';
+    console.log('[ReduxDevToolsPolyfill] 📤 Sending CDP message:', messageType);
+    const result = sendCDPMessageFn(serverHost, serverPort, messageStr);
     // Handle Promise if returned / Promise가 반환되면 처리
-    if (result && typeof result.catch === 'function') {
-      result.catch((error: unknown) => {
-        console.error('[ReduxDevToolsPolyfill] Failed to send CDP message:', error);
-      });
+    if (result && typeof result.then === 'function') {
+      (result as Promise<void>)
+        .then(() => {
+          console.log('[ReduxDevToolsPolyfill] ✅ Message sent successfully:', messageType);
+        })
+        .catch((error: unknown) => {
+          console.error('[ReduxDevToolsPolyfill] ❌ Failed to send CDP message:', error);
+        });
+    } else {
+      // Synchronous call succeeded / 동기 호출 성공
+      console.log('[ReduxDevToolsPolyfill] ✅ Message sent successfully:', messageType);
     }
   } catch (e) {
-    console.error('[ReduxDevToolsPolyfill] Error sending CDP message:', e);
+    console.error('[ReduxDevToolsPolyfill] ❌ Error sending CDP message:', e);
   }
 }
 
@@ -139,6 +164,11 @@ function flushPendingActions(): void {
         },
       });
     } else if (pending.type === 'action') {
+      // Get and increment next action ID for this instance / 이 instance의 다음 액션 ID 가져오기 및 증가
+      const currentActionId = nextActionIds.get(pending.instanceId) || 1;
+      const nextActionId = pending.nextActionId || currentActionId;
+      nextActionIds.set(pending.instanceId, nextActionId);
+
       // Send ACTION message / ACTION 메시지 전송
       sendCDPMessage({
         method: 'Redux.message',
@@ -150,6 +180,7 @@ function flushPendingActions(): void {
           payload: JSON.stringify(pending.state),
           maxAge: 50,
           timestamp: pending.timestamp,
+          nextActionId,
         },
       });
     }
@@ -165,10 +196,28 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
   const name = config?.name ?? 'Store';
   console.log('[ReduxDevToolsPolyfill] createConnection called:', { instanceId, name });
 
+  // Track current state for re-initialization / 재초기화를 위한 현재 상태 추적
+  let currentState: State = undefined;
+
+  // Initialize action ID counter for this instance / 이 instance의 액션 ID 카운터 초기화
+  if (!nextActionIds.has(instanceId)) {
+    nextActionIds.set(instanceId, 1);
+  }
+
+  // Register active connection / 활성 연결 등록
+  activeConnections.set(instanceId, {
+    instanceId,
+    name,
+    getState: () => currentState,
+  });
+
   return {
     init(state: State, _liftedData?: unknown): void {
       console.log('[ReduxDevToolsPolyfill] init called for', name, 'instanceId:', instanceId);
       const timestamp = Date.now();
+
+      // Update current state / 현재 상태 업데이트
+      currentState = state;
 
       if (isConnected && sendCDPMessageFn) {
         console.log('[ReduxDevToolsPolyfill] init: sending immediately');
@@ -210,6 +259,14 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
     send(action: Action | null, state: State): void {
       const timestamp = Date.now();
 
+      // Update current state / 현재 상태 업데이트
+      currentState = state;
+
+      // Get and increment next action ID for this instance / 이 instance의 다음 액션 ID 가져오기 및 증가
+      const currentActionId = nextActionIds.get(instanceId) || 1;
+      const nextActionId = currentActionId + 1;
+      nextActionIds.set(instanceId, nextActionId);
+
       if (isConnected && sendCDPMessageFn) {
         // Send immediately / 즉시 전송
         sendCDPMessage({
@@ -222,6 +279,7 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
             payload: JSON.stringify(state),
             maxAge: 50,
             timestamp,
+            nextActionId,
           },
         });
       } else {
@@ -233,6 +291,7 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
           action,
           state,
           timestamp,
+          nextActionId,
         });
       }
     },
@@ -262,6 +321,56 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
       }
     },
   };
+}
+
+/**
+ * Notify extension that DevTools is ready / DevTools가 준비되었음을 extension에 알림
+ * Called by DevTools when observer is registered / observer가 등록되면 DevTools에서 호출
+ * Re-sends INIT messages for all active connections / 모든 활성 연결에 대해 INIT 메시지를 다시 전송
+ */
+function notifyExtensionReady(): void {
+  console.log('[ReduxDevToolsPolyfill] notifyExtensionReady called');
+  console.log('[ReduxDevToolsPolyfill] Active connections:', activeConnections.size);
+
+  if (!isConnected || !sendCDPMessageFn) {
+    console.log('[ReduxDevToolsPolyfill] Not connected, skipping re-initialization');
+    return;
+  }
+
+  // Re-send INIT for all active connections / 모든 활성 연결에 대해 INIT 다시 전송
+  activeConnections.forEach((connection) => {
+    const { instanceId, name, getState } = connection;
+    const state = getState();
+    const timestamp = Date.now();
+
+    console.log('[ReduxDevToolsPolyfill] Re-sending INIT for', name, 'instanceId:', instanceId);
+
+    // Send INIT_INSTANCE message / INIT_INSTANCE 메시지 전송
+    sendCDPMessage({
+      method: 'Redux.message',
+      params: {
+        type: 'INIT_INSTANCE',
+        instanceId,
+        source: '@devtools-page',
+      },
+    });
+
+    // Send INIT message / INIT 메시지 전송
+    sendCDPMessage({
+      method: 'Redux.message',
+      params: {
+        type: 'INIT',
+        instanceId,
+        source: '@devtools-page',
+        name,
+        payload: JSON.stringify(state),
+        maxAge: 50,
+        timestamp,
+      },
+    });
+  });
+
+  console.log('[ReduxDevToolsPolyfill] Re-initialization complete');
 }
 
 /**
@@ -295,6 +404,7 @@ const reduxDevToolsExtension: DevToolsExtension & ((config?: unknown) => unknown
   // Object form with connect method for Zustand / Zustand용 connect 메서드가 있는 객체 형태
   {
     connect: createConnection,
+    notifyExtensionReady: notifyExtensionReady,
   }
 );
 
@@ -425,8 +535,10 @@ export function installReduxDevToolsPolyfill(): void {
   // Also set on window if it exists (required for Zustand) / window가 존재하면 window에도 설정 (Zustand에서 필요)
   // Zustand checks: window.__REDUX_DEVTOOLS_EXTENSION__
   if (typeof window !== 'undefined') {
-    (window as Record<string, unknown>).__REDUX_DEVTOOLS_EXTENSION__ = reduxDevToolsExtension;
-    (window as Record<string, unknown>).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = composeWithDevTools;
+    (window as unknown as Record<string, unknown>).__REDUX_DEVTOOLS_EXTENSION__ =
+      reduxDevToolsExtension;
+    (window as unknown as Record<string, unknown>).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ =
+      composeWithDevTools;
   }
 
   // Mark as installed / 설치됨으로 표시
@@ -466,7 +578,7 @@ export function replaceWithJSIVersion(jsiExtension: any): void {
   // Replace extension / extension 교체
   globalObj.__REDUX_DEVTOOLS_EXTENSION__ = jsiExtension;
   if (typeof window !== 'undefined') {
-    (window as Record<string, unknown>).__REDUX_DEVTOOLS_EXTENSION__ = jsiExtension;
+    (window as unknown as Record<string, unknown>).__REDUX_DEVTOOLS_EXTENSION__ = jsiExtension;
   }
 
   // Also replace compose if JSI provides it / JSI가 제공하면 compose도 교체
@@ -478,7 +590,7 @@ export function replaceWithJSIVersion(jsiExtension: any): void {
     globalObj.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ =
       jsiExtension.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
     if (typeof window !== 'undefined') {
-      (window as Record<string, unknown>).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ =
+      (window as unknown as Record<string, unknown>).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ =
         jsiExtension.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
     }
   }
@@ -494,6 +606,8 @@ export function replaceWithJSIVersion(jsiExtension: any): void {
 
 // Note: installReduxDevToolsPolyfill() is now called from Metro polyfill file / 참고: installReduxDevToolsPolyfill()은 이제 Metro polyfill 파일에서 호출됩니다
 // This ensures it runs before index.js / 이것은 index.js 전에 실행되도록 보장합니다
+// Also auto-install when this module is imported / 이 모듈이 import될 때 자동으로 설치
+// This provides a fallback if Metro polyfill doesn't run / Metro polyfill이 실행되지 않을 경우를 위한 폴백
+installReduxDevToolsPolyfill();
 
 export { reduxDevToolsExtension, composeWithDevTools };
-export { getPendingActions, clearPendingActions, replaceWithJSIVersion };

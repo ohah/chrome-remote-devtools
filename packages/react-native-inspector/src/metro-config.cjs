@@ -1,4 +1,4 @@
-// Metro transformer for Chrome Remote DevTools Redux DevTools Extension / Chrome Remote DevTools Redux DevTools Extension용 Metro transformer
+// Metro transformer for Redux DevTools plugin / Redux DevTools 플러그인용 Metro transformer
 // Injects polyfill before entry point to ensure __REDUX_DEVTOOLS_EXTENSION__ is available / entry point 전에 polyfill을 주입하여 __REDUX_DEVTOOLS_EXTENSION__이 사용 가능하도록 보장
 
 const path = require('path');
@@ -15,7 +15,7 @@ const requirePolyfill = createRequire(__filename);
  * @param {import('metro-config').ConfigT} config Metro configuration / Metro 설정
  * @returns {import('metro-config').ConfigT} Modified Metro configuration / 수정된 Metro 설정
  */
-function withChromeRemoteDevToolsRedux(config) {
+function withReduxDevTools(config) {
   // Get the path to the polyfill file / polyfill 파일 경로 가져오기
   // Use require.resolve to get the absolute path from package / 패키지에서 절대 경로를 얻기 위해 require.resolve 사용
   let polyfillPath;
@@ -63,4 +63,4 @@ function withChromeRemoteDevToolsRedux(config) {
   };
 }
 
-module.exports = { withChromeRemoteDevToolsRedux };
+module.exports = { withReduxDevTools, withChromeRemoteDevToolsRedux: withReduxDevTools };
