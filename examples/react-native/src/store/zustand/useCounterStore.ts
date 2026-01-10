@@ -1,8 +1,8 @@
 // Counter store with Zustand / Zustand를 사용한 카운터 store
-// Note: Redux DevTools Extension is auto-initialized on import / 참고: Redux DevTools Extension은 import 시 자동 초기화됩니다
-import '@ohah/chrome-remote-devtools-react-native';
-import { create } from '@ohah/chrome-remote-devtools-react-native/zustand';
-import { devtools } from '@ohah/chrome-remote-devtools-react-native/zustand/middleware';
+// Using Chrome Remote DevTools middleware for reliable DevTools connection
+// 안정적인 DevTools 연결을 위해 Chrome Remote DevTools 미들웨어 사용
+import { create } from 'zustand';
+import { devtools } from '@ohah/chrome-remote-devtools-react-native/zustand';
 
 interface CounterState {
   value: number;
@@ -17,20 +17,18 @@ const useCounterStore = create<CounterState>()(
       value: 0,
       increment: () => {
         console.log('[Zustand CounterStore] increment() called');
-        set((state) => ({ value: state.value + 1 }), undefined, 'counter/increment');
+        set((state) => ({ value: state.value + 1 }));
       },
       decrement: () => {
         console.log('[Zustand CounterStore] decrement() called');
-        set((state) => ({ value: state.value - 1 }), undefined, 'counter/decrement');
+        set((state) => ({ value: state.value - 1 }));
       },
       reset: () => {
         console.log('[Zustand CounterStore] reset() called');
-        set({ value: 0 }, undefined, 'counter/reset');
+        set({ value: 0 });
       },
     }),
-    {
-      name: 'CounterStore',
-    }
+    { name: 'CounterStore' }
   )
 );
 
