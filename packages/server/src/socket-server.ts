@@ -319,6 +319,71 @@ export class SocketServer {
     }
   }
 
+  /**
+   * Send cached Redux store information to DevTools / 캐시된 Redux store 정보를 DevTools로 전송
+   * Called when DevTools connects to a React Native Inspector / DevTools가 React Native Inspector에 연결될 때 호출됨
+   * @param ws - DevTools WebSocket connection / DevTools WebSocket 연결
+   * @param inspectorId - React Native Inspector ID / React Native Inspector ID
+   * @param devtoolsId - DevTools ID for logging / 로깅용 DevTools ID
+   */
+  private sendCachedReduxStores(ws: WebSocket, inspectorId: string, devtoolsId: string): void {
+    const stores = this.reactNativeInspectorManager.getReduxStores(inspectorId);
+
+    if (stores.length === 0) {
+      log('devtools', devtoolsId, 'no cached Redux stores to send');
+      return;
+    }
+
+    log('devtools', devtoolsId, `sending ${stores.length} cached Redux store(s) to DevTools`);
+
+    for (const store of stores) {
+      try {
+        // Send INIT_INSTANCE message / INIT_INSTANCE 메시지 전송
+        const initInstanceMsg = JSON.stringify({
+          method: 'Redux.message',
+          params: {
+            type: 'INIT_INSTANCE',
+            instanceId: store.instanceId,
+            source: '@devtools-page',
+          },
+        });
+        ws.send(initInstanceMsg);
+        log(
+          'devtools',
+          devtoolsId,
+          `📤 Sent cached INIT_INSTANCE for instance ${store.instanceId}`
+        );
+
+        // Send INIT message with current state / 현재 상태와 함께 INIT 메시지 전송
+        const initMsg = JSON.stringify({
+          method: 'Redux.message',
+          params: {
+            type: 'INIT',
+            instanceId: store.instanceId,
+            source: '@devtools-page',
+            name: store.name,
+            payload: store.payload,
+            maxAge: 50,
+            timestamp: store.timestamp,
+          },
+        });
+        ws.send(initMsg);
+        log(
+          'devtools',
+          devtoolsId,
+          `📤 Sent cached INIT for instance ${store.instanceId} (${store.name})`
+        );
+      } catch (error) {
+        logError(
+          'devtools',
+          devtoolsId,
+          `failed to send cached Redux store ${store.instanceId}`,
+          error
+        );
+      }
+    }
+  }
+
   initSocketServer(server: ReturnType<typeof createServer>) {
     server.on('upgrade', (request, socket, head) => {
       const url = new URL(request.url || '/', `http://${request.headers.host}`);
@@ -502,6 +567,15 @@ export class SocketServer {
           this.reactNativeInspectorManager.associateWithClient(clientId, clientId);
           devtool.clientId = clientId; // Update devtool's clientId / devtool의 clientId 업데이트
           log('devtools', id, `associated with React Native Inspector ${clientId}`);
+
+          // Send cached Redux store information to DevTools after a delay / 지연 후 캐시된 Redux store 정보를 DevTools로 전송
+          // Wait for DevTools Frontend to initialize its observer (100ms setTimeout + some buffer) / DevTools Frontend가 observer를 초기화할 때까지 대기
+          setTimeout(() => {
+            // Check if WebSocket is still open / WebSocket이 아직 열려 있는지 확인
+            if (ws.readyState === WebSocket.OPEN) {
+              this.sendCachedReduxStores(ws, clientId, id);
+            }
+          }, 200);
         }
       }
     }
