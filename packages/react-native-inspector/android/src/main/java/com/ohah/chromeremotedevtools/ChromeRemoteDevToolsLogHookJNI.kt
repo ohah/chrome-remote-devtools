@@ -103,13 +103,8 @@ class ChromeRemoteDevToolsLogHookJNI {
     @JvmStatic
     external fun nativeGetObjectProperties(objectId: String): String?
 
-    /**
-     * Set server info for Redux DevTools Extension / Redux DevTools Extension을 위한 서버 정보 설정
-     * @param serverHost Server host / 서버 호스트
-     * @param serverPort Server port / 서버 포트
-     */
-    @JvmStatic
-    external fun nativeSetReduxDevToolsServerInfo(serverHost: String, serverPort: Int)
+    // Note: nativeSetReduxDevToolsServerInfo was removed / nativeSetReduxDevToolsServerInfo 제거됨
+    // Redux DevTools Extension server info is now set via JavaScript polyfill / Redux DevTools Extension 서버 정보는 이제 JavaScript polyfill을 통해 설정됩니다
 
     /**
      * Send CDP message directly from C++ / C++에서 직접 CDP 메시지 전송

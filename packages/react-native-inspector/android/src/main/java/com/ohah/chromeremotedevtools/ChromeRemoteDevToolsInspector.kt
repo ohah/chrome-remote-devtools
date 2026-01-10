@@ -49,10 +49,17 @@ object ChromeRemoteDevToolsInspector {
   }
 
   /**
+   * Get connection for URL / URL에 대한 연결 가져오기
+   */
+  fun getConnection(url: String): ChromeRemoteDevToolsInspectorPackagerConnection? {
+    return socketConnections[url]
+  }
+
+  /**
    * Normalize server host for Android / Android용 서버 호스트 정규화
    * Android emulator uses 10.0.2.2 to access host machine's localhost / Android 에뮬레이터는 호스트 머신의 localhost에 접근하기 위해 10.0.2.2를 사용합니다
    */
-  private fun normalizeServerHost(serverHost: String): String {
+  fun normalizeServerHost(serverHost: String): String {
     // Check if running on emulator / 에뮬레이터에서 실행 중인지 확인
     val fingerprint = android.os.Build.FINGERPRINT.lowercase()
     val model = android.os.Build.MODEL.lowercase()
