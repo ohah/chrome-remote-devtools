@@ -20,6 +20,9 @@ interface DevToolsConfig {
 let nextInstanceId = 1;
 const storeInstances = new Map<number, { name: string; initialized: boolean }>();
 
+// Track next action ID for each instance / 각 instance별 다음 액션 ID 추적
+const nextActionIds: Map<number, number> = new Map();
+
 // Pending messages queue (before connection is ready)
 interface PendingMessage {
   method: string;
@@ -109,6 +112,11 @@ export function createReduxDevToolsMiddleware(config?: DevToolsConfig): Middlewa
 
   storeInstances.set(instanceId, { name, initialized: false });
 
+  // Initialize nextActionId for this instance / 이 instance의 nextActionId 초기화
+  if (!nextActionIds.has(instanceId)) {
+    nextActionIds.set(instanceId, 1);
+  }
+
   const middleware: Middleware = (store) => {
     // Initialize on first access / 첫 접근 시 초기화
     if (!initialized) {
@@ -144,6 +152,11 @@ export function createReduxDevToolsMiddleware(config?: DevToolsConfig): Middlewa
       // Execute action first / 먼저 액션 실행
       const result = next(action);
 
+      // Get and increment next action ID for this instance / 이 instance의 다음 액션 ID 가져오기 및 증가
+      const currentActionId = nextActionIds.get(instanceId) || 1;
+      const nextActionId = currentActionId + 1;
+      nextActionIds.set(instanceId, nextActionId);
+
       // Send action to DevTools / DevTools로 액션 전송
       sendCDPMessage({
         method: 'Redux.message',
@@ -155,6 +168,7 @@ export function createReduxDevToolsMiddleware(config?: DevToolsConfig): Middlewa
           payload: JSON.stringify(store.getState()),
           maxAge,
           timestamp: Date.now(),
+          nextActionId, // Add nextActionId / nextActionId 추가
         },
       });
 
@@ -185,6 +199,11 @@ export function createReduxDevToolsEnhancer(config?: DevToolsConfig): StoreEnhan
   const instanceId = config?.instanceId ?? nextInstanceId++;
   const name = config?.name ?? 'Redux Store';
   const maxAge = config?.maxAge ?? 50;
+
+  // Initialize nextActionId for this instance / 이 instance의 nextActionId 초기화
+  if (!nextActionIds.has(instanceId)) {
+    nextActionIds.set(instanceId, 1);
+  }
 
   return (createStore) => (reducer, preloadedState) => {
     const store = createStore(reducer, preloadedState);
@@ -218,6 +237,11 @@ export function createReduxDevToolsEnhancer(config?: DevToolsConfig): StoreEnhan
     const wrappedDispatch = (action: unknown) => {
       const result = originalDispatch(action as any);
 
+      // Get and increment next action ID for this instance / 이 instance의 다음 액션 ID 가져오기 및 증가
+      const currentActionId = nextActionIds.get(instanceId) || 1;
+      const nextActionId = currentActionId + 1;
+      nextActionIds.set(instanceId, nextActionId);
+
       sendCDPMessage({
         method: 'Redux.message',
         params: {
@@ -228,6 +252,7 @@ export function createReduxDevToolsEnhancer(config?: DevToolsConfig): StoreEnhan
           payload: JSON.stringify(store.getState()),
           maxAge,
           timestamp: Date.now(),
+          nextActionId, // Add nextActionId / nextActionId 추가
         },
       });
 

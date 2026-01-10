@@ -19,6 +19,9 @@ interface DevToolsConfig {
 // Store instances for tracking
 let nextInstanceId = 1;
 
+// Track next action ID for each instance / 각 instance별 다음 액션 ID 추적
+const nextActionIds: Map<number, number> = new Map();
+
 // Pending messages queue (before connection is ready)
 interface PendingMessage {
   method: string;
@@ -183,6 +186,11 @@ export const chromeDevtools: DevToolsMiddleware = (initializer, config) => (set,
     return initializer(set, get, store);
   }
 
+  // Initialize nextActionId for this instance / 이 instance의 nextActionId 초기화
+  if (!nextActionIds.has(instanceId)) {
+    nextActionIds.set(instanceId, 1);
+  }
+
   // Track action names for better DevTools display
   let currentActionName = 'anonymous';
 
@@ -214,6 +222,11 @@ export const chromeDevtools: DevToolsMiddleware = (initializer, config) => (set,
     // Get new state / 새 state 가져오기
     const newState = get();
 
+    // Get and increment next action ID for this instance / 이 instance의 다음 액션 ID 가져오기 및 증가
+    const currentActionId = nextActionIds.get(instanceId) || 1;
+    const nextActionId = currentActionId + 1;
+    nextActionIds.set(instanceId, nextActionId);
+
     // Send ACTION message / ACTION 메시지 전송
     console.log('[ZustandMiddleware] Sending ACTION for', name, 'action:', actionName);
     sendCDPMessage({
@@ -226,6 +239,7 @@ export const chromeDevtools: DevToolsMiddleware = (initializer, config) => (set,
         payload: JSON.stringify(newState),
         maxAge,
         timestamp: Date.now(),
+        nextActionId, // Add nextActionId / nextActionId 추가
       },
     });
   }) as typeof set;
