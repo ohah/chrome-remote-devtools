@@ -34,7 +34,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
   serverPort = 8080,
   children,
   autoConnect = true,
-  showStatusUI = __DEV__,
+  showStatusUI = false,
 }: ChromeRemoteDevToolsInspectorProviderProps): React.JSX.Element {
   const initializedRef = useRef(false);
   const connectionRef = useRef<Promise<void> | null>(null);
