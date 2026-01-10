@@ -1,6 +1,6 @@
 // Redux Cart Screen / Redux 쇼핑 카트 화면
-import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addItem,
@@ -11,21 +11,41 @@ import {
 import type { RootState } from '../../store/redux/store';
 import type { CartItem } from '../../store/redux/slices/cartSlice';
 
+// Random item names / 랜덤 아이템 이름
+const ITEM_NAMES = [
+  'Apple',
+  'Banana',
+  'Orange',
+  'Grapes',
+  'Strawberry',
+  'Watermelon',
+  'Pineapple',
+  'Mango',
+  'Kiwi',
+  'Peach',
+  'Cherry',
+  'Blueberry',
+  'Raspberry',
+  'Blackberry',
+  'Papaya',
+];
+
+// Generate random item / 랜덤 아이템 생성
+const generateRandomItem = () => {
+  const randomName = ITEM_NAMES[Math.floor(Math.random() * ITEM_NAMES.length)];
+  const randomPrice = Math.round((Math.random() * 50 + 1) * 100) / 100; // $1.00 - $50.00
+  return { name: randomName, price: randomPrice };
+};
+
 export default function ReduxCartScreen() {
   const items = useSelector((state: RootState) => state.cart.items);
   const dispatch = useDispatch();
-  const [itemName, setItemName] = useState('');
-  const [itemPrice, setItemPrice] = useState('');
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleAddItem = () => {
-    const price = parseFloat(itemPrice);
-    if (itemName.trim() && !isNaN(price) && price > 0) {
-      dispatch(addItem({ name: itemName, price }));
-      setItemName('');
-      setItemPrice('');
-    }
+    const { name, price } = generateRandomItem();
+    dispatch(addItem({ name, price }));
   };
 
   const renderItem = ({ item }: { item: CartItem }) => (
@@ -57,23 +77,9 @@ export default function ReduxCartScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Redux Shopping Cart</Text>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={itemName}
-          onChangeText={setItemName}
-          placeholder="Item name"
-        />
-        <TextInput
-          style={styles.input}
-          value={itemPrice}
-          onChangeText={setItemPrice}
-          placeholder="Price"
-          keyboardType="numeric"
-        />
+      <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
-          <Text style={styles.addButtonText}>Add Item</Text>
+          <Text style={styles.addButtonText}>Add Random Item</Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -94,20 +100,8 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  buttonContainer: {
     marginBottom: 20,
-  },
-  inputContainer: {
-    marginBottom: 20,
-    gap: 10,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
   },
   list: {
     flex: 1,
