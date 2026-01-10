@@ -1,0 +1,38 @@
+{
+  "name": "@ohah/redux-devtools-plugin",
+  "version": "0.1.0",
+  "description": "Redux DevTools plugin for Chrome Remote DevTools",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "import": "./dist/ui/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "build:lib": "BUILD_LIB=true tsc && vite build",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@redux-devtools/remote": "^0.9.5"
+  },
+  "devDependencies": {
+    "@redux-devtools/app": "^6.2.2",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.6.0",
+    "localforage": "^1.10.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-redux": "^9.2.0",
+    "redux": "^5.0.1",
+    "redux-persist": "^6.0.0",
+    "typescript": "^5.9.3",
+    "vite": "npm:rolldown-vite@7.3.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  }
+}
