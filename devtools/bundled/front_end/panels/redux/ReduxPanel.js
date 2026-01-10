@@ -4,51 +4,58 @@
 import * as UI from '../../ui/legacy/legacy.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as Root from '../../core/root/root.js';
-import { ReduxExtensionBridge } from './ReduxExtensionBridge.js';
+import { getReduxExtensionBridge, initializeReduxBridge } from './ReduxExtensionBridge.js';
 export class ReduxPanel extends UI.Panel.Panel {
     #iframe = null;
     #bridge;
-    #target = null;
     constructor() {
         super('redux');
         this.setHideOnDetach();
-        this.#bridge = new ReduxExtensionBridge();
+        // Initialize global bridge if not already / 전역 bridge 초기화 (아직 안 되었으면)
+        initializeReduxBridge();
+        // Use global singleton bridge / 전역 싱글톤 bridge 사용
+        this.#bridge = getReduxExtensionBridge();
         // Create iframe directly / iframe 직접 생성
         this.#iframe = document.createElement('iframe');
         this.#iframe.className = 'redux-devtools-iframe';
         this.#iframe.style.width = '100%';
         this.#iframe.style.height = '100%';
         this.#iframe.style.border = 'none';
-        // Build URL for devpanel.html / devpanel.html URL 구성
+        // Build URL for plugin HTML / 플러그인 HTML URL 구성
         // Use the same base URL as the current page / 현재 페이지와 동일한 base URL 사용
         const remoteBase = Root.Runtime.getRemoteBase();
         let reduxDevToolsPage;
         if (remoteBase) {
             // Use remote base if available / remote base가 있으면 사용
-            reduxDevToolsPage = `${remoteBase.base}panels/redux/extension/devpanel.html`;
+            reduxDevToolsPage = `${remoteBase.base}panels/plugins/redux-plugin/index.html`;
         }
         else {
             // Fallback to relative path / 상대 경로로 폴백
             const currentPath = window.location.pathname;
             const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-            reduxDevToolsPage = `${basePath}/panels/redux/extension/devpanel.html`;
+            reduxDevToolsPage = `${basePath}/panels/plugins/redux-plugin/index.html`;
         }
         this.#iframe.src = reduxDevToolsPage;
         this.#iframe.onload = () => {
             if (this.#iframe?.contentWindow) {
+                // Initialize iframe window - this will flush buffered messages / iframe window 초기화 - 버퍼된 메시지가 전송됨
                 this.#bridge.initialize(this.#iframe.contentWindow);
             }
         };
         this.contentElement.appendChild(this.#iframe);
-        // Setup CDP listener / CDP 리스너 설정
-        this.setupCDPListener();
     }
     wasShown() {
         super.wasShown();
-        this.setupCDPListener();
+        // When panel is shown, flush buffered messages again for new connections / 패널이 표시될 때 새 연결을 위해 버퍼된 메시지를 다시 플러싱
+        // This ensures history is sent when panel is reopened / 패널이 다시 열릴 때 히스토리가 전송되도록 보장
+        if (this.#iframe?.contentWindow) {
+            // Re-initialize to flush buffer / 버퍼를 플러싱하기 위해 재초기화
+            this.#bridge.initialize(this.#iframe.contentWindow);
+        }
         // When panel is shown, ensure START message is sent / 패널이 표시될 때 START 메시지가 전송되도록 보장
         // This handles the case where Extension didn't call connect / Extension이 connect를 호출하지 않은 경우 처리
-        if (this.#iframe?.contentWindow && this.#target) {
+        const target = SDK.TargetManager.TargetManager.instance().primaryPageTarget();
+        if (this.#iframe?.contentWindow && target) {
             setTimeout(() => {
                 this.#bridge.sendStartMessageToPageIfNeeded();
             }, 500);
@@ -56,33 +63,7 @@ export class ReduxPanel extends UI.Panel.Panel {
     }
     willHide() {
         super.willHide();
-        this.cleanupCDPListener();
-    }
-    setupCDPListener() {
-        const target = SDK.TargetManager.TargetManager.instance().primaryPageTarget();
-        if (!target) {
-            SDK.TargetManager.TargetManager.instance().addEventListener("AvailableTargetsChanged" /* SDK.TargetManager.Events.AVAILABLE_TARGETS_CHANGED */, () => {
-                const newTarget = SDK.TargetManager.TargetManager.instance().primaryPageTarget();
-                if (newTarget && !this.#target) {
-                    this.#target = newTarget;
-                    this.attachToTarget(newTarget);
-                }
-            }, this);
-            return;
-        }
-        this.#target = target;
-        this.attachToTarget(target);
-    }
-    attachToTarget(target) {
-        const router = target.router();
-        if (!router?.connection) {
-            return;
-        }
-        // Redux CDP 이벤트를 bridge로 전달 / Redux CDP 이벤트를 bridge로 전달
-        this.#bridge.attachToTarget(target, router.connection);
-    }
-    cleanupCDPListener() {
-        this.#bridge.cleanup();
+        // Don't cleanup - bridge is global and keeps listening / 정리하지 않음 - bridge는 전역이고 계속 리스닝
     }
 }
 //# sourceMappingURL=ReduxPanel.js.map

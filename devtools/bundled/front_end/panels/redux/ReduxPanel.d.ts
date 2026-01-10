@@ -4,7 +4,4 @@ export declare class ReduxPanel extends UI.Panel.Panel {
     constructor();
     wasShown(): void;
     willHide(): void;
-    private setupCDPListener;
-    private attachToTarget;
-    private cleanupCDPListener;
 }

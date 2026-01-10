@@ -3064,6 +3064,7 @@ export const knownContextValues = new Set([
     'redirect-source-request-url',
     'reduce',
     'reduced-contrast',
+    'redux-view',
     'references',
     'references.console-insights',
     'refresh',
