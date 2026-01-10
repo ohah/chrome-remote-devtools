@@ -1,21 +1,42 @@
 // Redux Todo Screen / Redux Todo 화면
-import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTodo, toggleTodo, deleteTodo } from '../../store/redux/slices/todoSlice';
 import type { RootState } from '../../store/redux/store';
 import type { Todo } from '../../store/redux/slices/todoSlice';
 
+// Random todo texts / 랜덤 Todo 텍스트
+const TODO_TEXTS = [
+  'Buy groceries',
+  'Finish project',
+  'Call mom',
+  'Exercise',
+  'Read a book',
+  'Write code',
+  'Learn React Native',
+  'Clean the house',
+  'Cook dinner',
+  'Walk the dog',
+  'Study TypeScript',
+  'Review PRs',
+  'Update documentation',
+  'Fix bugs',
+  'Plan vacation',
+];
+
+// Generate random todo / 랜덤 Todo 생성
+const generateRandomTodo = () => {
+  return TODO_TEXTS[Math.floor(Math.random() * TODO_TEXTS.length)];
+};
+
 export default function ReduxTodoScreen() {
   const todos = useSelector((state: RootState) => state.todo.todos);
   const dispatch = useDispatch();
-  const [text, setText] = useState('');
 
   const handleAddTodo = () => {
-    if (text.trim()) {
-      dispatch(addTodo(text));
-      setText('');
-    }
+    const text = generateRandomTodo();
+    dispatch(addTodo(text));
   };
 
   const renderTodo = ({ item }: { item: Todo }) => (
@@ -32,17 +53,9 @@ export default function ReduxTodoScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Redux Todo List</Text>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={text}
-          onChangeText={setText}
-          placeholder="Enter todo..."
-          onSubmitEditing={handleAddTodo}
-        />
+      <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.addButton} onPress={handleAddTodo}>
-          <Text style={styles.addButtonText}>Add</Text>
+          <Text style={styles.addButtonText}>Add Random Todo</Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -60,22 +73,8 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  buttonContainer: {
     marginBottom: 20,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    gap: 10,
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
   },
   list: {
     flex: 1,
