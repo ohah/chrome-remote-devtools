@@ -1,6 +1,6 @@
 // Redux store configuration / Redux store 설정
-// Note: Redux DevTools Extension is automatically injected via JSI before JS execution / 참고: Redux DevTools Extension은 JS 실행 전에 JSI를 통해 자동으로 주입됩니다
-import '@ohah/chrome-remote-devtools-react-native';
+// Using Chrome Remote DevTools middleware for reliable DevTools connection
+// 안정적인 DevTools 연결을 위해 Chrome Remote DevTools 미들웨어 사용
 import { configureStore } from '@reduxjs/toolkit';
 import counterReducer from './slices/counterSlice';
 import todoReducer from './slices/todoSlice';
@@ -12,7 +12,6 @@ export const store = configureStore({
     todo: todoReducer,
     cart: cartReducer,
   },
-  // Use extension directly if available, otherwise use true / extension이 있으면 직접 사용, 없으면 true
   devTools: true,
 });
 

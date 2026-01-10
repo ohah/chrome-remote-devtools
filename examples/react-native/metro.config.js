@@ -1,6 +1,9 @@
 const { getMetroConfig } = require('@craby/devkit');
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const path = require('path');
+const {
+  withChromeRemoteDevToolsRedux,
+} = require('@ohah/chrome-remote-devtools-react-native/metro');
 
 /**
  * Metro configuration
@@ -11,7 +14,8 @@ const path = require('path');
 const config = getMetroConfig(__dirname);
 
 // Merge with default config / 기본 config와 병합
-// Note: Redux DevTools Extension is now injected via JSI, so Metro polyfill is not needed / 참고: Redux DevTools Extension은 이제 JSI를 통해 주입되므로 Metro polyfill이 필요하지 않습니다
 const mergedConfig = mergeConfig(getDefaultConfig(__dirname), config);
 
-module.exports = mergedConfig;
+// Apply Chrome Remote DevTools Redux DevTools Extension polyfill / Chrome Remote DevTools Redux DevTools Extension polyfill 적용
+// This injects __REDUX_DEVTOOLS_EXTENSION__ before index.js runs / 이것은 index.js가 실행되기 전에 __REDUX_DEVTOOLS_EXTENSION__을 주입합니다
+module.exports = withChromeRemoteDevToolsRedux(mergedConfig);
