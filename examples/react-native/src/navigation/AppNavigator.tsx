@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import HomeScreen from '../screens/HomeScreen';
 import ReduxNavigator from './ReduxNavigator';
 import ZustandNavigator from './ZustandNavigator';
+import MMKVNavigator from './MMKVNavigator';
 
 const BottomTab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -41,6 +42,15 @@ function ZustandStack() {
   );
 }
 
+// MMKV Stack Navigator / MMKV 스택 네비게이터
+function MMKVStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="MMKVMain" component={MMKVNavigator} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+}
+
 export default function AppNavigator() {
   return (
     <BottomTab.Navigator
@@ -72,6 +82,14 @@ export default function AppNavigator() {
         options={{
           title: 'Zustand',
           tabBarIcon: ({ color, size = 24 }) => <Icon name="inventory" size={size} color={color} />,
+        }}
+      />
+      <BottomTab.Screen
+        name="MMKV"
+        component={MMKVStack}
+        options={{
+          title: 'MMKV',
+          tabBarIcon: ({ color, size = 24 }) => <Icon name="storage" size={size} color={color} />,
         }}
       />
     </BottomTab.Navigator>
