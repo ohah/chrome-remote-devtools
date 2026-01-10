@@ -161,7 +161,7 @@ bun run format:rust         # Format Rust code with rustfmt
 
 # Build
 bun run build               # Build all packages
-bun run build:redux-extension  # Build Redux DevTools Extension and copy to devtools-frontend
+bun run build:devtools      # Build Redux DevTools plugin and devtools-frontend
 ```
 
 ## Project Structure
@@ -205,33 +205,52 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Redux DevTools Integration
 
-Chrome Remote DevTools includes a Redux DevTools panel that provides the same UI as the official Chrome Extension. The Redux DevTools Extension is built from source and integrated into devtools-frontend using ExtensionView.
+Chrome Remote DevTools includes a Redux DevTools panel that provides the same UI as the official Chrome Extension. The panel uses `@redux-devtools/app` for the UI and communicates via CDP protocol.
 
-### Building Redux DevTools Extension
+### Building Redux DevTools
 
-To build and integrate the Redux DevTools Extension:
+To build the Redux DevTools plugin and devtools-frontend:
 
 ```bash
-bun run build:redux-extension
+bun run build:devtools
 ```
 
 This will:
 
-1. Build all Redux DevTools packages
-2. Build the Chrome Extension
-3. Copy the built files to `devtools/devtools-frontend/front_end/panels/redux/extension/`
+1. Build the `@ohah/redux-devtools-plugin` package
+2. Build devtools-frontend with the Redux panel
+3. Copy the built files to `devtools/bundled/`
 
 ### Redux Panel
 
-The Redux panel is available in the DevTools drawer view. It uses:
+The Redux panel is available in the DevTools panel view. It uses:
 
-- **ExtensionView**: Loads the Redux DevTools Extension HTML in an iframe
-- **ReduxExtensionBridge**: Simulates Chrome Extension APIs and converts CDP messages to Extension format
-- **CDP Events**: Listens for `Redux.init`, `Redux.actionDispatched`, and `Redux.error` events
+- **ReduxExtensionBridge**: Manages CDP message buffering and forwarding to the plugin iframe
+- **CDP Events**: Listens for `Redux.message` events (INIT, ACTION, STATE, etc.)
+- **@redux-devtools/app**: Provides the Redux DevTools UI
 
-### Usage
+### React Native Integration
 
-When a React Native app (or any app) uses Redux with the DevTools Extension polyfill, Redux actions and state changes are sent as CDP messages. The Redux panel automatically displays them using the same UI as the Chrome Extension.
+For React Native apps, use the middleware from `@ohah/chrome-remote-devtools-react-native`:
+
+```typescript
+// Redux middleware
+import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-react-native/redux';
+
+const store = createStore(
+  rootReducer,
+  applyMiddleware(createReduxDevToolsMiddleware({ name: 'MyApp' }))
+);
+
+// Zustand middleware
+import { chromeDevtools } from '@ohah/chrome-remote-devtools-react-native/zustand';
+
+const useStore = create(
+  chromeDevtools((set) => ({ ... }), { name: 'MyStore' })
+);
+```
+
+Redux actions and state changes are sent as CDP messages and displayed in the Redux panel.
 
 ## References
 
