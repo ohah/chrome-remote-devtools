@@ -4,6 +4,7 @@ import path from 'path';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import { readFileSync, existsSync, copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
 import tailwindcss from '@tailwindcss/vite';
+import { initializePluginScanner, createPluginServerMiddleware } from './src/utils/plugin-server';
 
 const host = process.env.TAURI_DEV_HOST;
 
