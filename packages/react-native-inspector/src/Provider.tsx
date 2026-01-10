@@ -6,6 +6,9 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 import { setServerInfo } from './server-info';
 import { connect } from './index';
 
+// Import polyfill to ensure it's installed / polyfill이 설치되도록 import
+import './redux-devtools-extension';
+
 /**
  * Chrome Remote DevTools Inspector Provider Props / Chrome Remote DevTools Inspector Provider Props
  */
@@ -35,57 +38,10 @@ export function ChromeRemoteDevToolsInspectorProvider({
 }: ChromeRemoteDevToolsInspectorProviderProps): React.JSX.Element {
   const initializedRef = useRef(false);
   const connectionRef = useRef<Promise<void> | null>(null);
-  const [jsiInjected, setJsiInjected] = useState<boolean | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
-
-  // Check JSI injection status / JSI 주입 상태 확인
-  useEffect(() => {
-    const checkJSIInjection = () => {
-      try {
-        const globalObj = typeof global !== 'undefined' ? global : typeof window !== 'undefined' ? window : {};
-
-        // Check if JSI injection flag exists / JSI 주입 플래그가 존재하는지 확인
-        const jsiInjectedFlag = (globalObj as any).__REDUX_DEVTOOLS_EXTENSION_JSI_INJECTED__;
-        const extension = (globalObj as any).__REDUX_DEVTOOLS_EXTENSION__;
-
-        if (jsiInjectedFlag === true) {
-          console.log('✅ [ChromeRemoteDevTools] JSI injection detected / JSI 주입이 감지됨');
-          console.log('   - __REDUX_DEVTOOLS_EXTENSION__ exists: Yes');
-          console.log('   - Type:', typeof extension);
-          console.log('   - Has connect:', typeof extension?.connect === 'function');
-          setJsiInjected(true);
-          return true;
-        } else if (extension) {
-          // Extension exists but JSI flag is not set (might be Metro polyfill) / Extension이 존재하지만 JSI 플래그가 설정되지 않음 (Metro polyfill일 수 있음)
-          console.warn('⚠️ [ChromeRemoteDevTools] __REDUX_DEVTOOLS_EXTENSION__ exists but JSI flag is not set / __REDUX_DEVTOOLS_EXTENSION__가 존재하지만 JSI 플래그가 설정되지 않음');
-          console.warn('   - This might be Metro polyfill, not JSI injection / 이것은 Metro polyfill일 수 있으며, JSI 주입이 아닙니다');
-          setJsiInjected(false);
-          return false;
-        } else {
-          console.error('❌ [ChromeRemoteDevTools] JSI injection not detected / JSI 주입이 감지되지 않음');
-          console.error('   - __REDUX_DEVTOOLS_EXTENSION__ does not exist / __REDUX_DEVTOOLS_EXTENSION__가 존재하지 않음');
-          setJsiInjected(false);
-          return false;
-        }
-      } catch (error) {
-        console.error('❌ [ChromeRemoteDevTools] Error checking JSI injection:', error);
-        setJsiInjected(false);
-        return false;
-      }
-    };
-
-    // Check immediately / 즉시 확인
-    checkJSIInjection();
-
-    // Also check after a short delay (in case JSI injection happens asynchronously) / 짧은 지연 후에도 확인 (JSI 주입이 비동기적으로 발생할 수 있음)
-    const timeoutId = setTimeout(() => {
-      checkJSIInjection();
-    }, 100);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, []);
+  const [jsiInjected] = useState<boolean>(true); // Extension is always available now / Extension이 이제 항상 사용 가능함
+  const [connectionStatus, setConnectionStatus] = useState<
+    'disconnected' | 'connecting' | 'connected'
+  >('disconnected');
 
   useEffect(() => {
     // Set server info / 서버 정보 설정
@@ -93,14 +49,11 @@ export function ChromeRemoteDevToolsInspectorProvider({
 
     // Only initialize once / 한 번만 초기화
     if (!initializedRef.current) {
-      console.log(
-        '[ChromeRemoteDevTools] Initializing Provider',
-        {
-          serverHost,
-          serverPort,
-          jsiInjected,
-        }
-      );
+      console.log('[ChromeRemoteDevTools] Initializing Provider', {
+        serverHost,
+        serverPort,
+        jsiInjected,
+      });
       initializedRef.current = true;
     } else {
       // Update server info if changed / 변경된 경우 서버 정보 업데이트
@@ -141,10 +94,18 @@ export function ChromeRemoteDevToolsInspectorProvider({
             <Text
               style={[
                 styles.statusValue,
-                jsiInjected === true ? styles.statusSuccess : jsiInjected === false ? styles.statusError : styles.statusPending,
+                jsiInjected === true
+                  ? styles.statusSuccess
+                  : jsiInjected === false
+                    ? styles.statusError
+                    : styles.statusPending,
               ]}
             >
-              {jsiInjected === true ? '✅ Success' : jsiInjected === false ? '❌ Failed' : '⏳ Checking...'}
+              {jsiInjected === true
+                ? '✅ Success'
+                : jsiInjected === false
+                  ? '❌ Failed'
+                  : '⏳ Checking...'}
             </Text>
           </View>
           <View style={styles.statusRow}>
@@ -152,15 +113,25 @@ export function ChromeRemoteDevToolsInspectorProvider({
             <Text
               style={[
                 styles.statusValue,
-                connectionStatus === 'connected' ? styles.statusSuccess : connectionStatus === 'connecting' ? styles.statusPending : styles.statusError,
+                connectionStatus === 'connected'
+                  ? styles.statusSuccess
+                  : connectionStatus === 'connecting'
+                    ? styles.statusPending
+                    : styles.statusError,
               ]}
             >
-              {connectionStatus === 'connected' ? '✅ Connected' : connectionStatus === 'connecting' ? '⏳ Connecting...' : '❌ Disconnected'}
+              {connectionStatus === 'connected'
+                ? '✅ Connected'
+                : connectionStatus === 'connecting'
+                  ? '⏳ Connecting...'
+                  : '❌ Disconnected'}
             </Text>
           </View>
           <View style={styles.statusRow}>
             <Text style={styles.statusLabel}>Server:</Text>
-            <Text style={styles.statusValue}>{serverHost}:{serverPort}</Text>
+            <Text style={styles.statusValue}>
+              {serverHost}:{serverPort}
+            </Text>
           </View>
         </View>
       )}
