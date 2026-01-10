@@ -15,6 +15,33 @@ import * as Root from "./../../core/root/root.js";
 
 // gen/front_end/panels/redux/ReduxExtensionBridge.js
 import * as SDK from "./../../core/sdk/sdk.js";
+var globalBridgeInstance = null;
+var bridgeInitialized = false;
+function getReduxExtensionBridge() {
+  if (!globalBridgeInstance) {
+    globalBridgeInstance = new ReduxExtensionBridge();
+  }
+  return globalBridgeInstance;
+}
+function initializeReduxBridge() {
+  if (bridgeInitialized) {
+    return;
+  }
+  bridgeInitialized = true;
+  const bridge = getReduxExtensionBridge();
+  const targetManager = SDK.TargetManager.TargetManager.instance();
+  const primaryTarget = targetManager.primaryPageTarget();
+  if (primaryTarget) {
+    bridge.attachToTargetIfNeeded(primaryTarget);
+  }
+  targetManager.addEventListener("AvailableTargetsChanged", () => {
+    const newTarget = targetManager.primaryPageTarget();
+    if (newTarget) {
+      bridge.attachToTargetIfNeeded(newTarget);
+    }
+  });
+  console.log("[ReduxExtensionBridge] Global bridge initialized, listening for targets");
+}
 var ReduxExtensionBridge = class {
   iframeWindow = null;
   target = null;
@@ -25,18 +52,42 @@ var ReduxExtensionBridge = class {
   // Track if connect was called / connect 호출 여부 추적
   startSent = false;
   // Track if START message was sent / START 메시지 전송 여부 추적
+  messageBuffer = [];
+  // Buffer for messages before panel is ready / 패널 준비 전 메시지 버퍼
+  panelReady = false;
+  // Track if panel (iframe) is ready / 패널(iframe) 준비 여부
   /**
    * Initialize bridge with iframe window / iframe window로 브릿지 초기화
    */
   initialize(iframeWindow) {
+    console.log("[ReduxExtensionBridge] Initializing bridge with iframe window");
     this.iframeWindow = iframeWindow;
     this.injectExtensionAPI();
+    this.panelReady = true;
+    console.log("[ReduxExtensionBridge] Panel marked as ready, flushing buffered messages");
+    this.flushMessageBuffer();
     setTimeout(() => {
       if (!this.connectCalled && this.target && !this.startSent) {
         console.log("[ReduxExtensionBridge] Extension did not call connect, sending START anyway");
         this.sendStartMessageToPage();
       }
     }, 2e3);
+  }
+  /**
+   * Flush buffered messages to extension / 버퍼된 메시지를 extension으로 전송
+   * Messages are sent but buffer is preserved for re-flush on new connections / 메시지는 전송되지만 버퍼는 새 연결 시 재플러싱을 위해 보존됨
+   */
+  flushMessageBuffer() {
+    if (!this.panelReady || !this.iframeWindow || !this.messagePort) {
+      console.log("[ReduxExtensionBridge] Cannot flush buffer - panelReady:", this.panelReady, "iframeWindow:", !!this.iframeWindow, "messagePort:", !!this.messagePort);
+      return;
+    }
+    console.log(`[ReduxExtensionBridge] Flushing ${this.messageBuffer.length} buffered messages`);
+    for (const message of this.messageBuffer) {
+      console.log("[ReduxExtensionBridge] Flushing message:", message);
+      this.sendToExtensionDirect(message);
+    }
+    console.log("[ReduxExtensionBridge] Buffer flush complete, buffer preserved with", this.messageBuffer.length, "messages");
   }
   /**
    * Inject chrome.runtime API into iframe / iframe에 chrome.runtime API 주입
@@ -165,18 +216,55 @@ var ReduxExtensionBridge = class {
   }
   /**
    * Send message to Redux DevTools Extension iframe / Redux DevTools Extension iframe으로 메시지 전송
+   * If panel is not ready, buffer the message / 패널이 준비되지 않았으면 메시지 버퍼링
    */
   sendToExtension(message) {
-    if (!this.iframeWindow || !this.messagePort) {
+    if (!this.panelReady || !this.iframeWindow || !this.messagePort) {
+      const messageType = message.name === "INIT_INSTANCE" ? "INIT_INSTANCE" : message.message.type;
+      console.log(`[ReduxExtensionBridge] Buffering message (panelReady: ${this.panelReady}):`, messageType);
+      this.messageBuffer.push(message);
       return;
     }
+    this.sendToExtensionDirect(message);
+  }
+  /**
+   * Send message directly to Redux DevTools Extension iframe / Redux DevTools Extension iframe으로 메시지 직접 전송
+   */
+  sendToExtensionDirect(message) {
+    if (!this.iframeWindow || !this.messagePort) {
+      console.warn("[ReduxExtensionBridge] Cannot send message - iframeWindow or messagePort not available");
+      return;
+    }
+    console.log("[ReduxExtensionBridge] Sending message to extension:", message);
     this.messagePort.postMessage(message);
     this.iframeWindow.postMessage(message, "*");
+    console.log("[ReduxExtensionBridge] Message sent via postMessage");
+  }
+  /**
+   * Attach to target if not already attached / 아직 연결되지 않았으면 타겟에 연결
+   * Used by global initializer / 전역 초기화에서 사용
+   */
+  attachToTargetIfNeeded(target) {
+    if (this.target === target) {
+      return;
+    }
+    const router = target.router();
+    if (!router?.connection) {
+      return;
+    }
+    console.log("[ReduxExtensionBridge] Attaching to target:", target.name());
+    this.attachToTarget(target, router.connection);
   }
   /**
    * Attach to target and listen for Redux CDP events / 타겟에 연결하고 Redux CDP 이벤트 리스닝
    */
   attachToTarget(target, connection) {
+    if (this.observer && this.target) {
+      const oldRouter = this.target.router();
+      if (oldRouter?.connection) {
+        oldRouter.connection.unobserve(this.observer);
+      }
+    }
     this.target = target;
     this.observer = {
       onEvent: (event) => {
@@ -190,23 +278,76 @@ var ReduxExtensionBridge = class {
       }
     };
     connection.observe(this.observer);
+    console.log("[ReduxExtensionBridge] Observer registered, requesting re-initialization from page");
+    this.requestReduxReInitialization();
+  }
+  /**
+   * Request Redux stores to re-initialize / Redux store들에게 재초기화 요청
+   * This sends a message to the page that triggers the app to send INIT messages again
+   * 페이지에 메시지를 보내서 앱이 다시 INIT 메시지를 보내도록 함
+   */
+  requestReduxReInitialization() {
+    if (!this.target) {
+      return;
+    }
+    this.target.runtimeAgent().invoke_evaluate({
+      expression: `
+        (function() {
+          // Trigger all connected Redux stores to re-send their state
+          // \uC5F0\uACB0\uB41C \uBAA8\uB4E0 Redux store\uB4E4\uC774 \uC0C1\uD0DC\uB97C \uB2E4\uC2DC \uBCF4\uB0B4\uB3C4\uB85D \uD2B8\uB9AC\uAC70
+          if (window.__REDUX_DEVTOOLS_EXTENSION__ && typeof window.__REDUX_DEVTOOLS_EXTENSION__.notifyExtensionReady === 'function') {
+            window.__REDUX_DEVTOOLS_EXTENSION__.notifyExtensionReady();
+            return 'notifyExtensionReady called';
+          } else if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+            // Fallback: trigger re-initialization by dispatching a synthetic message
+            // \uD3F4\uBC31: \uD569\uC131 \uBA54\uC2DC\uC9C0\uB97C \uB514\uC2A4\uD328\uCE58\uD558\uC5EC \uC7AC\uCD08\uAE30\uD654 \uD2B8\uB9AC\uAC70
+            return '__REDUX_DEVTOOLS_EXTENSION__ exists but no notifyExtensionReady';
+          }
+          return 'no __REDUX_DEVTOOLS_EXTENSION__';
+        })();
+      `,
+      returnByValue: true
+    }).then((response) => {
+      console.log("[ReduxExtensionBridge] Re-initialization request result:", response.result?.value);
+    }).catch((error) => {
+      console.warn("[ReduxExtensionBridge] Failed to request re-initialization:", error);
+    });
   }
   /**
    * Convert CDP message to Extension message format / CDP 메시지를 Extension 메시지 형식으로 변환
    * Matches Redux DevTools Extension message format exactly / Redux DevTools Extension 메시지 형식과 정확히 일치
+   *
+   * Extension expects:
+   * - {name: "INIT_INSTANCE", instanceId: number} for INIT_INSTANCE type
+   * - {name: "RELAY", message: {...}} for other message types
+   * Extension은 다음을 기대함:
+   * - {name: "INIT_INSTANCE", instanceId: number} (INIT_INSTANCE 타입의 경우)
+   * - {name: "RELAY", message: {...}} (다른 메시지 타입의 경우)
    */
   convertCDPToExtensionMessage(event) {
     const params = event.params;
-    const extensionMessage = {
-      type: params.type,
-      instanceId: params.instanceId,
-      source: params.source,
-      payload: params.payload,
-      action: params.action,
-      name: params.name,
-      maxAge: params.maxAge,
-      nextActionId: params.nextActionId
-    };
+    let extensionMessage;
+    if (params.type === "INIT_INSTANCE") {
+      extensionMessage = {
+        name: "INIT_INSTANCE",
+        instanceId: params.instanceId
+      };
+    } else {
+      extensionMessage = {
+        name: "RELAY",
+        message: {
+          type: params.type,
+          instanceId: params.instanceId,
+          source: params.source,
+          payload: params.payload,
+          action: params.action,
+          name: params.name,
+          maxAge: params.maxAge,
+          nextActionId: params.nextActionId,
+          timestamp: params.timestamp
+        }
+      };
+    }
     this.sendToExtension(extensionMessage);
   }
   /**
@@ -300,11 +441,11 @@ var ReduxExtensionBridge = class {
 var ReduxPanel = class extends UI.Panel.Panel {
   #iframe = null;
   #bridge;
-  #target = null;
   constructor() {
     super("redux");
     this.setHideOnDetach();
-    this.#bridge = new ReduxExtensionBridge();
+    initializeReduxBridge();
+    this.#bridge = getReduxExtensionBridge();
     this.#iframe = document.createElement("iframe");
     this.#iframe.className = "redux-devtools-iframe";
     this.#iframe.style.width = "100%";
@@ -313,11 +454,11 @@ var ReduxPanel = class extends UI.Panel.Panel {
     const remoteBase = Root.Runtime.getRemoteBase();
     let reduxDevToolsPage;
     if (remoteBase) {
-      reduxDevToolsPage = `${remoteBase.base}panels/redux/extension/devpanel.html`;
+      reduxDevToolsPage = `${remoteBase.base}panels/plugins/redux-plugin/index.html`;
     } else {
       const currentPath = window.location.pathname;
       const basePath = currentPath.substring(0, currentPath.lastIndexOf("/"));
-      reduxDevToolsPage = `${basePath}/panels/redux/extension/devpanel.html`;
+      reduxDevToolsPage = `${basePath}/panels/plugins/redux-plugin/index.html`;
     }
     this.#iframe.src = reduxDevToolsPage;
     this.#iframe.onload = () => {
@@ -326,12 +467,14 @@ var ReduxPanel = class extends UI.Panel.Panel {
       }
     };
     this.contentElement.appendChild(this.#iframe);
-    this.setupCDPListener();
   }
   wasShown() {
     super.wasShown();
-    this.setupCDPListener();
-    if (this.#iframe?.contentWindow && this.#target) {
+    if (this.#iframe?.contentWindow) {
+      this.#bridge.initialize(this.#iframe.contentWindow);
+    }
+    const target = SDK2.TargetManager.TargetManager.instance().primaryPageTarget();
+    if (this.#iframe?.contentWindow && target) {
       setTimeout(() => {
         this.#bridge.sendStartMessageToPageIfNeeded();
       }, 500);
@@ -339,32 +482,6 @@ var ReduxPanel = class extends UI.Panel.Panel {
   }
   willHide() {
     super.willHide();
-    this.cleanupCDPListener();
-  }
-  setupCDPListener() {
-    const target = SDK2.TargetManager.TargetManager.instance().primaryPageTarget();
-    if (!target) {
-      SDK2.TargetManager.TargetManager.instance().addEventListener("AvailableTargetsChanged", () => {
-        const newTarget = SDK2.TargetManager.TargetManager.instance().primaryPageTarget();
-        if (newTarget && !this.#target) {
-          this.#target = newTarget;
-          this.attachToTarget(newTarget);
-        }
-      }, this);
-      return;
-    }
-    this.#target = target;
-    this.attachToTarget(target);
-  }
-  attachToTarget(target) {
-    const router = target.router();
-    if (!router?.connection) {
-      return;
-    }
-    this.#bridge.attachToTarget(target, router.connection);
-  }
-  cleanupCDPListener() {
-    this.#bridge.cleanup();
   }
 };
 export {

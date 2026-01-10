@@ -2,6 +2,44 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as SDK from '../../core/sdk/sdk.js';
+// Global singleton instance / 전역 싱글톤 인스턴스
+let globalBridgeInstance = null;
+let bridgeInitialized = false;
+/**
+ * Get global ReduxExtensionBridge instance / 전역 ReduxExtensionBridge 인스턴스 가져오기
+ * Creates instance if not exists / 인스턴스가 없으면 생성
+ */
+export function getReduxExtensionBridge() {
+    if (!globalBridgeInstance) {
+        globalBridgeInstance = new ReduxExtensionBridge();
+    }
+    return globalBridgeInstance;
+}
+/**
+ * Initialize Redux bridge with TargetManager / TargetManager로 Redux bridge 초기화
+ * Should be called once when DevTools starts / DevTools 시작 시 한 번 호출해야 함
+ */
+export function initializeReduxBridge() {
+    if (bridgeInitialized) {
+        return;
+    }
+    bridgeInitialized = true;
+    const bridge = getReduxExtensionBridge();
+    const targetManager = SDK.TargetManager.TargetManager.instance();
+    // Try to attach to existing primary target / 기존 primary target에 연결 시도
+    const primaryTarget = targetManager.primaryPageTarget();
+    if (primaryTarget) {
+        bridge.attachToTargetIfNeeded(primaryTarget);
+    }
+    // Listen for new targets / 새 target 감지
+    targetManager.addEventListener("AvailableTargetsChanged" /* SDK.TargetManager.Events.AVAILABLE_TARGETS_CHANGED */, () => {
+        const newTarget = targetManager.primaryPageTarget();
+        if (newTarget) {
+            bridge.attachToTargetIfNeeded(newTarget);
+        }
+    });
+    console.log('[ReduxExtensionBridge] Global bridge initialized, listening for targets');
+}
 /**
  * Redux DevTools Extension과의 통신 브릿지 / Redux DevTools Extension과의 통신 브릿지
  * Extension의 chrome.runtime API를 시뮬레이션하고 CDP 메시지를 Extension 형식으로 변환 / Extension의 chrome.runtime API를 시뮬레이션하고 CDP 메시지를 Extension 형식으로 변환
@@ -14,12 +52,20 @@ export class ReduxExtensionBridge {
     messageListeners = [];
     connectCalled = false; // Track if connect was called / connect 호출 여부 추적
     startSent = false; // Track if START message was sent / START 메시지 전송 여부 추적
+    messageBuffer = []; // Buffer for messages before panel is ready / 패널 준비 전 메시지 버퍼
+    panelReady = false; // Track if panel (iframe) is ready / 패널(iframe) 준비 여부
     /**
      * Initialize bridge with iframe window / iframe window로 브릿지 초기화
      */
     initialize(iframeWindow) {
+        console.log('[ReduxExtensionBridge] Initializing bridge with iframe window');
         this.iframeWindow = iframeWindow;
         this.injectExtensionAPI();
+        // Mark panel as ready / 패널 준비 완료 표시
+        this.panelReady = true;
+        console.log('[ReduxExtensionBridge] Panel marked as ready, flushing buffered messages');
+        // Flush buffered messages to extension / 버퍼된 메시지를 extension으로 전송
+        this.flushMessageBuffer();
         // Wait for Extension to load and call chrome.runtime.connect / Extension이 로드되고 chrome.runtime.connect를 호출할 때까지 대기
         // If connect is not called within a reasonable time, send START anyway / 합리적인 시간 내에 connect가 호출되지 않으면 START를 보냄
         setTimeout(() => {
@@ -29,6 +75,23 @@ export class ReduxExtensionBridge {
                 this.sendStartMessageToPage();
             }
         }, 2000);
+    }
+    /**
+     * Flush buffered messages to extension / 버퍼된 메시지를 extension으로 전송
+     * Messages are sent but buffer is preserved for re-flush on new connections / 메시지는 전송되지만 버퍼는 새 연결 시 재플러싱을 위해 보존됨
+     */
+    flushMessageBuffer() {
+        if (!this.panelReady || !this.iframeWindow || !this.messagePort) {
+            console.log('[ReduxExtensionBridge] Cannot flush buffer - panelReady:', this.panelReady, 'iframeWindow:', !!this.iframeWindow, 'messagePort:', !!this.messagePort);
+            return;
+        }
+        console.log(`[ReduxExtensionBridge] Flushing ${this.messageBuffer.length} buffered messages`);
+        // Send all messages but keep buffer intact for re-flush on new connections / 모든 메시지를 전송하지만 새 연결 시 재플러싱을 위해 버퍼는 유지
+        for (const message of this.messageBuffer) {
+            console.log('[ReduxExtensionBridge] Flushing message:', message);
+            this.sendToExtensionDirect(message);
+        }
+        console.log('[ReduxExtensionBridge] Buffer flush complete, buffer preserved with', this.messageBuffer.length, 'messages');
     }
     /**
      * Inject chrome.runtime API into iframe / iframe에 chrome.runtime API 주입
@@ -175,20 +238,60 @@ export class ReduxExtensionBridge {
     }
     /**
      * Send message to Redux DevTools Extension iframe / Redux DevTools Extension iframe으로 메시지 전송
+     * If panel is not ready, buffer the message / 패널이 준비되지 않았으면 메시지 버퍼링
      */
     sendToExtension(message) {
-        if (!this.iframeWindow || !this.messagePort) {
+        // If panel is not ready, buffer the message / 패널이 준비되지 않았으면 메시지 버퍼링
+        if (!this.panelReady || !this.iframeWindow || !this.messagePort) {
+            const messageType = message.name === 'INIT_INSTANCE' ? 'INIT_INSTANCE' : message.message.type;
+            console.log(`[ReduxExtensionBridge] Buffering message (panelReady: ${this.panelReady}):`, messageType);
+            this.messageBuffer.push(message);
             return;
         }
+        this.sendToExtensionDirect(message);
+    }
+    /**
+     * Send message directly to Redux DevTools Extension iframe / Redux DevTools Extension iframe으로 메시지 직접 전송
+     */
+    sendToExtensionDirect(message) {
+        if (!this.iframeWindow || !this.messagePort) {
+            console.warn('[ReduxExtensionBridge] Cannot send message - iframeWindow or messagePort not available');
+            return;
+        }
+        console.log('[ReduxExtensionBridge] Sending message to extension:', message);
         // MessagePort로 메시지 전송 / MessagePort로 메시지 전송
         this.messagePort.postMessage(message);
         // 또는 postMessage로 직접 전송 / 또는 postMessage로 직접 전송
         this.iframeWindow.postMessage(message, '*');
+        console.log('[ReduxExtensionBridge] Message sent via postMessage');
+    }
+    /**
+     * Attach to target if not already attached / 아직 연결되지 않았으면 타겟에 연결
+     * Used by global initializer / 전역 초기화에서 사용
+     */
+    attachToTargetIfNeeded(target) {
+        // Skip if already attached to this target / 이미 이 타겟에 연결되어 있으면 건너뜀
+        if (this.target === target) {
+            return;
+        }
+        const router = target.router();
+        if (!router?.connection) {
+            return;
+        }
+        console.log('[ReduxExtensionBridge] Attaching to target:', target.name());
+        this.attachToTarget(target, router.connection);
     }
     /**
      * Attach to target and listen for Redux CDP events / 타겟에 연결하고 Redux CDP 이벤트 리스닝
      */
     attachToTarget(target, connection) {
+        // Cleanup previous observer if exists / 이전 observer가 있으면 정리
+        if (this.observer && this.target) {
+            const oldRouter = this.target.router();
+            if (oldRouter?.connection) {
+                oldRouter.connection.unobserve(this.observer);
+            }
+        }
         this.target = target;
         this.observer = {
             onEvent: (event) => {
@@ -203,25 +306,87 @@ export class ReduxExtensionBridge {
             },
         };
         connection.observe(this.observer);
+        // After observer is registered, request re-send of cached stores from server
+        // 서버에서 캐시된 store를 다시 보내달라고 요청
+        // We do this by sending START message to the page, which will trigger the app to send INIT again
+        // 페이지에 START 메시지를 보내서 앱이 다시 INIT을 보내도록 함
+        console.log('[ReduxExtensionBridge] Observer registered, requesting re-initialization from page');
+        this.requestReduxReInitialization();
+    }
+    /**
+     * Request Redux stores to re-initialize / Redux store들에게 재초기화 요청
+     * This sends a message to the page that triggers the app to send INIT messages again
+     * 페이지에 메시지를 보내서 앱이 다시 INIT 메시지를 보내도록 함
+     */
+    requestReduxReInitialization() {
+        if (!this.target) {
+            return;
+        }
+        // Send a special message to trigger re-initialization
+        // __REDUX_DEVTOOLS_EXTENSION__의 send 메서드를 호출하여 현재 상태를 다시 보내도록 함
+        this.target.runtimeAgent().invoke_evaluate({
+            expression: `
+        (function() {
+          // Trigger all connected Redux stores to re-send their state
+          // 연결된 모든 Redux store들이 상태를 다시 보내도록 트리거
+          if (window.__REDUX_DEVTOOLS_EXTENSION__ && typeof window.__REDUX_DEVTOOLS_EXTENSION__.notifyExtensionReady === 'function') {
+            window.__REDUX_DEVTOOLS_EXTENSION__.notifyExtensionReady();
+            return 'notifyExtensionReady called';
+          } else if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+            // Fallback: trigger re-initialization by dispatching a synthetic message
+            // 폴백: 합성 메시지를 디스패치하여 재초기화 트리거
+            return '__REDUX_DEVTOOLS_EXTENSION__ exists but no notifyExtensionReady';
+          }
+          return 'no __REDUX_DEVTOOLS_EXTENSION__';
+        })();
+      `,
+            returnByValue: true,
+        }).then((response) => {
+            console.log('[ReduxExtensionBridge] Re-initialization request result:', response.result?.value);
+        }).catch((error) => {
+            console.warn('[ReduxExtensionBridge] Failed to request re-initialization:', error);
+        });
     }
     /**
      * Convert CDP message to Extension message format / CDP 메시지를 Extension 메시지 형식으로 변환
      * Matches Redux DevTools Extension message format exactly / Redux DevTools Extension 메시지 형식과 정확히 일치
+     *
+     * Extension expects:
+     * - {name: "INIT_INSTANCE", instanceId: number} for INIT_INSTANCE type
+     * - {name: "RELAY", message: {...}} for other message types
+     * Extension은 다음을 기대함:
+     * - {name: "INIT_INSTANCE", instanceId: number} (INIT_INSTANCE 타입의 경우)
+     * - {name: "RELAY", message: {...}} (다른 메시지 타입의 경우)
      */
     convertCDPToExtensionMessage(event) {
         const params = event.params;
         // Redux.message 이벤트는 params에 직접 메시지 정보가 있음 / Redux.message event has message info directly in params
         // Redux DevTools Extension이 기대하는 메시지 형식으로 변환 / Redux DevTools Extension이 기대하는 메시지 형식으로 변환
-        const extensionMessage = {
-            type: params.type,
-            instanceId: params.instanceId,
-            source: params.source,
-            payload: params.payload,
-            action: params.action,
-            name: params.name,
-            maxAge: params.maxAge,
-            nextActionId: params.nextActionId,
-        };
+        let extensionMessage;
+        if (params.type === 'INIT_INSTANCE') {
+            // INIT_INSTANCE는 특별한 형식 / INIT_INSTANCE has special format
+            extensionMessage = {
+                name: 'INIT_INSTANCE',
+                instanceId: params.instanceId,
+            };
+        }
+        else {
+            // 다른 메시지는 RELAY 형식으로 래핑 / Other messages are wrapped in RELAY format
+            extensionMessage = {
+                name: 'RELAY',
+                message: {
+                    type: params.type,
+                    instanceId: params.instanceId,
+                    source: params.source,
+                    payload: params.payload,
+                    action: params.action,
+                    name: params.name,
+                    maxAge: params.maxAge,
+                    nextActionId: params.nextActionId,
+                    timestamp: params.timestamp,
+                },
+            };
+        }
         // Send to extension via MessagePort (simulating chrome.runtime.Port) / MessagePort를 통해 extension으로 전송 (chrome.runtime.Port 시뮬레이션)
         // Redux DevTools Extension expects messages via chrome.runtime.Port.postMessage / Redux DevTools Extension은 chrome.runtime.Port.postMessage를 통해 메시지를 기대함
         this.sendToExtension(extensionMessage);
