@@ -10,11 +10,17 @@
 package com.ohah.chromeremotedevtools
 
 import android.util.Log
+import okhttp3.Dns
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import java.net.Inet4Address
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
+import javax.net.SocketFactory
 import java.util.concurrent.TimeUnit
 
 /**
@@ -29,6 +35,7 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
 ) {
   private var webSocket: WebSocket? = null
   private var isConnected: Boolean = false
+
   private val client = OkHttpClient.Builder()
     .connectTimeout(10, TimeUnit.SECONDS)
     .readTimeout(10, TimeUnit.SECONDS)
