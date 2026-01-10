@@ -15,9 +15,6 @@
     "build:lib": "BUILD_LIB=true tsc && vite build",
     "dev": "vite"
   },
-  "dependencies": {
-    "@redux-devtools/remote": "^0.9.5"
-  },
   "devDependencies": {
     "@redux-devtools/app": "^6.2.2",
     "@types/react": "^19.2.7",

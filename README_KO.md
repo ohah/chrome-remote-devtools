@@ -147,7 +147,7 @@ bun run format:rust         # rustfmt로 Rust 코드 포맷팅
 
 # 빌드
 bun run build               # 전체 패키지 빌드
-bun run build:redux-extension  # Redux DevTools Extension 빌드 및 devtools-frontend로 복사
+bun run build:devtools      # Redux DevTools 플러그인 및 devtools-frontend 빌드
 ```
 
 ## 프로젝트 구조
@@ -191,33 +191,52 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.
 
 ## Redux DevTools 통합
 
-Chrome Remote DevTools는 공식 Chrome Extension과 동일한 UI를 제공하는 Redux DevTools 패널을 포함합니다. Redux DevTools Extension은 소스에서 빌드되어 ExtensionView를 통해 devtools-frontend에 통합됩니다.
+Chrome Remote DevTools는 공식 Chrome Extension과 동일한 UI를 제공하는 Redux DevTools 패널을 포함합니다. 패널은 `@redux-devtools/app`을 UI로 사용하고 CDP 프로토콜을 통해 통신합니다.
 
-### Redux DevTools Extension 빌드
+### Redux DevTools 빌드
 
-Redux DevTools Extension을 빌드하고 통합하려면:
+Redux DevTools 플러그인과 devtools-frontend를 빌드하려면:
 
 ```bash
-bun run build:redux-extension
+bun run build:devtools
 ```
 
 이 명령은 다음을 수행합니다:
 
-1. 모든 Redux DevTools 패키지 빌드
-2. Chrome Extension 빌드
-3. 빌드된 파일을 `devtools/devtools-frontend/front_end/panels/redux/extension/`로 복사
+1. `@ohah/redux-devtools-plugin` 패키지 빌드
+2. Redux 패널이 포함된 devtools-frontend 빌드
+3. 빌드된 파일을 `devtools/bundled/`로 복사
 
 ### Redux 패널
 
-Redux 패널은 DevTools drawer view에서 사용할 수 있습니다. 다음을 사용합니다:
+Redux 패널은 DevTools panel view에서 사용할 수 있습니다. 다음을 사용합니다:
 
-- **ExtensionView**: iframe에서 Redux DevTools Extension HTML 로드
-- **ReduxExtensionBridge**: Chrome Extension API를 시뮬레이션하고 CDP 메시지를 Extension 형식으로 변환
-- **CDP 이벤트**: `Redux.init`, `Redux.actionDispatched`, `Redux.error` 이벤트 리스닝
+- **ReduxExtensionBridge**: CDP 메시지 버퍼링 및 플러그인 iframe으로 전달 관리
+- **CDP 이벤트**: `Redux.message` 이벤트 리스닝 (INIT, ACTION, STATE 등)
+- **@redux-devtools/app**: Redux DevTools UI 제공
 
-### 사용 방법
+### React Native 통합
 
-React Native 앱(또는 다른 앱)이 DevTools Extension polyfill과 함께 Redux를 사용하면, Redux 액션과 상태 변경이 CDP 메시지로 전송됩니다. Redux 패널은 Chrome Extension과 동일한 UI를 사용하여 자동으로 표시합니다.
+React Native 앱에서는 `@ohah/chrome-remote-devtools-react-native`의 미들웨어를 사용합니다:
+
+```typescript
+// Redux 미들웨어
+import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-react-native/redux';
+
+const store = createStore(
+  rootReducer,
+  applyMiddleware(createReduxDevToolsMiddleware({ name: 'MyApp' }))
+);
+
+// Zustand 미들웨어
+import { chromeDevtools } from '@ohah/chrome-remote-devtools-react-native/zustand';
+
+const useStore = create(
+  chromeDevtools((set) => ({ ... }), { name: 'MyStore' })
+);
+```
+
+Redux 액션과 상태 변경은 CDP 메시지로 전송되어 Redux 패널에 표시됩니다.
 
 ## 참조 프로젝트
 

@@ -208,7 +208,6 @@ export default defineConfig(() => {
           'react-redux',
           'redux',
           'redux-persist',
-          '@redux-devtools/remote',
           '@redux-devtools/app',
           'localforage',
         ],
