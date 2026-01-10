@@ -2,6 +2,20 @@ import { WebSocket } from 'ws';
 import { log, logError } from '../socket-server';
 
 /**
+ * Redux store instance information / Redux store 인스턴스 정보
+ */
+export interface ReduxStoreInstance {
+  /** Instance ID / 인스턴스 ID */
+  instanceId: number;
+  /** Store name / Store 이름 */
+  name: string;
+  /** Current state (JSON string) / 현재 상태 (JSON 문자열) */
+  payload: string;
+  /** Timestamp / 타임스탬프 */
+  timestamp: number;
+}
+
+/**
  * React Native Inspector connection information / React Native Inspector 연결 정보
  */
 export interface ReactNativeInspectorConnection {
@@ -17,6 +31,8 @@ export interface ReactNativeInspectorConnection {
   deviceId?: string;
   /** Associated client ID (if connected to a client) / 연결된 클라이언트 ID (클라이언트에 연결된 경우) */
   clientId?: string;
+  /** Redux store instances / Redux store 인스턴스 */
+  reduxStores?: Map<number, ReduxStoreInstance>;
 }
 
 /**
@@ -118,5 +134,68 @@ export class ReactNativeInspectorConnectionManager {
       connection.clientId = undefined;
       log('rn-inspector', inspectorId, 'disassociated from client');
     }
+  }
+
+  /**
+   * Store Redux store instance information / Redux store 인스턴스 정보 저장
+   * Called when INIT message is received from React Native app / React Native 앱에서 INIT 메시지를 받으면 호출됨
+   * @param inspectorId - Inspector connection ID / Inspector 연결 ID
+   * @param storeInfo - Store information / Store 정보
+   */
+  storeReduxInstance(inspectorId: string, storeInfo: ReduxStoreInstance): void {
+    const connection = this.connections.get(inspectorId);
+    if (!connection) {
+      return;
+    }
+
+    if (!connection.reduxStores) {
+      connection.reduxStores = new Map();
+    }
+
+    connection.reduxStores.set(storeInfo.instanceId, storeInfo);
+    log(
+      'rn-inspector',
+      inspectorId,
+      `stored Redux instance ${storeInfo.instanceId} (${storeInfo.name})`
+    );
+  }
+
+  /**
+   * Update Redux store state / Redux store 상태 업데이트
+   * Called when ACTION message is received / ACTION 메시지를 받으면 호출됨
+   * @param inspectorId - Inspector connection ID / Inspector 연결 ID
+   * @param instanceId - Redux instance ID / Redux 인스턴스 ID
+   * @param payload - New state (JSON string) / 새 상태 (JSON 문자열)
+   * @param timestamp - Timestamp / 타임스탬프
+   */
+  updateReduxState(
+    inspectorId: string,
+    instanceId: number,
+    payload: string,
+    timestamp: number
+  ): void {
+    const connection = this.connections.get(inspectorId);
+    if (!connection || !connection.reduxStores) {
+      return;
+    }
+
+    const store = connection.reduxStores.get(instanceId);
+    if (store) {
+      store.payload = payload;
+      store.timestamp = timestamp;
+    }
+  }
+
+  /**
+   * Get all Redux store instances for a connection / 연결의 모든 Redux store 인스턴스 가져오기
+   * @param inspectorId - Inspector connection ID / Inspector 연결 ID
+   * @returns Array of Redux store instances / Redux store 인스턴스 배열
+   */
+  getReduxStores(inspectorId: string): ReduxStoreInstance[] {
+    const connection = this.connections.get(inspectorId);
+    if (!connection || !connection.reduxStores) {
+      return [];
+    }
+    return Array.from(connection.reduxStores.values());
   }
 }
