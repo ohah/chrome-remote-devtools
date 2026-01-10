@@ -2,7 +2,7 @@
 // Scans packages directory for plugins and collects metadata / packages 디렉토리에서 플러그인을 스캔하고 메타데이터 수집
 
 import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
-import { join, resolve } from 'path';
+import { join } from 'path';
 
 /**
  * Plugin metadata / 플러그인 메타데이터
@@ -79,7 +79,6 @@ export function scanPlugins(packagesDir: string): PluginMetadata[] {
         }
 
         // Read plugin config if exists / 플러그인 설정 파일이 있으면 읽기
-        let panelConfig: PluginMetadata['panel'] | undefined;
         const pluginConfigPath = join(pluginDir, 'plugin.config.ts');
         if (existsSync(pluginConfigPath)) {
           // For now, we'll read from package.json exports / 일단 package.json exports에서 읽기
