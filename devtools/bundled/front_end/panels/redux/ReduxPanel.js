@@ -38,8 +38,13 @@ export class ReduxPanel extends UI.Panel.Panel {
         this.#iframe.src = reduxDevToolsPage;
         this.#iframe.onload = () => {
             if (this.#iframe?.contentWindow) {
-                // Initialize iframe window - this will flush buffered messages / iframe window 초기화 - 버퍼된 메시지가 전송됨
-                this.#bridge.initialize(this.#iframe.contentWindow);
+                // Wait a bit for iframe content to fully load / iframe 콘텐츠가 완전히 로드될 때까지 약간 대기
+                setTimeout(() => {
+                    if (this.#iframe?.contentWindow) {
+                        // Initialize iframe window - this will flush buffered messages / iframe window 초기화 - 버퍼된 메시지가 전송됨
+                        this.#bridge.initialize(this.#iframe.contentWindow);
+                    }
+                }, 100);
             }
         };
         this.contentElement.appendChild(this.#iframe);

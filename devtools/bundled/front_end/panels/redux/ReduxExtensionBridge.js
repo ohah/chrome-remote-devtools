@@ -2,35 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as SDK from '../../core/sdk/sdk.js';
-// Global singleton instance / 전역 싱글톤 인스턴스
-let globalBridgeInstance = null;
-let bridgeInitialized = false;
 /**
  * Get global ReduxExtensionBridge instance / 전역 ReduxExtensionBridge 인스턴스 가져오기
  * Creates instance if not exists / 인스턴스가 없으면 생성
+ * Uses window object to ensure true singleton across all module scopes / 모든 모듈 스코프에서 진정한 싱글톤을 보장하기 위해 window 객체 사용
  */
 export function getReduxExtensionBridge() {
-    if (!globalBridgeInstance) {
-        globalBridgeInstance = new ReduxExtensionBridge();
+    const win = window;
+    if (!win.__DEVTOOLS_REDUX_BRIDGE__) {
+        win.__DEVTOOLS_REDUX_BRIDGE__ = new ReduxExtensionBridge();
     }
-    return globalBridgeInstance;
+    return win.__DEVTOOLS_REDUX_BRIDGE__;
 }
 /**
  * Initialize Redux bridge with TargetManager / TargetManager로 Redux bridge 초기화
  * Should be called once when DevTools starts / DevTools 시작 시 한 번 호출해야 함
+ * Uses window object to ensure initialization happens only once across all module scopes
+ * 모든 모듈 스코프에서 초기화가 한 번만 발생하도록 window 객체 사용
  */
 export function initializeReduxBridge() {
-    if (bridgeInitialized) {
-        return;
-    }
-    bridgeInitialized = true;
+    const win = window;
     const bridge = getReduxExtensionBridge();
     const targetManager = SDK.TargetManager.TargetManager.instance();
-    // Try to attach to existing primary target / 기존 primary target에 연결 시도
+    // Always try to attach to existing primary target / 항상 기존 primary target에 연결 시도
+    // This is needed because target may not be available when first initialized / 첫 초기화 시 target이 없을 수 있으므로 필요
     const primaryTarget = targetManager.primaryPageTarget();
     if (primaryTarget) {
         bridge.attachToTargetIfNeeded(primaryTarget);
     }
+    // Only register event listener once / 이벤트 리스너는 한 번만 등록
+    if (win.__DEVTOOLS_REDUX_BRIDGE_INITIALIZED__) {
+        return;
+    }
+    win.__DEVTOOLS_REDUX_BRIDGE_INITIALIZED__ = true;
     // Listen for new targets / 새 target 감지
     targetManager.addEventListener("AvailableTargetsChanged" /* SDK.TargetManager.Events.AVAILABLE_TARGETS_CHANGED */, () => {
         const newTarget = targetManager.primaryPageTarget();
@@ -60,21 +64,42 @@ export class ReduxExtensionBridge {
     initialize(iframeWindow) {
         console.log('[ReduxExtensionBridge] Initializing bridge with iframe window');
         this.iframeWindow = iframeWindow;
+        // Inject extension API first to set up messagePort / messagePort 설정을 위해 먼저 extension API 주입
         this.injectExtensionAPI();
-        // Mark panel as ready / 패널 준비 완료 표시
-        this.panelReady = true;
-        console.log('[ReduxExtensionBridge] Panel marked as ready, flushing buffered messages');
-        // Flush buffered messages to extension / 버퍼된 메시지를 extension으로 전송
-        this.flushMessageBuffer();
-        // Wait for Extension to load and call chrome.runtime.connect / Extension이 로드되고 chrome.runtime.connect를 호출할 때까지 대기
-        // If connect is not called within a reasonable time, send START anyway / 합리적인 시간 내에 connect가 호출되지 않으면 START를 보냄
+        // Wait a bit to ensure messagePort is ready / messagePort가 준비될 때까지 약간 대기
+        // Then mark panel as ready and flush / 그 다음 패널을 준비 완료로 표시하고 플러시
         setTimeout(() => {
-            if (!this.connectCalled && this.target && !this.startSent) {
-                // Extension didn't call connect, send START anyway / Extension이 connect를 호출하지 않았으므로 START를 보냄
-                console.log('[ReduxExtensionBridge] Extension did not call connect, sending START anyway');
-                this.sendStartMessageToPage();
+            if (this.messagePort) {
+                // Mark panel as ready / 패널 준비 완료 표시
+                this.panelReady = true;
+                console.log('[ReduxExtensionBridge] Panel marked as ready, flushing buffered messages');
+                // Flush buffered messages to extension / 버퍼된 메시지를 extension으로 전송
+                this.flushMessageBuffer();
+                // Wait for Extension to load and call chrome.runtime.connect / Extension이 로드되고 chrome.runtime.connect를 호출할 때까지 대기
+                // If connect is not called within a reasonable time, send START anyway / 합리적인 시간 내에 connect가 호출되지 않으면 START를 보냄
+                setTimeout(() => {
+                    if (!this.connectCalled && this.target && !this.startSent) {
+                        // Extension didn't call connect, send START anyway / Extension이 connect를 호출하지 않았으므로 START를 보냄
+                        console.log('[ReduxExtensionBridge] Extension did not call connect, sending START anyway');
+                        this.sendStartMessageToPage();
+                    }
+                }, 2000);
             }
-        }, 2000);
+            else {
+                console.warn('[ReduxExtensionBridge] messagePort not ready after injection, retrying...');
+                // Retry after a bit more time / 조금 더 기다린 후 재시도
+                setTimeout(() => {
+                    if (this.messagePort) {
+                        this.panelReady = true;
+                        console.log('[ReduxExtensionBridge] Panel marked as ready (retry), flushing buffered messages');
+                        this.flushMessageBuffer();
+                    }
+                    else {
+                        console.error('[ReduxExtensionBridge] messagePort still not ready after retry');
+                    }
+                }, 500);
+            }
+        }, 100);
     }
     /**
      * Flush buffered messages to extension / 버퍼된 메시지를 extension으로 전송
@@ -206,6 +231,7 @@ export class ReduxExtensionBridge {
     /**
      * Send message to page via Runtime.evaluate / Runtime.evaluate를 통해 페이지로 메시지 전송
      * This simulates the original Redux DevTools Extension message passing / 이것은 원래 Redux DevTools Extension 메시지 전달을 시뮬레이션
+     * Supports both web (window) and React Native (global) environments / 웹(window)과 React Native(global) 환경 모두 지원
      */
     sendMessageToPage(message) {
         if (!this.target) {
@@ -215,23 +241,33 @@ export class ReduxExtensionBridge {
         const messageStr = JSON.stringify(message);
         // Send message to page via postMessage simulation / postMessage 시뮬레이션을 통해 페이지로 메시지 전송
         // The page's subscribe listener will receive this / 페이지의 subscribe 리스너가 이를 받음
+        // Support both window (web) and global (React Native) / window(웹)과 global(React Native) 모두 지원
         this.target.runtimeAgent().invoke_evaluate({
             expression: `
         (function() {
-          if (window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION_LISTENERS__) {
+          // Try window first (web), then global (React Native) / 먼저 window(웹) 시도, 그 다음 global(React Native)
+          const globalObj = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {};
+          const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+          const listeners = globalObj.__REDUX_DEVTOOLS_EXTENSION_LISTENERS__;
+
+          if (extension && listeners) {
             const message = ${messageStr};
             // Trigger message listeners / 메시지 리스너 트리거
-            window.__REDUX_DEVTOOLS_EXTENSION_LISTENERS__.forEach(listener => {
+            listeners.forEach(listener => {
               try {
                 listener(message);
               } catch (e) {
                 console.warn('[ReduxDevTools] Error in message listener:', e);
               }
             });
+            return 'message sent';
           }
+          return 'no extension or listeners';
         })();
       `,
-            returnByValue: false,
+            returnByValue: true,
+        }).then(response => {
+            console.log('[ReduxExtensionBridge] Message sent result:', response.result?.value);
         }).catch((error) => {
             console.warn('[ReduxExtensionBridge] Failed to send message to page:', error);
         });
@@ -317,6 +353,7 @@ export class ReduxExtensionBridge {
      * Request Redux stores to re-initialize / Redux store들에게 재초기화 요청
      * This sends a message to the page that triggers the app to send INIT messages again
      * 페이지에 메시지를 보내서 앱이 다시 INIT 메시지를 보내도록 함
+     * Supports both web (window) and React Native (global) environments / 웹(window)과 React Native(global) 환경 모두 지원
      */
     requestReduxReInitialization() {
         if (!this.target) {
@@ -324,15 +361,20 @@ export class ReduxExtensionBridge {
         }
         // Send a special message to trigger re-initialization
         // __REDUX_DEVTOOLS_EXTENSION__의 send 메서드를 호출하여 현재 상태를 다시 보내도록 함
+        // Support both window (web) and global (React Native) / window(웹)과 global(React Native) 모두 지원
         this.target.runtimeAgent().invoke_evaluate({
             expression: `
         (function() {
+          // Try window first (web), then global (React Native) / 먼저 window(웹) 시도, 그 다음 global(React Native)
+          const globalObj = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {};
+          const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+
           // Trigger all connected Redux stores to re-send their state
           // 연결된 모든 Redux store들이 상태를 다시 보내도록 트리거
-          if (window.__REDUX_DEVTOOLS_EXTENSION__ && typeof window.__REDUX_DEVTOOLS_EXTENSION__.notifyExtensionReady === 'function') {
-            window.__REDUX_DEVTOOLS_EXTENSION__.notifyExtensionReady();
+          if (extension && typeof extension.notifyExtensionReady === 'function') {
+            extension.notifyExtensionReady();
             return 'notifyExtensionReady called';
-          } else if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+          } else if (extension) {
             // Fallback: trigger re-initialization by dispatching a synthetic message
             // 폴백: 합성 메시지를 디스패치하여 재초기화 트리거
             return '__REDUX_DEVTOOLS_EXTENSION__ exists but no notifyExtensionReady';
@@ -341,7 +383,7 @@ export class ReduxExtensionBridge {
         })();
       `,
             returnByValue: true,
-        }).then((response) => {
+        }).then(response => {
             console.log('[ReduxExtensionBridge] Re-initialization request result:', response.result?.value);
         }).catch((error) => {
             console.warn('[ReduxExtensionBridge] Failed to request re-initialization:', error);
