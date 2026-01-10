@@ -69,7 +69,7 @@ function sendCDPMessage(message: { method: string; params: unknown }): void {
     isConnected,
     hasCDPSender: !!cdpMessageSender,
     hasServerInfo: !!serverInfo,
-    serverInfo: serverInfo ? { host: serverInfo.serverHost, port: serverInfo.serverPort } : null,
+    serverInfo: serverInfo ? { host: serverInfo.host, port: serverInfo.port } : null,
     pendingMessagesCount: pendingMessages.length,
   });
 
@@ -86,11 +86,11 @@ function sendCDPMessage(message: { method: string; params: unknown }): void {
       '[ZustandMiddleware] 📤 Sending message:',
       messageType,
       'to',
-      serverInfo.serverHost,
+      serverInfo.host,
       ':',
-      serverInfo.serverPort
+      serverInfo.port
     );
-    cdpMessageSender(serverInfo.serverHost, serverInfo.serverPort, JSON.stringify(message));
+    cdpMessageSender(serverInfo.host, serverInfo.port, JSON.stringify(message));
     console.log('[ZustandMiddleware] ✅ Message sent successfully:', messageType);
   } catch (e) {
     console.error('[ZustandMiddleware] ❌ Error sending message:', messageType, e);
@@ -109,7 +109,7 @@ function flushPendingMessages(): void {
     isConnected,
     hasCDPSender: !!cdpMessageSender,
     hasServerInfo: !!serverInfo,
-    serverInfo: serverInfo ? { host: serverInfo.serverHost, port: serverInfo.serverPort } : null,
+    serverInfo: serverInfo ? { host: serverInfo.host, port: serverInfo.port } : null,
     pendingMessagesCount: pendingMessages.length,
   });
 
@@ -126,7 +126,7 @@ function flushPendingMessages(): void {
       const messageType = (message.params as any)?.type || 'unknown';
       try {
         console.log('[ZustandMiddleware] 📤 Flushing message:', messageType);
-        cdpMessageSender(serverInfo.serverHost, serverInfo.serverPort, JSON.stringify(message));
+        cdpMessageSender(serverInfo.host, serverInfo.port, JSON.stringify(message));
         console.log('[ZustandMiddleware] ✅ Flushed message:', messageType);
       } catch (e) {
         console.error('[ZustandMiddleware] ❌ Error flushing message:', messageType, e);
