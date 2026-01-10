@@ -19,6 +19,8 @@ import {
   setCDPMessageSender as setReduxCDPMessageSender,
   setServerConnection as setReduxServerConnection,
 } from './redux-devtools-extension';
+// Import MMKV DevTools setters / MMKV DevTools setter import
+import { setMMKVCDPSender, setMMKVConnectionReady } from './mmkv';
 
 // Try to get TurboModule first (New Architecture), fallback to Legacy Module / TurboModule을 먼저 시도 (New Architecture), Legacy Module로 폴백
 const TurboModule = TurboModuleRegistry.get<Spec>('ChromeRemoteDevToolsInspector');
@@ -60,6 +62,8 @@ export async function connect(serverHostParam: string, serverPortParam: number):
   setZustandCDPSender(cdpSender);
   // Set up Redux DevTools Extension CDP sender / Redux DevTools Extension CDP 전송자 설정
   setReduxCDPMessageSender(cdpSender);
+  // Set up MMKV DevTools CDP sender / MMKV DevTools CDP 전송자 설정
+  setMMKVCDPSender(cdpSender);
 
   // Connect to server with retry logic / 재시도 로직이 있는 서버 연결
   const maxRetries = 3;
@@ -92,6 +96,8 @@ export async function connect(serverHostParam: string, serverPortParam: number):
   setZustandConnectionReady();
   // Set Redux DevTools Extension server connection / Redux DevTools Extension 서버 연결 설정
   setReduxServerConnection(serverHostParam, serverPortParam);
+  // Set MMKV DevTools connection ready / MMKV DevTools 연결 준비 완료 설정
+  setMMKVConnectionReady();
 
   // Note: Console hooking is handled at native level (JSI C++ hook) / 참고: Console 훅은 네이티브 레벨(JSI C++ 훅)에서 처리됩니다
 }
@@ -228,6 +234,10 @@ export type { ChromeRemoteDevToolsInspectorProviderProps } from './Provider';
 
 // Export Zustand DevTools middleware / Zustand DevTools 미들웨어 export
 export { chromeDevtools, namedAction } from './zustand-middleware';
+
+// Export MMKV DevTools / MMKV DevTools export
+export { registerMMKVDevTools, unregisterMMKVDevTools, handleMMKVCDPMessage } from './mmkv';
+export type { MMKVEntry, MMKVEntryType, MMKVEntryValue } from './mmkv/types';
 
 export default {
   connect,
