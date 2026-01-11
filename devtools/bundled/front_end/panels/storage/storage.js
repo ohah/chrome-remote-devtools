@@ -1117,12 +1117,12 @@ var StoragePanelSidebar = class extends UI5.Widget.VBox {
     }
     const mmkvStorageTreeElement = new MMKVStorageTreeElement(this.panel, mmkvStorage);
     this.mmkvStorageTreeElements.set(mmkvStorage, mmkvStorageTreeElement);
-    this.mmkvListTreeElement.appendChild(mmkvStorageTreeElement, comparator);
     function comparator(a, b) {
       const aTitle = a.titleAsText().toLocaleLowerCase();
       const bTitle = b.titleAsText().toLocaleLowerCase();
       return aTitle.localeCompare(bTitle);
     }
+    this.mmkvListTreeElement.appendChild(mmkvStorageTreeElement, comparator);
   }
   mmkvStorageRemoved = (event) => {
     const mmkvStorage = event.data;
