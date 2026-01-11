@@ -27,6 +27,19 @@
  */
 @interface ChromeRemoteDevToolsInspectorModule : NSObject <RCTBridgeModule, RCTTurboModule, RCTTurboModuleWithJSIBindings>
 
+/**
+ * Handle CDP message from WebSocket / WebSocket으로부터 CDP 메시지 처리
+ * Routes to JavaScript handler based on method name / 메서드 이름을 기준으로 JavaScript 핸들러로 라우팅
+ * @param messageJson CDP message as JSON string / JSON 문자열로 된 CDP 메시지
+ */
++ (void)handleCDPMessage:(NSString *)messageJson;
+
+/**
+ * Set module instance / 모듈 인스턴스 설정
+ * @param instance Module instance / 모듈 인스턴스
+ */
++ (void)setModuleInstance:(ChromeRemoteDevToolsInspectorModule *)instance;
+
 @end
 
 #endif

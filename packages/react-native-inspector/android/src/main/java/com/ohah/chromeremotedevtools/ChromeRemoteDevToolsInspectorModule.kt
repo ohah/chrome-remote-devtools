@@ -31,6 +31,114 @@ class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicat
 
   companion object {
     const val NAME = "ChromeRemoteDevToolsInspector"
+
+    // Store module instance for CDP message handling / CDP 메시지 처리를 위한 모듈 인스턴스 저장
+    @Volatile
+    private var instance: ChromeRemoteDevToolsInspectorModule? = null
+
+    /**
+     * Handle CDP message from WebSocket / WebSocket으로부터 CDP 메시지 처리
+     * Routes to JavaScript handler based on method name / 메서드 이름을 기준으로 JavaScript 핸들러로 라우팅
+     * Uses JSI for direct JavaScript handler invocation (same as iOS) / iOS와 동일하게 JSI를 사용하여 JavaScript 핸들러 직접 호출
+     */
+    fun handleCDPMessage(messageJson: String) {
+      try {
+        // Use JSI-based handler via native C++ code / 네이티브 C++ 코드를 통해 JSI 기반 핸들러 사용
+        // This is more reliable than evaluateScript and matches iOS behavior / 이것은 evaluateScript보다 안정적이며 iOS 동작과 일치함
+        ChromeRemoteDevToolsLogHookJNI.nativeHandleCDPMessage(messageJson)
+        android.util.Log.d(NAME, "Called JavaScript CDP message handler via JSI / JSI를 통해 JavaScript CDP 메시지 핸들러 호출됨")
+      } catch (e: Exception) {
+        android.util.Log.e(NAME, "Failed to call JavaScript CDP message handler via JSI / JSI를 통해 JavaScript CDP 메시지 핸들러 호출 실패: ${e.message}", e)
+        // Fallback to old method if JSI fails / JSI가 실패하면 이전 방법으로 폴백
+        handleCDPMessageFallback(messageJson)
+      }
+    }
+
+    /**
+     * Fallback method for CDP message handling using evaluateScript / evaluateScript를 사용한 CDP 메시지 처리 폴백 메서드
+     * Used when JSI-based handler fails / JSI 기반 핸들러가 실패할 때 사용됨
+     */
+    private fun handleCDPMessageFallback(messageJson: String) {
+      val module = instance
+      if (module == null) {
+        android.util.Log.w(NAME, "Module instance not available for CDP message handling / CDP 메시지 처리를 위한 모듈 인스턴스를 사용할 수 없음")
+        return
+      }
+
+      val context = module.reactApplicationContext
+      if (context == null) {
+        android.util.Log.w(NAME, "React application context is null / React 애플리케이션 컨텍스트가 null입니다")
+        return
+      }
+
+      // Call JavaScript handler via Runtime.evaluate / Runtime.evaluate를 통해 JavaScript 핸들러 호출
+      context.runOnJSQueueThread {
+        try {
+          val catalystInstance = context.catalystInstance
+          if (catalystInstance != null) {
+            // Use Base64 encoding to safely pass JSON string / JSON 문자열을 안전하게 전달하기 위해 Base64 인코딩 사용
+            // This avoids all escaping issues / 모든 이스케이프 문제를 피함
+            try {
+              // Encode JSON string to Base64 / JSON 문자열을 Base64로 인코딩
+              val base64Json = android.util.Base64.encodeToString(
+                messageJson.toByteArray(Charsets.UTF_8),
+                android.util.Base64.NO_WRAP
+              )
+
+              // Use evaluateScript to call global function / 전역 함수를 호출하기 위해 evaluateScript 사용
+              // Decode Base64 in JavaScript and pass to handler / JavaScript에서 Base64를 디코딩하여 핸들러에 전달
+              val script = """
+                (function() {
+                  const handler = typeof window !== 'undefined' ? window.__CDP_MESSAGE_HANDLER__ : typeof global !== 'undefined' ? global.__CDP_MESSAGE_HANDLER__ : null;
+                  if (handler && typeof handler === 'function') {
+                    try {
+                      // Decode Base64 to get original JSON string / Base64를 디코딩하여 원본 JSON 문자열 가져오기
+                      const base64Json = "$base64Json";
+                      const jsonString = atob(base64Json);
+                      handler(jsonString);
+                    } catch (e) {
+                      console.error('[CDPMessageHandler] Error calling handler:', e);
+                    }
+                  }
+                })();
+              """.trimIndent()
+
+              // Note: evaluateScript might not be available in all React Native versions
+              // 참고: evaluateScript는 모든 React Native 버전에서 사용 가능하지 않을 수 있음
+              // Fallback: Use RCTDeviceEventEmitter if evaluateScript fails
+              // 폴백: evaluateScript가 실패하면 RCTDeviceEventEmitter 사용
+              try {
+                val evaluateMethod = catalystInstance.javaClass.getMethod("evaluateScript", String::class.java, String::class.java, String::class.java, Boolean::class.java)
+                evaluateMethod.invoke(catalystInstance, script, null, "", false)
+                android.util.Log.d(NAME, "Called JavaScript CDP message handler via evaluateScript (fallback) / evaluateScript를 통해 JavaScript CDP 메시지 핸들러 호출됨 (폴백)")
+              } catch (e: NoSuchMethodException) {
+                android.util.Log.w(NAME, "evaluateScript not available / evaluateScript를 사용할 수 없음")
+                android.util.Log.w(NAME, "CDP message handler call skipped (evaluateScript not available) / CDP 메시지 핸들러 호출 건너뜀 (evaluateScript를 사용할 수 없음)")
+              }
+            } catch (e: Exception) {
+              android.util.Log.e(NAME, "Failed to encode JSON message to Base64 / JSON 메시지를 Base64로 인코딩 실패: ${e.message}", e)
+              android.util.Log.e(NAME, "Message content / 메시지 내용: $messageJson")
+            }
+          } else {
+            android.util.Log.w(NAME, "CatalystInstance is null / CatalystInstance가 null입니다")
+          }
+        } catch (e: Exception) {
+          android.util.Log.e(NAME, "Failed to call JavaScript CDP message handler / JavaScript CDP 메시지 핸들러 호출 실패", e)
+        }
+      }
+    }
+
+    /**
+     * Set module instance / 모듈 인스턴스 설정
+     */
+    fun setInstance(module: ChromeRemoteDevToolsInspectorModule?) {
+      instance = module
+    }
+  }
+
+  init {
+    // Register instance / 인스턴스 등록
+    setInstance(this)
   }
 
   /**

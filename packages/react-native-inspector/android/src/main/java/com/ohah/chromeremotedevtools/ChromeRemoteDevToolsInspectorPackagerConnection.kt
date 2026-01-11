@@ -129,6 +129,12 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
                 sendNetworkGetResponseBodyResponse(cdpRequestId, networkRequestId)
                 return
               }
+
+              // Route other CDP commands to JavaScript handler / 다른 CDP 명령을 JavaScript 핸들러로 라우팅
+              // Handler routes based on method name / 핸들러가 메서드 이름을 기준으로 라우팅
+              Log.d(TAG, "Routing CDP command to JavaScript handler / CDP 명령을 JavaScript 핸들러로 라우팅: $method")
+              ChromeRemoteDevToolsInspectorModule.handleCDPMessage(text)
+              return
             }
           } else if (message.has("method")) {
             // Handle CDP events (messages without id field) / CDP 이벤트 처리 (id 필드가 없는 메시지)

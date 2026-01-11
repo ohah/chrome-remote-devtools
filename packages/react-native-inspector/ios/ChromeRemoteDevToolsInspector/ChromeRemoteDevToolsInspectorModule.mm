@@ -12,6 +12,7 @@
 #import "ChromeRemoteDevToolsInspectorPackagerConnection.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTLog.h>
+#include <optional>
 
 // Import TurboModule headers for JSI Runtime access / JSI Runtime 접근을 위한 TurboModule 헤더 import
 #import <ReactCommon/RCTTurboModule.h>
@@ -46,6 +47,9 @@ static id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> g_connection 
 // Store CallInvoker and runtime accessor for safe JSI runtime access / 안전한 JSI 런타임 접근을 위한 CallInvoker 및 런타임 접근자 저장
 static std::shared_ptr<facebook::react::CallInvoker> g_callInvoker = nullptr;
 static std::function<void(std::function<void(facebook::jsi::Runtime&)>)> g_runtimeExecutor = nullptr;
+
+// Store module instance for CDP message handling / CDP 메시지 처리를 위한 모듈 인스턴스 저장
+static ChromeRemoteDevToolsInspectorModule* g_moduleInstance = nil;
 
 // Objective-C++ callback for sending CDP messages / CDP 메시지 전송을 위한 Objective-C++ 콜백
 #ifdef CONSOLE_HOOK_AVAILABLE
@@ -142,6 +146,75 @@ static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
  * This allows JavaScript to call native Inspector methods / JavaScript에서 네이티브 Inspector 메서드를 호출할 수 있게 합니다
  */
 @implementation ChromeRemoteDevToolsInspectorModule
+
++ (void)handleCDPMessage:(NSString *)messageJson {
+  // Call JavaScript handler via JSI Runtime / JSI Runtime을 통해 JavaScript 핸들러 호출
+  if (g_runtimeExecutor) {
+    g_runtimeExecutor([messageJson](facebook::jsi::Runtime& runtime) {
+      try {
+        // Get global object / 전역 객체 가져오기
+        facebook::jsi::Object global = runtime.global();
+
+        // Try to get handler from window or global / window 또는 global에서 핸들러 가져오기 시도
+        std::optional<facebook::jsi::Function> handler;
+
+        // Try window first / 먼저 window 시도
+        try {
+          facebook::jsi::Value windowValue = global.getProperty(runtime, "window");
+          if (windowValue.isObject()) {
+            facebook::jsi::Object windowObj = windowValue.asObject(runtime);
+            facebook::jsi::Value handlerProp = windowObj.getProperty(runtime, "__CDP_MESSAGE_HANDLER__");
+            if (handlerProp.isObject() && handlerProp.asObject(runtime).isFunction(runtime)) {
+              handler = handlerProp.asObject(runtime).asFunction(runtime);
+            }
+          }
+        } catch (...) {
+          // window not available, try global / window를 사용할 수 없음, global 시도
+        }
+
+        // Try global if window handler not found / window 핸들러를 찾지 못한 경우 global 시도
+        if (!handler.has_value()) {
+          try {
+            facebook::jsi::Value globalValue = global.getProperty(runtime, "global");
+            if (globalValue.isObject()) {
+              facebook::jsi::Object globalObj = globalValue.asObject(runtime);
+              facebook::jsi::Value handlerProp = globalObj.getProperty(runtime, "__CDP_MESSAGE_HANDLER__");
+              if (handlerProp.isObject() && handlerProp.asObject(runtime).isFunction(runtime)) {
+                handler = handlerProp.asObject(runtime).asFunction(runtime);
+              }
+            }
+          } catch (...) {
+            // global not available / global을 사용할 수 없음
+          }
+        }
+
+        // Call handler if found / 핸들러를 찾은 경우 호출
+        if (handler.has_value()) {
+          // Convert NSString to JSI String / NSString을 JSI String으로 변환
+          const char* utf8String = [messageJson UTF8String];
+          facebook::jsi::String messageStr = facebook::jsi::String::createFromUtf8(runtime, utf8String);
+
+          // Call handler with message / 메시지와 함께 핸들러 호출
+          handler->call(runtime, messageStr);
+
+          NSLog(@"[ChromeRemoteDevToolsInspectorModule] Called JavaScript CDP message handler / JavaScript CDP 메시지 핸들러 호출됨");
+        } else {
+          NSLog(@"[ChromeRemoteDevToolsInspectorModule] CDP message handler not found / CDP 메시지 핸들러를 찾을 수 없음");
+        }
+      } catch (const std::exception& e) {
+        NSLog(@"[ChromeRemoteDevToolsInspectorModule] Failed to call JavaScript CDP message handler (C++ exception): %s / JavaScript CDP 메시지 핸들러 호출 실패 (C++ 예외): %s", e.what());
+      } catch (...) {
+        NSLog(@"[ChromeRemoteDevToolsInspectorModule] Failed to call JavaScript CDP message handler (unknown exception) / JavaScript CDP 메시지 핸들러 호출 실패 (알 수 없는 예외)");
+      }
+    });
+  } else {
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] Runtime executor is not available / Runtime executor를 사용할 수 없음");
+  }
+}
+
++ (void)setModuleInstance:(ChromeRemoteDevToolsInspectorModule *)instance {
+  g_moduleInstance = instance;
+}
 
 RCT_EXPORT_MODULE(ChromeRemoteDevToolsInspector)
 
@@ -303,6 +376,9 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
     rejecter(@"CONNECTION_FAILED", @"Failed to connect to Chrome Remote DevTools server", nil);
     return;
   }
+
+  // Register module instance / 모듈 인스턴스 등록
+  [ChromeRemoteDevToolsInspectorModule setModuleInstance:self];
 
   // Set platform callback for C++ code / C++ 코드를 위한 플랫폼 콜백 설정
 #ifdef CONSOLE_HOOK_AVAILABLE
