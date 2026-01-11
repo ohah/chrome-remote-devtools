@@ -6,7 +6,7 @@
 import 'react-native-gesture-handler';
 // Note: Redux DevTools Extension is auto-initialized on import / 참고: Redux DevTools Extension은 import 시 자동 초기화됩니다
 import '@ohah/chrome-remote-devtools-react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar, useColorScheme, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -14,7 +14,9 @@ import { Provider } from 'react-redux';
 import {
   ChromeRemoteDevToolsInspectorProvider,
   registerMMKVDevTools,
+  registerAsyncStorageDevTools,
 } from '@ohah/chrome-remote-devtools-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { store } from './store/redux/store';
 import { userStorage, cacheStorage, defaultStorage, legacyStorage } from './store/mmkv/storage';
 import AppNavigator from './navigation/AppNavigator';
@@ -24,7 +26,7 @@ function App() {
 
   // Register MMKV DevTools / MMKV DevTools 등록
   // v4 is default, v3 is for legacy support / v4가 기본, v3는 하위 호환용
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       registerMMKVDevTools({
         user: userStorage, // v4
@@ -34,6 +36,16 @@ function App() {
       });
     } catch (error) {
       console.error('[App] Error registering MMKV DevTools:', error);
+      // Don't block app startup / 앱 시작을 막지 않음
+    }
+  }, []);
+
+  // Register AsyncStorage DevTools / AsyncStorage DevTools 등록
+  useEffect(() => {
+    try {
+      registerAsyncStorageDevTools(AsyncStorage);
+    } catch (error) {
+      console.error('[App] Error registering AsyncStorage DevTools:', error);
       // Don't block app startup / 앱 시작을 막지 않음
     }
   }, []);
