@@ -3566,8 +3566,8 @@ UI14.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/redux/redux-meta.js
 import * as i18n55 from "./../../core/i18n/i18n.js";
-import * as UI15 from "./../../ui/legacy/legacy.js";
 import * as SDK22 from "./../../core/sdk/sdk.js";
+import * as UI15 from "./../../ui/legacy/legacy.js";
 import * as SDK8 from "./../../core/sdk/sdk.js";
 function getReduxExtensionBridge() {
   const win = window;
