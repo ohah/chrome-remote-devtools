@@ -181,12 +181,12 @@ export class StoragePanelSidebar extends UI.Widget.VBox {
         }
         const mmkvStorageTreeElement = new MMKVStorageTreeElement(this.panel, mmkvStorage);
         this.mmkvStorageTreeElements.set(mmkvStorage, mmkvStorageTreeElement);
-        this.mmkvListTreeElement.appendChild(mmkvStorageTreeElement, comparator);
         function comparator(a, b) {
             const aTitle = a.titleAsText().toLocaleLowerCase();
             const bTitle = b.titleAsText().toLocaleLowerCase();
             return aTitle.localeCompare(bTitle);
         }
+        this.mmkvListTreeElement.appendChild(mmkvStorageTreeElement, comparator);
     }
     mmkvStorageRemoved = (event) => {
         const mmkvStorage = event.data;
@@ -247,12 +247,12 @@ export class StoragePanelSidebar extends UI.Widget.VBox {
             // If multiple AsyncStorage instances exist, use expandable category / 여러 AsyncStorage 인스턴스가 있는 경우 확장 가능한 카테고리 사용
             const asyncStorageStorageTreeElement = new AsyncStorageStorageTreeElement(this.panel, asyncStorageStorage);
             this.asyncStorageStorageTreeElements.set(asyncStorageStorage, asyncStorageStorageTreeElement);
-            this.asyncStorageListTreeElement.appendChild(asyncStorageStorageTreeElement, comparator);
             function comparator(a, b) {
                 const aTitle = a.titleAsText().toLocaleLowerCase();
                 const bTitle = b.titleAsText().toLocaleLowerCase();
                 return aTitle.localeCompare(bTitle);
             }
+            this.asyncStorageListTreeElement.appendChild(asyncStorageStorageTreeElement, comparator);
         }
     }
     asyncStorageStorageRemoved = (event) => {
