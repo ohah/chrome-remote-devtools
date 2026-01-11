@@ -289,6 +289,9 @@ export class TargetBase {
     mmkvStorageAgent() {
         return this.getAgent('MMKVStorage');
     }
+    asyncStorageStorageAgent() {
+        return this.getAgent('AsyncStorageStorage');
+    }
     networkAgent() {
         return this.getAgent('Network');
     }
@@ -410,6 +413,9 @@ export class TargetBase {
     }
     registerMMKVStorageDispatcher(dispatcher) {
         this.registerDispatcher('MMKVStorage', dispatcher);
+    }
+    registerAsyncStorageStorageDispatcher(dispatcher) {
+        this.registerDispatcher('AsyncStorageStorage', dispatcher);
     }
     registerNetworkDispatcher(dispatcher) {
         this.registerDispatcher('Network', dispatcher);

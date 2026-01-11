@@ -40,6 +40,11 @@ export namespace ProtocolMapping {
      * Event for animation that has been updated.
      */
     'Animation.animationUpdated': [Protocol.Animation.AnimationUpdatedEvent];
+    'AsyncStorageStorage.asyncStorageItemsCleared': [Protocol.AsyncStorageStorage.AsyncStorageItemsClearedEvent];
+    'AsyncStorageStorage.asyncStorageItemRemoved': [Protocol.AsyncStorageStorage.AsyncStorageItemRemovedEvent];
+    'AsyncStorageStorage.asyncStorageItemAdded': [Protocol.AsyncStorageStorage.AsyncStorageItemAddedEvent];
+    'AsyncStorageStorage.asyncStorageItemUpdated': [Protocol.AsyncStorageStorage.AsyncStorageItemUpdatedEvent];
+    'AsyncStorageStorage.asyncStorageInstanceCreated': [Protocol.AsyncStorageStorage.AsyncStorageInstanceCreatedEvent];
     'Audits.issueAdded': [Protocol.Audits.IssueAddedEvent];
     /**
      * Emitted when an address form is filled.
@@ -1021,6 +1026,29 @@ export namespace ProtocolMapping {
      */
     'Animation.setTiming': {
       paramsType: [Protocol.Animation.SetTimingRequest];
+      returnType: void;
+    };
+    /**
+     * Enables storage tracking, storage events will now be delivered to the client.
+     */
+    'AsyncStorageStorage.enable': {
+      paramsType: [];
+      returnType: void;
+    };
+    'AsyncStorageStorage.getAsyncStorageItems': {
+      paramsType: [Protocol.AsyncStorageStorage.GetAsyncStorageItemsRequest];
+      returnType: Protocol.AsyncStorageStorage.GetAsyncStorageItemsResponse;
+    };
+    'AsyncStorageStorage.setAsyncStorageItem': {
+      paramsType: [Protocol.AsyncStorageStorage.SetAsyncStorageItemRequest];
+      returnType: void;
+    };
+    'AsyncStorageStorage.removeAsyncStorageItem': {
+      paramsType: [Protocol.AsyncStorageStorage.RemoveAsyncStorageItemRequest];
+      returnType: void;
+    };
+    'AsyncStorageStorage.clear': {
+      paramsType: [Protocol.AsyncStorageStorage.ClearRequest];
       returnType: void;
     };
     /**

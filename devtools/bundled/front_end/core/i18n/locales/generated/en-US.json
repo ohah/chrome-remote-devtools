@@ -3623,6 +3623,15 @@
   "panels/application/AppManifestView.ts | windowControlsOverlay": {
     "message": "Window Controls Overlay"
   },
+  "panels/application/AsyncStorageStorageItemsView.ts | asyncStorageStorageItemDeleted": {
+    "message": "The storage item was deleted."
+  },
+  "panels/application/AsyncStorageStorageItemsView.ts | asyncStorageStorageItems": {
+    "message": "AsyncStorage Storage Items"
+  },
+  "panels/application/AsyncStorageStorageItemsView.ts | asyncStorageStorageItemsCleared": {
+    "message": "AsyncStorage Storage Items cleared"
+  },
   "panels/application/BackForwardCacheTreeElement.ts | backForwardCache": {
     "message": "Back/forward cache"
   },

@@ -138,6 +138,7 @@ export declare class TargetBase {
     mediaAgent(): ProtocolProxyApi.MediaApi;
     memoryAgent(): ProtocolProxyApi.MemoryApi;
     mmkvStorageAgent(): ProtocolProxyApi.MMKVStorageApi;
+    asyncStorageStorageAgent(): ProtocolProxyApi.AsyncStorageStorageApi;
     networkAgent(): ProtocolProxyApi.NetworkApi;
     overlayAgent(): ProtocolProxyApi.OverlayApi;
     pageAgent(): ProtocolProxyApi.PageApi;
@@ -181,6 +182,7 @@ export declare class TargetBase {
     registerLogDispatcher(dispatcher: ProtocolProxyApi.LogDispatcher): void;
     registerMediaDispatcher(dispatcher: ProtocolProxyApi.MediaDispatcher): void;
     registerMMKVStorageDispatcher(dispatcher: ProtocolProxyApi.MMKVStorageDispatcher): void;
+    registerAsyncStorageStorageDispatcher(dispatcher: ProtocolProxyApi.AsyncStorageStorageDispatcher): void;
     registerNetworkDispatcher(dispatcher: ProtocolProxyApi.NetworkDispatcher): void;
     registerOverlayDispatcher(dispatcher: ProtocolProxyApi.OverlayDispatcher): void;
     registerPageDispatcher(dispatcher: ProtocolProxyApi.PageDispatcher): void;

@@ -683,6 +683,54 @@ export declare namespace Animation {
     }
 }
 /**
+ * Query and modify AsyncStorage storage.
+ */
+export declare namespace AsyncStorageStorage {
+    /**
+     * AsyncStorage Storage item (key-value pair).
+     */
+    type Item = string[];
+    interface GetAsyncStorageItemsRequest {
+        instanceId: string;
+    }
+    interface GetAsyncStorageItemsResponse extends ProtocolResponseWithError {
+        entries: Item[];
+    }
+    interface SetAsyncStorageItemRequest {
+        instanceId: string;
+        key: string;
+        value: string;
+    }
+    interface RemoveAsyncStorageItemRequest {
+        instanceId: string;
+        key: string;
+    }
+    interface ClearRequest {
+        instanceId: string;
+    }
+    interface AsyncStorageItemsClearedEvent {
+        instanceId: string;
+    }
+    interface AsyncStorageItemRemovedEvent {
+        instanceId: string;
+        key: string;
+    }
+    interface AsyncStorageItemAddedEvent {
+        instanceId: string;
+        key: string;
+        newValue: string;
+    }
+    interface AsyncStorageItemUpdatedEvent {
+        instanceId: string;
+        key: string;
+        oldValue: string;
+        newValue: string;
+    }
+    interface AsyncStorageInstanceCreatedEvent {
+        instanceId: string;
+    }
+}
+/**
  * Audits domain allows investigation of page violations and possible improvements.
  */
 export declare namespace Audits {
