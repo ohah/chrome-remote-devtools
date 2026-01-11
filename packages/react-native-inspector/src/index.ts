@@ -21,6 +21,8 @@ import {
 } from './redux-devtools-extension';
 // Import MMKV DevTools setters / MMKV DevTools setter import
 import { setMMKVCDPSender, setMMKVConnectionReady } from './mmkv';
+// Import AsyncStorage DevTools setters / AsyncStorage DevTools setter import
+import { setAsyncStorageCDPSender, setAsyncStorageConnectionReady } from './async-storage';
 
 // Try to get TurboModule first (New Architecture), fallback to Legacy Module / TurboModule을 먼저 시도 (New Architecture), Legacy Module로 폴백
 const TurboModule = TurboModuleRegistry.get<Spec>('ChromeRemoteDevToolsInspector');
@@ -64,6 +66,8 @@ export async function connect(serverHostParam: string, serverPortParam: number):
   setReduxCDPMessageSender(cdpSender);
   // Set up MMKV DevTools CDP sender / MMKV DevTools CDP 전송자 설정
   setMMKVCDPSender(cdpSender);
+  // Set up AsyncStorage DevTools CDP sender / AsyncStorage DevTools CDP 전송자 설정
+  setAsyncStorageCDPSender(cdpSender);
 
   // Connect to server with retry logic / 재시도 로직이 있는 서버 연결
   const maxRetries = 3;
@@ -98,6 +102,8 @@ export async function connect(serverHostParam: string, serverPortParam: number):
   setReduxServerConnection(serverHostParam, serverPortParam);
   // Set MMKV DevTools connection ready / MMKV DevTools 연결 준비 완료 설정
   setMMKVConnectionReady();
+  // Set AsyncStorage DevTools connection ready / AsyncStorage DevTools 연결 준비 완료 설정
+  setAsyncStorageConnectionReady();
 
   // Note: Console hooking is handled at native level (JSI C++ hook) / 참고: Console 훅은 네이티브 레벨(JSI C++ 훅)에서 처리됩니다
 }
@@ -236,8 +242,16 @@ export type { ChromeRemoteDevToolsInspectorProviderProps } from './Provider';
 export { chromeDevtools, namedAction } from './zustand-middleware';
 
 // Export MMKV DevTools / MMKV DevTools export
-export { registerMMKVDevTools, unregisterMMKVDevTools, handleMMKVCDPMessage } from './mmkv';
+export { registerMMKVDevTools, unregisterMMKVDevTools } from './mmkv';
 export type { MMKVEntry, MMKVEntryType, MMKVEntryValue } from './mmkv/types';
+
+// Export AsyncStorage DevTools / AsyncStorage DevTools export
+export { registerAsyncStorageDevTools, unregisterAsyncStorageDevTools } from './async-storage';
+export type {
+  AsyncStorageEntry,
+  AsyncStorageEntryType,
+  AsyncStorageEntryValue,
+} from './async-storage/types';
 
 export default {
   connect,
