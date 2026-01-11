@@ -103,6 +103,15 @@ class ChromeRemoteDevToolsLogHookJNI {
     @JvmStatic
     external fun nativeGetObjectProperties(objectId: String): String?
 
+    /**
+     * Handle CDP message from WebSocket using JSI / JSI를 사용하여 WebSocket에서 CDP 메시지 처리
+     * This is the Android equivalent of iOS handleCDPMessage: method / 이것은 iOS handleCDPMessage: 메서드와 동등한 Android 버전입니다
+     * Uses stored RuntimeExecutor to call JavaScript handler directly via JSI / 저장된 RuntimeExecutor를 사용하여 JSI를 통해 JavaScript 핸들러를 직접 호출
+     * @param messageJson CDP message as JSON string / JSON 문자열로 된 CDP 메시지
+     */
+    @JvmStatic
+    external fun nativeHandleCDPMessage(messageJson: String)
+
     // Note: nativeSetReduxDevToolsServerInfo was removed / nativeSetReduxDevToolsServerInfo 제거됨
     // Redux DevTools Extension server info is now set via JavaScript polyfill / Redux DevTools Extension 서버 정보는 이제 JavaScript polyfill을 통해 설정됩니다
 

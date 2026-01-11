@@ -751,6 +751,129 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeGetObjec
 // Note: nativeSetReduxDevToolsServerInfo was removed / nativeSetReduxDevToolsServerInfo 제거됨
 // Redux DevTools Extension server info is now set via JavaScript polyfill / Redux DevTools Extension 서버 정보는 이제 JavaScript polyfill을 통해 설정됩니다
 
+// JNI function to handle CDP message from WebSocket using JSI / JSI를 사용하여 WebSocket에서 CDP 메시지를 처리하는 JNI 함수
+// This is the Android equivalent of iOS handleCDPMessage: method / 이것은 iOS handleCDPMessage: 메서드와 동등한 Android 버전입니다
+extern "C" JNIEXPORT void JNICALL
+Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHandleCDPMessage(
+    JNIEnv *env,
+    jobject /* thiz */,
+    jstring messageJson) {
+#ifdef REACT_NATIVE_JSI_AVAILABLE
+  try {
+    if (!messageJson) {
+      __android_log_print(ANDROID_LOG_WARN, TAG,
+                          "nativeHandleCDPMessage: messageJson is null / messageJson이 null입니다");
+      return;
+    }
+
+    // Get RuntimeExecutor from stored reference / 저장된 참조에서 RuntimeExecutor 가져오기
+    facebook::react::RuntimeExecutor executor = nullptr;
+    {
+      std::lock_guard<std::mutex> lock(g_runtimeExecutorMutex);
+      executor = g_runtimeExecutor;
+    }
+
+    if (!executor) {
+      __android_log_print(ANDROID_LOG_WARN, TAG,
+                          "nativeHandleCDPMessage: RuntimeExecutor not available / RuntimeExecutor를 사용할 수 없음");
+      return;
+    }
+
+    // Convert Java string to C++ string / Java 문자열을 C++ 문자열로 변환
+    const char* messageStr = env->GetStringUTFChars(messageJson, nullptr);
+    if (!messageStr) {
+      __android_log_print(ANDROID_LOG_ERROR, TAG,
+                          "nativeHandleCDPMessage: Failed to get string UTF chars / 문자열 UTF 문자를 가져오지 못함");
+      return;
+    }
+
+    std::string messageCpp(messageStr);
+    env->ReleaseStringUTFChars(messageJson, messageStr);
+
+    __android_log_print(ANDROID_LOG_DEBUG, TAG,
+                        "nativeHandleCDPMessage: Calling JavaScript handler via JSI / JSI를 통해 JavaScript 핸들러 호출 중");
+
+    // Call JavaScript handler via RuntimeExecutor / RuntimeExecutor를 통해 JavaScript 핸들러 호출
+    executor([messageCpp](facebook::jsi::Runtime& runtime) {
+      try {
+        // Get global object / 전역 객체 가져오기
+        facebook::jsi::Object global = runtime.global();
+
+        // Try to get handler from window or global / window 또는 global에서 핸들러 가져오기 시도
+        facebook::jsi::Function* handler = nullptr;
+        facebook::jsi::Value handlerValue = facebook::jsi::Value::undefined();
+
+        // Try window first / 먼저 window 시도
+        try {
+          facebook::jsi::Value windowValue = global.getProperty(runtime, "window");
+          if (windowValue.isObject()) {
+            facebook::jsi::Object windowObj = windowValue.asObject(runtime);
+            facebook::jsi::Value handlerProp = windowObj.getProperty(runtime, "__CDP_MESSAGE_HANDLER__");
+            if (handlerProp.isObject() && handlerProp.asObject(runtime).isFunction(runtime)) {
+              handlerValue = std::move(handlerProp);
+            }
+          }
+        } catch (...) {
+          // window not available, try global / window를 사용할 수 없음, global 시도
+        }
+
+        // Try global if window handler not found / window 핸들러를 찾지 못한 경우 global 시도
+        if (handlerValue.isUndefined()) {
+          try {
+            facebook::jsi::Value globalValue = global.getProperty(runtime, "global");
+            if (globalValue.isObject()) {
+              facebook::jsi::Object globalObj = globalValue.asObject(runtime);
+              facebook::jsi::Value handlerProp = globalObj.getProperty(runtime, "__CDP_MESSAGE_HANDLER__");
+              if (handlerProp.isObject() && handlerProp.asObject(runtime).isFunction(runtime)) {
+                handlerValue = std::move(handlerProp);
+              }
+            }
+          } catch (...) {
+            // global not available / global을 사용할 수 없음
+          }
+        }
+
+        // Call handler if found / 핸들러를 찾은 경우 호출
+        if (!handlerValue.isUndefined() && handlerValue.isObject() && handlerValue.asObject(runtime).isFunction(runtime)) {
+          facebook::jsi::Function handlerFunc = handlerValue.asObject(runtime).asFunction(runtime);
+
+          // Convert C++ string to JSI String / C++ 문자열을 JSI String으로 변환
+          facebook::jsi::String messageJSI = facebook::jsi::String::createFromUtf8(runtime, messageCpp);
+
+          // Call handler with message / 메시지와 함께 핸들러 호출
+          handlerFunc.call(runtime, messageJSI);
+
+          __android_log_print(ANDROID_LOG_DEBUG, TAG,
+                              "nativeHandleCDPMessage: Called JavaScript CDP message handler / JavaScript CDP 메시지 핸들러 호출됨");
+        } else {
+          __android_log_print(ANDROID_LOG_WARN, TAG,
+                              "nativeHandleCDPMessage: CDP message handler not found / CDP 메시지 핸들러를 찾을 수 없음");
+        }
+      } catch (const facebook::jsi::JSError& e) {
+        __android_log_print(ANDROID_LOG_ERROR, TAG,
+                            "nativeHandleCDPMessage: JSI Error: %s", e.what());
+      } catch (const std::exception& e) {
+        __android_log_print(ANDROID_LOG_ERROR, TAG,
+                            "nativeHandleCDPMessage: Exception: %s", e.what());
+      } catch (...) {
+        __android_log_print(ANDROID_LOG_ERROR, TAG,
+                            "nativeHandleCDPMessage: Unknown exception / 알 수 없는 예외");
+      }
+    });
+
+  } catch (const std::exception& e) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "nativeHandleCDPMessage: Exception: %s", e.what());
+  } catch (...) {
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+                        "nativeHandleCDPMessage: Unknown exception / 알 수 없는 예외");
+  }
+#else
+  __android_log_print(ANDROID_LOG_WARN, TAG,
+                      "nativeHandleCDPMessage: JSI not available / JSI를 사용할 수 없음");
+#endif
+}
+
 // JNI_OnLoad - called when library is loaded / 라이브러리가 로드될 때 호출됨
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
   // Store JVM reference / JVM 참조 저장

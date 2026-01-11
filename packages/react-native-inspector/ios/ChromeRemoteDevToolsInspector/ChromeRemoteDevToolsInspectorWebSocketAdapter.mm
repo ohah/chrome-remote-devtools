@@ -8,6 +8,7 @@
  */
 
 #import "ChromeRemoteDevToolsInspectorWebSocketAdapter.h"
+#import "ChromeRemoteDevToolsInspectorModule.h"
 
 #if RCT_DEV || RCT_REMOTE_PROFILE
 
@@ -229,6 +230,14 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
       RCTLogError(@"[ChromeRemoteDevTools] Failed to serialize Network.getResponseBody error response / Network.getResponseBody 오류 응답 직렬화 실패");
       return; // Don't forward the original message / 원본 메시지를 전달하지 않음
     }
+
+    // Route other CDP commands to JavaScript handler / 다른 CDP 명령을 JavaScript 핸들러로 라우팅
+    // Handler routes based on method name / 핸들러가 메서드 이름을 기준으로 라우팅
+    RCTLogInfo(@"[ChromeRemoteDevTools] Routing CDP command to JavaScript handler / CDP 명령을 JavaScript 핸들러로 라우팅: %@", method);
+
+    // Call JavaScript handler via Module / Module을 통해 JavaScript 핸들러 호출
+    [ChromeRemoteDevToolsInspectorModule handleCDPMessage:message];
+    return;
   }
 
   // Forward other messages to delegate / 다른 메시지는 delegate로 전달
