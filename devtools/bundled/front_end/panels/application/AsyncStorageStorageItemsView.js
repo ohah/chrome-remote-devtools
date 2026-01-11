@@ -1,0 +1,147 @@
+// Copyright 2021 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+/* eslint-disable @devtools/no-imperative-dom-api */
+/*
+ * Copyright (C) 2008 Nokia Inc.  All rights reserved.
+ * Copyright (C) 2013 Samsung Electronics. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+import * as Common from '../../core/common/common.js';
+import * as i18n from '../../core/i18n/i18n.js';
+import * as TextUtils from '../../models/text_utils/text_utils.js';
+import * as SourceFrame from '../../ui/legacy/components/source_frame/source_frame.js';
+import * as UI from '../../ui/legacy/legacy.js';
+import * as VisualLogging from '../../ui/visual_logging/visual_logging.js';
+import * as ApplicationComponents from './components/components.js';
+import { KeyValueStorageItemsView } from './KeyValueStorageItemsView.js';
+const UIStrings = {
+    /**
+     * @description Name for the "AsyncStorage Storage Items" table that shows the content of the AsyncStorage Storage.
+     */
+    asyncStorageStorageItems: 'AsyncStorage Storage Items',
+    /**
+     * @description Text for announcing that the "AsyncStorage Storage Items" table was cleared, that is, all
+     * entries were deleted.
+     */
+    asyncStorageStorageItemsCleared: 'AsyncStorage Storage Items cleared',
+    /**
+     * @description Text for announcing a AsyncStorage Storage key/value item has been deleted
+     */
+    asyncStorageStorageItemDeleted: 'The storage item was deleted.',
+};
+const str_ = i18n.i18n.registerUIStrings('panels/application/AsyncStorageStorageItemsView.ts', UIStrings);
+const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
+export class AsyncStorageStorageItemsView extends KeyValueStorageItemsView {
+    asyncStorageStorage;
+    eventListeners;
+    get storage() {
+        return this.asyncStorageStorage;
+    }
+    constructor(asyncStorageStorage) {
+        // Create custom metadata view that shows only instanceId / instanceId만 표시하는 커스텀 metadata view 생성
+        const metadataView = new ApplicationComponents.StorageMetadataView.StorageMetadataView();
+        // Override getTitle to return only instanceId / getTitle을 오버라이드하여 instanceId만 반환
+        metadataView.getTitle = () => asyncStorageStorage.instanceId;
+        super(i18nString(UIStrings.asyncStorageStorageItems), 'async-storage-storage', true, undefined, metadataView);
+        this.asyncStorageStorage = asyncStorageStorage;
+        this.element.classList.add('storage-view', 'table');
+        this.showPreview(null, null);
+        this.eventListeners = [];
+        this.setStorage(asyncStorageStorage);
+    }
+    createPreview(key, value) {
+        const url = `async-storage://${this.asyncStorageStorage.instanceId}/${key}`;
+        const provider = TextUtils.StaticContentProvider.StaticContentProvider.fromString(url, Common.ResourceType.resourceTypes.XHR, value);
+        return SourceFrame.PreviewFactory.PreviewFactory.createPreview(provider, 'text/plain');
+    }
+    setStorage(asyncStorageStorage) {
+        Common.EventTarget.removeEventListeners(this.eventListeners);
+        this.asyncStorageStorage = asyncStorageStorage;
+        this.element.setAttribute('jslog', `${VisualLogging.pane().context('async-storage-storage-data')}`);
+        this.eventListeners = [
+            this.asyncStorageStorage.addEventListener("AsyncStorageItemsCleared" /* AsyncStorageStorage.Events.ASYNC_STORAGE_ITEMS_CLEARED */, this.asyncStorageStorageItemsCleared, this),
+            this.asyncStorageStorage.addEventListener("AsyncStorageItemRemoved" /* AsyncStorageStorage.Events.ASYNC_STORAGE_ITEM_REMOVED */, this.asyncStorageStorageItemRemoved, this),
+            this.asyncStorageStorage.addEventListener("AsyncStorageItemAdded" /* AsyncStorageStorage.Events.ASYNC_STORAGE_ITEM_ADDED */, this.asyncStorageStorageItemAdded, this),
+            this.asyncStorageStorage.addEventListener("AsyncStorageItemUpdated" /* AsyncStorageStorage.Events.ASYNC_STORAGE_ITEM_UPDATED */, this.asyncStorageStorageItemUpdated, this),
+        ];
+        this.refreshItems();
+    }
+    asyncStorageStorageItemsCleared() {
+        if (!this.isShowing()) {
+            return;
+        }
+        this.itemsCleared();
+    }
+    itemsCleared() {
+        super.itemsCleared();
+        UI.ARIAUtils.LiveAnnouncer.alert(i18nString(UIStrings.asyncStorageStorageItemsCleared));
+    }
+    asyncStorageStorageItemRemoved(event) {
+        if (!this.isShowing()) {
+            return;
+        }
+        this.itemRemoved(event.data.key);
+    }
+    itemRemoved(key) {
+        super.itemRemoved(key);
+        UI.ARIAUtils.LiveAnnouncer.alert(i18nString(UIStrings.asyncStorageStorageItemDeleted));
+    }
+    asyncStorageStorageItemAdded(event) {
+        if (!this.isShowing()) {
+            return;
+        }
+        this.itemAdded(event.data.key, event.data.value);
+    }
+    asyncStorageStorageItemUpdated(event) {
+        if (!this.isShowing()) {
+            return;
+        }
+        this.itemUpdated(event.data.key, event.data.value);
+    }
+    refreshItems() {
+        void this.#refreshItems();
+    }
+    async #refreshItems() {
+        const items = await this.asyncStorageStorage.getItems();
+        if (!items || !this.toolbar) {
+            return;
+        }
+        const { filterRegex } = this.toolbar;
+        const filteredItems = items.map(item => ({ key: item[0], value: item[1] }))
+            .filter(item => filterRegex?.test(`${item.key} ${item.value}`) ?? true);
+        this.showItems(filteredItems);
+    }
+    deleteAllItems() {
+        this.asyncStorageStorage.clear();
+        // explicitly clear the view because the event won't be fired when it has no items
+        this.asyncStorageStorageItemsCleared();
+    }
+    removeItem(key) {
+        this.asyncStorageStorage?.removeItem(key);
+    }
+    setItem(key, value) {
+        this.asyncStorageStorage?.setItem(key, value);
+    }
+}
+//# sourceMappingURL=AsyncStorageStorageItemsView.js.map

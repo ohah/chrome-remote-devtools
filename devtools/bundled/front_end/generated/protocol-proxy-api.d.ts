@@ -22,6 +22,8 @@ declare namespace ProtocolProxyApi {
 
     Animation: AnimationApi;
 
+    AsyncStorageStorage: AsyncStorageStorageApi;
+
     Audits: AuditsApi;
 
     Autofill: AutofillApi;
@@ -134,6 +136,8 @@ declare namespace ProtocolProxyApi {
     Accessibility: AccessibilityDispatcher;
 
     Animation: AnimationDispatcher;
+
+    AsyncStorageStorage: AsyncStorageStorageDispatcher;
 
     Audits: AuditsDispatcher;
 
@@ -380,6 +384,34 @@ declare namespace ProtocolProxyApi {
      * Event for animation that has been updated.
      */
     animationUpdated(params: Protocol.Animation.AnimationUpdatedEvent): void;
+
+  }
+
+  export interface AsyncStorageStorageApi {
+    /**
+     * Enables storage tracking, storage events will now be delivered to the client.
+     */
+    invoke_enable(): Promise<Protocol.ProtocolResponseWithError>;
+
+    invoke_getAsyncStorageItems(params: Protocol.AsyncStorageStorage.GetAsyncStorageItemsRequest): Promise<Protocol.AsyncStorageStorage.GetAsyncStorageItemsResponse>;
+
+    invoke_setAsyncStorageItem(params: Protocol.AsyncStorageStorage.SetAsyncStorageItemRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+    invoke_removeAsyncStorageItem(params: Protocol.AsyncStorageStorage.RemoveAsyncStorageItemRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+    invoke_clear(params: Protocol.AsyncStorageStorage.ClearRequest): Promise<Protocol.ProtocolResponseWithError>;
+
+  }
+  export interface AsyncStorageStorageDispatcher {
+    asyncStorageItemsCleared(params: Protocol.AsyncStorageStorage.AsyncStorageItemsClearedEvent): void;
+
+    asyncStorageItemRemoved(params: Protocol.AsyncStorageStorage.AsyncStorageItemRemovedEvent): void;
+
+    asyncStorageItemAdded(params: Protocol.AsyncStorageStorage.AsyncStorageItemAddedEvent): void;
+
+    asyncStorageItemUpdated(params: Protocol.AsyncStorageStorage.AsyncStorageItemUpdatedEvent): void;
+
+    asyncStorageInstanceCreated(params: Protocol.AsyncStorageStorage.AsyncStorageInstanceCreatedEvent): void;
 
   }
 

@@ -96,6 +96,17 @@ function registerCommands(inspectorBackend2) {
   inspectorBackend2.registerType("Animation.AnimationEffect", [{ "name": "delay", "type": "number", "optional": false, "description": "`AnimationEffect`'s delay.", "typeRef": null }, { "name": "endDelay", "type": "number", "optional": false, "description": "`AnimationEffect`'s end delay.", "typeRef": null }, { "name": "iterationStart", "type": "number", "optional": false, "description": "`AnimationEffect`'s iteration start.", "typeRef": null }, { "name": "iterations", "type": "number", "optional": true, "description": "`AnimationEffect`'s iterations. Omitted if the value is infinite.", "typeRef": null }, { "name": "duration", "type": "number", "optional": false, "description": "`AnimationEffect`'s iteration duration. Milliseconds for time based animations and percentage [0 - 100] for scroll driven animations (i.e. when viewOrScrollTimeline exists).", "typeRef": null }, { "name": "direction", "type": "string", "optional": false, "description": "`AnimationEffect`'s playback direction.", "typeRef": null }, { "name": "fill", "type": "string", "optional": false, "description": "`AnimationEffect`'s fill mode.", "typeRef": null }, { "name": "backendNodeId", "type": "number", "optional": true, "description": "`AnimationEffect`'s target node.", "typeRef": "DOM.BackendNodeId" }, { "name": "keyframesRule", "type": "object", "optional": true, "description": "`AnimationEffect`'s keyframes.", "typeRef": "Animation.KeyframesRule" }, { "name": "easing", "type": "string", "optional": false, "description": "`AnimationEffect`'s timing function.", "typeRef": null }]);
   inspectorBackend2.registerType("Animation.KeyframesRule", [{ "name": "name", "type": "string", "optional": true, "description": "CSS keyframed animation's name.", "typeRef": null }, { "name": "keyframes", "type": "array", "optional": false, "description": "List of animation keyframes.", "typeRef": "Animation.KeyframeStyle" }]);
   inspectorBackend2.registerType("Animation.KeyframeStyle", [{ "name": "offset", "type": "string", "optional": false, "description": "Keyframe's time offset.", "typeRef": null }, { "name": "easing", "type": "string", "optional": false, "description": "`AnimationEffect`'s timing function.", "typeRef": null }]);
+  inspectorBackend2.registerEvent("AsyncStorageStorage.asyncStorageItemsCleared", ["instanceId"]);
+  inspectorBackend2.registerEvent("AsyncStorageStorage.asyncStorageItemRemoved", ["instanceId", "key"]);
+  inspectorBackend2.registerEvent("AsyncStorageStorage.asyncStorageItemAdded", ["instanceId", "key", "newValue"]);
+  inspectorBackend2.registerEvent("AsyncStorageStorage.asyncStorageItemUpdated", ["instanceId", "key", "oldValue", "newValue"]);
+  inspectorBackend2.registerEvent("AsyncStorageStorage.asyncStorageInstanceCreated", ["instanceId"]);
+  inspectorBackend2.registerCommand("AsyncStorageStorage.enable", [], [], "Enables storage tracking, storage events will now be delivered to the client.");
+  inspectorBackend2.registerCommand("AsyncStorageStorage.getAsyncStorageItems", [{ "name": "instanceId", "type": "string", "optional": false, "description": "", "typeRef": null }], ["entries"], "");
+  inspectorBackend2.registerCommand("AsyncStorageStorage.setAsyncStorageItem", [{ "name": "instanceId", "type": "string", "optional": false, "description": "", "typeRef": null }, { "name": "key", "type": "string", "optional": false, "description": "", "typeRef": null }, { "name": "value", "type": "string", "optional": false, "description": "", "typeRef": null }], [], "");
+  inspectorBackend2.registerCommand("AsyncStorageStorage.removeAsyncStorageItem", [{ "name": "instanceId", "type": "string", "optional": false, "description": "", "typeRef": null }, { "name": "key", "type": "string", "optional": false, "description": "", "typeRef": null }], [], "");
+  inspectorBackend2.registerCommand("AsyncStorageStorage.clear", [{ "name": "instanceId", "type": "string", "optional": false, "description": "", "typeRef": null }], [], "");
+  inspectorBackend2.registerType("AsyncStorageStorage.Item", [{ "name": "Item", "type": "array", "optional": false, "description": "AsyncStorage Storage item (key-value pair).", "typeRef": "string" }]);
   inspectorBackend2.registerEnum("Audits.CookieExclusionReason", { ExcludeSameSiteUnspecifiedTreatedAsLax: "ExcludeSameSiteUnspecifiedTreatedAsLax", ExcludeSameSiteNoneInsecure: "ExcludeSameSiteNoneInsecure", ExcludeSameSiteLax: "ExcludeSameSiteLax", ExcludeSameSiteStrict: "ExcludeSameSiteStrict", ExcludeInvalidSameParty: "ExcludeInvalidSameParty", ExcludeSamePartyCrossPartyContext: "ExcludeSamePartyCrossPartyContext", ExcludeDomainNonASCII: "ExcludeDomainNonASCII", ExcludeThirdPartyCookieBlockedInFirstPartySet: "ExcludeThirdPartyCookieBlockedInFirstPartySet", ExcludeThirdPartyPhaseout: "ExcludeThirdPartyPhaseout", ExcludePortMismatch: "ExcludePortMismatch", ExcludeSchemeMismatch: "ExcludeSchemeMismatch" });
   inspectorBackend2.registerEnum("Audits.CookieWarningReason", { WarnSameSiteUnspecifiedCrossSiteContext: "WarnSameSiteUnspecifiedCrossSiteContext", WarnSameSiteNoneInsecure: "WarnSameSiteNoneInsecure", WarnSameSiteUnspecifiedLaxAllowUnsafe: "WarnSameSiteUnspecifiedLaxAllowUnsafe", WarnSameSiteStrictLaxDowngradeStrict: "WarnSameSiteStrictLaxDowngradeStrict", WarnSameSiteStrictCrossDowngradeStrict: "WarnSameSiteStrictCrossDowngradeStrict", WarnSameSiteStrictCrossDowngradeLax: "WarnSameSiteStrictCrossDowngradeLax", WarnSameSiteLaxCrossDowngradeStrict: "WarnSameSiteLaxCrossDowngradeStrict", WarnSameSiteLaxCrossDowngradeLax: "WarnSameSiteLaxCrossDowngradeLax", WarnAttributeValueExceedsMaxSize: "WarnAttributeValueExceedsMaxSize", WarnDomainNonASCII: "WarnDomainNonASCII", WarnThirdPartyPhaseout: "WarnThirdPartyPhaseout", WarnCrossSiteRedirectDowngradeChangesInclusion: "WarnCrossSiteRedirectDowngradeChangesInclusion", WarnDeprecationTrialMetadata: "WarnDeprecationTrialMetadata", WarnThirdPartyCookieHeuristic: "WarnThirdPartyCookieHeuristic" });
   inspectorBackend2.registerEnum("Audits.CookieOperation", { SetCookie: "SetCookie", ReadCookie: "ReadCookie" });
@@ -1833,6 +1844,9 @@ var TargetBase = class {
   mmkvStorageAgent() {
     return this.getAgent("MMKVStorage");
   }
+  asyncStorageStorageAgent() {
+    return this.getAgent("AsyncStorageStorage");
+  }
   networkAgent() {
     return this.getAgent("Network");
   }
@@ -1954,6 +1968,9 @@ var TargetBase = class {
   }
   registerMMKVStorageDispatcher(dispatcher) {
     this.registerDispatcher("MMKVStorage", dispatcher);
+  }
+  registerAsyncStorageStorageDispatcher(dispatcher) {
+    this.registerDispatcher("AsyncStorageStorage", dispatcher);
   }
   registerNetworkDispatcher(dispatcher) {
     this.registerDispatcher("Network", dispatcher);

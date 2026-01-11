@@ -38,6 +38,8 @@
     "../../../../../../front_end/panels/application/AppManifestView.ts",
     "../../../../../../front_end/panels/application/ApplicationPanelSidebar.ts",
     "../../../../../../front_end/panels/application/ApplicationPanelTreeElement.ts",
+    "../../../../../../front_end/panels/application/AsyncStorageStorageItemsView.ts",
+    "../../../../../../front_end/panels/application/AsyncStorageStorageModel.ts",
     "../../../../../../front_end/panels/application/BackForwardCacheTreeElement.ts",
     "../../../../../../front_end/panels/application/BackgroundServiceModel.ts",
     "../../../../../../front_end/panels/application/BackgroundServiceView.ts",
