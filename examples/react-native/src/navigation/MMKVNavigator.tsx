@@ -12,8 +12,7 @@ export default function MMKVNavigator() {
         name="MMKVTest"
         component={MMKVTestScreen}
         options={{
-          title: 'MMKV Test',
-          headerShown: true,
+          headerShown: false,
         }}
       />
     </Stack.Navigator>
