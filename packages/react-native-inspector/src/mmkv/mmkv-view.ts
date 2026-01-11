@@ -21,11 +21,7 @@ export type MMKVView = {
 /**
  * Get MMKV view / MMKV 뷰 가져오기
  */
-export const getMMKVView = (
-  storageId: string,
-  storage: MMKV,
-  blacklist?: RegExp
-): MMKVView => {
+export const getMMKVView = (storageId: string, storage: MMKV, blacklist?: RegExp): MMKVView => {
   const mmkv = getMMKVAdapter(storage);
 
   // Helper function to check if a key should be blacklisted / 키가 블랙리스트에 포함되어야 하는지 확인하는 헬퍼 함수

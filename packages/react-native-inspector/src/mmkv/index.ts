@@ -32,16 +32,12 @@ function sendAllSnapshots(): void {
     return;
   }
 
-  console.log(
-    `[MMKVDevTools] Sending snapshots for ${mmkvViews.size} storages`
-  );
+  console.log(`[MMKVDevTools] Sending snapshots for ${mmkvViews.size} storages`);
 
   mmkvViews.forEach((view) => {
     try {
       const entries = view.getAllEntries();
-      console.log(
-        `[MMKVDevTools] Sending snapshot for ${view.getId()}: ${entries.length} entries`
-      );
+      console.log(`[MMKVDevTools] Sending snapshot for ${view.getId()}: ${entries.length} entries`);
       sendSnapshot(view.getId(), entries);
     } catch (error) {
       console.error(`[MMKVDevTools] Error sending snapshot for ${view.getId()}:`, error);
@@ -64,7 +60,9 @@ export function setMMKVCDPSender(
  */
 export function setMMKVConnectionReady(): void {
   isConnected = true;
-  console.log(`[MMKVDevTools] Connection ready, mmkvViews: ${mmkvViews ? mmkvViews.size : 0} storages`);
+  console.log(
+    `[MMKVDevTools] Connection ready, mmkvViews: ${mmkvViews ? mmkvViews.size : 0} storages`
+  );
 }
 
 /**
@@ -203,7 +201,9 @@ export function registerMMKVDevTools(
       }
     });
 
-    console.log(`[MMKVDevTools] Registered ${mmkvViews.size} storages, waiting for DevTools enable signal`);
+    console.log(
+      `[MMKVDevTools] Registered ${mmkvViews.size} storages, waiting for DevTools enable signal`
+    );
 
     // Register CDP message handlers / CDP 메시지 핸들러 등록
     // Route based on method name / 메서드 이름을 기준으로 라우팅
@@ -227,7 +227,7 @@ export function registerMMKVDevTools(
         }
 
         const entries = view.getAllEntries();
-        const cdpEntries: Array<[string, string]> = entries.map(entry => [
+        const cdpEntries: Array<[string, string]> = entries.map((entry) => [
           entry.key,
           entryValueToString(entry),
         ]);
@@ -252,7 +252,12 @@ export function registerMMKVDevTools(
 
       registerCDPMessageHandler('MMKVStorage.setMMKVItem', (message) => {
         const params = message.params as { instanceId?: string; key?: string; value?: string };
-        if (!params?.instanceId || params.key === undefined || params.value === undefined || !mmkvViews) {
+        if (
+          !params?.instanceId ||
+          params.key === undefined ||
+          params.value === undefined ||
+          !mmkvViews
+        ) {
           return;
         }
 
@@ -316,7 +321,7 @@ export function registerMMKVDevTools(
  */
 export function unregisterMMKVDevTools(): void {
   // Unregister CDP handlers / CDP 핸들러 등록 해제
-  unregisterHandlers.forEach(unregister => unregister());
+  unregisterHandlers.forEach((unregister) => unregister());
   unregisterHandlers = [];
 
   // Remove all subscriptions / 모든 구독 제거
@@ -325,4 +330,3 @@ export function unregisterMMKVDevTools(): void {
 
   mmkvViews = null;
 }
-

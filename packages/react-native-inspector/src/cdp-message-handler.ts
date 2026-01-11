@@ -17,12 +17,11 @@ const handlers: Map<string, CDPMessageHandler> = new Map();
  * @param handler Handler function / 핸들러 함수
  * @returns Unregister function / 등록 해제 함수
  */
-export function registerCDPMessageHandler(
-  method: string,
-  handler: CDPMessageHandler
-): () => void {
+export function registerCDPMessageHandler(method: string, handler: CDPMessageHandler): () => void {
   handlers.set(method, handler);
-  console.log(`[CDPMessageHandler] Registered handler for ${method} / ${method}에 대한 핸들러 등록됨`);
+  console.log(
+    `[CDPMessageHandler] Registered handler for ${method} / ${method}에 대한 핸들러 등록됨`
+  );
 
   // Update global handler / 전역 핸들러 업데이트
   updateGlobalHandler();
@@ -30,7 +29,9 @@ export function registerCDPMessageHandler(
   // Return unregister function / 등록 해제 함수 반환
   return () => {
     handlers.delete(method);
-    console.log(`[CDPMessageHandler] Unregistered handler for ${method} / ${method}에 대한 핸들러 등록 해제됨`);
+    console.log(
+      `[CDPMessageHandler] Unregistered handler for ${method} / ${method}에 대한 핸들러 등록 해제됨`
+    );
     updateGlobalHandler();
   };
 }
@@ -56,7 +57,9 @@ export function handleCDPMessage(message: {
   const handler = handlers.get(message.method);
   if (!handler) {
     // No handler registered - this is normal for commands we don't handle / 핸들러가 등록되지 않음 - 처리하지 않는 명령의 경우 정상
-    console.log(`[CDPMessageHandler] No handler registered for ${message.method} / ${message.method}에 대한 핸들러가 등록되지 않음`);
+    console.log(
+      `[CDPMessageHandler] No handler registered for ${message.method} / ${message.method}에 대한 핸들러가 등록되지 않음`
+    );
     return;
   }
 
@@ -93,7 +96,8 @@ function handleCDPMessageFromNative(messageJson: string): void {
  * This allows native code to call a single function / 네이티브 코드가 단일 함수를 호출할 수 있게 함
  */
 function updateGlobalHandler(): void {
-  const globalObj = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {};
+  const globalObj =
+    typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {};
   // Native code calls this with JSON string / 네이티브 코드가 JSON 문자열로 호출
   (globalObj as any).__CDP_MESSAGE_HANDLER__ = handleCDPMessageFromNative;
 }

@@ -13,8 +13,7 @@ export const looksLikeGarbled = (str: string): boolean => {
   if (controlChars.test(str)) return true;
 
   // 3. Optionally, check if most chars are non-printable / 선택적으로, 대부분의 문자가 비인쇄 가능한지 확인
-  const printableRatio =
-    [...str].filter((c) => c >= ' ' && c <= '~').length / str.length;
+  const printableRatio = [...str].filter((c) => c >= ' ' && c <= '~').length / str.length;
   if (printableRatio < 0.7) return true; // mostly non-printable → probably binary / 대부분 비인쇄 가능 → 아마도 바이너리
 
   return false; // seems like valid string / 유효한 문자열처럼 보임
