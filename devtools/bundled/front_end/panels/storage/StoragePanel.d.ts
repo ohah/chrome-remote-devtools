@@ -1,6 +1,7 @@
 import * as Common from '../../core/common/common.js';
 import type * as Platform from '../../core/platform/platform.js';
 import * as UI from '../../ui/legacy/legacy.js';
+import { type AsyncStorageStorage } from '../application/AsyncStorageStorageModel.js';
 import { type MMKVStorage } from '../application/MMKVStorageModel.js';
 export declare class StoragePanel extends UI.Panel.PanelWithSidebar {
     visibleView: UI.Widget.Widget | null;
@@ -8,6 +9,7 @@ export declare class StoragePanel extends UI.Panel.PanelWithSidebar {
     storageViews: HTMLElement;
     private readonly storageViewToolbar;
     private mmkvStorageView;
+    private asyncStorageStorageView;
     private readonly sidebar;
     private constructor();
     static instance(opts?: {
@@ -18,6 +20,7 @@ export declare class StoragePanel extends UI.Panel.PanelWithSidebar {
     showView(view: UI.Widget.Widget | null): void;
     scheduleShowView(viewPromise: Promise<UI.Widget.Widget>): Promise<UI.Widget.Widget | null>;
     showMMKVStorage(mmkvStorage: MMKVStorage): void;
+    showAsyncStorageStorage(asyncStorageStorage: AsyncStorageStorage): void;
     showCategoryView(categoryName: string, categoryHeadline: string, categoryDescription: string, _categoryLink: Platform.DevToolsPath.UrlString | null): void;
 }
 export declare class StoragePanelSidebar extends UI.Widget.VBox {
@@ -26,6 +29,7 @@ export declare class StoragePanelSidebar extends UI.Widget.VBox {
     mmkvListTreeElement: ExpandableStoragePanelTreeElement;
     asyncStorageListTreeElement: ExpandableStoragePanelTreeElement;
     private mmkvStorageTreeElements;
+    private asyncStorageStorageTreeElements;
     constructor(panel: StoragePanel);
     focus(): void;
     private mmkvStorageModelAdded;
@@ -34,6 +38,12 @@ export declare class StoragePanelSidebar extends UI.Widget.VBox {
     private addMMKVStorage;
     private mmkvStorageRemoved;
     private removeMMKVStorage;
+    private asyncStorageStorageModelAdded;
+    private asyncStorageStorageModelRemoved;
+    private asyncStorageStorageAdded;
+    private addAsyncStorageStorage;
+    private asyncStorageStorageRemoved;
+    private removeAsyncStorageStorage;
 }
 declare class StoragePanelTreeElement extends UI.TreeOutline.TreeElement {
     protected readonly storagePanel: StoragePanel;
