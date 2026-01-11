@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as i18n from '../../core/i18n/i18n.js';
-import * as UI from '../../ui/legacy/legacy.js';
 import * as SDK from '../../core/sdk/sdk.js';
+import * as UI from '../../ui/legacy/legacy.js';
 import { initializeReduxBridge } from './ReduxExtensionBridge.js';
 // Initialize Redux bridge when this module loads / 이 모듈이 로드될 때 Redux bridge 초기화
 // This ensures messages are buffered even before panel is opened / 패널이 열리기 전에도 메시지가 버퍼링되도록 보장

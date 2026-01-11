@@ -9,9 +9,9 @@ var ReduxPanel_exports = {};
 __export(ReduxPanel_exports, {
   ReduxPanel: () => ReduxPanel
 });
-import * as UI from "./../../ui/legacy/legacy.js";
-import * as SDK2 from "./../../core/sdk/sdk.js";
 import * as Root from "./../../core/root/root.js";
+import * as SDK2 from "./../../core/sdk/sdk.js";
+import * as UI from "./../../ui/legacy/legacy.js";
 
 // gen/front_end/panels/redux/ReduxExtensionBridge.js
 import * as SDK from "./../../core/sdk/sdk.js";

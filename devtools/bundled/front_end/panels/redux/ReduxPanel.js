@@ -1,9 +1,9 @@
 // Copyright 2025 The Chromium Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import * as UI from '../../ui/legacy/legacy.js';
-import * as SDK from '../../core/sdk/sdk.js';
 import * as Root from '../../core/root/root.js';
+import * as SDK from '../../core/sdk/sdk.js';
+import * as UI from '../../ui/legacy/legacy.js';
 import { getReduxExtensionBridge, initializeReduxBridge } from './ReduxExtensionBridge.js';
 export class ReduxPanel extends UI.Panel.Panel {
     #iframe = null;
@@ -35,6 +35,7 @@ export class ReduxPanel extends UI.Panel.Panel {
             const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
             reduxDevToolsPage = `${basePath}/panels/plugins/redux-plugin/index.html`;
         }
+        // Set iframe source / iframe 소스 설정
         this.#iframe.src = reduxDevToolsPage;
         this.#iframe.onload = () => {
             if (this.#iframe?.contentWindow) {
@@ -47,6 +48,7 @@ export class ReduxPanel extends UI.Panel.Panel {
                 }, 100);
             }
         };
+        // Append iframe to content element / iframe을 content element에 추가
         this.contentElement.appendChild(this.#iframe);
     }
     wasShown() {
