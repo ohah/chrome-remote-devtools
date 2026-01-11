@@ -800,7 +800,6 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeHandleCD
         facebook::jsi::Object global = runtime.global();
 
         // Try to get handler from window or global / window 또는 global에서 핸들러 가져오기 시도
-        facebook::jsi::Function* handler = nullptr;
         facebook::jsi::Value handlerValue = facebook::jsi::Value::undefined();
 
         // Try window first / 먼저 window 시도
