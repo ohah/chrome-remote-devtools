@@ -7,6 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ReduxNavigator from './ReduxNavigator';
 import ZustandNavigator from './ZustandNavigator';
 import MMKVNavigator from './MMKVNavigator';
+import AsyncStorageNavigator from './AsyncStorageNavigator';
 
 const BottomTab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -51,6 +52,19 @@ function MMKVStack() {
   );
 }
 
+// AsyncStorage Stack Navigator / AsyncStorage 스택 네비게이터
+function AsyncStorageStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="AsyncStorageMain"
+        component={AsyncStorageNavigator}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 export default function AppNavigator() {
   return (
     <BottomTab.Navigator
@@ -89,6 +103,14 @@ export default function AppNavigator() {
         component={MMKVStack}
         options={{
           title: 'MMKV',
+          tabBarIcon: ({ color, size = 24 }) => <Icon name="storage" size={size} color={color} />,
+        }}
+      />
+      <BottomTab.Screen
+        name="AsyncStorage"
+        component={AsyncStorageStack}
+        options={{
+          title: 'AsyncStorage',
           tabBarIcon: ({ color, size = 24 }) => <Icon name="storage" size={size} color={color} />,
         }}
       />
