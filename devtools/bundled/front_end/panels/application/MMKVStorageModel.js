@@ -43,7 +43,76 @@ export class MMKVStorage extends Common.ObjectWrapper.ObjectWrapper {
         return this.#instanceId;
     }
     getItems() {
-        return this.model.agent.invoke_getMMKVItems({ instanceId: this.instanceId }).then(({ entries }) => entries);
+        const target = this.model.target();
+        if (!target) {
+            return Promise.resolve(null);
+        }
+        // Use Runtime.evaluate to directly execute JavaScript / Runtime.evaluate를 사용하여 JavaScript 직접 실행
+        // This avoids needing native code to forward CDP commands / 이렇게 하면 네이티브 코드에서 CDP 명령을 전달할 필요가 없음
+        return target.runtimeAgent().invoke_evaluate({
+            expression: `
+        (function() {
+          // Get global object (window for web, global for React Native) / 전역 객체 가져오기 (웹은 window, React Native는 global)
+          const globalObj = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {};
+
+          // Access MMKV views from global / 전역에서 MMKV views 접근
+          const mmkvViews = globalObj.__MMKV_VIEWS__;
+          if (!mmkvViews) {
+            return JSON.stringify({ entries: [] });
+          }
+
+          // Get view for this instance / 이 인스턴스에 대한 view 가져오기
+          const view = mmkvViews.get('${this.instanceId}');
+          if (!view) {
+            return JSON.stringify({ entries: [] });
+          }
+
+          // Get all entries / 모든 엔트리 가져오기
+          const entries = view.getAllEntries();
+
+          // Convert to CDP format (array of [key, value] tuples) / CDP 형식으로 변환 ([key, value] 튜플 배열)
+          const cdpEntries = entries.map(entry => {
+            let valueStr;
+            if (entry.type === 'string') {
+              valueStr = entry.value;
+            } else if (entry.type === 'number') {
+              valueStr = String(entry.value);
+            } else if (entry.type === 'boolean') {
+              valueStr = String(entry.value);
+            } else {
+              // buffer is array of numbers, convert to JSON / buffer는 숫자 배열이므로 JSON으로 변환
+              valueStr = JSON.stringify(entry.value);
+            }
+            return [entry.key, valueStr];
+          });
+
+          // Return as JSON string / JSON 문자열로 반환
+          return JSON.stringify({ entries: cdpEntries });
+        })();
+      `,
+            returnByValue: true,
+        }).then((response) => {
+            if (response.exceptionDetails) {
+                console.error('[MMKVStorage] Error getting items:', response.exceptionDetails.text);
+                return null;
+            }
+            // Parse the JSON string result / JSON 문자열 결과 파싱
+            const resultStr = response.result?.value;
+            if (!resultStr) {
+                return null;
+            }
+            try {
+                const result = JSON.parse(resultStr);
+                return result.entries || null;
+            }
+            catch (e) {
+                console.error('[MMKVStorage] Failed to parse result:', e);
+                return null;
+            }
+        }).catch((error) => {
+            console.error('[MMKVStorage] Failed to get items:', error);
+            return null;
+        });
     }
     setItem(key, value) {
         void this.model.agent.invoke_setMMKVItem({ instanceId: this.instanceId, key, value });
