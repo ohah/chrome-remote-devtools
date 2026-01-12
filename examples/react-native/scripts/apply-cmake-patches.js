@@ -20,8 +20,10 @@ function applyPatch(packageName, buildGradlePath) {
 
   // Check if patch is already applied by looking for the specific patch pattern /
   // 특정 패치 패턴을 확인하여 패치가 이미 적용되었는지 확인
+  // Match the exact patch code pattern including comments /
+  // 주석을 포함한 정확한 패치 코드 패턴 매칭
   const patchAlreadyAppliedPattern =
-    /(\s+cmake\s*\{[\s\S]*?def rootDir = rootProject\.rootDir[\s\S]*?buildStagingDirectory "\$\{rootDir\}\/\.cmake-build\/\$\{project\.name\}")/s;
+    /def rootDir = rootProject\.rootDir[\s\S]*?buildStagingDirectory "\$\{rootDir\}\/\.cmake-build\/\$\{project\.name\}"/s;
   if (patchAlreadyAppliedPattern.test(content)) {
     console.log(`[apply-cmake-patches] ${packageName}: Patch already applied`);
     return;
