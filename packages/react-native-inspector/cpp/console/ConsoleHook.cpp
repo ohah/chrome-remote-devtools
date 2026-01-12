@@ -10,8 +10,10 @@
 #include "ConsoleHook.h"
 #include "ConsoleUtils.h"
 #include "ConsoleEventSender.h"
+#include "ConsoleGlobals.h" // For g_objectIdCounter / g_objectIdCounter를 위해
 #include "../ConsoleHook.h" // For RemoteObject / RemoteObject를 위해
 #include <cstring>
+#include <optional>
 
 // Platform-specific log support / 플랫폼별 로그 지원
 #ifdef __ANDROID__
@@ -105,7 +107,88 @@ bool hookConsoleMethods(facebook::jsi::Runtime& runtime) {
                                     const facebook::jsi::Value& /* this */,
                                     const facebook::jsi::Value* args,
                                     size_t count) -> facebook::jsi::Value {
-            // 1. Convert JSI values to RemoteObjects / JSI 값을 RemoteObject로 변환
+            // 1. Add __cdpObjectId to objects and store in global Map / 객체에 __cdpObjectId 추가하고 전역 Map에 저장
+            // This allows Runtime.getProperties to find objects later / 이를 통해 Runtime.getProperties가 나중에 객체를 찾을 수 있음
+            LOGI("ConsoleHook: console.%s called with %zu arguments / console.%s가 %zu개의 인자로 호출됨", methodName, count, methodName, count);
+            try {
+              // Get or create __cdpObjects Map in global scope / 전역 스코프에서 __cdpObjects Map 가져오기 또는 생성
+              facebook::jsi::Value global = rt.global();
+              facebook::jsi::Object globalObj = global.asObject(rt);
+              facebook::jsi::Value cdpObjectsValue = globalObj.getProperty(rt, "__cdpObjects");
+              LOGI("ConsoleHook: __cdpObjects value type: %s / __cdpObjects 값 타입: %s",
+                   cdpObjectsValue.isUndefined() ? "undefined" : (cdpObjectsValue.isObject() ? "object" : "other"),
+                   cdpObjectsValue.isUndefined() ? "undefined" : (cdpObjectsValue.isObject() ? "object" : "other"));
+
+              std::optional<facebook::jsi::Object> cdpObjectsMapOpt;
+              bool mapExists = false;
+
+              if (cdpObjectsValue.isUndefined() || !cdpObjectsValue.isObject()) {
+                // Create new Map / 새 Map 생성
+                facebook::jsi::Value mapConstructorValue = globalObj.getProperty(rt, "Map");
+                if (mapConstructorValue.isObject() && mapConstructorValue.asObject(rt).isFunction(rt)) {
+                  facebook::jsi::Function mapConstructor = mapConstructorValue.asObject(rt).asFunction(rt);
+                  // callAsConstructor로 Map 인스턴스 생성 / callAsConstructor로 Map 인스턴스 생성
+                  facebook::jsi::Value mapInstance = mapConstructor.callAsConstructor(rt);
+                  if (mapInstance.isObject()) {
+                    cdpObjectsMapOpt = mapInstance.asObject(rt);
+                    globalObj.setProperty(rt, "__cdpObjects", mapInstance);
+                    mapExists = true;
+                    LOGI("ConsoleHook: Created __cdpObjects Map / __cdpObjects Map 생성");
+                  }
+                }
+              } else {
+                cdpObjectsMapOpt = cdpObjectsValue.asObject(rt);
+                mapExists = true;
+                LOGI("ConsoleHook: Using existing __cdpObjects / 기존 __cdpObjects 사용");
+              }
+
+              // Store objects in the Map / Map에 객체 저장
+              if (mapExists && cdpObjectsMapOpt.has_value()) {
+                facebook::jsi::Object& cdpObjectsMap = *cdpObjectsMapOpt;
+                for (size_t i = 0; i < count; i++) {
+                  try {
+                    if (args[i].isObject() && !args[i].isNull()) {
+                      auto obj = args[i].asObject(rt);
+                      // Check if object already has __cdpObjectId / 객체에 이미 __cdpObjectId가 있는지 확인
+                      facebook::jsi::Value existingId = obj.getProperty(rt, "__cdpObjectId");
+                      std::string objectIdStr;
+
+                      if (existingId.isUndefined()) {
+                        // Generate unique objectId / 고유한 objectId 생성
+                        size_t objectId = g_objectIdCounter.fetch_add(1);
+                        objectIdStr = std::to_string(objectId);
+                        // Add __cdpObjectId to the object / 객체에 __cdpObjectId 추가
+                        obj.setProperty(rt, "__cdpObjectId",
+                                        facebook::jsi::String::createFromUtf8(rt, objectIdStr));
+                        LOGI("ConsoleHook: Added __cdpObjectId=%s to object / 객체에 __cdpObjectId=%s 추가", objectIdStr.c_str(), objectIdStr.c_str());
+                      } else {
+                        objectIdStr = existingId.asString(rt).utf8(rt);
+                        LOGI("ConsoleHook: Object already has __cdpObjectId=%s / 객체에 이미 __cdpObjectId=%s가 있음", objectIdStr.c_str(), objectIdStr.c_str());
+                      }
+
+                      // Store object in Map using objectId as key / objectId를 키로 사용하여 Map에 객체 저장
+                      facebook::jsi::Value setMethod = cdpObjectsMap.getProperty(rt, "set");
+                      if (setMethod.isObject() && setMethod.asObject(rt).isFunction(rt)) {
+                        facebook::jsi::Function setFunc = setMethod.asObject(rt).asFunction(rt);
+                        // callWithThis를 사용하여 this 바인딩 / callWithThis를 사용하여 this 바인딩
+                        setFunc.callWithThis(rt, cdpObjectsMap,
+                                             facebook::jsi::String::createFromUtf8(rt, objectIdStr),
+                                             std::move(args[i]));
+                        LOGI("ConsoleHook: Stored object with objectId=%s in __cdpObjects Map / __cdpObjects Map에 objectId=%s인 객체 저장", objectIdStr.c_str(), objectIdStr.c_str());
+                      } else {
+                        LOGW("ConsoleHook: Map.set method not found / Map.set 메서드를 찾을 수 없음");
+                      }
+                    }
+                  } catch (...) {
+                    // Failed to add ID or store object, continue / ID 추가 또는 객체 저장 실패, 계속
+                  }
+                }
+              }
+            } catch (...) {
+              // Failed to create or access __cdpObjects Map, continue / __cdpObjects Map 생성 또는 접근 실패, 계속
+            }
+
+            // 2. Convert JSI values to RemoteObjects / JSI 값을 RemoteObject로 변환
             std::vector<RemoteObject> parsedArgs;
             for (size_t i = 0; i < count; i++) {
               parsedArgs.push_back(jsiValueToRemoteObject(rt, args[i]));

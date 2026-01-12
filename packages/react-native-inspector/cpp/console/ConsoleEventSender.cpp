@@ -119,9 +119,17 @@ void sendConsoleAPICalled(facebook::jsi::Runtime& runtime,
             // Try to parse description as JSON / description을 JSON으로 파싱 시도
             folly::dynamic parsedDesc = folly::parseJson(arg.description);
             if (parsedDesc.isObject()) {
-              // Generate unique objectId / 고유한 objectId 생성
-              size_t objectId = console::g_objectIdCounter.fetch_add(1);
-              argObj["objectId"] = std::to_string(objectId);
+              // Use objectId from RemoteObject if available, otherwise generate new one / RemoteObject에서 objectId를 사용할 수 있으면 사용, 없으면 새로 생성
+              std::string objectIdStr;
+              if (!arg.objectId.empty()) {
+                // Use existing objectId from RemoteObject / RemoteObject의 기존 objectId 사용
+                objectIdStr = arg.objectId;
+              } else {
+                // Generate unique objectId / 고유한 objectId 생성
+                size_t objectId = console::g_objectIdCounter.fetch_add(1);
+                objectIdStr = std::to_string(objectId);
+              }
+              argObj["objectId"] = objectIdStr;
 
               // Store original JSON string for Runtime.getProperties / Runtime.getProperties를 위해 원본 JSON 문자열 저장
               argObj["_originalDescription"] = arg.description;

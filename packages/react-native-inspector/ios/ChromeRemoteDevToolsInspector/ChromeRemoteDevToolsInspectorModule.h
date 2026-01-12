@@ -40,6 +40,13 @@
  */
 + (void)setModuleInstance:(ChromeRemoteDevToolsInspectorModule *)instance;
 
+/**
+ * Get object properties for Runtime.getProperties / Runtime.getProperties를 위한 객체 속성 가져오기
+ * @param objectId Object ID / 객체 ID
+ * @param completion Completion handler with properties JSON string / 속성 JSON 문자열과 함께 완료 핸들러
+ */
++ (void)getObjectProperties:(NSString *)objectId completion:(void (^)(NSString *propertiesJson))completion;
+
 @end
 
 #endif

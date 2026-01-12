@@ -130,6 +130,16 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
                 return
               }
 
+              // Handle Runtime.getProperties request / Runtime.getProperties 요청 처리
+              if (method == "Runtime.getProperties") {
+                Log.d(TAG, "Runtime.getProperties detected! / Runtime.getProperties 감지됨!")
+                val params = message.optJSONObject("params")
+                val objectId = params?.optString("objectId") ?: ""
+                Log.d(TAG, "Runtime.getProperties objectId / Runtime.getProperties objectId: $objectId")
+                sendRuntimeGetPropertiesResponse(cdpRequestId, objectId)
+                return
+              }
+
               // Route other CDP commands to JavaScript handler / 다른 CDP 명령을 JavaScript 핸들러로 라우팅
               // Handler routes based on method name / 핸들러가 메서드 이름을 기준으로 라우팅
               Log.d(TAG, "Routing CDP command to JavaScript handler / CDP 명령을 JavaScript 핸들러로 라우팅: $method")
@@ -291,6 +301,63 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
     val messageStr = response.toString()
     Log.d(TAG, "Sending Network.getResponseBody response / Network.getResponseBody 응답 전송: ${messageStr.take(200)}...")
     sendCDPMessage(messageStr)
+  }
+
+  /**
+   * Send Runtime.getProperties response / Runtime.getProperties 응답 전송
+   * @param requestId CDP request ID / CDP 요청 ID
+   * @param objectId Object ID / 객체 ID
+   * Note: Object properties are retrieved from C++ hook via JNI / 참고: 객체 속성은 JNI를 통해 C++ 훅에서 가져옵니다
+   */
+  private fun sendRuntimeGetPropertiesResponse(requestId: Int, objectId: String) {
+    Log.d(TAG, "sendRuntimeGetPropertiesResponse called / sendRuntimeGetPropertiesResponse 호출됨: requestId=$requestId, objectId=$objectId")
+
+    // Get object properties from C++ hook via JNI / JNI를 통해 C++ 훅에서 객체 속성 가져오기
+    val propertiesJson = try {
+      ChromeRemoteDevToolsLogHookJNI.nativeGetObjectProperties(objectId)
+    } catch (e: Exception) {
+      Log.e(TAG, "Failed to get object properties from C++ hook / C++ 훅에서 객체 속성 가져오기 실패: ${e.message}", e)
+      null
+    }
+
+    if (propertiesJson == null || propertiesJson.isEmpty()) {
+      Log.d(TAG, "Object properties not found for objectId / objectId에 대한 객체 속성을 찾을 수 없음: $objectId")
+      // Return empty result / 빈 결과 반환
+      val response = org.json.JSONObject().apply {
+        put("id", requestId)
+        put("result", org.json.JSONObject().apply {
+          put("result", org.json.JSONArray())
+          put("internalProperties", org.json.JSONArray())
+          put("privateProperties", org.json.JSONArray())
+        })
+      }
+      sendCDPMessage(response.toString())
+      return
+    }
+
+    // Parse the JSON response from C++ / C++에서 받은 JSON 응답 파싱
+    try {
+      val propertiesResult = org.json.JSONObject(propertiesJson)
+      val response = org.json.JSONObject().apply {
+        put("id", requestId)
+        put("result", propertiesResult)
+      }
+      val messageStr = response.toString()
+      Log.d(TAG, "Sending Runtime.getProperties response / Runtime.getProperties 응답 전송: ${messageStr.take(200)}...")
+      sendCDPMessage(messageStr)
+    } catch (e: Exception) {
+      Log.e(TAG, "Failed to parse properties JSON / 속성 JSON 파싱 실패: ${e.message}", e)
+      // Return empty result on error / 에러 시 빈 결과 반환
+      val response = org.json.JSONObject().apply {
+        put("id", requestId)
+        put("result", org.json.JSONObject().apply {
+          put("result", org.json.JSONArray())
+          put("internalProperties", org.json.JSONArray())
+          put("privateProperties", org.json.JSONArray())
+        })
+      }
+      sendCDPMessage(response.toString())
+    }
   }
 
   /**

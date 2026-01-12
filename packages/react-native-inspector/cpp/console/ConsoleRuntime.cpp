@@ -12,15 +12,83 @@
 #include "ConsoleGlobals.h"
 #include <folly/json.h>
 
+// Platform-specific log support / 플랫폼별 로그 지원
+#ifdef __ANDROID__
+#include <android/log.h>
+#define LOG_TAG "ConsoleRuntime"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
+#else
+#define LOGI(...)
+#define LOGW(...)
+#endif
+
 namespace chrome_remote_devtools {
 namespace console {
 
 // Find object by __cdpObjectId in runtime / 런타임에서 __cdpObjectId로 객체 찾기
 facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::string& objectId) {
+  LOGI("findObjectById: Looking for objectId=%s / objectId=%s인 객체 찾기", objectId.c_str(), objectId.c_str());
+
   try {
-    // Search in global scope / 전역 스코프에서 검색
-    auto global = runtime.global();
-    auto propertyNames = global.getPropertyNames(runtime);
+    // First, try to get object from __cdpObjects Map / 먼저 __cdpObjects Map에서 객체 가져오기 시도
+    auto globalObj = runtime.global();
+
+    try {
+      facebook::jsi::Value cdpObjectsValue = globalObj.getProperty(runtime, "__cdpObjects");
+      if (cdpObjectsValue.isUndefined()) {
+        LOGW("findObjectById: __cdpObjects is undefined / __cdpObjects가 undefined임");
+      } else if (!cdpObjectsValue.isObject()) {
+        LOGW("findObjectById: __cdpObjects is not an object / __cdpObjects가 객체가 아님");
+      } else {
+        facebook::jsi::Object cdpObjectsObj = cdpObjectsValue.asObject(runtime);
+
+        // Check if it's a Map by checking for Map-specific methods / Map 특정 메서드 확인하여 Map인지 확인
+        facebook::jsi::Value getMethod = cdpObjectsObj.getProperty(runtime, "get");
+        bool isMap = getMethod.isObject() && getMethod.asObject(runtime).isFunction(runtime);
+
+        if (isMap) {
+          LOGI("findObjectById: Found __cdpObjects Map, calling Map.get with objectId=%s / __cdpObjects Map 찾음, objectId=%s로 Map.get 호출", objectId.c_str(), objectId.c_str());
+          facebook::jsi::Function getFunc = getMethod.asObject(runtime).asFunction(runtime);
+          try {
+            // callWithThis를 사용하여 this 바인딩 / callWithThis를 사용하여 this 바인딩
+            facebook::jsi::Value objValue = getFunc.callWithThis(runtime, cdpObjectsObj,
+                                                                  facebook::jsi::String::createFromUtf8(runtime, objectId));
+            if (objValue.isUndefined()) {
+              LOGW("findObjectById: Map.get returned undefined for objectId=%s / Map.get이 objectId=%s에 대해 undefined 반환", objectId.c_str(), objectId.c_str());
+            } else if (!objValue.isObject() || objValue.isNull()) {
+              LOGW("findObjectById: Map.get returned non-object for objectId=%s / Map.get이 objectId=%s에 대해 객체가 아닌 값 반환", objectId.c_str(), objectId.c_str());
+            } else {
+              LOGI("findObjectById: Found object in Map for objectId=%s / Map에서 objectId=%s인 객체 찾음", objectId.c_str(), objectId.c_str());
+              return objValue;  // Found in Map! / Map에서 찾음!
+            }
+          } catch (const std::exception& e) {
+            LOGW("findObjectById: Exception calling Map.get: %s / Map.get 호출 중 예외: %s", e.what(), e.what());
+          } catch (...) {
+            LOGW("findObjectById: Unknown exception calling Map.get / Map.get 호출 중 알 수 없는 예외");
+          }
+        } else {
+          // Not a Map, try as regular object / Map이 아니면 일반 객체로 시도
+          LOGI("findObjectById: __cdpObjects is not a Map, trying as regular object with key=%s / __cdpObjects가 Map이 아님, 키=%s로 일반 객체로 시도", objectId.c_str(), objectId.c_str());
+          try {
+            facebook::jsi::Value objValue = cdpObjectsObj.getProperty(runtime, objectId.c_str());
+            if (!objValue.isUndefined() && objValue.isObject() && !objValue.isNull()) {
+              LOGI("findObjectById: Found object in __cdpObjects for objectId=%s / __cdpObjects에서 objectId=%s인 객체 찾음", objectId.c_str(), objectId.c_str());
+              return objValue;
+            }
+          } catch (...) {
+            LOGW("findObjectById: Exception getting property from __cdpObjects / __cdpObjects에서 속성 가져오기 중 예외");
+          }
+        }
+      }
+    } catch (const std::exception& e) {
+      LOGW("findObjectById: Exception getting from __cdpObjects: %s / __cdpObjects에서 가져오기 중 예외: %s", e.what(), e.what());
+    } catch (...) {
+      LOGW("findObjectById: Unknown exception getting from __cdpObjects / __cdpObjects에서 가져오기 중 알 수 없는 예외");
+    }
+
+    // Fallback: Search in global scope / 폴백: 전역 스코프에서 검색
+    auto propertyNames = globalObj.getPropertyNames(runtime);
 
     for (size_t i = 0; i < propertyNames.size(runtime); i++) {
       try {
@@ -28,7 +96,7 @@ facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::
         if (!nameValue.isString()) continue;
 
         std::string propName = nameValue.asString(runtime).utf8(runtime);
-        auto propValue = global.getProperty(runtime, propName.c_str());
+        auto propValue = globalObj.getProperty(runtime, propName.c_str());
 
         // Check if it's an object / 객체인지 확인
         if (propValue.isObject() && !propValue.isNull()) {
@@ -62,7 +130,7 @@ facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::
     const char* globalNames[] = {"window", "global", "globalThis"};
     for (const char* globalName : globalNames) {
       try {
-        auto globalObjValue = global.getProperty(runtime, globalName);
+        auto globalObjValue = globalObj.getProperty(runtime, globalName);
         if (globalObjValue.isObject()) {
           auto globalObj = globalObjValue.asObject(runtime);
           auto propertyNames = globalObj.getPropertyNames(runtime);
@@ -105,11 +173,14 @@ facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::
 std::string getObjectProperties(facebook::jsi::Runtime& runtime, const std::string& objectId, bool ownProperties) {
   (void)ownProperties; // Suppress unused parameter warning / 사용되지 않은 파라미터 경고 억제
 
+  LOGI("getObjectProperties: Getting properties for objectId=%s / objectId=%s의 속성 가져오기", objectId.c_str(), objectId.c_str());
+
   try {
     // Find object by ID / ID로 객체 찾기
     auto objValue = findObjectById(runtime, objectId);
     if (objValue.isUndefined() || !objValue.isObject() || objValue.isNull()) {
       // Object not found, return empty result / 객체를 찾지 못함, 빈 결과 반환
+      LOGW("getObjectProperties: Object not found for objectId=%s / objectId=%s인 객체를 찾을 수 없음", objectId.c_str(), objectId.c_str());
       folly::dynamic response = folly::dynamic::object;
       response["result"] = folly::dynamic::array();
       response["internalProperties"] = folly::dynamic::array();
@@ -117,6 +188,8 @@ std::string getObjectProperties(facebook::jsi::Runtime& runtime, const std::stri
       folly::json::serialization_opts opts;
       return folly::json::serialize(response, opts);
     }
+
+    LOGI("getObjectProperties: Object found for objectId=%s, getting properties / objectId=%s인 객체 찾음, 속성 가져오기", objectId.c_str(), objectId.c_str());
 
     auto obj = objValue.asObject(runtime);
     folly::dynamic properties = folly::dynamic::array();
@@ -176,27 +249,13 @@ std::string getObjectProperties(facebook::jsi::Runtime& runtime, const std::stri
           valueObj["subtype"] = "null";
           valueObj["value"] = nullptr;
         } else if (remoteObj.type == "object") {
-          // For nested objects, generate objectId if needed / 중첩된 객체의 경우 필요하면 objectId 생성
-          // For now, just show as Object / 지금은 Object로만 표시
-          valueObj["description"] = "Object";
+          // jsiValueToRemoteObject already generated objectId and stored in Map / jsiValueToRemoteObject가 이미 objectId를 생성하고 Map에 저장함
+          valueObj["description"] = remoteObj.description.empty() ? "Object" : remoteObj.description;
           valueObj["className"] = "Object";
 
-          // If description contains JSON, we could add objectId / description에 JSON이 있으면 objectId 추가 가능
-          if (!remoteObj.description.empty() && remoteObj.description[0] == '{') {
-            size_t nestedObjectId = console::g_objectIdCounter.fetch_add(1);
-            std::string nestedIdStr = std::to_string(nestedObjectId);
-
-            // Try to add __cdpObjectId to nested object / 중첩된 객체에 __cdpObjectId 추가 시도
-            try {
-              if (propValue.isObject() && !propValue.isNull()) {
-                auto nestedObj = propValue.asObject(runtime);
-                nestedObj.setProperty(runtime, "__cdpObjectId",
-                                      facebook::jsi::String::createFromUtf8(runtime, nestedIdStr));
-                valueObj["objectId"] = nestedIdStr;
-              }
-            } catch (...) {
-              // Failed to add ID to nested object / 중첩된 객체에 ID 추가 실패
-            }
+          // Use objectId from RemoteObject (already set by jsiValueToRemoteObject) / RemoteObject의 objectId 사용 (jsiValueToRemoteObject가 이미 설정함)
+          if (!remoteObj.objectId.empty()) {
+            valueObj["objectId"] = remoteObj.objectId;
           }
         }
 

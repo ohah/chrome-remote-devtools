@@ -173,7 +173,7 @@ bool isConsoleHookEnabled(facebook::jsi::Runtime& runtime) {
     }
   } catch (const std::exception& e) {
     // Failed to check runtime state / 런타임 상태 확인 실패
-    LOGW("isConsoleHookEnabled: Exception checking runtime state: %s / 런타임 상태 확인 중 예외: %s", e.what());
+    LOGW("isConsoleHookEnabled: Exception checking runtime state: %s", e.what());
   } catch (...) {
     // Failed to check runtime state / 런타임 상태 확인 실패
     LOGW("isConsoleHookEnabled: Unknown exception checking runtime state / 런타임 상태 확인 중 알 수 없는 예외");
