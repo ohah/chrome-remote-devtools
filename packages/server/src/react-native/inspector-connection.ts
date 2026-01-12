@@ -6,7 +6,7 @@ import { log, logError } from '../socket-server';
  */
 export interface ReduxStoreInstance {
   /** Instance ID / 인스턴스 ID */
-  instanceId: number;
+  instanceId: string | number;
   /** Store name / Store 이름 */
   name: string;
   /** Current state (JSON string) / 현재 상태 (JSON 문자열) */
@@ -32,7 +32,7 @@ export interface ReactNativeInspectorConnection {
   /** Associated client ID (if connected to a client) / 연결된 클라이언트 ID (클라이언트에 연결된 경우) */
   clientId?: string;
   /** Redux store instances / Redux store 인스턴스 */
-  reduxStores?: Map<number, ReduxStoreInstance>;
+  reduxStores?: Map<string | number, ReduxStoreInstance>;
 }
 
 /**
@@ -170,7 +170,7 @@ export class ReactNativeInspectorConnectionManager {
    */
   updateReduxState(
     inspectorId: string,
-    instanceId: number,
+    instanceId: string | number,
     payload: string,
     timestamp: number
   ): void {
