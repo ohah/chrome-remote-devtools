@@ -33,11 +33,6 @@
       "react-native": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./redux": {
-      "types": "./src/redux.ts",
-      "react-native": "./src/redux.ts",
-      "default": "./src/redux.ts"
-    },
     "./redux-devtools-extension": {
       "types": "./src/redux-devtools-extension.ts",
       "react-native": "./src/redux-devtools-extension.ts",
