@@ -93,6 +93,15 @@ export function setServerConnection(host: string, port: number): void {
 }
 
 /**
+ * Reset connection state (for testing only) / 연결 상태 리셋 (테스트 전용)
+ */
+export function resetConnectionState(): void {
+  isConnected = false;
+  serverHost = '';
+  serverPort = 0;
+}
+
+/**
  * Send CDP message / CDP 메시지 전송
  */
 function sendCDPMessage(message: object): void {
@@ -185,7 +194,10 @@ function flushPendingActions(): void {
         typeof normalizedAction === 'object' &&
         'type' in normalizedAction === false
       ) {
-        normalizedAction = { ...(normalizedAction as Record<string, unknown>), type: '@@ZUSTAND/SET' };
+        normalizedAction = {
+          ...(normalizedAction as Record<string, unknown>),
+          type: '@@ZUSTAND/SET',
+        };
       }
 
       // Send ACTION message / ACTION 메시지 전송
@@ -299,7 +311,10 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
         typeof normalizedAction === 'object' &&
         'type' in normalizedAction === false
       ) {
-        normalizedAction = { ...(normalizedAction as Record<string, unknown>), type: anonymousActionType };
+        normalizedAction = {
+          ...(normalizedAction as Record<string, unknown>),
+          type: anonymousActionType,
+        };
       }
 
       // Get and increment next action ID for this instance / 이 instance의 다음 액션 ID 가져오기 및 증가
