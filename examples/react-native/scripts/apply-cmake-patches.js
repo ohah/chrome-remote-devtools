@@ -41,16 +41,14 @@ function applyPatch(packageName, buildGradlePath) {
 
   // Use rootProject.rootDir instead of parentFile chain for more robust path resolution /
   // 더 견고한 경로 해석을 위해 parentFile 체인 대신 rootProject.rootDir 사용
-  const patchCode = '\n' +
-      '      // Use shorter build directory to avoid Windows path length limit\n' +
-      '      // Windows 경로 길이 제한을 피하기 위해 더 짧은 빌드 디렉토리 사용\n' +
-      '      def rootDir = rootProject.rootDir\n' +
-      '      buildStagingDirectory "${rootDir}/.cmake-build/${project.name}"';
+  const patchCode =
+    '\n' +
+    '      // Use shorter build directory to avoid Windows path length limit\n' +
+    '      // Windows 경로 길이 제한을 피하기 위해 더 짧은 빌드 디렉토리 사용\n' +
+    '      def rootDir = rootProject.rootDir\n' +
+    '      buildStagingDirectory "${rootDir}/.cmake-build/${project.name}"';
 
-  content = content.replace(
-    cmakeBlockPattern,
-    `$1${patchCode}\n$2`
-  );
+  content = content.replace(cmakeBlockPattern, `$1${patchCode}\n$2`);
 
   // Add error handling for file write operation / 파일 쓰기 작업에 대한 에러 처리 추가
   try {
