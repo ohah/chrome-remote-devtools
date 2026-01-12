@@ -1,0 +1,34 @@
+[package]
+name = "chrome-remote-devtools-server"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Chrome Remote DevTools WebSocket relay server"
+
+[lib]
+name = "chrome_remote_devtools_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "chrome-remote-devtools-server"
+path = "src/main.rs"
+
+[dependencies]
+# 워크스페이스 의존성 사용
+tokio.workspace = true
+tokio-tungstenite.workspace = true
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+rustls.workspace = true
+rustls-pemfile.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+clap.workspace = true
+
+# 추가 의존성
+url = "2.5"
+thiserror = "1.0"

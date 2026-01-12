@@ -1,0 +1,64 @@
+// Chrome Remote DevTools Server - Standalone binary / Chrome Remote DevTools 서버 - 독립 실행형 바이너리
+use chrome_remote_devtools_server::ServerConfig;
+use clap::Parser;
+
+#[derive(Parser)]
+#[command(name = "chrome-remote-devtools-server")]
+#[command(about = "Chrome Remote DevTools WebSocket relay server")]
+struct Cli {
+    /// Server port / 서버 포트
+    #[arg(short, long, default_value = "8080")]
+    port: u16,
+
+    /// Server host / 서버 호스트
+    #[arg(short = 'H', long, default_value = "0.0.0.0")]
+    host: String,
+
+    /// Enable HTTPS/WSS / HTTPS/WSS 활성화
+    #[arg(long)]
+    ssl: bool,
+
+    /// Path to SSL certificate file / SSL 인증서 파일 경로
+    #[arg(long)]
+    cert: Option<String>,
+
+    /// Path to SSL private key file / SSL 개인 키 파일 경로
+    #[arg(long)]
+    key: Option<String>,
+
+    /// Enable logging / 로깅 활성화
+    #[arg(long)]
+    log_enabled: bool,
+
+    /// Comma-separated list of CDP methods to log / 로깅할 CDP 메소드 목록 (쉼표로 구분)
+    #[arg(long)]
+    log_methods: Option<String>,
+
+    /// Path to log file / 로그 파일 경로
+    #[arg(long)]
+    log_file: Option<String>,
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let cli = Cli::parse();
+
+    let config = ServerConfig {
+        port: cli.port,
+        host: cli.host,
+        use_ssl: cli.ssl,
+        ssl_cert_path: cli.cert,
+        ssl_key_path: cli.key,
+        log_enabled: cli.log_enabled,
+        log_methods: cli.log_methods,
+        log_file: cli.log_file,
+    };
+
+    // TODO: Implement server startup / 서버 시작 구현
+    // run_server(config).await?;
+
+    println!("Server configuration: {:?}", config);
+    println!("TODO: Server implementation pending / 서버 구현 대기 중");
+
+    Ok(())
+}
