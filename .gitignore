@@ -89,6 +89,12 @@ playwright-report/
 *.dex
 *.class
 
+# CMake build directories / CMake 빌드 디렉토리
+.cmake-build/
+**/.cmake-build/
+**/build/
+**/.cxx/
+
 # React Native / Expo
 **/.expo/
 **/.expo-shared/
