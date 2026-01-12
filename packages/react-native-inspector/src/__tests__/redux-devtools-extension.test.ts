@@ -79,8 +79,15 @@ describe('Redux DevTools Extension Polyfill', () => {
 
     test('should queue actions before connection is ready / 연결 준비 전에 액션 대기열에 추가', () => {
       installReduxDevToolsPolyfill();
+      // Reset connection state to ensure connection is not ready / 연결 상태를 리셋하여 연결이 준비되지 않았음을 보장
+      resetConnectionState();
+      setCDPMessageSender(() => {});
+
       const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
       const connection = extension.connect({ name: 'TestStore' });
+
+      // Clear any existing pending actions / 기존 pending actions 제거
+      clearPendingActions();
 
       // Send action before connection is ready / 연결 준비 전에 액션 전송
       connection.send({ type: 'TEST_ACTION' }, { count: 1 });
