@@ -33,6 +33,7 @@ struct RemoteObject {
   std::string subtype;  // Optional: "array", "null", "error", etc. / 선택사항: "array", "null", "error" 등
   std::string value;    // For primitive types / 기본 타입용
   std::string description;  // For objects, contains JSON stringified value / 객체의 경우 JSON 문자열화된 값 포함
+  std::string objectId;  // Optional: Object ID for Runtime.getProperties / 선택사항: Runtime.getProperties를 위한 객체 ID
 };
 
 /**

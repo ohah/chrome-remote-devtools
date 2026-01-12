@@ -231,6 +231,109 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
       return; // Don't forward the original message / 원본 메시지를 전달하지 않음
     }
 
+    // Handle Runtime.getProperties request / Runtime.getProperties 요청 처리
+    if ([method isEqualToString:@"Runtime.getProperties"]) {
+      NSNumber *requestId = messageDict[@"id"];
+      NSDictionary *params = messageDict[@"params"];
+      NSString *objectId = params[@"objectId"] ?: @"";
+      RCTLogInfo(@"[ChromeRemoteDevTools] Runtime.getProperties detected! / Runtime.getProperties 감지됨: objectId=%@", objectId);
+
+      // Get object properties from C++ hook via Module / Module을 통해 C++ 훅에서 객체 속성 가져오기
+      // Note: This is async, so we handle response in completion handler / 참고: 이것은 비동기이므로 completion handler에서 응답 처리
+      [ChromeRemoteDevToolsInspectorModule getObjectProperties:objectId completion:^(NSString *propertiesJson) {
+        if (!propertiesJson || propertiesJson.length == 0) {
+          RCTLogInfo(@"[ChromeRemoteDevTools] Object properties not found for objectId / objectId에 대한 객체 속성을 찾을 수 없음: %@", objectId);
+          // Return empty result / 빈 결과 반환
+          NSDictionary *response = @{
+            @"id": requestId,
+            @"result": @{
+              @"result": @[],
+              @"internalProperties": @[],
+              @"privateProperties": @[]
+            }
+          };
+          NSError *responseError = nil;
+          NSData *responseJsonData = [NSJSONSerialization dataWithJSONObject:response options:0 error:&responseError];
+          if (!responseError && responseJsonData) {
+            NSString *responseStr = [[NSString alloc] initWithData:responseJsonData encoding:NSUTF8StringEncoding];
+            if (responseStr) {
+              [self send:[responseStr UTF8String]];
+            }
+          }
+          return;
+        }
+
+        // Parse the JSON response from C++ / C++에서 받은 JSON 응답 파싱
+        NSError *parseError = nil;
+        NSData *propertiesData = [propertiesJson dataUsingEncoding:NSUTF8StringEncoding];
+        NSDictionary *propertiesResult = [NSJSONSerialization JSONObjectWithData:propertiesData options:0 error:&parseError];
+
+        if (parseError || !propertiesResult) {
+          RCTLogError(@"[ChromeRemoteDevTools] Failed to parse properties JSON / 속성 JSON 파싱 실패: %@", parseError);
+          // Return empty result on error / 에러 시 빈 결과 반환
+          NSDictionary *response = @{
+            @"id": requestId,
+            @"result": @{
+              @"result": @[],
+              @"internalProperties": @[],
+              @"privateProperties": @[]
+            }
+          };
+          NSError *responseError = nil;
+          NSData *responseJsonData = [NSJSONSerialization dataWithJSONObject:response options:0 error:&responseError];
+          if (!responseError && responseJsonData) {
+            NSString *responseStr = [[NSString alloc] initWithData:responseJsonData encoding:NSUTF8StringEncoding];
+            if (responseStr) {
+              [self send:[responseStr UTF8String]];
+            }
+          }
+          return;
+        }
+
+        NSDictionary *response = @{
+          @"id": requestId,
+          @"result": propertiesResult
+        };
+
+        NSError *responseError = nil;
+        NSData *responseJsonData = [NSJSONSerialization dataWithJSONObject:response options:0 error:&responseError];
+        if (!responseError && responseJsonData) {
+          NSString *responseStr = [[NSString alloc] initWithData:responseJsonData encoding:NSUTF8StringEncoding];
+          if (responseStr) {
+            RCTLogInfo(@"[ChromeRemoteDevTools] Sending Runtime.getProperties response / Runtime.getProperties 응답 전송: %@", [responseStr substringToIndex:MIN(200, responseStr.length)]);
+            [self send:[responseStr UTF8String]];
+            return; // Don't forward the original message / 원본 메시지를 전달하지 않음
+          } else {
+            RCTLogError(@"[ChromeRemoteDevTools] Failed to encode Runtime.getProperties response as UTF-8 string / Runtime.getProperties 응답을 UTF-8 문자열로 인코딩 실패");
+          }
+        } else {
+          RCTLogError(@"[ChromeRemoteDevTools] Failed to serialize Runtime.getProperties response: %@ / Runtime.getProperties 응답 직렬화 실패: %@", responseError, response);
+        }
+
+        // Send error response if serialization failed / 직렬화 실패 시 오류 응답 전송
+        NSDictionary *errorResponse = @{
+          @"id": requestId,
+          @"error": @{
+            @"code": @(-32000),
+            @"message": @"Failed to serialize Runtime.getProperties response"
+          }
+        };
+        NSError *errorSerializationError = nil;
+        NSData *errorJsonData = [NSJSONSerialization dataWithJSONObject:errorResponse options:0 error:&errorSerializationError];
+        if (!errorSerializationError && errorJsonData) {
+          NSString *errorStr = [[NSString alloc] initWithData:errorJsonData encoding:NSUTF8StringEncoding];
+          if (errorStr) {
+            RCTLogInfo(@"[ChromeRemoteDevTools] Sending Runtime.getProperties error response / Runtime.getProperties 오류 응답 전송: %@", [errorStr substringToIndex:MIN(200, errorStr.length)]);
+            [self send:[errorStr UTF8String]];
+            return; // Don't forward the original message / 원본 메시지를 전달하지 않음
+          }
+        }
+        // If we reach here, even the error response serialization failed. Log and avoid forwarding.
+        RCTLogError(@"[ChromeRemoteDevTools] Failed to serialize Runtime.getProperties error response / Runtime.getProperties 오류 응답 직렬화 실패");
+      }];
+      return; // Don't forward the original message / 원본 메시지를 전달하지 않음
+    }
+
     // Route other CDP commands to JavaScript handler / 다른 CDP 명령을 JavaScript 핸들러로 라우팅
     // Handler routes based on method name / 핸들러가 메서드 이름을 기준으로 라우팅
     RCTLogInfo(@"[ChromeRemoteDevTools] Routing CDP command to JavaScript handler / CDP 명령을 JavaScript 핸들러로 라우팅: %@", method);

@@ -8,6 +8,18 @@
  */
 
 #include "ConsoleUtils.h"
+#include "ConsoleGlobals.h"
+
+// Platform-specific log support / 플랫폼별 로그 지원
+#ifdef __ANDROID__
+#include <android/log.h>
+#define LOG_TAG "ConsoleUtils"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
+#else
+#define LOGI(...)
+#define LOGW(...)
+#endif
 
 namespace chrome_remote_devtools {
 namespace console {
@@ -36,6 +48,63 @@ RemoteObject jsiValueToRemoteObject(facebook::jsi::Runtime& runtime, const faceb
       // For objects, do NOT set value field / 객체의 경우 value 필드를 설정하지 않음
       // Only set description with JSON stringified value / description에만 JSON 문자열화된 값을 설정
       // This allows DevTools to display it as an object, not a string / 이를 통해 DevTools가 문자열이 아닌 객체로 표시할 수 있음
+
+      // Always generate objectId for objects and store in Map (like web CDP client) / 객체에 대해 항상 objectId 생성하고 Map에 저장 (웹 CDP 클라이언트처럼)
+      try {
+        auto obj = value.asObject(runtime);
+        facebook::jsi::Value cdpIdValue = obj.getProperty(runtime, "__cdpObjectId");
+        std::string objectIdStr;
+
+        if (cdpIdValue.isString()) {
+          // Use existing objectId / 기존 objectId 사용
+          objectIdStr = cdpIdValue.asString(runtime).utf8(runtime);
+          result.objectId = objectIdStr;
+        } else {
+          // Generate new objectId / 새 objectId 생성
+          size_t objectId = console::g_objectIdCounter.fetch_add(1);
+          objectIdStr = std::to_string(objectId);
+
+          // Add __cdpObjectId to object / 객체에 __cdpObjectId 추가
+          obj.setProperty(runtime, "__cdpObjectId",
+                          facebook::jsi::String::createFromUtf8(runtime, objectIdStr));
+
+          // Store in __cdpObjects Map / __cdpObjects Map에 저장
+          try {
+            auto globalObj = runtime.global();
+            facebook::jsi::Value cdpObjectsValue = globalObj.getProperty(runtime, "__cdpObjects");
+            if (cdpObjectsValue.isUndefined() || !cdpObjectsValue.isObject()) {
+              // Create new Map if doesn't exist / 없으면 새 Map 생성
+              facebook::jsi::Value mapConstructorValue = globalObj.getProperty(runtime, "Map");
+              if (mapConstructorValue.isObject() && mapConstructorValue.asObject(runtime).isFunction(runtime)) {
+                facebook::jsi::Function mapConstructor = mapConstructorValue.asObject(runtime).asFunction(runtime);
+                facebook::jsi::Value mapInstance = mapConstructor.callAsConstructor(runtime);
+                if (mapInstance.isObject()) {
+                  globalObj.setProperty(runtime, "__cdpObjects", mapInstance);
+                  // Get the newly created Map / 새로 생성된 Map 가져오기
+                  cdpObjectsValue = globalObj.getProperty(runtime, "__cdpObjects");
+                }
+              }
+            }
+
+            if (cdpObjectsValue.isObject()) {
+              facebook::jsi::Object cdpObjectsMap = cdpObjectsValue.asObject(runtime);
+              facebook::jsi::Value setMethod = cdpObjectsMap.getProperty(runtime, "set");
+              if (setMethod.isObject() && setMethod.asObject(runtime).isFunction(runtime)) {
+                facebook::jsi::Function setFunc = setMethod.asObject(runtime).asFunction(runtime);
+                setFunc.callWithThis(runtime, cdpObjectsMap,
+                                     facebook::jsi::String::createFromUtf8(runtime, objectIdStr),
+                                     value);
+              }
+            }
+          } catch (...) {
+            // Failed to store in Map, continue / Map에 저장 실패, 계속
+          }
+
+          result.objectId = objectIdStr;
+        }
+      } catch (...) {
+        // Failed to process objectId / objectId 처리 실패
+      }
 
       // Try to stringify object using JSON.stringify / JSON.stringify를 사용하여 객체 문자열화 시도
       try {

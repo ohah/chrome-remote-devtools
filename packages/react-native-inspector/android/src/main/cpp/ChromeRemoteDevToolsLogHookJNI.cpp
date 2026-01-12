@@ -689,11 +689,17 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeGetObjec
 
     const char* objectIdStr = env->GetStringUTFChars(objectId, nullptr);
     if (!objectIdStr) {
+      __android_log_print(ANDROID_LOG_WARN, TAG,
+                          "nativeGetObjectProperties: objectId is null / objectId가 null임");
       return nullptr;
     }
 
     std::string objectIdCpp(objectIdStr);
     env->ReleaseStringUTFChars(objectId, objectIdStr);
+
+    __android_log_print(ANDROID_LOG_INFO, TAG,
+                        "nativeGetObjectProperties: objectId=%s (length=%zu) / objectId=%s (길이=%zu)",
+                        objectIdCpp.c_str(), objectIdCpp.length(), objectIdCpp.c_str(), objectIdCpp.length());
 
 #ifdef REACT_NATIVE_JSI_AVAILABLE
     // Get RuntimeExecutor from stored reference / 저장된 참조에서 RuntimeExecutor 가져오기
@@ -710,23 +716,44 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeGetObjec
     }
 
     // Access runtime and get object properties / 런타임에 접근하고 객체 속성 가져오기
-    std::string resultJson;
-    bool success = false;
+    // Copy objectId to ensure it's captured correctly in lambda / 람다에서 올바르게 캡처되도록 objectId 복사
+    std::string objectIdCopy = objectIdCpp;
 
-    executor([&](facebook::jsi::Runtime& runtime) {
+    // Use promise/future to wait for async executor completion / 비동기 executor 완료를 기다리기 위해 promise/future 사용
+    std::promise<std::string> promise;
+    std::future<std::string> future = promise.get_future();
+
+    executor([objectIdCopy, &promise](facebook::jsi::Runtime& runtime) {
       try {
-        resultJson = chrome_remote_devtools::getObjectProperties(runtime, objectIdCpp, false);
-        success = true;
+        __android_log_print(ANDROID_LOG_INFO, TAG,
+                            "executor: Calling getObjectProperties with objectId=%s (length=%zu) / executor: objectId=%s (길이=%zu)로 getObjectProperties 호출",
+                            objectIdCopy.c_str(), objectIdCopy.length(), objectIdCopy.c_str(), objectIdCopy.length());
+        std::string resultJson = chrome_remote_devtools::getObjectProperties(runtime, objectIdCopy, false);
+        __android_log_print(ANDROID_LOG_INFO, TAG,
+                            "executor: getObjectProperties returned result (length=%zu) / executor: getObjectProperties가 결과 반환 (길이=%zu)",
+                            resultJson.length(), resultJson.length());
+        promise.set_value(resultJson);
       } catch (const std::exception& e) {
         __android_log_print(ANDROID_LOG_ERROR, TAG,
                             "Exception in getObjectProperties: %s", e.what());
+        promise.set_value("");
       } catch (...) {
         __android_log_print(ANDROID_LOG_ERROR, TAG,
                             "Unknown exception in getObjectProperties");
+        promise.set_value("");
       }
     });
 
-    if (success && !resultJson.empty()) {
+    // Wait for result with timeout / 타임아웃과 함께 결과 대기
+    auto status = future.wait_for(std::chrono::seconds(5));
+    if (status == std::future_status::timeout) {
+      __android_log_print(ANDROID_LOG_ERROR, TAG,
+                          "getObjectProperties timed out / getObjectProperties 타임아웃");
+      return nullptr;
+    }
+
+    std::string resultJson = future.get();
+    if (!resultJson.empty()) {
       jstring result = env->NewStringUTF(resultJson.c_str());
       return result;
     }

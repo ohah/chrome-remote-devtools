@@ -216,6 +216,42 @@ static RCTLogFunction ChromeRemoteDevToolsLogFunction = ^(
   g_moduleInstance = instance;
 }
 
++ (void)getObjectProperties:(NSString *)objectId completion:(void (^)(NSString *propertiesJson))completion {
+  if (!g_runtimeExecutor) {
+    NSLog(@"[ChromeRemoteDevToolsInspectorModule] Runtime executor is not available, returning empty result / Runtime executor를 사용할 수 없어 빈 결과 반환");
+    completion(@"");
+    return;
+  }
+
+  std::string objectIdCpp = [objectId UTF8String];
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] getObjectProperties called with objectId: %s / getObjectProperties 호출됨, objectId: %s", objectIdCpp.c_str(), objectIdCpp.c_str());
+
+  g_runtimeExecutor([objectIdCpp, completion](facebook::jsi::Runtime& runtime) {
+    try {
+#ifdef CONSOLE_HOOK_AVAILABLE
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] Getting object properties for objectId: %s / objectId에 대한 객체 속성 가져오기: %s", objectIdCpp.c_str(), objectIdCpp.c_str());
+      // Get object properties from C++ hook / C++ 훅에서 객체 속성 가져오기
+      std::string propertiesJson = chrome_remote_devtools::getObjectProperties(runtime, objectIdCpp, false);
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] Got properties JSON, length: %zu / 속성 JSON 가져옴, 길이: %zu", propertiesJson.length(), propertiesJson.length());
+      if (propertiesJson.length() > 0) {
+        NSLog(@"[ChromeRemoteDevToolsInspectorModule] Properties JSON (first 200 chars): %s / 속성 JSON (처음 200자): %s", propertiesJson.substr(0, 200).c_str(), propertiesJson.substr(0, 200).c_str());
+      }
+      NSString *propertiesJsonStr = [NSString stringWithUTF8String:propertiesJson.c_str()];
+      completion(propertiesJsonStr ?: @"");
+#else
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] Console hook not available, returning empty result / Console 훅을 사용할 수 없어 빈 결과 반환");
+      completion(@"");
+#endif
+    } catch (const std::exception& e) {
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] Exception in getObjectProperties: %s / getObjectProperties에서 예외 발생: %s", e.what());
+      completion(@"");
+    } catch (...) {
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] Unknown exception in getObjectProperties / getObjectProperties에서 알 수 없는 예외 발생");
+      completion(@"");
+    }
+  });
+}
+
 RCT_EXPORT_MODULE(ChromeRemoteDevToolsInspector)
 
 + (BOOL)requiresMainQueueSetup {
