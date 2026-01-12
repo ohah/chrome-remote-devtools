@@ -1,0 +1,102 @@
+name: Test React Native Inspector
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  check:
+    name: Check if should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.react-native-inspector }}
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            react-native-inspector:
+              - 'packages/react-native-inspector/**'
+              - '.github/workflows/test-react-native-inspector.yml'
+
+  test:
+    name: Test React Native Inspector Package
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Skip if no changes
+        if: needs.check.outputs.should-run != 'true'
+        run: echo "No react-native-inspector changes, skipping tests"
+        continue-on-error: false
+
+      - name: Setup Bun
+        if: needs.check.outputs.should-run == 'true'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        if: needs.check.outputs.should-run == 'true'
+        run: bun install
+
+      - name: Run tests with coverage
+        if: needs.check.outputs.should-run == 'true'
+        run: bun test packages/react-native-inspector/src/__tests__ --coverage
+
+      - name: Generate coverage comment
+        if: needs.check.outputs.should-run == 'true' && github.event_name == 'pull_request'
+        run: bun scripts/coverage-comment.ts packages/react-native-inspector/src/__tests__ "React Native Inspector"
+
+      - name: Comment PR with coverage
+        if: needs.check.outputs.should-run == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const comment = fs.readFileSync('coverage-comment.md', 'utf8');
+
+            // Find existing comment from this bot / 기존 댓글 찾기
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existingComment = comments.data.find(
+              (c) => c.user.type === 'Bot' && c.body.includes('Test Coverage Report - React Native Inspector')
+            );
+
+            if (existingComment) {
+              // Update existing comment / 기존 댓글 업데이트
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: comment
+              });
+            } else {
+              // Create new comment / 새 댓글 생성
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+      - name: Build package
+        if: needs.check.outputs.should-run == 'true'
+        run: cd packages/react-native-inspector && bun run build
