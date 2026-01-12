@@ -2,7 +2,7 @@
 // Using Chrome Remote DevTools middleware for reliable DevTools connection
 // 안정적인 DevTools 연결을 위해 Chrome Remote DevTools 미들웨어 사용
 import { create } from 'zustand';
-import { devtools } from '@ohah/chrome-remote-devtools-react-native/zustand';
+import { devtools } from 'zustand/middleware';
 
 export interface CartItem {
   id: string;
@@ -65,7 +65,7 @@ const useCartStore = create<CartState>()(
         return state.items.reduce((total, item) => total + item.price * item.quantity, 0);
       },
     }),
-    { name: 'CartStore' }
+    { name: 'CartStore', enabled: true }
   )
 );
 
