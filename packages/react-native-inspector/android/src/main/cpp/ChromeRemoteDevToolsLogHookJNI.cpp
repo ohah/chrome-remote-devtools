@@ -34,6 +34,9 @@
 
 #define TAG "ChromeRemoteDevToolsLogHookJNI"
 
+// Timeout for waiting on object properties result / 객체 속성 결과 대기 타임아웃
+constexpr int OBJECT_PROPERTIES_TIMEOUT_SECONDS = 5;
+
 // Global JNI environment / 전역 JNI 환경
 static JavaVM* g_jvm = nullptr;
 static bool g_is_jsi_hooked = false;
@@ -720,10 +723,12 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeGetObjec
     std::string objectIdCopy = objectIdCpp;
 
     // Use promise/future to wait for async executor completion / 비동기 executor 완료를 기다리기 위해 promise/future 사용
-    std::promise<std::string> promise;
-    std::future<std::string> future = promise.get_future();
+    // Use shared_ptr to ensure promise lifetime extends beyond timeout /
+    // timeout 이후에도 promise가 유지되도록 shared_ptr 사용
+    auto promise = std::make_shared<std::promise<std::string>>();
+    std::future<std::string> future = promise->get_future();
 
-    executor([objectIdCopy, &promise](facebook::jsi::Runtime& runtime) {
+    executor([objectIdCopy, promise](facebook::jsi::Runtime& runtime) {
       try {
         __android_log_print(ANDROID_LOG_INFO, TAG,
                             "executor: Calling getObjectProperties with objectId=%s (length=%zu) / executor: objectId=%s (길이=%zu)로 getObjectProperties 호출",
@@ -732,23 +737,25 @@ Java_com_ohah_chromeremotedevtools_ChromeRemoteDevToolsLogHookJNI_nativeGetObjec
         __android_log_print(ANDROID_LOG_INFO, TAG,
                             "executor: getObjectProperties returned result (length=%zu) / executor: getObjectProperties가 결과 반환 (길이=%zu)",
                             resultJson.length(), resultJson.length());
-        promise.set_value(resultJson);
+        promise->set_value(resultJson);
       } catch (const std::exception& e) {
         __android_log_print(ANDROID_LOG_ERROR, TAG,
                             "Exception in getObjectProperties: %s", e.what());
-        promise.set_value("");
+        promise->set_value("");
       } catch (...) {
         __android_log_print(ANDROID_LOG_ERROR, TAG,
                             "Unknown exception in getObjectProperties");
-        promise.set_value("");
+        promise->set_value("");
       }
     });
 
     // Wait for result with timeout / 타임아웃과 함께 결과 대기
-    auto status = future.wait_for(std::chrono::seconds(5));
+    auto status = future.wait_for(std::chrono::seconds(OBJECT_PROPERTIES_TIMEOUT_SECONDS));
     if (status == std::future_status::timeout) {
       __android_log_print(ANDROID_LOG_ERROR, TAG,
                           "getObjectProperties timed out / getObjectProperties 타임아웃");
+      // Promise will be destroyed when shared_ptr goes out of scope /
+      // shared_ptr이 스코프를 벗어날 때 promise가 파괴됨
       return nullptr;
     }
 
