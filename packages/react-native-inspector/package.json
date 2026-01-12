@@ -33,16 +33,6 @@
       "react-native": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./zustand": {
-      "types": "./src/zustand.ts",
-      "react-native": "./src/zustand.ts",
-      "default": "./src/zustand.ts"
-    },
-    "./zustand/middleware": {
-      "types": "./src/zustand/middleware.ts",
-      "react-native": "./src/zustand/middleware.ts",
-      "default": "./src/zustand/middleware.ts"
-    },
     "./redux": {
       "types": "./src/redux.ts",
       "react-native": "./src/redux.ts",
@@ -69,17 +59,10 @@
   "devDependencies": {
     "@types/react": "^19.2.7",
     "tsdown": "^0.16.8",
-    "typescript": "^5.9.3",
-    "zustand": "^5.0.9"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
-    "react-native": ">=0.83.0",
-    "zustand": "^5.0.9"
-  },
-  "peerDependenciesMeta": {
-    "zustand": {
-      "optional": true
-    }
+    "react-native": ">=0.83.0"
   }
 }
