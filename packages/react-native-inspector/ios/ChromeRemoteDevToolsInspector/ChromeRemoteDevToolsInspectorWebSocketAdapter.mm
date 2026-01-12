@@ -41,6 +41,28 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
 @end
 
 @implementation ChromeRemoteDevToolsInspectorWebSocketAdapter
+
+// Helper method to send empty Runtime.getProperties response /
+// 빈 Runtime.getProperties 응답을 전송하는 헬퍼 메서드
+- (void)sendEmptyPropertiesResponse:(NSString *)requestId {
+  NSDictionary *response = @{
+    @"id": requestId,
+    @"result": @{
+      @"result": @[],
+      @"internalProperties": @[],
+      @"privateProperties": @[]
+    }
+  };
+  NSError *responseError = nil;
+  NSData *responseJsonData = [NSJSONSerialization dataWithJSONObject:response options:0 error:&responseError];
+  if (!responseError && responseJsonData) {
+    NSString *responseStr = [[NSString alloc] initWithData:responseJsonData encoding:NSUTF8StringEncoding];
+    if (responseStr) {
+      [self send:[responseStr UTF8String]];
+    }
+  }
+}
+
 - (instancetype)initWithURL:(const std::string &)url delegate:(std::weak_ptr<IWebSocketDelegate>)delegate
 {
   if ((self = [super init]) != nullptr) {
@@ -243,23 +265,7 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
       [ChromeRemoteDevToolsInspectorModule getObjectProperties:objectId completion:^(NSString *propertiesJson) {
         if (!propertiesJson || propertiesJson.length == 0) {
           RCTLogInfo(@"[ChromeRemoteDevTools] Object properties not found for objectId / objectId에 대한 객체 속성을 찾을 수 없음: %@", objectId);
-          // Return empty result / 빈 결과 반환
-          NSDictionary *response = @{
-            @"id": requestId,
-            @"result": @{
-              @"result": @[],
-              @"internalProperties": @[],
-              @"privateProperties": @[]
-            }
-          };
-          NSError *responseError = nil;
-          NSData *responseJsonData = [NSJSONSerialization dataWithJSONObject:response options:0 error:&responseError];
-          if (!responseError && responseJsonData) {
-            NSString *responseStr = [[NSString alloc] initWithData:responseJsonData encoding:NSUTF8StringEncoding];
-            if (responseStr) {
-              [self send:[responseStr UTF8String]];
-            }
-          }
+          [self sendEmptyPropertiesResponse:requestId];
           return;
         }
 
@@ -270,23 +276,7 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
 
         if (parseError || !propertiesResult) {
           RCTLogError(@"[ChromeRemoteDevTools] Failed to parse properties JSON / 속성 JSON 파싱 실패: %@", parseError);
-          // Return empty result on error / 에러 시 빈 결과 반환
-          NSDictionary *response = @{
-            @"id": requestId,
-            @"result": @{
-              @"result": @[],
-              @"internalProperties": @[],
-              @"privateProperties": @[]
-            }
-          };
-          NSError *responseError = nil;
-          NSData *responseJsonData = [NSJSONSerialization dataWithJSONObject:response options:0 error:&responseError];
-          if (!responseError && responseJsonData) {
-            NSString *responseStr = [[NSString alloc] initWithData:responseJsonData encoding:NSUTF8StringEncoding];
-            if (responseStr) {
-              [self send:[responseStr UTF8String]];
-            }
-          }
+          [self sendEmptyPropertiesResponse:requestId];
           return;
         }
 

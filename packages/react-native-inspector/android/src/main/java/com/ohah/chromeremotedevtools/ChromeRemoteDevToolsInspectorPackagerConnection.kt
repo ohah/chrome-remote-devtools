@@ -304,6 +304,22 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
   }
 
   /**
+   * Send empty Runtime.getProperties response / 빈 Runtime.getProperties 응답 전송
+   * @param requestId CDP request ID / CDP 요청 ID
+   */
+  private fun sendEmptyPropertiesResponse(requestId: Int) {
+    val response = org.json.JSONObject().apply {
+      put("id", requestId)
+      put("result", org.json.JSONObject().apply {
+        put("result", org.json.JSONArray())
+        put("internalProperties", org.json.JSONArray())
+        put("privateProperties", org.json.JSONArray())
+      })
+    }
+    sendCDPMessage(response.toString())
+  }
+
+  /**
    * Send Runtime.getProperties response / Runtime.getProperties 응답 전송
    * @param requestId CDP request ID / CDP 요청 ID
    * @param objectId Object ID / 객체 ID
@@ -322,16 +338,7 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
 
     if (propertiesJson == null || propertiesJson.isEmpty()) {
       Log.d(TAG, "Object properties not found for objectId / objectId에 대한 객체 속성을 찾을 수 없음: $objectId")
-      // Return empty result / 빈 결과 반환
-      val response = org.json.JSONObject().apply {
-        put("id", requestId)
-        put("result", org.json.JSONObject().apply {
-          put("result", org.json.JSONArray())
-          put("internalProperties", org.json.JSONArray())
-          put("privateProperties", org.json.JSONArray())
-        })
-      }
-      sendCDPMessage(response.toString())
+      sendEmptyPropertiesResponse(requestId)
       return
     }
 
@@ -347,16 +354,7 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
       sendCDPMessage(messageStr)
     } catch (e: Exception) {
       Log.e(TAG, "Failed to parse properties JSON / 속성 JSON 파싱 실패: ${e.message}", e)
-      // Return empty result on error / 에러 시 빈 결과 반환
-      val response = org.json.JSONObject().apply {
-        put("id", requestId)
-        put("result", org.json.JSONObject().apply {
-          put("result", org.json.JSONArray())
-          put("internalProperties", org.json.JSONArray())
-          put("privateProperties", org.json.JSONArray())
-        })
-      }
-      sendCDPMessage(response.toString())
+      sendEmptyPropertiesResponse(requestId)
     }
   }
 
