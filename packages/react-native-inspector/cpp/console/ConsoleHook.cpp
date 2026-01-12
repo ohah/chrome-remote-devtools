@@ -15,6 +15,8 @@
 #include <cstring>
 #include <optional>
 
+using chrome_remote_devtools::console::storeObjectInCdpMap;
+
 // Platform-specific log support / 플랫폼별 로그 지원
 #ifdef __ANDROID__
 #include <android/log.h>
@@ -160,27 +162,26 @@ bool hookConsoleMethods(facebook::jsi::Runtime& runtime) {
                         // Add __cdpObjectId to the object / 객체에 __cdpObjectId 추가
                         obj.setProperty(rt, "__cdpObjectId",
                                         facebook::jsi::String::createFromUtf8(rt, objectIdStr));
-                        LOGI("ConsoleHook: Added __cdpObjectId=%s to object / 객체에 __cdpObjectId=%s 추가", objectIdStr.c_str(), objectIdStr.c_str());
-                      } else {
+                        LOGI("ConsoleHook: Added __cdpObjectId=%s to object", objectIdStr.c_str());
+                      } else if (existingId.isString()) {
                         objectIdStr = existingId.asString(rt).utf8(rt);
-                        LOGI("ConsoleHook: Object already has __cdpObjectId=%s / 객체에 이미 __cdpObjectId=%s가 있음", objectIdStr.c_str(), objectIdStr.c_str());
+                        LOGI("ConsoleHook: Object already has __cdpObjectId=%s", objectIdStr.c_str());
+                      } else {
+                        // __cdpObjectId exists but is not a string; skip using it /
+                        // __cdpObjectId가 존재하지만 문자열이 아님; 사용 건너뜀
+                        LOGW("ConsoleHook: __cdpObjectId exists but is not a string; skipping object");
+                        continue;
                       }
 
                       // Store object in Map using objectId as key / objectId를 키로 사용하여 Map에 객체 저장
-                      facebook::jsi::Value setMethod = cdpObjectsMap.getProperty(rt, "set");
-                      if (setMethod.isObject() && setMethod.asObject(rt).isFunction(rt)) {
-                        facebook::jsi::Function setFunc = setMethod.asObject(rt).asFunction(rt);
-                        // callWithThis를 사용하여 this 바인딩 / callWithThis를 사용하여 this 바인딩
-                        setFunc.callWithThis(rt, cdpObjectsMap,
-                                             facebook::jsi::String::createFromUtf8(rt, objectIdStr),
-                                             std::move(args[i]));
-                        LOGI("ConsoleHook: Stored object with objectId=%s in __cdpObjects Map / __cdpObjects Map에 objectId=%s인 객체 저장", objectIdStr.c_str(), objectIdStr.c_str());
+                      if (storeObjectInCdpMap(rt, objectIdStr, args[i])) {
+                        LOGI("ConsoleHook: Stored object with objectId=%s in __cdpObjects Map", objectIdStr.c_str());
                       } else {
-                        LOGW("ConsoleHook: Map.set method not found / Map.set 메서드를 찾을 수 없음");
+                        LOGW("ConsoleHook: Failed to store object with objectId=%s in __cdpObjects Map", objectIdStr.c_str());
                       }
                     }
                   } catch (...) {
-                    // Failed to add ID or store object, continue / ID 추가 또는 객체 저장 실패, 계속
+                    LOGW("ConsoleHook: Failed to store object in __cdpObjects Map at index %zu", i);
                   }
                 }
               }

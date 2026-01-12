@@ -24,6 +24,45 @@
 namespace chrome_remote_devtools {
 namespace console {
 
+// Store object in __cdpObjects Map / __cdpObjects Map에 객체 저장
+bool storeObjectInCdpMap(facebook::jsi::Runtime& runtime, const std::string& objectIdStr, const facebook::jsi::Value& value) {
+  try {
+    auto globalObj = runtime.global();
+    // Check if Map exists immediately before use to avoid race conditions /
+    // race condition을 피하기 위해 사용 직전에 Map 존재 여부 확인
+    facebook::jsi::Value cdpObjectsValue = globalObj.getProperty(runtime, "__cdpObjects");
+    if (cdpObjectsValue.isUndefined() || !cdpObjectsValue.isObject()) {
+      // Create new Map if doesn't exist / 없으면 새 Map 생성
+      facebook::jsi::Value mapConstructorValue = globalObj.getProperty(runtime, "Map");
+      if (mapConstructorValue.isObject() && mapConstructorValue.asObject(runtime).isFunction(runtime)) {
+        facebook::jsi::Function mapConstructor = mapConstructorValue.asObject(runtime).asFunction(runtime);
+        facebook::jsi::Value mapInstance = mapConstructor.callAsConstructor(runtime);
+        if (mapInstance.isObject()) {
+          globalObj.setProperty(runtime, "__cdpObjects", mapInstance);
+          // Get the newly created Map / 새로 생성된 Map 가져오기
+          cdpObjectsValue = globalObj.getProperty(runtime, "__cdpObjects");
+        }
+      }
+    }
+
+    if (cdpObjectsValue.isObject()) {
+      facebook::jsi::Object cdpObjectsMap = cdpObjectsValue.asObject(runtime);
+      facebook::jsi::Value setMethod = cdpObjectsMap.getProperty(runtime, "set");
+      if (setMethod.isObject() && setMethod.asObject(runtime).isFunction(runtime)) {
+        facebook::jsi::Function setFunc = setMethod.asObject(runtime).asFunction(runtime);
+        setFunc.callWithThis(runtime, cdpObjectsMap,
+                             facebook::jsi::String::createFromUtf8(runtime, objectIdStr),
+                             value);
+        return true;
+      }
+    }
+    return false;
+  } catch (...) {
+    LOGW("ConsoleUtils: Failed to store object with id %s in __cdpObjects Map", objectIdStr.c_str());
+    return false;
+  }
+}
+
 // Convert JSI value to RemoteObject / JSI 값을 RemoteObject로 변환
 RemoteObject jsiValueToRemoteObject(facebook::jsi::Runtime& runtime, const facebook::jsi::Value& value) {
   RemoteObject result;
@@ -69,41 +108,12 @@ RemoteObject jsiValueToRemoteObject(facebook::jsi::Runtime& runtime, const faceb
                           facebook::jsi::String::createFromUtf8(runtime, objectIdStr));
 
           // Store in __cdpObjects Map / __cdpObjects Map에 저장
-          try {
-            auto globalObj = runtime.global();
-            facebook::jsi::Value cdpObjectsValue = globalObj.getProperty(runtime, "__cdpObjects");
-            if (cdpObjectsValue.isUndefined() || !cdpObjectsValue.isObject()) {
-              // Create new Map if doesn't exist / 없으면 새 Map 생성
-              facebook::jsi::Value mapConstructorValue = globalObj.getProperty(runtime, "Map");
-              if (mapConstructorValue.isObject() && mapConstructorValue.asObject(runtime).isFunction(runtime)) {
-                facebook::jsi::Function mapConstructor = mapConstructorValue.asObject(runtime).asFunction(runtime);
-                facebook::jsi::Value mapInstance = mapConstructor.callAsConstructor(runtime);
-                if (mapInstance.isObject()) {
-                  globalObj.setProperty(runtime, "__cdpObjects", mapInstance);
-                  // Get the newly created Map / 새로 생성된 Map 가져오기
-                  cdpObjectsValue = globalObj.getProperty(runtime, "__cdpObjects");
-                }
-              }
-            }
-
-            if (cdpObjectsValue.isObject()) {
-              facebook::jsi::Object cdpObjectsMap = cdpObjectsValue.asObject(runtime);
-              facebook::jsi::Value setMethod = cdpObjectsMap.getProperty(runtime, "set");
-              if (setMethod.isObject() && setMethod.asObject(runtime).isFunction(runtime)) {
-                facebook::jsi::Function setFunc = setMethod.asObject(runtime).asFunction(runtime);
-                setFunc.callWithThis(runtime, cdpObjectsMap,
-                                     facebook::jsi::String::createFromUtf8(runtime, objectIdStr),
-                                     value);
-              }
-            }
-          } catch (...) {
-            // Failed to store in Map, continue / Map에 저장 실패, 계속
-          }
+          storeObjectInCdpMap(runtime, objectIdStr, value);
 
           result.objectId = objectIdStr;
         }
       } catch (...) {
-        // Failed to process objectId / objectId 처리 실패
+        LOGW("ConsoleUtils: Failed to process __cdpObjectId in jsiValueToRemoteObject");
       }
 
       // Try to stringify object using JSON.stringify / JSON.stringify를 사용하여 객체 문자열화 시도
