@@ -3,7 +3,10 @@
 // It provides Redux DevTools functionality before JSI hooks are ready / JSI 훅이 준비되기 전에 Redux DevTools 기능을 제공합니다
 // Works with both Redux Toolkit and Zustand / Redux Toolkit과 Zustand 모두에서 작동합니다
 
-import { getGlobalObj } from './redux-utils';
+import { getGlobalObj } from './utils';
+
+// Type declarations for React Native environment / React Native 환경용 타입 선언
+declare const window: any;
 
 // Type declarations / 타입 선언
 type Action = { type: string; [key: string]: unknown };
@@ -19,7 +22,9 @@ interface DevToolsConnection {
 
 interface ConnectConfig {
   name?: string;
-  instanceId?: number;
+  instanceId?: string | number;
+  maxAge?: number;
+  anonymousActionType?: string;
   [key: string]: unknown;
 }
 
@@ -32,7 +37,7 @@ interface DevToolsExtension {
 // 서버 연결이 준비되기 전 액션을 저장하는 대기열
 interface PendingAction {
   type: 'init' | 'action';
-  instanceId: number;
+  instanceId: string | number;
   name: string;
   action?: Action | null;
   state: State;
@@ -46,16 +51,16 @@ let serverPort = 0;
 let isConnected = false;
 let nextInstanceId = 1;
 // Track next action ID for each instance / 각 instance별 다음 액션 ID 추적
-const nextActionIds: Map<number, number> = new Map();
+const nextActionIds: Map<string | number, number> = new Map();
 
 // Active connections - used to re-send INIT when DevTools reconnects
 // 활성 연결들 - DevTools가 재연결할 때 INIT을 다시 보내기 위해 사용
 interface ActiveConnection {
-  instanceId: number;
+  instanceId: string | number;
   name: string;
   getState: () => State;
 }
-const activeConnections: Map<number, ActiveConnection> = new Map();
+const activeConnections: Map<string | number, ActiveConnection> = new Map();
 
 // CDP message sender function / CDP 메시지 전송 함수
 // May return void or Promise<void> / void 또는 Promise<void>를 반환할 수 있음
@@ -169,6 +174,20 @@ function flushPendingActions(): void {
       const nextActionId = pending.nextActionId || currentActionId;
       nextActionIds.set(pending.instanceId, nextActionId);
 
+      // Normalize action / 액션 정규화
+      let normalizedAction: Action | null = pending.action ?? null;
+      if (!normalizedAction) {
+        normalizedAction = { type: '@@ZUSTAND/SET' };
+      } else if (typeof normalizedAction === 'string') {
+        normalizedAction = { type: normalizedAction };
+      } else if (
+        normalizedAction &&
+        typeof normalizedAction === 'object' &&
+        'type' in normalizedAction === false
+      ) {
+        normalizedAction = { ...(normalizedAction as Record<string, unknown>), type: '@@ZUSTAND/SET' };
+      }
+
       // Send ACTION message / ACTION 메시지 전송
       sendCDPMessage({
         method: 'Redux.message',
@@ -176,7 +195,7 @@ function flushPendingActions(): void {
           type: 'ACTION',
           instanceId: pending.instanceId,
           source: '@devtools-page',
-          action: pending.action ? JSON.stringify(pending.action) : undefined,
+          action: normalizedAction ? JSON.stringify(normalizedAction) : undefined,
           payload: JSON.stringify(pending.state),
           maxAge: 50,
           timestamp: pending.timestamp,
@@ -194,6 +213,7 @@ function flushPendingActions(): void {
 function createConnection(config?: ConnectConfig): DevToolsConnection {
   const instanceId = config?.instanceId ?? nextInstanceId++;
   const name = config?.name ?? 'Store';
+  const anonymousActionType = config?.anonymousActionType ?? '@@ZUSTAND/SET';
   console.log('[ReduxDevToolsPolyfill] createConnection called:', { instanceId, name });
 
   // Track current state for re-initialization / 재초기화를 위한 현재 상태 추적
@@ -262,6 +282,26 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
       // Update current state / 현재 상태 업데이트
       currentState = state;
 
+      // Normalize action / 액션 정규화
+      let normalizedAction: Action | null = action ?? null;
+
+      // If action is null, use anonymous action type / action이 null이면 anonymous action type 사용
+      if (!normalizedAction) {
+        normalizedAction = { type: anonymousActionType };
+      }
+      // If action is a string, convert to object / action이 문자열이면 객체로 변환
+      else if (typeof normalizedAction === 'string') {
+        normalizedAction = { type: normalizedAction };
+      }
+      // Ensure action has type property / action에 type 속성이 있는지 확인
+      else if (
+        normalizedAction &&
+        typeof normalizedAction === 'object' &&
+        'type' in normalizedAction === false
+      ) {
+        normalizedAction = { ...(normalizedAction as Record<string, unknown>), type: anonymousActionType };
+      }
+
       // Get and increment next action ID for this instance / 이 instance의 다음 액션 ID 가져오기 및 증가
       const currentActionId = nextActionIds.get(instanceId) || 1;
       const nextActionId = currentActionId + 1;
@@ -275,7 +315,7 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
             type: 'ACTION',
             instanceId,
             source: '@devtools-page',
-            action: action ? JSON.stringify(action) : undefined,
+            action: normalizedAction ? JSON.stringify(normalizedAction) : undefined,
             payload: JSON.stringify(state),
             maxAge: 50,
             timestamp,
@@ -288,7 +328,7 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
           type: 'action',
           instanceId,
           name,
-          action,
+          action: normalizedAction,
           state,
           timestamp,
           nextActionId,
