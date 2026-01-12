@@ -12,8 +12,6 @@ import type { Spec } from './NativeChromeRemoteDevToolsInspector';
 import { sendCDPMessage } from './cdp-message';
 import { setServerInfo } from './server-info';
 
-// Import middleware setters / 미들웨어 setter import
-import { setZustandCDPSender, setZustandConnectionReady } from './zustand-middleware';
 // Import Redux DevTools Extension setters / Redux DevTools Extension setter import
 import {
   setCDPMessageSender as setReduxCDPMessageSender,
@@ -60,8 +58,6 @@ export async function connect(serverHostParam: string, serverPortParam: number):
     }
   };
 
-  // Set up middleware CDP senders / 미들웨어 CDP 전송자 설정
-  setZustandCDPSender(cdpSender);
   // Set up Redux DevTools Extension CDP sender / Redux DevTools Extension CDP 전송자 설정
   setReduxCDPMessageSender(cdpSender);
   // Set up MMKV DevTools CDP sender / MMKV DevTools CDP 전송자 설정
@@ -96,8 +92,6 @@ export async function connect(serverHostParam: string, serverPortParam: number):
     }
   }
 
-  // Set middleware connections ready / 미들웨어 연결 준비 완료 설정
-  setZustandConnectionReady();
   // Set Redux DevTools Extension server connection / Redux DevTools Extension 서버 연결 설정
   setReduxServerConnection(serverHostParam, serverPortParam);
   // Set MMKV DevTools connection ready / MMKV DevTools 연결 준비 완료 설정
@@ -237,9 +231,6 @@ export type { ChromeRemoteDevToolsInspectorProviderProps } from './Provider';
 
 // Note: Redux DevTools functionality is now provided by @ohah/redux-devtools-plugin / 참고: Redux DevTools 기능은 이제 @ohah/redux-devtools-plugin에서 제공됩니다
 // Users should import from the plugin directly / 사용자는 플러그인에서 직접 import해야 합니다
-
-// Export Zustand DevTools middleware / Zustand DevTools 미들웨어 export
-export { chromeDevtools, namedAction } from './zustand-middleware';
 
 // Export MMKV DevTools / MMKV DevTools export
 export { registerMMKVDevTools, unregisterMMKVDevTools } from './mmkv';
