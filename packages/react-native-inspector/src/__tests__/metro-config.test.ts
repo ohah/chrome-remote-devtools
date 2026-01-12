@@ -79,10 +79,6 @@ describe('Metro Config', () => {
 
     // Verify path contains expected filename / 경로에 예상 파일명이 포함되어 있는지 확인
     expect(polyfillPath).toContain('redux-devtools-extension-polyfill.js');
-    // Try to verify path exists, but don't fail if it doesn't in CI / 경로 존재 확인 시도, CI에서 없어도 실패하지 않음
-    if (fs.existsSync(polyfillPath)) {
-      expect(fs.existsSync(polyfillPath)).toBe(true);
-    }
   });
 
   test('should export withChromeRemoteDevToolsRedux alias / withChromeRemoteDevToolsRedux 별칭 export', () => {
