@@ -12,16 +12,17 @@ type State = unknown;
 
 interface DevToolsConfig {
   name?: string;
-  instanceId?: number;
+  instanceId?: string | number;
   maxAge?: number;
 }
 
 // Store instances for tracking
 let nextInstanceId = 1;
-const storeInstances = new Map<number, { name: string; initialized: boolean }>();
+const storeInstances = new Map<string | number, { name: string; initialized: boolean }>();
+const storeNameCount = new Map<string, number>(); // Track count of stores with same name / 같은 이름을 가진 스토어 개수 추적
 
 // Track next action ID for each instance / 각 instance별 다음 액션 ID 추적
-const nextActionIds: Map<number, number> = new Map();
+const nextActionIds: Map<string | number, number> = new Map();
 
 // Pending messages queue (before connection is ready)
 interface PendingMessage {
@@ -105,8 +106,31 @@ function flushPendingMessages(): void {
  * ```
  */
 export function createReduxDevToolsMiddleware(config?: DevToolsConfig): Middleware {
-  const instanceId = config?.instanceId ?? nextInstanceId++;
-  const name = config?.name ?? 'Redux Store';
+  // Generate instance ID from store name / 스토어 이름에서 인스턴스 ID 생성
+  let instanceId: string | number;
+  if (config?.instanceId !== undefined) {
+    instanceId = config.instanceId;
+  } else {
+    // Generate default name if not provided / 제공되지 않으면 기본 이름 생성
+    const defaultName = `Redux-Store-${nextInstanceId}`;
+    const name = config?.name ?? defaultName;
+    
+    // Get count for this store name / 이 스토어 이름에 대한 개수 가져오기
+    const count = storeNameCount.get(name) || 0;
+    storeNameCount.set(name, count + 1);
+    
+    // Create instance ID with index if multiple stores have same name / 같은 이름을 가진 여러 스토어가 있으면 인덱스와 함께 인스턴스 ID 생성
+    const baseId = name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || `redux-store-${nextInstanceId++}`;
+    
+    // Add index suffix if multiple stores with same name / 같은 이름을 가진 여러 스토어가 있으면 인덱스 접미사 추가
+    instanceId = count > 0 ? `${baseId}-${count}` : baseId;
+  }
+  const name = config?.name ?? `Redux-Store-${nextInstanceId}`;
   const maxAge = config?.maxAge ?? 50;
   let initialized = false;
 
@@ -196,8 +220,31 @@ export function createReduxDevToolsMiddleware(config?: DevToolsConfig): Middlewa
  * ```
  */
 export function createReduxDevToolsEnhancer(config?: DevToolsConfig): StoreEnhancer {
-  const instanceId = config?.instanceId ?? nextInstanceId++;
-  const name = config?.name ?? 'Redux Store';
+  // Generate instance ID from store name / 스토어 이름에서 인스턴스 ID 생성
+  let instanceId: string | number;
+  if (config?.instanceId !== undefined) {
+    instanceId = config.instanceId;
+  } else {
+    // Generate default name if not provided / 제공되지 않으면 기본 이름 생성
+    const defaultName = `Redux-Store-${nextInstanceId}`;
+    const name = config?.name ?? defaultName;
+    
+    // Get count for this store name / 이 스토어 이름에 대한 개수 가져오기
+    const count = storeNameCount.get(name) || 0;
+    storeNameCount.set(name, count + 1);
+    
+    // Create instance ID with index if multiple stores have same name / 같은 이름을 가진 여러 스토어가 있으면 인덱스와 함께 인스턴스 ID 생성
+    const baseId = name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || `redux-store-${nextInstanceId++}`;
+    
+    // Add index suffix if multiple stores with same name / 같은 이름을 가진 여러 스토어가 있으면 인덱스 접미사 추가
+    instanceId = count > 0 ? `${baseId}-${count}` : baseId;
+  }
+  const name = config?.name ?? `Redux-Store-${nextInstanceId}`;
   const maxAge = config?.maxAge ?? 50;
 
   // Initialize nextActionId for this instance / 이 instance의 nextActionId 초기화
