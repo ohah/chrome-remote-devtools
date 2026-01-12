@@ -9,7 +9,8 @@
     "ios:release": "react-native run-ios --mode Release",
     "start": "react-native start",
     "build:android": "cd android && ./gradlew assembleRelease",
-    "build:ios": "cd ios && xcodebuild -workspace ChromeRemoteDevTools.xcworkspace -scheme ChromeRemoteDevTools -configuration Release -destination 'generic/platform=iOS' archive"
+    "build:ios": "cd ios && xcodebuild -workspace ChromeRemoteDevTools.xcworkspace -scheme ChromeRemoteDevTools -configuration Release -destination 'generic/platform=iOS' archive",
+    "postinstall": "node scripts/apply-cmake-patches.js"
   },
   "dependencies": {
     "@ohah/chrome-remote-devtools-react-native": "workspace:*",
