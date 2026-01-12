@@ -2,7 +2,7 @@
 // Using Chrome Remote DevTools middleware for reliable DevTools connection
 // 안정적인 DevTools 연결을 위해 Chrome Remote DevTools 미들웨어 사용
 import { create } from 'zustand';
-import { devtools } from '@ohah/chrome-remote-devtools-react-native/zustand';
+import { devtools } from 'zustand/middleware';
 
 interface CounterState {
   value: number;
@@ -28,7 +28,7 @@ const useCounterStore = create<CounterState>()(
         set({ value: 0 });
       },
     }),
-    { name: 'CounterStore' }
+    { name: 'CounterStore', enabled: true }
   )
 );
 
