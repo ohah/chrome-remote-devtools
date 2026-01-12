@@ -192,7 +192,7 @@ function flushPendingActions(): void {
       } else if (
         normalizedAction &&
         typeof normalizedAction === 'object' &&
-        'type' in normalizedAction === false
+        !('type' in normalizedAction)
       ) {
         normalizedAction = {
           ...(normalizedAction as Record<string, unknown>),
@@ -201,13 +201,14 @@ function flushPendingActions(): void {
       }
 
       // Send ACTION message / ACTION 메시지 전송
+      // normalizedAction is always an object after normalization / 정규화 후 normalizedAction은 항상 객체입니다
       sendCDPMessage({
         method: 'Redux.message',
         params: {
           type: 'ACTION',
           instanceId: pending.instanceId,
           source: '@devtools-page',
-          action: normalizedAction ? JSON.stringify(normalizedAction) : undefined,
+          action: JSON.stringify(normalizedAction),
           payload: JSON.stringify(pending.state),
           maxAge: 50,
           timestamp: pending.timestamp,
@@ -309,7 +310,7 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
       else if (
         normalizedAction &&
         typeof normalizedAction === 'object' &&
-        'type' in normalizedAction === false
+        !('type' in normalizedAction)
       ) {
         normalizedAction = {
           ...(normalizedAction as Record<string, unknown>),
@@ -324,13 +325,14 @@ function createConnection(config?: ConnectConfig): DevToolsConnection {
 
       if (isConnected && sendCDPMessageFn) {
         // Send immediately / 즉시 전송
+        // normalizedAction is always an object after normalization / 정규화 후 normalizedAction은 항상 객체입니다
         sendCDPMessage({
           method: 'Redux.message',
           params: {
             type: 'ACTION',
             instanceId,
             source: '@devtools-page',
-            action: normalizedAction ? JSON.stringify(normalizedAction) : undefined,
+            action: JSON.stringify(normalizedAction),
             payload: JSON.stringify(state),
             maxAge: 50,
             timestamp,
