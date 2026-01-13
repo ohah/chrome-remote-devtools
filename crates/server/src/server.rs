@@ -89,15 +89,15 @@ pub async fn run_server(config: ServerConfig) -> Result<(), crate::ServerError> 
         axum_server::bind_rustls(addr, rustls_config)
             .serve(app.into_make_service())
             .await
-            .map_err(|e| crate::ServerError::Io(e))?;
+            .map_err(crate::ServerError::Io)?;
     } else {
         // Run server without TLS / TLS 없이 서버 실행
         let listener = TcpListener::bind(&addr)
             .await
-            .map_err(|e| crate::ServerError::Io(e))?;
+            .map_err(crate::ServerError::Io)?;
         axum::serve(listener, app)
             .await
-            .map_err(|e| crate::ServerError::Io(e))?;
+            .map_err(crate::ServerError::Io)?;
     }
 
     Ok(())
