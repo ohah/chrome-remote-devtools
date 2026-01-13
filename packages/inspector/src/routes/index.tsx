@@ -9,7 +9,7 @@ import { useServerUrl } from '@/shared/lib';
 import { Settings, Smartphone, Globe, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, type Tab } from '@/components/tabs';
-import { getClientTypeFilter } from './__root';
+import { getClientTypeFilter, getTabsVisibility } from './__root';
 
 export const Route = createFileRoute('/')({
   component: ConnectionPage,
@@ -18,6 +18,7 @@ export const Route = createFileRoute('/')({
 function ConnectionPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [filterState, setFilterState] = useState(getClientTypeFilter);
+  const [showTabs, setShowTabs] = useState(getTabsVisibility);
   const navigate = useNavigate();
   const location = useLocation();
   const { serverUrl } = useServerUrl();
@@ -40,6 +41,17 @@ function ConnectionPage() {
     window.addEventListener('client-filter-change', handleFilterChange);
     return () => {
       window.removeEventListener('client-filter-change', handleFilterChange);
+    };
+  }, []);
+
+  // Listen to tab visibility changes / 탭 표시 상태 변경 사항 듣기
+  useEffect(() => {
+    const handleTabsVisibilityChange = () => {
+      setShowTabs(getTabsVisibility());
+    };
+    window.addEventListener('tabs-visibility-change', handleTabsVisibilityChange);
+    return () => {
+      window.removeEventListener('tabs-visibility-change', handleTabsVisibilityChange);
     };
   }, []);
 
@@ -124,19 +136,23 @@ function ConnectionPage() {
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-900">
-      {/* Tabs / 탭 */}
-      {tabs.length > 0 ? (
-        <Tabs tabs={tabs} activeTabId={activeClientId} onTabChange={handleTabChange} />
-      ) : (
-        <div className="flex items-end bg-gray-800 border-b border-gray-700 h-10 px-4">
-          <div className="text-sm text-gray-400">
-            {!serverUrl
-              ? 'Server URL Required'
-              : filteredClients.length === 0
-                ? 'No clients available (check filters)'
-                : 'No clients available'}
-          </div>
-        </div>
+      {/* Tabs / 탭 - Show/hide based on visibility state / 표시 상태에 따라 표시/숨김 */}
+      {showTabs && (
+        <>
+          {tabs.length > 0 ? (
+            <Tabs tabs={tabs} activeTabId={activeClientId} onTabChange={handleTabChange} />
+          ) : (
+            <div className="flex items-end bg-gray-800 border-b border-gray-700 h-10 px-4">
+              <div className="text-sm text-gray-400">
+                {!serverUrl
+                  ? 'Server URL Required'
+                  : filteredClients.length === 0
+                    ? 'No clients available (check filters)'
+                    : 'No clients available'}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Content area / 콘텐츠 영역 */}
