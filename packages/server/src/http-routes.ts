@@ -1,3 +1,9 @@
+/**
+ * @deprecated This TypeScript HTTP router has been ported to Rust.
+ * @deprecated 이 TypeScript HTTP 라우터는 Rust로 포팅되었습니다.
+ * The Rust implementation is located at: crates/server/src/http_routes.rs
+ * Rust 구현 위치: crates/server/src/http_routes.rs
+ */
 import { IncomingMessage, ServerResponse } from 'http';
 import { readFileSync } from 'fs';
 import { join } from 'path';
