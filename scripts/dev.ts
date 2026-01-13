@@ -72,11 +72,23 @@ const services: Service[] = [
   {
     name: 'SERVER',
     color: colors.server,
-    cwd: join(rootDir, 'packages/server'),
-    command: ['bun', 'run', 'dev'],
+    cwd: rootDir, // Run from root for Cargo workspace / Cargo 워크스페이스를 위해 루트에서 실행
+    command: [
+      'cargo',
+      'run',
+      '--bin',
+      'chrome-remote-devtools-server',
+      '--',
+      '--port',
+      config.serverPort.toString(),
+      '--host',
+      '0.0.0.0',
+      ...(process.env.LOG_ENABLED === 'true' ? ['--log-enabled'] : []),
+      ...(process.env.LOG_METHODS ? ['--log-methods', process.env.LOG_METHODS] : []),
+    ],
     env: {
-      PORT: config.serverPort.toString(),
-      LOG_ENABLED: 'true', // Enable server logs / 서버 로그 활성화
+      LOG_ENABLED: process.env.LOG_ENABLED || 'true', // Enable server logs by default / 기본적으로 서버 로그 활성화
+      ...(process.env.LOG_METHODS ? { LOG_METHODS: process.env.LOG_METHODS } : {}),
     },
     port: config.serverPort,
     healthCheckUrl: `http://localhost:${config.serverPort}/json`,
@@ -161,6 +173,7 @@ async function checkPort(port: number): Promise<boolean> {
 // Health check for service / 서비스 헬스 체크
 async function healthCheck(url: string, timeout: number): Promise<boolean> {
   const startTime = Date.now();
+  let lastError: Error | null = null;
   while (Date.now() - startTime < timeout) {
     try {
       const response = await fetch(url, {
@@ -171,10 +184,17 @@ async function healthCheck(url: string, timeout: number): Promise<boolean> {
         // 404 is OK for some services / 일부 서비스는 404도 정상
         return true;
       }
-    } catch {
+    } catch (error) {
       // Service not ready yet, wait and retry / 서비스가 아직 준비되지 않음, 대기 후 재시도
+      lastError = error instanceof Error ? error : new Error(String(error));
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  // Log last error if health check failed / 헬스 체크 실패 시 마지막 에러 로깅
+  if (lastError) {
+    console.error(
+      `${colors.warning}Health check error for ${url}: ${lastError.message}${colors.reset}`
+    );
   }
   return false;
 }
@@ -197,8 +217,9 @@ async function setupProcessOutput(service: Service, proc: ReturnType<typeof spaw
           console.log(`${prefix} ${line}`);
         }
       }
-    } catch {
-      // Stream ended / 스트림 종료
+    } catch (error) {
+      // Stream ended or error / 스트림 종료 또는 에러
+      console.error(`${prefix} ${colors.error}Error reading stdout: ${error}${colors.reset}`);
     } finally {
       reader.releaseLock();
     }
@@ -215,11 +236,13 @@ async function setupProcessOutput(service: Service, proc: ReturnType<typeof spaw
         const text = decoder.decode(value, { stream: true });
         const lines = text.split('\n').filter((line) => line.trim());
         for (const line of lines) {
+          // Always show stderr, especially for errors / stderr는 항상 표시, 특히 에러의 경우
           console.error(`${prefix} ${colors.error}${line}${colors.reset}`);
         }
       }
-    } catch {
-      // Stream ended / 스트림 종료
+    } catch (error) {
+      // Stream ended or error / 스트림 종료 또는 에러
+      console.error(`${prefix} ${colors.error}Error reading stderr: ${error}${colors.reset}`);
     } finally {
       reader.releaseLock();
     }
@@ -275,6 +298,7 @@ async function startServices() {
       processes.push({ service, proc, started: false });
 
       // Setup output handling / 출력 처리 설정
+      // Start output handling immediately to catch early errors / 초기 에러를 잡기 위해 즉시 출력 처리 시작
       setupProcessOutput(service, proc).catch((error) => {
         console.error(
           `${colors.error}[${service.name}] Error handling output: ${error}${colors.reset}`
@@ -289,7 +313,13 @@ async function startServices() {
             processInfo.started = false;
             failedServices.add(service.name);
             console.error(
-              `${colors.error}[${service.name}] Process exited with code ${code}${colors.reset}`
+              `\n${colors.error}[${service.name}] ❌ Process exited with code ${code}${colors.reset}`
+            );
+            console.error(
+              `${colors.error}[${service.name}] Command: ${service.command.join(' ')}${colors.reset}`
+            );
+            console.error(
+              `${colors.error}[${service.name}] Working directory: ${service.cwd}${colors.reset}\n`
             );
           }
         }
@@ -299,7 +329,14 @@ async function startServices() {
       await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
       failedServices.add(service.name);
-      console.error(`${colors.error}[${service.name}] Failed to start: ${error}${colors.reset}`);
+      console.error(`\n${colors.error}[${service.name}] ❌ Failed to start:${colors.reset}`);
+      console.error(`${colors.error}[${service.name}] Error: ${error}${colors.reset}`);
+      console.error(
+        `${colors.error}[${service.name}] Command: ${service.command.join(' ')}${colors.reset}`
+      );
+      console.error(
+        `${colors.error}[${service.name}] Working directory: ${service.cwd}${colors.reset}\n`
+      );
     }
   }
 
@@ -320,6 +357,23 @@ async function startServices() {
         // For optional services, don't count as failure / 선택적 서비스는 실패로 간주하지 않음
         if (!service.optional) {
           failedServices.add(service.name);
+          console.error(`\n${colors.error}[${service.name}] ❌ Health check failed${colors.reset}`);
+          console.error(
+            `${colors.error}[${service.name}] URL: ${service.healthCheckUrl}${colors.reset}`
+          );
+          console.error(
+            `${colors.error}[${service.name}] Timeout: ${config.healthCheckTimeout}ms${colors.reset}`
+          );
+          // Check if process is still running / 프로세스가 아직 실행 중인지 확인
+          const exitCode = proc.exitCode;
+          if (exitCode !== null && exitCode !== 0) {
+            console.error(
+              `${colors.error}[${service.name}] Process exit code: ${exitCode}${colors.reset}`
+            );
+          }
+          console.error(
+            `${colors.error}[${service.name}] Check the logs above for error details${colors.reset}\n`
+          );
         }
         return false;
       }
