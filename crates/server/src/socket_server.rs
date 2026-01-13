@@ -326,7 +326,10 @@ impl SocketServer {
             let clients = self.clients.read().await;
             if let Some(client) = clients.get(client_id) {
                 // Request stored events / 저장된 이벤트 요청
-                let methods = vec!["Storage.replayStoredEvents", "SessionReplay.replayStoredEvents"];
+                let methods = vec![
+                    "Storage.replayStoredEvents",
+                    "SessionReplay.replayStoredEvents",
+                ];
                 let client_sender = client.sender.clone();
                 let devtools_id = id.clone();
                 let logger_clone = self.logger.clone();
@@ -402,7 +405,10 @@ impl SocketServer {
                                 logger_clone.log(
                                     LogType::DevTools,
                                     &devtools_id,
-                                    &format!("📤 Sent cached INIT_INSTANCE for instance {}", store.instance_id),
+                                    &format!(
+                                        "📤 Sent cached INIT_INSTANCE for instance {}",
+                                        store.instance_id
+                                    ),
                                     None,
                                     None,
                                 );
@@ -434,7 +440,10 @@ impl SocketServer {
                                 logger_clone.log(
                                     LogType::DevTools,
                                     &devtools_id,
-                                    &format!("📤 Sent cached INIT for instance {} ({})", store.instance_id, store.name),
+                                    &format!(
+                                        "📤 Sent cached INIT for instance {} ({})",
+                                        store.instance_id, store.name
+                                    ),
                                     None,
                                     None,
                                 );
