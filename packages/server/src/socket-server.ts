@@ -1,3 +1,11 @@
+/**
+ * @deprecated This TypeScript WebSocket server has been ported to Rust.
+ * @deprecated 이 TypeScript WebSocket 서버는 Rust로 포팅되었습니다.
+ * The Rust implementation is located at: crates/server/src/socket_server.rs
+ * Rust 구현 위치: crates/server/src/socket_server.rs
+ * This file is kept for reference only and may be removed in the future.
+ * 이 파일은 참고용으로만 유지되며 향후 제거될 수 있습니다.
+ */
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
 import { gunzipSync } from 'zlib';
@@ -208,6 +216,10 @@ interface DevTools {
   clientId?: string;
 }
 
+/**
+ * @deprecated Use the Rust implementation instead: crates/server/src/socket_server.rs
+ * @deprecated Rust 구현을 사용하세요: crates/server/src/socket_server.rs
+ */
 export class SocketServer {
   private clients: Map<string, Client> = new Map();
   private devtools: Map<string, DevTools> = new Map();

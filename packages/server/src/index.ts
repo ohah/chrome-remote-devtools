@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 // Chrome Remote DevTools Server / Chrome Remote DevTools 서버
+// @deprecated This TypeScript server has been ported to Rust. Use the Rust server instead.
+// @deprecated 이 TypeScript 서버는 Rust로 포팅되었습니다. Rust 서버를 사용하세요.
+// The Rust server is located at: crates/server/
+// Rust 서버 위치: crates/server/
 import { createServer as createHttpServer } from 'http';
 import { createServer as createHttpsServer } from 'https';
 import { readFileSync, existsSync } from 'fs';
