@@ -9,9 +9,7 @@ static SERVER_HANDLE: OnceLock<Arc<RwLock<ServerHandle>>> = OnceLock::new();
 /// Start the WebSocket server / WebSocket 서버 시작
 #[tauri::command]
 async fn start_server(port: u16, host: String) -> Result<(), String> {
-    let handle = SERVER_HANDLE.get_or_init(|| {
-        Arc::new(RwLock::new(ServerHandle::new()))
-    });
+    let handle = SERVER_HANDLE.get_or_init(|| Arc::new(RwLock::new(ServerHandle::new())));
 
     let server = handle.write().await;
     let config = ServerConfig {
@@ -23,6 +21,7 @@ async fn start_server(port: u16, host: String) -> Result<(), String> {
         log_enabled: true,
         log_methods: None,
         log_file: None,
+        dev_mode: cfg!(debug_assertions), // Enable dev mode only in debug builds / 디버그 빌드에서만 개발 모드 활성화
     };
 
     server.start(config).await.map_err(|e| e.to_string())?;

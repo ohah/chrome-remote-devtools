@@ -24,7 +24,11 @@ pub fn create_router() -> Router<Arc<SocketServer>> {
         .route("/remote/debug/*path", get(handle_websocket_upgrade));
 
     // Only add /client.js route in development mode / 개발 모드에서만 /client.js 라우트 추가
-    if cfg!(debug_assertions) || std::env::var("DEV_MODE").map(|v| v == "true").unwrap_or(false) {
+    if cfg!(debug_assertions)
+        || std::env::var("DEV_MODE")
+            .map(|v| v == "true")
+            .unwrap_or(false)
+    {
         router = router.route("/client.js", get(serve_client_script));
     }
 
