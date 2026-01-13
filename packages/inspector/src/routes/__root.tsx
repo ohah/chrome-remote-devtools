@@ -28,7 +28,11 @@ function ClientTypeFilter() {
     setShowWeb(newValue);
     localStorage.setItem('client-filter-web', String(newValue));
     // Dispatch custom event to notify other components / 다른 컴포넌트에 알리기 위한 커스텀 이벤트 발생
-    window.dispatchEvent(new CustomEvent('client-filter-change', { detail: { web: newValue, reactNative: showReactNative } }));
+    window.dispatchEvent(
+      new CustomEvent('client-filter-change', {
+        detail: { web: newValue, reactNative: showReactNative },
+      })
+    );
   };
 
   const handleReactNativeToggle = () => {
@@ -36,7 +40,9 @@ function ClientTypeFilter() {
     setShowReactNative(newValue);
     localStorage.setItem('client-filter-react-native', String(newValue));
     // Dispatch custom event to notify other components / 다른 컴포넌트에 알리기 위한 커스텀 이벤트 발생
-    window.dispatchEvent(new CustomEvent('client-filter-change', { detail: { web: showWeb, reactNative: newValue } }));
+    window.dispatchEvent(
+      new CustomEvent('client-filter-change', { detail: { web: showWeb, reactNative: newValue } })
+    );
   };
 
   return (
@@ -58,7 +64,7 @@ function ClientTypeFilter() {
             <Smartphone className="w-3.5 h-3.5" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="z-1001">
+        <TooltipContent side="bottom" className="z-[1001]">
           <p>React Native {showReactNative ? '(shown)' : '(hidden)'}</p>
         </TooltipContent>
       </Tooltip>
@@ -79,7 +85,7 @@ function ClientTypeFilter() {
             <Globe className="w-3.5 h-3.5" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="z-1001">
+        <TooltipContent side="bottom" className="z-[1001]">
           <p>Web {showWeb ? '(shown)' : '(hidden)'}</p>
         </TooltipContent>
       </Tooltip>
@@ -105,7 +111,9 @@ function TabVisibilityToggle() {
     setShowTabs(newValue);
     localStorage.setItem('tabs-visible', String(newValue));
     // Dispatch custom event to notify other components / 다른 컴포넌트에 알리기 위한 커스텀 이벤트 발생
-    window.dispatchEvent(new CustomEvent('tabs-visibility-change', { detail: { visible: newValue } }));
+    window.dispatchEvent(
+      new CustomEvent('tabs-visibility-change', { detail: { visible: newValue } })
+    );
   };
 
   return (
@@ -122,7 +130,7 @@ function TabVisibilityToggle() {
           {showTabs ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="bottom" className="z-1001">
+      <TooltipContent side="bottom" className="z-[1001]">
         <p>{showTabs ? 'Hide tabs' : 'Show tabs'}</p>
       </TooltipContent>
     </Tooltip>
@@ -168,7 +176,7 @@ function TitleBar() {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-1000 h-[35px] bg-gray-800 select-none grid grid-cols-[1fr_max-content]">
+    <div className="fixed top-0 left-0 right-0 z-[1000] h-[35px] bg-gray-800 select-none grid grid-cols-[1fr_max-content]">
       <div
         className="titlebar-drag-region flex items-center"
         data-tauri-drag-region={isTauri ? true : undefined}
@@ -193,7 +201,7 @@ function TitleBar() {
                 <RefreshCw className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-1001">
+            <TooltipContent side="bottom" className="z-[1001]">
               <p>Refresh</p>
             </TooltipContent>
           </Tooltip>
@@ -209,7 +217,7 @@ function TitleBar() {
                 <Minus className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-1001">
+            <TooltipContent side="bottom" className="z-[1001]">
               <p>Minimize</p>
             </TooltipContent>
           </Tooltip>
@@ -225,7 +233,7 @@ function TitleBar() {
                 <Maximize2 className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-1001">
+            <TooltipContent side="bottom" className="z-[1001]">
               <p>Maximize</p>
             </TooltipContent>
           </Tooltip>
@@ -241,7 +249,7 @@ function TitleBar() {
                 <X className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-1001">
+            <TooltipContent side="bottom" className="z-[1001]">
               <p>Close</p>
             </TooltipContent>
           </Tooltip>

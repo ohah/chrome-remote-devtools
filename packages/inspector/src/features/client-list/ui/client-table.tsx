@@ -48,15 +48,9 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
                       className="w-5 h-5 mx-auto text-gray-400"
                       role="img"
                       aria-label="React Native"
-                      title="React Native"
                     />
                   ) : (
-                    <Globe
-                      className="w-5 h-5 mx-auto text-gray-400"
-                      role="img"
-                      aria-label="Web"
-                      title="Web"
-                    />
+                    <Globe className="w-5 h-5 mx-auto text-gray-400" role="img" aria-label="Web" />
                   )}
                 </td>
 

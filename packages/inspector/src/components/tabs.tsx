@@ -22,7 +22,12 @@ export function Tabs({ tabs, activeTabId, onTabChange, onTabClose, className }: 
   }
 
   return (
-    <div className={cn('flex items-end bg-gray-800 border-b border-gray-700 overflow-x-auto', className)}>
+    <div
+      className={cn(
+        'flex items-end bg-gray-800 border-b border-gray-700 overflow-x-auto',
+        className
+      )}
+    >
       <div className="flex items-end min-w-full">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId;
