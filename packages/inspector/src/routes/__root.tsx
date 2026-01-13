@@ -1,41 +1,65 @@
 // Root route
-import { createRootRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
+import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, RefreshCw, Minus, Maximize2, X, Globe, Smartphone } from 'lucide-react';
+import { RefreshCw, Minus, Maximize2, X, Globe, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-// Mode type / 모드 타입
-type InspectorMode = 'web' | 'react-native';
+// Client type filter component / 클라이언트 타입 필터 컴포넌트
+function ClientTypeFilter() {
+  const [showWeb, setShowWeb] = useState(true);
+  const [showReactNative, setShowReactNative] = useState(true);
 
-// Mode selector component / 모드 선택 컴포넌트
-function ModeSelector({
-  mode,
-  onModeChange,
-}: {
-  mode: InspectorMode;
-  onModeChange: (mode: InspectorMode) => void;
-}) {
+  // Load filter state from localStorage / localStorage에서 필터 상태 로드
+  useEffect(() => {
+    const savedShowWeb = localStorage.getItem('client-filter-web');
+    const savedShowRN = localStorage.getItem('client-filter-react-native');
+    if (savedShowWeb !== null) {
+      setShowWeb(savedShowWeb === 'true');
+    }
+    if (savedShowRN !== null) {
+      setShowReactNative(savedShowRN === 'true');
+    }
+  }, []);
+
+  // Save filter state to localStorage / 필터 상태를 localStorage에 저장
+  const handleWebToggle = () => {
+    const newValue = !showWeb;
+    setShowWeb(newValue);
+    localStorage.setItem('client-filter-web', String(newValue));
+    // Dispatch custom event to notify other components / 다른 컴포넌트에 알리기 위한 커스텀 이벤트 발생
+    window.dispatchEvent(new CustomEvent('client-filter-change', { detail: { web: newValue, reactNative: showReactNative } }));
+  };
+
+  const handleReactNativeToggle = () => {
+    const newValue = !showReactNative;
+    setShowReactNative(newValue);
+    localStorage.setItem('client-filter-react-native', String(newValue));
+    // Dispatch custom event to notify other components / 다른 컴포넌트에 알리기 위한 커스텀 이벤트 발생
+    window.dispatchEvent(new CustomEvent('client-filter-change', { detail: { web: showWeb, reactNative: newValue } }));
+  };
+
   return (
-    <div className="flex items-center gap-0.5 px-0.5 py-0.5 bg-gray-700/30 rounded titlebar-nav-button">
+    <div className="flex items-center gap-0.5 px-0.5 py-0.5 bg-gray-700/30 rounded titlebar-nav-button ml-2">
       <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onModeChange('react-native')}
+            onClick={handleReactNativeToggle}
             className={`cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all ${
-              mode === 'react-native'
+              showReactNative
                 ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-600/50'
+                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 opacity-50'
             }`}
-            aria-label="React Native Mode"
+            aria-label="React Native Filter"
+            aria-pressed={showReactNative}
           >
             <Smartphone className="w-3.5 h-3.5" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="z-[1001]">
-          <p>React Native</p>
+        <TooltipContent side="bottom" className="z-1001">
+          <p>React Native {showReactNative ? '(shown)' : '(hidden)'}</p>
         </TooltipContent>
       </Tooltip>
       <Tooltip delayDuration={300}>
@@ -43,19 +67,20 @@ function ModeSelector({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onModeChange('web')}
+            onClick={handleWebToggle}
             className={`cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all ${
-              mode === 'web'
+              showWeb
                 ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-600/50'
+                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 opacity-50'
             }`}
-            aria-label="Web Remote Mode"
+            aria-label="Web Filter"
+            aria-pressed={showWeb}
           >
             <Globe className="w-3.5 h-3.5" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="z-[1001]">
-          <p>Web</p>
+        <TooltipContent side="bottom" className="z-1001">
+          <p>Web {showWeb ? '(shown)' : '(hidden)'}</p>
         </TooltipContent>
       </Tooltip>
     </div>
@@ -63,23 +88,12 @@ function ModeSelector({
 }
 
 // Title bar component
-function TitleBar({ showBack = false }: { showBack?: boolean }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+function TitleBar() {
   const [appWindow, setAppWindow] = useState<ReturnType<
     typeof import('@tauri-apps/api/window').getCurrentWindow
   > | null>(null);
-  const [mode, setMode] = useState<InspectorMode>(() => {
-    // Load mode from localStorage / localStorage에서 모드 로드
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('inspector-mode');
-      return (saved === 'web' || saved === 'react-native' ? saved : 'web') as InspectorMode;
-    }
-    return 'web';
-  });
 
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
-  const isTauriPage = location.pathname === '/tauri';
 
   useEffect(() => {
     if (isTauri) {
@@ -88,17 +102,6 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
       });
     }
   }, []);
-
-  useEffect(() => {
-    // Save mode to localStorage / 모드를 localStorage에 저장
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('inspector-mode', mode);
-    }
-  }, [mode]);
-
-  const handleBack = () => {
-    navigate({ to: '/' });
-  };
 
   const handleRefresh = () => {
     window.location.reload();
@@ -123,31 +126,13 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[1000] h-[35px] bg-gray-800 select-none grid grid-cols-[1fr_max-content]">
+    <div className="fixed top-0 left-0 right-0 z-1000 h-[35px] bg-gray-800 select-none grid grid-cols-[1fr_max-content]">
       <div
         className="titlebar-drag-region flex items-center"
         data-tauri-drag-region={isTauri ? true : undefined}
       >
-        {/* Mode selector (only on Tauri page) / 모드 선택기 (Tauri 페이지에서만) */}
-        {isTauri && isTauriPage && <ModeSelector mode={mode} onModeChange={setMode} />}
-        {showBack && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="titlebar-nav-button h-6 w-6 bg-transparent text-gray-400 hover:bg-white/10 rounded ml-1"
-                onClick={handleBack}
-                aria-label="Go back"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-[1001]">
-              <p>Back</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
+        {/* Client type filter (always show in Tauri) / 클라이언트 타입 필터 (Tauri에서 항상 표시) */}
+        {isTauri && <ClientTypeFilter />}
       </div>
       {isTauri && appWindow && (
         <div className="titlebar-controls flex">
@@ -164,7 +149,7 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
                 <RefreshCw className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-[1001]">
+            <TooltipContent side="bottom" className="z-1001">
               <p>Refresh</p>
             </TooltipContent>
           </Tooltip>
@@ -180,7 +165,7 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
                 <Minus className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-[1001]">
+            <TooltipContent side="bottom" className="z-1001">
               <p>Minimize</p>
             </TooltipContent>
           </Tooltip>
@@ -196,7 +181,7 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
                 <Maximize2 className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-[1001]">
+            <TooltipContent side="bottom" className="z-1001">
               <p>Maximize</p>
             </TooltipContent>
           </Tooltip>
@@ -212,7 +197,7 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
                 <X className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-[1001]">
+            <TooltipContent side="bottom" className="z-1001">
               <p>Close</p>
             </TooltipContent>
           </Tooltip>
@@ -222,26 +207,28 @@ function TitleBar({ showBack = false }: { showBack?: boolean }) {
   );
 }
 
-export const Route = createRootRoute({
-  component: () => {
-    const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
-    const location = useLocation();
-    const currentPath = location.pathname;
-    const showTitleBar = isTauri;
-    // Show back button on routes that are not the root / 루트가 아닌 경로에서 뒤로가기 버튼 표시
-    const routesWithBackButton = ['/replay'];
-    const isDevtoolsRoute = currentPath.startsWith('/devtools/');
-    const showBack = routesWithBackButton.includes(currentPath) || isDevtoolsRoute;
-    return (
-      <div className="h-screen flex flex-col bg-gray-900">
-        {showTitleBar && <TitleBar showBack={showBack} />}
-        <div className={`flex-1 overflow-hidden ${showTitleBar ? 'pt-[35px]' : ''}`}>
-          <Outlet />
-        </div>
+// Root component / 루트 컴포넌트
+function RootComponent() {
+  const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+  const showTitleBar = isTauri;
+
+  return (
+    <div className="h-screen flex flex-col bg-gray-900">
+      {showTitleBar && <TitleBar />}
+      <div className={`flex-1 overflow-hidden ${showTitleBar ? 'pt-[35px]' : ''}`}>
+        <Outlet />
       </div>
-    );
-  },
+    </div>
+  );
+}
+
+export const Route = createRootRoute({
+  component: RootComponent,
 });
 
-// Export mode type for use in other components / 다른 컴포넌트에서 사용할 수 있도록 모드 타입 export
-export type { InspectorMode };
+// Export filter state getter function / 필터 상태를 가져오는 함수 export
+export function getClientTypeFilter(): { web: boolean; reactNative: boolean } {
+  const showWeb = localStorage.getItem('client-filter-web') !== 'false';
+  const showReactNative = localStorage.getItem('client-filter-react-native') !== 'false';
+  return { web: showWeb, reactNative: showReactNative };
+}

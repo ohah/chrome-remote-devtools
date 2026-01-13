@@ -1,96 +1,39 @@
-// Web-specific connection page / 웹 전용 연결 페이지
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+// Connection page with mode routing / 모드 라우팅을 사용한 연결 페이지
+import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { ClientTable, ClientFilter, filterClients } from '@/features/client-list';
 import { SettingsModal } from '@/features/settings';
 import { clientQueries } from '@/entities/client';
 import { LoadingState, ErrorState } from '@/shared/ui';
-import { GITHUB_REPO_URL, useServerUrl } from '@/shared/lib';
-import { Upload, Settings, HelpCircle, Globe, Smartphone } from 'lucide-react';
-import type { InspectorMode } from '@/routes/__root';
+import { useServerUrl } from '@/shared/lib';
+import { Upload, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-// Mode selector component / 모드 선택 컴포넌트
-function ModeSelector({
-  mode,
-  onModeChange,
-}: {
-  mode: InspectorMode;
-  onModeChange: (mode: InspectorMode) => void;
-}) {
-  return (
-    <div className="flex items-center gap-0.5 px-0.5 py-0.5 bg-gray-700/30 rounded">
-      <Tooltip delayDuration={300}>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onModeChange('react-native')}
-            className={`cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all ${
-              mode === 'react-native'
-                ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-600/50'
-            }`}
-            aria-label="React Native Mode"
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          <p>React Native</p>
-        </TooltipContent>
-      </Tooltip>
-      <Tooltip delayDuration={300}>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onModeChange('web')}
-            className={`cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all ${
-              mode === 'web'
-                ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-600/50'
-            }`}
-            aria-label="Web Remote Mode"
-          >
-            <Globe className="w-3.5 h-3.5" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          <p>Web</p>
-        </TooltipContent>
-      </Tooltip>
-    </div>
-  );
-}
+// Validate mode parameter / 모드 파라미터 검증
+type InspectorMode = 'web' | 'react-native';
 
-export const Route = createFileRoute('/web')({
-  component: WebConnectionPage,
+export const Route = createFileRoute('/mode/$mode')({
+  // Validate mode parameter / 모드 파라미터 검증
+  beforeLoad: ({ params }) => {
+    if (params.mode !== 'web' && params.mode !== 'react-native') {
+      // Redirect to default mode if invalid / 유효하지 않으면 기본 모드로 리다이렉트
+      throw redirect({
+        to: '/mode/$mode',
+        params: { mode: 'web' },
+      });
+    }
+  },
+  component: ConnectionPage,
 });
 
-function WebConnectionPage() {
+function ConnectionPage() {
+  const { mode } = Route.useParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [mode, setMode] = useState<InspectorMode>(() => {
-    // Load mode from localStorage / localStorage에서 모드 로드
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('inspector-mode');
-      return (saved === 'web' || saved === 'react-native' ? saved : 'web') as InspectorMode;
-    }
-    return 'web';
-  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { serverUrl } = useServerUrl();
-
-  useEffect(() => {
-    // Save mode to localStorage / 모드를 localStorage에 저장
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('inspector-mode', mode);
-    }
-  }, [mode]);
   const {
     data: clients = [],
     isLoading,
@@ -102,12 +45,22 @@ function WebConnectionPage() {
     enabled: !!serverUrl, // Only fetch if server URL is set
   });
 
-  // Filter clients based on search query
+  // Filter clients based on mode and search query / 모드와 검색 쿼리에 따라 클라이언트 필터링
   const filteredClients = useMemo(() => {
-    return filterClients(clients, searchQuery);
-  }, [clients, searchQuery]);
+    let filtered = clients;
 
-  // Navigate to devtools when client row is clicked
+    // Filter by mode / 모드에 따라 필터링
+    if (mode === 'react-native') {
+      filtered = filtered.filter((client) => client.type === 'react-native');
+    } else {
+      filtered = filtered.filter((client) => client.type === 'web');
+    }
+
+    // Filter by search query / 검색 쿼리에 따라 필터링
+    return filterClients(filtered, searchQuery);
+  }, [clients, searchQuery, mode]);
+
+  // Navigate to devtools when client row is clicked / 클라이언트 행 클릭 시 DevTools로 이동
   const handleSelect = (clientId: string) => {
     navigate({
       to: '/devtools/$clientId',
@@ -157,13 +110,14 @@ function WebConnectionPage() {
     return <ErrorState error={error} onRetry={() => refetch()} isRetrying={isRefetching} />;
   }
 
+  // Show client list for both modes / 두 모드 모두 클라이언트 리스트 표시
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header bar (sticky) */}
-        <div className="sticky top-0 z-50 bg-gray-800 border-b border-gray-700 pl-0 pr-4 py-3 flex items-center justify-between mb-4">
+        {/* Tauri-specific header / Tauri 전용 헤더 */}
+        <div className="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <ModeSelector mode={mode} onModeChange={setMode} />
+            <h1 className="text-xl font-semibold text-gray-200">Chrome Remote DevTools</h1>
             <ClientFilter query={searchQuery} onQueryChange={setSearchQuery} />
           </div>
           <div className="flex items-center gap-4">
@@ -195,25 +149,6 @@ function WebConnectionPage() {
               <Settings className="h-5 w-5" />
               Settings
             </Button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="flex items-center gap-2 text-gray-400 hover:text-gray-200"
-                  aria-label="Open GitHub repository in new tab"
-                >
-                  <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
-                    <HelpCircle className="h-5 w-5" />
-                    Help
-                  </a>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <p>Help</p>
-              </TooltipContent>
-            </Tooltip>
           </div>
         </div>
 
