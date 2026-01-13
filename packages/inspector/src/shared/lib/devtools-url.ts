@@ -27,6 +27,12 @@ export function buildDevToolsUrl(clientId: string, serverUrl?: string): string {
   const wsUrl = `${serverHost}/remote/debug/devtools/${devtoolsId}?clientId=${clientId}`;
   params.append('ws', wsUrl);
 
+  // Add unique instance hash for localStorage isolation / localStorage 격리를 위한 고유 인스턴스 해시 추가
+  // This ensures each DevTools instance has a slightly different URL to help with isolation
+  // / 각 DevTools 인스턴스가 약간 다른 URL을 가지도록 하여 격리에 도움이 됨
+  const instanceHash = clientId.slice(0, 8); // Use first 8 chars of clientId / clientId의 처음 8자 사용
+  params.append('instance', instanceHash);
+
   // DevTools configuration parameters / DevTools 설정 파라미터
   Object.entries(DEVTOOLS_CONFIG).forEach(([key, value]) => {
     params.append(key, value);
