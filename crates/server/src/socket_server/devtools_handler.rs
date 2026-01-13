@@ -6,7 +6,8 @@ use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::RwLock;
-use super::types::{CDPMessage, Client, DevTools};
+use super::message::CDPMessage;
+use super::{Client, DevTools};
 
 /// Handle DevTools WebSocket connection / DevTools WebSocket 연결 처리
 pub async fn handle_devtools_connection(

@@ -1,6 +1,6 @@
 // Message processing utilities / 메시지 처리 유틸리티
 use crate::logging::{LogType, Logger};
-use super::types::{CDPMessage, CompressedParams};
+use super::message::{CDPMessage, CompressedParams};
 use flate2::read::GzDecoder;
 use std::io::Read;
 

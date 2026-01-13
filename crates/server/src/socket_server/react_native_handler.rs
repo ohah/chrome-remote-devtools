@@ -9,7 +9,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::RwLock;
-use super::types::{CDPMessage, DevTools};
+use super::message::CDPMessage;
+use super::DevTools;
 
 /// Handle React Native Inspector WebSocket / React Native Inspector WebSocket 처리
 pub async fn handle_react_native_inspector_websocket(
