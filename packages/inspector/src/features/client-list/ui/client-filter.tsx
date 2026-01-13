@@ -1,7 +1,7 @@
 /**
  * Client filter component / 클라이언트 필터 컴포넌트
  */
-import { HiMagnifyingGlass, HiXMark } from 'react-icons/hi2';
+import { Search, X } from 'lucide-react';
 
 interface ClientFilterProps {
   /** Search query value / 검색 쿼리 값 */
@@ -17,7 +17,7 @@ export function ClientFilter({ query, onQueryChange }: ClientFilterProps) {
         Search clients
       </label>
       {/* Search icon / 검색 아이콘 */}
-      <HiMagnifyingGlass className="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none" />
+      <Search className="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none" />
       <input
         id="client-search"
         type="text"
@@ -35,7 +35,7 @@ export function ClientFilter({ query, onQueryChange }: ClientFilterProps) {
           aria-label="Clear search"
           type="button"
         >
-          <HiXMark className="h-4 w-4" />
+          <X className="h-4 w-4" />
         </button>
       )}
     </div>

@@ -1,7 +1,7 @@
 // Client table component / 클라이언트 테이블 컴포넌트 (Chii style / Chii 스타일)
 import type { Client } from '@/entities/client';
 import { sanitizeUrl } from '@/shared/lib';
-import { HiDevicePhoneMobile, HiGlobeAlt } from 'react-icons/hi2';
+import { Smartphone, Globe } from 'lucide-react';
 
 interface ClientTableProps {
   clients: Client[];
@@ -44,14 +44,14 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
                 {/* Type icon / 타입 아이콘 */}
                 <td className="px-2 py-3 text-center">
                   {isReactNative ? (
-                    <HiDevicePhoneMobile
+                    <Smartphone
                       className="w-5 h-5 mx-auto text-gray-400"
                       role="img"
                       aria-label="React Native"
                       title="React Native"
                     />
                   ) : (
-                    <HiGlobeAlt
+                    <Globe
                       className="w-5 h-5 mx-auto text-gray-400"
                       role="img"
                       aria-label="Web"
