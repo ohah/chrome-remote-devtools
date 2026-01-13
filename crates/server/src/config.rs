@@ -10,8 +10,6 @@ pub struct ServerConfig {
     pub host: String,
     /// Enable SSL/TLS / SSL/TLS 활성화
     pub use_ssl: bool,
-    /// TLS backend type / TLS 백엔드 타입 ("rustls" or "openssl")
-    pub tls_backend: Option<String>,
     /// SSL certificate path / SSL 인증서 경로
     pub ssl_cert_path: Option<String>,
     /// SSL key path / SSL 키 경로
@@ -33,7 +31,6 @@ impl Default for ServerConfig {
             port: 8080,
             host: "0.0.0.0".to_string(),
             use_ssl: false,
-            tls_backend: None, // Default to rustls / 기본값은 rustls
             ssl_cert_path: None,
             ssl_key_path: None,
             log_enabled: false,
@@ -61,7 +58,6 @@ impl ServerConfig {
                 .unwrap_or(default_port),
             host: std::env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
             use_ssl,
-            tls_backend: std::env::var("TLS_BACKEND").ok(), // "rustls" or "openssl" / "rustls" 또는 "openssl"
             ssl_cert_path: std::env::var("SSL_CERT_PATH").ok(),
             ssl_key_path: std::env::var("SSL_KEY_PATH").ok(),
             log_enabled: std::env::var("LOG_ENABLED")
