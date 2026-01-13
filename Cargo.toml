@@ -16,12 +16,14 @@ license = "MIT"
 tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = "0.24"
 axum = { version = "0.7", features = ["ws", "http1", "http2", "macros"] }
+axum-server = { version = "0.8", features = ["tls-rustls", "tls-openssl"] }
 tower = "0.5"
 tower-http = { version = "0.6", features = ["cors", "trace"] }
 
 # SSL/TLS
-rustls = "0.23"
+rustls = "0.23.36"
 rustls-pemfile = "2.1"
+tokio-rustls = "0.26.4"
 
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
