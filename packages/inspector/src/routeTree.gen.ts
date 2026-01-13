@@ -9,10 +9,22 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WebRouteImport } from './routes/web'
+import { Route as TauriRouteImport } from './routes/tauri'
 import { Route as ReplayRouteImport } from './routes/replay'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DevtoolsClientIdRouteImport } from './routes/devtools/$clientId'
 
+const WebRoute = WebRouteImport.update({
+  id: '/web',
+  path: '/web',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TauriRoute = TauriRouteImport.update({
+  id: '/tauri',
+  path: '/tauri',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReplayRoute = ReplayRouteImport.update({
   id: '/replay',
   path: '/replay',
@@ -32,35 +44,57 @@ const DevtoolsClientIdRoute = DevtoolsClientIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/replay': typeof ReplayRoute
+  '/tauri': typeof TauriRoute
+  '/web': typeof WebRoute
   '/devtools/$clientId': typeof DevtoolsClientIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/replay': typeof ReplayRoute
+  '/tauri': typeof TauriRoute
+  '/web': typeof WebRoute
   '/devtools/$clientId': typeof DevtoolsClientIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/replay': typeof ReplayRoute
+  '/tauri': typeof TauriRoute
+  '/web': typeof WebRoute
   '/devtools/$clientId': typeof DevtoolsClientIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/replay' | '/devtools/$clientId'
+  fullPaths: '/' | '/replay' | '/tauri' | '/web' | '/devtools/$clientId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/replay' | '/devtools/$clientId'
-  id: '__root__' | '/' | '/replay' | '/devtools/$clientId'
+  to: '/' | '/replay' | '/tauri' | '/web' | '/devtools/$clientId'
+  id: '__root__' | '/' | '/replay' | '/tauri' | '/web' | '/devtools/$clientId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ReplayRoute: typeof ReplayRoute
+  TauriRoute: typeof TauriRoute
+  WebRoute: typeof WebRoute
   DevtoolsClientIdRoute: typeof DevtoolsClientIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/web': {
+      id: '/web'
+      path: '/web'
+      fullPath: '/web'
+      preLoaderRoute: typeof WebRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tauri': {
+      id: '/tauri'
+      path: '/tauri'
+      fullPath: '/tauri'
+      preLoaderRoute: typeof TauriRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/replay': {
       id: '/replay'
       path: '/replay'
@@ -88,6 +122,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ReplayRoute: ReplayRoute,
+  TauriRoute: TauriRoute,
+  WebRoute: WebRoute,
   DevtoolsClientIdRoute: DevtoolsClientIdRoute,
 }
 export const routeTree = rootRouteImport
