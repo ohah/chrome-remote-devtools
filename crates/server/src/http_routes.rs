@@ -13,7 +13,7 @@ use std::sync::Arc;
 use tokio::fs;
 
 /// Create HTTP router / HTTP 라우터 생성
-pub fn create_router() -> Router<Arc<SocketServer>> {
+pub fn create_router(dev_mode: bool) -> Router<Arc<SocketServer>> {
     let mut router = Router::new()
         .route("/json", get(get_all_clients))
         .route("/json/clients", get(get_all_clients_detailed))
@@ -24,11 +24,7 @@ pub fn create_router() -> Router<Arc<SocketServer>> {
         .route("/remote/debug/*path", get(handle_websocket_upgrade));
 
     // Only add /client.js route in development mode / 개발 모드에서만 /client.js 라우트 추가
-    if cfg!(debug_assertions)
-        || std::env::var("DEV_MODE")
-            .map(|v| v == "true")
-            .unwrap_or(false)
-    {
+    if dev_mode {
         router = router.route("/client.js", get(serve_client_script));
     }
 

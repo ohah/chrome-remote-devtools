@@ -914,15 +914,6 @@ impl SocketServer {
             .collect()
     }
 
-    /// Get inspector by ID / ID로 Inspector 가져오기
-    pub async fn get_inspector(&self, inspector_id: &str) -> Option<InspectorInfo> {
-        let devtools = self.devtools.read().await;
-        devtools.get(inspector_id).map(|devtool| InspectorInfo {
-            id: devtool.id.clone(),
-            client_id: devtool.client_id.clone(),
-        })
-    }
-
     /// Get all inspectors / 모든 Inspector 가져오기
     pub async fn get_all_inspectors(&self) -> Vec<InspectorInfo> {
         let devtools = self.devtools.read().await;

@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use std::fs::{File, OpenOptions};
 use std::io::{self, Write};
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use std::time::SystemTime;
 
 /// Log type / 로그 타입
@@ -31,6 +31,7 @@ impl LogType {
 pub struct LogConfig {
     enabled: bool,
     allowed_methods: Option<HashSet<String>>,
+    #[allow(dead_code)]
     log_file: Option<String>,
 }
 
@@ -122,8 +123,8 @@ impl LogWriter {
 
 /// Logger instance / 로거 인스턴스
 pub struct Logger {
-    config: Arc<LogConfig>,
-    writer: Arc<Mutex<LogWriter>>,
+    config: Arc<RwLock<LogConfig>>,
+    writer: Arc<RwLock<LogWriter>>,
 }
 
 impl Logger {
@@ -133,21 +134,37 @@ impl Logger {
         methods: Option<String>,
         log_file: Option<String>,
     ) -> Result<Self, io::Error> {
-        let config = Arc::new(LogConfig::new(enabled, methods, log_file.clone())?);
-        let writer = Arc::new(Mutex::new(LogWriter::new(log_file)?));
+        let config = Arc::new(RwLock::new(LogConfig::new(
+            enabled,
+            methods,
+            log_file.clone(),
+        )?));
+        let writer = Arc::new(RwLock::new(LogWriter::new(log_file)?));
 
         Ok(Self { config, writer })
     }
 
     /// Update log configuration / 로그 설정 업데이트
+    #[allow(dead_code)]
     pub fn update_config(
-        &mut self,
+        &self,
         enabled: bool,
         methods: Option<String>,
         log_file: Option<String>,
     ) -> Result<(), io::Error> {
-        self.config = Arc::new(LogConfig::new(enabled, methods, log_file.clone())?);
-        self.writer = Arc::new(Mutex::new(LogWriter::new(log_file)?));
+        let new_config = LogConfig::new(enabled, methods.clone(), log_file.clone())?;
+        let new_writer = LogWriter::new(log_file)?;
+
+        {
+            let mut config = self.config.write().unwrap();
+            *config = new_config;
+        }
+
+        {
+            let mut writer = self.writer.write().unwrap();
+            *writer = new_writer;
+        }
+
         Ok(())
     }
 
@@ -160,9 +177,11 @@ impl Logger {
         data: Option<&serde_json::Value>,
         method: Option<&str>,
     ) {
-        if !self.config.should_log_method(method) {
+        let config = self.config.read().unwrap();
+        if !config.should_log_method(method) {
             return;
         }
+        drop(config);
 
         let timestamp = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
@@ -172,7 +191,6 @@ impl Logger {
 
         let log_message = if let Some(data) = data {
             let data_str = serde_json::to_string_pretty(data).unwrap_or_else(|_| "{}".to_string());
-            let _msg = format!("{} {} {}\n", timestamp, prefix, message);
             println!("{} {}", prefix, message);
             println!("{}", data_str);
             format!("{} {} {} {}\n", timestamp, prefix, message, data_str)
@@ -180,16 +198,18 @@ impl Logger {
             format!("{} {} {}\n", timestamp, prefix, message)
         };
 
-        if let Ok(writer) = self.writer.lock() {
+        if let Ok(writer) = self.writer.read() {
             let _ = writer.write(&log_message);
         }
     }
 
     /// Log error / 에러 로깅
     pub fn log_error(&self, log_type: LogType, id: &str, message: &str, error: Option<&str>) {
-        if !self.config.is_enabled() {
+        let config = self.config.read().unwrap();
+        if !config.is_enabled() {
             return;
         }
+        drop(config);
 
         let timestamp = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
@@ -204,7 +224,7 @@ impl Logger {
         };
 
         eprintln!("{} {}: {}", prefix, message, error.unwrap_or(""));
-        if let Ok(writer) = self.writer.lock() {
+        if let Ok(writer) = self.writer.read() {
             let _ = writer.write(&log_message);
         }
     }
