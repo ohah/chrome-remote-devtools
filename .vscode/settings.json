@@ -50,5 +50,26 @@
   },
 
   // Show files excluded by .gitignore in explorer / 탐색기에서 .gitignore로 제외된 파일도 표시
-  "explorer.excludeGitIgnore": false
+  "explorer.excludeGitIgnore": false,
+
+  // Rust Analyzer settings / Rust Analyzer 설정
+  "rust-analyzer.cargo.buildScripts.useRustcWrapper": true,
+  "rust-analyzer.cargo.allFeatures": true,
+
+  // Check on save settings / 저장 시 검사 설정
+  "rust-analyzer.checkOnSave": true,
+  "rust-analyzer.checkOnSave.command": "clippy",
+  "rust-analyzer.checkOnSave.allTargets": true,
+
+  // Workspace root / 워크스페이스 루트
+  "rust-analyzer.linkedProjects": ["Cargo.toml"],
+  // Files to exclude from rust-analyzer / rust-analyzer에서 제외할 파일
+  "rust-analyzer.files.excludeDirs": [
+    "**/node_modules",
+    "**/target",
+    "**/dist",
+    "**/doc_build",
+    "**/reference",
+    "**/devtools/devtools-frontend"
+  ]
 }
