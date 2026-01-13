@@ -1,4 +1,6 @@
 // Client connection handler / 클라이언트 연결 핸들러
+use super::message_processor::process_client_message;
+use super::{Client, DevTools};
 use crate::logging::{LogType, Logger};
 use crate::react_native::ReactNativeInspectorConnectionManager;
 use axum::extract::ws::{Message, WebSocket};
@@ -7,8 +9,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::RwLock;
-use super::message_processor::process_client_message;
-use super::{Client, DevTools};
 
 /// Handle client WebSocket connection / 클라이언트 WebSocket 연결 처리
 pub async fn handle_client_connection(
@@ -70,11 +70,7 @@ pub async fn handle_client_connection(
         while let Some(msg) = receiver.next().await {
             match msg {
                 Ok(Message::Text(text)) => {
-                    let data = process_client_message(
-                        &text,
-                        &client_id_for_msg,
-                        &logger_for_msg,
-                    );
+                    let data = process_client_message(&text, &client_id_for_msg, &logger_for_msg);
 
                     // Send to DevTools / DevTools로 전송
                     let devtools = devtools_for_msg.read().await;
@@ -103,10 +99,7 @@ pub async fn handle_client_connection(
                                     logger_for_msg.log_error(
                                         LogType::Client,
                                         &client_id_for_msg,
-                                        &format!(
-                                            "failed to send to RN inspector {}",
-                                            inspector.id
-                                        ),
+                                        &format!("failed to send to RN inspector {}", inspector.id),
                                         Some(&e.to_string()),
                                     );
                                 }

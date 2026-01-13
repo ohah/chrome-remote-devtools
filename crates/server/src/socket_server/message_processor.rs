@@ -1,6 +1,6 @@
 // Message processing utilities / 메시지 처리 유틸리티
-use crate::logging::{LogType, Logger};
 use super::message::{CDPMessage, CompressedParams};
+use crate::logging::{LogType, Logger};
 use flate2::read::GzDecoder;
 use std::io::Read;
 
@@ -29,12 +29,7 @@ pub fn process_client_message(message: &str, client_id: &str, logger: &Logger) -
                             }
                         }
                     } else {
-                        logger.log_error(
-                            LogType::Client,
-                            client_id,
-                            "decompression failed",
-                            None,
-                        );
+                        logger.log_error(LogType::Client, client_id, "decompression failed", None);
                     }
                 }
             }
