@@ -173,6 +173,9 @@ impl SocketServer {
             clients.insert(id.clone(), client.clone());
         }
 
+        // Request stored events from client when DevTools connect / DevTools 연결 시 클라이언트에 저장된 이벤트 요청
+        // This will be handled when DevTools connects / DevTools 연결 시 처리됨
+
         // Spawn task to send messages to client / 클라이언트로 메시지 전송 태스크
         let logger_clone = self.logger.clone();
         let client_id_for_send = id.clone();
@@ -317,6 +320,44 @@ impl SocketServer {
             devtools.insert(id.clone(), devtool.clone());
         }
 
+        // Request stored events from client when DevTools connects / DevTools 연결 시 클라이언트에 저장된 이벤트 요청
+        if let Some(client_id) = &client_id {
+            // Try regular client first / 일반 클라이언트 먼저 시도
+            let clients = self.clients.read().await;
+            if let Some(client) = clients.get(client_id) {
+                // Request stored events / 저장된 이벤트 요청
+                let methods = vec!["Storage.replayStoredEvents", "SessionReplay.replayStoredEvents"];
+                let client_sender = client.sender.clone();
+                let devtools_id = id.clone();
+                let logger_clone = self.logger.clone();
+                drop(clients);
+                for method in methods {
+                    let message = serde_json::json!({
+                        "method": method,
+                        "params": {},
+                    });
+                    if let Ok(json_str) = serde_json::to_string(&message) {
+                        if let Err(e) = client_sender.send(json_str) {
+                            logger_clone.log_error(
+                                LogType::DevTools,
+                                &devtools_id,
+                                &format!("failed to request {} from client {}", method, client_id),
+                                Some(&e.to_string()),
+                            );
+                        } else {
+                            logger_clone.log(
+                                LogType::DevTools,
+                                &devtools_id,
+                                &format!("requested {} from client {}", method, client_id),
+                                None,
+                                None,
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
         // If connected to React Native Inspector, send cached Redux stores / React Native Inspector에 연결된 경우 캐시된 Redux stores 전송
         if let Some(client_id) = &client_id {
             let rn_connection = self
@@ -340,23 +381,62 @@ impl SocketServer {
                 tokio::spawn(async move {
                     tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
                     for store in stores {
-                        let message = serde_json::json!({
+                        // Send INIT_INSTANCE message first / 먼저 INIT_INSTANCE 메시지 전송
+                        let init_instance_msg = serde_json::json!({
                             "method": "Redux.message",
                             "params": {
-                                "type": "INIT",
+                                "type": "INIT_INSTANCE",
                                 "instanceId": store.instance_id,
-                                "name": store.name,
-                                "payload": store.payload,
-                                "timestamp": store.timestamp,
+                                "source": "@devtools-page",
                             }
                         });
-                        if let Ok(json_str) = serde_json::to_string(&message) {
+                        if let Ok(json_str) = serde_json::to_string(&init_instance_msg) {
                             if let Err(e) = sender_clone.send(json_str) {
                                 logger_clone.log_error(
                                     LogType::DevTools,
                                     &devtools_id,
-                                    "failed to send cached Redux store",
+                                    "failed to send cached INIT_INSTANCE",
                                     Some(&e.to_string()),
+                                );
+                            } else {
+                                logger_clone.log(
+                                    LogType::DevTools,
+                                    &devtools_id,
+                                    &format!("📤 Sent cached INIT_INSTANCE for instance {}", store.instance_id),
+                                    None,
+                                    None,
+                                );
+                            }
+                        }
+
+                        // Send INIT message with current state / 현재 상태와 함께 INIT 메시지 전송
+                        let init_msg = serde_json::json!({
+                            "method": "Redux.message",
+                            "params": {
+                                "type": "INIT",
+                                "instanceId": store.instance_id,
+                                "source": "@devtools-page",
+                                "name": store.name,
+                                "payload": store.payload,
+                                "maxAge": 50,
+                                "timestamp": store.timestamp,
+                            }
+                        });
+                        if let Ok(json_str) = serde_json::to_string(&init_msg) {
+                            if let Err(e) = sender_clone.send(json_str) {
+                                logger_clone.log_error(
+                                    LogType::DevTools,
+                                    &devtools_id,
+                                    "failed to send cached Redux store INIT",
+                                    Some(&e.to_string()),
+                                );
+                            } else {
+                                logger_clone.log(
+                                    LogType::DevTools,
+                                    &devtools_id,
+                                    &format!("📤 Sent cached INIT for instance {} ({})", store.instance_id, store.name),
+                                    None,
+                                    None,
                                 );
                             }
                         }
