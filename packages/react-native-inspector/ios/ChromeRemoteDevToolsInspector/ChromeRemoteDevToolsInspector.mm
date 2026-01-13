@@ -114,7 +114,7 @@ static NSURL *getInspectorDeviceUrl(NSString *serverHost, NSInteger serverPort)
 
   // Use WebSocket URL (ws://) instead of HTTP / HTTP 대신 WebSocket URL (ws://) 사용
   return [NSURL
-      URLWithString:[NSString stringWithFormat:@"ws://%@/inspector/device?name=%@&app=%@&device=%@",
+      URLWithString:[NSString stringWithFormat:@"ws://%@/remote/debug/inspector/device?name=%@&app=%@&device=%@",
                                                getServerHost(serverHost, serverPort),
                                                escapedDeviceName,
                                                escapedAppName,
