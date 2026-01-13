@@ -32,3 +32,6 @@ clap.workspace = true
 # 추가 의존성
 url = "2.5"
 thiserror = "1.0"
+uuid = { version = "1.10", features = ["v4"] }
+flate2 = "1.0"
+futures-util = "0.3.31"
