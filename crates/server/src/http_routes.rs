@@ -2,25 +2,33 @@
 use crate::socket_server::SocketServer;
 use axum::extract::ws::WebSocketUpgrade;
 use axum::extract::{Path, Query, State};
-use axum::http::StatusCode;
-use axum::response::Json;
+use axum::http::{header, StatusCode};
+use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{get, post};
 use axum::Router;
 use serde_json::{json, Value};
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::Arc;
+use tokio::fs;
 
 /// Create HTTP router / HTTP 라우터 생성
 pub fn create_router() -> Router<Arc<SocketServer>> {
-    Router::new()
+    let mut router = Router::new()
         .route("/json", get(get_all_clients))
         .route("/json/clients", get(get_all_clients_detailed))
         .route("/json/inspectors", get(get_all_inspectors))
         .route("/json/client/:id", get(get_client))
-        .route("/client.js", get(serve_client_script))
         .route("/inspector/device", get(handle_inspector_device_http))
         .route("/open-debugger", post(handle_open_debugger))
-        .route("/remote/debug/*path", get(handle_websocket_upgrade))
+        .route("/remote/debug/*path", get(handle_websocket_upgrade));
+
+    // Only add /client.js route in development mode / 개발 모드에서만 /client.js 라우트 추가
+    if cfg!(debug_assertions) || std::env::var("DEV_MODE").map(|v| v == "true").unwrap_or(false) {
+        router = router.route("/client.js", get(serve_client_script));
+    }
+
+    router
 }
 
 /// Get all clients / 모든 클라이언트 가져오기
@@ -113,9 +121,42 @@ async fn get_client(
 }
 
 /// Serve client script / 클라이언트 스크립트 서빙
-async fn serve_client_script() -> Result<&'static str, StatusCode> {
-    // TODO: Implement client script serving / 클라이언트 스크립트 서빙 구현
-    Ok("console.error('Client script not found. Please build: cd packages/client && bun run build');")
+/// Note: This endpoint is only available in development mode / 주의: 이 엔드포인트는 개발 모드에서만 사용 가능
+/// In production (Tauri build), the client script is not included / 운영 환경(Tauri 빌드)에서는 클라이언트 스크립트가 포함되지 않음
+async fn serve_client_script() -> Result<Response, StatusCode> {
+    // Check if running in development mode / 개발 모드에서 실행 중인지 확인
+    // In development, try to serve the client script from the source directory / 개발 환경에서는 소스 디렉토리에서 클라이언트 스크립트 서빙 시도
+    // In production (Tauri), this file won't be available / 운영 환경(Tauri)에서는 이 파일을 사용할 수 없음
+
+    // Try IIFE format first (for script tags) / 먼저 IIFE 형식 시도 (script 태그용)
+    let iife_path = PathBuf::from("packages/client/dist/index.iife.js");
+    if let Ok(content) = fs::read_to_string(&iife_path).await {
+        return Ok((
+            StatusCode::OK,
+            [(header::CONTENT_TYPE, "application/javascript")],
+            content,
+        )
+            .into_response());
+    }
+
+    // Fallback: try index.js if iife doesn't exist / Fallback: iife가 없으면 index.js 시도
+    let js_path = PathBuf::from("packages/client/dist/index.js");
+    if let Ok(content) = fs::read_to_string(&js_path).await {
+        return Ok((
+            StatusCode::OK,
+            [(header::CONTENT_TYPE, "application/javascript")],
+            content,
+        )
+            .into_response());
+    }
+
+    // Fallback: warning if not built or in production / Fallback: 빌드되지 않았거나 운영 환경인 경우 경고 메시지
+    Ok((
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, "application/javascript")],
+        "console.error('Client script not found. This endpoint is only available in development mode. Please build: cd packages/client && bun run build');",
+    )
+        .into_response())
 }
 
 /// Handle inspector device HTTP GET request / inspector device HTTP GET 요청 처리
