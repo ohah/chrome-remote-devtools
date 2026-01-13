@@ -19,6 +19,10 @@ pub enum ServerError {
     AlreadyRunning,
     #[error("IO error / IO 오류: {0}")]
     Io(#[from] std::io::Error),
+    #[error("TLS error / TLS 오류: {0}")]
+    Tls(String),
+    #[error("Certificate error / 인증서 오류: {0}")]
+    Certificate(String),
     #[error("Other error / 기타 오류: {0}")]
     Other(String),
 }
@@ -26,9 +30,12 @@ pub enum ServerError {
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
+/// Server task handle type / 서버 태스크 핸들 타입
+type ServerTaskHandle = tokio::task::JoinHandle<Result<(), ServerError>>;
+
 /// Server handle for managing server lifecycle / 서버 생명주기 관리를 위한 서버 핸들
 pub struct ServerHandle {
-    server: Arc<RwLock<Option<tokio::task::JoinHandle<Result<(), ServerError>>>>>,
+    server: Arc<RwLock<Option<ServerTaskHandle>>>,
 }
 
 impl ServerHandle {
