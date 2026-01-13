@@ -1,4 +1,6 @@
 // React Native Inspector connection handler / React Native Inspector 연결 핸들러
+use super::message::CDPMessage;
+use super::DevTools;
 use crate::logging::{LogType, Logger};
 use crate::react_native::{
     ConnectionInfo, ReactNativeInspectorConnectionManager, ReduxStoreInstance,
@@ -9,8 +11,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::RwLock;
-use super::message::CDPMessage;
-use super::DevTools;
 
 /// Handle React Native Inspector WebSocket / React Native Inspector WebSocket 처리
 pub async fn handle_react_native_inspector_websocket(
@@ -99,9 +99,7 @@ pub async fn handle_react_native_inspector_websocket(
                             if method == "Redux.message" {
                                 if let Some(params) = &parsed.params {
                                     if let Ok(redux_params) =
-                                        serde_json::from_value::<serde_json::Value>(
-                                            params.clone(),
-                                        )
+                                        serde_json::from_value::<serde_json::Value>(params.clone())
                                     {
                                         if let Some(redux_type) =
                                             redux_params.get("type").and_then(|v| v.as_str())
@@ -224,10 +222,7 @@ pub async fn handle_react_native_inspector_websocket(
                                         logger_for_msg.log_error(
                                             LogType::RnInspector,
                                             &inspector_id_for_msg,
-                                            &format!(
-                                                "failed to send to devtools {}",
-                                                devtool.id
-                                            ),
+                                            &format!("failed to send to devtools {}", devtool.id),
                                             Some(&e.to_string()),
                                         );
                                     } else {
@@ -241,7 +236,10 @@ pub async fn handle_react_native_inspector_websocket(
                                 logger_for_msg.log(
                                     LogType::RnInspector,
                                     &inspector_id_for_msg,
-                                    &format!("no devtools connected to forward message (clientId: {})", client_id),
+                                    &format!(
+                                        "no devtools connected to forward message (clientId: {})",
+                                        client_id
+                                    ),
                                     None,
                                     None,
                                 );

@@ -1,4 +1,6 @@
 // DevTools connection handler / DevTools 연결 핸들러
+use super::message::CDPMessage;
+use super::{Client, DevTools};
 use crate::logging::{LogType, Logger};
 use crate::react_native::ReactNativeInspectorConnectionManager;
 use axum::extract::ws::{Message, WebSocket};
@@ -6,8 +8,6 @@ use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::RwLock;
-use super::message::CDPMessage;
-use super::{Client, DevTools};
 
 /// Handle DevTools WebSocket connection / DevTools WebSocket 연결 처리
 pub async fn handle_devtools_connection(
@@ -93,9 +93,7 @@ pub async fn handle_devtools_connection(
         let rn_connection = rn_manager.get_connection(client_id).await;
         if rn_connection.is_some() {
             // Associate DevTools with React Native Inspector / DevTools를 React Native Inspector와 연결
-            rn_manager
-                .associate_with_client(client_id, client_id)
-                .await;
+            rn_manager.associate_with_client(client_id, client_id).await;
 
             // Send cached Redux stores after a delay / 지연 후 캐시된 Redux stores 전송
             let stores = rn_manager.get_redux_stores(client_id).await;
@@ -240,10 +238,7 @@ pub async fn handle_devtools_connection(
                                     logger_for_msg.log_error(
                                         LogType::DevTools,
                                         &devtools_id_for_msg,
-                                        &format!(
-                                            "failed to send to RN inspector {}",
-                                            client_id
-                                        ),
+                                        &format!("failed to send to RN inspector {}", client_id),
                                         Some(&e.to_string()),
                                     );
                                 }
