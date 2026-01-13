@@ -8,7 +8,7 @@ use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::RwLock;
 use super::message_processor::process_client_message;
-use super::types::{Client, DevTools};
+use super::{Client, DevTools};
 
 /// Handle client WebSocket connection / 클라이언트 WebSocket 연결 처리
 pub async fn handle_client_connection(

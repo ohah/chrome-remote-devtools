@@ -1,5 +1,5 @@
 // WebSocket server implementation / WebSocket 서버 구현
-mod types;
+mod message;
 mod message_processor;
 mod client_handler;
 mod devtools_handler;
@@ -8,12 +8,50 @@ mod react_native_handler;
 use crate::logging::{LogType, Logger};
 use crate::react_native::ReactNativeInspectorConnectionManager;
 use axum::extract::ws::WebSocket;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::sync::Arc;
+use tokio::sync::mpsc;
 use tokio::sync::RwLock;
 
-pub use types::{ClientInfo, InspectorInfo};
-use types::{Client, DevTools};
+// Re-export message types / 메시지 타입 재내보내기
+pub use message::{CDPMessage, CompressedParams};
+
+/// Client connection / 클라이언트 연결
+struct Client {
+    id: String,
+    url: Option<String>,
+    title: Option<String>,
+    favicon: Option<String>,
+    ua: Option<String>,
+    time: Option<String>,
+    sender: mpsc::UnboundedSender<String>,
+}
+
+/// DevTools connection / DevTools 연결
+struct DevTools {
+    id: String,
+    client_id: Option<String>,
+    sender: mpsc::UnboundedSender<String>,
+}
+
+/// Client information / 클라이언트 정보
+#[derive(Debug, Clone, Serialize)]
+pub struct ClientInfo {
+    pub id: String,
+    pub url: Option<String>,
+    pub title: Option<String>,
+    pub favicon: Option<String>,
+    pub ua: Option<String>,
+    pub time: Option<String>,
+}
+
+/// Inspector information / Inspector 정보
+#[derive(Debug, Clone, Serialize)]
+pub struct InspectorInfo {
+    pub id: String,
+    pub client_id: Option<String>,
+}
 
 use client_handler::handle_client_connection;
 use devtools_handler::handle_devtools_connection;
