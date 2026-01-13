@@ -8,7 +8,7 @@ import { clientQueries } from '@/entities/client';
 import { useServerUrl } from '@/shared/lib';
 import { Tabs, type Tab } from '@/components/tabs';
 import { Smartphone, Globe } from 'lucide-react';
-import { getClientTypeFilter } from '@/routes/__root';
+import { getClientTypeFilter, getTabsVisibility } from '@/routes/__root';
 
 // Export component for route / 라우트용 컴포넌트 export
 export { DevToolsPage as component };
@@ -19,6 +19,7 @@ function DevToolsPage() {
   const navigate = useNavigate();
   const { serverUrl } = useServerUrl();
   const [filterState, setFilterState] = useState(getClientTypeFilter);
+  const [showTabs, setShowTabs] = useState(getTabsVisibility);
 
   // Get all clients for Activity pattern / Activity 패턴을 위한 모든 클라이언트 가져오기
   const {
@@ -36,6 +37,17 @@ function DevToolsPage() {
     window.addEventListener('client-filter-change', handleFilterChange);
     return () => {
       window.removeEventListener('client-filter-change', handleFilterChange);
+    };
+  }, []);
+
+  // Listen to tab visibility changes / 탭 표시 상태 변경 사항 듣기
+  useEffect(() => {
+    const handleTabsVisibilityChange = () => {
+      setShowTabs(getTabsVisibility());
+    };
+    window.addEventListener('tabs-visibility-change', handleTabsVisibilityChange);
+    return () => {
+      window.removeEventListener('tabs-visibility-change', handleTabsVisibilityChange);
     };
   }, []);
 
@@ -85,13 +97,17 @@ function DevToolsPage() {
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-900">
-      {/* Tabs / 탭 - Always show / 항상 표시 */}
-      {tabs.length > 0 ? (
-        <Tabs tabs={tabs} activeTabId={clientId} onTabChange={handleTabChange} />
-      ) : (
-        <div className="flex items-end bg-gray-800 border-b border-gray-700 h-10 px-4">
-          <div className="text-sm text-gray-400">No clients available</div>
-        </div>
+      {/* Tabs / 탭 - Show/hide based on visibility state / 표시 상태에 따라 표시/숨김 */}
+      {showTabs && (
+        <>
+          {tabs.length > 0 ? (
+            <Tabs tabs={tabs} activeTabId={clientId} onTabChange={handleTabChange} />
+          ) : (
+            <div className="flex items-end bg-gray-800 border-b border-gray-700 h-10 px-4">
+              <div className="text-sm text-gray-400">No clients available</div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Activity pattern: render all iframes, show only active one / Activity 패턴: 모든 iframe 렌더링, 활성 탭만 표시 */}
