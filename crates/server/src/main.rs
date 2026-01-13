@@ -52,6 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         log_enabled: cli.log_enabled,
         log_methods: cli.log_methods,
         log_file: cli.log_file,
+        dev_mode: cfg!(debug_assertions), // Enable dev mode in debug builds / 디버그 빌드에서 개발 모드 활성화
     };
 
     chrome_remote_devtools_server::run_server(config).await?;
