@@ -10,9 +10,6 @@ import { useServerUrl } from '@/shared/lib';
 import { Upload, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Validate mode parameter / 모드 파라미터 검증
-type InspectorMode = 'web' | 'react-native';
-
 export const Route = createFileRoute('/mode/$mode')({
   // Validate mode parameter / 모드 파라미터 검증
   beforeLoad: ({ params }) => {

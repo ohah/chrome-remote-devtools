@@ -9,17 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TauriRouteImport } from './routes/tauri'
 import { Route as ReplayRouteImport } from './routes/replay'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ModeModeRouteImport } from './routes/mode/$mode'
 import { Route as DevtoolsClientIdRouteImport } from './routes/devtools/$clientId'
 
-const TauriRoute = TauriRouteImport.update({
-  id: '/tauri',
-  path: '/tauri',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ReplayRoute = ReplayRouteImport.update({
   id: '/replay',
   path: '/replay',
@@ -44,14 +38,12 @@ const DevtoolsClientIdRoute = DevtoolsClientIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/replay': typeof ReplayRoute
-  '/tauri': typeof TauriRoute
   '/devtools/$clientId': typeof DevtoolsClientIdRoute
   '/mode/$mode': typeof ModeModeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/replay': typeof ReplayRoute
-  '/tauri': typeof TauriRoute
   '/devtools/$clientId': typeof DevtoolsClientIdRoute
   '/mode/$mode': typeof ModeModeRoute
 }
@@ -59,41 +51,26 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/replay': typeof ReplayRoute
-  '/tauri': typeof TauriRoute
   '/devtools/$clientId': typeof DevtoolsClientIdRoute
   '/mode/$mode': typeof ModeModeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/replay' | '/tauri' | '/devtools/$clientId' | '/mode/$mode'
+  fullPaths: '/' | '/replay' | '/devtools/$clientId' | '/mode/$mode'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/replay' | '/tauri' | '/devtools/$clientId' | '/mode/$mode'
-  id:
-    | '__root__'
-    | '/'
-    | '/replay'
-    | '/tauri'
-    | '/devtools/$clientId'
-    | '/mode/$mode'
+  to: '/' | '/replay' | '/devtools/$clientId' | '/mode/$mode'
+  id: '__root__' | '/' | '/replay' | '/devtools/$clientId' | '/mode/$mode'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ReplayRoute: typeof ReplayRoute
-  TauriRoute: typeof TauriRoute
   DevtoolsClientIdRoute: typeof DevtoolsClientIdRoute
   ModeModeRoute: typeof ModeModeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tauri': {
-      id: '/tauri'
-      path: '/tauri'
-      fullPath: '/tauri'
-      preLoaderRoute: typeof TauriRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/replay': {
       id: '/replay'
       path: '/replay'
@@ -128,7 +105,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ReplayRoute: ReplayRoute,
-  TauriRoute: TauriRoute,
   DevtoolsClientIdRoute: DevtoolsClientIdRoute,
   ModeModeRoute: ModeModeRoute,
 }
