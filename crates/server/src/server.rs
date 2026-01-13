@@ -3,7 +3,6 @@ use crate::config::ServerConfig;
 use crate::http_routes::create_router;
 use crate::logging::Logger;
 use crate::socket_server::SocketServer;
-use axum_server::tls_openssl::OpenSSLConfig;
 use axum_server::tls_rustls::RustlsConfig;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -45,23 +44,10 @@ pub async fn run_server(config: ServerConfig) -> Result<(), crate::ServerError> 
     // Start server / 서버 시작
     let protocol = if config.use_ssl { "https" } else { "http" };
     let ws_protocol = if config.use_ssl { "wss" } else { "ws" };
-    let tls_backend_info = if config.use_ssl {
-        let backend = config
-            .tls_backend
-            .as_deref()
-            .unwrap_or("rustls")
-            .to_lowercase();
-        format!(" (TLS backend: {})", backend)
-    } else {
-        String::new()
-    };
     logger.log(
         crate::logging::LogType::Server,
         "server",
-        &format!(
-            "Server started at {}://{}{}",
-            protocol, addr, tls_backend_info
-        ),
+        &format!("Server started at {}://{}", protocol, addr),
         None,
         None,
     );
@@ -89,50 +75,21 @@ pub async fn run_server(config: ServerConfig) -> Result<(), crate::ServerError> 
             )
         })?;
 
-        // Determine TLS backend / TLS 백엔드 결정
-        // Default to rustls if not specified / 지정되지 않으면 rustls 기본값
-        let tls_backend = config
-            .tls_backend
-            .as_deref()
-            .unwrap_or("rustls")
-            .to_lowercase();
+        // Load TLS configuration using rustls / rustls를 사용하여 TLS 설정 로드
+        let rustls_config = RustlsConfig::from_pem_file(&cert_path, &key_path)
+            .await
+            .map_err(|e| {
+                crate::ServerError::Certificate(format!(
+                    "Failed to load TLS configuration / TLS 설정 로드 실패: {}",
+                    e
+                ))
+            })?;
 
-        // Load TLS configuration and run server based on backend / 백엔드에 따라 TLS 설정 로드 및 서버 실행
-        match tls_backend.as_str() {
-            "openssl" => {
-                // Load OpenSSL configuration / OpenSSL 설정 로드
-                let openssl_config =
-                    OpenSSLConfig::from_pem_file(&cert_path, &key_path).map_err(|e| {
-                        crate::ServerError::Certificate(format!(
-                            "Failed to load OpenSSL configuration / OpenSSL 설정 로드 실패: {}",
-                            e
-                        ))
-                    })?;
-
-                // Run server with OpenSSL using axum-server / axum-server를 사용하여 OpenSSL로 서버 실행
-                axum_server::bind_openssl(addr, openssl_config)
-                    .serve(app.into_make_service())
-                    .await
-                    .map_err(|e| crate::ServerError::Io(e))?;
-            }
-            "rustls" | _ => {
-                // Load Rustls configuration / Rustls 설정 로드
-                let rustls_config = RustlsConfig::from_pem_file(&cert_path, &key_path)
-                    .await
-                    .map_err(|e| {
-                        crate::ServerError::Certificate(format!(
-                            "Failed to load Rustls configuration / Rustls 설정 로드 실패: {}",
-                            e
-                        ))
-                    })?;
-
-                // Run server with Rustls using axum-server / axum-server를 사용하여 Rustls로 서버 실행
-                axum_server::bind_rustls(addr, rustls_config)
-                    .serve(app.into_make_service())
-                    .await
-                    .map_err(|e| crate::ServerError::Io(e))?;
-            }
-        }
+        // Run server with TLS using axum-server / axum-server를 사용하여 TLS로 서버 실행
+        axum_server::bind_rustls(addr, rustls_config)
+            .serve(app.into_make_service())
+            .await
+            .map_err(|e| crate::ServerError::Io(e))?;
     } else {
         // Run server without TLS / TLS 없이 서버 실행
         let listener = TcpListener::bind(&addr)
