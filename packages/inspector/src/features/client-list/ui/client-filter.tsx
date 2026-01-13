@@ -1,6 +1,8 @@
 /**
  * Client filter component / 클라이언트 필터 컴포넌트
  */
+import { HiMagnifyingGlass, HiXMark } from 'react-icons/hi2';
+
 interface ClientFilterProps {
   /** Search query value / 검색 쿼리 값 */
   query: string;
@@ -15,20 +17,7 @@ export function ClientFilter({ query, onQueryChange }: ClientFilterProps) {
         Search clients
       </label>
       {/* Search icon / 검색 아이콘 */}
-      <svg
-        className="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
+      <HiMagnifyingGlass className="absolute left-3 h-4 w-4 text-gray-400 pointer-events-none" />
       <input
         id="client-search"
         type="text"
@@ -46,14 +35,7 @@ export function ClientFilter({ query, onQueryChange }: ClientFilterProps) {
           aria-label="Clear search"
           type="button"
         >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <HiXMark className="h-4 w-4" />
         </button>
       )}
     </div>
