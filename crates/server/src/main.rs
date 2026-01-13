@@ -54,11 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         log_file: cli.log_file,
     };
 
-    // TODO: Implement server startup / 서버 시작 구현
-    // run_server(config).await?;
-
-    println!("Server configuration: {:?}", config);
-    println!("TODO: Server implementation pending / 서버 구현 대기 중");
+    chrome_remote_devtools_server::run_server(config).await?;
 
     Ok(())
 }
