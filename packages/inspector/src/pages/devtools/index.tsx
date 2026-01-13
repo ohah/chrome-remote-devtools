@@ -114,6 +114,7 @@ function DevToolsPage() {
       <div className="flex-1 relative">
         {filteredClients.map((client) => {
           const iframeRef = getOrCreateIframeRef(client.id);
+          // Always use random instance for complete isolation / 완전한 격리를 위해 항상 랜덤 인스턴스 사용
           const devtoolsUrl = buildDevToolsUrl(client.id);
           const isActive = client.id === clientId;
 
