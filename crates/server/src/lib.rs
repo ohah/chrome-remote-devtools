@@ -2,44 +2,15 @@
 // This library provides the server functionality that can be used both as a standalone server
 // and integrated into Tauri applications / 이 라이브러리는 독립 실행형 서버와 Tauri 애플리케이션에 통합 가능한 서버 기능을 제공합니다
 
-use std::sync::Arc;
-use tokio::sync::RwLock;
+mod config;
+mod http_routes;
+mod logging;
+mod react_native;
+mod server;
+mod socket_server;
 
-/// Server configuration / 서버 설정
-#[derive(Debug, Clone)]
-pub struct ServerConfig {
-    /// Server port / 서버 포트
-    pub port: u16,
-    /// Server host / 서버 호스트
-    pub host: String,
-    /// Enable SSL/TLS / SSL/TLS 활성화
-    pub use_ssl: bool,
-    /// SSL certificate path / SSL 인증서 경로
-    pub ssl_cert_path: Option<String>,
-    /// SSL key path / SSL 키 경로
-    pub ssl_key_path: Option<String>,
-    /// Enable logging / 로깅 활성화
-    pub log_enabled: bool,
-    /// Comma-separated list of methods to log / 로깅할 메소드 목록 (쉼표로 구분)
-    pub log_methods: Option<String>,
-    /// Log file path / 로그 파일 경로
-    pub log_file: Option<String>,
-}
-
-impl Default for ServerConfig {
-    fn default() -> Self {
-        Self {
-            port: 8080,
-            host: "0.0.0.0".to_string(),
-            use_ssl: false,
-            ssl_cert_path: None,
-            ssl_key_path: None,
-            log_enabled: false,
-            log_methods: None,
-            log_file: None,
-        }
-    }
-}
+pub use config::ServerConfig;
+pub use server::run_server;
 
 /// Server error type / 서버 에러 타입
 #[derive(Debug, thiserror::Error)]
@@ -51,6 +22,9 @@ pub enum ServerError {
     #[error("Other error / 기타 오류: {0}")]
     Other(String),
 }
+
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
 /// Server handle for managing server lifecycle / 서버 생명주기 관리를 위한 서버 핸들
 pub struct ServerHandle {
@@ -66,17 +40,14 @@ impl ServerHandle {
     }
 
     /// Start server in background / 백그라운드에서 서버 시작
-    pub async fn start(&self, _config: ServerConfig) -> Result<(), ServerError> {
+    pub async fn start(&self, config: ServerConfig) -> Result<(), ServerError> {
         let mut server = self.server.write().await;
         if server.is_some() {
             return Err(ServerError::AlreadyRunning);
         }
 
-        let handle = tokio::spawn(async move {
-            // TODO: Implement server startup logic / 서버 시작 로직 구현
-            // run_server(config).await
-            Ok(())
-        });
+        let config_clone = config.clone();
+        let handle = tokio::spawn(async move { run_server(config_clone).await });
 
         *server = Some(handle);
         Ok(())
