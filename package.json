@@ -8,7 +8,8 @@
     "examples/*"
   ],
   "scripts": {
-    "dev": "bun scripts/dev.ts",
+    "dev": "INSPECTOR_MODE=tauri bun scripts/dev.ts",
+    "dev:web": "INSPECTOR_MODE=web bun scripts/dev.ts",
     "dev:all": "bun run --filter='*' dev",
     "dev:example:basic": "bun run --filter='basic' dev",
     "dev:server": "cargo run --bin chrome-remote-devtools-server -- --port 8080 --host 0.0.0.0",

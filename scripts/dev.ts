@@ -25,6 +25,8 @@ const config = {
   includeIframeExample: process.env.INCLUDE_IFRAME_EXAMPLE !== 'false', // Default: true
   includePopupExample: process.env.INCLUDE_POPUP_EXAMPLE !== 'false', // Default: true
   includeTauri: process.env.INCLUDE_TAURI !== 'false', // Default: true
+  // Include server (default: true, but false when Tauri mode) / 서버 포함 (기본값: true, Tauri 모드일 때는 false)
+  includeServer: process.env.INCLUDE_SERVER !== 'false' && process.env.INSPECTOR_MODE !== 'tauri', // Default: true, but false if INSPECTOR_MODE=tauri
   healthCheckTimeout: process.env.HEALTH_CHECK_TIMEOUT
     ? parseInt(process.env.HEALTH_CHECK_TIMEOUT)
     : 10000, // 10 seconds
@@ -69,30 +71,35 @@ const services: Service[] = [
     cwd: join(rootDir, 'packages/client-rrweb'),
     command: ['bun', 'run', 'build:watch'],
   },
-  {
-    name: 'SERVER',
-    color: colors.server,
-    cwd: rootDir, // Run from root for Cargo workspace / Cargo 워크스페이스를 위해 루트에서 실행
-    command: [
-      'cargo',
-      'run',
-      '--bin',
-      'chrome-remote-devtools-server',
-      '--',
-      '--port',
-      config.serverPort.toString(),
-      '--host',
-      '0.0.0.0',
-      ...(process.env.LOG_ENABLED === 'true' ? ['--log-enabled'] : []),
-      ...(process.env.LOG_METHODS ? ['--log-methods', process.env.LOG_METHODS] : []),
-    ],
-    env: {
-      LOG_ENABLED: process.env.LOG_ENABLED || 'true', // Enable server logs by default / 기본적으로 서버 로그 활성화
-      ...(process.env.LOG_METHODS ? { LOG_METHODS: process.env.LOG_METHODS } : {}),
-    },
-    port: config.serverPort,
-    healthCheckUrl: `http://localhost:${config.serverPort}/json`,
-  },
+  // Server (only if includeServer is true, not needed for Tauri mode) / 서버 (includeServer가 true인 경우만, Tauri 모드에서는 불필요)
+  ...(config.includeServer
+    ? [
+        {
+          name: 'SERVER',
+          color: colors.server,
+          cwd: rootDir, // Run from root for Cargo workspace / Cargo 워크스페이스를 위해 루트에서 실행
+          command: [
+            'cargo',
+            'run',
+            '--bin',
+            'chrome-remote-devtools-server',
+            '--',
+            '--port',
+            config.serverPort.toString(),
+            '--host',
+            '0.0.0.0',
+            ...(process.env.LOG_ENABLED === 'true' ? ['--log-enabled'] : []),
+            ...(process.env.LOG_METHODS ? ['--log-methods', process.env.LOG_METHODS] : []),
+          ],
+          env: {
+            LOG_ENABLED: process.env.LOG_ENABLED || 'true', // Enable server logs by default / 기본적으로 서버 로그 활성화
+            ...(process.env.LOG_METHODS ? { LOG_METHODS: process.env.LOG_METHODS } : {}),
+          },
+          port: config.serverPort,
+          healthCheckUrl: `http://localhost:${config.serverPort}/json`,
+        },
+      ]
+    : []),
   {
     name: 'INSPECTOR',
     color: colors.inspector,
@@ -147,6 +154,9 @@ const services: Service[] = [
     return false;
   }
   if (service.name === 'TAURI' && !config.includeTauri) {
+    return false;
+  }
+  if (service.name === 'SERVER' && !config.includeServer) {
     return false;
   }
   return true;
