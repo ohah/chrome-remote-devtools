@@ -1,5 +1,6 @@
 // gen/front_end/panels/session_replay/session_replay-meta.prebundle.js
 import * as i18n from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
 import * as UI from "./../../ui/legacy/legacy.js";
 var UIStrings = {
   /**
@@ -28,6 +29,10 @@ UI.ViewManager.registerViewExtension({
   order: 1e3,
   persistence: "permanent",
   hasToolbar: false,
+  condition: () => {
+    const clientType = Root.Runtime.Runtime.queryParam("clientType");
+    return clientType !== "react-native";
+  },
   async loadView() {
     const SessionReplay = await loadSessionReplayModule();
     return SessionReplay.SessionReplayPanel.SessionReplayPanel.instance();

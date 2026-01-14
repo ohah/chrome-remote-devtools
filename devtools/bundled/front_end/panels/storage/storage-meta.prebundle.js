@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import * as i18n from '../../core/i18n/i18n.js';
+import * as Root from '../../core/root/root.js';
 import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
@@ -30,6 +31,11 @@ UI.ViewManager.registerViewExtension({
     order: 1003,
     persistence: "permanent" /* UI.ViewManager.ViewPersistence.PERMANENT */,
     hasToolbar: false,
+    condition: () => {
+        // Show only for React Native / React Native에서만 표시
+        const clientType = Root.Runtime.Runtime.queryParam('clientType');
+        return clientType === 'react-native';
+    },
     async loadView() {
         const Storage = await loadStorageModule();
         return Storage.StoragePanel.StoragePanel.instance();

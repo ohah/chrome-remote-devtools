@@ -16622,6 +16622,30 @@
   "panels/welcome/welcome-meta.ts | welcome": {
     "message": "Welcome"
   },
+  "panels/welcome/WelcomePanel.ts | documentation": {
+    "message": "Documentation"
+  },
+  "panels/welcome/WelcomePanel.ts | github": {
+    "message": "GitHub"
+  },
+  "panels/welcome/WelcomePanel.ts | reactNativeDescription": {
+    "message": "Debug React Native apps with full DevTools integration. Monitor network requests, console logs, and Redux state in real-time."
+  },
+  "panels/welcome/WelcomePanel.ts | reactNativeTitle": {
+    "message": "React Native Support"
+  },
+  "panels/welcome/WelcomePanel.ts | webDescription": {
+    "message": "Debug web applications remotely with Chrome DevTools. Inspect elements, monitor network, and profile performance seamlessly."
+  },
+  "panels/welcome/WelcomePanel.ts | webTitle": {
+    "message": "Web Support"
+  },
+  "panels/welcome/WelcomePanel.ts | welcomeSubtitle": {
+    "message": "Welcome to debugging in Chrome DevTools"
+  },
+  "panels/welcome/WelcomePanel.ts | welcomeTitle": {
+    "message": "Welcome to Chrome Remote DevTools"
+  },
   "panels/whats_new/ReleaseNoteView.ts | seeFeatures": {
     "message": "See all new features"
   },

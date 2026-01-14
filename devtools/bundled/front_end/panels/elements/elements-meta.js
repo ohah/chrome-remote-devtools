@@ -177,6 +177,10 @@ UI.ViewManager.registerViewExtension({
   order: 10,
   persistence: "permanent",
   hasToolbar: false,
+  condition: () => {
+    const clientType = Root.Runtime.Runtime.queryParam("clientType");
+    return clientType !== "react-native";
+  },
   async loadView() {
     const Elements = await loadElementsModule();
     return Elements.ElementsPanel.ElementsPanel.instance();

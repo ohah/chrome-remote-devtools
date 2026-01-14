@@ -1,9 +1,10 @@
 // Copyright 2025 The Chromium Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import * as UI from '../../ui/legacy/legacy.js';
+/* eslint-disable @devtools/no-lit-render-outside-of-view */
+/* eslint-disable @devtools/no-a-tags-in-lit */
 import * as i18n from '../../core/i18n/i18n.js';
-import * as UIHelpers from '../../ui/helpers/helpers.js';
+import * as UI from '../../ui/legacy/legacy.js';
 import { html, render } from '../../ui/lit/lit.js';
 import '../../ui/kit/kit.js';
 const UIStrings = {
@@ -23,24 +24,47 @@ const UIStrings = {
      * @description Link text for GitHub repository
      */
     github: 'GitHub',
+    /**
+     * @description React Native support card title
+     */
+    reactNativeTitle: 'React Native Support',
+    /**
+     * @description React Native support card description
+     */
+    reactNativeDescription: 'Debug React Native apps with full DevTools integration. Monitor network requests, console logs, and Redux state in real-time.',
+    /**
+     * @description Web support card title
+     */
+    webTitle: 'Web Support',
+    /**
+     * @description Web support card description
+     */
+    webDescription: 'Debug web applications remotely with Chrome DevTools. Inspect elements, monitor network, and profile performance seamlessly.',
 };
 const str_ = i18n.i18n.registerUIStrings('panels/welcome/WelcomePanel.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
 let welcomePanelInstance;
+export const DEFAULT_VIEW = (_input, _output, target) => {
+    render(html `
+    <div>
+      <div></div>
+    </div>`, target, { host: _input });
+};
 export class WelcomePanel extends UI.Panel.Panel {
     constructor() {
         super('welcome');
         this.render();
     }
     render() {
+        // Set contentElement styles for centering / 가운데 정렬을 위한 contentElement 스타일 설정
+        /* eslint-disable @devtools/no-imperative-dom-api */
+        this.contentElement.style.display = 'flex';
+        this.contentElement.style.justifyContent = 'center';
+        this.contentElement.style.width = '100%';
+        this.contentElement.style.boxSizing = 'border-box';
+        this.contentElement.style.padding = '0 24px';
         const container = document.createElement('div');
         container.className = 'welcome-panel';
-        const openDocumentation = () => {
-            UIHelpers.openInNewTab('https://ohah.github.io/chrome-remote-devtools');
-        };
-        const openGitHub = () => {
-            UIHelpers.openInNewTab('https://github.com/ohah/chrome-remote-devtools');
-        };
         // clang-format off
         render(html `
       <style>
@@ -49,9 +73,12 @@ export class WelcomePanel extends UI.Panel.Panel {
           max-width: 800px;
           margin: 0 auto;
           font-family: system-ui, -apple-system, sans-serif;
+          width: 100%;
+          box-sizing: border-box;
         }
         .welcome-header {
           text-align: center;
+          width: 100%;
         }
         .welcome-icon {
           width: 64px;
@@ -89,19 +116,90 @@ export class WelcomePanel extends UI.Panel.Panel {
         .welcome-link:hover {
           text-decoration: underline;
         }
+        .welcome-cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 24px;
+          margin-top: 48px;
+          width: 100%;
+          max-width: 100%;
+        }
+        .welcome-card {
+          background: var(--color-background-elevation-1);
+          border: 1px solid var(--color-border);
+          border-radius: 8px;
+          padding: 24px;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .welcome-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .welcome-card-title {
+          font-size: 18px;
+          font-weight: 500;
+          margin-bottom: 12px;
+          color: var(--color-text-primary);
+        }
+        .welcome-card-description {
+          font-size: 14px;
+          line-height: 1.6;
+          color: var(--color-text-secondary);
+        }
       </style>
       <div class="welcome-header">
         <div class="welcome-icon">⚙️</div>
         <h1 class="welcome-title">${i18nString(UIStrings.welcomeTitle)}</h1>
         <p class="welcome-subtitle">${i18nString(UIStrings.welcomeSubtitle)}</p>
         <div class="welcome-links">
-          <a class="welcome-link" @click=${openDocumentation}>${i18nString(UIStrings.documentation)}</a>
-          <a class="welcome-link" @click=${openGitHub}>${i18nString(UIStrings.github)}</a>
+          <!-- eslint-disable-next-line @devtools/no-a-tags-in-lit -->
+          <a href="https://ohah.github.io/chrome-remote-devtools" target="_blank" rel="noopener noreferrer" class="welcome-link">${i18nString(UIStrings.documentation)}</a>
+          <!-- eslint-disable-next-line @devtools/no-a-tags-in-lit -->
+          <a href="https://github.com/ohah/chrome-remote-devtools" target="_blank" rel="noopener noreferrer" class="welcome-link">${i18nString(UIStrings.github)}</a>
+        </div>
+      </div>
+      <div class="welcome-cards">
+        <div class="welcome-card">
+          <div class="welcome-card-title">${i18nString(UIStrings.reactNativeTitle)}</div>
+          <div class="welcome-card-description">${i18nString(UIStrings.reactNativeDescription)}</div>
+        </div>
+        <div class="welcome-card">
+          <div class="welcome-card-title">${i18nString(UIStrings.webTitle)}</div>
+          <div class="welcome-card-description">${i18nString(UIStrings.webDescription)}</div>
         </div>
       </div>
     `, container);
         // clang-format on
+        // Handle link clicks - send message to parent window for Tauri / 링크 클릭 처리 - Tauri를 위해 부모 창에 메시지 전송
+        // Since DevTools runs in iframe, we need to use postMessage to communicate with parent / DevTools가 iframe에서 실행되므로 부모와 통신하기 위해 postMessage 사용
+        const links = container.querySelectorAll('.welcome-link');
+        links.forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                const href = link.getAttribute('href');
+                if (!href) {
+                    return;
+                }
+                // Check if we're in an iframe / iframe 안에 있는지 확인
+                if (window.parent && window.parent !== window) {
+                    // Send message to parent window to open link / 부모 창에 링크 열기 메시지 전송
+                    // Parent window will handle Tauri API if needed / 부모 창이 필요시 Tauri API 처리
+                    window.parent.postMessage({
+                        type: 'OPEN_EXTERNAL_LINK',
+                        url: href,
+                    }, '*');
+                }
+                else {
+                    // Not in iframe, use standard window.open / iframe이 아니면 표준 window.open 사용
+                    window.open(href, '_blank', 'noopener,noreferrer');
+                }
+            });
+        });
+        // IMPORTANT: This line must not be removed / 중요: 이 줄은 삭제하면 안 됩니다
+        // DO NOT DELETE: container must be appended to contentElement for panel to display
+        // 삭제 금지: 패널이 표시되려면 container를 contentElement에 추가해야 합니다
         this.contentElement.appendChild(container);
+        /* eslint-enable @devtools/no-imperative-dom-api */
     }
     static instance(opts = { forceNew: null }) {
         const { forceNew } = opts;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import * as i18n from '../../core/i18n/i18n.js';
+import * as Root from '../../core/root/root.js';
 import * as UI from '../../ui/legacy/legacy.js';
 
 import type * as SessionReplay from './session_replay.js';
@@ -38,6 +39,11 @@ UI.ViewManager.registerViewExtension({
   order: 1000,
   persistence: UI.ViewManager.ViewPersistence.PERMANENT,
   hasToolbar: false,
+  condition: () => {
+    // Hide for React Native / React Native에서는 숨김
+    const clientType = Root.Runtime.Runtime.queryParam('clientType');
+    return clientType !== 'react-native';
+  },
   async loadView() {
     const SessionReplay = await loadSessionReplayModule();
     return SessionReplay.SessionReplayPanel.SessionReplayPanel.instance();

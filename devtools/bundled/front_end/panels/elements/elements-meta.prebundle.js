@@ -179,6 +179,11 @@ UI.ViewManager.registerViewExtension({
     order: 10,
     persistence: "permanent" /* UI.ViewManager.ViewPersistence.PERMANENT */,
     hasToolbar: false,
+    condition: () => {
+        // Hide for React Native / React Native에서는 숨김
+        const clientType = Root.Runtime.Runtime.queryParam('clientType');
+        return clientType !== 'react-native';
+    },
     async loadView() {
         const Elements = await loadElementsModule();
         return Elements.ElementsPanel.ElementsPanel.instance();
