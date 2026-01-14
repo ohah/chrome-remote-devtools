@@ -84,17 +84,20 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         run: cd packages/client && bun run build
 
-      - name: Run integration tests
+      - name: Run all integration tests
         if: needs.check.outputs.should-run == 'true'
-        run: bun run test:e2e:integration
+        run: |
+          bunx playwright test tests/integration tests/e2e/inspector-localstorage-isolation.test.ts --project=chromium
         continue-on-error: true
         id: test-run
 
-      - name: Run inspector localStorage isolation test
-        if: needs.check.outputs.should-run == 'true'
-        run: bunx playwright test tests/e2e/inspector-localstorage-isolation.test.ts --project=chromium
-        continue-on-error: true
-        id: inspector-test-run
+      - name: Check test results
+        if: always() && needs.check.outputs.should-run == 'true'
+        run: |
+          if [ "${{ steps.test-run.outcome }}" != "success" ]; then
+            echo "Tests failed"
+            exit 1
+          fi
 
       - name: Publish Test Results
         if: always() && github.event_name == 'pull_request' && needs.check.outputs.should-run == 'true'
@@ -136,6 +139,8 @@ jobs:
       - name: Comment test results on PR
         if: always() && github.event_name == 'pull_request' && needs.check.outputs.should-run == 'true'
         uses: actions/github-script@v7
+        env:
+          TEST_RUN_OUTCOME: ${{ steps.test-run.outcome }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -146,6 +151,10 @@ jobs:
             const runId = context.runId;
             const repo = context.repo;
             const artifactUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}`;
+
+            // Check test results / 테스트 결과 확인
+            const testRunOutcome = process.env.TEST_RUN_OUTCOME || 'success';
+            const hasTestFailure = testRunOutcome === 'failure';
 
             // Find video files / 비디오 파일 찾기
             let videoFiles = [];
@@ -165,14 +174,23 @@ jobs:
               console.log('No screenshot files found');
             }
 
-            // Always comment if screenshots exist, even if no videos / 스크린샷이 있으면 비디오가 없어도 댓글 작성
-            if (screenshotFiles.length === 0 && videoFiles.length === 0) {
-              console.log('No test artifacts to comment');
+            // Always comment if there are test failures or artifacts / 테스트 실패 또는 아티팩트가 있으면 항상 댓글 작성
+            if (screenshotFiles.length === 0 && videoFiles.length === 0 && !hasTestFailure) {
+              console.log('No test artifacts or failures to comment');
               return;
             }
 
             // Create comment / 댓글 생성
             let comment = '## 📊 Test Results\n\n';
+
+            // Add test status / 테스트 상태 추가
+            if (hasTestFailure) {
+              comment += '### ❌ Test Status: **FAILED**\n\n';
+              comment += `- ❌ Integration tests and Inspector localStorage isolation test failed\n`;
+              comment += '\n';
+            } else {
+              comment += '### ✅ Test Status: **PASSED**\n\n';
+            }
 
             // Add screenshots section / 스크린샷 섹션 추가
             if (screenshotFiles.length > 0) {
