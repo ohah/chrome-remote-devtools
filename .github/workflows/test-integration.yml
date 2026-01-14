@@ -126,7 +126,7 @@ jobs:
             // Find video files / 비디오 파일 찾기
             let videoFiles = [];
             try {
-              const result = execSync('find test-results -name "*.webm" -type f', { encoding: 'utf-8' });
+              const result = execSync('find test-results -name "*.webm" -type f 2>/dev/null || true', { encoding: 'utf-8' });
               videoFiles = result.trim().split('\n').filter(f => f.length > 0);
             } catch (error) {
               console.log('No video files found');
@@ -135,7 +135,7 @@ jobs:
             // Find screenshot files / 스크린샷 파일 찾기
             let screenshotFiles = [];
             try {
-              const result = execSync('find test-results/screenshots -name "*.png" -type f', { encoding: 'utf-8' });
+              const result = execSync('find test-results/screenshots -name "*.png" -type f 2>/dev/null || true', { encoding: 'utf-8' });
               screenshotFiles = result.trim().split('\n').filter(f => f.length > 0);
             } catch (error) {
               console.log('No screenshot files found');
@@ -172,14 +172,12 @@ jobs:
               comment += `**Artifact name:** \`playwright-videos\`\n\n`;
 
               // List video files / 비디오 파일 목록
-              if (videoFiles.length > 0) {
-                comment += '<details>\n<summary>Video files</summary>\n\n';
-                videoFiles.forEach((file, index) => {
-                  const fileName = path.basename(file);
-                  comment += `${index + 1}. \`${fileName}\`\n`;
-                });
-                comment += '\n</details>\n';
-              }
+              comment += '<details>\n<summary>Video files</summary>\n\n';
+              videoFiles.forEach((file, index) => {
+                const fileName = path.basename(file);
+                comment += `${index + 1}. \`${fileName}\`\n`;
+              });
+              comment += '\n</details>\n';
             }
 
             // Post comment to PR / PR에 댓글 작성
@@ -190,9 +188,9 @@ jobs:
             });
 
             // Find existing comment / 기존 댓글 찾기
-            const botComment = comments.find(comment =>
-              comment.user.type === 'Bot' &&
-              comment.body.includes('📊 Test Results')
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('📊 Test Results')
             );
 
             if (botComment) {
