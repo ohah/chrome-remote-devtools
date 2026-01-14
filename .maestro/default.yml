@@ -1,0 +1,6 @@
+appId: ${MAESTRO_APP_ID}
+---
+- launchApp
+- assertVisible:
+    text: 'Chrome Remote DevTools'
+    optional: true

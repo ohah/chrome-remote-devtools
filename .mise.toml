@@ -5,6 +5,7 @@ node = "24.11.1"
 pnpm = "latest"
 ruby = "3.3"
 java = "17"
+maestro = "latest"
 
 [env]
 RUST_BACKTRACE = "1"

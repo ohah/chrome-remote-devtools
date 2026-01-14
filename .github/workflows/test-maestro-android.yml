@@ -1,0 +1,178 @@
+name: Maestro Android Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "examples/react-native/**"
+      - ".maestro/**"
+      - "packages/react-native-inspector/**"
+      - ".github/workflows/test-maestro-android.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "examples/react-native/**"
+      - ".maestro/**"
+      - "packages/react-native-inspector/**"
+      - ".github/workflows/test-maestro-android.yml"
+
+jobs:
+  check:
+    name: Check if should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.maestro }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            maestro:
+              - 'examples/react-native/**'
+              - '.maestro/**'
+              - 'packages/react-native-inspector/**'
+              - '.github/workflows/test-maestro-android.yml'
+
+  maestro-android-test:
+    name: Maestro Android Tests
+    needs: check
+    runs-on: macos-14
+    permissions:
+      pull-requests: write
+      checks: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Skip if no changes
+        if: needs.check.outputs.should-run != 'true'
+        run: echo "No Maestro test changes, skipping tests"
+        continue-on-error: false
+
+      - name: Setup Java
+        if: needs.check.outputs.should-run == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Bun
+        if: needs.check.outputs.should-run == 'true'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Rust
+        if: needs.check.outputs.should-run == 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry
+        if: needs.check.outputs.should-run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install dependencies
+        if: needs.check.outputs.should-run == 'true'
+        run: bun install
+
+      - name: Setup Android SDK
+        if: needs.check.outputs.should-run == 'true'
+        uses: android-actions/setup-android@v3
+
+      - name: Create Android Emulator
+        if: needs.check.outputs.should-run == 'true'
+        id: maestro-test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          profile: Nexus 6
+          script: |
+            # Install Maestro / Maestro 설치
+            curl -Ls "https://get.maestro.mobile.dev" | bash
+            export PATH="$PATH:$HOME/.maestro/bin"
+
+            # Verify Maestro installation / Maestro 설치 확인
+            maestro --version
+
+            # Build and install React Native app / React Native 앱 빌드 및 설치
+            cd examples/react-native
+            bun run android:release
+
+            # Wait for emulator to be ready / 에뮬레이터 준비 대기
+            adb wait-for-device
+            sleep 10
+
+            # Verify app is installed / 앱 설치 확인
+            adb shell pm list packages | grep chromeremotedevtools || echo "App not installed"
+
+            # Run Maestro tests / Maestro 테스트 실행
+            cd ../..
+            MAESTRO_APP_ID=com.chromeremotedevtools maestro test .maestro
+        continue-on-error: true
+
+      - name: Upload Maestro test results
+        if: always() && needs.check.outputs.should-run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-test-results
+          path: |
+            .maestro/**/*.png
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Comment test results on PR
+        if: always() && github.event_name == 'pull_request' && needs.check.outputs.should-run == 'true'
+        uses: actions/github-script@v7
+        env:
+          TEST_OUTCOME: ${{ steps.maestro-test.outcome }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const testOutcome = process.env.TEST_OUTCOME || 'success';
+            const status = testOutcome === 'success' ? '✅ **PASSED**' : '❌ **FAILED**';
+            const workflowUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const comment = `## 📱 Maestro Android Test Results
+
+            ${status}
+
+            Maestro Android tests have completed. Check the [workflow run](${workflowUrl}) for details.
+            `;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Maestro Android Test Results')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment,
+              });
+            }

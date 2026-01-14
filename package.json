@@ -37,6 +37,12 @@
     "test:e2e:integration": "playwright test tests/integration",
     "test:e2e:integration:ui": "playwright test --ui",
     "test:e2e:integration:debug": "playwright test --debug",
+    "test:maestro": "maestro test .maestro",
+    "test:maestro:android": "MAESTRO_APP_ID=com.chromeremotedevtools maestro test .maestro",
+    "test:maestro:android:build": "cd examples/react-native && bun run android:release && cd ../.. && bun run test:maestro:android",
+    "test:maestro:ios": "MAESTRO_APP_ID=org.reactjs.native.example.ChromeRemoteDevTools maestro test .maestro",
+    "test:maestro:ios:build": "cd examples/react-native && bun run ios:release && cd ../.. && bun run test:maestro:ios",
+    "test:maestro:studio": "maestro studio",
     "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts"
   },
   "devDependencies": {
