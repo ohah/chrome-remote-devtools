@@ -3,13 +3,25 @@ import { DEVTOOLS_FRONTEND_PATH, DEVTOOLS_CONFIG } from './constants';
 import { getServerUrl } from './server-url';
 
 /**
+ * Options for building DevTools URL / DevTools URL 구성 옵션
+ */
+export interface BuildDevToolsUrlOptions {
+  /** Client identifier / 클라이언트 식별자 */
+  clientId: string;
+  /** Server URL (default: getServerUrl()) / 서버 URL (기본값: getServerUrl()) */
+  serverUrl?: string;
+  /** Client type ('web' | 'react-native') / 클라이언트 타입 */
+  clientType?: 'web' | 'react-native';
+}
+
+/**
  * Build DevTools iframe URL with WebSocket configuration / WebSocket 설정과 함께 DevTools iframe URL 구성
- * @param clientId - Client identifier / 클라이언트 식별자
- * @param serverUrl - Server URL (default: getServerUrl()) / 서버 URL (기본값: getServerUrl())
+ * @param options - Build options / 구성 옵션
  * @returns DevTools iframe URL / DevTools iframe URL
  * @throws Error if server URL is not set / 서버 URL이 설정되지 않았으면 에러 발생
  */
-export function buildDevToolsUrl(clientId: string, serverUrl?: string): string {
+export function buildDevToolsUrl(options: BuildDevToolsUrlOptions): string {
+  const { clientId, serverUrl, clientType } = options;
   const serverUrlValue = serverUrl ?? getServerUrl();
   if (!serverUrlValue) {
     throw new Error('Server URL is not set');
@@ -33,6 +45,11 @@ export function buildDevToolsUrl(clientId: string, serverUrl?: string): string {
   // Generate random string: timestamp + random number / 랜덤 문자열 생성: 타임스탬프 + 랜덤 숫자
   const randomInstance = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
   params.append('instance', randomInstance);
+
+  // Client type parameter / 클라이언트 타입 파라미터
+  if (clientType) {
+    params.append('clientType', clientType);
+  }
 
   // DevTools configuration parameters / DevTools 설정 파라미터
   Object.entries(DEVTOOLS_CONFIG).forEach(([key, value]) => {
