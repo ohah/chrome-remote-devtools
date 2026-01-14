@@ -22,7 +22,7 @@ jobs:
         with:
           filters: |
             server:
-              - 'packages/server/**'
+              - 'crates/server/**'
               - '.github/workflows/test-server.yml'
 
   test:
@@ -41,23 +41,45 @@ jobs:
         run: echo "No server changes, skipping tests"
         continue-on-error: false
 
-      - name: Setup Bun
+      - name: Setup Rust
         if: needs.check.outputs.should-run == 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry
+        if: needs.check.outputs.should-run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install cargo-llvm-cov
+        if: needs.check.outputs.should-run == 'true'
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: Run Rust tests with coverage
+        if: needs.check.outputs.should-run == 'true'
+        run: cargo llvm-cov --package chrome-remote-devtools-server --lib --lcov --output-path coverage/lcov.info
+
+      - name: Setup Bun for coverage script
+        if: needs.check.outputs.should-run == 'true' && github.event_name == 'pull_request'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
-      - name: Install dependencies
-        if: needs.check.outputs.should-run == 'true'
+      - name: Install dependencies for coverage script
+        if: needs.check.outputs.should-run == 'true' && github.event_name == 'pull_request'
         run: bun install
-
-      - name: Run tests with coverage
-        if: needs.check.outputs.should-run == 'true'
-        run: bun test packages/server --coverage
 
       - name: Generate coverage comment
         if: needs.check.outputs.should-run == 'true' && github.event_name == 'pull_request'
-        run: bun scripts/coverage-comment.ts packages/server Server
+        run: bun scripts/coverage-comment-rust.ts
 
       - name: Comment PR with coverage
         if: needs.check.outputs.should-run == 'true' && github.event_name == 'pull_request'
@@ -96,7 +118,3 @@ jobs:
                 body: comment
               });
             }
-
-      - name: Build package
-        if: needs.check.outputs.should-run == 'true'
-        run: cd packages/server && bun run build
