@@ -54,6 +54,24 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Setup Rust
+        if: needs.check.outputs.should-run == 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry
+        if: needs.check.outputs.should-run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
       - name: Install dependencies
         if: needs.check.outputs.should-run == 'true'
         run: bun install
