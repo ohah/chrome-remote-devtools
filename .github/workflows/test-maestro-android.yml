@@ -78,9 +78,11 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Setup Tools
+      - name: Setup Bun
         if: needs.check.outputs.should-run == 'true'
-        uses: jdx/mise-action@v3
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Setup Java
         if: needs.check.outputs.should-run == 'true'
