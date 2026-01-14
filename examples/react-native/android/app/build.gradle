@@ -68,27 +68,63 @@ react {
             }
         }
     } else {
-        // macOS/Linux: Try bun's hermes-compiler package first / macOS/Linux: bun의 hermes-compiler 패키지 먼저 시도
+        // macOS/Linux: Try multiple possible paths / macOS/Linux: 여러 가능한 경로 시도
         def monorepoRoot = rootProject.projectDir.parentFile.parentFile.parentFile
+        def exampleRoot = rootProject.projectDir.parentFile.parentFile
         def osBin = osName.contains("mac") ? "osx-bin" : "linux-bin"
-        def bunHermesPath = new File(monorepoRoot, "node_modules/.bun/hermes-compiler@0.14.0/node_modules/hermes-compiler/hermesc/${osBin}/hermesc")
-        if (bunHermesPath.exists()) {
-            hermesCommand = bunHermesPath.absolutePath
+        def reactNativeDir = file("../../node_modules/react-native")
+        
+        // Try multiple possible paths / 여러 가능한 경로 시도
+        def possiblePaths = [
+            // Monorepo root paths / 모노레포 루트 경로
+            new File(monorepoRoot, "node_modules/hermes-compiler/hermesc/${osBin}/hermesc"),
+            new File(monorepoRoot, "node_modules/.bun/hermes-compiler@0.14.0/node_modules/hermes-compiler/hermesc/${osBin}/hermesc"),
+            // Example root paths / 예제 루트 경로
+            new File(exampleRoot, "node_modules/hermes-compiler/hermesc/${osBin}/hermesc"),
+            new File(exampleRoot, "node_modules/.bun/hermes-compiler@0.14.0/node_modules/hermes-compiler/hermesc/${osBin}/hermesc"),
+            // React Native paths / React Native 경로
+            new File(reactNativeDir, "node_modules/hermes-compiler/hermesc/${osBin}/hermesc"),
+            new File(reactNativeDir, "sdks/hermesc/${osBin}/hermesc")
+        ]
+        
+        def foundPath = null
+        for (def path : possiblePaths) {
+            if (path.exists()) {
+                foundPath = path
+                break
+            }
+        }
+        
+        if (foundPath != null) {
+            hermesCommand = foundPath.absolutePath
         } else {
-            // Fallback: try with 2 levels up (if examples/react-native is the root)
-            // 대안: 2단계 위로 시도 (examples/react-native가 루트인 경우)
-            def fallbackRoot = rootProject.projectDir.parentFile.parentFile
-            def fallbackPath = new File(fallbackRoot, "node_modules/.bun/hermes-compiler@0.14.0/node_modules/hermes-compiler/hermesc/${osBin}/hermesc")
-            if (fallbackPath.exists()) {
-                hermesCommand = fallbackPath.absolutePath
-            } else {
-                // Last fallback: try React Native's default path (may not exist in 0.83.1)
-                // 마지막 대안: React Native 기본 경로 시도 (0.83.1에서는 존재하지 않을 수 있음)
-                def reactNativeDir = file("../../node_modules/react-native")
-                def defaultHermesPath = new File(reactNativeDir, "sdks/hermesc/${osBin}/hermesc")
-                if (defaultHermesPath.exists()) {
-                    hermesCommand = defaultHermesPath.absolutePath
+            // Last resort: try to find in node_modules recursively / 마지막 수단: node_modules에서 재귀적으로 찾기
+            def findHermes = { File dir, int depth ->
+                if (depth > 4 || !dir.exists() || !dir.isDirectory()) return null
+                def hermesDir = new File(dir, "hermes-compiler")
+                if (hermesDir.exists()) {
+                    def hermesPath = new File(hermesDir, "hermesc/${osBin}/hermesc")
+                    if (hermesPath.exists()) return hermesPath
                 }
+                dir.listFiles()?.each { file ->
+                    if (file.isDirectory() && (file.name.startsWith("hermes") || file.name.startsWith("@react-native") || file.name == "node_modules")) {
+                        def found = findHermes(file, depth + 1)
+                        if (found != null) return found
+                    }
+                }
+                return null
+            }
+            
+            foundPath = findHermes(monorepoRoot, 0)
+            if (foundPath == null) {
+                foundPath = findHermes(exampleRoot, 0)
+            }
+            
+            if (foundPath != null) {
+                hermesCommand = foundPath.absolutePath
+            } else {
+                println "WARNING: Could not find hermesc binary, trying system hermesc"
+                hermesCommand = "hermesc"
             }
         }
     }
