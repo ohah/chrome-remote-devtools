@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import * as i18n from '../../core/i18n/i18n.js';
+import * as Root from '../../core/root/root.js';
 import * as SDK from '../../core/sdk/sdk.js';
 import * as UI from '../../ui/legacy/legacy.js';
 
@@ -48,6 +49,11 @@ UI.ViewManager.registerViewExtension({
   order: 1001,
   persistence: UI.ViewManager.ViewPersistence.PERMANENT,
   hasToolbar: false,
+  condition: () => {
+    // Show only for React Native / React Native에서만 표시
+    const clientType = Root.Runtime.Runtime.queryParam('clientType');
+    return clientType === 'react-native';
+  },
   async loadView() {
     const Redux = await loadReduxModule();
     return new Redux.ReduxPanel.ReduxPanel();

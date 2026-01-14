@@ -195,6 +195,10 @@ UI.ViewManager.registerViewExtension({
   order: 10,
   persistence: "permanent",
   hasToolbar: false,
+  condition: () => {
+    const clientType = Root.Runtime.Runtime.queryParam("clientType");
+    return clientType !== "react-native";
+  },
   async loadView() {
     const Elements = await loadElementsModule();
     return Elements.ElementsPanel.ElementsPanel.instance();
@@ -2325,6 +2329,7 @@ UI6.Toolbar.registerToolbarItem({
 // gen/front_end/panels/application/application-meta.js
 import * as Common9 from "./../../core/common/common.js";
 import * as i18n25 from "./../../core/i18n/i18n.js";
+import * as Root5 from "./../../core/root/root.js";
 import * as SDK6 from "./../../core/sdk/sdk.js";
 import * as UI7 from "./../../ui/legacy/legacy.js";
 import * as PreloadingHelper from "./../../panels/application/preloading/helper/helper.js";
@@ -2379,6 +2384,10 @@ UI7.ViewManager.registerViewExtension({
   title: i18nLazyString13(UIStrings13.application),
   commandPrompt: i18nLazyString13(UIStrings13.showApplication),
   order: 70,
+  condition: () => {
+    const clientType = Root5.Runtime.Runtime.queryParam("clientType");
+    return clientType !== "react-native";
+  },
   async loadView() {
     const Resources = await loadResourcesModule();
     return Resources.ResourcesPanel.ResourcesPanel.instance();
@@ -3530,6 +3539,7 @@ UI13.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/session_replay/session_replay-meta.js
 import * as i18n53 from "./../../core/i18n/i18n.js";
+import * as Root6 from "./../../core/root/root.js";
 import * as UI14 from "./../../ui/legacy/legacy.js";
 var UIStrings27 = {
   /**
@@ -3558,6 +3568,10 @@ UI14.ViewManager.registerViewExtension({
   order: 1e3,
   persistence: "permanent",
   hasToolbar: false,
+  condition: () => {
+    const clientType = Root6.Runtime.Runtime.queryParam("clientType");
+    return clientType !== "react-native";
+  },
   async loadView() {
     const SessionReplay = await loadSessionReplayModule();
     return SessionReplay.SessionReplayPanel.SessionReplayPanel.instance();
@@ -3566,6 +3580,7 @@ UI14.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/redux/redux-meta.js
 import * as i18n55 from "./../../core/i18n/i18n.js";
+import * as Root7 from "./../../core/root/root.js";
 import * as SDK22 from "./../../core/sdk/sdk.js";
 import * as UI15 from "./../../ui/legacy/legacy.js";
 import * as SDK8 from "./../../core/sdk/sdk.js";
@@ -4052,6 +4067,10 @@ UI15.ViewManager.registerViewExtension({
   order: 1001,
   persistence: "permanent",
   hasToolbar: false,
+  condition: () => {
+    const clientType = Root7.Runtime.Runtime.queryParam("clientType");
+    return clientType === "react-native";
+  },
   async loadView() {
     const Redux = await loadReduxModule();
     return new Redux.ReduxPanel.ReduxPanel();
@@ -4060,6 +4079,7 @@ UI15.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/storage/storage-meta.js
 import * as i18n57 from "./../../core/i18n/i18n.js";
+import * as Root8 from "./../../core/root/root.js";
 import * as UI16 from "./../../ui/legacy/legacy.js";
 var UIStrings29 = {
   /**
@@ -4088,6 +4108,10 @@ UI16.ViewManager.registerViewExtension({
   order: 1003,
   persistence: "permanent",
   hasToolbar: false,
+  condition: () => {
+    const clientType = Root8.Runtime.Runtime.queryParam("clientType");
+    return clientType === "react-native";
+  },
   async loadView() {
     const Storage = await loadStorageModule();
     return Storage.StoragePanel.StoragePanel.instance();
@@ -4095,8 +4119,8 @@ UI16.ViewManager.registerViewExtension({
 });
 
 // gen/front_end/entrypoints/devtools_app/devtools_app.prebundle.js
-import * as Root5 from "./../../core/root/root.js";
+import * as Root9 from "./../../core/root/root.js";
 import * as Main from "./../main/main.js";
-self.runtime = Root5.Runtime.Runtime.instance({ forceNew: true });
+self.runtime = Root9.Runtime.Runtime.instance({ forceNew: true });
 new Main.MainImpl.MainImpl();
 //# sourceMappingURL=devtools_app.js.map

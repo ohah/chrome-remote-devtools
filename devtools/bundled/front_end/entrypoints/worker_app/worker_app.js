@@ -1103,6 +1103,7 @@ Common4.Revealer.registerRevealer({
 // gen/front_end/panels/application/application-meta.js
 import * as Common5 from "./../../core/common/common.js";
 import * as i18n13 from "./../../core/i18n/i18n.js";
+import * as Root3 from "./../../core/root/root.js";
 import * as SDK4 from "./../../core/sdk/sdk.js";
 import * as UI5 from "./../../ui/legacy/legacy.js";
 import * as PreloadingHelper from "./../../panels/application/preloading/helper/helper.js";
@@ -1157,6 +1158,10 @@ UI5.ViewManager.registerViewExtension({
   title: i18nLazyString7(UIStrings7.application),
   commandPrompt: i18nLazyString7(UIStrings7.showApplication),
   order: 70,
+  condition: () => {
+    const clientType = Root3.Runtime.Runtime.queryParam("clientType");
+    return clientType !== "react-native";
+  },
   async loadView() {
     const Resources = await loadResourcesModule();
     return Resources.ResourcesPanel.ResourcesPanel.instance();
@@ -1642,8 +1647,8 @@ SDK6.ChildTargetManager.ChildTargetManager.install(async ({ target, waitingForDe
 });
 
 // gen/front_end/entrypoints/worker_app/worker_app.prebundle.js
-import * as Root3 from "./../../core/root/root.js";
+import * as Root4 from "./../../core/root/root.js";
 import * as Main from "./../main/main.js";
-self.runtime = Root3.Runtime.Runtime.instance({ forceNew: true });
+self.runtime = Root4.Runtime.Runtime.instance({ forceNew: true });
 new Main.MainImpl.MainImpl();
 //# sourceMappingURL=worker_app.js.map

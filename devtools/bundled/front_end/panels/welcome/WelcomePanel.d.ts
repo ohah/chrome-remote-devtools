@@ -1,5 +1,6 @@
 import * as UI from '../../ui/legacy/legacy.js';
 import '../../ui/kit/kit.js';
+export declare const DEFAULT_VIEW: (_input: unknown, _output: unknown, target: HTMLElement) => void;
 export declare class WelcomePanel extends UI.Panel.Panel {
     constructor();
     private render;
