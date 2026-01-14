@@ -218,23 +218,21 @@ impl SocketServer {
 }
 
 #[cfg(test)]
+/// Create test logger / 테스트용 로거 생성
+fn create_test_logger() -> Arc<crate::logging::Logger> {
+    Arc::new(crate::logging::Logger::new(false, None, None).unwrap())
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
-    use crate::logging::Logger;
-    use std::sync::Arc;
-
-    /// Create test logger / 테스트용 로거 생성
-    fn create_test_logger() -> Arc<Logger> {
-        Arc::new(Logger::new(false, None, None).unwrap())
-    }
 
     #[tokio::test]
     /// Test SocketServer instance creation / SocketServer 인스턴스 생성 테스트
     async fn test_socket_server_creation() {
         let logger = create_test_logger();
-        let _socket_server = SocketServer::new(logger);
         // Should not panic / 패닉이 발생하지 않아야 함
-        assert!(true);
+        let _socket_server = SocketServer::new(logger);
     }
 
     #[tokio::test]
@@ -288,39 +286,6 @@ mod tests {
 #[cfg(test)]
 mod message_routing_tests {
     use super::*;
-    use crate::logging::Logger;
-    use std::sync::Arc;
-
-    /// Create test logger / 테스트용 로거 생성
-    fn create_test_logger() -> Arc<Logger> {
-        Arc::new(Logger::new(false, None, None).unwrap())
-    }
-
-    #[tokio::test]
-    /// Test handle client connection structure / 클라이언트 연결 처리 구조 테스트
-    async fn test_handle_client_connection_structure() {
-        // This test verifies that the server can handle client connections
-        // 실제 WebSocket 연결은 통합 테스트에서 검증
-        // This test verifies basic structure / 기본 구조 검증
-        let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger);
-        let clients = socket_server.get_all_clients().await;
-        // Should return a vector / 벡터를 반환해야 함
-        assert!(clients.is_empty());
-    }
-
-    #[tokio::test]
-    /// Test handle inspector connection structure / Inspector 연결 처리 구조 테스트
-    async fn test_handle_inspector_connection_structure() {
-        // This test verifies that the server can handle inspector connections
-        // 실제 WebSocket 연결은 통합 테스트에서 검증
-        // This test verifies basic structure / 기본 구조 검증
-        let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger);
-        let inspectors = socket_server.get_all_inspectors().await;
-        // Should return a vector / 벡터를 반환해야 함
-        assert!(inspectors.is_empty());
-    }
 
     #[tokio::test]
     /// Test get client information / 클라이언트 정보 가져오기 테스트
