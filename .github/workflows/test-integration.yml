@@ -84,17 +84,22 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         run: cd packages/client && bun run build
 
-      - name: Run all integration tests
+      - name: Run integration tests
         if: needs.check.outputs.should-run == 'true'
-        run: |
-          bunx playwright test tests/integration tests/e2e/inspector-localstorage-isolation.test.ts --project=chromium
+        run: bun run test:e2e:integration
         continue-on-error: true
         id: test-run
+
+      - name: Run inspector localStorage isolation test
+        if: needs.check.outputs.should-run == 'true'
+        run: bunx playwright test tests/e2e/inspector-localstorage-isolation.test.ts --project=chromium
+        continue-on-error: true
+        id: inspector-test-run
 
       - name: Check test results
         if: always() && needs.check.outputs.should-run == 'true'
         run: |
-          if [ "${{ steps.test-run.outcome }}" != "success" ]; then
+          if [ "${{ steps.test-run.outcome }}" != "success" ] || [ "${{ steps.inspector-test-run.outcome }}" != "success" ]; then
             echo "Tests failed"
             exit 1
           fi
@@ -141,6 +146,7 @@ jobs:
         uses: actions/github-script@v7
         env:
           TEST_RUN_OUTCOME: ${{ steps.test-run.outcome }}
+          INSPECTOR_TEST_RUN_OUTCOME: ${{ steps.inspector-test-run.outcome }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -154,7 +160,8 @@ jobs:
 
             // Check test results / 테스트 결과 확인
             const testRunOutcome = process.env.TEST_RUN_OUTCOME || 'success';
-            const hasTestFailure = testRunOutcome === 'failure';
+            const inspectorTestRunOutcome = process.env.INSPECTOR_TEST_RUN_OUTCOME || 'success';
+            const hasTestFailure = testRunOutcome === 'failure' || inspectorTestRunOutcome === 'failure';
 
             // Find video files / 비디오 파일 찾기
             let videoFiles = [];
@@ -186,7 +193,12 @@ jobs:
             // Add test status / 테스트 상태 추가
             if (hasTestFailure) {
               comment += '### ❌ Test Status: **FAILED**\n\n';
-              comment += `- ❌ Integration tests and Inspector localStorage isolation test failed\n`;
+              if (testRunOutcome === 'failure') {
+                comment += `- ❌ Integration tests failed\n`;
+              }
+              if (inspectorTestRunOutcome === 'failure') {
+                comment += `- ❌ Inspector localStorage isolation test failed\n`;
+              }
               comment += '\n';
             } else {
               comment += '### ✅ Test Status: **PASSED**\n\n';
