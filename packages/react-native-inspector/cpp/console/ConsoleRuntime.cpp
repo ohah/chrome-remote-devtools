@@ -60,7 +60,7 @@ facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::
               LOGW("findObjectById: Map.get returned non-object for objectId=%s / Map.get이 objectId=%s에 대해 객체가 아닌 값 반환", objectId.c_str(), objectId.c_str());
             } else {
               LOGI("findObjectById: Found object in Map for objectId=%s / Map에서 objectId=%s인 객체 찾음", objectId.c_str(), objectId.c_str());
-              return objValue;  // Found in Map! / Map에서 찾음!
+              return std::move(objValue);  // Found in Map! / Map에서 찾음!
             }
           } catch (const std::exception& e) {
             LOGW("findObjectById: Exception calling Map.get: %s / Map.get 호출 중 예외: %s", e.what(), e.what());
@@ -74,7 +74,7 @@ facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::
             facebook::jsi::Value objValue = cdpObjectsObj.getProperty(runtime, objectId.c_str());
             if (!objValue.isUndefined() && objValue.isObject() && !objValue.isNull()) {
               LOGI("findObjectById: Found object in __cdpObjects for objectId=%s / __cdpObjects에서 objectId=%s인 객체 찾음", objectId.c_str(), objectId.c_str());
-              return objValue;
+              return std::move(objValue);
             }
           } catch (...) {
             LOGW("findObjectById: Exception getting property from __cdpObjects / __cdpObjects에서 속성 가져오기 중 예외");
@@ -108,7 +108,7 @@ facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::
             if (cdpIdValue.isString()) {
               std::string cdpId = cdpIdValue.asString(runtime).utf8(runtime);
               if (cdpId == objectId) {
-                return propValue;  // Found! / 찾음!
+                return std::move(propValue);  // Found! / 찾음!
               }
             }
 
@@ -149,7 +149,7 @@ facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::
                 if (cdpIdValue.isString()) {
                   std::string cdpId = cdpIdValue.asString(runtime).utf8(runtime);
                   if (cdpId == objectId) {
-                    return propValue;
+                    return std::move(propValue);
                   }
                 }
               }
