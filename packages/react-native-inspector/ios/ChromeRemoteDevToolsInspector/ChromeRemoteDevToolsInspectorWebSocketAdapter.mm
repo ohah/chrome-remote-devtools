@@ -260,12 +260,15 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
       NSString *objectId = params[@"objectId"] ?: @"";
       RCTLogInfo(@"[ChromeRemoteDevTools] Runtime.getProperties detected! / Runtime.getProperties 감지됨: objectId=%@", objectId);
 
+      // Convert NSNumber to NSString for method parameter / 메서드 파라미터를 위해 NSNumber를 NSString로 변환
+      NSString *requestIdString = [requestId stringValue];
+
       // Get object properties from C++ hook via Module / Module을 통해 C++ 훅에서 객체 속성 가져오기
       // Note: This is async, so we handle response in completion handler / 참고: 이것은 비동기이므로 completion handler에서 응답 처리
       [ChromeRemoteDevToolsInspectorModule getObjectProperties:objectId completion:^(NSString *propertiesJson) {
         if (!propertiesJson || propertiesJson.length == 0) {
           RCTLogInfo(@"[ChromeRemoteDevTools] Object properties not found for objectId / objectId에 대한 객체 속성을 찾을 수 없음: %@", objectId);
-          [self sendEmptyPropertiesResponse:requestId];
+          [self sendEmptyPropertiesResponse:requestIdString];
           return;
         }
 
@@ -276,7 +279,7 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
 
         if (parseError || !propertiesResult) {
           RCTLogError(@"[ChromeRemoteDevTools] Failed to parse properties JSON / 속성 JSON 파싱 실패: %@", parseError);
-          [self sendEmptyPropertiesResponse:requestId];
+          [self sendEmptyPropertiesResponse:requestIdString];
           return;
         }
 
