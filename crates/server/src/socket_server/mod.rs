@@ -281,6 +281,70 @@ mod tests {
         // Should return a vector / 벡터를 반환해야 함
         assert!(inspectors.is_empty());
     }
+
+    #[tokio::test]
+    /// Test get client with empty string / 빈 문자열로 클라이언트 조회 테스트
+    async fn test_get_client_with_empty_string() {
+        let logger = create_test_logger();
+        let socket_server = SocketServer::new(logger);
+        let client = socket_server.get_client("").await;
+        assert!(client.is_none());
+    }
+
+    #[tokio::test]
+    /// Test get client with special characters / 특수 문자가 포함된 클라이언트 ID 조회 테스트
+    async fn test_get_client_with_special_characters() {
+        let logger = create_test_logger();
+        let socket_server = SocketServer::new(logger);
+        let client = socket_server.get_client("test/client-id").await;
+        assert!(client.is_none());
+    }
+
+    #[tokio::test]
+    /// Test ClientInfo struct serialization / ClientInfo 구조체 직렬화 테스트
+    async fn test_client_info_serialization() {
+        let client_info = ClientInfo {
+            id: "test-id".to_string(),
+            url: Some("https://example.com".to_string()),
+            title: Some("Test Page".to_string()),
+            favicon: Some("favicon.ico".to_string()),
+            ua: Some("Mozilla/5.0".to_string()),
+            time: Some("2024-01-01".to_string()),
+        };
+
+        // Test serialization / 직렬화 테스트
+        let json = serde_json::to_string(&client_info).unwrap();
+        assert!(json.contains("test-id"));
+        assert!(json.contains("https://example.com"));
+    }
+
+    #[tokio::test]
+    /// Test InspectorInfo struct serialization / InspectorInfo 구조체 직렬화 테스트
+    async fn test_inspector_info_serialization() {
+        let inspector_info = InspectorInfo {
+            id: "inspector-1".to_string(),
+            client_id: Some("client-1".to_string()),
+        };
+
+        // Test serialization / 직렬화 테스트
+        let json = serde_json::to_string(&inspector_info).unwrap();
+        assert!(json.contains("inspector-1"));
+        assert!(json.contains("client-1"));
+    }
+
+    #[tokio::test]
+    /// Test InspectorInfo with None client_id / client_id가 None인 InspectorInfo 테스트
+    async fn test_inspector_info_without_client_id() {
+        let inspector_info = InspectorInfo {
+            id: "inspector-1".to_string(),
+            client_id: None,
+        };
+
+        // Test serialization / 직렬화 테스트
+        let json = serde_json::to_string(&inspector_info).unwrap();
+        assert!(json.contains("inspector-1"));
+        assert!(!json.contains("client-1"));
+    }
 }
 
 #[cfg(test)]

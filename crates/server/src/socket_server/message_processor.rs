@@ -71,3 +71,49 @@ pub fn process_client_message(message: &str, client_id: &str, logger: &Logger) -
         message.to_string()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::logging::Logger;
+
+    fn create_test_logger() -> Logger {
+        Logger::new(false, None, None).unwrap()
+    }
+
+    #[test]
+    /// Test processing normal JSON message / 일반 JSON 메시지 처리 테스트
+    fn test_process_normal_message() {
+        let logger = create_test_logger();
+        let message = r#"{"method":"Test.method","params":{}}"#;
+        let result = process_client_message(message, "test-client", &logger);
+        assert_eq!(result, message);
+    }
+
+    #[test]
+    /// Test processing invalid JSON message / 잘못된 JSON 메시지 처리 테스트
+    fn test_process_invalid_json() {
+        let logger = create_test_logger();
+        let message = "invalid json";
+        let result = process_client_message(message, "test-client", &logger);
+        assert_eq!(result, message);
+    }
+
+    #[test]
+    /// Test processing message without method / method가 없는 메시지 처리 테스트
+    fn test_process_message_without_method() {
+        let logger = create_test_logger();
+        let message = r#"{"params":{}}"#;
+        let result = process_client_message(message, "test-client", &logger);
+        assert_eq!(result, message);
+    }
+
+    #[test]
+    /// Test processing message with empty params / 빈 params가 있는 메시지 처리 테스트
+    fn test_process_message_with_empty_params() {
+        let logger = create_test_logger();
+        let message = r#"{"method":"Test.method","params":null}"#;
+        let result = process_client_message(message, "test-client", &logger);
+        assert_eq!(result, message);
+    }
+}

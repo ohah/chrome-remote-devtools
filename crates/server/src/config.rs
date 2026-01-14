@@ -72,3 +72,91 @@ impl ServerConfig {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    /// Test default configuration / 기본 설정 테스트
+    fn test_default_config() {
+        let config = ServerConfig::default();
+        assert_eq!(config.port, 8080);
+        assert_eq!(config.host, "0.0.0.0");
+        assert!(!config.use_ssl);
+        assert!(config.ssl_cert_path.is_none());
+        assert!(config.ssl_key_path.is_none());
+        assert!(!config.log_enabled);
+        assert!(config.log_methods.is_none());
+        assert!(config.log_file.is_none());
+    }
+
+    #[test]
+    /// Test configuration serialization / 설정 직렬화 테스트
+    fn test_config_serialization() {
+        let config = ServerConfig::default();
+        let json = serde_json::to_string(&config).unwrap();
+        assert!(json.contains("8080"));
+        assert!(json.contains("0.0.0.0"));
+    }
+
+    #[test]
+    /// Test configuration deserialization / 설정 역직렬화 테스트
+    fn test_config_deserialization() {
+        let json = r#"{"port":9000,"host":"127.0.0.1","use_ssl":true,"ssl_cert_path":"cert.pem","ssl_key_path":"key.pem","log_enabled":true,"log_methods":"test","log_file":"log.txt","dev_mode":true}"#;
+        let config: ServerConfig = serde_json::from_str(json).unwrap();
+        assert_eq!(config.port, 9000);
+        assert_eq!(config.host, "127.0.0.1");
+        assert!(config.use_ssl);
+        assert_eq!(config.ssl_cert_path, Some("cert.pem".to_string()));
+        assert_eq!(config.ssl_key_path, Some("key.pem".to_string()));
+        assert!(config.log_enabled);
+        assert_eq!(config.log_methods, Some("test".to_string()));
+        assert_eq!(config.log_file, Some("log.txt".to_string()));
+        assert!(config.dev_mode);
+    }
+
+    #[test]
+    /// Test from_env with SSL enabled / SSL이 활성화된 경우 from_env 테스트
+    fn test_from_env_with_ssl() {
+        // Save original values / 원본 값 저장
+        let original_use_ssl = std::env::var("USE_SSL").ok();
+        let original_port = std::env::var("PORT").ok();
+        let original_cert = std::env::var("SSL_CERT_PATH").ok();
+        let original_key = std::env::var("SSL_KEY_PATH").ok();
+
+        // Set test values / 테스트 값 설정
+        std::env::set_var("USE_SSL", "true");
+        std::env::set_var("PORT", "8443");
+        std::env::set_var("SSL_CERT_PATH", "cert.pem");
+        std::env::set_var("SSL_KEY_PATH", "key.pem");
+
+        let config = ServerConfig::from_env();
+        assert!(config.use_ssl);
+        assert_eq!(config.port, 8443);
+        assert_eq!(config.ssl_cert_path, Some("cert.pem".to_string()));
+        assert_eq!(config.ssl_key_path, Some("key.pem".to_string()));
+
+        // Restore original values / 원본 값 복원
+        if let Some(val) = original_use_ssl {
+            std::env::set_var("USE_SSL", val);
+        } else {
+            std::env::remove_var("USE_SSL");
+        }
+        if let Some(val) = original_port {
+            std::env::set_var("PORT", val);
+        } else {
+            std::env::remove_var("PORT");
+        }
+        if let Some(val) = original_cert {
+            std::env::set_var("SSL_CERT_PATH", val);
+        } else {
+            std::env::remove_var("SSL_CERT_PATH");
+        }
+        if let Some(val) = original_key {
+            std::env::set_var("SSL_KEY_PATH", val);
+        } else {
+            std::env::remove_var("SSL_KEY_PATH");
+        }
+    }
+}
