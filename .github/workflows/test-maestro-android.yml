@@ -4,17 +4,17 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - "examples/react-native/**"
-      - ".maestro/**"
-      - "packages/react-native-inspector/**"
-      - ".github/workflows/test-maestro-android.yml"
+      - 'examples/react-native/**'
+      - '.maestro/**'
+      - 'packages/react-native-inspector/**'
+      - '.github/workflows/test-maestro-android.yml'
   pull_request:
     branches: [main, develop]
     paths:
-      - "examples/react-native/**"
-      - ".maestro/**"
-      - "packages/react-native-inspector/**"
-      - ".github/workflows/test-maestro-android.yml"
+      - 'examples/react-native/**'
+      - '.maestro/**'
+      - 'packages/react-native-inspector/**'
+      - '.github/workflows/test-maestro-android.yml'
 
 jobs:
   check:
@@ -88,8 +88,8 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
-          java-version: "17"
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Setup Rust
         if: needs.check.outputs.should-run == 'true'
@@ -152,6 +152,19 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
+
+      - name: Find Hermes compiler location
+        if: needs.check.outputs.should-run == 'true'
+        run: |
+          echo "Searching for hermesc binary..."
+          find . -name "hermesc" -type f 2>/dev/null | head -10 || echo "hermesc not found"
+          find . -path "*/hermes-compiler/*/hermesc" -type f 2>/dev/null | head -10 || echo "hermes-compiler not found"
+          echo "Checking node_modules structure..."
+          ls -la node_modules/ | grep hermes || echo "No hermes in root node_modules"
+          ls -la examples/react-native/node_modules/ | grep hermes || echo "No hermes in example node_modules"
+          if [ -d "examples/react-native/node_modules/react-native" ]; then
+            ls -la examples/react-native/node_modules/react-native/node_modules/ | grep hermes || echo "No hermes in react-native node_modules"
+          fi
 
       - name: Build Android app
         if: needs.check.outputs.should-run == 'true'
