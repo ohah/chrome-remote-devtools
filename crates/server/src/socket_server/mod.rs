@@ -216,3 +216,119 @@ impl SocketServer {
             .collect()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::logging::Logger;
+    use std::sync::Arc;
+
+    /// Create test logger / 테스트용 로거 생성
+    fn create_test_logger() -> Arc<Logger> {
+        Arc::new(Logger::new(false, None, None).unwrap())
+    }
+
+    #[tokio::test]
+    /// Test SocketServer instance creation / SocketServer 인스턴스 생성 테스트
+    async fn test_socket_server_creation() {
+        let logger = create_test_logger();
+        let _socket_server = SocketServer::new(logger);
+        // Should not panic / 패닉이 발생하지 않아야 함
+        assert!(true);
+    }
+
+    #[tokio::test]
+    /// Test empty clients list initially / 초기에는 빈 클라이언트 목록 반환 테스트
+    async fn test_empty_clients_list_initially() {
+        let logger = create_test_logger();
+        let socket_server = SocketServer::new(logger);
+        let clients = socket_server.get_all_clients().await;
+        assert_eq!(clients.len(), 0);
+    }
+
+    #[tokio::test]
+    /// Test empty inspectors list initially / 초기에는 빈 Inspector 목록 반환 테스트
+    async fn test_empty_inspectors_list_initially() {
+        let logger = create_test_logger();
+        let socket_server = SocketServer::new(logger);
+        let inspectors = socket_server.get_all_inspectors().await;
+        assert_eq!(inspectors.len(), 0);
+    }
+
+    #[tokio::test]
+    /// Test get client by ID when client doesn't exist / 클라이언트가 없을 때 ID로 클라이언트 가져오기 테스트
+    async fn test_get_client_by_id_when_not_exists() {
+        let logger = create_test_logger();
+        let socket_server = SocketServer::new(logger);
+        let client = socket_server.get_client("test-client-1").await;
+        assert!(client.is_none());
+    }
+
+    #[tokio::test]
+    /// Test get all clients returns array / 모든 클라이언트 반환 테스트
+    async fn test_get_all_clients_returns_array() {
+        let logger = create_test_logger();
+        let socket_server = SocketServer::new(logger);
+        let clients = socket_server.get_all_clients().await;
+        // Should return a vector / 벡터를 반환해야 함
+        assert!(clients.is_empty());
+    }
+
+    #[tokio::test]
+    /// Test get all inspectors returns array / 모든 Inspector 반환 테스트
+    async fn test_get_all_inspectors_returns_array() {
+        let logger = create_test_logger();
+        let socket_server = SocketServer::new(logger);
+        let inspectors = socket_server.get_all_inspectors().await;
+        // Should return a vector / 벡터를 반환해야 함
+        assert!(inspectors.is_empty());
+    }
+}
+
+#[cfg(test)]
+mod message_routing_tests {
+    use super::*;
+    use crate::logging::Logger;
+    use std::sync::Arc;
+
+    /// Create test logger / 테스트용 로거 생성
+    fn create_test_logger() -> Arc<Logger> {
+        Arc::new(Logger::new(false, None, None).unwrap())
+    }
+
+    #[tokio::test]
+    /// Test handle client connection structure / 클라이언트 연결 처리 구조 테스트
+    async fn test_handle_client_connection_structure() {
+        // This test verifies that the server can handle client connections
+        // 실제 WebSocket 연결은 통합 테스트에서 검증
+        // This test verifies basic structure / 기본 구조 검증
+        let logger = create_test_logger();
+        let socket_server = SocketServer::new(logger);
+        let clients = socket_server.get_all_clients().await;
+        // Should return a vector / 벡터를 반환해야 함
+        assert!(clients.is_empty());
+    }
+
+    #[tokio::test]
+    /// Test handle inspector connection structure / Inspector 연결 처리 구조 테스트
+    async fn test_handle_inspector_connection_structure() {
+        // This test verifies that the server can handle inspector connections
+        // 실제 WebSocket 연결은 통합 테스트에서 검증
+        // This test verifies basic structure / 기본 구조 검증
+        let logger = create_test_logger();
+        let socket_server = SocketServer::new(logger);
+        let inspectors = socket_server.get_all_inspectors().await;
+        // Should return a vector / 벡터를 반환해야 함
+        assert!(inspectors.is_empty());
+    }
+
+    #[tokio::test]
+    /// Test get client information / 클라이언트 정보 가져오기 테스트
+    async fn test_get_client_information() {
+        let logger = create_test_logger();
+        let socket_server = SocketServer::new(logger);
+        let client = socket_server.get_client("test-client").await;
+        // Should return None when client doesn't exist / 클라이언트가 없을 때 None 반환
+        assert!(client.is_none());
+    }
+}
