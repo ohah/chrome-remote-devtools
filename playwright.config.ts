@@ -33,7 +33,7 @@ export default defineConfig({
     ? [
         // Integration tests only need server / Integration 테스트는 서버만 필요
         {
-          command: 'bun run --filter="@ohah/chrome-remote-devtools-server" dev',
+          command: 'cargo run --bin chrome-remote-devtools-server -- --port 8080 --host 0.0.0.0',
           url: 'http://localhost:8080/json',
           reuseExistingServer: !process.env.CI,
           timeout: 120000,

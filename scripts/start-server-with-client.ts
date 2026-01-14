@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // Start server with client build / 클라이언트 빌드와 함께 서버 시작
 import { $ } from 'bun';
-import { resolve, join } from 'path';
+import { resolve } from 'path';
 
 // Use Bun's built-in import.meta.dir instead of fileURLToPath/dirname / fileURLToPath/dirname 대신 Bun의 내장 import.meta.dir 사용
 const rootDir = resolve(import.meta.dir, '..');
@@ -17,17 +17,28 @@ try {
 }
 
 console.log('Starting server... / 서버 시작 중...');
-// Start server directly / 서버 직접 시작
-const serverPath = join(rootDir, 'packages/server/src/index.ts');
-const serverProcess = Bun.spawn(['bun', 'run', '--watch', serverPath], {
-  cwd: rootDir,
-  stdout: 'inherit',
-  stderr: 'inherit',
-  env: {
-    ...process.env,
-    PORT: '8080',
-  },
-});
+// Start Rust server / Rust 서버 시작
+const serverProcess = Bun.spawn(
+  [
+    'cargo',
+    'run',
+    '--bin',
+    'chrome-remote-devtools-server',
+    '--',
+    '--port',
+    '8080',
+    '--host',
+    '0.0.0.0',
+  ],
+  {
+    cwd: rootDir,
+    stdout: 'inherit',
+    stderr: 'inherit',
+    env: {
+      ...process.env,
+    },
+  }
+);
 
 // Handle process exit / 프로세스 종료 처리
 process.on('SIGINT', () => {
