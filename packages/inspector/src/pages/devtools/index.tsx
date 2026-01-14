@@ -51,6 +51,38 @@ function DevToolsPage() {
     };
   }, []);
 
+  // Handle postMessage from DevTools iframe to open external links / DevTools iframe에서 외부 링크 열기 위한 postMessage 처리
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      // Only handle OPEN_EXTERNAL_LINK messages / OPEN_EXTERNAL_LINK 메시지만 처리
+      if (event.data?.type === 'OPEN_EXTERNAL_LINK' && event.data?.url) {
+        const url = event.data.url as string;
+
+        // Check if running in Tauri / Tauri 환경인지 확인
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const tauriWindow = window as any;
+        if (typeof window !== 'undefined' && tauriWindow.__TAURI__?.shell) {
+          try {
+            // Use Tauri shell API to open external links / Tauri shell API를 사용하여 외부 링크 열기
+            await tauriWindow.__TAURI__.shell.open(url);
+          } catch (err) {
+            console.error('Failed to open link with Tauri:', err);
+            // Fallback to window.open if Tauri API fails / Tauri API 실패 시 window.open으로 폴백
+            window.open(url, '_blank', 'noopener,noreferrer');
+          }
+        } else {
+          // Use standard window.open for web environment / 웹 환경에서는 표준 window.open 사용
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
   // Filter clients based on filter state / 필터 상태에 따라 클라이언트 필터링
   const filteredClients = clients.filter((client) => {
     if (client.type === 'web') {
@@ -115,7 +147,10 @@ function DevToolsPage() {
         {filteredClients.map((client) => {
           const iframeRef = getOrCreateIframeRef(client.id);
           // Always use random instance for complete isolation / 완전한 격리를 위해 항상 랜덤 인스턴스 사용
-          const devtoolsUrl = buildDevToolsUrl(client.id);
+          const devtoolsUrl = buildDevToolsUrl({
+            clientId: client.id,
+            clientType: client.type,
+          });
           const isActive = client.id === clientId;
 
           const isRN = client.type === 'react-native';
