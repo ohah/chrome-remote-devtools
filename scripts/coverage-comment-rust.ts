@@ -53,7 +53,9 @@ function parseLCOV(lcovPath: string): {
       }
     } else if (line.startsWith('FNDA:')) {
       // Function data (hits) / 함수 데이터 (실행 횟수)
-      // This is handled separately / 별도로 처리됨
+      // Note: FNDA parsing is not implemented, function coverage
+      // is simplified to count functions only / FNDA 파싱은 구현되지 않음,
+      // 함수 커버리지는 함수 개수만 계산함
     } else if (line.startsWith('DA:')) {
       // Line data / 라인 데이터
       const match = line.match(/^DA:(\d+),(\d+)$/);
@@ -65,7 +67,7 @@ function parseLCOV(lcovPath: string): {
       }
     } else if (line.startsWith('BRDA:')) {
       // Branch data / 브랜치 데이터
-      const match = line.match(/^BRDA:(\d+),(\d+),(\d+),(-?\d+)$/);
+      const match = line.match(/^BRDA:(\d+),(\d+),(\d+),(-|\d+)$/);
       if (match && currentRecord && currentRecord.branches) {
         const hits = match[4] === '-' ? 0 : parseInt(match[4]);
         currentRecord.branches.push({
@@ -110,7 +112,10 @@ function parseLCOV(lcovPath: string): {
     const fileLines = record.lines.length;
     const fileCoveredLines = record.lines.filter((l) => l.hits > 0).length;
     const fileFuncs = record.functions.length;
-    const fileCoveredFuncs = record.functions.length; // Simplified / 단순화
+    // Note: Function coverage is simplified - FNDA records are not parsed
+    // so we assume all functions are covered / 함수 커버리지는 단순화됨
+    // - FNDA 레코드가 파싱되지 않아 모든 함수가 커버된 것으로 가정
+    const fileCoveredFuncs = record.functions.length;
     const fileBranches = record.branches.length;
     const fileCoveredBranches = record.branches.filter((b) => b.hits > 0).length;
 
@@ -129,7 +134,7 @@ function parseLCOV(lcovPath: string): {
 
     files.push({
       file: record.file.replace(process.cwd() + '/', ''),
-      funcs: fileLines > 0 ? (fileCoveredLines / fileLines) * 100 : 0,
+      funcs: fileFuncs > 0 ? (fileCoveredFuncs / fileFuncs) * 100 : 0,
       lines: fileLines > 0 ? (fileCoveredLines / fileLines) * 100 : 0,
       branches: fileBranches > 0 ? (fileCoveredBranches / fileBranches) * 100 : 0,
       uncovered: formatUncoveredLines(uncoveredLines),

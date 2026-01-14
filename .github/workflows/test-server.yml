@@ -65,7 +65,9 @@ jobs:
 
       - name: Run Rust tests with coverage
         if: needs.check.outputs.should-run == 'true'
-        run: cargo llvm-cov --package chrome-remote-devtools-server --lib --lcov --output-path coverage/lcov.info
+        run: |
+          mkdir -p coverage
+          cargo llvm-cov --package chrome-remote-devtools-server --lib --lcov --output-path coverage/lcov.info
 
       - name: Setup Bun for coverage script
         if: needs.check.outputs.should-run == 'true' && github.event_name == 'pull_request'
