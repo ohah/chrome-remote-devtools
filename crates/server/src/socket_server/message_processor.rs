@@ -5,8 +5,9 @@ use flate2::read::GzDecoder;
 use std::io::Read;
 
 /// Process client message (decompress if needed) / 클라이언트 메시지 처리 (필요시 압축 해제)
+/// Returns original message if not compressed, decompressed message if compressed / 압축되지 않은 경우 원본 메시지 반환, 압축된 경우 압축 해제된 메시지 반환
 pub fn process_client_message(message: &str, client_id: &str, logger: &Logger) -> String {
-    // Try to parse message / 메시지 파싱 시도
+    // Try to parse message to check for compression / 압축 여부 확인을 위해 메시지 파싱 시도
     if let Ok(mut parsed) = serde_json::from_str::<CDPMessage>(message) {
         // Check for compressed params / 압축된 파라미터 확인
         if let Some(params) = &parsed.params {
@@ -30,7 +31,21 @@ pub fn process_client_message(message: &str, client_id: &str, logger: &Logger) -
                         }
                     } else {
                         logger.log_error(LogType::Client, client_id, "decompression failed", None);
+                        // If decompression fails, return original message / 압축 해제 실패 시 원본 메시지 반환
+                        return message.to_string();
                     }
+
+                    // Log message / 메시지 로깅
+                    logger.log(
+                        LogType::Client,
+                        client_id,
+                        "received",
+                        Some(&serde_json::json!(parsed)),
+                        parsed.method.as_deref(),
+                    );
+
+                    // Return decompressed message / 압축 해제된 메시지 반환
+                    return serde_json::to_string(&parsed).unwrap_or_else(|_| message.to_string());
                 }
             }
         }
@@ -44,10 +59,8 @@ pub fn process_client_message(message: &str, client_id: &str, logger: &Logger) -
             parsed.method.as_deref(),
         );
 
-        // Return as JSON string / JSON 문자열로 반환
-        serde_json::to_string(&parsed).unwrap_or_else(|_| message.to_string())
+        message.to_string()
     } else {
-        // If parsing fails, log raw message / 파싱 실패 시 원본 메시지 로깅
         logger.log(
             LogType::Client,
             client_id,
