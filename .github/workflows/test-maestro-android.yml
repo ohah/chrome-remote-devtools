@@ -4,17 +4,17 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - "examples/react-native/**"
-      - ".maestro/**"
-      - "packages/react-native-inspector/**"
-      - ".github/workflows/test-maestro-android.yml"
+      - 'examples/react-native/**'
+      - '.maestro/**'
+      - 'packages/react-native-inspector/**'
+      - '.github/workflows/test-maestro-android.yml'
   pull_request:
     branches: [main, develop]
     paths:
-      - "examples/react-native/**"
-      - ".maestro/**"
-      - "packages/react-native-inspector/**"
-      - ".github/workflows/test-maestro-android.yml"
+      - 'examples/react-native/**'
+      - '.maestro/**'
+      - 'packages/react-native-inspector/**'
+      - '.github/workflows/test-maestro-android.yml'
 
 jobs:
   check:
@@ -86,8 +86,8 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
-          java-version: "17"
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Setup Rust
         if: needs.check.outputs.should-run == 'true'
@@ -145,6 +145,7 @@ jobs:
         with:
           avd-name: avd-33
           api-level: 33
+          arch: x86_64
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
@@ -162,6 +163,7 @@ jobs:
         with:
           avd-name: avd-33
           api-level: 33
+          arch: x86_64
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
