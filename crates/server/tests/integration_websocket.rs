@@ -26,7 +26,10 @@ async fn test_websocket_client_connection() {
 
     // Connection established successfully / 연결이 성공적으로 설정됨
     // Timeout is expected since server doesn't send messages immediately / 서버가 즉시 메시지를 보내지 않으므로 타임아웃 예상
-    assert!(result.is_ok(), "Connection should be established / 연결이 설정되어야 함");
+    assert!(
+        result.is_ok(),
+        "Connection should be established / 연결이 설정되어야 함"
+    );
 
     stop_test_server(handle).await;
 }
@@ -53,7 +56,10 @@ async fn test_websocket_devtools_connection() {
     let result = tokio::time::timeout(tokio::time::Duration::from_millis(100), read.next()).await;
 
     // Timeout is expected since server doesn't send messages immediately / 서버가 즉시 메시지를 보내지 않으므로 타임아웃 예상
-    assert!(result.is_ok(), "Connection should be established / 연결이 설정되어야 함");
+    assert!(
+        result.is_ok(),
+        "Connection should be established / 연결이 설정되어야 함"
+    );
 
     stop_test_server(handle).await;
 }
