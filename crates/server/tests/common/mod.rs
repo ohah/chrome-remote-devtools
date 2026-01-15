@@ -31,7 +31,12 @@ pub async fn start_test_server(port: u16) -> ServerHandle {
     let mut retry_interval = Duration::from_millis(50);
 
     loop {
-        match client.get(&url).timeout(Duration::from_millis(100)).send().await {
+        match client
+            .get(&url)
+            .timeout(Duration::from_millis(100))
+            .send()
+            .await
+        {
             Ok(resp) if resp.status().is_success() => {
                 // Server is ready / 서버가 준비됨
                 break;
