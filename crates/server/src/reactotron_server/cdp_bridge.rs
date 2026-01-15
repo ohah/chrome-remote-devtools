@@ -5,12 +5,22 @@ use std::sync::Arc;
 
 /// Convert Reactotron command to CDP message / Reactotron 명령을 CDP 메시지로 변환
 /// Returns None if the command type is not supported / 지원되지 않는 명령 타입이면 None 반환
-pub fn convert_reactotron_to_cdp(
-    cmd: &Command,
-    logger: Arc<Logger>,
-) -> Option<serde_json::Value> {
+pub fn convert_reactotron_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<serde_json::Value> {
     let cmd_type = cmd.r#type.as_str();
-    
+
+    // Log original Reactotron command / 원본 Reactotron 명령 로깅
+    logger.log(
+        LogType::Reactotron,
+        "cdp-bridge",
+        &format!("🔄 Converting Reactotron command: type={}", cmd_type),
+        Some(&serde_json::json!({
+            "type": cmd.r#type,
+            "payload": cmd.payload,
+            "clientId": cmd.client_id,
+        })),
+        Some("convert_reactotron_to_cdp"),
+    );
+
     // Check if it's a console message / 콘솔 메시지인지 확인
     if cmd_type.starts_with("console.") {
         let console_type = match cmd_type {
@@ -36,9 +46,9 @@ pub fn convert_reactotron_to_cdp(
         };
         return convert_console_to_cdp(cmd, console_type, logger);
     }
-    
-    // Check if it's a console message with type "console" / 타입이 "console"인 경우
-    if cmd_type == "console" {
+
+    // Check if it's a console message with type "console" or "log" / 타입이 "console" 또는 "log"인 경우
+    if cmd_type == "console" || cmd_type == "log" {
         let console_type = cmd
             .payload
             .get("level")
@@ -51,11 +61,31 @@ pub fn convert_reactotron_to_cdp(
                 _ => "log",
             })
             .unwrap_or("log");
+
+        logger.log(
+            LogType::Reactotron,
+            "cdp-bridge",
+            &format!(
+                "📝 Detected console/log message with level: {}",
+                console_type
+            ),
+            Some(&cmd.payload),
+            Some("detect_console"),
+        );
+
         return convert_console_to_cdp(cmd, console_type, logger);
     }
-    
+
     // Check if it's a network event / 네트워크 이벤트인지 확인
     if cmd_type.starts_with("network.") || cmd_type == "api.request" || cmd_type == "api.response" {
+        logger.log(
+            LogType::Reactotron,
+            "cdp-bridge",
+            &format!("🌐 Detected network event: {}", cmd_type),
+            Some(&cmd.payload),
+            Some("detect_network"),
+        );
+
         match cmd_type {
             "network.request" | "api.request" => {
                 return convert_network_request_to_cdp(cmd, logger);
@@ -69,10 +99,18 @@ pub fn convert_reactotron_to_cdp(
             _ => {}
         }
     }
-    
+
     // Check if it's a network event with type "network" or "api" / 타입이 "network" 또는 "api"인 경우
     if cmd_type == "network" || cmd_type == "api" {
         if let Some(kind) = cmd.payload.get("kind").and_then(|v| v.as_str()) {
+            logger.log(
+                LogType::Reactotron,
+                "cdp-bridge",
+                &format!("🌐 Detected network/api event with kind: {}", kind),
+                Some(&cmd.payload),
+                Some("detect_network_kind"),
+            );
+
             match kind {
                 "request" => return convert_network_request_to_cdp(cmd, logger),
                 "response" => return convert_network_response_to_cdp(cmd, logger),
@@ -82,7 +120,20 @@ pub fn convert_reactotron_to_cdp(
         }
     }
 
-    // Other types are not converted / 다른 타입은 변환하지 않음
+    // Command type not supported / 지원되지 않는 명령 타입
+    logger.log(
+        LogType::Reactotron,
+        "cdp-bridge",
+        &format!(
+            "⚠️ Command type not supported for CDP conversion: {}",
+            cmd_type
+        ),
+        Some(&serde_json::json!({
+            "type": cmd.r#type,
+            "payload": cmd.payload,
+        })),
+        Some("unsupported_type"),
+    );
     None
 }
 
@@ -165,8 +216,18 @@ fn convert_console_to_cdp(
     logger.log(
         LogType::Reactotron,
         "cdp-bridge",
-        &format!("Converted console.{} to Runtime.consoleAPICalled", console_type),
-        Some(&cdp_message),
+        &format!(
+            "✅ Converted console.{} to Runtime.consoleAPICalled (args count: {})",
+            console_type,
+            args.len()
+        ),
+        Some(&serde_json::json!({
+            "original": {
+                "type": cmd.r#type,
+                "payload": cmd.payload,
+            },
+            "converted": cdp_message,
+        })),
         Some("Runtime.consoleAPICalled"),
     );
 
@@ -174,28 +235,51 @@ fn convert_console_to_cdp(
 }
 
 /// Convert network request to CDP Network.requestWillBeSent event / 네트워크 요청을 CDP Network.requestWillBeSent 이벤트로 변환
-fn convert_network_request_to_cdp(
-    cmd: &Command,
-    logger: Arc<Logger>,
-) -> Option<serde_json::Value> {
+fn convert_network_request_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<serde_json::Value> {
     let payload = &cmd.payload;
 
     // Extract request information / 요청 정보 추출
+    // For api.request, URL is in payload.request.url / api.request의 경우 URL은 payload.request.url에 있음
     let url = payload
-        .get("url")
+        .get("request")
+        .and_then(|r| r.get("url"))
         .and_then(|v| v.as_str())
         .map(String::from)
+        .or_else(|| {
+            payload
+                .get("url")
+                .and_then(|v| v.as_str())
+                .map(String::from)
+        })
         .unwrap_or_else(|| "".to_string());
 
     let method = payload
-        .get("method")
+        .get("request")
+        .and_then(|r| r.get("method"))
         .and_then(|v| v.as_str())
         .map(String::from)
+        .or_else(|| {
+            payload
+                .get("method")
+                .and_then(|v| v.as_str())
+                .map(String::from)
+        })
         .unwrap_or_else(|| "GET".to_string());
 
-    let headers = payload.get("headers").cloned().unwrap_or_else(|| serde_json::json!({}));
+    // For api.request, headers are in payload.request.headers / api.request의 경우 headers는 payload.request.headers에 있음
+    let headers = payload
+        .get("request")
+        .and_then(|r| r.get("headers"))
+        .cloned()
+        .or_else(|| payload.get("headers").cloned())
+        .unwrap_or_else(|| serde_json::json!({}));
 
-    let post_data = payload.get("data").or_else(|| payload.get("body"));
+    // For api.request, data is in payload.request.data / api.request의 경우 data는 payload.request.data에 있음
+    let post_data = payload
+        .get("request")
+        .and_then(|r| r.get("data"))
+        .or_else(|| payload.get("data"))
+        .or_else(|| payload.get("body"));
 
     // Generate request ID / 요청 ID 생성
     let request_id = payload
@@ -253,7 +337,9 @@ fn convert_network_request_to_cdp(
             } else {
                 request_obj.insert(
                     "postData".to_string(),
-                    serde_json::json!(serde_json::to_string(data).unwrap_or_else(|_| "{}".to_string())),
+                    serde_json::json!(
+                        serde_json::to_string(data).unwrap_or_else(|_| "{}".to_string())
+                    ),
                 );
             }
         }
@@ -283,24 +369,48 @@ fn convert_network_response_to_cdp(
     let payload = &cmd.payload;
 
     // Extract response information / 응답 정보 추출
+    // For api.response, URL is in payload.request.url / api.response의 경우 URL은 payload.request.url에 있음
     let url = payload
-        .get("url")
+        .get("request")
+        .and_then(|r| r.get("url"))
         .and_then(|v| v.as_str())
         .map(String::from)
+        .or_else(|| {
+            payload
+                .get("url")
+                .and_then(|v| v.as_str())
+                .map(String::from)
+        })
         .unwrap_or_else(|| "".to_string());
 
+    // For api.response, status is in payload.response.status / api.response의 경우 status는 payload.response.status에 있음
     let status = payload
-        .get("status")
+        .get("response")
+        .and_then(|r| r.get("status"))
         .and_then(|v| v.as_u64())
+        .or_else(|| payload.get("status").and_then(|v| v.as_u64()))
         .unwrap_or(200);
 
     let status_text = payload
-        .get("statusText")
+        .get("response")
+        .and_then(|r| r.get("statusText"))
         .and_then(|v| v.as_str())
         .map(String::from)
+        .or_else(|| {
+            payload
+                .get("statusText")
+                .and_then(|v| v.as_str())
+                .map(String::from)
+        })
         .unwrap_or_else(|| "OK".to_string());
 
-    let headers = payload.get("headers").cloned().unwrap_or_else(|| serde_json::json!({}));
+    // For api.response, headers are in payload.response.headers / api.response의 경우 headers는 payload.response.headers에 있음
+    let headers = payload
+        .get("response")
+        .and_then(|r| r.get("headers"))
+        .cloned()
+        .or_else(|| payload.get("headers").cloned())
+        .unwrap_or_else(|| serde_json::json!({}));
 
     // Generate request ID / 요청 ID 생성
     let request_id = payload
@@ -385,19 +495,10 @@ fn convert_network_response_to_cdp(
 }
 
 /// Convert network error to CDP Network.loadingFailed event / 네트워크 에러를 CDP Network.loadingFailed 이벤트로 변환
-fn convert_network_error_to_cdp(
-    cmd: &Command,
-    logger: Arc<Logger>,
-) -> Option<serde_json::Value> {
+fn convert_network_error_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<serde_json::Value> {
     let payload = &cmd.payload;
 
     // Extract error information / 에러 정보 추출
-    let url = payload
-        .get("url")
-        .and_then(|v| v.as_str())
-        .map(String::from)
-        .unwrap_or_else(|| "".to_string());
-
     let error_text = payload
         .get("error")
         .and_then(|v| v.as_str())

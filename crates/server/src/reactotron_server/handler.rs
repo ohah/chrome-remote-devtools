@@ -298,12 +298,36 @@ async fn handle_incoming_message(
 
                 // Convert Reactotron message to CDP format and send to DevTools / Reactotron 메시지를 CDP 형식으로 변환하여 DevTools로 전송
                 if let Some(socket_server) = socket_server.as_ref() {
-                    if let Some(cdp_message) = crate::reactotron_server::cdp_bridge::convert_reactotron_to_cdp(&cmd, logger.clone()) {
+                    let cdp_result = crate::reactotron_server::cdp_bridge::convert_reactotron_to_cdp(&cmd, logger.clone());
+                    if let Some(cdp_message) = cdp_result {
+                        logger.log(
+                            LogType::Reactotron,
+                            &client_id,
+                            &format!("✅ CDP conversion successful for type: {}", cmd.r#type),
+                            Some(&serde_json::json!({
+                                "originalType": cmd.r#type,
+                                "cdpMethod": cdp_message.get("method").and_then(|m| m.as_str()),
+                                "cdpMessage": cdp_message,
+                            })),
+                            Some("cdp_conversion_success"),
+                        );
+
                         // Send CDP message to DevTools connected to this client / 이 클라이언트에 연결된 DevTools로 CDP 메시지 전송
                         let server_guard = socket_server.read().await;
                         server_guard
                             .send_cdp_message_to_devtools(&client_id, &cdp_message, logger.clone())
                             .await;
+                    } else {
+                        logger.log(
+                            LogType::Reactotron,
+                            &client_id,
+                            &format!("⚠️ CDP conversion returned None for type: {} (not supported or conversion failed)", cmd.r#type),
+                            Some(&serde_json::json!({
+                                "type": cmd.r#type,
+                                "payload": cmd.payload,
+                            })),
+                            Some("cdp_conversion_failed"),
+                        );
                     }
                 }
             }

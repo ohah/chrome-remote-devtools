@@ -16,6 +16,7 @@ use tokio::sync::mpsc;
 use tokio::sync::RwLock;
 
 /// Client connection / 클라이언트 연결
+#[derive(Clone)]
 struct Client {
     id: String,
     url: Option<String>,
@@ -313,6 +314,40 @@ impl SocketServer {
     /// Get all clients / 모든 클라이언트 가져오기
     pub async fn get_all_clients(&self) -> Vec<ClientInfo> {
         let clients = self.clients.read().await;
+        let client_count = clients.len();
+
+        // Log for debugging / 디버깅을 위해 로깅
+        if client_count > 0 {
+            let reactotron_count = clients
+                .values()
+                .filter(|c| {
+                    c.url
+                        .as_ref()
+                        .map(|u| u.starts_with("reactotron://"))
+                        .unwrap_or(false)
+                })
+                .count();
+
+            self.logger.log(
+                LogType::Server,
+                "socket-server",
+                &format!(
+                    "📋 get_all_clients: {} total clients ({} Reactotron)",
+                    client_count, reactotron_count
+                ),
+                Some(&serde_json::json!({
+                    "total": client_count,
+                    "reactotron": reactotron_count,
+                    "clients": clients.values().map(|c| serde_json::json!({
+                        "id": c.id,
+                        "url": c.url,
+                        "title": c.title,
+                    })).collect::<Vec<_>>(),
+                })),
+                Some("get_all_clients"),
+            );
+        }
+
         clients
             .values()
             .map(|client| ClientInfo {
@@ -368,6 +403,12 @@ impl SocketServer {
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_secs().to_string())
             .unwrap_or_else(|_| "0".to_string());
+
+        // Clone values for logging / 로깅을 위해 값 복제
+        let url_for_log = url.clone();
+        let title_for_log = title.clone();
+        let ua_for_log = ua.clone();
+
         let client = Arc::new(Client {
             id: client_id.clone(),
             url: Some(url),
@@ -378,7 +419,25 @@ impl SocketServer {
             sender: tx.clone(),
         });
 
-        clients.insert(client_id, client);
+        clients.insert(client_id.clone(), client);
+
+        // Log registration for debugging / 디버깅을 위해 등록 로깅
+        logger.log(
+            LogType::Reactotron,
+            &client_id,
+            &format!(
+                "📝 Registered Reactotron client in SocketServer: id={}, url={}, title={}",
+                client_id, url_for_log, title_for_log
+            ),
+            Some(&serde_json::json!({
+                "clientId": client_id,
+                "url": url_for_log,
+                "title": title_for_log,
+                "ua": ua_for_log,
+            })),
+            Some("register_reactotron_client"),
+        );
+
         Some(tx)
     }
 
@@ -405,7 +464,7 @@ impl SocketServer {
     ) {
         let devtools = self.devtools.read().await;
         let mut sent_count = 0;
-        
+
         // Find DevTools connected to this client / 이 클라이언트에 연결된 DevTools 찾기
         for devtool in devtools.values() {
             if devtool.client_id.as_ref() == Some(&client_id.to_string()) {
@@ -415,7 +474,10 @@ impl SocketServer {
                         logger.log(
                             LogType::Reactotron,
                             client_id,
-                            &format!("Failed to send CDP message to DevTools {}: {}", devtool.id, e),
+                            &format!(
+                                "Failed to send CDP message to DevTools {}: {}",
+                                devtool.id, e
+                            ),
                             None,
                             None,
                         );
@@ -425,7 +487,7 @@ impl SocketServer {
                 }
             }
         }
-        
+
         if sent_count > 0 {
             logger.log(
                 LogType::Reactotron,
@@ -433,8 +495,52 @@ impl SocketServer {
                 &format!(
                     "Sent CDP message to {} DevTools: {}",
                     sent_count,
-                    cdp_message.get("method").and_then(|m| m.as_str()).unwrap_or("unknown")
+                    cdp_message
+                        .get("method")
+                        .and_then(|m| m.as_str())
+                        .unwrap_or("unknown")
                 ),
+                None,
+                None,
+            );
+        }
+    }
+
+    /// Update Reactotron client information / Reactotron 클라이언트 정보 업데이트
+    pub async fn update_reactotron_client(
+        &self,
+        client_id: &str,
+        url: Option<String>,
+        title: Option<String>,
+        ua: Option<String>,
+        logger: Arc<Logger>,
+    ) {
+        let mut clients = self.clients.write().await;
+        if let Some(client) = clients.get_mut(client_id) {
+            // Clone the Arc to get mutable access / 가변 접근을 위해 Arc 복제
+            let client_clone = Arc::clone(client);
+            drop(clients); // Release the write lock / write lock 해제
+
+            // Create a new client with updated information / 업데이트된 정보로 새 클라이언트 생성
+            let mut new_client = client_clone.as_ref().clone();
+            if let Some(url) = url {
+                new_client.url = Some(url);
+            }
+            if let Some(title) = title {
+                new_client.title = Some(title);
+            }
+            if let Some(ua) = ua {
+                new_client.ua = Some(ua);
+            }
+
+            // Replace the client in the map / 맵에서 클라이언트 교체
+            let mut clients = self.clients.write().await;
+            clients.insert(client_id.to_string(), Arc::new(new_client));
+
+            logger.log(
+                LogType::Reactotron,
+                client_id,
+                "Updated Reactotron client information",
                 None,
                 None,
             );

@@ -47,22 +47,82 @@ async fn get_all_clients_detailed(
     State(server): State<Arc<RwLock<SocketServer>>>,
 ) -> Result<Json<Value>, StatusCode> {
     let server = server.read().await;
-    let regular_clients: Vec<Value> = server
-        .get_all_clients()
-        .await
-        .into_iter()
-        .map(|client| {
-            json!({
-                "id": client.id,
-                "type": "web",
-                "url": client.url,
-                "title": client.title,
-                "favicon": client.favicon,
-                "ua": client.ua,
-                "time": client.time,
-            })
-        })
-        .collect();
+    let all_clients_info = server.get_all_clients().await;
+
+    // Log all clients for debugging / 디버깅을 위해 모든 클라이언트 로깅
+    server.logger.log(
+        crate::logging::LogType::Server,
+        "http-routes",
+        &format!("📋 get_all_clients_detailed: Found {} total clients", all_clients_info.len()),
+        Some(&serde_json::json!({
+            "total": all_clients_info.len(),
+            "clients": all_clients_info.iter().map(|c| serde_json::json!({
+                "id": c.id,
+                "url": c.url,
+                "title": c.title,
+            })).collect::<Vec<_>>(),
+        })),
+        Some("get_all_clients_detailed"),
+    );
+
+    // Separate clients by type / 타입별로 클라이언트 분리
+    let mut regular_clients: Vec<Value> = Vec::new();
+    let mut reactotron_clients: Vec<Value> = Vec::new();
+
+    for client in all_clients_info {
+        // Check if it's a Reactotron client / Reactotron 클라이언트인지 확인
+        if let Some(url) = &client.url {
+            if url.starts_with("reactotron://") {
+                // Reactotron client / Reactotron 클라이언트
+                let device_name = client.title.clone().unwrap_or_else(|| "Unknown Device".to_string());
+                server.logger.log(
+                    crate::logging::LogType::Server,
+                    "http-routes",
+                    &format!("🔵 Found Reactotron client: {} ({})", client.id, device_name),
+                    Some(&serde_json::json!({
+                        "id": client.id,
+                        "url": client.url,
+                        "title": client.title,
+                        "deviceName": device_name,
+                    })),
+                    Some("reactotron_client"),
+                );
+
+                reactotron_clients.push(json!({
+                    "id": client.id,
+                    "type": "reactotron",
+                    "deviceName": device_name,
+                    "url": client.url,
+                    "title": client.title,
+                    "ua": client.ua,
+                    "time": client.time,
+                }));
+                continue;
+            }
+        }
+
+        // Regular web client / 일반 웹 클라이언트
+        regular_clients.push(json!({
+            "id": client.id,
+            "type": "web",
+            "url": client.url,
+            "title": client.title,
+            "favicon": client.favicon,
+            "ua": client.ua,
+            "time": client.time,
+        }));
+    }
+
+    server.logger.log(
+        crate::logging::LogType::Server,
+        "http-routes",
+        &format!("📊 Client breakdown: {} regular, {} Reactotron, {} RN",
+                 regular_clients.len(),
+                 reactotron_clients.len(),
+                 0), // RN count will be added below
+        None,
+        Some("client_breakdown"),
+    );
 
     let rn_inspectors = server
         .react_native_inspector_manager
@@ -82,7 +142,7 @@ async fn get_all_clients_detailed(
         })
         .collect();
 
-    let all_clients: Vec<Value> = [regular_clients, rn_inspector_clients].concat();
+    let all_clients: Vec<Value> = [regular_clients, reactotron_clients, rn_inspector_clients].concat();
 
     Ok(Json(json!({ "clients": all_clients })))
 }

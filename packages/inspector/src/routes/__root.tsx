@@ -379,10 +379,11 @@ export const Route = createRootRoute({
 });
 
 // Export filter state getter function / 필터 상태를 가져오는 함수 export
-export function getClientTypeFilter(): { web: boolean; reactNative: boolean } {
+export function getClientTypeFilter(): { web: boolean; reactNative: boolean; reactotron: boolean } {
   const showWeb = localStorage.getItem('client-filter-web') !== 'false';
   const showReactNative = localStorage.getItem('client-filter-react-native') !== 'false';
-  return { web: showWeb, reactNative: showReactNative };
+  const showReactotron = localStorage.getItem('reactotron-enabled') === 'true';
+  return { web: showWeb, reactNative: showReactNative, reactotron: showReactotron };
 }
 
 // Export tab visibility getter function / 탭 표시 상태를 가져오는 함수 export
