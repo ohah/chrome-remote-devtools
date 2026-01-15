@@ -125,7 +125,10 @@ async fn test_websocket_message_sending() {
             panic!("DevTools stream ended unexpectedly / DevTools 스트림이 예기치 않게 종료됨");
         }
         Ok(Some(Err(e))) => {
-            panic!("Error reading from DevTools: {} / DevTools에서 읽기 오류: {}", e, e);
+            panic!(
+                "Error reading from DevTools: {} / DevTools에서 읽기 오류: {}",
+                e, e
+            );
         }
         Err(_) => {
             // Timeout - message might not have been forwarded if no DevTools was connected / 타임아웃 - DevTools가 연결되지 않았으면 메시지가 전달되지 않았을 수 있음
