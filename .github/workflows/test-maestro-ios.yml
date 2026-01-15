@@ -110,6 +110,7 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         run: |
           cd examples/react-native/ios
+          bundle install
           bundle exec pod install
           cd ../../..
 
