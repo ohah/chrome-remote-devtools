@@ -23,6 +23,8 @@ pub struct ServerConfig {
     /// Development mode / 개발 모드
     /// When enabled, additional endpoints like /client.js are available / 활성화되면 /client.js 같은 추가 엔드포인트 사용 가능
     pub dev_mode: bool,
+    /// Enable Reactotron server / Reactotron 서버 활성화
+    pub enable_reactotron_server: bool,
 }
 
 impl Default for ServerConfig {
@@ -38,6 +40,7 @@ impl Default for ServerConfig {
             log_file: None,
             // Default to debug mode in debug builds, production mode in release builds / 디버그 빌드에서는 디버그 모드, 릴리스 빌드에서는 프로덕션 모드
             dev_mode: cfg!(debug_assertions),
+            enable_reactotron_server: false,
         }
     }
 }
@@ -69,6 +72,9 @@ impl ServerConfig {
             dev_mode: std::env::var("DEV_MODE")
                 .map(|v| v == "true")
                 .unwrap_or_else(|_| cfg!(debug_assertions)),
+            enable_reactotron_server: std::env::var("ENABLE_REACTOTRON_SERVER")
+                .map(|v| v == "true")
+                .unwrap_or(false),
         }
     }
 }

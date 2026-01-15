@@ -1,10 +1,14 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 use chrome_remote_devtools_server::{ServerConfig, ServerHandle};
+use std::io::{self, Write};
 use std::sync::{Arc, OnceLock};
 use tokio::sync::RwLock;
 
 // Global server handle / 전역 서버 핸들
 static SERVER_HANDLE: OnceLock<Arc<RwLock<ServerHandle>>> = OnceLock::new();
+
+// Global Reactotron server enabled state / 전역 Reactotron 서버 활성화 상태
+static REACTOTRON_ENABLED: OnceLock<Arc<RwLock<bool>>> = OnceLock::new();
 
 /// Start the WebSocket server / WebSocket 서버 시작
 #[tauri::command]
@@ -22,6 +26,7 @@ async fn start_server(port: u16, host: String) -> Result<(), String> {
         log_methods: None,
         log_file: None,
         dev_mode: cfg!(debug_assertions), // Enable dev mode only in debug builds / 디버그 빌드에서만 개발 모드 활성화
+        enable_reactotron_server: false,  // Default to false / 기본값은 false
     };
 
     server.start(config).await.map_err(|e| e.to_string())?;
@@ -49,6 +54,138 @@ async fn is_server_running() -> bool {
     }
 }
 
+/// Start Reactotron server / Reactotron 서버 시작
+/// This will restart the main server with Reactotron enabled / 메인 서버를 Reactotron 활성화 상태로 재시작합니다
+#[tauri::command]
+async fn start_reactotron_server(port: u16, host: String) -> Result<(), String> {
+    eprintln!(
+        "[reactotron] 🔄 Starting Reactotron server (port: {}, host: {})",
+        port, host
+    );
+    let _ = io::stderr().flush();
+
+    // Stop existing server if running / 실행 중인 서버가 있으면 중지
+    if let Some(handle) = SERVER_HANDLE.get() {
+        eprintln!("[reactotron] 🛑 Stopping existing server...");
+        let _ = io::stderr().flush();
+        let server = handle.write().await;
+        server.stop().await.map_err(|e| {
+            eprintln!("[reactotron] ❌ Failed to stop server: {}", e);
+            let _ = io::stderr().flush();
+            e.to_string()
+        })?;
+        eprintln!("[reactotron] ✅ Server stopped");
+        let _ = io::stderr().flush();
+    }
+
+    // Set Reactotron enabled / Reactotron 활성화 설정
+    let reactotron_enabled = REACTOTRON_ENABLED.get_or_init(|| Arc::new(RwLock::new(false)));
+    *reactotron_enabled.write().await = true;
+    eprintln!("[reactotron] ✅ Reactotron enabled flag set to true");
+    let _ = io::stderr().flush();
+
+    // Start server with Reactotron enabled / Reactotron 활성화 상태로 서버 시작
+    let handle = SERVER_HANDLE.get_or_init(|| Arc::new(RwLock::new(ServerHandle::new())));
+    let server = handle.write().await;
+    let config = ServerConfig {
+        port,
+        host: host.clone(),
+        use_ssl: false,
+        ssl_cert_path: None,
+        ssl_key_path: None,
+        log_enabled: true,
+        log_methods: None,
+        log_file: None,
+        dev_mode: cfg!(debug_assertions),
+        enable_reactotron_server: true,
+    };
+
+    eprintln!("[reactotron] 🚀 Starting server with Reactotron enabled...");
+    let _ = io::stderr().flush();
+    server.start(config).await.map_err(|e| {
+        eprintln!("[reactotron] ❌ Failed to start server: {}", e);
+        let _ = io::stderr().flush();
+        e.to_string()
+    })?;
+    eprintln!(
+        "[reactotron] ✅ Server started successfully with Reactotron enabled on ws://{}:{}",
+        host, port
+    );
+    let _ = io::stderr().flush();
+    Ok(())
+}
+
+/// Stop Reactotron server / Reactotron 서버 중지
+/// This will restart the main server with Reactotron disabled / 메인 서버를 Reactotron 비활성화 상태로 재시작합니다
+#[tauri::command]
+async fn stop_reactotron_server(port: u16, host: String) -> Result<(), String> {
+    eprintln!(
+        "[reactotron] 🔄 Stopping Reactotron server (port: {}, host: {})",
+        port, host
+    );
+    let _ = io::stderr().flush();
+
+    // Stop existing server if running / 실행 중인 서버가 있으면 중지
+    if let Some(handle) = SERVER_HANDLE.get() {
+        eprintln!("[reactotron] 🛑 Stopping existing server...");
+        let _ = io::stderr().flush();
+        let server = handle.write().await;
+        server.stop().await.map_err(|e| {
+            eprintln!("[reactotron] ❌ Failed to stop server: {}", e);
+            let _ = io::stderr().flush();
+            e.to_string()
+        })?;
+        eprintln!("[reactotron] ✅ Server stopped");
+        let _ = io::stderr().flush();
+    }
+
+    // Set Reactotron disabled / Reactotron 비활성화 설정
+    let reactotron_enabled = REACTOTRON_ENABLED.get_or_init(|| Arc::new(RwLock::new(false)));
+    *reactotron_enabled.write().await = false;
+    eprintln!("[reactotron] ✅ Reactotron enabled flag set to false");
+    let _ = io::stderr().flush();
+
+    // Start server with Reactotron disabled / Reactotron 비활성화 상태로 서버 시작
+    let handle = SERVER_HANDLE.get_or_init(|| Arc::new(RwLock::new(ServerHandle::new())));
+    let server = handle.write().await;
+    let config = ServerConfig {
+        port,
+        host: host.clone(),
+        use_ssl: false,
+        ssl_cert_path: None,
+        ssl_key_path: None,
+        log_enabled: true,
+        log_methods: None,
+        log_file: None,
+        dev_mode: cfg!(debug_assertions),
+        enable_reactotron_server: false,
+    };
+
+    eprintln!("[reactotron] 🚀 Starting server with Reactotron disabled...");
+    let _ = io::stderr().flush();
+    server.start(config).await.map_err(|e| {
+        eprintln!("[reactotron] ❌ Failed to start server: {}", e);
+        let _ = io::stderr().flush();
+        e.to_string()
+    })?;
+    eprintln!(
+        "[reactotron] ✅ Server started successfully with Reactotron disabled on ws://{}:{}",
+        host, port
+    );
+    let _ = io::stderr().flush();
+    Ok(())
+}
+
+/// Check if Reactotron server is running / Reactotron 서버가 실행 중인지 확인
+#[tauri::command]
+async fn is_reactotron_server_running() -> bool {
+    if let Some(reactotron_enabled) = REACTOTRON_ENABLED.get() {
+        *reactotron_enabled.read().await
+    } else {
+        false
+    }
+}
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -60,13 +197,20 @@ pub fn run() {
     let server_handle = Arc::new(RwLock::new(ServerHandle::new()));
     SERVER_HANDLE.set(server_handle.clone()).ok();
 
+    // Initialize Reactotron enabled state / Reactotron 활성화 상태 초기화
+    let reactotron_enabled = Arc::new(RwLock::new(false));
+    REACTOTRON_ENABLED.set(reactotron_enabled).ok();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             greet,
             start_server,
             stop_server,
-            is_server_running
+            is_server_running,
+            start_reactotron_server,
+            stop_reactotron_server,
+            is_reactotron_server_running
         ])
         .setup(move |_app| {
             // Start server after Tauri runtime is ready / Tauri 런타임이 준비된 후 서버 시작
@@ -82,6 +226,7 @@ pub fn run() {
                     log_methods: None,
                     log_file: None,
                     dev_mode: cfg!(debug_assertions), // Enable dev mode only in debug builds / 디버그 빌드에서만 개발 모드 활성화
+                    enable_reactotron_server: false, // Start without Reactotron by default / 기본적으로 Reactotron 없이 시작
                 };
 
                 let server = server_handle_clone.write().await;
