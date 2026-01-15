@@ -13,6 +13,7 @@ pub enum LogType {
     DevTools,
     Server,
     RnInspector,
+    Reactotron,
 }
 
 impl LogType {
@@ -22,6 +23,7 @@ impl LogType {
             LogType::DevTools => "devtools",
             LogType::Server => "server",
             LogType::RnInspector => "rn-inspector",
+            LogType::Reactotron => "reactotron",
         }
     }
 }
@@ -193,8 +195,11 @@ impl Logger {
             let data_str = serde_json::to_string_pretty(data).unwrap_or_else(|_| "{}".to_string());
             println!("{} {}", prefix, message);
             println!("{}", data_str);
+            let _ = io::stdout().flush();
             format!("{} {} {} {}\n", timestamp, prefix, message, data_str)
         } else {
+            println!("{} {}", prefix, message);
+            let _ = io::stdout().flush();
             format!("{} {} {}\n", timestamp, prefix, message)
         };
 

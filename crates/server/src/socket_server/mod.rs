@@ -7,6 +7,7 @@ mod react_native_handler;
 
 use crate::logging::{LogType, Logger};
 use crate::react_native::ReactNativeInspectorConnectionManager;
+use crate::reactotron_server::ReactotronServer;
 use axum::extract::ws::WebSocket;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -59,18 +60,37 @@ pub struct SocketServer {
     clients: Arc<RwLock<HashMap<String, Arc<Client>>>>,
     devtools: Arc<RwLock<HashMap<String, Arc<DevTools>>>>,
     pub react_native_inspector_manager: Arc<ReactNativeInspectorConnectionManager>,
+    pub reactotron_server: Option<Arc<ReactotronServer>>,
     logger: Arc<Logger>,
 }
 
 impl SocketServer {
     /// Create new socket server / 새로운 소켓 서버 생성
-    pub fn new(logger: Arc<Logger>) -> Self {
+    pub fn new(logger: Arc<Logger>, enable_reactotron: bool) -> Self {
+        if enable_reactotron {
+            eprintln!("[reactotron] 🚀 Initializing Reactotron server...");
+            logger.log(
+                LogType::Server,
+                "reactotron",
+                "Initializing Reactotron server",
+                None,
+                None,
+            );
+        } else {
+            eprintln!("[reactotron] ⚠️ Reactotron server is disabled");
+        }
+
         Self {
             clients: Arc::new(RwLock::new(HashMap::new())),
             devtools: Arc::new(RwLock::new(HashMap::new())),
             react_native_inspector_manager: Arc::new(ReactNativeInspectorConnectionManager::new(
                 logger.clone(),
             )),
+            reactotron_server: if enable_reactotron {
+                Some(Arc::new(ReactotronServer::new(logger.clone())))
+            } else {
+                None
+            },
             logger,
         }
     }
@@ -93,6 +113,58 @@ impl SocketServer {
             })),
             None,
         );
+
+        // Handle Reactotron connections on root path / 루트 경로에서 Reactotron 연결 처리
+        // Reactotron clients connect to ws://host:port (no path) / Reactotron 클라이언트는 ws://host:port로 연결 (경로 없음)
+        if (path.is_empty() || path == "/") && self.reactotron_server.is_some() {
+            eprintln!("[reactotron] 🔌 WebSocket connection attempt on root path (path: '{}', reactotron_server enabled: true)", path);
+            self.logger.log(
+                LogType::Server,
+                "reactotron",
+                &format!("Reactotron WebSocket connection attempt on root path (path: '{}')", path),
+                Some(&serde_json::json!({
+                    "path": path,
+                    "queryParams": query_params,
+                })),
+                None,
+            );
+            if let Some(reactotron_server) = &self.reactotron_server {
+                let connection_id = reactotron_server.next_connection_id().await;
+                let address = query_params
+                    .get("address")
+                    .cloned()
+                    .unwrap_or_else(|| "unknown".to_string());
+                eprintln!("[reactotron] 🚀 Routing to Reactotron handler (connection_id: {}, address: {})", connection_id, address);
+                self.logger.log(
+                    LogType::Server,
+                    "reactotron",
+                    &format!("Routing to Reactotron handler (connection_id: {}, address: {})", connection_id, address),
+                    None,
+                    None,
+                );
+                crate::reactotron_server::handle_reactotron_websocket(
+                    ws,
+                    address,
+                    connection_id,
+                    reactotron_server.connections.clone(),
+                    reactotron_server.subscriptions.clone(),
+                    self.logger.clone(),
+                )
+                .await;
+                return;
+            } else {
+                eprintln!("[reactotron] ⚠️ Reactotron server is None but path matches root");
+                self.logger.log(
+                    LogType::Server,
+                    "reactotron",
+                    "Reactotron server is None but path matches root",
+                    None,
+                    None,
+                );
+            }
+        } else if (path.is_empty() || path == "/") && self.reactotron_server.is_none() {
+            eprintln!("[reactotron] ⚠️ WebSocket connection on root path but Reactotron server is disabled (path: '{}')", path);
+        }
 
         // Handle React Native Inspector / React Native Inspector 처리
         // Note: axum's Path extractor for wildcard routes returns the path without the prefix

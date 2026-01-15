@@ -21,7 +21,8 @@ pub fn create_router(dev_mode: bool) -> Router<Arc<SocketServer>> {
         .route("/json/client/:id", get(get_client))
         .route("/inspector/device", get(handle_inspector_device_http))
         .route("/open-debugger", post(handle_open_debugger))
-        .route("/remote/debug/*path", get(handle_websocket_upgrade));
+        .route("/remote/debug/*path", get(handle_websocket_upgrade))
+        .route("/", get(handle_root_websocket_upgrade));
 
     // Only add /client.js route in development mode / 개발 모드에서만 /client.js 라우트 추가
     if dev_mode {
@@ -215,6 +216,23 @@ async fn handle_websocket_upgrade(
         async move {
             server_clone
                 .handle_websocket_upgrade(socket, path, params)
+                .await;
+        }
+    })
+}
+
+/// Handle root path WebSocket upgrade for Reactotron / Reactotron을 위한 루트 경로 WebSocket 업그레이드 처리
+async fn handle_root_websocket_upgrade(
+    ws: WebSocketUpgrade,
+    Query(params): Query<HashMap<String, String>>,
+    State(server): State<Arc<SocketServer>>,
+) -> axum::response::Response {
+    ws.on_upgrade(move |socket| {
+        let server_clone = server.clone();
+        async move {
+            // Pass empty path for root / 루트 경로를 위해 빈 경로 전달
+            server_clone
+                .handle_websocket_upgrade(socket, String::new(), params)
                 .await;
         }
     })

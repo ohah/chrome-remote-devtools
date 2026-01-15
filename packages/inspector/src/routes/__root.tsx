@@ -1,7 +1,7 @@
 // Root route
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { RefreshCw, Minus, Maximize2, X, Globe, Smartphone, Eye, EyeOff } from 'lucide-react';
+import { RefreshCw, Minus, Maximize2, X, Globe, Smartphone, Eye, EyeOff, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -9,18 +9,44 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 function ClientTypeFilter() {
   const [showWeb, setShowWeb] = useState(true);
   const [showReactNative, setShowReactNative] = useState(true);
+  const [reactotronEnabled, setReactotronEnabled] = useState(false);
+  const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
   // Load filter state from localStorage / localStorage에서 필터 상태 로드
   useEffect(() => {
     const savedShowWeb = localStorage.getItem('client-filter-web');
     const savedShowRN = localStorage.getItem('client-filter-react-native');
+    const savedReactotron = localStorage.getItem('reactotron-enabled');
     if (savedShowWeb !== null) {
       setShowWeb(savedShowWeb === 'true');
     }
     if (savedShowRN !== null) {
       setShowReactNative(savedShowRN === 'true');
     }
+    if (savedReactotron !== null) {
+      setReactotronEnabled(savedReactotron === 'true');
+    }
+
+    // Check Reactotron server status on mount / 마운트 시 Reactotron 서버 상태 확인
+    if (isTauri && savedReactotron === 'true') {
+      checkReactotronStatus();
+    }
   }, []);
+
+  // Check Reactotron server status / Reactotron 서버 상태 확인
+  const checkReactotronStatus = async () => {
+    if (!isTauri) return;
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      const isRunning = await invoke<boolean>('is_reactotron_server_running');
+      setReactotronEnabled(isRunning);
+      if (isRunning !== (localStorage.getItem('reactotron-enabled') === 'true')) {
+        localStorage.setItem('reactotron-enabled', String(isRunning));
+      }
+    } catch (error) {
+      console.error('Failed to check Reactotron server status:', error);
+    }
+  };
 
   // Save filter state to localStorage / 필터 상태를 localStorage에 저장
   const handleWebToggle = () => {
@@ -45,8 +71,61 @@ function ClientTypeFilter() {
     );
   };
 
+  // Handle Reactotron toggle / Reactotron 토글 처리
+  const handleReactotronToggle = async () => {
+    if (!isTauri) return;
+
+    const newValue = !reactotronEnabled;
+    setReactotronEnabled(newValue);
+    localStorage.setItem('reactotron-enabled', String(newValue));
+
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      const port = 9090; // Reactotron default port / Reactotron 기본 포트
+      const host = '0.0.0.0';
+
+      if (newValue) {
+        console.log('[Reactotron] Starting Reactotron server...');
+        await invoke('start_reactotron_server', { port, host });
+        console.log('[Reactotron] ✅ Reactotron server started successfully');
+      } else {
+        console.log('[Reactotron] Stopping Reactotron server...');
+        await invoke('stop_reactotron_server', { port, host });
+        console.log('[Reactotron] ✅ Reactotron server stopped successfully');
+      }
+    } catch (error) {
+      console.error('[Reactotron] ❌ Failed to toggle Reactotron server:', error);
+      // Revert state on error / 에러 시 상태 되돌리기
+      setReactotronEnabled(!newValue);
+      localStorage.setItem('reactotron-enabled', String(!newValue));
+    }
+  };
+
   return (
     <div className="flex items-center gap-0.5 px-0.5 py-0.5 bg-gray-700/30 rounded titlebar-nav-button ml-2">
+      {isTauri && (
+        <Tooltip delayDuration={300}>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleReactotronToggle}
+              className={`cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all ${
+                reactotronEnabled
+                  ? 'bg-gray-600 text-gray-100 shadow-sm hover:bg-gray-500'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 opacity-50'
+              }`}
+              aria-label="Reactotron Server"
+              aria-pressed={reactotronEnabled}
+            >
+              <Zap className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="z-[1001]">
+            <p>Reactotron {reactotronEnabled ? '(enabled)' : '(disabled)'}</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
       <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>
           <Button

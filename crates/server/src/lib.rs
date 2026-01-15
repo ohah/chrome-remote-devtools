@@ -6,6 +6,7 @@ mod config;
 mod http_routes;
 mod logging;
 mod react_native;
+mod reactotron_server;
 mod server;
 mod socket_server;
 
@@ -27,6 +28,7 @@ pub enum ServerError {
     Other(String),
 }
 
+use std::io::{self, Write};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
@@ -47,16 +49,28 @@ impl ServerHandle {
     }
 
     /// Start server in background / 백그라운드에서 서버 시작
+    /// If server is already running, it will be stopped and restarted / 서버가 이미 실행 중이면 중지하고 재시작합니다
     pub async fn start(&self, config: ServerConfig) -> Result<(), ServerError> {
         let mut server = self.server.write().await;
-        if server.is_some() {
-            return Err(ServerError::AlreadyRunning);
+
+        // Stop existing server if running / 실행 중인 서버가 있으면 중지
+        if let Some(handle) = server.take() {
+            eprintln!("[server] 🛑 Stopping existing server before restart...");
+            let _ = io::stderr().flush();
+            handle.abort();
+            // Wait a bit for the server to fully stop / 서버가 완전히 중지될 때까지 잠시 대기
+            tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
         }
 
         let config_clone = config.clone();
+        eprintln!("[server] 🚀 Starting server on {}:{} (Reactotron: {})",
+                  config.host, config.port, config.enable_reactotron_server);
+        let _ = io::stderr().flush();
         let handle = tokio::spawn(async move { run_server(config_clone).await });
 
         *server = Some(handle);
+        // Wait a bit for the server to start / 서버가 시작될 때까지 잠시 대기
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         Ok(())
     }
 
@@ -64,7 +78,13 @@ impl ServerHandle {
     pub async fn stop(&self) -> Result<(), ServerError> {
         let mut server = self.server.write().await;
         if let Some(handle) = server.take() {
+            eprintln!("[server] 🛑 Stopping server...");
+            let _ = io::stderr().flush();
             handle.abort();
+            // Wait a bit for the server to fully stop / 서버가 완전히 중지될 때까지 잠시 대기
+            tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+            eprintln!("[server] ✅ Server stopped");
+            let _ = io::stderr().flush();
         }
         Ok(())
     }
