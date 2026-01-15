@@ -5,7 +5,7 @@ mod handler;
 mod server;
 mod types;
 
-pub use bridge::{register_reactotron_client, unregister_reactotron_client};
+pub use bridge::{register_reactotron_client, unregister_reactotron_client, update_reactotron_client};
 pub use cdp_bridge::convert_reactotron_to_cdp;
 pub use handler::{handle_reactotron_websocket, send_command, ClientConnection, ClientConnections, Subscriptions};
 pub use server::ReactotronServer;

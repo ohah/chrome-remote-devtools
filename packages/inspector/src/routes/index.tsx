@@ -64,6 +64,9 @@ function ConnectionPage() {
       if (client.type === 'react-native') {
         return filterState.reactNative;
       }
+      if (client.type === 'reactotron') {
+        return filterState.reactotron;
+      }
       return false;
     });
   }, [clients, filterState]);
@@ -77,11 +80,11 @@ function ConnectionPage() {
   const tabs: Tab[] = filteredClients.map((client) => ({
     id: client.id,
     label:
-      client.type === 'react-native'
-        ? client.deviceName || client.appName || client.id.slice(0, 8)
+      client.type === 'react-native' || client.type === 'reactotron'
+        ? client.deviceName || client.appName || client.title || client.id.slice(0, 8)
         : client.url || client.id.slice(0, 8),
     icon:
-      client.type === 'react-native' ? (
+      client.type === 'react-native' || client.type === 'reactotron' ? (
         <Smartphone className="w-4 h-4" />
       ) : (
         <Globe className="w-4 h-4" />

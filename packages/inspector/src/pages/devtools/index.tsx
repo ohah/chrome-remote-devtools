@@ -91,6 +91,9 @@ function DevToolsPage() {
     if (client.type === 'react-native') {
       return filterState.reactNative;
     }
+    if (client.type === 'reactotron') {
+      return filterState.reactotron;
+    }
     return false;
   });
 
@@ -113,10 +116,10 @@ function DevToolsPage() {
   const tabs: Tab[] = filteredClients.map((client) => ({
     id: client.id,
     label:
-      client.type === 'react-native'
-        ? client.deviceName || client.appName || client.id.slice(0, 8)
+      client.type === 'react-native' || client.type === 'reactotron'
+        ? client.deviceName || client.appName || client.title || client.id.slice(0, 8)
         : client.url || client.id.slice(0, 8),
-    icon: client.type === 'react-native' ? <Smartphone className="w-4 h-4" /> : <Globe className="w-4 h-4" />,
+    icon: client.type === 'react-native' || client.type === 'reactotron' ? <Smartphone className="w-4 h-4" /> : <Globe className="w-4 h-4" />,
   }));
 
   // Handle tab change / 탭 변경 처리
@@ -153,9 +156,9 @@ function DevToolsPage() {
           });
           const isActive = client.id === clientId;
 
-          const isRN = client.type === 'react-native';
+          const isRN = client.type === 'react-native' || client.type === 'reactotron';
           const title = isRN
-            ? `DevTools - ${client.deviceName || client.id}`
+            ? `DevTools - ${client.deviceName || client.title || client.id}`
             : `DevTools - ${client.url || client.id}`;
 
           return (
