@@ -69,60 +69,84 @@ react {
         }
     } else {
         // macOS/Linux: Try bun's hermes-compiler package first / macOS/Linux: bun의 hermes-compiler 패키지 먼저 시도
+        println "[Hermes Debug] Starting hermesc path search / hermesc 경로 검색 시작"
+        println "[Hermes Debug] OS: ${osName}"
+        println "[Hermes Debug] rootProject.projectDir: ${rootProject.projectDir.absolutePath}"
+
         def monorepoRoot = rootProject.projectDir.parentFile.parentFile.parentFile
         def exampleRoot = rootProject.projectDir.parentFile.parentFile
         def osBin = osName.contains("mac") ? "osx-bin" : "linux-bin"
         def reactNativeDir = file("../../node_modules/react-native")
 
+        println "[Hermes Debug] monorepoRoot: ${monorepoRoot.absolutePath}"
+        println "[Hermes Debug] exampleRoot: ${exampleRoot.absolutePath}"
+        println "[Hermes Debug] reactNativeDir: ${reactNativeDir.absolutePath}"
+        println "[Hermes Debug] osBin: ${osBin}"
+
         // Try monorepo root paths / 모노레포 루트 경로 시도
         def bunHermesPath = new File(monorepoRoot, "node_modules/.bun/hermes-compiler@0.14.0/node_modules/hermes-compiler/hermesc/${osBin}/hermesc")
+        println "[Hermes Debug] Trying: ${bunHermesPath.absolutePath} (exists: ${bunHermesPath.exists()})"
         if (bunHermesPath.exists()) {
             hermesCommand = bunHermesPath.absolutePath
+            println "[Hermes Debug] ✅ Found hermesc at: ${hermesCommand}"
         } else {
             // Try monorepo root node_modules / 모노레포 루트 node_modules 시도
             def monorepoHermesPath = new File(monorepoRoot, "node_modules/hermes-compiler/hermesc/${osBin}/hermesc")
+            println "[Hermes Debug] Trying: ${monorepoHermesPath.absolutePath} (exists: ${monorepoHermesPath.exists()})"
             if (monorepoHermesPath.exists()) {
                 hermesCommand = monorepoHermesPath.absolutePath
+                println "[Hermes Debug] ✅ Found hermesc at: ${hermesCommand}"
             } else {
                 // Fallback: try with 2 levels up (if examples/react-native is the root)
                 // 대안: 2단계 위로 시도 (examples/react-native가 루트인 경우)
                 def fallbackRoot = rootProject.projectDir.parentFile.parentFile
                 def fallbackPath = new File(fallbackRoot, "node_modules/.bun/hermes-compiler@0.14.0/node_modules/hermes-compiler/hermesc/${osBin}/hermesc")
+                println "[Hermes Debug] Trying: ${fallbackPath.absolutePath} (exists: ${fallbackPath.exists()})"
                 if (fallbackPath.exists()) {
                     hermesCommand = fallbackPath.absolutePath
+                    println "[Hermes Debug] ✅ Found hermesc at: ${hermesCommand}"
                 } else {
                     // Try example root node_modules / 예제 루트 node_modules 시도
                     def exampleHermesPath = new File(exampleRoot, "node_modules/hermes-compiler/hermesc/${osBin}/hermesc")
+                    println "[Hermes Debug] Trying: ${exampleHermesPath.absolutePath} (exists: ${exampleHermesPath.exists()})"
                     if (exampleHermesPath.exists()) {
                         hermesCommand = exampleHermesPath.absolutePath
+                        println "[Hermes Debug] ✅ Found hermesc at: ${hermesCommand}"
                     } else {
                         // Try React Native's node_modules / React Native의 node_modules 시도
                         def reactNativeHermesPath = new File(reactNativeDir, "node_modules/hermes-compiler/hermesc/${osBin}/hermesc")
+                        println "[Hermes Debug] Trying: ${reactNativeHermesPath.absolutePath} (exists: ${reactNativeHermesPath.exists()})"
                         if (reactNativeHermesPath.exists()) {
                             hermesCommand = reactNativeHermesPath.absolutePath
+                            println "[Hermes Debug] ✅ Found hermesc at: ${hermesCommand}"
                         } else {
                             // Try React Native's nested node_modules / React Native의 중첩된 node_modules 시도
                             def reactNativeNestedHermesPath = new File(reactNativeDir, "node_modules/react-native/node_modules/hermes-compiler/hermesc/${osBin}/hermesc")
+                            println "[Hermes Debug] Trying: ${reactNativeNestedHermesPath.absolutePath} (exists: ${reactNativeNestedHermesPath.exists()})"
                             if (reactNativeNestedHermesPath.exists()) {
                                 hermesCommand = reactNativeNestedHermesPath.absolutePath
+                                println "[Hermes Debug] ✅ Found hermesc at: ${hermesCommand}"
                             } else {
                                 // Last fallback: try React Native's default path (may not exist in 0.83.1)
                                 // 마지막 대안: React Native 기본 경로 시도 (0.83.1에서는 존재하지 않을 수 있음)
                                 def defaultHermesPath = new File(reactNativeDir, "sdks/hermesc/${osBin}/hermesc")
+                                println "[Hermes Debug] Trying: ${defaultHermesPath.absolutePath} (exists: ${defaultHermesPath.exists()})"
                                 if (defaultHermesPath.exists()) {
                                     hermesCommand = defaultHermesPath.absolutePath
+                                    println "[Hermes Debug] ✅ Found hermesc at: ${hermesCommand}"
                                 } else {
                                     // Debug: print attempted paths / 디버그: 시도한 경로 출력
-                                    println "WARNING: Could not find hermesc binary. Attempted paths:"
-                                    println "  - ${bunHermesPath.absolutePath}"
-                                    println "  - ${monorepoHermesPath.absolutePath}"
-                                    println "  - ${fallbackPath.absolutePath}"
-                                    println "  - ${exampleHermesPath.absolutePath}"
-                                    println "  - ${reactNativeHermesPath.absolutePath}"
-                                    println "  - ${reactNativeNestedHermesPath.absolutePath}"
-                                    println "  - ${defaultHermesPath.absolutePath}"
-                                    println "Trying system hermesc..."
+                                    println "[Hermes Debug] ❌ WARNING: Could not find hermesc binary. Attempted paths:"
+                                    println "[Hermes Debug]   - ${bunHermesPath.absolutePath}"
+                                    println "[Hermes Debug]   - ${monorepoHermesPath.absolutePath}"
+                                    println "[Hermes Debug]   - ${fallbackPath.absolutePath}"
+                                    println "[Hermes Debug]   - ${exampleHermesPath.absolutePath}"
+                                    println "[Hermes Debug]   - ${reactNativeHermesPath.absolutePath}"
+                                    println "[Hermes Debug]   - ${reactNativeNestedHermesPath.absolutePath}"
+                                    println "[Hermes Debug]   - ${defaultHermesPath.absolutePath}"
+                                    println "[Hermes Debug] Trying system hermesc..."
                                     hermesCommand = "hermesc"
+                                    println "[Hermes Debug] Using system command: ${hermesCommand}"
                                 }
                             }
                         }

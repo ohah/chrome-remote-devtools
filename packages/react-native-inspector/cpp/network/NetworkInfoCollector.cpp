@@ -121,7 +121,7 @@ ResponseInfo collectXHRResponseInfo(facebook::jsi::Runtime& runtime,
       if (responseType.empty() || responseType == "text") {
         if (responseValue.isString()) {
           info.responseText = responseValue.asString(runtime).utf8(runtime);
-          LOGI("NetworkInfoCollector: Collected response (text): length=%zu / 응답 수집됨 (text): 길이=%zu", info.responseText.length());
+          LOGI("NetworkInfoCollector: Collected response (text): length=%zu / 응답 수집됨 (text): 길이=%zu", info.responseText.length(), info.responseText.length());
         }
       }
       // Case 2: responseType is 'json' - response is a parsed JSON object / 케이스 2: responseType이 'json' - response는 파싱된 JSON 객체
@@ -133,7 +133,7 @@ ResponseInfo collectXHRResponseInfo(facebook::jsi::Runtime& runtime,
             .call(runtime, responseValue);
           if (jsonValue.isString()) {
             info.responseText = jsonValue.asString(runtime).utf8(runtime);
-            LOGI("NetworkInfoCollector: Collected response (json): length=%zu / 응답 수집됨 (json): 길이=%zu", info.responseText.length());
+            LOGI("NetworkInfoCollector: Collected response (json): length=%zu / 응답 수집됨 (json): 길이=%zu", info.responseText.length(), info.responseText.length());
           }
         }
       }
@@ -146,7 +146,7 @@ ResponseInfo collectXHRResponseInfo(facebook::jsi::Runtime& runtime,
             facebook::jsi::Value internalResponseValue = xhrObj.getProperty(runtime, "_response");
             if (internalResponseValue.isString()) {
               info.responseText = internalResponseValue.asString(runtime).utf8(runtime);
-              LOGI("NetworkInfoCollector: Collected response (blob): length=%zu / 응답 수집됨 (blob): 길이=%zu", info.responseText.length());
+              LOGI("NetworkInfoCollector: Collected response (blob): length=%zu / 응답 수집됨 (blob): 길이=%zu", info.responseText.length(), info.responseText.length());
             } else {
               LOGW("NetworkInfoCollector: _response for blob is not a string / blob용 _response가 문자열이 아님");
             }
@@ -163,7 +163,7 @@ ResponseInfo collectXHRResponseInfo(facebook::jsi::Runtime& runtime,
           facebook::jsi::Value internalResponseValue = xhrObj.getProperty(runtime, "_response");
           if (internalResponseValue.isString()) {
             info.responseText = internalResponseValue.asString(runtime).utf8(runtime);
-            LOGI("NetworkInfoCollector: Collected response (arraybuffer): length=%zu / 응답 수집됨 (arraybuffer): 길이=%zu", info.responseText.length());
+            LOGI("NetworkInfoCollector: Collected response (arraybuffer): length=%zu / 응답 수집됨 (arraybuffer): 길이=%zu", info.responseText.length(), info.responseText.length());
           } else {
             LOGW("NetworkInfoCollector: _response for arraybuffer is not a string / arraybuffer용 _response가 문자열이 아님");
           }
@@ -175,7 +175,7 @@ ResponseInfo collectXHRResponseInfo(facebook::jsi::Runtime& runtime,
       else {
         if (responseValue.isString()) {
           info.responseText = responseValue.asString(runtime).utf8(runtime);
-          LOGI("NetworkInfoCollector: Collected response (unknown type, as string): length=%zu / 응답 수집됨 (알 수 없는 타입, 문자열로): 길이=%zu", info.responseText.length());
+          LOGI("NetworkInfoCollector: Collected response (unknown type, as string): length=%zu / 응답 수집됨 (알 수 없는 타입, 문자열로): 길이=%zu", info.responseText.length(), info.responseText.length());
         } else if (responseValue.isObject()) {
           // Try to stringify if it's an object / 객체인 경우 문자열화 시도
           try {
@@ -184,15 +184,15 @@ ResponseInfo collectXHRResponseInfo(facebook::jsi::Runtime& runtime,
               .call(runtime, responseValue);
             if (jsonValue.isString()) {
               info.responseText = jsonValue.asString(runtime).utf8(runtime);
-              LOGI("NetworkInfoCollector: Collected response (unknown type, stringified): length=%zu / 응답 수집됨 (알 수 없는 타입, 문자열화): 길이=%zu", info.responseText.length());
+              LOGI("NetworkInfoCollector: Collected response (unknown type, stringified): length=%zu / 응답 수집됨 (알 수 없는 타입, 문자열화): 길이=%zu", info.responseText.length(), info.responseText.length());
             }
           } catch (...) {
-            LOGW("NetworkInfoCollector: Failed to stringify response for unknown responseType: %s / 알 수 없는 responseType에 대해 응답 문자열화 실패: %s", responseType.c_str());
+            LOGW("NetworkInfoCollector: Failed to stringify response for unknown responseType: %s / 알 수 없는 responseType에 대해 응답 문자열화 실패: %s", responseType.c_str(), responseType.c_str());
           }
         }
       }
     } catch (const std::exception& e) {
-      LOGE("NetworkInfoCollector: Exception while getting 'response' property: %s / 'response' 속성 가져오기 중 예외: %s", e.what());
+      LOGE("NetworkInfoCollector: Exception while getting 'response' property: %s / 'response' 속성 가져오기 중 예외: %s", e.what(), e.what());
     } catch (...) {
       LOGE("NetworkInfoCollector: Unknown exception while getting 'response' property / 'response' 속성 가져오기 중 알 수 없는 예외");
     }

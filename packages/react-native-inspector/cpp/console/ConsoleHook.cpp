@@ -146,7 +146,6 @@ bool hookConsoleMethods(facebook::jsi::Runtime& runtime) {
 
               // Store objects in the Map / Map에 객체 저장
               if (mapExists && cdpObjectsMapOpt.has_value()) {
-                facebook::jsi::Object& cdpObjectsMap = *cdpObjectsMapOpt;
                 for (size_t i = 0; i < count; i++) {
                   try {
                     if (args[i].isObject() && !args[i].isNull()) {
