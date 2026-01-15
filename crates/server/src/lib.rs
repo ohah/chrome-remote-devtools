@@ -60,11 +60,14 @@ impl ServerHandle {
     ) -> Arc<RwLock<SocketServer>> {
         let mut socket_server_opt = self.socket_server.write().await;
         if let Some(server) = socket_server_opt.as_ref() {
-            // Update Reactotron server state if needed / 필요시 Reactotron 서버 상태 업데이트
+            // Always update Reactotron server state based on enable_reactotron / enable_reactotron에 따라 항상 Reactotron 서버 상태 업데이트
+            let mut server_guard = server.write().await;
             if enable_reactotron {
-                let mut server_guard = server.write().await;
                 server_guard.enable_reactotron_server();
+            } else {
+                server_guard.disable_reactotron_server();
             }
+            drop(server_guard);
             // Return existing instance / 기존 인스턴스 반환
             server.clone()
         } else {

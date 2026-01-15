@@ -470,7 +470,19 @@ impl SocketServer {
             if devtool.client_id.as_ref() == Some(&client_id.to_string()) {
                 // Convert CDP message to JSON string / CDP 메시지를 JSON 문자열로 변환
                 if let Ok(cdp_json) = serde_json::to_string(cdp_message) {
-                    if let Err(e) = devtool.sender.send(cdp_json) {
+                    // Log the actual message being sent / 실제로 전송되는 메시지 로깅
+                    logger.log(
+                        LogType::Reactotron,
+                        client_id,
+                        &format!(
+                            "📤 Sending CDP message to DevTools {}: {}",
+                            devtool.id, cdp_json
+                        ),
+                        Some(cdp_message),
+                        cdp_message.get("method").and_then(|m| m.as_str()),
+                    );
+
+                    if let Err(e) = devtool.sender.send(cdp_json.clone()) {
                         logger.log(
                             LogType::Reactotron,
                             client_id,
@@ -484,6 +496,16 @@ impl SocketServer {
                     } else {
                         sent_count += 1;
                     }
+                } else {
+                    logger.log_error(
+                        LogType::Reactotron,
+                        client_id,
+                        "Failed to serialize CDP message to JSON",
+                        Some(
+                            &serde_json::to_string(cdp_message)
+                                .unwrap_or_else(|_| "serialization failed".to_string()),
+                        ),
+                    );
                 }
             }
         }

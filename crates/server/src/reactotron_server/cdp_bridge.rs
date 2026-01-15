@@ -8,19 +8,6 @@ use std::sync::Arc;
 pub fn convert_reactotron_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<serde_json::Value> {
     let cmd_type = cmd.r#type.as_str();
 
-    // Log original Reactotron command / 원본 Reactotron 명령 로깅
-    logger.log(
-        LogType::Reactotron,
-        "cdp-bridge",
-        &format!("🔄 Converting Reactotron command: type={}", cmd_type),
-        Some(&serde_json::json!({
-            "type": cmd.r#type,
-            "payload": cmd.payload,
-            "clientId": cmd.client_id,
-        })),
-        Some("convert_reactotron_to_cdp"),
-    );
-
     // Check if it's a console message / 콘솔 메시지인지 확인
     if cmd_type.starts_with("console.") {
         let console_type = match cmd_type {
@@ -78,14 +65,6 @@ pub fn convert_reactotron_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<s
 
     // Check if it's a network event / 네트워크 이벤트인지 확인
     if cmd_type.starts_with("network.") || cmd_type == "api.request" || cmd_type == "api.response" {
-        logger.log(
-            LogType::Reactotron,
-            "cdp-bridge",
-            &format!("🌐 Detected network event: {}", cmd_type),
-            Some(&cmd.payload),
-            Some("detect_network"),
-        );
-
         match cmd_type {
             "network.request" | "api.request" => {
                 return convert_network_request_to_cdp(cmd, logger);
@@ -103,14 +82,6 @@ pub fn convert_reactotron_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<s
     // Check if it's a network event with type "network" or "api" / 타입이 "network" 또는 "api"인 경우
     if cmd_type == "network" || cmd_type == "api" {
         if let Some(kind) = cmd.payload.get("kind").and_then(|v| v.as_str()) {
-            logger.log(
-                LogType::Reactotron,
-                "cdp-bridge",
-                &format!("🌐 Detected network/api event with kind: {}", kind),
-                Some(&cmd.payload),
-                Some("detect_network_kind"),
-            );
-
             match kind {
                 "request" => return convert_network_request_to_cdp(cmd, logger),
                 "response" => return convert_network_response_to_cdp(cmd, logger),
@@ -121,19 +92,6 @@ pub fn convert_reactotron_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<s
     }
 
     // Command type not supported / 지원되지 않는 명령 타입
-    logger.log(
-        LogType::Reactotron,
-        "cdp-bridge",
-        &format!(
-            "⚠️ Command type not supported for CDP conversion: {}",
-            cmd_type
-        ),
-        Some(&serde_json::json!({
-            "type": cmd.r#type,
-            "payload": cmd.payload,
-        })),
-        Some("unsupported_type"),
-    );
     None
 }
 
@@ -143,60 +101,123 @@ fn convert_console_to_cdp(
     console_type: &str,
     logger: Arc<Logger>,
 ) -> Option<serde_json::Value> {
-    // Extract message from payload / payload에서 메시지 추출
-    let message = cmd
-        .payload
-        .get("message")
-        .and_then(|v| v.as_str())
-        .map(String::from)
-        .or_else(|| {
-            cmd.payload
-                .get("value")
-                .and_then(|v| v.as_str())
-                .map(String::from)
-        })
-        .unwrap_or_else(|| "".to_string());
-
-    // Extract args if available / args가 있으면 추출
-    let args = if let Some(args_array) = cmd.payload.get("args").and_then(|v| v.as_array()) {
-        args_array
-            .iter()
-            .map(|arg| {
-                // Convert argument to CDP format / 인자를 CDP 형식으로 변환
-                let value = if let Some(str_val) = arg.as_str() {
-                    str_val.to_string()
-                } else {
-                    serde_json::to_string(arg).unwrap_or_else(|_| "undefined".to_string())
-                };
+    // Helper function to convert value to CDP RemoteObject / 값을 CDP RemoteObject로 변환하는 헬퍼 함수
+    let convert_to_remote_object = |arg: &serde_json::Value| -> serde_json::Value {
+        match arg {
+            serde_json::Value::String(s) => {
                 serde_json::json!({
                     "type": "string",
-                    "value": value,
+                    "value": s,
                 })
-            })
+            }
+            serde_json::Value::Number(n) => {
+                if let Some(i) = n.as_i64() {
+                    serde_json::json!({
+                        "type": "number",
+                        "value": i,
+                    })
+                } else if let Some(f) = n.as_f64() {
+                    serde_json::json!({
+                        "type": "number",
+                        "value": f,
+                    })
+                } else {
+                    serde_json::json!({
+                        "type": "string",
+                        "value": n.to_string(),
+                    })
+                }
+            }
+            serde_json::Value::Bool(b) => {
+                serde_json::json!({
+                    "type": "boolean",
+                    "value": b,
+                })
+            }
+            serde_json::Value::Null => {
+                serde_json::json!({
+                    "type": "object",
+                    "subtype": "null",
+                })
+            }
+            serde_json::Value::Array(arr) => {
+                let description = format!("Array({})", arr.len());
+                serde_json::json!({
+                    "type": "object",
+                    "subtype": "array",
+                    "description": description,
+                    "value": serde_json::to_string(arg).unwrap_or_else(|_| "[]".to_string()),
+                })
+            }
+            serde_json::Value::Object(_) => {
+                let description = serde_json::to_string(arg).unwrap_or_else(|_| "{}".to_string());
+                serde_json::json!({
+                    "type": "object",
+                    "description": description,
+                    "value": description,
+                })
+            }
+        }
+    };
+
+    // Extract args from payload / payload에서 args 추출
+    // Reactotron의 log 타입은 message가 배열일 수 있음 / Reactotron's log type can have message as array
+    let args = if let Some(args_array) = cmd.payload.get("args").and_then(|v| v.as_array()) {
+        // args가 있으면 사용 / Use args if available
+        args_array
+            .iter()
+            .map(convert_to_remote_object)
             .collect::<Vec<_>>()
-    } else if !message.is_empty() {
-        // If no args but has message, create args from message / args가 없지만 message가 있으면 message로 args 생성
+    } else if let Some(message_array) = cmd.payload.get("message").and_then(|v| v.as_array()) {
+        // message가 배열인 경우 / If message is an array
+        message_array
+            .iter()
+            .map(convert_to_remote_object)
+            .collect::<Vec<_>>()
+    } else if let Some(message_str) = cmd.payload.get("message").and_then(|v| v.as_str()) {
+        // message가 문자열인 경우 / If message is a string
         vec![serde_json::json!({
             "type": "string",
-            "value": message,
+            "value": message_str.to_string(),
         })]
+    } else if let Some(value) = cmd.payload.get("value") {
+        // value가 있는 경우 (모든 타입 지원) / If value exists (supports all types)
+        vec![convert_to_remote_object(value)]
     } else {
         vec![]
     };
 
-    // Get timestamp / 타임스탬프 가져오기
+    // Get timestamp in milliseconds (CDP Runtime.consoleAPICalled uses milliseconds) / 타임스탬프를 밀리초 단위로 가져오기 (CDP Runtime.consoleAPICalled는 밀리초 사용)
+    // Reactotron's date field is typically in milliseconds (Date.now() format) / Reactotron의 date 필드는 일반적으로 밀리초 단위 (Date.now() 형식)
     let timestamp = cmd
         .date
         .as_ref()
         .and_then(|d| {
             // Try to parse timestamp from date string / date 문자열에서 타임스탬프 파싱 시도
-            d.parse::<f64>().ok().map(|t| (t * 1000.0) as u64)
+            d.parse::<f64>().ok().map(|t| {
+                // Reactotron typically sends milliseconds (Date.now()), but check if it's reasonable / Reactotron은 일반적으로 밀리초를 보내지만, 합리적인 값인지 확인
+                // Current time in milliseconds (2025): ~1735689600000 / 현재 시간 밀리초 (2025년): ~1735689600000
+                // If timestamp is unreasonably large (> year 3000 in milliseconds), it might be in microseconds / 타임스탬프가 비정상적으로 크면 (3000년 이후 밀리초), 마이크로초일 수 있음
+                if t > 3_155_760_000_000_000.0 {
+                    // Likely microseconds, convert to milliseconds / 마이크로초일 가능성, 밀리초로 변환
+                    t / 1000.0
+                } else if t > 4_102_444_800_000.0 {
+                    // Already in milliseconds (but very large, might be future date) / 이미 밀리초 단위 (하지만 매우 큼, 미래 날짜일 수 있음)
+                    t
+                } else if t > 4_102_444_800.0 {
+                    // Between 2100 seconds and 2100 milliseconds - ambiguous, assume milliseconds / 2100초와 2100밀리초 사이 - 모호함, 밀리초로 가정
+                    t
+                } else {
+                    // Likely seconds, convert to milliseconds / 초일 가능성, 밀리초로 변환
+                    t * 1000.0
+                }
+            })
         })
         .unwrap_or_else(|| {
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
-                .as_millis() as u64
+                .as_millis() as f64
         });
 
     // Create CDP message / CDP 메시지 생성
@@ -235,7 +256,10 @@ fn convert_console_to_cdp(
 }
 
 /// Convert network request to CDP Network.requestWillBeSent event / 네트워크 요청을 CDP Network.requestWillBeSent 이벤트로 변환
-fn convert_network_request_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<serde_json::Value> {
+fn convert_network_request_to_cdp(
+    cmd: &Command,
+    _logger: Arc<Logger>,
+) -> Option<serde_json::Value> {
     let payload = &cmd.payload;
 
     // Extract request information / 요청 정보 추출
@@ -296,11 +320,20 @@ fn convert_network_request_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<
             )
         });
 
-    // Get timestamp / 타임스탬프 가져오기
-    let timestamp = cmd
+    // Get timestamp in milliseconds / 타임스탬프를 밀리초 단위로 가져오기
+    let timestamp_ms = cmd
         .date
         .as_ref()
-        .and_then(|d| d.parse::<f64>().ok().map(|t| (t * 1000.0) as u64))
+        .and_then(|d| {
+            d.parse::<f64>().ok().map(|t| {
+                // If timestamp is very large (> year 2100 in seconds), assume it's in milliseconds / 타임스탬프가 매우 크면 (2100년 이후 초 단위), 밀리초 단위로 가정
+                if t > 4_102_444_800.0 {
+                    t as u64 // Already in milliseconds / 이미 밀리초 단위
+                } else {
+                    (t * 1000.0) as u64 // Convert seconds to milliseconds / 초를 밀리초로 변환
+                }
+            })
+        })
         .unwrap_or_else(|| {
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -309,6 +342,8 @@ fn convert_network_request_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<
         });
 
     // Create CDP message / CDP 메시지 생성
+    // CDP Network events use seconds for timestamp and wallTime / CDP Network 이벤트는 timestamp와 wallTime에 초 단위 사용
+    let timestamp_seconds = timestamp_ms as f64 / 1000.0;
     let mut params = serde_json::json!({
         "requestId": request_id,
         "loaderId": request_id.clone(),
@@ -321,8 +356,8 @@ fn convert_network_request_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<
             "initialPriority": "Medium",
             "referrerPolicy": "strict-origin-when-cross-origin",
         },
-        "timestamp": timestamp as f64 / 1000.0,
-        "wallTime": timestamp as f64 / 1000.0,
+        "timestamp": timestamp_seconds,
+        "wallTime": timestamp_seconds,
         "initiator": {
             "type": "other"
         },
@@ -350,21 +385,13 @@ fn convert_network_request_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<
         "params": params
     });
 
-    logger.log(
-        LogType::Reactotron,
-        "cdp-bridge",
-        "Converted network.request to Network.requestWillBeSent",
-        Some(&cdp_message),
-        Some("Network.requestWillBeSent"),
-    );
-
     Some(cdp_message)
 }
 
 /// Convert network response to CDP Network.responseReceived event / 네트워크 응답을 CDP Network.responseReceived 이벤트로 변환
 fn convert_network_response_to_cdp(
     cmd: &Command,
-    logger: Arc<Logger>,
+    _logger: Arc<Logger>,
 ) -> Option<serde_json::Value> {
     let payload = &cmd.payload;
 
@@ -413,10 +440,19 @@ fn convert_network_response_to_cdp(
         .unwrap_or_else(|| serde_json::json!({}));
 
     // Generate request ID / 요청 ID 생성
+    // For api.response, ID might be in payload.request.id or payload.id / api.response의 경우 ID는 payload.request.id 또는 payload.id에 있을 수 있음
     let request_id = payload
-        .get("requestId")
+        .get("request")
+        .and_then(|r| r.get("id"))
         .and_then(|v| v.as_str())
         .map(String::from)
+        .or_else(|| payload.get("id").and_then(|v| v.as_str()).map(String::from))
+        .or_else(|| {
+            payload
+                .get("requestId")
+                .and_then(|v| v.as_str())
+                .map(String::from)
+        })
         .unwrap_or_else(|| {
             format!(
                 "reactotron-{}",
@@ -427,11 +463,20 @@ fn convert_network_response_to_cdp(
             )
         });
 
-    // Get timestamp / 타임스탬프 가져오기
-    let timestamp = cmd
+    // Get timestamp in milliseconds / 타임스탬프를 밀리초 단위로 가져오기
+    let timestamp_ms = cmd
         .date
         .as_ref()
-        .and_then(|d| d.parse::<f64>().ok().map(|t| (t * 1000.0) as u64))
+        .and_then(|d| {
+            d.parse::<f64>().ok().map(|t| {
+                // If timestamp is very large (> year 2100 in seconds), assume it's in milliseconds / 타임스탬프가 매우 크면 (2100년 이후 초 단위), 밀리초 단위로 가정
+                if t > 4_102_444_800.0 {
+                    t as u64 // Already in milliseconds / 이미 밀리초 단위
+                } else {
+                    (t * 1000.0) as u64 // Convert seconds to milliseconds / 초를 밀리초로 변환
+                }
+            })
+        })
         .unwrap_or_else(|| {
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -440,12 +485,14 @@ fn convert_network_response_to_cdp(
         });
 
     // Create CDP message / CDP 메시지 생성
+    // CDP Network events use seconds for timestamp / CDP Network 이벤트는 timestamp에 초 단위 사용
+    let timestamp_seconds = timestamp_ms as f64 / 1000.0;
     let cdp_message = serde_json::json!({
         "method": "Network.responseReceived",
         "params": {
             "requestId": request_id,
             "loaderId": request_id.clone(),
-            "timestamp": timestamp as f64 / 1000.0,
+            "timestamp": timestamp_seconds,
             "type": "Other",
             "response": {
                 "url": url,
@@ -460,7 +507,7 @@ fn convert_network_response_to_cdp(
                 "fromPrefetchCache": false,
                 "encodedDataLength": 0,
                 "timing": {
-                    "requestTime": timestamp as f64 / 1000.0,
+                    "requestTime": timestamp_seconds,
                     "proxyStart": -1.0,
                     "proxyEnd": -1.0,
                     "dnsStart": -1.0,
@@ -483,19 +530,11 @@ fn convert_network_response_to_cdp(
         }
     });
 
-    logger.log(
-        LogType::Reactotron,
-        "cdp-bridge",
-        "Converted network.response to Network.responseReceived",
-        Some(&cdp_message),
-        Some("Network.responseReceived"),
-    );
-
     Some(cdp_message)
 }
 
 /// Convert network error to CDP Network.loadingFailed event / 네트워크 에러를 CDP Network.loadingFailed 이벤트로 변환
-fn convert_network_error_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<serde_json::Value> {
+fn convert_network_error_to_cdp(cmd: &Command, _logger: Arc<Logger>) -> Option<serde_json::Value> {
     let payload = &cmd.payload;
 
     // Extract error information / 에러 정보 추출
@@ -526,11 +565,20 @@ fn convert_network_error_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<se
             )
         });
 
-    // Get timestamp / 타임스탬프 가져오기
-    let timestamp = cmd
+    // Get timestamp in milliseconds / 타임스탬프를 밀리초 단위로 가져오기
+    let timestamp_ms = cmd
         .date
         .as_ref()
-        .and_then(|d| d.parse::<f64>().ok().map(|t| (t * 1000.0) as u64))
+        .and_then(|d| {
+            d.parse::<f64>().ok().map(|t| {
+                // If timestamp is very large (> year 2100 in seconds), assume it's in milliseconds / 타임스탬프가 매우 크면 (2100년 이후 초 단위), 밀리초 단위로 가정
+                if t > 4_102_444_800.0 {
+                    t as u64 // Already in milliseconds / 이미 밀리초 단위
+                } else {
+                    (t * 1000.0) as u64 // Convert seconds to milliseconds / 초를 밀리초로 변환
+                }
+            })
+        })
         .unwrap_or_else(|| {
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -539,25 +587,19 @@ fn convert_network_error_to_cdp(cmd: &Command, logger: Arc<Logger>) -> Option<se
         });
 
     // Create CDP message / CDP 메시지 생성
+    // CDP Network events use seconds for timestamp / CDP Network 이벤트는 timestamp에 초 단위 사용
+    let timestamp_seconds = timestamp_ms as f64 / 1000.0;
     let cdp_message = serde_json::json!({
         "method": "Network.loadingFailed",
         "params": {
             "requestId": request_id,
-            "timestamp": timestamp as f64 / 1000.0,
+            "timestamp": timestamp_seconds,
             "type": "Other",
             "errorText": error_text,
             "canceled": false,
             "blockedReason": "other",
         }
     });
-
-    logger.log(
-        LogType::Reactotron,
-        "cdp-bridge",
-        "Converted network.error to Network.loadingFailed",
-        Some(&cdp_message),
-        Some("Network.loadingFailed"),
-    );
 
     Some(cdp_message)
 }
