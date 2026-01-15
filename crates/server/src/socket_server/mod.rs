@@ -61,7 +61,7 @@ pub struct SocketServer {
     devtools: Arc<RwLock<HashMap<String, Arc<DevTools>>>>,
     pub react_native_inspector_manager: Arc<ReactNativeInspectorConnectionManager>,
     pub reactotron_server: Option<Arc<ReactotronServer>>,
-    logger: Arc<Logger>,
+    pub logger: Arc<Logger>, // Made public for shared server instances / 공유 서버 인스턴스를 위해 public으로 변경
 }
 
 impl SocketServer {
@@ -95,76 +95,119 @@ impl SocketServer {
         }
     }
 
+    /// Enable Reactotron server if not already enabled / Reactotron 서버가 아직 활성화되지 않았으면 활성화
+    pub fn enable_reactotron_server(&mut self) {
+        if self.reactotron_server.is_none() {
+            eprintln!("[reactotron] 🚀 Enabling Reactotron server...");
+            self.logger.log(
+                LogType::Server,
+                "reactotron",
+                "Enabling Reactotron server",
+                None,
+                None,
+            );
+            self.reactotron_server = Some(Arc::new(ReactotronServer::new(self.logger.clone())));
+        }
+    }
+
+    /// Disable Reactotron server / Reactotron 서버 비활성화
+    pub fn disable_reactotron_server(&mut self) {
+        if self.reactotron_server.is_some() {
+            eprintln!("[reactotron] 🛑 Disabling Reactotron server...");
+            self.logger.log(
+                LogType::Server,
+                "reactotron",
+                "Disabling Reactotron server",
+                None,
+                None,
+            );
+            self.reactotron_server = None;
+        }
+    }
+
     /// Handle WebSocket upgrade / WebSocket 업그레이드 처리
-    pub async fn handle_websocket_upgrade(
-        self: Arc<Self>,
+    /// Handle WebSocket upgrade (static method for RwLock) / WebSocket 업그레이드 처리 (RwLock용 정적 메서드)
+    pub async fn handle_websocket_upgrade_rwlock(
+        server: Arc<RwLock<Self>>,
         ws: WebSocket,
         path: String,
         query_params: HashMap<String, String>,
     ) {
         // Log the received path for debugging / 디버깅을 위해 받은 경로 로깅
-        self.logger.log(
-            LogType::Server,
-            "websocket",
-            &format!("WebSocket upgrade request for path: {}", path),
-            Some(&serde_json::json!({
-                "path": path,
-                "queryParams": query_params,
-            })),
-            None,
-        );
-
-        // Handle Reactotron connections on root path / 루트 경로에서 Reactotron 연결 처리
-        // Reactotron clients connect to ws://host:port (no path) / Reactotron 클라이언트는 ws://host:port로 연결 (경로 없음)
-        if (path.is_empty() || path == "/") && self.reactotron_server.is_some() {
-            eprintln!("[reactotron] 🔌 WebSocket connection attempt on root path (path: '{}', reactotron_server enabled: true)", path);
-            self.logger.log(
+        {
+            let server_guard = server.read().await;
+            server_guard.logger.log(
                 LogType::Server,
-                "reactotron",
-                &format!("Reactotron WebSocket connection attempt on root path (path: '{}')", path),
+                "websocket",
+                &format!("WebSocket upgrade request for path: {}", path),
                 Some(&serde_json::json!({
                     "path": path,
                     "queryParams": query_params,
                 })),
                 None,
             );
-            if let Some(reactotron_server) = &self.reactotron_server {
-                let connection_id = reactotron_server.next_connection_id().await;
-                let address = query_params
-                    .get("address")
-                    .cloned()
-                    .unwrap_or_else(|| "unknown".to_string());
-                eprintln!("[reactotron] 🚀 Routing to Reactotron handler (connection_id: {}, address: {})", connection_id, address);
-                self.logger.log(
+        }
+
+        // Handle Reactotron connections on root path / 루트 경로에서 Reactotron 연결 처리
+        // Reactotron clients connect to ws://host:port (no path) / Reactotron 클라이언트는 ws://host:port로 연결 (경로 없음)
+        {
+            let server_guard = server.read().await;
+            if (path.is_empty() || path == "/") && server_guard.reactotron_server.is_some() {
+                eprintln!("[reactotron] 🔌 WebSocket connection attempt on root path (path: '{}', reactotron_server enabled: true)", path);
+                server_guard.logger.log(
                     LogType::Server,
                     "reactotron",
-                    &format!("Routing to Reactotron handler (connection_id: {}, address: {})", connection_id, address),
-                    None,
-                    None,
-                );
-                crate::reactotron_server::handle_reactotron_websocket(
-                    ws,
-                    address,
-                    connection_id,
-                    reactotron_server.connections.clone(),
-                    reactotron_server.subscriptions.clone(),
-                    Some(self.clone()),
-                    self.logger.clone(),
-                )
-                .await;
-                return;
-            } else {
-                eprintln!("[reactotron] ⚠️ Reactotron server is None but path matches root");
-                self.logger.log(
-                    LogType::Server,
-                    "reactotron",
-                    "Reactotron server is None but path matches root",
-                    None,
+                    &format!(
+                        "Reactotron WebSocket connection attempt on root path (path: '{}')",
+                        path
+                    ),
+                    Some(&serde_json::json!({
+                        "path": path,
+                        "queryParams": query_params,
+                    })),
                     None,
                 );
+                if let Some(reactotron_server) = &server_guard.reactotron_server {
+                    let connection_id = reactotron_server.next_connection_id().await;
+                    let address = query_params
+                        .get("address")
+                        .cloned()
+                        .unwrap_or_else(|| "unknown".to_string());
+                    eprintln!("[reactotron] 🚀 Routing to Reactotron handler (connection_id: {}, address: {})", connection_id, address);
+                    server_guard.logger.log(
+                        LogType::Server,
+                        "reactotron",
+                        &format!(
+                            "Routing to Reactotron handler (connection_id: {}, address: {})",
+                            connection_id, address
+                        ),
+                        None,
+                        None,
+                    );
+                    crate::reactotron_server::handle_reactotron_websocket(
+                        ws,
+                        address,
+                        connection_id,
+                        reactotron_server.connections.clone(),
+                        reactotron_server.subscriptions.clone(),
+                        Some(server.clone()),
+                        server_guard.logger.clone(),
+                    )
+                    .await;
+                    return;
+                } else {
+                    eprintln!("[reactotron] ⚠️ Reactotron server is None but path matches root");
+                    server_guard.logger.log(
+                        LogType::Server,
+                        "reactotron",
+                        "Reactotron server is None but path matches root",
+                        None,
+                        None,
+                    );
+                }
+            } else if (path.is_empty() || path == "/") && server_guard.reactotron_server.is_none() {
+                eprintln!("[reactotron] ⚠️ WebSocket connection on root path but Reactotron server is disabled (path: '{}')", path);
             }
-        } else if (path.is_empty() || path == "/") && self.reactotron_server.is_none() {
-            eprintln!("[reactotron] ⚠️ WebSocket connection on root path but Reactotron server is disabled (path: '{}')", path);
         }
 
         // Handle React Native Inspector / React Native Inspector 처리
@@ -173,30 +216,33 @@ impl SocketServer {
         // So /remote/debug/*path with path "inspector/device" will give us "inspector/device" (without leading slash)
         // 따라서 /remote/debug/*path에서 path가 "inspector/device"이면 "inspector/device"를 받습니다 (앞의 슬래시 없이)
         // Also handle direct /inspector/device path (with leading slash) / 직접 /inspector/device 경로도 처리 (앞의 슬래시 포함)
-        if path == "inspector/device"
-            || path.starts_with("inspector/device")
-            || path == "/inspector/device"
-            || path.starts_with("/inspector/device")
         {
-            self.logger.log(
-                LogType::RnInspector,
-                "websocket",
-                "Routing to React Native Inspector handler",
-                Some(&serde_json::json!({
-                    "originalPath": path,
-                    "queryParams": query_params,
-                })),
-                None,
-            );
-            handle_react_native_inspector_websocket(
-                ws,
-                query_params,
-                self.devtools.clone(),
-                self.react_native_inspector_manager.clone(),
-                self.logger.clone(),
-            )
-            .await;
-            return;
+            let server_guard = server.read().await;
+            if path == "inspector/device"
+                || path.starts_with("inspector/device")
+                || path == "/inspector/device"
+                || path.starts_with("/inspector/device")
+            {
+                server_guard.logger.log(
+                    LogType::RnInspector,
+                    "websocket",
+                    "Routing to React Native Inspector handler",
+                    Some(&serde_json::json!({
+                        "originalPath": path,
+                        "queryParams": query_params,
+                    })),
+                    None,
+                );
+                handle_react_native_inspector_websocket(
+                    ws,
+                    query_params,
+                    server_guard.devtools.clone(),
+                    server_guard.react_native_inspector_manager.clone(),
+                    server_guard.logger.clone(),
+                )
+                .await;
+                return;
+            }
         }
 
         // Handle standard Chrome Remote DevTools connections / 표준 Chrome Remote DevTools 연결 처리
@@ -204,47 +250,50 @@ impl SocketServer {
         // Note: path from axum wildcard doesn't include leading slash / axum 와일드카드의 path는 앞의 슬래시를 포함하지 않음
         let path_parts: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
 
-        if path_parts.len() < 2 {
-            self.logger.log(
-                LogType::Server,
-                "websocket",
-                &format!("Invalid path format: {}", path),
-                None,
-                None,
-            );
-            return;
-        }
-
-        let from = path_parts[0];
-        let id = path_parts[1].to_string();
-
-        match from {
-            "client" => {
-                handle_client_connection(
-                    ws,
-                    id,
-                    query_params,
-                    self.clients.clone(),
-                    self.devtools.clone(),
-                    self.react_native_inspector_manager.clone(),
-                    self.logger.clone(),
-                )
-                .await;
+        {
+            let server_guard = server.read().await;
+            if path_parts.len() < 2 {
+                server_guard.logger.log(
+                    LogType::Server,
+                    "websocket",
+                    &format!("Invalid path format: {}", path),
+                    None,
+                    None,
+                );
+                return;
             }
-            "devtools" => {
-                let client_id = query_params.get("clientId").cloned();
-                handle_devtools_connection(
-                    ws,
-                    id,
-                    client_id,
-                    self.clients.clone(),
-                    self.devtools.clone(),
-                    self.react_native_inspector_manager.clone(),
-                    self.logger.clone(),
-                )
-                .await;
+
+            let from = path_parts[0];
+            let id = path_parts[1].to_string();
+
+            match from {
+                "client" => {
+                    handle_client_connection(
+                        ws,
+                        id,
+                        query_params,
+                        server_guard.clients.clone(),
+                        server_guard.devtools.clone(),
+                        server_guard.react_native_inspector_manager.clone(),
+                        server_guard.logger.clone(),
+                    )
+                    .await;
+                }
+                "devtools" => {
+                    let client_id = query_params.get("clientId").cloned();
+                    handle_devtools_connection(
+                        ws,
+                        id,
+                        client_id,
+                        server_guard.clients.clone(),
+                        server_guard.devtools.clone(),
+                        server_guard.react_native_inspector_manager.clone(),
+                        server_guard.logger.clone(),
+                    )
+                    .await;
+                }
+                _ => {}
             }
-            _ => {}
         }
     }
 
@@ -334,11 +383,7 @@ impl SocketServer {
     }
 
     /// Unregister Reactotron client from Remote DevTools / Reactotron 클라이언트를 Remote DevTools에서 등록 해제
-    pub async fn unregister_reactotron_client(
-        &self,
-        client_id: &str,
-        logger: Arc<Logger>,
-    ) {
+    pub async fn unregister_reactotron_client(&self, client_id: &str, logger: Arc<Logger>) {
         let mut clients = self.clients.write().await;
         if clients.remove(client_id).is_some() {
             logger.log(

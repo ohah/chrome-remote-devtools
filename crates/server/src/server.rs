@@ -8,32 +8,31 @@ use std::io::{self, Write};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
+use tokio::sync::RwLock;
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 
-/// Run the server / 서버 실행
-pub async fn run_server(config: ServerConfig) -> Result<(), crate::ServerError> {
-    // Initialize logger / 로거 초기화
-    let logger = Arc::new(
-        Logger::new(
-            config.log_enabled,
-            config.log_methods.clone(),
-            config.log_file.clone(),
-        )
-        .map_err(crate::ServerError::Io)?,
-    );
-
-    // Create socket server / 소켓 서버 생성
-    let socket_server = Arc::new(SocketServer::new(logger.clone(), config.enable_reactotron_server));
+/// Run the server with a shared SocketServer instance / 공유 SocketServer 인스턴스와 함께 서버 실행
+pub async fn run_server_with_socket_server(
+    config: ServerConfig,
+    socket_server_rwlock: Arc<tokio::sync::RwLock<SocketServer>>,
+) -> Result<(), crate::ServerError> {
+    // Use logger from socket_server / socket_server의 logger 사용
+    // We need to read the lock to get the logger / logger를 얻기 위해 lock을 읽어야 함
+    let logger = {
+        let server = socket_server_rwlock.read().await;
+        server.logger.clone()
+    };
 
     // Create HTTP router / HTTP 라우터 생성
+    // Pass the RwLock to the router state / 라우터 state에 RwLock 전달
     let app = create_router(config.dev_mode)
         .layer(
             ServiceBuilder::new()
                 .layer(CorsLayer::permissive())
                 .into_inner(),
         )
-        .with_state(socket_server.clone());
+        .with_state(socket_server_rwlock.clone());
 
     // Parse address / 주소 파싱
     let addr: SocketAddr = format!("{}:{}", config.host, config.port)
@@ -125,4 +124,22 @@ pub async fn run_server(config: ServerConfig) -> Result<(), crate::ServerError> 
     }
 
     Ok(())
+}
+
+/// Run the server / 서버 실행 (기존 함수, 하위 호환성 유지)
+pub async fn run_server(config: ServerConfig) -> Result<(), crate::ServerError> {
+    // Initialize logger / 로거 초기화
+    let logger = Arc::new(
+        Logger::new(
+            config.log_enabled,
+            config.log_methods.clone(),
+            config.log_file.clone(),
+        )
+        .map_err(crate::ServerError::Io)?,
+    );
+
+    // Create socket server / 소켓 서버 생성
+    let socket_server = Arc::new(RwLock::new(SocketServer::new(logger.clone(), config.enable_reactotron_server)));
+
+    run_server_with_socket_server(config, socket_server).await
 }

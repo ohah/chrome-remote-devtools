@@ -31,7 +31,7 @@ pub async fn handle_reactotron_websocket(
     connection_id: u32,
     connections: ClientConnections,
     subscriptions: Subscriptions,
-    socket_server: Option<Arc<crate::socket_server::SocketServer>>,
+    socket_server: Option<Arc<tokio::sync::RwLock<crate::socket_server::SocketServer>>>,
     logger: Arc<Logger>,
 ) {
     // Always log connection attempt / 연결 시도 항상 로깅
@@ -159,7 +159,7 @@ async fn handle_incoming_message(
     sender: mpsc::UnboundedSender<Message>,
     connections: ClientConnections,
     subscriptions: Subscriptions,
-    socket_server: Option<Arc<crate::socket_server::SocketServer>>,
+    socket_server: Option<Arc<tokio::sync::RwLock<crate::socket_server::SocketServer>>>,
     logger: Arc<Logger>,
 ) -> Result<(), ()> {
     match msg {
