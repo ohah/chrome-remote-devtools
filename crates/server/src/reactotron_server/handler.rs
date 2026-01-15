@@ -31,6 +31,7 @@ pub async fn handle_reactotron_websocket(
     connection_id: u32,
     connections: ClientConnections,
     subscriptions: Subscriptions,
+    socket_server: Option<Arc<crate::socket_server::SocketServer>>,
     logger: Arc<Logger>,
 ) {
     // Always log connection attempt / 연결 시도 항상 로깅
@@ -53,10 +54,12 @@ pub async fn handle_reactotron_websocket(
 
     let mut current_client_id: Option<String> = None;
     let mut message_id_counter: u32 = 0;
+    let socket_server_clone = socket_server.clone();
 
     // Clone for cleanup / 정리를 위해 클론
     let connections_clone = connections.clone();
     let logger_clone = logger.clone();
+    let socket_server_for_cleanup = socket_server.clone();
 
     // Spawn task to send messages to client / 클라이언트로 메시지 전송 태스크 생성
     let mut send_task = tokio::spawn(async move {
@@ -81,6 +84,7 @@ pub async fn handle_reactotron_websocket(
                         tx.clone(),
                         connections.clone(),
                         subscriptions.clone(),
+                        socket_server_clone.clone(),
                         logger.clone(),
                     )
                     .await
@@ -131,6 +135,16 @@ pub async fn handle_reactotron_websocket(
                 })),
                 None,
             );
+
+            // Unregister Reactotron client from Remote DevTools / Reactotron 클라이언트를 Remote DevTools에서 등록 해제
+            if let Some(server) = socket_server_for_cleanup.as_ref() {
+                crate::reactotron_server::bridge::unregister_reactotron_client(
+                    &client_id,
+                    server.clone(),
+                    logger_clone.clone(),
+                )
+                .await;
+            }
         }
     }
 }
@@ -145,6 +159,7 @@ async fn handle_incoming_message(
     sender: mpsc::UnboundedSender<Message>,
     connections: ClientConnections,
     subscriptions: Subscriptions,
+    socket_server: Option<Arc<crate::socket_server::SocketServer>>,
     logger: Arc<Logger>,
 ) -> Result<(), ()> {
     match msg {
@@ -253,6 +268,29 @@ async fn handle_incoming_message(
                     })),
                     None,
                 );
+
+                // Register Reactotron client as Remote DevTools client / Reactotron 클라이언트를 Remote DevTools 클라이언트로 등록
+                if let Some(server) = socket_server.as_ref() {
+                    if let Some(_tx) = crate::reactotron_server::bridge::register_reactotron_client(
+                        final_client_id.clone(),
+                        &cmd.payload,
+                        server.clone(),
+                        logger.clone(),
+                    )
+                    .await
+                    {
+                        // Store the sender for later use / 나중에 사용하기 위해 sender 저장
+                        // Note: The sender is already stored in the Client struct in SocketServer
+                        // 주의: sender는 이미 SocketServer의 Client 구조체에 저장됨
+                        logger.log(
+                            LogType::Reactotron,
+                            &connection_id.to_string(),
+                            &format!("Registered Reactotron client {} in Remote DevTools", final_client_id),
+                            None,
+                            None,
+                        );
+                    }
+                }
             }
 
             if let Some(client_id) = current_client_id {

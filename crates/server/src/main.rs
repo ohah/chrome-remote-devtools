@@ -53,6 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         log_methods: cli.log_methods,
         log_file: cli.log_file,
         dev_mode: cfg!(debug_assertions), // Enable dev mode in debug builds / 디버그 빌드에서 개발 모드 활성화
+        enable_reactotron_server: false, // Default to false for standalone server / 독립 실행형 서버는 기본적으로 false
     };
 
     chrome_remote_devtools_server::run_server(config).await?;

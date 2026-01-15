@@ -97,7 +97,7 @@ impl SocketServer {
 
     /// Handle WebSocket upgrade / WebSocket 업그레이드 처리
     pub async fn handle_websocket_upgrade(
-        &self,
+        self: Arc<Self>,
         ws: WebSocket,
         path: String,
         query_params: HashMap<String, String>,
@@ -148,6 +148,7 @@ impl SocketServer {
                     connection_id,
                     reactotron_server.connections.clone(),
                     reactotron_server.subscriptions.clone(),
+                    Some(self.clone()),
                     self.logger.clone(),
                 )
                 .await;
@@ -287,6 +288,68 @@ impl SocketServer {
             })
             .collect()
     }
+
+    /// Register Reactotron client as Remote DevTools client / Reactotron 클라이언트를 Remote DevTools 클라이언트로 등록
+    /// Returns a channel sender for sending messages to the client / 클라이언트로 메시지를 보내기 위한 채널 sender 반환
+    pub async fn register_reactotron_client(
+        &self,
+        client_id: String,
+        url: String,
+        title: String,
+        ua: String,
+        logger: Arc<Logger>,
+    ) -> Option<mpsc::UnboundedSender<String>> {
+        let (tx, _rx) = mpsc::unbounded_channel::<String>();
+
+        let mut clients = self.clients.write().await;
+
+        // Check if client already exists / 클라이언트가 이미 존재하는지 확인
+        if clients.contains_key(&client_id) {
+            logger.log(
+                LogType::Reactotron,
+                &client_id,
+                &format!("Client {} already registered, updating", client_id),
+                None,
+                None,
+            );
+        }
+
+        // Create client struct / 클라이언트 구조체 생성
+        let time_str = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs().to_string())
+            .unwrap_or_else(|_| "0".to_string());
+        let client = Arc::new(Client {
+            id: client_id.clone(),
+            url: Some(url),
+            title: Some(title),
+            favicon: None,
+            ua: Some(ua),
+            time: Some(time_str),
+            sender: tx.clone(),
+        });
+
+        clients.insert(client_id, client);
+        Some(tx)
+    }
+
+    /// Unregister Reactotron client from Remote DevTools / Reactotron 클라이언트를 Remote DevTools에서 등록 해제
+    pub async fn unregister_reactotron_client(
+        &self,
+        client_id: &str,
+        logger: Arc<Logger>,
+    ) {
+        let mut clients = self.clients.write().await;
+        if clients.remove(client_id).is_some() {
+            logger.log(
+                LogType::Reactotron,
+                client_id,
+                "Unregistered Reactotron client from Remote DevTools",
+                None,
+                None,
+            );
+        }
+    }
 }
 
 #[cfg(test)]
@@ -304,14 +367,14 @@ mod tests {
     async fn test_socket_server_creation() {
         let logger = create_test_logger();
         // Should not panic / 패닉이 발생하지 않아야 함
-        let _socket_server = SocketServer::new(logger);
+        let _socket_server = SocketServer::new(logger, false);
     }
 
     #[tokio::test]
     /// Test empty clients list initially / 초기에는 빈 클라이언트 목록 반환 테스트
     async fn test_empty_clients_list_initially() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger);
+        let socket_server = SocketServer::new(logger, false);
         let clients = socket_server.get_all_clients().await;
         assert_eq!(clients.len(), 0);
     }
@@ -320,7 +383,7 @@ mod tests {
     /// Test empty inspectors list initially / 초기에는 빈 Inspector 목록 반환 테스트
     async fn test_empty_inspectors_list_initially() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger);
+        let socket_server = SocketServer::new(logger, false);
         let inspectors = socket_server.get_all_inspectors().await;
         assert_eq!(inspectors.len(), 0);
     }
@@ -329,7 +392,7 @@ mod tests {
     /// Test get client by ID when client doesn't exist / 클라이언트가 없을 때 ID로 클라이언트 가져오기 테스트
     async fn test_get_client_by_id_when_not_exists() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger);
+        let socket_server = SocketServer::new(logger, false);
         let client = socket_server.get_client("test-client-1").await;
         assert!(client.is_none());
     }
@@ -338,7 +401,7 @@ mod tests {
     /// Test get all clients returns array / 모든 클라이언트 반환 테스트
     async fn test_get_all_clients_returns_array() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger);
+        let socket_server = SocketServer::new(logger, false);
         let clients = socket_server.get_all_clients().await;
         // Should return a vector / 벡터를 반환해야 함
         assert!(clients.is_empty());
@@ -348,7 +411,7 @@ mod tests {
     /// Test get all inspectors returns array / 모든 Inspector 반환 테스트
     async fn test_get_all_inspectors_returns_array() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger);
+        let socket_server = SocketServer::new(logger, false);
         let inspectors = socket_server.get_all_inspectors().await;
         // Should return a vector / 벡터를 반환해야 함
         assert!(inspectors.is_empty());
@@ -358,7 +421,7 @@ mod tests {
     /// Test get client with empty string / 빈 문자열로 클라이언트 조회 테스트
     async fn test_get_client_with_empty_string() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger);
+        let socket_server = SocketServer::new(logger, false);
         let client = socket_server.get_client("").await;
         assert!(client.is_none());
     }
@@ -367,7 +430,7 @@ mod tests {
     /// Test get client with special characters / 특수 문자가 포함된 클라이언트 ID 조회 테스트
     async fn test_get_client_with_special_characters() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger);
+        let socket_server = SocketServer::new(logger, false);
         let client = socket_server.get_client("test/client-id").await;
         assert!(client.is_none());
     }
@@ -427,7 +490,7 @@ mod message_routing_tests {
     /// Test get client information / 클라이언트 정보 가져오기 테스트
     async fn test_get_client_information() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger);
+        let socket_server = SocketServer::new(logger, false);
         let client = socket_server.get_client("test-client").await;
         // Should return None when client doesn't exist / 클라이언트가 없을 때 None 반환
         assert!(client.is_none());
