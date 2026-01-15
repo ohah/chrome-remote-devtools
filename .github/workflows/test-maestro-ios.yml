@@ -1,0 +1,205 @@
+name: Maestro iOS Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'examples/react-native/**'
+      - '.maestro/**'
+      - 'packages/react-native-inspector/**'
+      - '.github/workflows/test-maestro-ios.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'examples/react-native/**'
+      - '.maestro/**'
+      - 'packages/react-native-inspector/**'
+      - '.github/workflows/test-maestro-ios.yml'
+
+jobs:
+  check:
+    name: Check if should run
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.maestro }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            maestro:
+              - "examples/react-native/**"
+              - ".maestro/**"
+              - "packages/react-native-inspector/**"
+              - ".github/workflows/test-maestro-ios.yml"
+
+  maestro-ios-test:
+    name: Maestro iOS Tests
+    needs: check
+    runs-on: macos-latest
+    permissions:
+      pull-requests: write
+      checks: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Skip if no changes
+        if: needs.check.outputs.should-run != "true"
+        run: echo "No Maestro test changes, skipping tests"
+        continue-on-error: false
+
+      - name: Setup Tools
+        if: needs.check.outputs.should-run == "true"
+        uses: jdx/mise-action@v3
+
+      - name: Setup Bun
+        if: needs.check.outputs.should-run == "true"
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Rust
+        if: needs.check.outputs.should-run == "true"
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry
+        if: needs.check.outputs.should-run == "true"
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles("**/Cargo.lock") }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install Maestro
+        if: needs.check.outputs.should-run == "true"
+        run: curl -Ls "https://get.maestro.mobile.dev" | bash
+
+      - name: Add Maestro to PATH
+        if: needs.check.outputs.should-run == "true"
+        run: echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Setup Ruby
+        if: needs.check.outputs.should-run == "true"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Install dependencies
+        if: needs.check.outputs.should-run == "true"
+        run: bun install
+
+      - name: Prepare packages
+        if: needs.check.outputs.should-run == "true"
+        run: cargo xtask prepare --ts || echo "xtask prepare skipped if not available"
+
+      - name: Install CocoaPods dependencies
+        if: needs.check.outputs.should-run == "true"
+        run: |
+          cd examples/react-native/ios
+          bundle install
+          bundle exec pod install
+          cd ../../..
+
+      - name: Build iOS app
+        if: needs.check.outputs.should-run == "true"
+        run: |
+          xcodebuild \
+            -workspace ChromeRemoteDevTools.xcworkspace \
+            -scheme ChromeRemoteDevTools \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -derivedDataPath "$HOME/DerivedData" \
+            -quiet
+        working-directory: examples/react-native/ios
+
+      - name: Install app
+        if: needs.check.outputs.should-run == "true"
+        run: |
+          APP_PATH=$(find "$HOME/DerivedData/Build/Products/Release-iphonesimulator" -name "*.app" | head -n 1)
+          DEVICE_UDID=$(xcrun simctl list devices iPhone available --json | jq -r '.devices | to_entries[] | .value[] | select(.name | contains("iPhone")) | .udid' | head -n 1)
+          echo "Booting simulator: $DEVICE_UDID"
+          xcrun simctl boot "$DEVICE_UDID" || true
+          echo "Installing app: $APP_PATH"
+          xcrun simctl install booted "$APP_PATH"
+
+      - name: Run Maestro tests
+        if: needs.check.outputs.should-run == "true"
+        id: maestro-test
+        run: |
+          cd $GITHUB_WORKSPACE
+          MAESTRO_APP_ID=org.reactjs.native.example.ChromeRemoteDevTools MAESTRO_DRIVER_STARTUP_TIMEOUT=600000 maestro test .maestro
+        continue-on-error: true
+
+      - name: Check test results
+        if: always() && needs.check.outputs.should-run == "true"
+        run: |
+          if [ "${{ steps.maestro-test.outcome }}" != "success" ]; then
+            echo "Maestro iOS tests failed"
+            exit 1
+          fi
+
+      - name: Upload Maestro test results
+        if: always() && needs.check.outputs.should-run == "true"
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-ios-test-results
+          path: |
+            .maestro/**/*.png
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Comment test results on PR
+        if: always() && github.event_name == "pull_request" && needs.check.outputs.should-run == "true"
+        uses: actions/github-script@v7
+        env:
+          TEST_OUTCOME: ${{ steps.maestro-test.outcome }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const testOutcome = process.env.TEST_OUTCOME || "success";
+            const status = testOutcome === "success" ? "✅ **PASSED**" : "❌ **FAILED**";
+            const workflowUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const comment = `## 📱 Maestro iOS Test Results
+
+            ${status}
+
+            Maestro iOS tests have completed. Check the [workflow run](${workflowUrl}) for details.
+            `;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(
+              (c) =>
+                c.user.type === "Bot" &&
+                c.body.includes("Maestro iOS Test Results")
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment,
+              });
+            }
