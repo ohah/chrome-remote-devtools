@@ -11,9 +11,10 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::fs;
+use tokio::sync::RwLock;
 
 /// Create HTTP router / HTTP 라우터 생성
-pub fn create_router(dev_mode: bool) -> Router<Arc<SocketServer>> {
+pub fn create_router(dev_mode: bool) -> Router<Arc<RwLock<SocketServer>>> {
     let mut router = Router::new()
         .route("/json", get(get_all_clients))
         .route("/json/clients", get(get_all_clients_detailed))
@@ -34,16 +35,18 @@ pub fn create_router(dev_mode: bool) -> Router<Arc<SocketServer>> {
 
 /// Get all clients / 모든 클라이언트 가져오기
 async fn get_all_clients(
-    State(server): State<Arc<SocketServer>>,
+    State(server): State<Arc<RwLock<SocketServer>>>,
 ) -> Result<Json<Value>, StatusCode> {
+    let server = server.read().await;
     let clients = server.get_all_clients().await;
     Ok(Json(json!({ "targets": clients })))
 }
 
 /// Get all clients with details / 상세 정보와 함께 모든 클라이언트 가져오기
 async fn get_all_clients_detailed(
-    State(server): State<Arc<SocketServer>>,
+    State(server): State<Arc<RwLock<SocketServer>>>,
 ) -> Result<Json<Value>, StatusCode> {
+    let server = server.read().await;
     let regular_clients: Vec<Value> = server
         .get_all_clients()
         .await
@@ -86,17 +89,19 @@ async fn get_all_clients_detailed(
 
 /// Get all inspectors / 모든 Inspector 가져오기
 async fn get_all_inspectors(
-    State(server): State<Arc<SocketServer>>,
+    State(server): State<Arc<RwLock<SocketServer>>>,
 ) -> Result<Json<Value>, StatusCode> {
+    let server = server.read().await;
     let inspectors = server.get_all_inspectors().await;
     Ok(Json(json!({ "inspectors": inspectors })))
 }
 
 /// Get specific client / 특정 클라이언트 가져오기
 async fn get_client(
-    State(server): State<Arc<SocketServer>>,
+    State(server): State<Arc<RwLock<SocketServer>>>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, StatusCode> {
+    let server = server.read().await;
     // Try regular client first / 일반 클라이언트 먼저 시도
     if let Some(client) = server.get_client(&id).await {
         return Ok(Json(json!({ "client": client })));
@@ -180,12 +185,13 @@ async fn handle_inspector_device_http(
 
 /// Handle open debugger endpoint / open debugger 엔드포인트 처리
 async fn handle_open_debugger(
-    State(server): State<Arc<SocketServer>>,
+    State(server): State<Arc<RwLock<SocketServer>>>,
     Query(params): Query<HashMap<String, String>>,
 ) -> Result<Json<Value>, StatusCode> {
     let device_id = params.get("device");
 
     if let Some(device_id) = device_id {
+        let server = server.read().await;
         let connections = server
             .react_native_inspector_manager
             .get_all_connections()
@@ -209,14 +215,12 @@ async fn handle_websocket_upgrade(
     ws: WebSocketUpgrade,
     Path(path): Path<String>,
     Query(params): Query<HashMap<String, String>>,
-    State(server): State<Arc<SocketServer>>,
+    State(server): State<Arc<RwLock<SocketServer>>>,
 ) -> axum::response::Response {
     ws.on_upgrade(move |socket| {
         let server_clone = server.clone();
         async move {
-            server_clone
-                .handle_websocket_upgrade(socket, path, params)
-                .await;
+            SocketServer::handle_websocket_upgrade_rwlock(server_clone, socket, path, params).await;
         }
     })
 }
@@ -225,15 +229,13 @@ async fn handle_websocket_upgrade(
 async fn handle_root_websocket_upgrade(
     ws: WebSocketUpgrade,
     Query(params): Query<HashMap<String, String>>,
-    State(server): State<Arc<SocketServer>>,
+    State(server): State<Arc<RwLock<SocketServer>>>,
 ) -> axum::response::Response {
     ws.on_upgrade(move |socket| {
         let server_clone = server.clone();
         async move {
             // Pass empty path for root / 루트 경로를 위해 빈 경로 전달
-            server_clone
-                .handle_websocket_upgrade(socket, String::new(), params)
-                .await;
+            SocketServer::handle_websocket_upgrade_rwlock(server_clone, socket, String::new(), params).await;
         }
     })
 }

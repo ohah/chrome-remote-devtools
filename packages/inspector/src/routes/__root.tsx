@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { RefreshCw, Minus, Maximize2, X, Globe, Smartphone, Eye, EyeOff, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useServerUrl } from '@/shared/lib/server-url';
 
 // Client type filter component / 클라이언트 타입 필터 컴포넌트
 function ClientTypeFilter() {
@@ -11,6 +12,7 @@ function ClientTypeFilter() {
   const [showReactNative, setShowReactNative] = useState(true);
   const [reactotronEnabled, setReactotronEnabled] = useState(false);
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+  const { setServerUrl } = useServerUrl(); // Get setServerUrl function / setServerUrl 함수 가져오기
 
   // Load filter state from localStorage / localStorage에서 필터 상태 로드
   useEffect(() => {
@@ -24,14 +26,25 @@ function ClientTypeFilter() {
       setShowReactNative(savedShowRN === 'true');
     }
     if (savedReactotron !== null) {
-      setReactotronEnabled(savedReactotron === 'true');
+      const isEnabled = savedReactotron === 'true';
+      setReactotronEnabled(isEnabled);
+
+      // Set server URL based on Reactotron state / Reactotron 상태에 따라 서버 URL 설정
+      if (isEnabled) {
+        setServerUrl('http://localhost:9090');
+      } else {
+        setServerUrl('http://localhost:8080');
+      }
+    } else {
+      // Default to 8080 if not set / 설정되지 않았으면 기본값 8080
+      setServerUrl('http://localhost:8080');
     }
 
     // Check Reactotron server status on mount / 마운트 시 Reactotron 서버 상태 확인
     if (isTauri && savedReactotron === 'true') {
       checkReactotronStatus();
     }
-  }, []);
+  }, [setServerUrl]);
 
   // Check Reactotron server status / Reactotron 서버 상태 확인
   const checkReactotronStatus = async () => {
@@ -88,10 +101,18 @@ function ClientTypeFilter() {
         console.log('[Reactotron] Starting Reactotron server...');
         await invoke('start_reactotron_server', { port, host });
         console.log('[Reactotron] ✅ Reactotron server started successfully');
+
+        // Update server URL to 9090 / 서버 URL을 9090으로 변경
+        setServerUrl('http://localhost:9090');
+        console.log('[Reactotron] ✅ Server URL updated to http://localhost:9090');
       } else {
         console.log('[Reactotron] Stopping Reactotron server...');
         await invoke('stop_reactotron_server', { port, host });
         console.log('[Reactotron] ✅ Reactotron server stopped successfully');
+
+        // Update server URL back to 8080 / 서버 URL을 8080으로 되돌림
+        setServerUrl('http://localhost:8080');
+        console.log('[Reactotron] ✅ Server URL updated to http://localhost:8080');
       }
     } catch (error) {
       console.error('[Reactotron] ❌ Failed to toggle Reactotron server:', error);

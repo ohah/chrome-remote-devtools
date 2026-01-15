@@ -28,6 +28,8 @@ pub enum ServerError {
     Other(String),
 }
 
+use crate::logging::Logger;
+use crate::socket_server::SocketServer;
 use std::io::{self, Write};
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -38,6 +40,7 @@ type ServerTaskHandle = tokio::task::JoinHandle<Result<(), ServerError>>;
 /// Server handle for managing server lifecycle / 서버 생명주기 관리를 위한 서버 핸들
 pub struct ServerHandle {
     server: Arc<RwLock<Option<ServerTaskHandle>>>,
+    socket_server: Arc<RwLock<Option<Arc<RwLock<SocketServer>>>>>, // Shared SocketServer instance wrapped in RwLock / RwLock으로 감싼 공유 SocketServer 인스턴스
 }
 
 impl ServerHandle {
@@ -45,6 +48,30 @@ impl ServerHandle {
     pub fn new() -> Self {
         Self {
             server: Arc::new(RwLock::new(None)),
+            socket_server: Arc::new(RwLock::new(None)),
+        }
+    }
+
+    /// Get or create shared SocketServer instance / 공유 SocketServer 인스턴스 가져오기 또는 생성
+    pub async fn get_or_create_socket_server(
+        &self,
+        logger: Arc<Logger>,
+        enable_reactotron: bool,
+    ) -> Arc<RwLock<SocketServer>> {
+        let mut socket_server_opt = self.socket_server.write().await;
+        if let Some(server) = socket_server_opt.as_ref() {
+            // Update Reactotron server state if needed / 필요시 Reactotron 서버 상태 업데이트
+            if enable_reactotron {
+                let mut server_guard = server.write().await;
+                server_guard.enable_reactotron_server();
+            }
+            // Return existing instance / 기존 인스턴스 반환
+            server.clone()
+        } else {
+            // Create new instance / 새 인스턴스 생성
+            let server = Arc::new(RwLock::new(SocketServer::new(logger, enable_reactotron)));
+            *socket_server_opt = Some(server.clone());
+            server
         }
     }
 
@@ -62,11 +89,30 @@ impl ServerHandle {
             tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
         }
 
+        // Get or create shared SocketServer / 공유 SocketServer 가져오기 또는 생성
+        let logger = Arc::new(
+            Logger::new(
+                config.log_enabled,
+                config.log_methods.clone(),
+                config.log_file.clone(),
+            )
+            .map_err(ServerError::Io)?,
+        );
+        let socket_server_rwlock = self.get_or_create_socket_server(logger.clone(), config.enable_reactotron_server).await;
+
         let config_clone = config.clone();
+        let socket_server_clone = socket_server_rwlock.clone();
         eprintln!("[server] 🚀 Starting server on {}:{} (Reactotron: {})",
                   config.host, config.port, config.enable_reactotron_server);
         let _ = io::stderr().flush();
-        let handle = tokio::spawn(async move { run_server(config_clone).await });
+        let handle = tokio::spawn(async move {
+            // Get Arc<SocketServer> from RwLock for the server / 서버를 위해 RwLock에서 Arc<SocketServer> 가져오기
+            let socket_server = socket_server_clone.read().await;
+            // We need to clone the Arc, but we can't do that from a read guard / read guard에서 Arc를 클론할 수 없음
+            // So we'll pass the RwLock and extract the SocketServer inside / 따라서 RwLock을 전달하고 내부에서 SocketServer 추출
+            drop(socket_server);
+            crate::server::run_server_with_socket_server(config_clone, socket_server_clone).await
+        });
 
         *server = Some(handle);
         // Wait a bit for the server to start / 서버가 시작될 때까지 잠시 대기
