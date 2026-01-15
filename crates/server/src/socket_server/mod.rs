@@ -395,6 +395,51 @@ impl SocketServer {
             );
         }
     }
+
+    /// Send CDP message to DevTools connected to a client / 클라이언트에 연결된 DevTools로 CDP 메시지 전송
+    pub async fn send_cdp_message_to_devtools(
+        &self,
+        client_id: &str,
+        cdp_message: &serde_json::Value,
+        logger: Arc<Logger>,
+    ) {
+        let devtools = self.devtools.read().await;
+        let mut sent_count = 0;
+        
+        // Find DevTools connected to this client / 이 클라이언트에 연결된 DevTools 찾기
+        for devtool in devtools.values() {
+            if devtool.client_id.as_ref() == Some(&client_id.to_string()) {
+                // Convert CDP message to JSON string / CDP 메시지를 JSON 문자열로 변환
+                if let Ok(cdp_json) = serde_json::to_string(cdp_message) {
+                    if let Err(e) = devtool.sender.send(cdp_json) {
+                        logger.log(
+                            LogType::Reactotron,
+                            client_id,
+                            &format!("Failed to send CDP message to DevTools {}: {}", devtool.id, e),
+                            None,
+                            None,
+                        );
+                    } else {
+                        sent_count += 1;
+                    }
+                }
+            }
+        }
+        
+        if sent_count > 0 {
+            logger.log(
+                LogType::Reactotron,
+                client_id,
+                &format!(
+                    "Sent CDP message to {} DevTools: {}",
+                    sent_count,
+                    cdp_message.get("method").and_then(|m| m.as_str()).unwrap_or("unknown")
+                ),
+                None,
+                None,
+            );
+        }
+    }
 }
 
 #[cfg(test)]
