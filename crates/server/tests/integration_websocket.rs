@@ -17,7 +17,7 @@ async fn test_websocket_client_connection() {
     // Split WebSocket stream / WebSocket 스트림 분리
     // Hold write half to keep the WebSocket stream alive / WebSocket 스트림을 유지하기 위해 write 절반 보유
     // Even though we don't write to it, dropping it would close the connection / 쓰지 않더라도 드롭하면 연결이 닫힘
-    let (mut write, mut read) = ws_stream.split();
+    let (write, mut read) = ws_stream.split();
     let _ = &write; // Keep write half alive / write 절반 유지
 
     // Connection should be established / 연결이 설정되어야 함
@@ -49,7 +49,7 @@ async fn test_websocket_devtools_connection() {
     // Split WebSocket stream / WebSocket 스트림 분리
     // Hold write half to keep the WebSocket stream alive / WebSocket 스트림을 유지하기 위해 write 절반 보유
     // Even though we don't write to it, dropping it would close the connection / 쓰지 않더라도 드롭하면 연결이 닫힘
-    let (mut write, mut read) = ws_stream.split();
+    let (write, mut read) = ws_stream.split();
     let _ = &write; // Keep write half alive / write 절반 유지
 
     // Connection should be established / 연결이 설정되어야 함
