@@ -189,6 +189,14 @@ jobs:
             MAESTRO_APP_ID=com.chromeremotedevtools MAESTRO_DRIVER_STARTUP_TIMEOUT=600000 maestro test .maestro
         continue-on-error: true
 
+      - name: Check test results
+        if: always() && needs.check.outputs.should-run == 'true'
+        run: |
+          if [ "${{ steps.maestro-test.outcome }}" != "success" ]; then
+            echo "Maestro tests failed"
+            exit 1
+          fi
+
       - name: Upload Maestro test results
         if: always() && needs.check.outputs.should-run == 'true'
         uses: actions/upload-artifact@v4
