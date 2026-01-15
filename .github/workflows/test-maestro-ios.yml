@@ -55,12 +55,6 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         uses: jdx/mise-action@v3
 
-      - name: Setup Bun
-        if: needs.check.outputs.should-run == 'true'
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
       - name: Setup Rust
         if: needs.check.outputs.should-run == 'true'
         uses: dtolnay/rust-toolchain@stable
@@ -87,12 +81,11 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         run: echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
 
-      - name: Setup Ruby
+      - name: Install Bundler
         if: needs.check.outputs.should-run == 'true'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.0'
-          bundler-cache: true
+        run: |
+          gem install bundler:2.5.9
+          bundle --version
 
       - name: Install dependencies
         if: needs.check.outputs.should-run == 'true'
@@ -102,13 +95,32 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         run: cargo xtask prepare --ts || echo "xtask prepare skipped if not available"
 
+      - name: Cache CocoaPods
+        if: needs.check.outputs.should-run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            examples/react-native/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: ${{ runner.os }}-pods-${{ hashFiles('examples/react-native/ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
       - name: Install CocoaPods dependencies
         if: needs.check.outputs.should-run == 'true'
         run: |
           cd examples/react-native/ios
-          bundle install
           bundle exec pod install
           cd ../../..
+
+      - name: Cache DerivedData
+        if: needs.check.outputs.should-run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: $HOME/DerivedData
+          key: ${{ runner.os }}-deriveddata-${{ hashFiles('examples/react-native/ios/**/*.pbxproj', 'examples/react-native/ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-deriveddata-
 
       - name: Build iOS app
         if: needs.check.outputs.should-run == 'true'
@@ -126,7 +138,17 @@ jobs:
         if: needs.check.outputs.should-run == 'true'
         run: |
           APP_PATH=$(find "$HOME/DerivedData/Build/Products/Release-iphonesimulator" -name "*.app" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: No .app file found in $HOME/DerivedData/Build/Products/Release-iphonesimulator"
+            echo "Contents of build directory for debugging:"
+            find "$HOME/DerivedData/Build/Products/Release-iphonesimulator" -maxdepth 3 -print || echo "Build products directory not found"
+            exit 1
+          fi
           DEVICE_UDID=$(xcrun simctl list devices iPhone available --json | jq -r '.devices | to_entries[] | .value[] | select(.name | contains("iPhone")) | .udid' | head -n 1)
+          if [ -z "$DEVICE_UDID" ]; then
+            echo "Error: No available iPhone simulator found"
+            exit 1
+          fi
           echo "Booting simulator: $DEVICE_UDID"
           xcrun simctl boot "$DEVICE_UDID" || true
           echo "Installing app: $APP_PATH"
