@@ -16,11 +16,19 @@ To use Chrome Remote DevTools in your web page, you need to install the client p
 
 ### 1. Start the WebSocket Relay Server
 
+**Recommended method (for development convenience)**:
+
 ```bash
 bun run dev:server
 ```
 
-The server will start on `http://localhost:8080` by default.
+**Direct Rust server execution**:
+
+```bash
+cargo run --bin chrome-remote-devtools-server -- --port 8080 --host 0.0.0.0
+```
+
+> **Note**: `bun run dev:server` is a wrapper script that runs the cargo command above for development convenience. The server is implemented in Rust and will start on `http://localhost:8080` by default.
 
 ### 2. Start the Inspector (Web Version)
 
@@ -173,7 +181,7 @@ registerAsyncStorageDevTools(AsyncStorage);
 
 ### Your First Debugging Session
 
-1. Start Chrome Remote DevTools server (`bun run dev:server`)
+1. Start Chrome Remote DevTools server (`bun run dev:server` or `cargo run --bin chrome-remote-devtools-server -- --port 8080`)
 2. Start Inspector web version (`bun run dev:inspector`)
 3. Run your React Native app and connect to the server
 4. Open Inspector in your browser (`http://localhost:5173`)
