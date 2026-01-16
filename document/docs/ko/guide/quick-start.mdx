@@ -16,11 +16,19 @@ import { PackageManagerTabs } from '@theme';
 
 ### 1. WebSocket 릴레이 서버 시작
 
+**개발 편의를 위한 방법 (권장)**:
+
 ```bash
 bun run dev:server
 ```
 
-서버는 기본적으로 `http://localhost:8080`에서 시작됩니다.
+**직접 Rust 서버 실행**:
+
+```bash
+cargo run --bin chrome-remote-devtools-server -- --port 8080 --host 0.0.0.0
+```
+
+> **참고**: `bun run dev:server`는 개발 편의를 위해 위의 cargo 명령어를 실행하는 래퍼 스크립트입니다. 서버는 Rust로 구현되어 있으며, 기본적으로 `http://localhost:8080`에서 시작됩니다.
 
 ### 2. Inspector (웹 버전) 시작
 
@@ -173,7 +181,7 @@ registerAsyncStorageDevTools(AsyncStorage);
 
 ### 첫 디버깅 세션
 
-1. Chrome Remote DevTools 서버 시작 (`bun run dev:server`)
+1. Chrome Remote DevTools 서버 시작 (`bun run dev:server` 또는 `cargo run --bin chrome-remote-devtools-server -- --port 8080`)
 2. Inspector 웹 버전 시작 (`bun run dev:inspector`)
 3. React Native 앱 실행 및 서버에 연결
 4. 브라우저에서 Inspector 열기 (`http://localhost:5173`)
