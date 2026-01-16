@@ -4,7 +4,7 @@ pageType: home
 hero:
   name: Chrome Remote DevTools
   text: Remote Debugging Tool
-  tagline: Debug web pages remotely using Chrome DevTools Protocol (CDP)
+  tagline: Debug web pages and React Native apps remotely using Chrome DevTools Protocol (CDP)
   actions:
     - theme: brand
       text: Get Started
@@ -34,4 +34,10 @@ features:
   - title: JavaScript Execution
     details: Evaluate JavaScript expressions in page context
     icon: ⚡
+  - title: Redux DevTools (React Native)
+    details: Track Redux state and actions, time-travel debugging
+    icon: 🔄
+  - title: Storage Inspection (React Native)
+    details: Inspect and modify MMKV and AsyncStorage
+    icon: 💾
 ---

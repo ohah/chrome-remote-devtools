@@ -10,29 +10,39 @@ graph TB
         C[CDP Client]
     end
 
-    subgraph Server["Bun Relay Server"]
+    subgraph Server["Rust WebSocket Server"]
         WS[WebSocket Server]
         RM[Message Router]
+        HTTP[HTTP API]
     end
 
     subgraph Inspector["Inspector"]
         IW[Web Inspector]
-        ID[Desktop Inspector]
+        subgraph Desktop["Desktop Inspector (Tauri)"]
+            ID[Tauri App]
+            ES[Embedded Server]
+        end
     end
 
     C <-->|WebSocket| WS
     WS <--> RM
     RM <-->|WebSocket| IW
     RM <-->|WebSocket| ID
+    ID <-->|Tauri Commands| ES
+    ES <-->|Internal| WS
+    HTTP <--> IW
+    HTTP <--> ID
 ```
 
 ## 통신 흐름
 
+### 웹 Inspector
+
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant S as Server
-    participant I as Inspector
+    participant S as Rust Server
+    participant I as Web Inspector
 
     C->>S: Connect via WebSocket
     I->>S: Connect via WebSocket
@@ -44,11 +54,32 @@ sequenceDiagram
     S->>I: Forward CDP response/event
 ```
 
+### 데스크탑 Inspector (Tauri)
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant T as Tauri App
+    participant ES as Embedded Server
+    participant I as Inspector UI
+
+    C->>ES: Connect via WebSocket
+    I->>T: Tauri Command
+    T->>ES: Start/Control Server
+    ES->>I: Notify client connected
+    I->>ES: Select client via WebSocket
+    I->>ES: Send CDP command
+    ES->>C: Forward CDP command
+    C->>ES: Send CDP response/event
+    ES->>I: Forward CDP response/event
+```
+
 ## 패키지 구조
 
-- **@ohah/chrome-remote-devtools-server**: WebSocket 릴레이 서버 (TypeScript/Bun)
+- **chrome-remote-devtools-server** (Rust): WebSocket 릴레이 서버 (독립 실행형 또는 Tauri에 내장)
 - **@ohah/chrome-remote-devtools-client**: CDP 클라이언트 (JavaScript, 웹페이지에 로드)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, 웹/데스크탑 공유)
+- **src-tauri** (Rust): Tauri 데스크탑 앱 (서버 내장)
 
 ## 데이터 저장소
 
@@ -62,11 +93,11 @@ sequenceDiagram
 
 ### Server
 
-서버는 클라이언트와 Inspector 사이의 릴레이 역할을 합니다. WebSocket 연결을 관리하고 CDP 메시지를 양방향으로 라우팅합니다.
+서버는 Rust로 구현된 WebSocket 릴레이 서버입니다. 클라이언트와 Inspector 사이의 릴레이 역할을 하며, WebSocket 연결을 관리하고 CDP 메시지를 양방향으로 라우팅합니다. 독립 실행형으로 실행하거나 Tauri 데스크탑 앱에 내장하여 사용할 수 있습니다.
 
 ### Inspector
 
-Inspector는 디버깅을 위한 DevTools UI를 제공합니다. 웹 애플리케이션이나 데스크탑 애플리케이션(Tauri 사용)으로 실행할 수 있습니다.
+Inspector는 디버깅을 위한 DevTools UI를 제공합니다. 웹 애플리케이션이나 데스크탑 애플리케이션(Tauri 사용)으로 실행할 수 있습니다. 데스크탑 버전의 경우 Tauri가 Rust 서버를 내장하여 별도의 서버 실행 없이 사용할 수 있습니다.
 
 ## 다음 단계
 

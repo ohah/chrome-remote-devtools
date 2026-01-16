@@ -1,1 +1,1 @@
-["runtime", "page", "dom", "network", "session-replay"]
+["runtime", "page", "dom", "network", "session-replay", "mmkv-storage", "async-storage", "redux"]
