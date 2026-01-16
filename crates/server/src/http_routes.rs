@@ -109,18 +109,31 @@ async fn get_all_clients_detailed(
 
     // Convert React Native Inspector connections to client format / React Native Inspector 연결을 클라이언트 형식으로 변환
     // Use client_id if available (for Reactotron clients), otherwise use inspector.id / client_id가 있으면 사용 (Reactotron 클라이언트용), 없으면 inspector.id 사용
-    let rn_inspector_clients: Vec<Value> = rn_inspectors
-        .into_iter()
-        .map(|inspector| {
-            json!({
-                "id": inspector.client_id.as_ref().unwrap_or(&inspector.id), // Use client_id if available, otherwise use inspector.id / client_id가 있으면 사용, 없으면 inspector.id 사용
-                "type": "react-native",
-                "deviceName": inspector.device_name,
-                "appName": inspector.app_name,
-                "deviceId": inspector.device_id,
-            })
-        })
-        .collect();
+    let mut rn_inspector_clients: Vec<Value> = Vec::new();
+    for inspector in rn_inspectors {
+        let client_id = inspector.client_id.as_ref().unwrap_or(&inspector.id);
+        let is_reactotron = inspector.client_id.is_some();
+
+        // Get title from client if available / 클라이언트에서 title 가져오기 (가능한 경우)
+        let title = if let Some(client_id_str) = &inspector.client_id {
+            if let Some(client) = server.get_client(client_id_str).await {
+                client.title
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        rn_inspector_clients.push(json!({
+            "id": client_id,
+            "type": if is_reactotron { "reactotron" } else { "react-native" },
+            "deviceName": inspector.device_name,
+            "appName": inspector.app_name,
+            "deviceId": inspector.device_id,
+            "title": title,
+        }));
+    }
 
     server.logger.log(
         crate::logging::LogType::Server,

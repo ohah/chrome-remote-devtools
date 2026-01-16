@@ -109,7 +109,7 @@ mod tests {
     #[test]
     /// Test configuration deserialization / 설정 역직렬화 테스트
     fn test_config_deserialization() {
-        let json = r#"{"port":9000,"host":"127.0.0.1","use_ssl":true,"ssl_cert_path":"cert.pem","ssl_key_path":"key.pem","log_enabled":true,"log_methods":"test","log_file":"log.txt","dev_mode":true}"#;
+        let json = r#"{"port":9000,"host":"127.0.0.1","use_ssl":true,"ssl_cert_path":"cert.pem","ssl_key_path":"key.pem","log_enabled":true,"log_methods":"test","log_file":"log.txt","dev_mode":true,"enable_reactotron_server":false}"#;
         let config: ServerConfig = serde_json::from_str(json).unwrap();
         assert_eq!(config.port, 9000);
         assert_eq!(config.host, "127.0.0.1");

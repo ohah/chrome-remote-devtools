@@ -1,7 +1,7 @@
 /**
  * Client entity types / 클라이언트 엔티티 타입
  */
-export type ClientType = 'web' | 'react-native';
+export type ClientType = 'web' | 'react-native' | 'reactotron';
 
 /**
  * Web client / 웹 클라이언트
@@ -33,9 +33,29 @@ export interface ReactNativeClient {
   appName?: string;
   /** Device ID / 디바이스 ID */
   deviceId?: string;
+  /** Title / 제목 */
+  title?: string;
+}
+
+/**
+ * Reactotron client / Reactotron 클라이언트
+ */
+export interface ReactotronClient {
+  /** Client unique identifier / 클라이언트 고유 식별자 */
+  id: string;
+  /** Client type / 클라이언트 타입 */
+  type: 'reactotron';
+  /** Device name / 디바이스 이름 */
+  deviceName?: string;
+  /** App name / 앱 이름 */
+  appName?: string;
+  /** Device ID / 디바이스 ID */
+  deviceId?: string;
+  /** Title / 제목 */
+  title?: string;
 }
 
 /**
  * Client union type / 클라이언트 유니온 타입
  */
-export type Client = WebClient | ReactNativeClient;
+export type Client = WebClient | ReactNativeClient | ReactotronClient;
