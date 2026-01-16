@@ -85,8 +85,113 @@ The Inspector will connect to your page and you can use all DevTools features:
 - Debug JavaScript
 - And much more!
 
+## Quick Start (React Native)
+
+This guide shows how to use Chrome Remote DevTools in React Native apps.
+
+### Installation
+
+Install the React Native Inspector package:
+
+<PackageManagerTabs command="install @ohah/chrome-remote-devtools-react-native" />
+
+### Metro Configuration
+
+Add Redux DevTools Extension polyfill to your Metro configuration:
+
+```javascript
+// metro.config.js
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { withChromeRemoteDevToolsRedux } = require('@ohah/chrome-remote-devtools-react-native/metro');
+
+const config = getDefaultConfig(__dirname);
+
+module.exports = withChromeRemoteDevToolsRedux(config);
+```
+
+### Connect in Your App
+
+Connect to the server from your React Native app:
+
+```typescript
+import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-react-native';
+
+// Connect to server
+ChromeRemoteDevToolsInspector.connect('localhost', 8080)
+  .then(() => {
+    console.log('✅ Connected to Chrome Remote DevTools');
+  })
+  .catch((error) => {
+    console.error('❌ Failed to connect:', error);
+  });
+```
+
+**Note**: If using Android emulator, use `10.0.2.2` instead of `localhost`:
+
+```typescript
+const serverHost = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+ChromeRemoteDevToolsInspector.connect(serverHost, 8080);
+```
+
+### Using Redux DevTools (Optional)
+
+If using Redux, add the middleware:
+
+```typescript
+import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-react-native/redux';
+import { createStore, applyMiddleware } from 'redux';
+
+const store = createStore(
+  rootReducer,
+  applyMiddleware(
+    createReduxDevToolsMiddleware({
+      name: 'MyApp',
+      instanceId: 'main-store'
+    })
+  )
+);
+```
+
+### Storage Inspection (Optional)
+
+To inspect MMKV or AsyncStorage, register them:
+
+```typescript
+import { registerMMKVDevTools } from '@ohah/chrome-remote-devtools-react-native';
+import { createMMKV } from 'react-native-mmkv';
+
+const storage = createMMKV({ id: 'user-storage' });
+registerMMKVDevTools(storage);
+```
+
+```typescript
+import { registerAsyncStorageDevTools } from '@ohah/chrome-remote-devtools-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+registerAsyncStorageDevTools(AsyncStorage);
+```
+
+### Your First Debugging Session
+
+1. Start Chrome Remote DevTools server (`bun run dev:server`)
+2. Start Inspector web version (`bun run dev:inspector`)
+3. Run your React Native app and connect to the server
+4. Open Inspector in your browser (`http://localhost:5173`)
+5. Select your client from the list
+6. Start debugging!
+
+The Inspector provides access to:
+
+- View and interact with the console
+- Monitor network requests
+- Debug JavaScript
+- Track Redux state and actions (if using Redux)
+- Inspect and modify MMKV/AsyncStorage (if registered)
+- And much more!
+
 ## Next Steps
 
 - Learn about the [Architecture](/architecture/overview)
 - Try the [Playground](/examples/)
 - Read the [API Documentation](/api/server)
+- Explore [React Native Custom CDP Domains](/api/domains/redux)

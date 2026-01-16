@@ -1,6 +1,6 @@
 # 서버 아키텍처
 
-서버는 클라이언트와 Inspector 사이의 WebSocket 릴레이 역할을 하며, CDP 메시지를 양방향으로 라우팅합니다.
+서버는 Rust로 구현된 WebSocket 릴레이 서버로, 클라이언트와 Inspector 사이의 릴레이 역할을 하며 CDP 메시지를 양방향으로 라우팅합니다.
 
 ## WebSocket 릴레이 서버
 
@@ -69,8 +69,34 @@ sequenceDiagram
 
 ## 구현
 
-서버는 다음을 사용하여 구현됩니다:
+서버는 Rust로 구현되며 다음 기술을 사용합니다:
 
-- **Bun**: TypeScript 런타임
-- **ws**: WebSocket 라이브러리
-- **HTTP Server**: 정적 파일 및 API 엔드포인트 제공용
+- **Rust**: 시스템 프로그래밍 언어
+- **Tokio**: 비동기 런타임
+- **Axum**: 웹 프레임워크 (HTTP 및 WebSocket)
+- **tokio-tungstenite**: WebSocket 라이브러리
+- **serde**: 직렬화/역직렬화
+
+## 실행 모드
+
+서버는 두 가지 모드로 실행할 수 있습니다:
+
+### 독립 실행형 모드
+
+```bash
+cargo run --bin chrome-remote-devtools-server -- --port 8080
+```
+
+독립 실행형 서버로 실행되며, 웹 Inspector나 외부 클라이언트가 연결할 수 있습니다.
+
+### Tauri 내장 모드
+
+Tauri 데스크탑 앱에 라이브러리로 내장되어 실행됩니다. Inspector UI가 Tauri 명령을 통해 서버를 시작/중지할 수 있습니다.
+
+```rust
+use chrome_remote_devtools_server::{ServerHandle, ServerConfig};
+
+let handle = ServerHandle::new();
+let config = ServerConfig::default();
+handle.start(config).await?;
+```

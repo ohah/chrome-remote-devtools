@@ -4,7 +4,7 @@ pageType: home
 hero:
   name: Chrome Remote DevTools
   text: 원격 디버깅 도구
-  tagline: Chrome DevTools Protocol (CDP)을 사용하여 웹페이지를 원격으로 디버깅
+  tagline: Chrome DevTools Protocol (CDP)을 사용하여 웹페이지 및 React Native 앱을 원격으로 디버깅
   actions:
     - theme: brand
       text: 시작하기
@@ -34,4 +34,10 @@ features:
   - title: JavaScript 실행
     details: 페이지 컨텍스트에서 JavaScript 표현식 평가
     icon: ⚡
+  - title: Redux DevTools (React Native)
+    details: Redux 상태 및 액션 추적, 시간 여행 디버깅
+    icon: 🔄
+  - title: 스토리지 검사 (React Native)
+    details: MMKV 및 AsyncStorage 스토리지 검사 및 수정
+    icon: 💾
 ---

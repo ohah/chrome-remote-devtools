@@ -1,6 +1,6 @@
 # Server Architecture
 
-The server acts as a WebSocket relay between clients and inspectors, routing CDP messages bidirectionally.
+The server is a Rust-implemented WebSocket relay server that acts as a relay between clients and inspectors, routing CDP messages bidirectionally.
 
 ## WebSocket Relay Server
 
@@ -69,8 +69,34 @@ The server provides HTTP endpoints for client discovery:
 
 ## Implementation
 
-The server is implemented using:
+The server is implemented in Rust using:
 
-- **Bun**: TypeScript runtime
-- **ws**: WebSocket library
-- **HTTP Server**: For serving static files and API endpoints
+- **Rust**: Systems programming language
+- **Tokio**: Async runtime
+- **Axum**: Web framework (HTTP and WebSocket)
+- **tokio-tungstenite**: WebSocket library
+- **serde**: Serialization/deserialization
+
+## Execution Modes
+
+The server can run in two modes:
+
+### Standalone Mode
+
+```bash
+cargo run --bin chrome-remote-devtools-server -- --port 8080
+```
+
+Runs as a standalone server that web inspectors or external clients can connect to.
+
+### Embedded Mode (Tauri)
+
+Embedded as a library in the Tauri desktop app. The Inspector UI can start/stop the server via Tauri commands.
+
+```rust
+use chrome_remote_devtools_server::{ServerHandle, ServerConfig};
+
+let handle = ServerHandle::new();
+let config = ServerConfig::default();
+handle.start(config).await?;
+```

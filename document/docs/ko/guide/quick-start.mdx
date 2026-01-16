@@ -85,8 +85,113 @@ Inspector가 페이지에 연결되고 모든 DevTools 기능을 사용할 수 �
 - JavaScript 디버깅
 - 그리고 더 많은 기능!
 
+## Quick Start (React Native)
+
+React Native 앱에서 Chrome Remote DevTools를 사용하는 방법입니다.
+
+### 설치
+
+React Native Inspector 패키지를 설치합니다:
+
+<PackageManagerTabs command="install @ohah/chrome-remote-devtools-react-native" />
+
+### Metro 설정
+
+Metro 설정에 Redux DevTools Extension polyfill을 추가합니다:
+
+```javascript
+// metro.config.js
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { withChromeRemoteDevToolsRedux } = require('@ohah/chrome-remote-devtools-react-native/metro');
+
+const config = getDefaultConfig(__dirname);
+
+module.exports = withChromeRemoteDevToolsRedux(config);
+```
+
+### 앱에서 연결
+
+React Native 앱에서 서버에 연결합니다:
+
+```typescript
+import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-react-native';
+
+// 서버에 연결
+ChromeRemoteDevToolsInspector.connect('localhost', 8080)
+  .then(() => {
+    console.log('✅ Connected to Chrome Remote DevTools');
+  })
+  .catch((error) => {
+    console.error('❌ Failed to connect:', error);
+  });
+```
+
+**참고**: Android 에뮬레이터를 사용하는 경우 `localhost` 대신 `10.0.2.2`를 사용하세요:
+
+```typescript
+const serverHost = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+ChromeRemoteDevToolsInspector.connect(serverHost, 8080);
+```
+
+### Redux DevTools 사용 (선택사항)
+
+Redux를 사용하는 경우 미들웨어를 추가합니다:
+
+```typescript
+import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-react-native/redux';
+import { createStore, applyMiddleware } from 'redux';
+
+const store = createStore(
+  rootReducer,
+  applyMiddleware(
+    createReduxDevToolsMiddleware({
+      name: 'MyApp',
+      instanceId: 'main-store'
+    })
+  )
+);
+```
+
+### 스토리지 검사 (선택사항)
+
+MMKV 또는 AsyncStorage를 검사하려면 등록합니다:
+
+```typescript
+import { registerMMKVDevTools } from '@ohah/chrome-remote-devtools-react-native';
+import { createMMKV } from 'react-native-mmkv';
+
+const storage = createMMKV({ id: 'user-storage' });
+registerMMKVDevTools(storage);
+```
+
+```typescript
+import { registerAsyncStorageDevTools } from '@ohah/chrome-remote-devtools-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+registerAsyncStorageDevTools(AsyncStorage);
+```
+
+### 첫 디버깅 세션
+
+1. Chrome Remote DevTools 서버 시작 (`bun run dev:server`)
+2. Inspector 웹 버전 시작 (`bun run dev:inspector`)
+3. React Native 앱 실행 및 서버에 연결
+4. 브라우저에서 Inspector 열기 (`http://localhost:5173`)
+5. 목록에서 클라이언트 선택
+6. 디버깅 시작!
+
+Inspector에서 다음 기능을 사용할 수 있습니다:
+
+- 콘솔 보기 및 상호작용
+- 네트워크 요청 모니터링
+- JavaScript 디버깅
+- Redux 상태 및 액션 추적 (Redux 사용 시)
+- MMKV/AsyncStorage 검사 및 수정 (등록한 경우)
+- 그리고 더 많은 기능!
+
 ## 다음 단계
 
 - [아키텍처](/ko/architecture/overview) 알아보기
 - [플레이그라운드](/ko/examples/) 체험하기
 - [API 문서](/ko/api/server) 읽기
+- [React Native 커스텀 CDP 도메인](/ko/api/domains/redux) 알아보기
