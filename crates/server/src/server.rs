@@ -61,12 +61,18 @@ pub async fn run_server_with_socket_server(
 
     // Log Reactotron server status / Reactotron 서버 상태 로깅
     if config.enable_reactotron_server {
-        eprintln!("[reactotron] ✅ Reactotron WebSocket server is ENABLED on root path (ws://{}:{})", config.host, config.port);
+        eprintln!(
+            "[reactotron] ✅ Reactotron WebSocket server is ENABLED on root path (ws://{}:{})",
+            config.host, config.port
+        );
         let _ = io::stderr().flush();
         logger.log(
             crate::logging::LogType::Server,
             "reactotron",
-            &format!("Reactotron WebSocket server enabled on root path (ws://{}:{})", config.host, config.port),
+            &format!(
+                "Reactotron WebSocket server enabled on root path (ws://{}:{})",
+                config.host, config.port
+            ),
             None,
             None,
         );
@@ -139,7 +145,10 @@ pub async fn run_server(config: ServerConfig) -> Result<(), crate::ServerError> 
     );
 
     // Create socket server / 소켓 서버 생성
-    let socket_server = Arc::new(RwLock::new(SocketServer::new(logger.clone(), config.enable_reactotron_server)));
+    let socket_server = Arc::new(RwLock::new(SocketServer::new(
+        logger.clone(),
+        config.enable_reactotron_server,
+    )));
 
     run_server_with_socket_server(config, socket_server).await
 }

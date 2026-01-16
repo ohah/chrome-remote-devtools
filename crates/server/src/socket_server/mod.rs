@@ -477,7 +477,10 @@ impl SocketServer {
                                 logger.log(
                                     LogType::Reactotron,
                                     client_id,
-                                    &format!("💾 Stored response body for requestId: {}", request_id),
+                                    &format!(
+                                        "💾 Stored response body for requestId: {}",
+                                        request_id
+                                    ),
                                     Some(&serde_json::json!({
                                         "requestId": request_id,
                                         "bodyLength": body.len(),

@@ -1,6 +1,6 @@
 // Bridge between Reactotron and Remote DevTools / Reactotron과 Remote DevTools 간 브릿지
-use crate::socket_server::SocketServer;
 use crate::logging::{LogType, Logger};
+use crate::socket_server::SocketServer;
 use serde_json::Value;
 use std::sync::Arc;
 use tokio::sync::mpsc;
@@ -51,20 +51,17 @@ pub async fn register_reactotron_client(
     let tx = {
         let server = socket_server.read().await;
         server
-            .register_reactotron_client(
-                client_id.clone(),
-                url,
-                title.clone(),
-                ua,
-                logger.clone(),
-            )
+            .register_reactotron_client(client_id.clone(), url, title.clone(), ua, logger.clone())
             .await
     };
 
     logger.log(
         LogType::Reactotron,
         &client_id,
-        &format!("✅ Registered Reactotron client as Remote DevTools client: {:?} ({})", name, title),
+        &format!(
+            "✅ Registered Reactotron client as Remote DevTools client: {:?} ({})",
+            name, title
+        ),
         Some(&serde_json::json!({
             "clientId": client_id,
             "name": name,
@@ -147,7 +144,10 @@ pub async fn update_reactotron_client(
     logger.log(
         LogType::Reactotron,
         &client_id,
-        &format!("Updated Reactotron client information: {:?}", title_for_log.as_ref()),
+        &format!(
+            "Updated Reactotron client information: {:?}",
+            title_for_log.as_ref()
+        ),
         Some(&serde_json::json!({
             "clientId": client_id,
             "name": name,

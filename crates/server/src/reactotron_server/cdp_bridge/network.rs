@@ -1,6 +1,8 @@
 // Convert network messages to CDP format / 네트워크 메시지를 CDP 형식으로 변환
 use crate::logging::Logger;
-use crate::reactotron_server::cdp_bridge::normalize::{normalize_reactotron_json_value, normalize_reactotron_string};
+use crate::reactotron_server::cdp_bridge::normalize::{
+    normalize_reactotron_json_value, normalize_reactotron_string,
+};
 use crate::reactotron_server::types::Command;
 use std::sync::Arc;
 
@@ -389,7 +391,10 @@ pub fn convert_network_response_to_cdp(
 }
 
 /// Convert network error to CDP Network.loadingFailed event / 네트워크 에러를 CDP Network.loadingFailed 이벤트로 변환
-pub fn convert_network_error_to_cdp(cmd: &Command, _logger: Arc<Logger>) -> Option<serde_json::Value> {
+pub fn convert_network_error_to_cdp(
+    cmd: &Command,
+    _logger: Arc<Logger>,
+) -> Option<serde_json::Value> {
     let payload = &cmd.payload;
 
     // Extract error information / 에러 정보 추출

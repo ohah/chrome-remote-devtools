@@ -14,6 +14,7 @@ pub fn test_config(port: u16) -> ServerConfig {
         log_methods: None,
         log_file: None,
         dev_mode: true,
+        enable_reactotron_server: false,
     }
 }
 
