@@ -10,6 +10,7 @@ use tokio::sync::mpsc;
 use tokio::sync::RwLock;
 
 /// Handle DevTools WebSocket connection / DevTools WebSocket 연결 처리
+#[allow(clippy::too_many_arguments)]
 pub async fn handle_devtools_connection(
     ws: WebSocket,
     id: String,
@@ -273,7 +274,6 @@ pub async fn handle_devtools_connection(
     let rn_manager_for_msg = rn_manager.clone();
     let logger_for_msg = logger.clone();
     let devtools_id_for_msg = id.clone();
-    let socket_server_for_msg = socket_server.clone();
     tokio::spawn(async move {
         while let Some(msg) = receiver.next().await {
             match msg {

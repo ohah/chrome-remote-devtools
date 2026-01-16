@@ -34,7 +34,8 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
         </thead>
         <tbody className="divide-y divide-gray-700">
           {clients.map((client) => {
-            const isReactNative = client.type === 'react-native';
+            const isReactNative = client.type === 'react-native' || client.type === 'reactotron';
+            const isWeb = client.type === 'web';
 
             return (
               <tr
@@ -60,7 +61,7 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
                     <span className="text-sm text-gray-200">{client.deviceName || '-'}</span>
                   ) : (
                     (() => {
-                      const safeUrl = sanitizeUrl(client.url);
+                      const safeUrl = isWeb ? sanitizeUrl(client.url) : null;
                       if (safeUrl) {
                         return (
                           <a
@@ -86,9 +87,9 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
                   <div className="flex items-center">
                     <span
                       className="text-sm text-gray-400 truncate max-w-md block"
-                      title={isReactNative ? client.appName : client.ua}
+                      title={isReactNative ? client.appName : isWeb ? client.ua : undefined}
                     >
-                      {isReactNative ? client.appName || '-' : client.ua || '-'}
+                      {isReactNative ? client.appName || '-' : isWeb ? client.ua || '-' : '-'}
                     </span>
                   </div>
                 </td>

@@ -10,8 +10,8 @@ export interface BuildDevToolsUrlOptions {
   clientId: string;
   /** Server URL (default: getServerUrl()) / 서버 URL (기본값: getServerUrl()) */
   serverUrl?: string;
-  /** Client type ('web' | 'react-native') / 클라이언트 타입 */
-  clientType?: 'web' | 'react-native';
+  /** Client type ('web' | 'react-native' | 'reactotron') / 클라이언트 타입 */
+  clientType?: 'web' | 'react-native' | 'reactotron';
 }
 
 /**
