@@ -17,6 +17,7 @@ pub async fn handle_devtools_connection(
     clients: Arc<RwLock<std::collections::HashMap<String, Arc<Client>>>>,
     devtools: Arc<RwLock<std::collections::HashMap<String, Arc<DevTools>>>>,
     rn_manager: Arc<ReactNativeInspectorConnectionManager>,
+    socket_server: Arc<RwLock<super::SocketServer>>,
     logger: Arc<Logger>,
 ) {
     logger.log(
@@ -268,6 +269,7 @@ pub async fn handle_devtools_connection(
     let rn_manager_for_msg = rn_manager.clone();
     let logger_for_msg = logger.clone();
     let devtools_id_for_msg = id.clone();
+    let socket_server_for_msg = socket_server.clone();
     tokio::spawn(async move {
         while let Some(msg) = receiver.next().await {
             match msg {
@@ -282,6 +284,65 @@ pub async fn handle_devtools_connection(
                             Some(&serde_json::json!(parsed)),
                             parsed.method.as_deref(),
                         );
+
+                        // Handle Network.getResponseBody command / Network.getResponseBody 명령 처리
+                        if let Some(method) = &parsed.method {
+                            if method == "Network.getResponseBody" {
+                                if let Some(id) = parsed.id {
+                                    // Extract request_id before spawning / spawn 전에 request_id 추출
+                                    let request_id_opt = parsed.params
+                                        .as_ref()
+                                        .and_then(|p| p.as_object())
+                                        .and_then(|params| params.get("requestId"))
+                                        .and_then(|r| r.as_str())
+                                        .map(|s| s.to_string());
+
+                                    if let Some(request_id) = request_id_opt {
+                                        let socket_server_for_body = socket_server.clone();
+                                        let devtools_for_body = devtools_for_msg.clone();
+                                        let devtools_id_for_body = devtools_id_for_msg.clone();
+                                        let logger_for_body = logger_for_msg.clone();
+
+                                        tokio::spawn(async move {
+                                            let server = socket_server_for_body.read().await;
+                                            let body = server.response_bodies.read().await.get(&request_id).cloned();
+
+                                            let response = serde_json::json!({
+                                                "id": id,
+                                                "result": {
+                                                    "body": body.unwrap_or_default(),
+                                                    "base64Encoded": false
+                                                }
+                                            });
+
+                                            if let Ok(response_str) = serde_json::to_string(&response) {
+                                                let devtools = devtools_for_body.read().await;
+                                                if let Some(devtool) = devtools.get(&devtools_id_for_body) {
+                                                    if let Err(e) = devtool.sender.send(response_str.clone()) {
+                                                        logger_for_body.log_error(
+                                                            LogType::DevTools,
+                                                            &devtools_id_for_body,
+                                                            "failed to send Network.getResponseBody response",
+                                                            Some(&e.to_string()),
+                                                        );
+                                                    } else {
+                                                        logger_for_body.log(
+                                                            LogType::DevTools,
+                                                            &devtools_id_for_body,
+                                                            &format!("✅ Sent Network.getResponseBody response for requestId: {}", request_id),
+                                                            Some(&response),
+                                                            Some("Network.getResponseBody"),
+                                                        );
+                                                    }
+                                                }
+                                                drop(devtools);
+                                            }
+                                        });
+                                        should_forward = false;
+                                    }
+                                }
+                            }
+                        }
 
                         // Handle enable commands and Page.getResourceTree for Reactotron CDP bridge / Reactotron CDP 브리지를 위한 enable 명령 및 Page.getResourceTree 처리
                         // For Reactotron clients, we need to respond to enable commands since they don't have a real target

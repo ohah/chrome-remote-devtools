@@ -65,39 +65,30 @@ async fn get_all_clients_detailed(
         Some("get_all_clients_detailed"),
     );
 
+    // Get React Native Inspector connections first (includes Reactotron clients registered as RN) / 먼저 React Native Inspector 연결 가져오기 (RN으로 등록된 Reactotron 클라이언트 포함)
+    let rn_inspectors = server
+        .react_native_inspector_manager
+        .get_all_connections()
+        .await;
+
+    // Create a set of React Native Inspector client IDs to avoid duplicates / 중복을 피하기 위해 React Native Inspector 클라이언트 ID 집합 생성
+    let rn_client_ids: std::collections::HashSet<String> = rn_inspectors
+        .iter()
+        .filter_map(|inspector| inspector.client_id.clone())
+        .collect();
+
     // Separate clients by type / 타입별로 클라이언트 분리
     let mut regular_clients: Vec<Value> = Vec::new();
-    let mut reactotron_clients: Vec<Value> = Vec::new();
 
     for client in all_clients_info {
-        // Check if it's a Reactotron client / Reactotron 클라이언트인지 확인
+        // Skip Reactotron clients that are registered as React Native Inspector / React Native Inspector로 등록된 Reactotron 클라이언트는 건너뛰기
+        // They will be included in rn_inspector_clients below / 아래의 rn_inspector_clients에 포함됨
         if let Some(url) = &client.url {
             if url.starts_with("reactotron://") {
-                // Reactotron client / Reactotron 클라이언트
-                let device_name = client.title.clone().unwrap_or_else(|| "Unknown Device".to_string());
-                server.logger.log(
-                    crate::logging::LogType::Server,
-                    "http-routes",
-                    &format!("🔵 Found Reactotron client: {} ({})", client.id, device_name),
-                    Some(&serde_json::json!({
-                        "id": client.id,
-                        "url": client.url,
-                        "title": client.title,
-                        "deviceName": device_name,
-                    })),
-                    Some("reactotron_client"),
-                );
-
-                reactotron_clients.push(json!({
-                    "id": client.id,
-                    "type": "reactotron",
-                    "deviceName": device_name,
-                    "url": client.url,
-                    "title": client.title,
-                    "ua": client.ua,
-                    "time": client.time,
-                }));
-                continue;
+                // Check if this Reactotron client is registered as React Native Inspector / 이 Reactotron 클라이언트가 React Native Inspector로 등록되었는지 확인
+                if rn_client_ids.contains(&client.id) {
+                    continue; // Skip, will be included in rn_inspector_clients / 건너뛰기, rn_inspector_clients에 포함됨
+                }
             }
         }
 
@@ -113,27 +104,13 @@ async fn get_all_clients_detailed(
         }));
     }
 
-    server.logger.log(
-        crate::logging::LogType::Server,
-        "http-routes",
-        &format!("📊 Client breakdown: {} regular, {} Reactotron, {} RN",
-                 regular_clients.len(),
-                 reactotron_clients.len(),
-                 0), // RN count will be added below
-        None,
-        Some("client_breakdown"),
-    );
-
-    let rn_inspectors = server
-        .react_native_inspector_manager
-        .get_all_connections()
-        .await;
-
+    // Convert React Native Inspector connections to client format / React Native Inspector 연결을 클라이언트 형식으로 변환
+    // Use client_id if available (for Reactotron clients), otherwise use inspector.id / client_id가 있으면 사용 (Reactotron 클라이언트용), 없으면 inspector.id 사용
     let rn_inspector_clients: Vec<Value> = rn_inspectors
         .into_iter()
         .map(|inspector| {
             json!({
-                "id": inspector.id,
+                "id": inspector.client_id.as_ref().unwrap_or(&inspector.id), // Use client_id if available, otherwise use inspector.id / client_id가 있으면 사용, 없으면 inspector.id 사용
                 "type": "react-native",
                 "deviceName": inspector.device_name,
                 "appName": inspector.app_name,
@@ -142,7 +119,17 @@ async fn get_all_clients_detailed(
         })
         .collect();
 
-    let all_clients: Vec<Value> = [regular_clients, reactotron_clients, rn_inspector_clients].concat();
+    server.logger.log(
+        crate::logging::LogType::Server,
+        "http-routes",
+        &format!("📊 Client breakdown: {} regular, {} React Native (including Reactotron)",
+                 regular_clients.len(),
+                 rn_inspector_clients.len()),
+        None,
+        Some("client_breakdown"),
+    );
+
+    let all_clients: Vec<Value> = [regular_clients, rn_inspector_clients].concat();
 
     Ok(Json(json!({ "clients": all_clients })))
 }

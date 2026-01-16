@@ -63,6 +63,7 @@ pub struct SocketServer {
     pub react_native_inspector_manager: Arc<ReactNativeInspectorConnectionManager>,
     pub reactotron_server: Option<Arc<ReactotronServer>>,
     pub logger: Arc<Logger>, // Made public for shared server instances / 공유 서버 인스턴스를 위해 public으로 변경
+    response_bodies: Arc<RwLock<HashMap<String, String>>>, // Store response bodies for Network.getResponseBody / Network.getResponseBody를 위한 응답 본문 저장
 }
 
 impl SocketServer {
@@ -93,6 +94,7 @@ impl SocketServer {
                 None
             },
             logger,
+            response_bodies: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
@@ -289,6 +291,7 @@ impl SocketServer {
                         server_guard.clients.clone(),
                         server_guard.devtools.clone(),
                         server_guard.react_native_inspector_manager.clone(),
+                        server.clone(),
                         server_guard.logger.clone(),
                     )
                     .await;
@@ -462,6 +465,32 @@ impl SocketServer {
         cdp_message: &serde_json::Value,
         logger: Arc<Logger>,
     ) {
+        // Store response body if this is Network.responseReceived event / Network.responseReceived 이벤트인 경우 응답 본문 저장
+        if let Some(method) = cdp_message.get("method").and_then(|m| m.as_str()) {
+            if method == "Network.responseReceived" {
+                if let Some(params) = cdp_message.get("params").and_then(|p| p.as_object()) {
+                    if let Some(request_id) = params.get("requestId").and_then(|r| r.as_str()) {
+                        if let Some(response) = params.get("response").and_then(|r| r.as_object()) {
+                            if let Some(body) = response.get("body").and_then(|b| b.as_str()) {
+                                let mut response_bodies = self.response_bodies.write().await;
+                                response_bodies.insert(request_id.to_string(), body.to_string());
+                                logger.log(
+                                    LogType::Reactotron,
+                                    client_id,
+                                    &format!("💾 Stored response body for requestId: {}", request_id),
+                                    Some(&serde_json::json!({
+                                        "requestId": request_id,
+                                        "bodyLength": body.len(),
+                                    })),
+                                    Some("store_response_body"),
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         let devtools = self.devtools.read().await;
         let mut sent_count = 0;
 

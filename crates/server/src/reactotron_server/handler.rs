@@ -138,18 +138,41 @@ pub async fn handle_reactotron_websocket(
 
             // Unregister Reactotron client from Remote DevTools / Reactotron 클라이언트를 Remote DevTools에서 등록 해제
             if let Some(server) = socket_server_for_cleanup.as_ref() {
+                // Unregister from Remote DevTools / Remote DevTools에서 등록 해제
                 crate::reactotron_server::bridge::unregister_reactotron_client(
                     &client_id,
                     server.clone(),
                     logger_clone.clone(),
                 )
                 .await;
+
+                // Also remove from React Native Inspector Manager / React Native Inspector Manager에서도 제거
+                let server_guard = server.read().await;
+                let rn_manager = server_guard.react_native_inspector_manager.clone();
+                drop(server_guard);
+
+                // Find and remove React Native Inspector connection with this client_id / 이 client_id를 가진 React Native Inspector 연결 찾아서 제거
+                let connections = rn_manager.get_all_connections().await;
+                for conn in connections {
+                    if conn.client_id.as_ref() == Some(&client_id) {
+                        rn_manager.remove_connection(&conn.id).await;
+                        logger_clone.log(
+                            LogType::Reactotron,
+                            &client_id,
+                            &format!("Removed React Native Inspector connection {} for Reactotron client", conn.id),
+                            None,
+                            None,
+                        );
+                        break;
+                    }
+                }
             }
         }
     }
 }
 
 /// Process incoming message / 들어오는 메시지 처리
+#[allow(clippy::too_many_arguments)]
 async fn handle_incoming_message(
     msg: Message,
     connection_id: u32,
@@ -271,6 +294,98 @@ async fn handle_incoming_message(
 
                 // Register Reactotron client as Remote DevTools client / Reactotron 클라이언트를 Remote DevTools 클라이언트로 등록
                 if let Some(server) = socket_server.as_ref() {
+                    // Extract React Native Inspector params from payload / payload에서 React Native Inspector params 추출
+                    let device_name = cmd
+                        .payload
+                        .get("name")
+                        .and_then(|v| v.as_str())
+                        .map(String::from);
+
+                    let app_name = cmd
+                        .payload
+                        .get("app")
+                        .and_then(|v| v.as_str())
+                        .map(String::from)
+                        .or_else(|| {
+                            cmd.payload
+                                .get("appName")
+                                .and_then(|v| v.as_str())
+                                .map(String::from)
+                        });
+
+                    let device_id = cmd
+                        .payload
+                        .get("device")
+                        .and_then(|v| v.as_str())
+                        .map(String::from)
+                        .or_else(|| {
+                            cmd.payload
+                                .get("deviceId")
+                                .and_then(|v| v.as_str())
+                                .map(String::from)
+                        })
+                        .or_else(|| Some(final_client_id.clone())); // Fallback to client_id if no device ID / device ID가 없으면 client_id 사용
+
+                    // Register as React Native Inspector connection / React Native Inspector 연결로 등록
+                    let server_guard = server.read().await;
+                    let rn_manager = server_guard.react_native_inspector_manager.clone();
+                    drop(server_guard);
+
+                    // Create a String sender wrapper for React Native Inspector / React Native Inspector를 위한 String sender 래퍼 생성
+                    // Reactotron uses Message type, but React Native Inspector uses String / Reactotron은 Message 타입을 사용하지만 React Native Inspector는 String을 사용
+                    let (tx_string, mut rx_string) =
+                        tokio::sync::mpsc::unbounded_channel::<String>();
+                    let sender_for_rn_wrapper = sender.clone();
+                    tokio::spawn(async move {
+                        while let Some(msg_str) = rx_string.recv().await {
+                            // Convert String to Message::Text and send via Reactotron sender / String을 Message::Text로 변환하여 Reactotron sender로 전송
+                            if let Err(e) = sender_for_rn_wrapper.send(Message::Text(msg_str)) {
+                                eprintln!(
+                                    "[reactotron] Failed to forward message to Reactotron: {}",
+                                    e
+                                );
+                                break;
+                            }
+                        }
+                    });
+
+                    // Create React Native Inspector connection info / React Native Inspector 연결 정보 생성
+                    let connection_info = crate::react_native::ConnectionInfo {
+                        id: String::new(), // Will be set by create_connection / create_connection에서 설정됨
+                        device_name: device_name.clone(),
+                        app_name: app_name.clone(),
+                        device_id: device_id.clone(),
+                        client_id: None,
+                    };
+
+                    // Create React Native Inspector connection / React Native Inspector 연결 생성
+                    let inspector_id = rn_manager
+                        .create_connection(connection_info, tx_string)
+                        .await;
+
+                    // Auto-associate with self as clientId (so DevTools can connect) / 자동으로 자신을 clientId로 연결 (DevTools가 연결할 수 있도록)
+                    rn_manager
+                        .associate_with_client(&inspector_id, &final_client_id)
+                        .await;
+
+                    logger.log(
+                        LogType::Reactotron,
+                        &connection_id.to_string(),
+                        &format!(
+                            "✅ Registered Reactotron client {} as React Native Inspector connection (inspector_id: {})",
+                            final_client_id, inspector_id
+                        ),
+                        Some(&serde_json::json!({
+                            "clientId": final_client_id,
+                            "inspectorId": inspector_id,
+                            "deviceName": device_name,
+                            "appName": app_name,
+                            "deviceId": device_id,
+                        })),
+                        None,
+                    );
+
+                    // Also register as Remote DevTools client / Remote DevTools 클라이언트로도 등록
                     if let Some(_tx) = crate::reactotron_server::bridge::register_reactotron_client(
                         final_client_id.clone(),
                         &cmd.payload,
@@ -285,7 +400,10 @@ async fn handle_incoming_message(
                         logger.log(
                             LogType::Reactotron,
                             &connection_id.to_string(),
-                            &format!("Registered Reactotron client {} in Remote DevTools", final_client_id),
+                            &format!(
+                                "Registered Reactotron client {} in Remote DevTools",
+                                final_client_id
+                            ),
                             None,
                             None,
                         );
@@ -298,36 +416,89 @@ async fn handle_incoming_message(
 
                 // Convert Reactotron message to CDP format and send to DevTools / Reactotron 메시지를 CDP 형식으로 변환하여 DevTools로 전송
                 if let Some(socket_server) = socket_server.as_ref() {
-                    let cdp_result = crate::reactotron_server::cdp_bridge::convert_reactotron_to_cdp(&cmd, logger.clone());
-                    if let Some(cdp_message) = cdp_result {
-                        logger.log(
-                            LogType::Reactotron,
-                            &client_id,
-                            &format!("✅ CDP conversion successful for type: {}", cmd.r#type),
-                            Some(&serde_json::json!({
-                                "originalType": cmd.r#type,
-                                "cdpMethod": cdp_message.get("method").and_then(|m| m.as_str()),
-                                "cdpMessage": cdp_message,
-                            })),
-                            Some("cdp_conversion_success"),
-                        );
+                    // Special handling for api.response - it returns multiple CDP events / api.response는 여러 CDP 이벤트를 반환하므로 특별 처리
+                    if cmd.r#type == "api.response" {
+                        if let Some(messages) =
+                            crate::reactotron_server::cdp_bridge::convert_network_response_to_cdp(
+                                &cmd,
+                                logger.clone(),
+                            )
+                        {
+                            logger.log(
+                                LogType::Reactotron,
+                                client_id,
+                                &format!("✅ CDP conversion successful for api.response ({} events)", messages.len()),
+                                Some(&serde_json::json!({
+                                    "originalType": cmd.r#type,
+                                    "eventCount": messages.len(),
+                                    "events": messages.iter().map(|m| m.get("method").and_then(|m| m.as_str())).collect::<Vec<_>>(),
+                                })),
+                                Some("cdp_conversion_success"),
+                            );
 
-                        // Send CDP message to DevTools connected to this client / 이 클라이언트에 연결된 DevTools로 CDP 메시지 전송
-                        let server_guard = socket_server.read().await;
-                        server_guard
-                            .send_cdp_message_to_devtools(&client_id, &cdp_message, logger.clone())
-                            .await;
+                            let server_guard = socket_server.read().await;
+                            for cdp_message in messages {
+                                server_guard
+                                    .send_cdp_message_to_devtools(
+                                        client_id,
+                                        &cdp_message,
+                                        logger.clone(),
+                                    )
+                                    .await;
+                            }
+                        } else {
+                            logger.log(
+                                LogType::Reactotron,
+                                client_id,
+                                "⚠️ CDP conversion returned None for api.response (conversion failed)",
+                                Some(&serde_json::json!({
+                                    "type": cmd.r#type,
+                                    "payload": cmd.payload,
+                                })),
+                                Some("cdp_conversion_failed"),
+                            );
+                        }
                     } else {
-                        logger.log(
-                            LogType::Reactotron,
-                            &client_id,
-                            &format!("⚠️ CDP conversion returned None for type: {} (not supported or conversion failed)", cmd.r#type),
-                            Some(&serde_json::json!({
-                                "type": cmd.r#type,
-                                "payload": cmd.payload,
-                            })),
-                            Some("cdp_conversion_failed"),
-                        );
+                        // For other commands, use the existing conversion / 다른 명령의 경우 기존 변환 사용
+                        let cdp_result =
+                            crate::reactotron_server::cdp_bridge::convert_reactotron_to_cdp(
+                                &cmd,
+                                logger.clone(),
+                            );
+                        if let Some(cdp_message) = cdp_result {
+                            logger.log(
+                                LogType::Reactotron,
+                                client_id,
+                                &format!("✅ CDP conversion successful for type: {}", cmd.r#type),
+                                Some(&serde_json::json!({
+                                    "originalType": cmd.r#type,
+                                    "cdpMethod": cdp_message.get("method").and_then(|m| m.as_str()),
+                                    "cdpMessage": cdp_message,
+                                })),
+                                Some("cdp_conversion_success"),
+                            );
+
+                            // Send CDP message to DevTools connected to this client / 이 클라이언트에 연결된 DevTools로 CDP 메시지 전송
+                            let server_guard = socket_server.read().await;
+                            server_guard
+                                .send_cdp_message_to_devtools(
+                                    client_id,
+                                    &cdp_message,
+                                    logger.clone(),
+                                )
+                                .await;
+                        } else {
+                            logger.log(
+                                LogType::Reactotron,
+                                client_id,
+                                &format!("⚠️ CDP conversion returned None for type: {} (not supported or conversion failed)", cmd.r#type),
+                                Some(&serde_json::json!({
+                                    "type": cmd.r#type,
+                                    "payload": cmd.payload,
+                                })),
+                                Some("cdp_conversion_failed"),
+                            );
+                        }
                     }
                 }
             }
@@ -384,6 +555,7 @@ async fn handle_incoming_message(
 }
 
 /// Send command to client / 클라이언트에 명령 전송
+#[allow(dead_code)]
 pub async fn send_command(
     command: CommandWithClientId,
     connections: ClientConnections,
