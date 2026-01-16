@@ -53,7 +53,10 @@ async fn get_all_clients_detailed(
     server.logger.log(
         crate::logging::LogType::Server,
         "http-routes",
-        &format!("📋 get_all_clients_detailed: Found {} total clients", all_clients_info.len()),
+        &format!(
+            "📋 get_all_clients_detailed: Found {} total clients",
+            all_clients_info.len()
+        ),
         Some(&serde_json::json!({
             "total": all_clients_info.len(),
             "clients": all_clients_info.iter().map(|c| serde_json::json!({
@@ -122,9 +125,11 @@ async fn get_all_clients_detailed(
     server.logger.log(
         crate::logging::LogType::Server,
         "http-routes",
-        &format!("📊 Client breakdown: {} regular, {} React Native (including Reactotron)",
-                 regular_clients.len(),
-                 rn_inspector_clients.len()),
+        &format!(
+            "📊 Client breakdown: {} regular, {} React Native (including Reactotron)",
+            regular_clients.len(),
+            rn_inspector_clients.len()
+        ),
         None,
         Some("client_breakdown"),
     );
@@ -282,7 +287,13 @@ async fn handle_root_websocket_upgrade(
         let server_clone = server.clone();
         async move {
             // Pass empty path for root / 루트 경로를 위해 빈 경로 전달
-            SocketServer::handle_websocket_upgrade_rwlock(server_clone, socket, String::new(), params).await;
+            SocketServer::handle_websocket_upgrade_rwlock(
+                server_clone,
+                socket,
+                String::new(),
+                params,
+            )
+            .await;
         }
     })
 }

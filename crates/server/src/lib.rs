@@ -101,12 +101,16 @@ impl ServerHandle {
             )
             .map_err(ServerError::Io)?,
         );
-        let socket_server_rwlock = self.get_or_create_socket_server(logger.clone(), config.enable_reactotron_server).await;
+        let socket_server_rwlock = self
+            .get_or_create_socket_server(logger.clone(), config.enable_reactotron_server)
+            .await;
 
         let config_clone = config.clone();
         let socket_server_clone = socket_server_rwlock.clone();
-        eprintln!("[server] 🚀 Starting server on {}:{} (Reactotron: {})",
-                  config.host, config.port, config.enable_reactotron_server);
+        eprintln!(
+            "[server] 🚀 Starting server on {}:{} (Reactotron: {})",
+            config.host, config.port, config.enable_reactotron_server
+        );
         let _ = io::stderr().flush();
         let handle = tokio::spawn(async move {
             // Get Arc<SocketServer> from RwLock for the server / 서버를 위해 RwLock에서 Arc<SocketServer> 가져오기

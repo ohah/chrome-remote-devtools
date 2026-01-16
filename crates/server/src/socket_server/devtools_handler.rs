@@ -54,14 +54,18 @@ pub async fn handle_devtools_connection(
         let clients = clients.read().await;
         if let Some(client) = clients.get(client_id) {
             let client_url = client.url.clone();
-            let is_reactotron = client_url.as_ref()
+            let is_reactotron = client_url
+                .as_ref()
                 .map(|url| url.starts_with("reactotron://"))
                 .unwrap_or(false);
 
             logger.log(
                 LogType::DevTools,
                 &id,
-                &format!("🔍 DevTools connected to client {}: is_reactotron={}, url={:?}", client_id, is_reactotron, client_url),
+                &format!(
+                    "🔍 DevTools connected to client {}: is_reactotron={}, url={:?}",
+                    client_id, is_reactotron, client_url
+                ),
                 Some(&serde_json::json!({
                     "clientId": client_id,
                     "isReactotron": is_reactotron,
@@ -290,7 +294,8 @@ pub async fn handle_devtools_connection(
                             if method == "Network.getResponseBody" {
                                 if let Some(id) = parsed.id {
                                     // Extract request_id before spawning / spawn 전에 request_id 추출
-                                    let request_id_opt = parsed.params
+                                    let request_id_opt = parsed
+                                        .params
                                         .as_ref()
                                         .and_then(|p| p.as_object())
                                         .and_then(|params| params.get("requestId"))
@@ -305,7 +310,12 @@ pub async fn handle_devtools_connection(
 
                                         tokio::spawn(async move {
                                             let server = socket_server_for_body.read().await;
-                                            let body = server.response_bodies.read().await.get(&request_id).cloned();
+                                            let body = server
+                                                .response_bodies
+                                                .read()
+                                                .await
+                                                .get(&request_id)
+                                                .cloned();
 
                                             let response = serde_json::json!({
                                                 "id": id,
@@ -315,10 +325,16 @@ pub async fn handle_devtools_connection(
                                                 }
                                             });
 
-                                            if let Ok(response_str) = serde_json::to_string(&response) {
+                                            if let Ok(response_str) =
+                                                serde_json::to_string(&response)
+                                            {
                                                 let devtools = devtools_for_body.read().await;
-                                                if let Some(devtool) = devtools.get(&devtools_id_for_body) {
-                                                    if let Err(e) = devtool.sender.send(response_str.clone()) {
+                                                if let Some(devtool) =
+                                                    devtools.get(&devtools_id_for_body)
+                                                {
+                                                    if let Err(e) =
+                                                        devtool.sender.send(response_str.clone())
+                                                    {
                                                         logger_for_body.log_error(
                                                             LogType::DevTools,
                                                             &devtools_id_for_body,
@@ -358,7 +374,8 @@ pub async fn handle_devtools_connection(
 
                                 if let Some(client_id) = &client_id {
                                     let clients = clients_for_msg.read().await;
-                                    let is_reactotron = clients.get(client_id)
+                                    let is_reactotron = clients
+                                        .get(client_id)
                                         .and_then(|c| c.url.as_ref())
                                         .map(|url| url.starts_with("reactotron://"))
                                         .unwrap_or(false);
@@ -391,8 +408,12 @@ pub async fn handle_devtools_connection(
 
                                         if let Ok(response_str) = serde_json::to_string(&response) {
                                             let devtools = devtools_for_response.read().await;
-                                            if let Some(devtool) = devtools.get(&devtools_id_for_response) {
-                                                if let Err(e) = devtool.sender.send(response_str.clone()) {
+                                            if let Some(devtool) =
+                                                devtools.get(&devtools_id_for_response)
+                                            {
+                                                if let Err(e) =
+                                                    devtool.sender.send(response_str.clone())
+                                                {
                                                     logger_for_response.log_error(
                                                         LogType::DevTools,
                                                         &devtools_id_for_response,
@@ -416,7 +437,11 @@ pub async fn handle_devtools_connection(
                                 }
                             }
 
-                            if method == "Runtime.enable" || method == "Network.enable" || method == "Console.enable" || method == "Page.enable" {
+                            if method == "Runtime.enable"
+                                || method == "Network.enable"
+                                || method == "Console.enable"
+                                || method == "Page.enable"
+                            {
                                 // Check if this is a Reactotron client / Reactotron 클라이언트인지 확인
                                 let devtools = devtools_for_msg.read().await;
                                 let current_devtool = devtools.get(&devtools_id_for_msg);
@@ -426,14 +451,18 @@ pub async fn handle_devtools_connection(
                                 logger_for_msg.log(
                                     LogType::DevTools,
                                     &devtools_id_for_msg,
-                                    &format!("🔍 Checking enable command {} for client_id: {:?}", method, client_id),
+                                    &format!(
+                                        "🔍 Checking enable command {} for client_id: {:?}",
+                                        method, client_id
+                                    ),
                                     None,
                                     Some("check_enable"),
                                 );
 
                                 if let Some(client_id) = &client_id {
                                     let clients = clients_for_msg.read().await;
-                                    let is_reactotron = clients.get(client_id)
+                                    let is_reactotron = clients
+                                        .get(client_id)
                                         .and_then(|c| c.url.as_ref())
                                         .map(|url| url.starts_with("reactotron://"))
                                         .unwrap_or(false);
@@ -456,7 +485,8 @@ pub async fn handle_devtools_connection(
                                         // Handle Page.getResourceTree request / Page.getResourceTree 요청 처리
                                         if method == "Page.getResourceTree" {
                                             let devtools_for_response = devtools_for_msg.clone();
-                                            let devtools_id_for_response = devtools_id_for_msg.clone();
+                                            let devtools_id_for_response =
+                                                devtools_id_for_msg.clone();
                                             let logger_for_response = logger_for_msg.clone();
 
                                             // Create minimal frame tree for Reactotron / Reactotron을 위한 최소한의 프레임 트리 생성
@@ -479,10 +509,16 @@ pub async fn handle_devtools_connection(
                                                 }
                                             });
 
-                                            if let Ok(response_str) = serde_json::to_string(&response) {
+                                            if let Ok(response_str) =
+                                                serde_json::to_string(&response)
+                                            {
                                                 let devtools = devtools_for_response.read().await;
-                                                if let Some(devtool) = devtools.get(&devtools_id_for_response) {
-                                                    if let Err(e) = devtool.sender.send(response_str.clone()) {
+                                                if let Some(devtool) =
+                                                    devtools.get(&devtools_id_for_response)
+                                                {
+                                                    if let Err(e) =
+                                                        devtool.sender.send(response_str.clone())
+                                                    {
                                                         logger_for_response.log_error(
                                                             LogType::DevTools,
                                                             &devtools_id_for_response,
@@ -504,89 +540,114 @@ pub async fn handle_devtools_connection(
                                             should_forward = false;
                                         } else {
                                             // Send success response for enable command / enable 명령에 대한 성공 응답 전송
-                                        let response = serde_json::json!({
-                                            "id": parsed.id,
-                                            "result": {}
-                                        });
-                                        let devtools_for_response = devtools_for_msg.clone();
-                                        let devtools_id_for_response = devtools_id_for_msg.clone();
-                                        let logger_for_response = logger_for_msg.clone();
+                                            let response = serde_json::json!({
+                                                "id": parsed.id,
+                                                "result": {}
+                                            });
+                                            let devtools_for_response = devtools_for_msg.clone();
+                                            let devtools_id_for_response =
+                                                devtools_id_for_msg.clone();
+                                            let logger_for_response = logger_for_msg.clone();
 
-                                        if let Ok(response_str) = serde_json::to_string(&response) {
-                                            let devtools = devtools_for_response.read().await;
-                                            if let Some(devtool) = devtools.get(&devtools_id_for_response) {
-                                                if let Err(e) = devtool.sender.send(response_str.clone()) {
-                                                    logger_for_response.log_error(
-                                                        LogType::DevTools,
-                                                        &devtools_id_for_response,
-                                                        &format!("failed to send {} response", method),
-                                                        Some(&e.to_string()),
-                                                    );
-                                                } else {
-                                                    logger_for_response.log(
-                                                        LogType::DevTools,
-                                                        &devtools_id_for_response,
-                                                        &format!("✅ Sent success response for {}", method),
-                                                        Some(&response),
-                                                        Some(method),
-                                                    );
+                                            if let Ok(response_str) =
+                                                serde_json::to_string(&response)
+                                            {
+                                                let devtools = devtools_for_response.read().await;
+                                                if let Some(devtool) =
+                                                    devtools.get(&devtools_id_for_response)
+                                                {
+                                                    if let Err(e) =
+                                                        devtool.sender.send(response_str.clone())
+                                                    {
+                                                        logger_for_response.log_error(
+                                                            LogType::DevTools,
+                                                            &devtools_id_for_response,
+                                                            &format!(
+                                                                "failed to send {} response",
+                                                                method
+                                                            ),
+                                                            Some(&e.to_string()),
+                                                        );
+                                                    } else {
+                                                        logger_for_response.log(
+                                                            LogType::DevTools,
+                                                            &devtools_id_for_response,
+                                                            &format!(
+                                                                "✅ Sent success response for {}",
+                                                                method
+                                                            ),
+                                                            Some(&response),
+                                                            Some(method),
+                                                        );
+                                                    }
                                                 }
+                                                drop(devtools);
                                             }
-                                            drop(devtools);
-                                        }
 
-                                        // For Runtime.enable, send executionContextCreated event / Runtime.enable의 경우 executionContextCreated 이벤트 전송
-                                        if method == "Runtime.enable" {
-                                            let devtools_for_exec = devtools_for_msg.clone();
-                                            let devtools_id_for_exec = devtools_id_for_msg.clone();
-                                            let logger_for_exec = logger_for_msg.clone();
+                                            // For Runtime.enable, send executionContextCreated event / Runtime.enable의 경우 executionContextCreated 이벤트 전송
+                                            if method == "Runtime.enable" {
+                                                let devtools_for_exec = devtools_for_msg.clone();
+                                                let devtools_id_for_exec =
+                                                    devtools_id_for_msg.clone();
+                                                let logger_for_exec = logger_for_msg.clone();
 
-                                            tokio::spawn(async move {
-                                                // Wait a bit for the response to be processed / 응답이 처리될 때까지 잠시 대기
-                                                tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+                                                tokio::spawn(async move {
+                                                    // Wait a bit for the response to be processed / 응답이 처리될 때까지 잠시 대기
+                                                    tokio::time::sleep(
+                                                        tokio::time::Duration::from_millis(50),
+                                                    )
+                                                    .await;
 
-                                                let execution_context_event = serde_json::json!({
-                                                    "method": "Runtime.executionContextCreated",
-                                                    "params": {
-                                                        "context": {
-                                                            "id": 1,
-                                                            "uniqueId": "1",
-                                                            "origin": "reactotron://",
-                                                            "name": "Reactotron",
-                                                            "auxData": {
-                                                                "isDefault": true
+                                                    let execution_context_event = serde_json::json!({
+                                                        "method": "Runtime.executionContextCreated",
+                                                        "params": {
+                                                            "context": {
+                                                                "id": 1,
+                                                                "uniqueId": "1",
+                                                                "origin": "reactotron://",
+                                                                "name": "Reactotron",
+                                                                "auxData": {
+                                                                    "isDefault": true
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                });
+                                                    });
 
-                                                if let Ok(event_str) = serde_json::to_string(&execution_context_event) {
-                                                    let devtools = devtools_for_exec.read().await;
-                                                    if let Some(devtool) = devtools.get(&devtools_id_for_exec) {
-                                                        if let Err(e) = devtool.sender.send(event_str.clone()) {
-                                                            logger_for_exec.log_error(
+                                                    if let Ok(event_str) = serde_json::to_string(
+                                                        &execution_context_event,
+                                                    ) {
+                                                        let devtools =
+                                                            devtools_for_exec.read().await;
+                                                        if let Some(devtool) =
+                                                            devtools.get(&devtools_id_for_exec)
+                                                        {
+                                                            if let Err(e) = devtool
+                                                                .sender
+                                                                .send(event_str.clone())
+                                                            {
+                                                                logger_for_exec.log_error(
                                                                 LogType::DevTools,
                                                                 &devtools_id_for_exec,
                                                                 "failed to send Runtime.executionContextCreated",
                                                                 Some(&e.to_string()),
                                                             );
-                                                        } else {
-                                                            logger_for_exec.log(
+                                                            } else {
+                                                                logger_for_exec.log(
                                                                 LogType::DevTools,
                                                                 &devtools_id_for_exec,
                                                                 "✅ Sent Runtime.executionContextCreated for Reactotron client",
                                                                 Some(&execution_context_event),
                                                                 Some("Runtime.executionContextCreated"),
                                                             );
+                                                            }
                                                         }
+                                                        drop(devtools);
                                                     }
-                                                    drop(devtools);
-                                                }
-                                            });
-                                        }
+                                                });
+                                            }
 
-                                        // Don't forward enable commands to Reactotron clients / Reactotron 클라이언트에게 enable 명령을 전달하지 않음
-                                        should_forward = false;
+                                            // Don't forward enable commands to Reactotron clients / Reactotron 클라이언트에게 enable 명령을 전달하지 않음
+                                            should_forward = false;
                                         }
                                     }
                                 }
@@ -622,7 +683,10 @@ pub async fn handle_devtools_connection(
                                         logger_for_msg.log_error(
                                             LogType::DevTools,
                                             &devtools_id_for_msg,
-                                            &format!("failed to send to RN inspector {}", client_id),
+                                            &format!(
+                                                "failed to send to RN inspector {}",
+                                                client_id
+                                            ),
                                             Some(&e.to_string()),
                                         );
                                     }
