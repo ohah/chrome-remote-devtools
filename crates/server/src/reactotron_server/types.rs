@@ -24,6 +24,7 @@ pub struct Command {
 /// Command with client ID / 클라이언트 ID가 포함된 명령
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 pub struct CommandWithClientId {
     pub r#type: String,
     pub payload: serde_json::Value,

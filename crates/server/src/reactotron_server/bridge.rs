@@ -88,6 +88,7 @@ pub async fn unregister_reactotron_client(
 }
 
 /// Update Reactotron client information / Reactotron 클라이언트 정보 업데이트
+#[allow(dead_code)]
 pub async fn update_reactotron_client(
     client_id: String,
     payload: &Value,
@@ -120,7 +121,7 @@ pub async fn update_reactotron_client(
     let title = name
         .clone()
         .or_else(|| app_name.clone())
-        .map(|t| Some(t))
+        .map(Some)
         .unwrap_or(None);
 
     let title_for_log = title.clone(); // Clone for logging / 로깅을 위해 복제
@@ -128,7 +129,7 @@ pub async fn update_reactotron_client(
     let ua = platform
         .as_ref()
         .map(|p| format!("Reactotron/{}", p))
-        .map(|u| Some(u))
+        .map(Some)
         .unwrap_or(None);
 
     // Update client information / 클라이언트 정보 업데이트
