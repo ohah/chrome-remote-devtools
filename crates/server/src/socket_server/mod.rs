@@ -170,44 +170,38 @@ impl SocketServer {
                     })),
                     None,
                 );
-                if let Some(reactotron_server) = &server_guard.reactotron_server {
-                    let connection_id = reactotron_server.next_connection_id().await;
-                    let address = query_params
-                        .get("address")
-                        .cloned()
-                        .unwrap_or_else(|| "unknown".to_string());
-                    eprintln!("[reactotron] 🚀 Routing to Reactotron handler (connection_id: {}, address: {})", connection_id, address);
-                    server_guard.logger.log(
-                        LogType::Server,
-                        "reactotron",
-                        &format!(
-                            "Routing to Reactotron handler (connection_id: {}, address: {})",
-                            connection_id, address
-                        ),
-                        None,
-                        None,
-                    );
-                    crate::reactotron_server::handle_reactotron_websocket(
-                        ws,
-                        address,
-                        connection_id,
-                        reactotron_server.connections.clone(),
-                        reactotron_server.subscriptions.clone(),
-                        Some(server.clone()),
-                        server_guard.logger.clone(),
-                    )
-                    .await;
-                    return;
-                } else {
-                    eprintln!("[reactotron] ⚠️ Reactotron server is None but path matches root");
-                    server_guard.logger.log(
-                        LogType::Server,
-                        "reactotron",
-                        "Reactotron server is None but path matches root",
-                        None,
-                        None,
-                    );
-                }
+                // reactotron_server.is_some() already checked above, so unwrap is safe / 위에서 이미 reactotron_server.is_some()을 체크했으므로 unwrap은 안전함
+                let reactotron_server = server_guard
+                    .reactotron_server
+                    .as_ref()
+                    .expect("Reactotron server should be Some when path matches root and reactotron_server.is_some() is true");
+                let connection_id = reactotron_server.next_connection_id().await;
+                let address = query_params
+                    .get("address")
+                    .cloned()
+                    .unwrap_or_else(|| "unknown".to_string());
+                eprintln!("[reactotron] 🚀 Routing to Reactotron handler (connection_id: {}, address: {})", connection_id, address);
+                server_guard.logger.log(
+                    LogType::Server,
+                    "reactotron",
+                    &format!(
+                        "Routing to Reactotron handler (connection_id: {}, address: {})",
+                        connection_id, address
+                    ),
+                    None,
+                    None,
+                );
+                crate::reactotron_server::handle_reactotron_websocket(
+                    ws,
+                    address,
+                    connection_id,
+                    reactotron_server.connections.clone(),
+                    reactotron_server.subscriptions.clone(),
+                    Some(server.clone()),
+                    server_guard.logger.clone(),
+                )
+                .await;
+                return;
             } else if (path.is_empty() || path == "/") && server_guard.reactotron_server.is_none() {
                 eprintln!("[reactotron] ⚠️ WebSocket connection on root path but Reactotron server is disabled (path: '{}')", path);
             }

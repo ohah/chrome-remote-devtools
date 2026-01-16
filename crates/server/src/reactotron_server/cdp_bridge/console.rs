@@ -160,8 +160,8 @@ pub fn convert_console_to_cdp(
                 } else if t > 4_102_444_800_000.0 {
                     // Already in milliseconds (but very large, might be future date) / 이미 밀리초 단위 (하지만 매우 큼, 미래 날짜일 수 있음)
                     t
-                } else if t > 4_102_444_800.0 {
-                    // Between 2100 seconds and 2100 milliseconds - ambiguous, assume milliseconds / 2100초와 2100밀리초 사이 - 모호함, 밀리초로 가정
+                } else if t > 4_102_444_800.0 && t <= 4_102_444_800_000.0 {
+                    // Between year 2100 in seconds and year 2100 in milliseconds - ambiguous, assume milliseconds / 2100년 초 단위와 밀리초 단위 사이 - 모호함, 밀리초로 가정
                     t
                 } else {
                     // Likely seconds, convert to milliseconds / 초일 가능성, 밀리초로 변환
