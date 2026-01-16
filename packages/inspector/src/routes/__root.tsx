@@ -1,6 +1,6 @@
 // Root route
 import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { RefreshCw, Minus, Maximize2, X, Globe, Smartphone, Eye, EyeOff, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -13,6 +13,21 @@ function ClientTypeFilter() {
   const [reactotronEnabled, setReactotronEnabled] = useState(false);
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
   const { setServerUrl } = useServerUrl(); // Get setServerUrl function / setServerUrl 함수 가져오기
+
+  // Check Reactotron server status / Reactotron 서버 상태 확인
+  const checkReactotronStatus = useCallback(async () => {
+    if (!isTauri) return;
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      const isRunning = await invoke<boolean>('is_reactotron_server_running');
+      setReactotronEnabled(isRunning);
+      if (isRunning !== (localStorage.getItem('reactotron-enabled') === 'true')) {
+        localStorage.setItem('reactotron-enabled', String(isRunning));
+      }
+    } catch (error) {
+      console.error('Failed to check Reactotron server status:', error);
+    }
+  }, [isTauri, setReactotronEnabled]);
 
   // Load filter state from localStorage / localStorage에서 필터 상태 로드
   useEffect(() => {
@@ -44,22 +59,7 @@ function ClientTypeFilter() {
     if (isTauri && savedReactotron === 'true') {
       checkReactotronStatus();
     }
-  }, [setServerUrl]);
-
-  // Check Reactotron server status / Reactotron 서버 상태 확인
-  const checkReactotronStatus = async () => {
-    if (!isTauri) return;
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      const isRunning = await invoke<boolean>('is_reactotron_server_running');
-      setReactotronEnabled(isRunning);
-      if (isRunning !== (localStorage.getItem('reactotron-enabled') === 'true')) {
-        localStorage.setItem('reactotron-enabled', String(isRunning));
-      }
-    } catch (error) {
-      console.error('Failed to check Reactotron server status:', error);
-    }
-  };
+  }, [setServerUrl, checkReactotronStatus]);
 
   // Save filter state to localStorage / 필터 상태를 localStorage에 저장
   const handleWebToggle = () => {
