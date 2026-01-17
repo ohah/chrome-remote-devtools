@@ -107,11 +107,32 @@ async fn get_all_clients_detailed(
         }));
     }
 
+    // Debug log: Log all RN inspector connections for debugging / 디버깅을 위해 모든 RN Inspector 연결 로깅
+    server.logger.log(
+        crate::logging::LogType::Server,
+        "http-routes",
+        &format!("🔍 Debug: Found {} RN inspectors", rn_inspectors.len()),
+        Some(&serde_json::json!({
+            "inspectors": rn_inspectors.iter().map(|i| serde_json::json!({
+                "id": i.id,
+                "deviceName": i.device_name,
+                "appName": i.app_name,
+                "deviceId": i.device_id,
+                "clientId": i.client_id,
+            })).collect::<Vec<_>>(),
+        })),
+        Some("debug_rn_inspectors"),
+    );
+
     // Convert React Native Inspector connections to client format / React Native Inspector 연결을 클라이언트 형식으로 변환
     // Use client_id if available (for Reactotron clients), otherwise use inspector.id / client_id가 있으면 사용 (Reactotron 클라이언트용), 없으면 inspector.id 사용
     let mut rn_inspector_clients: Vec<Value> = Vec::new();
     for inspector in rn_inspectors {
-        let client_id = inspector.client_id.as_ref().unwrap_or(&inspector.id);
+        // Clone client_id to avoid reference issues with json! macro / json! 매크로의 참조 문제를 피하기 위해 client_id 클론
+        let client_id = inspector
+            .client_id
+            .clone()
+            .unwrap_or_else(|| inspector.id.clone());
 
         // Check if this is actually a Reactotron client by checking the client URL / 클라이언트 URL을 확인하여 실제 Reactotron 클라이언트인지 확인
         let is_reactotron = if let Some(client_id_str) = &inspector.client_id {
