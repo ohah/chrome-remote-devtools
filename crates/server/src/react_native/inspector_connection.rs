@@ -33,8 +33,8 @@ pub struct ReactNativeInspectorConnection {
     pub client_id: Arc<RwLock<Option<String>>>,
     /// Redux store instances / Redux store 인스턴스
     pub redux_stores: Arc<RwLock<HashMap<String, ReduxStoreInstance>>>,
-    /// WebSocket message sender / WebSocket 메시지 전송자
-    pub sender: tokio::sync::mpsc::UnboundedSender<String>,
+    /// WebSocket message sender / WebSocket 메시지 전송자 (재연결 시 업데이트 가능하도록 Arc<RwLock<>>로 감쌈)
+    pub sender: Arc<RwLock<tokio::sync::mpsc::UnboundedSender<String>>>,
 }
 
 /// React Native Inspector connection manager / React Native Inspector 연결 관리자
@@ -53,11 +53,50 @@ impl ReactNativeInspectorConnectionManager {
     }
 
     /// Create a new React Native Inspector connection / 새로운 React Native Inspector 연결 생성
+    /// If a connection with the same deviceId and appName exists (even if disconnected), reuse it / 같은 deviceId와 appName을 가진 연결이 있으면 (연결 해제된 경우에도) 재사용
     pub async fn create_connection(
         &self,
         connection_info: ConnectionInfo,
         sender: tokio::sync::mpsc::UnboundedSender<String>,
     ) -> String {
+        // Check if there's an existing connection with the same deviceId and appName / 같은 deviceId와 appName을 가진 기존 연결 확인
+        let existing_id = {
+            let connections = self.connections.read().await;
+            connections
+                .values()
+                .find(|conn| {
+                    conn.device_id == connection_info.device_id
+                        && conn.app_name == connection_info.app_name
+                })
+                .map(|conn| conn.id.clone())
+        };
+
+        if let Some(existing_id) = existing_id {
+            // Reuse existing connection / 기존 연결 재사용
+            let connections = self.connections.read().await;
+            if let Some(existing_conn) = connections.get(&existing_id) {
+                // Update sender to use new WebSocket connection / 새로운 WebSocket 연결을 사용하도록 sender 업데이트
+                let mut sender_guard = existing_conn.sender.write().await;
+                *sender_guard = sender;
+                drop(sender_guard);
+
+                self.logger.log(
+                    LogType::RnInspector,
+                    &existing_id,
+                    "reconnected",
+                    Some(&serde_json::json!({
+                        "deviceName": connection_info.device_name,
+                        "appName": connection_info.app_name,
+                        "deviceId": connection_info.device_id,
+                    })),
+                    None,
+                );
+
+                return existing_id;
+            }
+        }
+
+        // Create new connection / 새 연결 생성
         let id = format!(
             "rn-inspector-{}-{}",
             std::time::SystemTime::now()
@@ -87,7 +126,7 @@ impl ReactNativeInspectorConnectionManager {
             device_id: connection_info.device_id,
             client_id: Arc::new(RwLock::new(None)),
             redux_stores: Arc::new(RwLock::new(HashMap::new())),
-            sender,
+            sender: Arc::new(RwLock::new(sender)),
         });
 
         {
