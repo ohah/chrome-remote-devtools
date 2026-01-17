@@ -18,6 +18,10 @@
 #define LOG_TAG "ConsoleRuntime"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
+#elif defined(__APPLE__)
+#define LOG_TAG "ConsoleRuntime"
+#define LOGI(...) ((void)0)
+#define LOGW(...) ((void)0)
 #else
 #define LOGI(...)
 #define LOGW(...)
@@ -132,8 +136,8 @@ facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::
       try {
         auto globalObjValue = globalObj.getProperty(runtime, globalName);
         if (globalObjValue.isObject()) {
-          auto globalObj = globalObjValue.asObject(runtime);
-          auto propertyNames = globalObj.getPropertyNames(runtime);
+          auto nestedGlobalObj = globalObjValue.asObject(runtime);
+          auto propertyNames = nestedGlobalObj.getPropertyNames(runtime);
 
           for (size_t i = 0; i < propertyNames.size(runtime); i++) {
             try {
@@ -141,7 +145,7 @@ facebook::jsi::Value findObjectById(facebook::jsi::Runtime& runtime, const std::
               if (!nameValue.isString()) continue;
 
               std::string propName = nameValue.asString(runtime).utf8(runtime);
-              auto propValue = globalObj.getProperty(runtime, propName.c_str());
+              auto propValue = nestedGlobalObj.getProperty(runtime, propName.c_str());
 
               if (propValue.isObject() && !propValue.isNull()) {
                 auto obj = propValue.asObject(runtime);
