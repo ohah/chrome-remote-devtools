@@ -289,7 +289,8 @@ function DevToolsPage() {
       let changed = false;
 
       for (const closedKey of prev) {
-        if (!currentClientKeys.has(closedKey)) {
+        // Remove from closed tabs when client reconnects / 클라이언트가 재연결되면 닫힌 탭에서 제거
+        if (currentClientKeys.has(closedKey)) {
           next.delete(closedKey);
           changed = true;
         }
