@@ -8,24 +8,39 @@ interface ServerSettingsProps {
 }
 
 export function ServerSettings({ onSave }: ServerSettingsProps) {
-  const { serverUrl: currentServerUrl, setServerUrl, resetServerUrl } = useServerUrl();
-  const [serverUrl, setServerUrlValue] = useState(currentServerUrl ?? '');
+  const {
+    normalServerUrl,
+    reactotronServerUrl,
+    isReactotronMode,
+    setNormalServerUrl,
+    setReactotronServerUrl,
+    resetNormalServerUrl,
+    resetReactotronServerUrl,
+  } = useServerUrl();
+  // Use mode-specific URL / 모드별 URL 사용
+  const currentModeUrl = isReactotronMode ? reactotronServerUrl : normalServerUrl;
+  const [serverUrl, setServerUrlValue] = useState(currentModeUrl ?? '');
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync with store when it changes
+  // Sync with store when mode or URL changes / 모드 또는 URL 변경 시 store와 동기화
   useEffect(() => {
-    setServerUrlValue(currentServerUrl ?? '');
-  }, [currentServerUrl]);
+    setServerUrlValue(currentModeUrl ?? '');
+  }, [currentModeUrl, isReactotronMode]);
 
   const handleSave = () => {
     setError(null);
     setIsSaving(true);
 
     try {
-      setServerUrl(serverUrl);
+      // Set URL based on current mode / 현재 모드에 따라 URL 설정
+      if (isReactotronMode) {
+        setReactotronServerUrl(serverUrl);
+      } else {
+        setNormalServerUrl(serverUrl);
+      }
       onSave?.();
-      // Show success message briefly
+      // Show success message briefly / 성공 메시지 간단히 표시
       setTimeout(() => {
         setIsSaving(false);
       }, 500);
@@ -42,8 +57,14 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
 
   const handleReset = () => {
     setError(null);
-    setServerUrlValue('');
-    resetServerUrl();
+    // Reset based on current mode / 현재 모드에 따라 재설정
+    if (isReactotronMode) {
+      resetReactotronServerUrl();
+      setServerUrlValue('http://localhost:9090');
+    } else {
+      resetNormalServerUrl();
+      setServerUrlValue('http://localhost:8080');
+    }
     onSave?.();
   };
 

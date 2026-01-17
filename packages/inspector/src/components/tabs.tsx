@@ -6,6 +6,8 @@ export interface Tab {
   id: string;
   label: string;
   icon?: React.ReactNode;
+  /** Whether the client is disconnected / 클라이언트가 연결 해제되었는지 여부 */
+  disconnected?: boolean;
 }
 
 interface TabsProps {
@@ -31,6 +33,9 @@ export function Tabs({ tabs, activeTabId, onTabChange, onTabClose, className }: 
       <div className="flex items-end min-w-full">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId;
+          const isDisconnected = tab.disconnected;
+          const canClose = !isActive && onTabClose; // Only allow closing inactive tabs / 비활성 탭만 닫을 수 있음
+
           return (
             <button
               key={tab.id}
@@ -39,14 +44,20 @@ export function Tabs({ tabs, activeTabId, onTabChange, onTabClose, className }: 
                 'group relative flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors',
                 'border-b-2 border-transparent hover:bg-gray-700/50',
                 isActive && 'bg-gray-900 border-b-2 border-blue-500 text-gray-100',
-                !isActive && 'text-gray-400 hover:text-gray-200'
+                !isActive && 'text-gray-400 hover:text-gray-200',
+                isDisconnected && 'opacity-60' // Visual indicator for disconnected tabs / 연결 해제된 탭의 시각적 표시
               )}
               aria-selected={isActive}
               role="tab"
             >
               {tab.icon && <span className="shrink-0">{tab.icon}</span>}
               <span className="whitespace-nowrap">{tab.label}</span>
-              {onTabClose && (
+              {isDisconnected && (
+                <span className="ml-1 text-xs text-gray-500" title="Disconnected / 연결 해제됨">
+                  (offline)
+                </span>
+              )}
+              {canClose && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

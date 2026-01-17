@@ -195,6 +195,20 @@ impl ReactNativeInspectorConnectionManager {
             Vec::new()
         }
     }
+
+    /// Clear all connections / 모든 연결 초기화
+    pub async fn clear_all_connections(&self) {
+        let mut connections = self.connections.write().await;
+        let count = connections.len();
+        connections.clear();
+        self.logger.log(
+            LogType::RnInspector,
+            "manager",
+            &format!("Cleared {} React Native Inspector connections", count),
+            None,
+            None,
+        );
+    }
 }
 
 /// Connection information / 연결 정보

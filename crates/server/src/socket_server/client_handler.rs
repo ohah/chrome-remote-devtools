@@ -37,7 +37,20 @@ pub async fn handle_client_connection(
 
     {
         let mut clients = clients.write().await;
+        let was_empty = clients.is_empty();
         clients.insert(id.clone(), client.clone());
+        let count_after = clients.len();
+        if was_empty {
+            eprintln!(
+                "[server] ✅ Client {} added to HashMap (first client, total: {})",
+                id, count_after
+            );
+        } else {
+            eprintln!(
+                "[server] ✅ Client {} added to HashMap (total: {})",
+                id, count_after
+            );
+        }
     }
 
     // Request stored events from client when DevTools connect / DevTools 연결 시 클라이언트에 저장된 이벤트 요청
