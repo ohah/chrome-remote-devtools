@@ -134,7 +134,7 @@ object ChromeRemoteDevToolsInspector {
 
     val connection = socketConnections[url]
     if (connection != null && !connection.isConnected()) {
-      android.util.Log.d("ChromeRemoteDevToolsInspector", "Reconnecting to %s / %s에 재연결 중".format(url, url))
+      android.util.Log.d("ChromeRemoteDevToolsInspector", "Reconnecting to $url / ${url}에 재연결 중")
       connection.reconnect()
     } else if (connection == null) {
       // Connection doesn't exist, create new one / 연결이 존재하지 않으면 새로 생성

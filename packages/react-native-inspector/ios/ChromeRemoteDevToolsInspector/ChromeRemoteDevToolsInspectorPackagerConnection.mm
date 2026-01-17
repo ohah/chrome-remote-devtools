@@ -148,7 +148,7 @@ RCT_NOT_IMPLEMENTED(-(instancetype)init)
     MAX_RECONNECT_DELAY // Cap at maximum delay / 최대 지연 시간으로 제한
   );
 
-  RCTLogInfo(@"[ChromeRemoteDevTools] Scheduling reconnection attempt %ld/%ld in %.1fs / 재연결 시도 %ld/%ld를 %.1fs 후에 예약",
+  RCTLogInfo(@"[ChromeRemoteDevTools] Scheduling reconnection attempt %ld/%ld in %.1fs / 재연결 시도 예약",
              (long)(_reconnectAttempts + 1), (long)MAX_RECONNECT_ATTEMPTS, delay);
 
   __weak ChromeRemoteDevToolsInspectorPackagerConnection *weakSelf = self;
@@ -157,13 +157,13 @@ RCT_NOT_IMPLEMENTED(-(instancetype)init)
                                                         block:^(NSTimer *timer) {
     __strong ChromeRemoteDevToolsInspectorPackagerConnection *strongSelf = weakSelf;
     if (strongSelf && !strongSelf.isConnected && strongSelf->_shouldReconnect) {
-      RCTLogInfo(@"[ChromeRemoteDevTools] Attempting reconnection %ld/%ld / 재연결 시도 %ld/%ld",
+      RCTLogInfo(@"[ChromeRemoteDevTools] Attempting reconnection %ld/%ld / 재연결 시도",
                  (long)(strongSelf->_reconnectAttempts + 1), (long)MAX_RECONNECT_ATTEMPTS);
       strongSelf->_reconnectAttempts++;
       strongSelf->_isReconnecting = NO;
       [strongSelf connect]; // Retry connection / 연결 재시도
     } else {
-      RCTLogInfo(@"[ChromeRemoteDevTools] Skipping reconnection (isConnected=%d, shouldReconnect=%d) / 재연결 건너뜀 (isConnected=%d, shouldReconnect=%d)",
+      RCTLogInfo(@"[ChromeRemoteDevTools] Skipping reconnection / 재연결 건너뜀 (isConnected=%d, shouldReconnect=%d)",
                  strongSelf.isConnected, strongSelf->_shouldReconnect);
       strongSelf->_isReconnecting = NO;
     }
