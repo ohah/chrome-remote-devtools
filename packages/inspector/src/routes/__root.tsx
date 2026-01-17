@@ -52,8 +52,13 @@ function ReactotronToggle() {
     if (isTauri && savedReactotron === 'true') {
       checkReactotronStatus();
     }
-  }, [setReactotronMode, setNormalServerUrl, setReactotronServerUrl, checkReactotronStatus, isTauri]);
-
+  }, [
+    setReactotronMode,
+    setNormalServerUrl,
+    setReactotronServerUrl,
+    checkReactotronStatus,
+    isTauri,
+  ]);
 
   // Handle Reactotron toggle / Reactotron 토글 처리
   const handleReactotronToggle = async () => {
