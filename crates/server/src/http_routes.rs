@@ -112,7 +112,22 @@ async fn get_all_clients_detailed(
     let mut rn_inspector_clients: Vec<Value> = Vec::new();
     for inspector in rn_inspectors {
         let client_id = inspector.client_id.as_ref().unwrap_or(&inspector.id);
-        let is_reactotron = inspector.client_id.is_some();
+
+        // Check if this is actually a Reactotron client by checking the client URL / 클라이언트 URL을 확인하여 실제 Reactotron 클라이언트인지 확인
+        let is_reactotron = if let Some(client_id_str) = &inspector.client_id {
+            if let Some(client) = server.get_client(client_id_str).await {
+                // Check if client URL starts with reactotron:// / 클라이언트 URL이 reactotron://로 시작하는지 확인
+                client
+                    .url
+                    .as_ref()
+                    .map(|url| url.starts_with("reactotron://"))
+                    .unwrap_or(false)
+            } else {
+                false
+            }
+        } else {
+            false
+        };
 
         // Get title from client if available / 클라이언트에서 title 가져오기 (가능한 경우)
         let title = if let Some(client_id_str) = &inspector.client_id {

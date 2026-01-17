@@ -128,6 +128,63 @@ impl SocketServer {
         }
     }
 
+    /// Clear all client connections and reset state / 모든 클라이언트 연결을 지우고 상태 초기화
+    pub async fn clear_all_connections(&self) {
+        // Get client count before clearing / 클리어 전 클라이언트 수 가져오기
+        let client_count_before = {
+            let clients = self.clients.read().await;
+            clients.len()
+        };
+
+        eprintln!(
+            "[server] 🧹 Clearing all client connections ({} clients before clear)...",
+            client_count_before
+        );
+        self.logger.log(
+            LogType::Server,
+            "server",
+            &format!(
+                "Clearing all client connections ({} clients)",
+                client_count_before
+            ),
+            None,
+            None,
+        );
+        // Clear clients / 클라이언트 초기화
+        {
+            let mut clients = self.clients.write().await;
+            let count = clients.len();
+            clients.clear();
+            eprintln!("[server] 🧹 Cleared {} clients from HashMap", count);
+        }
+        // Clear devtools / DevTools 초기화
+        {
+            let mut devtools = self.devtools.write().await;
+            let count = devtools.len();
+            devtools.clear();
+            eprintln!("[server] 🧹 Cleared {} devtools from HashMap", count);
+        }
+        // Clear response bodies / 응답 본문 초기화
+        {
+            let mut response_bodies = self.response_bodies.write().await;
+            response_bodies.clear();
+        }
+        // Clear React Native Inspector connections / React Native Inspector 연결 초기화
+        self.react_native_inspector_manager
+            .clear_all_connections()
+            .await;
+
+        // Verify clients are cleared / 클라이언트가 클리어되었는지 확인
+        let client_count_after = {
+            let clients = self.clients.read().await;
+            clients.len()
+        };
+        eprintln!(
+            "[server] ✅ All connections cleared ({} clients after clear)",
+            client_count_after
+        );
+    }
+
     /// Handle WebSocket upgrade / WebSocket 업그레이드 처리
     /// Handle WebSocket upgrade (static method for RwLock) / WebSocket 업그레이드 처리 (RwLock용 정적 메서드)
     pub async fn handle_websocket_upgrade_rwlock(
