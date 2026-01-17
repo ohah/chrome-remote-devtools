@@ -27,6 +27,12 @@
 #import "ChromeRemoteDevToolsInspectorUtils.h"
 
 using namespace facebook::react::jsinspector_modern;
+
+// Reconnection constants / 재연결 상수
+static const NSInteger MAX_RECONNECT_ATTEMPTS = 10; // Maximum reconnection attempts / 최대 재연결 시도 횟수
+static const NSTimeInterval INITIAL_RECONNECT_DELAY = 1.0; // Initial delay: 1 second / 초기 지연: 1초
+static const NSTimeInterval MAX_RECONNECT_DELAY = 30.0; // Maximum delay: 30 seconds / 최대 지연: 30초
+
 @interface ChromeRemoteDevToolsInspectorPackagerConnection () {
   std::unique_ptr<InspectorPackagerConnection> _cxxImpl;
   // Store raw pointer to delegate for accessing WebSocket adapter / WebSocket 어댑터 접근을 위한 delegate의 raw pointer 저장
@@ -38,11 +44,6 @@ using namespace facebook::react::jsinspector_modern;
   BOOL _isReconnecting; // Flag to prevent multiple simultaneous reconnection attempts / 동시 재연결 시도를 방지하는 플래그
   BOOL _shouldReconnect; // Flag to control reconnection / 재연결을 제어하는 플래그
 }
-
-// Reconnection constants / 재연결 상수
-static const NSInteger MAX_RECONNECT_ATTEMPTS = 10; // Maximum reconnection attempts / 최대 재연결 시도 횟수
-static const NSTimeInterval INITIAL_RECONNECT_DELAY = 1.0; // Initial delay: 1 second / 초기 지연: 1초
-static const NSTimeInterval MAX_RECONNECT_DELAY = 30.0; // Maximum delay: 30 seconds / 최대 지연: 30초
 
 @end
 
@@ -150,11 +151,11 @@ RCT_NOT_IMPLEMENTED(-(instancetype)init)
   RCTLogInfo(@"[ChromeRemoteDevTools] Scheduling reconnection attempt %ld/%ld in %.1fs / 재연결 시도 %ld/%ld를 %.1fs 후에 예약",
              (long)(_reconnectAttempts + 1), (long)MAX_RECONNECT_ATTEMPTS, delay);
 
-  __weak typeof(self) weakSelf = self;
+  __weak ChromeRemoteDevToolsInspectorPackagerConnection *weakSelf = self;
   _reconnectTimer = [NSTimer scheduledTimerWithTimeInterval:delay
                                                       repeats:NO
                                                         block:^(NSTimer *timer) {
-    __strong typeof(weakSelf) strongSelf = weakSelf;
+    __strong ChromeRemoteDevToolsInspectorPackagerConnection *strongSelf = weakSelf;
     if (strongSelf && !strongSelf.isConnected && strongSelf->_shouldReconnect) {
       RCTLogInfo(@"[ChromeRemoteDevTools] Attempting reconnection %ld/%ld / 재연결 시도 %ld/%ld",
                  (long)(strongSelf->_reconnectAttempts + 1), (long)MAX_RECONNECT_ATTEMPTS);

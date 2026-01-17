@@ -293,7 +293,7 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
         }
 
         NSDictionary *response = @{
-          @"id": requestId,
+          @"id": requestIdString,
           @"result": propertiesResult
         };
 
@@ -314,7 +314,7 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
 
         // Send error response if serialization failed / 직렬화 실패 시 오류 응답 전송
         NSDictionary *errorResponse = @{
-          @"id": requestId,
+          @"id": requestIdString,
           @"error": @{
             @"code": @(-32000),
             @"message": @"Failed to serialize Runtime.getProperties response"
