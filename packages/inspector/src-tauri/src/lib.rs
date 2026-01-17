@@ -1,5 +1,5 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-use chrome_remote_devtools_server::{ServerConfig, ServerHandle};
+use chrome_remote_devtools_server::{ServerConfig, ServerHandle, ShutdownStatus};
 use std::io::{self, Write};
 use std::sync::{Arc, OnceLock};
 use tokio::sync::RwLock;
@@ -34,13 +34,16 @@ async fn start_server(port: u16, host: String) -> Result<(), String> {
 }
 
 /// Stop the WebSocket server / WebSocket 서버 중지
+/// Returns shutdown status / 종료 상태 반환
 #[tauri::command]
-async fn stop_server() -> Result<(), String> {
+async fn stop_server() -> Result<String, String> {
     if let Some(handle) = SERVER_HANDLE.get() {
         let server = handle.write().await;
-        server.stop().await.map_err(|e| e.to_string())?;
+        let status = server.stop().await.map_err(|e| e.to_string())?;
+        Ok(format!("{:?}", status))
+    } else {
+        Ok(format!("{:?}", ShutdownStatus::NotRunning))
     }
-    Ok(())
 }
 
 /// Check if server is running / 서버가 실행 중인지 확인
@@ -56,27 +59,31 @@ async fn is_server_running() -> bool {
 
 /// Start Reactotron server / Reactotron 서버 시작
 /// This will restart the main server with Reactotron enabled / 메인 서버를 Reactotron 활성화 상태로 재시작합니다
+/// Returns shutdown status / 종료 상태 반환
 #[tauri::command]
-async fn start_reactotron_server(port: u16, host: String) -> Result<(), String> {
+async fn start_reactotron_server(port: u16, host: String) -> Result<String, String> {
     eprintln!(
         "[reactotron] 🔄 Starting Reactotron server (port: {}, host: {})",
         port, host
     );
     let _ = io::stderr().flush();
 
-    // Stop existing server if running / 실행 중인 서버가 있으면 중지
-    if let Some(handle) = SERVER_HANDLE.get() {
-        eprintln!("[reactotron] 🛑 Stopping existing server...");
+    // Stop existing server completely before starting new one / 새 서버 시작 전에 기존 서버 완전히 중지
+    let shutdown_status = if let Some(handle) = SERVER_HANDLE.get() {
+        eprintln!("[reactotron] 🛑 Stopping existing server completely...");
         let _ = io::stderr().flush();
         let server = handle.write().await;
-        server.stop().await.map_err(|e| {
+        let status = server.stop().await.map_err(|e| {
             eprintln!("[reactotron] ❌ Failed to stop server: {}", e);
             let _ = io::stderr().flush();
             e.to_string()
         })?;
-        eprintln!("[reactotron] ✅ Server stopped");
+        eprintln!("[reactotron] ✅ Server stopped (status: {:?})", status);
         let _ = io::stderr().flush();
-    }
+        format!("{:?}", status)
+    } else {
+        format!("{:?}", ShutdownStatus::NotRunning)
+    };
 
     // Set Reactotron enabled / Reactotron 활성화 설정
     let reactotron_enabled = REACTOTRON_ENABLED.get_or_init(|| Arc::new(RwLock::new(false)));
@@ -112,32 +119,36 @@ async fn start_reactotron_server(port: u16, host: String) -> Result<(), String> 
         host, port
     );
     let _ = io::stderr().flush();
-    Ok(())
+    Ok(shutdown_status)
 }
 
 /// Stop Reactotron server / Reactotron 서버 중지
-/// This will restart the main server with Reactotron disabled / 메인 서버를 Reactotron 비활성화 상태로 재시작합니다
+/// This will restart the main server with Reactotron disabled on port 8080 / 메인 서버를 Reactotron 비활성화 상태로 8080 포트에서 재시작합니다
+/// Returns shutdown status / 종료 상태 반환
 #[tauri::command]
-async fn stop_reactotron_server(port: u16, host: String) -> Result<(), String> {
+async fn stop_reactotron_server(port: u16, host: String) -> Result<String, String> {
     eprintln!(
-        "[reactotron] 🔄 Stopping Reactotron server (port: {}, host: {})",
+        "[reactotron] 🔄 Stopping Reactotron server (current port: {}, host: {})",
         port, host
     );
     let _ = io::stderr().flush();
 
-    // Stop existing server if running / 실행 중인 서버가 있으면 중지
-    if let Some(handle) = SERVER_HANDLE.get() {
-        eprintln!("[reactotron] 🛑 Stopping existing server...");
+    // Stop existing server completely before starting new one / 새 서버 시작 전에 기존 서버 완전히 중지
+    let shutdown_status = if let Some(handle) = SERVER_HANDLE.get() {
+        eprintln!("[reactotron] 🛑 Stopping existing server completely...");
         let _ = io::stderr().flush();
         let server = handle.write().await;
-        server.stop().await.map_err(|e| {
+        let status = server.stop().await.map_err(|e| {
             eprintln!("[reactotron] ❌ Failed to stop server: {}", e);
             let _ = io::stderr().flush();
             e.to_string()
         })?;
-        eprintln!("[reactotron] ✅ Server stopped");
+        eprintln!("[reactotron] ✅ Server stopped (status: {:?})", status);
         let _ = io::stderr().flush();
-    }
+        format!("{:?}", status)
+    } else {
+        format!("{:?}", ShutdownStatus::NotRunning)
+    };
 
     // Set Reactotron disabled / Reactotron 비활성화 설정
     let reactotron_enabled = REACTOTRON_ENABLED.get_or_init(|| Arc::new(RwLock::new(false)));
@@ -145,11 +156,11 @@ async fn stop_reactotron_server(port: u16, host: String) -> Result<(), String> {
     eprintln!("[reactotron] ✅ Reactotron enabled flag set to false");
     let _ = io::stderr().flush();
 
-    // Start server with Reactotron disabled / Reactotron 비활성화 상태로 서버 시작
+    // Start server with Reactotron disabled on port 8080 / Reactotron 비활성화 상태로 8080 포트에서 서버 시작
     let handle = SERVER_HANDLE.get_or_init(|| Arc::new(RwLock::new(ServerHandle::new())));
     let server = handle.write().await;
     let config = ServerConfig {
-        port,
+        port: 8080, // Always use port 8080 when stopping Reactotron / Reactotron 중지 시 항상 8080 포트 사용
         host: host.clone(),
         use_ssl: false,
         ssl_cert_path: None,
@@ -161,7 +172,7 @@ async fn stop_reactotron_server(port: u16, host: String) -> Result<(), String> {
         enable_reactotron_server: false,
     };
 
-    eprintln!("[reactotron] 🚀 Starting server with Reactotron disabled...");
+    eprintln!("[reactotron] 🚀 Starting server with Reactotron disabled on port 8080...");
     let _ = io::stderr().flush();
     server.start(config).await.map_err(|e| {
         eprintln!("[reactotron] ❌ Failed to start server: {}", e);
@@ -169,11 +180,11 @@ async fn stop_reactotron_server(port: u16, host: String) -> Result<(), String> {
         e.to_string()
     })?;
     eprintln!(
-        "[reactotron] ✅ Server started successfully with Reactotron disabled on ws://{}:{}",
-        host, port
+        "[reactotron] ✅ Server started successfully with Reactotron disabled on ws://{}:8080",
+        host
     );
     let _ = io::stderr().flush();
-    Ok(())
+    Ok(shutdown_status)
 }
 
 /// Check if Reactotron server is running / Reactotron 서버가 실행 중인지 확인
