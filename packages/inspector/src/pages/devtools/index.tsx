@@ -49,17 +49,8 @@ function DevToolsPage() {
   const [disconnectedClientKeys, setDisconnectedClientKeys] = useState<Set<string>>(new Set());
   // Map from unique key to latest client ID / 고유 키에서 최신 클라이언트 ID로의 매핑
   const [clientKeyToIdMap, setClientKeyToIdMap] = useState<Map<string, string>>(new Map());
-  const [closedTabs, setClosedTabs] = useState<Set<string>>(() => {
-    const saved = localStorage.getItem('closed-tabs');
-    return saved ? new Set(JSON.parse(saved)) : new Set();
-  });
   // Track server URL to detect changes / 서버 URL 변경 감지를 위한 추적
   const [previousServerUrl, setPreviousServerUrl] = useState<string | null>(serverUrl);
-
-  // Save closed tabs to localStorage / 닫힌 탭을 localStorage에 저장
-  useEffect(() => {
-    localStorage.setItem('closed-tabs', JSON.stringify(Array.from(closedTabs)));
-  }, [closedTabs]);
 
   // Update disconnected client keys and mapping when clients change / 클라이언트가 변경될 때 연결 해제된 클라이언트 키와 매핑 업데이트
   useEffect(() => {
@@ -116,7 +107,6 @@ function DevToolsPage() {
   useEffect(() => {
     const handleResetTabsState = () => {
       // Reset all tab-related state / 모든 탭 관련 상태 초기화
-      setClosedTabs(new Set());
       setDisconnectedClientKeys(new Set());
       setClientKeyToIdMap(new Map());
       // Remove client queries completely / 클라이언트 쿼리 완전히 제거
@@ -136,7 +126,6 @@ function DevToolsPage() {
   useEffect(() => {
     if (previousServerUrl !== null && previousServerUrl !== serverUrl) {
       // Server URL changed, reset all tab state / 서버 URL 변경됨, 모든 탭 상태 초기화
-      setClosedTabs(new Set());
       setDisconnectedClientKeys(new Set());
       setClientKeyToIdMap(new Map());
       setPreviousServerUrl(serverUrl);
@@ -211,22 +200,20 @@ function DevToolsPage() {
     // Add current clients / 현재 클라이언트 추가
     filteredClients.forEach((client) => {
       const key = getClientUniqueKey(client);
-      if (!closedTabs.has(key)) {
-        tabsMap.set(key, {
-          id: client.id, // Use actual client ID for navigation / 네비게이션을 위해 실제 클라이언트 ID 사용
-          label:
-            client.type === 'react-native' || client.type === 'reactotron'
-              ? client.deviceName || client.appName || client.title || client.id.slice(0, 8)
-              : client.url || client.id.slice(0, 8),
-          icon: client.type === 'react-native' || client.type === 'reactotron' ? <Smartphone className="w-4 h-4" /> : <Globe className="w-4 h-4" />,
-          disconnected: false,
-        });
-      }
+      tabsMap.set(key, {
+        id: client.id, // Use actual client ID for navigation / 네비게이션을 위해 실제 클라이언트 ID 사용
+        label:
+          client.type === 'react-native' || client.type === 'reactotron'
+            ? client.deviceName || client.appName || client.title || client.id.slice(0, 8)
+            : client.url || client.id.slice(0, 8),
+        icon: client.type === 'react-native' || client.type === 'reactotron' ? <Smartphone className="w-4 h-4" /> : <Globe className="w-4 h-4" />,
+        disconnected: false,
+      });
     });
 
     // Add disconnected clients that were previously seen / 이전에 본 연결 해제된 클라이언트 추가
     disconnectedClientKeys.forEach((key) => {
-      if (!currentClientKeys.has(key) && !closedTabs.has(key)) {
+      if (!currentClientKeys.has(key)) {
         // Get latest client ID from mapping / 매핑에서 최신 클라이언트 ID 가져오기
         const clientId = clientKeyToIdMap.get(key);
         if (!clientId) return;
@@ -253,7 +240,7 @@ function DevToolsPage() {
     });
 
     return Array.from(tabsMap.values());
-  }, [filteredClients, disconnectedClientKeys, closedTabs, clients, clientKeyToIdMap, previousServerUrl, serverUrl]);
+  }, [filteredClients, disconnectedClientKeys, clients, clientKeyToIdMap, previousServerUrl, serverUrl]);
 
   // Handle tab change / 탭 변경 처리
   const handleTabChange = (tabId: string) => {
@@ -263,42 +250,6 @@ function DevToolsPage() {
     });
   };
 
-  // Handle tab close / 탭 닫기 처리
-  const handleTabClose = (tabId: string) => {
-    // Find the unique key for this client ID / 이 클라이언트 ID에 대한 고유 키 찾기
-    const client = clients.find((c) => c.id === tabId);
-    const key = client ? getClientUniqueKey(client) : tabId;
-
-    setClosedTabs((prev) => {
-      const next = new Set(prev);
-      next.add(key);
-      return next;
-    });
-
-    // If closing active tab, navigate to connection page / 활성 탭을 닫으면 연결 페이지로 이동
-    if (clientId === tabId) {
-      navigate({ to: '/' });
-    }
-  };
-
-  // Clean up closed tabs when clients reconnect / 클라이언트가 재연결되면 닫힌 탭 정리
-  useEffect(() => {
-    const currentClientKeys = new Set(clients.map((c) => getClientUniqueKey(c)));
-    setClosedTabs((prev) => {
-      const next = new Set(prev);
-      let changed = false;
-
-      for (const closedKey of prev) {
-        // Remove from closed tabs when client reconnects / 클라이언트가 재연결되면 닫힌 탭에서 제거
-        if (currentClientKeys.has(closedKey)) {
-          next.delete(closedKey);
-          changed = true;
-        }
-      }
-
-      return changed ? next : prev;
-    });
-  }, [clients]);
 
   return (
     <div className="w-full h-full flex flex-col bg-gray-900">
@@ -310,7 +261,6 @@ function DevToolsPage() {
               tabs={tabs}
               activeTabId={clientId}
               onTabChange={handleTabChange}
-              onTabClose={handleTabClose}
             />
           ) : (
             <div className="flex items-end bg-gray-800 border-b border-gray-700 h-10 px-4">
