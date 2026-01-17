@@ -303,58 +303,90 @@ pub async fn handle_devtools_connection(
                                         .map(|s| s.to_string());
 
                                     if let Some(request_id) = request_id_opt {
-                                        let socket_server_for_body = socket_server.clone();
-                                        let devtools_for_body = devtools_for_msg.clone();
-                                        let devtools_id_for_body = devtools_id_for_msg.clone();
-                                        let logger_for_body = logger_for_msg.clone();
+                                        // Check if this is a React Native Inspector client / React Native Inspector 클라이언트인지 확인
+                                        let devtools = devtools_for_msg.read().await;
+                                        let client_id_opt = devtools
+                                            .get(&devtools_id_for_msg)
+                                            .and_then(|dt| dt.client_id.clone());
+                                        drop(devtools);
 
-                                        tokio::spawn(async move {
-                                            let server = socket_server_for_body.read().await;
-                                            let body = server
-                                                .response_bodies
-                                                .read()
-                                                .await
-                                                .get(&request_id)
-                                                .cloned();
+                                        // Check if client is React Native Inspector / 클라이언트가 React Native Inspector인지 확인
+                                        let is_rn_inspector =
+                                            if let Some(client_id) = &client_id_opt {
+                                                rn_manager_for_msg
+                                                    .get_connection(client_id)
+                                                    .await
+                                                    .is_some()
+                                            } else {
+                                                false
+                                            };
 
-                                            let response = serde_json::json!({
-                                                "id": id,
-                                                "result": {
-                                                    "body": body.unwrap_or_default(),
-                                                    "base64Encoded": false
+                                        if is_rn_inspector {
+                                            // For React Native Inspector, forward the request / React Native Inspector의 경우 요청 전달
+                                            logger_for_msg.log(
+                                                LogType::DevTools,
+                                                &devtools_id_for_msg,
+                                                &format!("🔍 Network.getResponseBody request for RN Inspector, forwarding to native / React Native Inspector용 Network.getResponseBody 요청, 네이티브로 전달: requestId={}", request_id),
+                                                None,
+                                                Some("Network.getResponseBody"),
+                                            );
+                                            // Don't set should_forward = false, let it forward to React Native Inspector / should_forward = false를 설정하지 않음, React Native Inspector로 전달되도록 함
+                                        } else {
+                                            // For regular clients (e.g., Reactotron), handle in Rust server / 일반 클라이언트(예: Reactotron)의 경우 Rust 서버에서 처리
+                                            let socket_server_for_body = socket_server.clone();
+                                            let devtools_for_body = devtools_for_msg.clone();
+                                            let devtools_id_for_body = devtools_id_for_msg.clone();
+                                            let logger_for_body = logger_for_msg.clone();
+
+                                            tokio::spawn(async move {
+                                                let server = socket_server_for_body.read().await;
+                                                let body = server
+                                                    .response_bodies
+                                                    .read()
+                                                    .await
+                                                    .get(&request_id)
+                                                    .cloned();
+
+                                                let response = serde_json::json!({
+                                                    "id": id,
+                                                    "result": {
+                                                        "body": body.unwrap_or_default(),
+                                                        "base64Encoded": false
+                                                    }
+                                                });
+
+                                                if let Ok(response_str) =
+                                                    serde_json::to_string(&response)
+                                                {
+                                                    let devtools = devtools_for_body.read().await;
+                                                    if let Some(devtool) =
+                                                        devtools.get(&devtools_id_for_body)
+                                                    {
+                                                        if let Err(e) = devtool
+                                                            .sender
+                                                            .send(response_str.clone())
+                                                        {
+                                                            logger_for_body.log_error(
+                                                                LogType::DevTools,
+                                                                &devtools_id_for_body,
+                                                                "failed to send Network.getResponseBody response",
+                                                                Some(&e.to_string()),
+                                                            );
+                                                        } else {
+                                                            logger_for_body.log(
+                                                                LogType::DevTools,
+                                                                &devtools_id_for_body,
+                                                                &format!("✅ Sent Network.getResponseBody response for requestId: {}", request_id),
+                                                                Some(&response),
+                                                                Some("Network.getResponseBody"),
+                                                            );
+                                                        }
+                                                    }
+                                                    drop(devtools);
                                                 }
                                             });
-
-                                            if let Ok(response_str) =
-                                                serde_json::to_string(&response)
-                                            {
-                                                let devtools = devtools_for_body.read().await;
-                                                if let Some(devtool) =
-                                                    devtools.get(&devtools_id_for_body)
-                                                {
-                                                    if let Err(e) =
-                                                        devtool.sender.send(response_str.clone())
-                                                    {
-                                                        logger_for_body.log_error(
-                                                            LogType::DevTools,
-                                                            &devtools_id_for_body,
-                                                            "failed to send Network.getResponseBody response",
-                                                            Some(&e.to_string()),
-                                                        );
-                                                    } else {
-                                                        logger_for_body.log(
-                                                            LogType::DevTools,
-                                                            &devtools_id_for_body,
-                                                            &format!("✅ Sent Network.getResponseBody response for requestId: {}", request_id),
-                                                            Some(&response),
-                                                            Some("Network.getResponseBody"),
-                                                        );
-                                                    }
-                                                }
-                                                drop(devtools);
-                                            }
-                                        });
-                                        should_forward = false;
+                                            should_forward = false;
+                                        }
                                     }
                                 }
                             }
