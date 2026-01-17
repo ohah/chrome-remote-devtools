@@ -1,5 +1,5 @@
 // Root route
-import { createRootRoute, Outlet } from '@tanstack/react-router';
+import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState, useCallback } from 'react';
 import { RefreshCw, Minus, Maximize2, X, Globe, Smartphone, Eye, EyeOff, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,10 @@ function ClientTypeFilter() {
   const [showWeb, setShowWeb] = useState(true);
   const [showReactNative, setShowReactNative] = useState(true);
   const [reactotronEnabled, setReactotronEnabled] = useState(false);
+  const [shutdownStatus, setShutdownStatus] = useState<string | null>(null);
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
-  const { setServerUrl } = useServerUrl(); // Get setServerUrl function / setServerUrl 함수 가져오기
+  const navigate = useNavigate();
+  const { setReactotronMode, setNormalServerUrl, setReactotronServerUrl } = useServerUrl(); // Get server URL functions / 서버 URL 함수 가져오기
 
   // Check Reactotron server status / Reactotron 서버 상태 확인
   const checkReactotronStatus = useCallback(async () => {
@@ -21,13 +23,14 @@ function ClientTypeFilter() {
       const { invoke } = await import('@tauri-apps/api/core');
       const isRunning = await invoke<boolean>('is_reactotron_server_running');
       setReactotronEnabled(isRunning);
+      setReactotronMode(isRunning);
       if (isRunning !== (localStorage.getItem('reactotron-enabled') === 'true')) {
         localStorage.setItem('reactotron-enabled', String(isRunning));
       }
     } catch (error) {
       console.error('Failed to check Reactotron server status:', error);
     }
-  }, [isTauri, setReactotronEnabled]);
+  }, [isTauri, setReactotronEnabled, setReactotronMode]);
 
   // Load filter state from localStorage / localStorage에서 필터 상태 로드
   useEffect(() => {
@@ -43,23 +46,23 @@ function ClientTypeFilter() {
     if (savedReactotron !== null) {
       const isEnabled = savedReactotron === 'true';
       setReactotronEnabled(isEnabled);
-
-      // Set server URL based on Reactotron state / Reactotron 상태에 따라 서버 URL 설정
-      if (isEnabled) {
-        setServerUrl('http://localhost:9090');
-      } else {
-        setServerUrl('http://localhost:8080');
-      }
+      // Set Reactotron mode in store / store에 Reactotron 모드 설정
+      setReactotronMode(isEnabled);
     } else {
-      // Default to 8080 if not set / 설정되지 않았으면 기본값 8080
-      setServerUrl('http://localhost:8080');
+      // Default to false if not set / 설정되지 않았으면 기본값 false
+      setReactotronMode(false);
     }
+
+    // Set default server URLs if not set / 설정되지 않았으면 기본 서버 URL 설정
+    // These will be used when switching modes / 모드 전환 시 사용됨
+    setNormalServerUrl('http://localhost:8080');
+    setReactotronServerUrl('http://localhost:9090');
 
     // Check Reactotron server status on mount / 마운트 시 Reactotron 서버 상태 확인
     if (isTauri && savedReactotron === 'true') {
       checkReactotronStatus();
     }
-  }, [setServerUrl, checkReactotronStatus]);
+  }, [setReactotronMode, setNormalServerUrl, setReactotronServerUrl, checkReactotronStatus]);
 
   // Save filter state to localStorage / 필터 상태를 localStorage에 저장
   const handleWebToggle = () => {
@@ -91,6 +94,7 @@ function ClientTypeFilter() {
     const newValue = !reactotronEnabled;
     setReactotronEnabled(newValue);
     localStorage.setItem('reactotron-enabled', String(newValue));
+    setShutdownStatus(null); // Clear previous status / 이전 상태 클리어
 
     try {
       const { invoke } = await import('@tauri-apps/api/core');
@@ -99,26 +103,43 @@ function ClientTypeFilter() {
 
       if (newValue) {
         console.log('[Reactotron] Starting Reactotron server...');
-        await invoke('start_reactotron_server', { port, host });
+        const status = await invoke<string>('start_reactotron_server', { port, host });
         console.log('[Reactotron] ✅ Reactotron server started successfully');
+        setShutdownStatus(status);
 
-        // Update server URL to 9090 / 서버 URL을 9090으로 변경
-        setServerUrl('http://localhost:9090');
-        console.log('[Reactotron] ✅ Server URL updated to http://localhost:9090');
+        // Set Reactotron mode and server URL / Reactotron 모드 및 서버 URL 설정
+        setReactotronMode(true);
+        setReactotronServerUrl('http://localhost:9090');
+        console.log('[Reactotron] ✅ Reactotron mode enabled, server URL: http://localhost:9090');
       } else {
         console.log('[Reactotron] Stopping Reactotron server...');
-        await invoke('stop_reactotron_server', { port, host });
+        // Use port 8080 for normal server / 일반 서버를 위해 8080 포트 사용
+        const status = await invoke<string>('stop_reactotron_server', { port: 8080, host });
         console.log('[Reactotron] ✅ Reactotron server stopped successfully');
+        setShutdownStatus(status);
 
-        // Update server URL back to 8080 / 서버 URL을 8080으로 되돌림
-        setServerUrl('http://localhost:8080');
-        console.log('[Reactotron] ✅ Server URL updated to http://localhost:8080');
+        // Set normal mode and server URL / 일반 모드 및 서버 URL 설정
+        setReactotronMode(false);
+        setNormalServerUrl('http://localhost:8080');
+        console.log('[Reactotron] ✅ Reactotron mode disabled, server URL: http://localhost:8080');
       }
+
+      // Clear tab information and navigate to home page / 탭 정보 초기화 후 홈 페이지로 이동
+      // Clear closed tabs from localStorage / localStorage에서 닫힌 탭 클리어
+      localStorage.removeItem('closed-tabs');
+      // Dispatch event to reset tab state and invalidate client queries / 탭 상태 초기화 및 클라이언트 쿼리 무효화를 위한 이벤트 발생
+      window.dispatchEvent(new CustomEvent('reset-tabs-state'));
+      // Invalidate client queries to clear cached data / 캐시된 데이터를 지우기 위해 클라이언트 쿼리 무효화
+      const { queryClient } = await import('@/shared/api/query-client');
+      const { clientQueries } = await import('@/entities/client');
+      queryClient.invalidateQueries({ queryKey: clientQueries.all() });
+      navigate({ to: '/' });
     } catch (error) {
       console.error('[Reactotron] ❌ Failed to toggle Reactotron server:', error);
       // Revert state on error / 에러 시 상태 되돌리기
       setReactotronEnabled(!newValue);
       localStorage.setItem('reactotron-enabled', String(!newValue));
+      setShutdownStatus(null);
     }
   };
 
@@ -143,7 +164,22 @@ function ClientTypeFilter() {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="z-[1001]">
-            <p>Reactotron {reactotronEnabled ? '(enabled)' : '(disabled)'}</p>
+            <div className="space-y-1">
+              <p>Reactotron {reactotronEnabled ? '(enabled)' : '(disabled)'}</p>
+              {shutdownStatus && (
+                <p
+                  className={`text-xs ${
+                    shutdownStatus === 'Graceful'
+                      ? 'text-green-400'
+                      : shutdownStatus === 'WithIssues' || shutdownStatus === 'Timeout'
+                        ? 'text-yellow-400'
+                        : 'text-gray-400'
+                  }`}
+                >
+                  Shutdown: {shutdownStatus}
+                </p>
+              )}
+            </div>
           </TooltipContent>
         </Tooltip>
       )}
