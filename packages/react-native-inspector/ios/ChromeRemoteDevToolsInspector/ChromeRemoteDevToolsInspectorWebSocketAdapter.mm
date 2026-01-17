@@ -37,6 +37,7 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
 @interface ChromeRemoteDevToolsInspectorWebSocketAdapter () <SRWebSocketDelegate> {
   std::weak_ptr<IWebSocketDelegate> _delegate;
   SRWebSocket *_webSocket;
+  BOOL _isConnected;
 }
 @end
 
@@ -76,27 +77,41 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
 
 - (void)send:(std::string_view)message
 {
+  // Check connection state before sending / 전송 전 연결 상태 확인
+  if (!_isConnected || _webSocket == nil) {
+    RCTLogWarn(@"[ChromeRemoteDevTools] Cannot send message, WebSocket not connected / 메시지를 전송할 수 없습니다. WebSocket이 연결되지 않았습니다");
+    return;
+  }
+
   __weak ChromeRemoteDevToolsInspectorWebSocketAdapter *weakSelf = self;
   NSString *messageStr = NSStringFromUTF8StringView(message);
   if (messageStr == nil) {
     RCTLogError(@"Failed to convert CDP message string to NSString, message will be dropped!");
+    return;
   }
   dispatch_async(dispatch_get_main_queue(), ^{
     ChromeRemoteDevToolsInspectorWebSocketAdapter *strongSelf = weakSelf;
-    if (strongSelf != nullptr) {
-      [strongSelf->_webSocket sendString:messageStr error:NULL];
+    if (strongSelf != nullptr && strongSelf->_isConnected && strongSelf->_webSocket != nil) {
+      // Double-check connection state before sending / 전송 전 연결 상태 재확인
+      NSError *error = nil;
+      [strongSelf->_webSocket sendString:messageStr error:&error];
+      if (error != nil) {
+        RCTLogError(@"[ChromeRemoteDevTools] Failed to send message: %@ / 메시지 전송 실패: %@", [error localizedDescription]);
+      }
     }
   });
 }
 
 - (void)close
 {
+  _isConnected = NO;
   [_webSocket closeWithCode:1000 reason:@"End of session"];
 }
 
 - (void)webSocketDidOpen:(__unused SRWebSocket *)webSocket
 {
   // NOTE: We are on the main queue here, per SRWebSocket's defaults.
+  _isConnected = YES;
   if (auto delegate = _delegate.lock()) {
     delegate->didOpen();
   }
@@ -114,14 +129,67 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
 - (void)webSocket:(__unused SRWebSocket *)webSocket didFailWithError:(NSError *)error
 {
   // NOTE: We are on the main queue here, per SRWebSocket's defaults.
+  _isConnected = NO;
+
+  NSInteger errorCode = -1;
+  NSString *errorDescription = nil;
+
+  // Safely extract error information and create a copy immediately / 에러 정보를 안전하게 추출하고 즉시 복사본 생성
+  if (error != nil) {
+    @try {
+      errorCode = [error code];
+
+      // For NSURLErrorDomain -1003 (hostname not found), use simple error code logging / NSURLErrorDomain -1003 (호스트명을 찾을 수 없음)의 경우 간단한 에러 코드 로깅 사용
+      // This prevents EXC_BAD_ACCESS in RCTLogNativeInternal when error description contains complex nested objects / 이것은 에러 설명에 복잡한 중첩 객체가 포함된 경우 RCTLogNativeInternal에서 EXC_BAD_ACCESS를 방지합니다
+      if ([error.domain isEqualToString:NSURLErrorDomain] && errorCode == -1003) {
+        errorDescription = @"Server hostname not found";
+      } else {
+        // Get localized description and create a copy immediately / localized description을 가져오고 즉시 복사본 생성
+        NSString *localizedDesc = [error localizedDescription];
+        if (localizedDesc && localizedDesc.length > 0) {
+          // Create a copy to ensure it's retained independently / 독립적으로 유지되도록 복사본 생성
+          errorDescription = [NSString stringWithString:localizedDesc];
+        } else {
+          errorDescription = [NSString stringWithFormat:@"Error code: %ld", (long)errorCode];
+        }
+      }
+    } @catch (NSException *exception) {
+      // If error extraction fails, use fallback / 에러 추출이 실패하면 폴백 사용
+      errorCode = -1;
+      errorDescription = @"Unknown error";
+    }
+  } else {
+    errorDescription = @"Unknown error";
+  }
+
+  // Ensure errorDescription is valid / errorDescription이 유효한지 확인
+  if (!errorDescription || errorDescription.length == 0) {
+    errorDescription = @"Unknown error";
+  }
+
   if (auto delegate = _delegate.lock()) {
-    delegate->didFailWithError([error code], [error description].UTF8String);
+    delegate->didFailWithError(errorCode, errorDescription.UTF8String);
   }
 
   // Notify connection that WebSocket failed / 연결에 WebSocket 실패를 알림
   // This will trigger reconnection attempt / 이것은 재연결 시도를 트리거합니다
-  RCTLogWarn(@"[ChromeRemoteDevTools] WebSocket connection failed: %@ / WebSocket 연결 실패: %@", error.localizedDescription);
-  [[NSNotificationCenter defaultCenter] postNotificationName:@"ChromeRemoteDevToolsWebSocketDidFail" object:nil userInfo:@{@"error": error}];
+  // Fix format string: only one %@ placeholder / 포맷 문자열 수정: %@ 플레이스홀더 하나만
+  RCTLogWarn(@"[ChromeRemoteDevTools] WebSocket connection failed: %@", errorDescription);
+
+  // Create userInfo dictionary with already-safe errorDescription / 이미 안전한 errorDescription으로 userInfo 딕셔너리 생성
+  NSNumber *errorCodeNumber = @(errorCode);
+  NSDictionary *userInfo = @{
+    @"errorCode": errorCodeNumber,
+    @"errorDescription": errorDescription
+  };
+
+  // Post notification safely / notification을 안전하게 전송
+  @try {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ChromeRemoteDevToolsWebSocketDidFail" object:nil userInfo:userInfo];
+  } @catch (NSException *exception) {
+    // If posting notification fails, log but don't crash / notification 전송이 실패하면 로그만 남기고 크래시하지 않음
+    NSLog(@"[ChromeRemoteDevTools] Failed to post WebSocketDidFail notification: %@", exception);
+  }
 }
 
 - (void)webSocket:(__unused SRWebSocket *)webSocket didReceiveMessageWithString:(NSString *)message
@@ -357,6 +425,7 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
             wasClean:(__unused BOOL)wasClean
 {
   // NOTE: We are on the main queue here, per SRWebSocket's defaults.
+  _isConnected = NO;
   if (auto delegate = _delegate.lock()) {
     delegate->didClose();
   }
