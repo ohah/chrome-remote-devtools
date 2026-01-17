@@ -1,15 +1,13 @@
 // Root route
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState, useCallback } from 'react';
-import { RefreshCw, Minus, Maximize2, X, Globe, Smartphone, Eye, EyeOff, Zap } from 'lucide-react';
+import { RefreshCw, Minus, Maximize2, X, Eye, EyeOff, Zap, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useServerUrl } from '@/shared/lib/server-url';
 
-// Client type filter component / 클라이언트 타입 필터 컴포넌트
-function ClientTypeFilter() {
-  const [showWeb, setShowWeb] = useState(true);
-  const [showReactNative, setShowReactNative] = useState(true);
+// Reactotron server toggle component / Reactotron 서버 토글 컴포넌트
+function ReactotronToggle() {
   const [reactotronEnabled, setReactotronEnabled] = useState(false);
   const [shutdownStatus, setShutdownStatus] = useState<string | null>(null);
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
@@ -30,19 +28,11 @@ function ClientTypeFilter() {
     } catch (error) {
       console.error('Failed to check Reactotron server status:', error);
     }
-  }, [isTauri, setReactotronEnabled, setReactotronMode]);
+  }, [isTauri, setReactotronMode]);
 
-  // Load filter state from localStorage / localStorage에서 필터 상태 로드
+  // Load Reactotron state from localStorage / localStorage에서 Reactotron 상태 로드
   useEffect(() => {
-    const savedShowWeb = localStorage.getItem('client-filter-web');
-    const savedShowRN = localStorage.getItem('client-filter-react-native');
     const savedReactotron = localStorage.getItem('reactotron-enabled');
-    if (savedShowWeb !== null) {
-      setShowWeb(savedShowWeb === 'true');
-    }
-    if (savedShowRN !== null) {
-      setShowReactNative(savedShowRN === 'true');
-    }
     if (savedReactotron !== null) {
       const isEnabled = savedReactotron === 'true';
       setReactotronEnabled(isEnabled);
@@ -62,30 +52,8 @@ function ClientTypeFilter() {
     if (isTauri && savedReactotron === 'true') {
       checkReactotronStatus();
     }
-  }, [setReactotronMode, setNormalServerUrl, setReactotronServerUrl, checkReactotronStatus]);
+  }, [setReactotronMode, setNormalServerUrl, setReactotronServerUrl, checkReactotronStatus, isTauri]);
 
-  // Save filter state to localStorage / 필터 상태를 localStorage에 저장
-  const handleWebToggle = () => {
-    const newValue = !showWeb;
-    setShowWeb(newValue);
-    localStorage.setItem('client-filter-web', String(newValue));
-    // Dispatch custom event to notify other components / 다른 컴포넌트에 알리기 위한 커스텀 이벤트 발생
-    window.dispatchEvent(
-      new CustomEvent('client-filter-change', {
-        detail: { web: newValue, reactNative: showReactNative },
-      })
-    );
-  };
-
-  const handleReactNativeToggle = () => {
-    const newValue = !showReactNative;
-    setShowReactNative(newValue);
-    localStorage.setItem('client-filter-react-native', String(newValue));
-    // Dispatch custom event to notify other components / 다른 컴포넌트에 알리기 위한 커스텀 이벤트 발생
-    window.dispatchEvent(
-      new CustomEvent('client-filter-change', { detail: { web: showWeb, reactNative: newValue } })
-    );
-  };
 
   // Handle Reactotron toggle / Reactotron 토글 처리
   const handleReactotronToggle = async () => {
@@ -183,48 +151,6 @@ function ClientTypeFilter() {
           </TooltipContent>
         </Tooltip>
       )}
-      <Tooltip delayDuration={300}>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleReactNativeToggle}
-            className={`cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all ${
-              showReactNative
-                ? 'bg-gray-600 text-gray-100 shadow-sm hover:bg-gray-500'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 opacity-50'
-            }`}
-            aria-label="React Native Filter"
-            aria-pressed={showReactNative}
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="z-[1001]">
-          <p>React Native {showReactNative ? '(shown)' : '(hidden)'}</p>
-        </TooltipContent>
-      </Tooltip>
-      <Tooltip delayDuration={300}>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleWebToggle}
-            className={`cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all ${
-              showWeb
-                ? 'bg-gray-600 text-gray-100 shadow-sm hover:bg-gray-500'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 opacity-50'
-            }`}
-            aria-label="Web Filter"
-            aria-pressed={showWeb}
-          >
-            <Globe className="w-3.5 h-3.5" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="z-[1001]">
-          <p>Web {showWeb ? '(shown)' : '(hidden)'}</p>
-        </TooltipContent>
-      </Tooltip>
     </div>
   );
 }
@@ -278,6 +204,7 @@ function TitleBar() {
   const [appWindow, setAppWindow] = useState<ReturnType<
     typeof import('@tauri-apps/api/window').getCurrentWindow
   > | null>(null);
+  const navigate = useNavigate();
 
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
@@ -288,6 +215,10 @@ function TitleBar() {
       });
     }
   }, []);
+
+  const handleHome = useCallback(() => {
+    navigate({ to: '/' });
+  }, [navigate]);
 
   const handleRefresh = () => {
     window.location.reload();
@@ -317,8 +248,25 @@ function TitleBar() {
         className="titlebar-drag-region flex items-center"
         data-tauri-drag-region={isTauri ? true : undefined}
       >
-        {/* Client type filter (always show in Tauri) / 클라이언트 타입 필터 (Tauri에서 항상 표시) */}
-        {isTauri && <ClientTypeFilter />}
+        {/* Home button / 홈 버튼 */}
+        <Tooltip delayDuration={300}>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleHome}
+              className="titlebar-nav-button cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 ml-2"
+              aria-label="Go to home"
+            >
+              <Home className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="z-[1001]">
+            <p>Go to home</p>
+          </TooltipContent>
+        </Tooltip>
+        {/* Reactotron toggle (always show in Tauri) / Reactotron 토글 (Tauri에서 항상 표시) */}
+        {isTauri && <ReactotronToggle />}
         {/* Tab visibility toggle (always show in Tauri) / 탭 표시/숨김 토글 (Tauri에서 항상 표시) */}
         {isTauri && <TabVisibilityToggle />}
       </div>
@@ -413,14 +361,6 @@ function RootComponent() {
 export const Route = createRootRoute({
   component: RootComponent,
 });
-
-// Export filter state getter function / 필터 상태를 가져오는 함수 export
-export function getClientTypeFilter(): { web: boolean; reactNative: boolean; reactotron: boolean } {
-  const showWeb = localStorage.getItem('client-filter-web') !== 'false';
-  const showReactNative = localStorage.getItem('client-filter-react-native') !== 'false';
-  const showReactotron = localStorage.getItem('reactotron-enabled') === 'true';
-  return { web: showWeb, reactNative: showReactNative, reactotron: showReactotron };
-}
 
 // Export tab visibility getter function / 탭 표시 상태를 가져오는 함수 export
 export function getTabsVisibility(): boolean {
