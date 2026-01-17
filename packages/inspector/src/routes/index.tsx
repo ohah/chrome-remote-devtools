@@ -141,11 +141,7 @@ function ConnectionPage() {
       {showTabs && (
         <>
           {tabs.length > 0 ? (
-            <Tabs
-              tabs={tabs}
-              activeTabId={activeClientId}
-              onTabChange={handleTabChange}
-            />
+            <Tabs tabs={tabs} activeTabId={activeClientId} onTabChange={handleTabChange} />
           ) : (
             <div className="flex items-end bg-gray-800 border-b border-gray-700 h-10 px-4">
               <div className="text-sm text-gray-400">
