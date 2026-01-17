@@ -34,7 +34,8 @@ export function Tabs({ tabs, activeTabId, onTabChange, onTabClose, className }: 
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId;
           const isDisconnected = tab.disconnected;
-          const canClose = !isActive && onTabClose; // Only allow closing inactive tabs / 비활성 탭만 닫을 수 있음
+          // Allow closing any tab if onTabClose is provided / onTabClose가 제공되면 어떤 탭이든 닫을 수 있음
+          const canClose = !!onTabClose;
 
           return (
             <button
@@ -57,21 +58,25 @@ export function Tabs({ tabs, activeTabId, onTabChange, onTabClose, className }: 
                   (offline)
                 </span>
               )}
-              {canClose && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onTabClose(tab.id);
-                  }}
-                  className={cn(
-                    'ml-1 p-0.5 rounded hover:bg-gray-600 opacity-0 group-hover:opacity-100 transition-opacity',
-                    isActive && 'opacity-100'
-                  )}
-                  aria-label={`Close ${tab.label}`}
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
+              {/* Reserve space for close button to prevent tab size changes / 탭 크기 변경을 방지하기 위해 닫기 버튼 공간 예약 */}
+              <span className="ml-1 w-[18px] flex items-center justify-center">
+                {canClose && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onTabClose?.(tab.id);
+                    }}
+                    className={cn(
+                      'p-0.5 rounded hover:bg-gray-600 transition-opacity',
+                      'opacity-0 group-hover:opacity-100',
+                      isActive && 'opacity-100'
+                    )}
+                    aria-label={`Close ${tab.label}`}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </span>
             </button>
           );
         })}
