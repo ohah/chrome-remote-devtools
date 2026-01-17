@@ -96,7 +96,7 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
       NSError *error = nil;
       [strongSelf->_webSocket sendString:messageStr error:&error];
       if (error != nil) {
-        RCTLogError(@"[ChromeRemoteDevTools] Failed to send message: %@ / 메시지 전송 실패: %@", [error localizedDescription]);
+        RCTLogError(@"[ChromeRemoteDevTools] Failed to send message: %@ / 메시지 전송 실패", [error localizedDescription]);
       }
     }
   });
@@ -433,10 +433,10 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
   // Notify connection that WebSocket closed / 연결에 WebSocket 종료를 알림
   // Don't reconnect if code is 1000 (normal closure) / 코드가 1000(정상 종료)이면 재연결하지 않음
   if (code != 1000) {
-    RCTLogWarn(@"[ChromeRemoteDevTools] WebSocket closed unexpectedly (code=%ld, reason=%@) / WebSocket이 예기치 않게 종료됨 (code=%ld, reason=%@)", (long)code, reason);
+    RCTLogWarn(@"[ChromeRemoteDevTools] WebSocket closed unexpectedly (code=%ld, reason=%@) / WebSocket이 예기치 않게 종료됨", (long)code, reason ?: @"");
     [[NSNotificationCenter defaultCenter] postNotificationName:@"ChromeRemoteDevToolsWebSocketDidClose" object:nil userInfo:@{@"code": @(code), @"reason": reason ?: @""}];
   } else {
-    RCTLogInfo(@"[ChromeRemoteDevTools] WebSocket closed normally (code=%ld) / WebSocket이 정상적으로 종료됨 (code=%ld)", (long)code);
+    RCTLogInfo(@"[ChromeRemoteDevTools] WebSocket closed normally (code=%ld) / WebSocket이 정상적으로 종료됨", (long)code);
   }
 }
 
