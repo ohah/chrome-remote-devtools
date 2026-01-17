@@ -108,7 +108,8 @@ pub async fn handle_client_connection(
                             if let Some(connection) =
                                 rn_manager_for_msg.get_connection(&inspector.id).await
                             {
-                                if let Err(e) = connection.sender.send(data.clone()) {
+                                let sender = connection.sender.read().await;
+                                if let Err(e) = sender.send(data.clone()) {
                                     logger_for_msg.log_error(
                                         LogType::Client,
                                         &client_id_for_msg,
