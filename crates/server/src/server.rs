@@ -16,6 +16,7 @@ use tower_http::cors::CorsLayer;
 pub async fn run_server_with_socket_server(
     config: ServerConfig,
     socket_server_rwlock: Arc<tokio::sync::RwLock<SocketServer>>,
+    shutdown_rx: tokio::sync::oneshot::Receiver<()>,
 ) -> Result<(), crate::ServerError> {
     // Use logger from socket_server / socket_server의 logger 사용
     // We need to read the lock to get the logger / logger를 얻기 위해 lock을 읽어야 함
@@ -115,16 +116,35 @@ pub async fn run_server_with_socket_server(
             })?;
 
         // Run server with TLS using axum-server / axum-server를 사용하여 TLS로 서버 실행
-        axum_server::bind_rustls(addr, rustls_config)
-            .serve(app.into_make_service())
-            .await
-            .map_err(crate::ServerError::Io)?;
+        // Note: axum-server doesn't support with_graceful_shutdown directly / axum-server는 with_graceful_shutdown을 직접 지원하지 않음
+        // Use tokio::select to handle shutdown signal / shutdown signal을 처리하기 위해 tokio::select 사용
+        let server_future =
+            axum_server::bind_rustls(addr, rustls_config).serve(app.into_make_service());
+
+        tokio::select! {
+            result = server_future => {
+                result.map_err(crate::ServerError::Io)?;
+            }
+            _ = shutdown_rx => {
+                // Shutdown signal received, server will stop / 종료 신호 수신, 서버가 중지됨
+            }
+        }
     } else {
         // Run server without TLS / TLS 없이 서버 실행
-        let listener = TcpListener::bind(&addr)
-            .await
-            .map_err(crate::ServerError::Io)?;
+        // Bind to port directly without retries / 재시도 없이 포트에 직접 바인딩
+        let listener = TcpListener::bind(&addr).await.map_err(|e| {
+            eprintln!("[server] ❌ Failed to bind to {}: {}", addr, e);
+            let _ = io::stderr().flush();
+            crate::ServerError::Io(e)
+        })?;
+
+        eprintln!("[server] ✅ Successfully bound to {}", addr);
+        let _ = io::stderr().flush();
+
         axum::serve(listener, app)
+            .with_graceful_shutdown(async {
+                shutdown_rx.await.ok();
+            })
             .await
             .map_err(crate::ServerError::Io)?;
     }
@@ -133,6 +153,7 @@ pub async fn run_server_with_socket_server(
 }
 
 /// Run the server / 서버 실행 (기존 함수, 하위 호환성 유지)
+/// Note: This function creates a dummy shutdown receiver that never triggers / 이 함수는 절대 트리거되지 않는 더미 종료 수신자를 생성합니다
 pub async fn run_server(config: ServerConfig) -> Result<(), crate::ServerError> {
     // Initialize logger / 로거 초기화
     let logger = Arc::new(
@@ -150,5 +171,7 @@ pub async fn run_server(config: ServerConfig) -> Result<(), crate::ServerError> 
         config.enable_reactotron_server,
     )));
 
-    run_server_with_socket_server(config, socket_server).await
+    // Create a dummy shutdown receiver that never triggers / 절대 트리거되지 않는 더미 종료 수신자 생성
+    let (_shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
+    run_server_with_socket_server(config, socket_server, shutdown_rx).await
 }
