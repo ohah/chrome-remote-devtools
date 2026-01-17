@@ -679,7 +679,8 @@ pub async fn handle_devtools_connection(
                                 if let Some(connection) =
                                     rn_manager_for_msg.get_connection(&client_id).await
                                 {
-                                    if let Err(e) = connection.sender.send(text.clone()) {
+                                    let sender = connection.sender.read().await;
+                                    if let Err(e) = sender.send(text.clone()) {
                                         logger_for_msg.log_error(
                                             LogType::DevTools,
                                             &devtools_id_for_msg,
