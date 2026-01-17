@@ -60,29 +60,11 @@ object ChromeRemoteDevToolsInspector {
    * Android emulator uses 10.0.2.2 to access host machine's localhost / Android 에뮬레이터는 호스트 머신의 localhost에 접근하기 위해 10.0.2.2를 사용합니다
    */
   fun normalizeServerHost(serverHost: String): String {
-    // Check if running on emulator / 에뮬레이터에서 실행 중인지 확인
-    val fingerprint = android.os.Build.FINGERPRINT.lowercase()
-    val model = android.os.Build.MODEL.lowercase()
-    val manufacturer = android.os.Build.MANUFACTURER.lowercase()
-    val brand = android.os.Build.BRAND.lowercase()
-    val device = android.os.Build.DEVICE.lowercase()
-    val product = android.os.Build.PRODUCT.lowercase()
+    // Check if running on emulator using ro.kernel.qemu / ro.kernel.qemu를 사용하여 에뮬레이터에서 실행 중인지 확인
+    val qemuValue = getSystemProperty("ro.kernel.qemu")
+    val isEmulator = qemuValue == "1"
 
-    val isEmulator = fingerprint.startsWith("generic") ||
-        fingerprint.startsWith("unknown") ||
-        fingerprint.contains("google/sdk") || // Google emulator fingerprint pattern / Google 에뮬레이터 fingerprint 패턴
-        fingerprint.contains("/emu") || // Emulator pattern in fingerprint / fingerprint의 에뮬레이터 패턴
-        model.contains("google_sdk") ||
-        model.contains("emulator") ||
-        model.contains("android sdk built for") ||
-        model.startsWith("sdk_") || // Google emulator models start with sdk_ / Google 에뮬레이터 모델은 sdk_로 시작
-        manufacturer.contains("genymotion") ||
-        (brand.startsWith("generic") && device.startsWith("generic")) ||
-        product == "google_sdk" ||
-        product.contains("emulator") ||
-        product.contains("sdk")
-
-    android.util.Log.d("ChromeRemoteDevToolsInspector", "Emulator check / 에뮬레이터 확인: isEmulator=$isEmulator, MODEL=${android.os.Build.MODEL}, FINGERPRINT=${android.os.Build.FINGERPRINT}")
+    android.util.Log.d("ChromeRemoteDevToolsInspector", "Emulator check / 에뮬레이터 확인: isEmulator=$isEmulator, ro.kernel.qemu=$qemuValue")
 
     // If localhost or 127.0.0.1 and running on emulator, use 10.0.2.2 / localhost 또는 127.0.0.1이고 에뮬레이터에서 실행 중이면 10.0.2.2 사용
     if (isEmulator && (serverHost == "localhost" || serverHost == "127.0.0.1")) {
@@ -188,6 +170,18 @@ object ChromeRemoteDevToolsInspector {
     val connection = socketConnections[url]
     if (connection != null && connection.isConnected()) {
       connection.sendCDPMessage(message)
+    }
+  }
+
+  /**
+   * Get system property value / 시스템 속성 값 가져오기
+   */
+  private fun getSystemProperty(key: String): String? {
+    return try {
+      val process = Runtime.getRuntime().exec("getprop $key")
+      process.inputStream.bufferedReader().use { it.readLine() }
+    } catch (e: Exception) {
+      null
     }
   }
 
