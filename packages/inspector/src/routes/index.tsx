@@ -10,21 +10,6 @@ import { Settings, Smartphone, Globe, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, type Tab } from '@/components/tabs';
 import { getTabsVisibility } from './__root';
-import type { Client } from '@/entities/client';
-
-/**
- * Get unique key for client identification / 클라이언트 식별을 위한 고유 키 가져오기
- * For React Native/Reactotron: use deviceId if available, otherwise use id / React Native/Reactotron의 경우: deviceId가 있으면 사용, 없으면 id 사용
- * For web: use id / 웹의 경우: id 사용
- */
-function getClientUniqueKey(client: Client): string {
-  if (client.type === 'react-native' || client.type === 'reactotron') {
-    // Use deviceId for React Native/Reactotron clients if available / React Native/Reactotron 클라이언트의 경우 deviceId 사용 (가능한 경우)
-    return client.deviceId || client.id;
-  }
-  // For web clients, use id / 웹 클라이언트의 경우 id 사용
-  return client.id;
-}
 
 export const Route = createFileRoute('/')({
   component: ConnectionPage,
@@ -48,8 +33,6 @@ function ConnectionPage() {
     enabled: !!serverUrl, // Only fetch if server URL is set
   });
 
-  const [closedTabs, setClosedTabs] = useState<Set<string>>(new Set());
-
   // Listen to tab visibility changes / 탭 표시 상태 변경 사항 듣기
   useEffect(() => {
     const handleTabsVisibilityChange = () => {
@@ -64,8 +47,6 @@ function ConnectionPage() {
   // Listen to tab state reset event / 탭 상태 초기화 이벤트 듣기
   useEffect(() => {
     const handleResetTabsState = () => {
-      // Reset all tab-related state / 모든 탭 관련 상태 초기화
-      setClosedTabs(new Set());
       // Remove client queries completely / 클라이언트 쿼리 완전히 제거
       queryClient.removeQueries({ queryKey: clientQueries.all() });
     };
@@ -85,25 +66,20 @@ function ConnectionPage() {
 
   // Build tabs from filtered clients / 필터링된 클라이언트로부터 탭 생성
   const tabs: Tab[] = useMemo(() => {
-    return filteredClients
-      .filter((client) => {
-        const key = getClientUniqueKey(client);
-        return !closedTabs.has(key);
-      })
-      .map((client) => ({
-        id: client.id,
-        label:
-          client.type === 'react-native' || client.type === 'reactotron'
-            ? client.deviceName || client.appName || client.title || client.id.slice(0, 8)
-            : client.url || client.id.slice(0, 8),
-        icon:
-          client.type === 'react-native' || client.type === 'reactotron' ? (
-            <Smartphone className="w-4 h-4" />
-          ) : (
-            <Globe className="w-4 h-4" />
-          ),
-      }));
-  }, [filteredClients, closedTabs]);
+    return filteredClients.map((client) => ({
+      id: client.id,
+      label:
+        client.type === 'react-native' || client.type === 'reactotron'
+          ? client.deviceName || client.appName || client.title || client.id.slice(0, 8)
+          : client.url || client.id.slice(0, 8),
+      icon:
+        client.type === 'react-native' || client.type === 'reactotron' ? (
+          <Smartphone className="w-4 h-4" />
+        ) : (
+          <Globe className="w-4 h-4" />
+        ),
+    }));
+  }, [filteredClients]);
 
   // Handle tab change / 탭 변경 처리
   const handleTabChange = useCallback(
@@ -114,21 +90,6 @@ function ConnectionPage() {
       });
     },
     [navigate]
-  );
-
-  // Handle tab close / 탭 닫기 처리
-  const handleTabClose = useCallback(
-    (tabId: string) => {
-      // Find the unique key for this client ID / 이 클라이언트 ID에 대한 고유 키 찾기
-      const client = clients.find((c) => c.id === tabId);
-      const key = client ? getClientUniqueKey(client) : tabId;
-      setClosedTabs((prev) => {
-        const next = new Set(prev);
-        next.add(key);
-        return next;
-      });
-    },
-    [clients]
   );
 
   // Handle file upload button click
@@ -184,7 +145,6 @@ function ConnectionPage() {
               tabs={tabs}
               activeTabId={activeClientId}
               onTabChange={handleTabChange}
-              onTabClose={handleTabClose}
             />
           ) : (
             <div className="flex items-end bg-gray-800 border-b border-gray-700 h-10 px-4">
