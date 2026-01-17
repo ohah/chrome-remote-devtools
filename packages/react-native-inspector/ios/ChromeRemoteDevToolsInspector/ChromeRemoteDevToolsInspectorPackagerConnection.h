@@ -23,6 +23,11 @@
 - (void)closeQuietly;
 - (void)sendEventToAllConnections:(NSString *)event;
 - (void)sendCDPMessage:(NSString *)message;
+
+@optional
+- (void)enableReconnection;
+- (void)disableReconnection;
+- (void)reconnect;
 @end
 
 /**

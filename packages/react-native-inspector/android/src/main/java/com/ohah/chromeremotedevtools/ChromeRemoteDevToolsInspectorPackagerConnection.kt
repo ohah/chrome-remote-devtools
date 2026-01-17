@@ -35,12 +35,77 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
 ) {
   private var webSocket: WebSocket? = null
   private var isConnected: Boolean = false
+  private var reconnectAttempts: Int = 0
+  private var reconnectHandler: android.os.Handler? = null
+  private var reconnectRunnable: Runnable? = null
+  private var isReconnecting: Boolean = false
+  private var shouldReconnect: Boolean = true // Flag to control reconnection / 재연결을 제어하는 플래그
 
   private val client = OkHttpClient.Builder()
     .connectTimeout(10, TimeUnit.SECONDS)
     .readTimeout(10, TimeUnit.SECONDS)
     .writeTimeout(10, TimeUnit.SECONDS)
     .build()
+
+  companion object {
+    private const val TAG = "ChromeRemoteDevToolsInspectorPackagerConnection"
+    private const val MAX_RECONNECT_ATTEMPTS = 10 // Maximum reconnection attempts / 최대 재연결 시도 횟수
+    private const val INITIAL_RECONNECT_DELAY_MS = 1000L // Initial delay: 1 second / 초기 지연: 1초
+    private const val MAX_RECONNECT_DELAY_MS = 30000L // Maximum delay: 30 seconds / 최대 지연: 30초
+  }
+
+  /**
+   * Schedule reconnection with exponential backoff / 지수 백오프를 사용하여 재연결 예약
+   */
+  private fun scheduleReconnect() {
+    if (isReconnecting || !shouldReconnect) {
+      return
+    }
+
+    if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+      Log.w(TAG, "Max reconnection attempts reached, stopping reconnection / 최대 재연결 시도 횟수에 도달, 재연결 중지")
+      isReconnecting = false
+      return
+    }
+
+    isReconnecting = true
+    // Calculate delay with exponential backoff / 지수 백오프로 지연 시간 계산
+    val delay = minOf(
+      INITIAL_RECONNECT_DELAY_MS * (1 shl reconnectAttempts), // Exponential backoff / 지수 백오프
+      MAX_RECONNECT_DELAY_MS // Cap at maximum delay / 최대 지연 시간으로 제한
+    )
+
+    Log.d(TAG, "Scheduling reconnection attempt ${reconnectAttempts + 1}/$MAX_RECONNECT_ATTEMPTS in ${delay}ms")
+
+    if (reconnectHandler == null) {
+      reconnectHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    }
+
+    reconnectRunnable = Runnable {
+      if (!isConnected && shouldReconnect) {
+        Log.d(TAG, "Attempting reconnection ${reconnectAttempts + 1}/$MAX_RECONNECT_ATTEMPTS")
+        reconnectAttempts++
+        isReconnecting = false
+        connect() // Retry connection / 연결 재시도
+      } else {
+        Log.d(TAG, "Skipping reconnection (isConnected=$isConnected, shouldReconnect=$shouldReconnect) / 재연결 건너뜀 (isConnected=$isConnected, shouldReconnect=$shouldReconnect)")
+        isReconnecting = false
+      }
+    }
+
+    reconnectHandler?.postDelayed(reconnectRunnable!!, delay)
+  }
+
+  /**
+   * Cancel pending reconnection attempts / 대기 중인 재연결 시도 취소
+   */
+  private fun cancelReconnect() {
+    reconnectRunnable?.let {
+      reconnectHandler?.removeCallbacks(it)
+      reconnectRunnable = null
+    }
+    isReconnecting = false
+  }
 
   /**
    * Connect to WebSocket server / WebSocket 서버에 연결
@@ -50,6 +115,9 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
       Log.d(TAG, "WebSocket already connected / WebSocket이 이미 연결되어 있습니다")
       return
     }
+
+    // Cancel any pending reconnection attempts / 대기 중인 재연결 시도 취소
+    cancelReconnect()
 
     Log.d(TAG, "Attempting to connect to WebSocket / WebSocket 연결 시도: $url")
 
@@ -69,6 +137,9 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
     webSocket = client.newWebSocket(request, object : WebSocketListener() {
       override fun onOpen(webSocket: WebSocket, response: Response) {
         isConnected = true
+        reconnectAttempts = 0 // Reset reconnect attempts on successful connection / 성공적인 연결 시 재연결 시도 횟수 초기화
+        isReconnecting = false
+        cancelReconnect() // Cancel any pending reconnection attempts / 대기 중인 재연결 시도 취소
         Log.d(TAG, "WebSocket connected successfully / WebSocket 연결 성공")
         Log.d(TAG, "Response code: ${response.code}, message: ${response.message}")
         Log.d(TAG, "WebSocket instance / WebSocket 인스턴스: $webSocket")
@@ -185,6 +256,11 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
         Log.e(TAG, "Stack trace:")
         t.printStackTrace()
         Log.e(TAG, "═══════════════════════════════════════════════════════════")
+
+        // Schedule reconnection if enabled / 재연결이 활성화된 경우 재연결 예약
+        if (shouldReconnect) {
+          scheduleReconnect()
+        }
       }
 
       override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -197,6 +273,12 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
         isConnected = false
         Log.d(TAG, "WebSocket closed / WebSocket 종료됨: code=$code, reason=$reason")
         Log.d(TAG, "WebSocket instance / WebSocket 인스턴스: $webSocket")
+
+        // Schedule reconnection if enabled and not a normal closure / 재연결이 활성화되고 정상 종료가 아닌 경우 재연결 예약
+        // Don't reconnect if code is 1000 (normal closure) / 코드가 1000(정상 종료)이면 재연결하지 않음
+        if (shouldReconnect && code != 1000) {
+          scheduleReconnect()
+        }
       }
     })
 
@@ -212,8 +294,40 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
    * Close connection quietly / 조용히 연결 종료
    */
   fun closeQuietly() {
+    shouldReconnect = false // Disable reconnection when closing quietly / 조용히 종료할 때 재연결 비활성화
+    cancelReconnect() // Cancel any pending reconnection attempts / 대기 중인 재연결 시도 취소
     webSocket?.close(1000, "Normal closure / 정상 종료")
     isConnected = false
+  }
+
+  /**
+   * Enable reconnection / 재연결 활성화
+   */
+  fun enableReconnection() {
+    shouldReconnect = true
+    Log.d(TAG, "Reconnection enabled / 재연결 활성화됨")
+  }
+
+  /**
+   * Disable reconnection / 재연결 비활성화
+   */
+  fun disableReconnection() {
+    shouldReconnect = false
+    cancelReconnect()
+    Log.d(TAG, "Reconnection disabled / 재연결 비활성화됨")
+  }
+
+  /**
+   * Manually trigger reconnection / 수동으로 재연결 트리거
+   */
+  fun reconnect() {
+    if (isConnected) {
+      Log.d(TAG, "Already connected, no need to reconnect / 이미 연결되어 있어 재연결 불필요")
+      return
+    }
+    reconnectAttempts = 0 // Reset attempts for manual reconnection / 수동 재연결을 위해 시도 횟수 초기화
+    cancelReconnect()
+    connect()
   }
 
   /**
@@ -388,10 +502,6 @@ class ChromeRemoteDevToolsInspectorPackagerConnection(
     val messageStr = response.toString()
     Log.d(TAG, "Sending Page.getResourceTree response / Page.getResourceTree 응답 전송: $messageStr")
     sendCDPMessage(messageStr)
-  }
-
-  companion object {
-    private const val TAG = "ChromeRemoteDevToolsInspectorPackagerConnection"
   }
 }
 

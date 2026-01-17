@@ -131,11 +131,34 @@ object ChromeRemoteDevToolsInspector {
     )
 
     socketConnections[url] = newConnection
+    newConnection.enableReconnection() // Enable automatic reconnection / 자동 재연결 활성화
     newConnection.connect()
 
     android.util.Log.d("ChromeRemoteDevToolsInspector", "Connection initiated / 연결 시작됨")
 
     return newConnection
+  }
+
+  /**
+   * Reconnect all disconnected connections / 모든 끊어진 연결 재연결
+   */
+  fun reconnectAll(context: Context, serverHost: String, serverPort: Int) {
+    android.util.Log.d("ChromeRemoteDevToolsInspector", "Reconnecting all connections / 모든 연결 재연결 중")
+    val normalizedHost = normalizeServerHost(serverHost)
+    val deviceName = android.os.Build.MODEL
+    val appName = context.packageName
+    val deviceId = getDeviceId(context)
+    val url = getInspectorDeviceUrl(normalizedHost, serverPort, deviceName, appName, deviceId)
+
+    val connection = socketConnections[url]
+    if (connection != null && !connection.isConnected()) {
+      android.util.Log.d("ChromeRemoteDevToolsInspector", "Reconnecting to %s / %s에 재연결 중".format(url, url))
+      connection.reconnect()
+    } else if (connection == null) {
+      // Connection doesn't exist, create new one / 연결이 존재하지 않으면 새로 생성
+      android.util.Log.d("ChromeRemoteDevToolsInspector", "Connection not found, creating new connection / 연결을 찾을 수 없어 새 연결 생성")
+      connect(context, serverHost, serverPort)
+    }
   }
 
   /**

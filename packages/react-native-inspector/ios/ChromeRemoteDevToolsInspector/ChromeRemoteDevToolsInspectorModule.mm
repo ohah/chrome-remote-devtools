@@ -51,6 +51,10 @@ static std::function<void(std::function<void(facebook::jsi::Runtime&)>)> g_runti
 // Store module instance for CDP message handling / CDP 메시지 처리를 위한 모듈 인스턴스 저장
 static ChromeRemoteDevToolsInspectorModule* g_moduleInstance = nil;
 
+// Store last server info for reconnection / 재연결을 위한 마지막 서버 정보 저장
+static NSString* g_lastServerHost = nil;
+static NSInteger g_lastServerPort = 0;
+
 // Objective-C++ callback for sending CDP messages / CDP 메시지 전송을 위한 Objective-C++ 콜백
 #ifdef CONSOLE_HOOK_AVAILABLE
 void sendCDPMessageIOS(const char* serverHost, int serverPort, const char* message) {
@@ -258,6 +262,40 @@ RCT_EXPORT_MODULE(ChromeRemoteDevToolsInspector)
   return NO;
 }
 
+- (instancetype)init {
+  if (self = [super init]) {
+    // Register for app lifecycle notifications / 앱 생명주기 알림 등록
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleAppWillEnterForeground:)
+                                                 name:UIApplicationWillEnterForegroundNotification
+                                               object:nil];
+  }
+  return self;
+}
+
+- (void)dealloc {
+  // Unregister from notifications / 알림 등록 해제
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)handleAppWillEnterForeground:(NSNotification *)notification {
+  // App came to foreground / 앱이 포그라운드로 복귀
+  NSLog(@"[ChromeRemoteDevToolsInspectorModule] App will enter foreground, checking connection status / 앱이 포그라운드로 복귀, 연결 상태 확인");
+  if (g_lastServerHost && g_lastServerPort > 0) {
+    // Check if connection is still active / 연결이 여전히 활성 상태인지 확인
+    id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> connection =
+      [ChromeRemoteDevToolsInspectorObjC connectWithServerHost:g_lastServerHost serverPort:g_lastServerPort];
+
+    if (connection && !connection.isConnected) {
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] Connection lost, attempting to reconnect / 연결이 끊어짐, 재연결 시도");
+      // Reconnect if connection is lost / 연결이 끊어진 경우 재연결
+      [ChromeRemoteDevToolsInspectorObjC reconnectAllWithServerHost:g_lastServerHost serverPort:g_lastServerPort];
+    } else if (connection && connection.isConnected) {
+      NSLog(@"[ChromeRemoteDevToolsInspectorModule] Connection is still active / 연결이 여전히 활성 상태");
+    }
+  }
+}
+
 #pragma mark - RCTTurboModule
 
 /**
@@ -398,6 +436,10 @@ RCT_EXPORT_METHOD(connect:(NSString *)serverHost
                   rejecter:(RCTPromiseRejectBlock)rejecter) {
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] connect: called / connect: 호출됨");
   NSLog(@"[ChromeRemoteDevToolsInspectorModule] Server: %@:%@", serverHost, serverPort);
+
+  // Store server info for reconnection / 재연결을 위해 서버 정보 저장
+  g_lastServerHost = serverHost;
+  g_lastServerPort = [serverPort integerValue];
 
   // Call Objective-C++ implementation / Objective-C++ 구현 호출
   id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> connection =

@@ -105,6 +105,10 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
   // This allows DevTools to register the execution context before console messages arrive / 이를 통해 DevTools가 콘솔 메시지가 도착하기 전에 execution context를 등록할 수 있음
   // We need to get the connection instance to send the event / 이벤트를 전송하기 위해 connection 인스턴스가 필요함
   // Note: This will be handled by ChromeRemoteDevToolsInspectorPackagerConnection / 참고: 이것은 ChromeRemoteDevToolsInspectorPackagerConnection에서 처리됨
+
+  // Notify connection that WebSocket opened successfully / 연결에 WebSocket이 성공적으로 열렸음을 알림
+  // This will reset reconnect attempts / 이것은 재연결 시도 횟수를 초기화합니다
+  [[NSNotificationCenter defaultCenter] postNotificationName:@"ChromeRemoteDevToolsWebSocketDidOpen" object:nil];
 }
 
 - (void)webSocket:(__unused SRWebSocket *)webSocket didFailWithError:(NSError *)error
@@ -113,6 +117,11 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
   if (auto delegate = _delegate.lock()) {
     delegate->didFailWithError([error code], [error description].UTF8String);
   }
+
+  // Notify connection that WebSocket failed / 연결에 WebSocket 실패를 알림
+  // This will trigger reconnection attempt / 이것은 재연결 시도를 트리거합니다
+  RCTLogWarn(@"[ChromeRemoteDevTools] WebSocket connection failed: %@ / WebSocket 연결 실패: %@", error.localizedDescription);
+  [[NSNotificationCenter defaultCenter] postNotificationName:@"ChromeRemoteDevToolsWebSocketDidFail" object:nil userInfo:@{@"error": error}];
 }
 
 - (void)webSocket:(__unused SRWebSocket *)webSocket didReceiveMessageWithString:(NSString *)message
@@ -350,6 +359,15 @@ NSString *NSStringFromUTF8StringView(std::string_view view)
   // NOTE: We are on the main queue here, per SRWebSocket's defaults.
   if (auto delegate = _delegate.lock()) {
     delegate->didClose();
+  }
+
+  // Notify connection that WebSocket closed / 연결에 WebSocket 종료를 알림
+  // Don't reconnect if code is 1000 (normal closure) / 코드가 1000(정상 종료)이면 재연결하지 않음
+  if (code != 1000) {
+    RCTLogWarn(@"[ChromeRemoteDevTools] WebSocket closed unexpectedly (code=%ld, reason=%@) / WebSocket이 예기치 않게 종료됨 (code=%ld, reason=%@)", (long)code, reason);
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ChromeRemoteDevToolsWebSocketDidClose" object:nil userInfo:@{@"code": @(code), @"reason": reason ?: @""}];
+  } else {
+    RCTLogInfo(@"[ChromeRemoteDevTools] WebSocket closed normally (code=%ld) / WebSocket이 정상적으로 종료됨 (code=%ld)", (long)code);
   }
 }
 
