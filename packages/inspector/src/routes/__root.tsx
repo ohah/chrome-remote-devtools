@@ -243,7 +243,7 @@ function TitleBar() {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[1000] h-[35px] bg-gray-800 select-none grid grid-cols-[1fr_max-content]">
+    <div className="fixed top-0 left-0 right-0 z-[1000] h-[35px] bg-gray-700 border-b border-gray-600 select-none grid grid-cols-[1fr_max-content]">
       <div
         className="titlebar-drag-region flex items-center"
         data-tauri-drag-region={isTauri ? true : undefined}
