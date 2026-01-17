@@ -19,6 +19,14 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 #elif defined(__APPLE__)
+// On Apple platforms, logging is intentionally disabled here to avoid
+// additional logging overhead from this console runtime. All LOGI/LOGW
+// calls become no-ops. If logging is needed on iOS/macOS, replace these
+// definitions with a platform logger such as NSLog in Objective-C++.
+// Apple 플랫폼에서는 이 콘솔 런타임의 추가 로깅 오버헤드를 피하기 위해
+// 로깅을 의도적으로 비활성화합니다. 모든 LOGI/LOGW 호출은 no-op이 됩니다.
+// iOS/macOS에서 로깅이 필요한 경우, Objective-C++의 NSLog와 같은
+// 플랫폼 로거로 이러한 정의를 교체하세요.
 #define LOG_TAG "ConsoleRuntime"
 #define LOGI(...) ((void)0)
 #define LOGW(...) ((void)0)
