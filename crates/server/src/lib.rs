@@ -232,6 +232,12 @@ impl ServerHandle {
             }
 
             // Wait for graceful shutdown with timeout / timeout을 두고 graceful shutdown 대기
+            // Note: 5 seconds timeout is chosen as a balance between allowing enough time
+            // for active connections to close gracefully and not blocking shutdown too long.
+            // For production systems with many connections, consider making this configurable.
+            // 참고: 5초 timeout은 활성 연결이 graceful하게 닫힐 수 있는 충분한 시간을 제공하면서
+            // 종료를 너무 오래 블로킹하지 않는 균형점으로 선택되었습니다.
+            // 많은 연결이 있는 프로덕션 시스템의 경우, 이를 설정 가능하게 만드는 것을 고려하세요.
             let shutdown_timeout = tokio::time::Duration::from_secs(5);
             let shutdown_status = tokio::time::timeout(shutdown_timeout, async {
                 // Wait for task to finish / 태스크가 완료될 때까지 대기
