@@ -64,6 +64,13 @@ NS_ASSUME_NONNULL_BEGIN
                            serverPort:(NSInteger)serverPort
                               message:(NSString *)message;
 
+/**
+ * Reconnect all disconnected connections / 모든 끊어진 연결 재연결
+ * @param serverHost Server host / 서버 호스트
+ * @param serverPort Server port / 서버 포트
+ */
++ (void)reconnectAllWithServerHost:(NSString *)serverHost serverPort:(NSInteger)serverPort;
+
 @end
 
 NS_ASSUME_NONNULL_END

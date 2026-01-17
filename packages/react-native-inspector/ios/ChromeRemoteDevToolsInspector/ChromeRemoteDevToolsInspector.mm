@@ -192,16 +192,41 @@ static void sendEventToAllConnections(NSString *event)
     socketConnections = [NSMutableDictionary new];
   }
 
-  NSString *key = [inspectorURL absoluteString];
+ NSString *key = [inspectorURL absoluteString];
   id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> connection = socketConnections[key];
   if ((connection == nullptr) || !connection.isConnected) {
     connection = [[ChromeRemoteDevToolsInspectorPackagerConnection alloc] initWithURL:inspectorURL];
 
     socketConnections[key] = connection;
+    // Enable automatic reconnection / 자동 재연결 활성화
+    if ([connection respondsToSelector:@selector(enableReconnection)]) {
+      [connection enableReconnection];
+    }
     [connection connect];
   }
 
   return connection;
+}
+
++ (void)reconnectAllWithServerHost:(NSString *)serverHost serverPort:(NSInteger)serverPort
+{
+  RCTLogInfo(@"[ChromeRemoteDevTools] Reconnecting all connections / 모든 연결 재연결 중");
+  NSURL *inspectorURL = getInspectorDeviceUrl(serverHost, serverPort);
+  NSString *key = [inspectorURL absoluteString];
+  id<ChromeRemoteDevToolsInspectorPackagerConnectionProtocol> connection = socketConnections[key];
+
+  if (connection && !connection.isConnected) {
+    RCTLogInfo(@"[ChromeRemoteDevTools] Reconnecting to %@ / %@에 재연결 중", key);
+    if ([connection respondsToSelector:@selector(reconnect)]) {
+      [connection reconnect];
+    } else {
+      [connection connect];
+    }
+  } else if (connection == nullptr) {
+    // Connection doesn't exist, create new one / 연결이 존재하지 않으면 새로 생성
+    RCTLogInfo(@"[ChromeRemoteDevTools] Connection not found, creating new connection / 연결을 찾을 수 없어 새 연결 생성");
+    [self connectWithServerHost:serverHost serverPort:serverPort];
+  }
 }
 
 + (void)sendCDPMessageWithServerHost:(NSString *)serverHost

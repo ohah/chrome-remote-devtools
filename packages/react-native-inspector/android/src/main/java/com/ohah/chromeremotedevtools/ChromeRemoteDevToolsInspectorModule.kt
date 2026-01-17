@@ -15,15 +15,19 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.LifecycleEventListener
+import android.app.Activity
 
 /**
  * TurboModule for Chrome Remote DevTools Inspector / Chrome Remote DevTools Inspector용 TurboModule
  * This allows JavaScript to call native Inspector methods / JavaScript에서 네이티브 Inspector 메서드를 호출할 수 있게 합니다
  */
 class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicationContext) :
-  ReactContextBaseJavaModule(reactApplicationContext) {
+  ReactContextBaseJavaModule(reactApplicationContext), LifecycleEventListener {
 
   private var connection: ChromeRemoteDevToolsInspectorPackagerConnection? = null
+  private var lastServerHost: String? = null
+  private var lastServerPort: Int? = null
 
   override fun getName(): String {
     return NAME
@@ -139,6 +143,46 @@ class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicat
   init {
     // Register instance / 인스턴스 등록
     setInstance(this)
+    // Register lifecycle listener for app state changes / 앱 상태 변경을 위한 생명주기 리스너 등록
+    reactApplicationContext.addLifecycleEventListener(this)
+  }
+
+  override fun onHostResume() {
+    // App came to foreground / 앱이 포그라운드로 복귀
+    android.util.Log.d(NAME, "App resumed, checking connection status / 앱이 재개됨, 연결 상태 확인")
+    if (lastServerHost != null && lastServerPort != null) {
+      val context = reactApplicationContext
+      if (context != null) {
+        // Check if connection is still active / 연결이 여전히 활성 상태인지 확인
+        val normalizedHost = ChromeRemoteDevToolsInspector.normalizeServerHost(lastServerHost!!)
+        val deviceName = android.os.Build.MODEL
+        val appName = context.packageName
+        val deviceId = ChromeRemoteDevToolsInspector.getDeviceId(context)
+        val url = ChromeRemoteDevToolsInspector.getInspectorDeviceUrl(normalizedHost, lastServerPort!!, deviceName, appName, deviceId)
+        val existingConnection = ChromeRemoteDevToolsInspector.getConnection(url)
+
+        if (existingConnection == null || !existingConnection.isConnected()) {
+          android.util.Log.d(NAME, "Connection lost, attempting to reconnect / 연결이 끊어짐, 재연결 시도")
+          // Reconnect if connection is lost / 연결이 끊어진 경우 재연결
+          ChromeRemoteDevToolsInspector.reconnectAll(context, lastServerHost!!, lastServerPort!!)
+        } else {
+          android.util.Log.d(NAME, "Connection is still active / 연결이 여전히 활성 상태")
+        }
+      }
+    }
+  }
+
+  override fun onHostPause() {
+    // App went to background / 앱이 백그라운드로 이동
+    android.util.Log.d(NAME, "App paused / 앱이 일시정지됨")
+    // Note: We don't disconnect here to allow background debugging / 참고: 백그라운드 디버깅을 허용하기 위해 여기서 연결을 끊지 않음
+  }
+
+  override fun onHostDestroy() {
+    // App is being destroyed / 앱이 파괴되는 중
+    android.util.Log.d(NAME, "App destroyed, cleaning up / 앱이 파괴됨, 정리 중")
+    // Remove lifecycle listener / 생명주기 리스너 제거
+    reactApplicationContext.removeLifecycleEventListener(this)
   }
 
   /**
@@ -161,6 +205,10 @@ class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicat
 
       // Set application context for native JNI access / 네이티브 JNI 접근을 위한 애플리케이션 컨텍스트 설정
       ChromeRemoteDevToolsLogHookJNI.setApplicationContext(context)
+
+      // Store server info for reconnection / 재연결을 위해 서버 정보 저장
+      lastServerHost = serverHost
+      lastServerPort = serverPort
 
       // Connect to server / 서버에 연결
       // Use Kotlin implementation directly / Kotlin 구현을 직접 사용
