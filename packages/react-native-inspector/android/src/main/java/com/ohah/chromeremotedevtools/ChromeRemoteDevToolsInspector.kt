@@ -175,11 +175,14 @@ object ChromeRemoteDevToolsInspector {
 
   /**
    * Get system property value / 시스템 속성 값 가져오기
+   * Uses SystemProperties reflection for better security and performance / 보안 및 성능 향상을 위해 SystemProperties reflection 사용
    */
   private fun getSystemProperty(key: String): String? {
     return try {
-      val process = Runtime.getRuntime().exec("getprop $key")
-      process.inputStream.bufferedReader().use { it.readLine() }
+      val systemPropertiesClass = Class.forName("android.os.SystemProperties")
+      val getMethod = systemPropertiesClass.getMethod("get", String::class.java)
+      val value = getMethod.invoke(null, key) as String
+      if (value.isBlank()) null else value
     } catch (e: Exception) {
       null
     }
