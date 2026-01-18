@@ -27,6 +27,7 @@ extern std::mutex g_responseDataMutex;
 
 // Track active fetch requests for XHR hook detection / XHR 훅 감지를 위한 활성 fetch 요청 추적
 extern std::atomic<bool> g_isFetchRequestActive;
+// Must be accessed only while holding g_fetchRequestMutex / g_fetchRequestMutex를 보유한 상태에서만 접근해야 함
 extern std::string g_activeFetchRequestId;
 extern std::mutex g_fetchRequestMutex;
 

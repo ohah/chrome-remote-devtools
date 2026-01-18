@@ -36,20 +36,6 @@ namespace chrome_remote_devtools {
 namespace network {
 
 bool hookFetch(facebook::jsi::Runtime& runtime) {
-  // Declare hookedFetch outside try block so it can be used after / hookedFetch를 try 블록 밖에 선언하여 이후에 사용 가능하게 함
-  facebook::jsi::Function hookedFetch = facebook::jsi::Function::createFromHostFunction(
-    runtime,
-    facebook::jsi::PropNameID::forAscii(runtime, "fetch"),
-    2, // input, init (optional)
-    [](facebook::jsi::Runtime& /*rt*/,
-       const facebook::jsi::Value& /*thisVal*/,
-       const facebook::jsi::Value* /*args*/,
-       size_t /*count*/) -> facebook::jsi::Value {
-      // This will be filled in below / 아래에서 채워질 것임
-      return facebook::jsi::Value::undefined();
-    }
-  );
-
   try {
     // Check if already hooked by checking for backup property / 백업 속성 확인하여 이미 훅되었는지 확인
     facebook::jsi::Value originalFetchValue = runtime.global().getProperty(runtime, "__original_fetch");
@@ -64,7 +50,7 @@ bool hookFetch(facebook::jsi::Runtime& runtime) {
       runtime.global().setProperty(runtime, "__original_fetch", std::move(fetchValue));
 
       // Create hooked fetch function / 훅된 fetch 함수 생성
-      hookedFetch = facebook::jsi::Function::createFromHostFunction(
+      facebook::jsi::Function hookedFetch = facebook::jsi::Function::createFromHostFunction(
         runtime,
         facebook::jsi::PropNameID::forAscii(runtime, "fetch"),
         2, // input, init (optional)
@@ -115,12 +101,11 @@ bool hookFetch(facebook::jsi::Runtime& runtime) {
             return facebook::jsi::Value::undefined();
           }
 
-          // Clear flag after fetch is called (XHR will handle tracking) / fetch 호출 후 플래그 지우기 (XHR이 추적 처리)
-          {
-            std::lock_guard<std::mutex> lock(g_fetchRequestMutex);
-            g_isFetchRequestActive.store(false);
-            g_activeFetchRequestId.clear();
-          }
+          // Note: We keep the flag active until Promise resolution to handle potential race conditions
+          // where XHR open() might be called asynchronously after fetch() returns
+          // The flag will be cleared in the Promise handlers (onFulfilled/onRejected)
+          // 참고: Promise 해결까지 플래그를 활성 상태로 유지하여 fetch() 반환 후 비동기적으로 호출될 수 있는
+          // XHR open()의 잠재적 race condition을 처리합니다. 플래그는 Promise 핸들러(onFulfilled/onRejected)에서 지워집니다
 
           // Ensure fetchResult is a valid Promise / fetchResult가 유효한 Promise인지 확인
           if (!fetchResult.isObject()) {
@@ -320,6 +305,14 @@ bool hookFetch(facebook::jsi::Runtime& runtime) {
                 // Return original response / 원본 응답 반환
                 // In Promise then callback, we need to return the value as-is / Promise then 콜백에서는 값을 그대로 반환해야 함
                 // This is critical for the Promise chain to work correctly / Promise 체인이 올바르게 동작하려면 이것이 중요함
+                // Clear flag after Promise is fulfilled (XHR should have detected it by now)
+                // Promise가 완료된 후 플래그 지우기 (XHR이 이미 감지했을 것임)
+                {
+                  std::lock_guard<std::mutex> lock(g_fetchRequestMutex);
+                  g_isFetchRequestActive.store(false);
+                  g_activeFetchRequestId.clear();
+                }
+
                 LOGI("FetchHook: onFulfilled returning original response / FetchHook: onFulfilled가 원본 응답 반환");
                 if (count > 0) {
                   // Return the original response value directly / 원본 응답 값을 직접 반환
@@ -357,6 +350,14 @@ bool hookFetch(facebook::jsi::Runtime& runtime) {
                       }
                     }
                   }
+                }
+
+                // Clear flag after Promise is rejected
+                // Promise가 거부된 후 플래그 지우기
+                {
+                  std::lock_guard<std::mutex> lock(g_fetchRequestMutex);
+                  g_isFetchRequestActive.store(false);
+                  g_activeFetchRequestId.clear();
                 }
 
                 // Send loadingFailed event / loadingFailed 이벤트 전송
@@ -417,6 +418,10 @@ bool hookFetch(facebook::jsi::Runtime& runtime) {
                 }
               }
               // Fallback: return first promise if catch is not available / catch를 사용할 수 없으면 첫 번째 promise 반환
+              // Ensure we always return a valid Promise object / 항상 유효한 Promise 객체를 반환하도록 보장
+              if (!firstPromise.isObject()) {
+                return fetchResult;
+              }
               return firstPromise;
             } catch (const std::exception& e) {
               LOGE("FetchHook: Exception while calling then: %s / FetchHook: then 호출 중 예외: %s", e.what(), e.what());
