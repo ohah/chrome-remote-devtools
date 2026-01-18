@@ -9,6 +9,7 @@
 
 #include "NetworkHook.h"
 #include "network/XHRHook.h"
+#include "network/FetchHook.h"
 #include "network/NetworkGlobals.h"
 #include <atomic>
 
@@ -65,14 +66,21 @@ bool hookNetworkMethods(facebook::jsi::Runtime& runtime) {
 
   try {
     // Hook XMLHttpRequest / XMLHttpRequest 훅
-    // Note: React Native internally wraps fetch with XMLHttpRequest, so XHR hook will catch both fetch and XHR requests / 참고: React Native는 내부적으로 fetch를 XMLHttpRequest로 래핑하므로 XHR 훅이 fetch와 XHR 요청을 모두 잡음
     bool xhrSuccess = network::hookXHR(runtime);
     if (!xhrSuccess) {
       LOGE("Failed to hook XMLHttpRequest / XMLHttpRequest 훅 실패");
       return false;
     }
 
-    // Fetch hook removed: React Native wraps fetch with XHR, so XHR hook handles all requests / Fetch 훅 제거: React Native가 fetch를 XHR로 래핑하므로 XHR 훅이 모든 요청을 처리함
+    // Hook Fetch / Fetch 훅
+    // Note: Fetch hook handles blob data extraction for fetch requests / 참고: Fetch 훅은 fetch 요청에 대한 blob 데이터 추출을 처리함
+    bool fetchSuccess = network::hookFetch(runtime);
+    if (!fetchSuccess) {
+      LOGW("Failed to hook Fetch (may not be available) / Fetch 훅 실패 (사용 불가능할 수 있음)");
+      // Continue even if fetch hook fails, as XHR hook will still catch fetch requests / fetch 훅이 실패해도 계속 진행, XHR 훅이 여전히 fetch 요청을 잡을 수 있음
+    } else {
+      LOGI("Fetch hook installed successfully / Fetch 훅이 성공적으로 설치됨");
+    }
 
     g_isNetworkHooked.store(true);
     LOGI("Network hook installed successfully / 네트워크 훅이 성공적으로 설치됨");
