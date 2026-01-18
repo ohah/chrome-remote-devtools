@@ -236,7 +236,6 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                   RequestInfo requestInfo = collectXHRRequestInfo(rt, metadata, args, count);
                   capturedUrl = requestInfo.url;
                   sendRequestWillBeSent(rt, requestId, requestInfo, "XHR");
-                  metadata.setProperty(rt, "requestId", facebook::jsi::String::createFromUtf8(rt, requestId));
                 } else {
                   // Fetch request - requestWillBeSent already sent by Fetch hook / Fetch 요청 - requestWillBeSent는 이미 Fetch 훅에서 전송됨
                   // Just collect URL for responseReceived / responseReceived를 위해 URL만 수집
@@ -245,6 +244,7 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                   LOGI("XHRHook: Fetch request detected, skipping requestWillBeSent / XHRHook: Fetch 요청 감지, requestWillBeSent 건너뜀");
                 }
 
+                // Store requestId in metadata (for both XHR and Fetch requests) / 메타데이터에 requestId 저장 (XHR 및 Fetch 요청 모두)
                 metadata.setProperty(rt, "requestId", facebook::jsi::String::createFromUtf8(rt, requestId));
                 shouldTrack = true;
             }
