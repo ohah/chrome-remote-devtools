@@ -21,6 +21,11 @@ std::map<std::string, std::string> g_responseData;
 // Mutex for thread-safe access to g_responseData / g_responseData에 대한 스레드 안전 접근을 위한 mutex
 std::mutex g_responseDataMutex;
 
+// Track active fetch requests for XHR hook detection / XHR 훅 감지를 위한 활성 fetch 요청 추적
+std::atomic<bool> g_isFetchRequestActive{false};
+std::string g_activeFetchRequestId;
+std::mutex g_fetchRequestMutex;
+
 } // namespace network
 } // namespace chrome_remote_devtools
 

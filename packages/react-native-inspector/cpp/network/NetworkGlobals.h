@@ -25,6 +25,11 @@ extern std::atomic<size_t> g_requestIdCounter;
 extern std::map<std::string, std::string> g_responseData;
 extern std::mutex g_responseDataMutex;
 
+// Track active fetch requests for XHR hook detection / XHR 훅 감지를 위한 활성 fetch 요청 추적
+extern std::atomic<bool> g_isFetchRequestActive;
+extern std::string g_activeFetchRequestId;
+extern std::mutex g_fetchRequestMutex;
+
 } // namespace network
 } // namespace chrome_remote_devtools
 

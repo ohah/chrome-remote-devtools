@@ -84,11 +84,30 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
               std::string method = args[0].asString(rt).utf8(rt);
               std::string url = args[1].asString(rt).utf8(rt);
 
+              // Check if this is a fetch request / Fetch 요청인지 확인
+              bool isFetchRequest = false;
+              std::string fetchRequestId;
+              {
+                std::lock_guard<std::mutex> lock(g_fetchRequestMutex);
+                if (g_isFetchRequestActive.load()) {
+                  isFetchRequest = true;
+                  fetchRequestId = g_activeFetchRequestId;
+                }
+              }
+
               // Store metadata in hidden property / 숨겨진 속성에 메타데이터 저장
               facebook::jsi::Object metadata = facebook::jsi::Object(rt);
               metadata.setProperty(rt, "method", facebook::jsi::String::createFromUtf8(rt, method));
               metadata.setProperty(rt, "url", facebook::jsi::String::createFromUtf8(rt, url));
               metadata.setProperty(rt, "headers", facebook::jsi::Object(rt));
+              if (isFetchRequest) {
+                // Mark as fetch request and store fetch requestId / Fetch 요청으로 표시하고 fetch requestId 저장
+                metadata.setProperty(rt, "__isFetchRequest", facebook::jsi::Value(true));
+                metadata.setProperty(rt, "__fetchRequestId", facebook::jsi::String::createFromUtf8(rt, fetchRequestId));
+                LOGI("XHRHook: Detected fetch request, will use fetch requestId=%s / XHRHook: Fetch 요청 감지, fetch requestId=%s 사용", fetchRequestId.c_str(), fetchRequestId.c_str());
+              } else {
+                metadata.setProperty(rt, "__isFetchRequest", facebook::jsi::Value(false));
+              }
               xhr.setProperty(rt, "__cdpNetworkMetadata", metadata);
             }
 
@@ -190,21 +209,44 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
             std::string requestId;
             std::string capturedUrl;
             bool shouldTrack = false;
+            bool isFetchRequest = false;
 
               if (metadataValue.isObject()) {
                 facebook::jsi::Object metadata = metadataValue.asObject(rt);
-              requestId = std::to_string(g_requestIdCounter.fetch_add(1));
 
-                // Collect request info / 요청 정보 수집
-                RequestInfo requestInfo = collectXHRRequestInfo(rt, metadata, args, count);
-              capturedUrl = requestInfo.url;
+                // Check if this is a fetch request / Fetch 요청인지 확인
+                try {
+                  facebook::jsi::Value isFetchRequestValue = metadata.getProperty(rt, "__isFetchRequest");
+                  if (isFetchRequestValue.isBool() && isFetchRequestValue.getBool()) {
+                    isFetchRequest = true;
+                    // Use fetch requestId / Fetch requestId 사용
+                    facebook::jsi::Value fetchRequestIdValue = metadata.getProperty(rt, "__fetchRequestId");
+                    if (fetchRequestIdValue.isString()) {
+                      requestId = fetchRequestIdValue.asString(rt).utf8(rt);
+                      LOGI("XHRHook: Using fetch requestId=%s for tracking / XHRHook: 추적에 fetch requestId=%s 사용", requestId.c_str(), requestId.c_str());
+                    }
+                  }
+                } catch (...) {
+                  // Not a fetch request / Fetch 요청이 아님
+                }
 
-                // Send requestWillBeSent event / requestWillBeSent 이벤트 전송
-                sendRequestWillBeSent(rt, requestId, requestInfo, "XHR");
+                if (!isFetchRequest) {
+                  // Regular XHR request / 일반 XHR 요청
+                  requestId = std::to_string(g_requestIdCounter.fetch_add(1));
+                  RequestInfo requestInfo = collectXHRRequestInfo(rt, metadata, args, count);
+                  capturedUrl = requestInfo.url;
+                  sendRequestWillBeSent(rt, requestId, requestInfo, "XHR");
+                  metadata.setProperty(rt, "requestId", facebook::jsi::String::createFromUtf8(rt, requestId));
+                } else {
+                  // Fetch request - requestWillBeSent already sent by Fetch hook / Fetch 요청 - requestWillBeSent는 이미 Fetch 훅에서 전송됨
+                  // Just collect URL for responseReceived / responseReceived를 위해 URL만 수집
+                  RequestInfo requestInfo = collectXHRRequestInfo(rt, metadata, args, count);
+                  capturedUrl = requestInfo.url;
+                  LOGI("XHRHook: Fetch request detected, skipping requestWillBeSent / XHRHook: Fetch 요청 감지, requestWillBeSent 건너뜀");
+                }
 
-                // Store requestId in metadata / 메타데이터에 requestId 저장
                 metadata.setProperty(rt, "requestId", facebook::jsi::String::createFromUtf8(rt, requestId));
-              shouldTrack = true;
+                shouldTrack = true;
             }
 
             // Call original send function FIRST, then add listeners / 원본 send 함수를 먼저 호출한 후 리스너 추가
@@ -246,7 +288,7 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                   rt,
                     facebook::jsi::PropNameID::forAscii(rt, "readystatechangeListener"),
                   0,
-                  [requestId, capturedUrl](facebook::jsi::Runtime& runtime,
+                  [requestId, capturedUrl, isFetchRequest](facebook::jsi::Runtime& runtime,
                                            const facebook::jsi::Value& thisVal,
                                            const facebook::jsi::Value*,
                                            size_t) -> facebook::jsi::Value {
@@ -324,7 +366,7 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                             } catch (...) {
                               // Failed to set error handled flag / 에러 처리 플래그 설정 실패
                             }
-                            
+
                             // Network error - send loadingFailed event / 네트워크 에러 - loadingFailed 이벤트 전송
                             LOGI("Network error detected (status=0) - sending loadingFailed / 네트워크 에러 감지 (status=0) - loadingFailed 전송");
                             sendLoadingFailed(runtime, requestId, "Network error", "XHR");
@@ -406,18 +448,39 @@ bool hookXHR(facebook::jsi::Runtime& runtime) {
                             LOGW("No headers found in responseInfo, using headers from collectXHRResponseInfo / responseInfo에 헤더 없음, collectXHRResponseInfo의 헤더 사용");
                           }
 
-                          // Store response data / 응답 데이터 저장 (thread-safe / 스레드 안전)
-                          // Only store if responseText is not empty / responseText가 비어있지 않을 때만 저장
-                          if (!responseInfo.responseText.empty()) {
-                            std::lock_guard<std::mutex> lock(g_responseDataMutex);
-                            g_responseData[requestId] = responseInfo.responseText;
+                          // For fetch requests, body is handled by Fetch hook, so clear it here / Fetch 요청의 경우 본문은 Fetch 훅에서 처리하므로 여기서 지움
+                          if (isFetchRequest) {
+                            // Check if Fetch hook already stored the body / Fetch 훅이 이미 본문을 저장했는지 확인
+                            std::string fetchBody;
+                            {
+                              std::lock_guard<std::mutex> lock(g_responseDataMutex);
+                              auto it = g_responseData.find(requestId);
+                              if (it != g_responseData.end()) {
+                                fetchBody = it->second;
+                                LOGI("XHRHook: Found body from Fetch hook for requestId=%s, length=%zu / XHRHook: requestId=%s에 대한 Fetch 훅의 본문 발견, 길이=%zu", requestId.c_str(), fetchBody.length(), requestId.c_str(), fetchBody.length());
+                              } else {
+                                LOGW("XHRHook: Body not found from Fetch hook for requestId=%s / XHRHook: requestId=%s에 대한 Fetch 훅의 본문을 찾을 수 없음", requestId.c_str(), requestId.c_str());
+                              }
+                            }
+                            // Clear responseText (body will be retrieved from g_responseData by Network.getResponseBody) / responseText 지우기 (본문은 Network.getResponseBody에서 g_responseData에서 가져옴)
+                            responseInfo.responseText = "";
+                            LOGI("XHRHook: Sending responseReceived for fetch request without body / XHRHook: 본문 없이 fetch 요청에 대한 responseReceived 전송");
+                          } else {
+                            // Store response data for regular XHR requests / 일반 XHR 요청에 대한 응답 데이터 저장 (thread-safe / 스레드 안전)
+                            // Only store if responseText is not empty / responseText가 비어있지 않을 때만 저장
+                            if (!responseInfo.responseText.empty()) {
+                              std::lock_guard<std::mutex> lock(g_responseDataMutex);
+                              g_responseData[requestId] = responseInfo.responseText;
+                            }
                           }
 
                           // Send responseReceived event / responseReceived 이벤트 전송
-                          sendResponseReceived(runtime, requestId, capturedUrl, responseInfo, "XHR");
+                          // Use "Fetch" for fetch requests, "XHR" for regular XHR requests / Fetch 요청에는 "Fetch", 일반 XHR 요청에는 "XHR" 사용
+                          sendResponseReceived(runtime, requestId, capturedUrl, responseInfo, isFetchRequest ? "Fetch" : "XHR");
 
                           // Send loadingFinished event / loadingFinished 이벤트 전송
-                          sendLoadingFinished(runtime, requestId, responseInfo.responseText);
+                          // For fetch requests, use empty string (body is in g_responseData) / Fetch 요청의 경우 빈 문자열 사용 (본문은 g_responseData에 있음)
+                          sendLoadingFinished(runtime, requestId, isFetchRequest ? "" : responseInfo.responseText);
                         }
                       }
                       return facebook::jsi::Value::undefined();
