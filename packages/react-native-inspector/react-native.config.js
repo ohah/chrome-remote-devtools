@@ -35,7 +35,7 @@ const workspaceRoot = findWorkspaceRoot(__dirname);
 const isMonorepo = workspaceRoot !== null;
 
 // Determine paths based on environment / 환경에 따라 경로 결정
-// In monorepo, use absolute paths from workspace root / 모노레포에서는 workspace root 기준 절대 경로 사용
+// In monorepo, use absolute paths from this package directory / 모노레포에서는 패키지 디렉터리 기준 절대 경로 사용
 // In npm package, use relative paths / npm 패키지에서는 상대 경로 사용
 const podspecPath = isMonorepo
   ? path.resolve(__dirname, 'ChromeRemoteDevToolsInspector.podspec')
