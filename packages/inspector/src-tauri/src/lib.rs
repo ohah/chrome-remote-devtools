@@ -223,7 +223,14 @@ pub fn run() {
             stop_reactotron_server,
             is_reactotron_server_running
         ])
-        .setup(move |_app| {
+        .setup(move |app| {
+            // Resolve client.js resource path / client.js 리소스 경로 해결
+            let client_js_path = app
+                .path()
+                .resolve("index.iife.js", tauri::path::BaseDirectory::Resource)
+                .ok()
+                .map(|p| p.to_string_lossy().to_string());
+
             // Start server after Tauri runtime is ready / Tauri 런타임이 준비된 후 서버 시작
             let server_handle_clone = server_handle.clone();
             tauri::async_runtime::spawn(async move {
@@ -238,6 +245,7 @@ pub fn run() {
                     log_file: None,
                     dev_mode: cfg!(debug_assertions), // Enable dev mode only in debug builds / 디버그 빌드에서만 개발 모드 활성화
                     enable_reactotron_server: false, // Start without Reactotron by default / 기본적으로 Reactotron 없이 시작
+                    client_js_resource_path: client_js_path, // Pass resolved resource path / 해결된 리소스 경로 전달
                 };
 
                 let server = server_handle_clone.write().await;

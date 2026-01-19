@@ -25,6 +25,9 @@ pub struct ServerConfig {
     pub dev_mode: bool,
     /// Enable Reactotron server / Reactotron 서버 활성화
     pub enable_reactotron_server: bool,
+    /// Client.js resource path (for Tauri builds) / Client.js 리소스 경로 (Tauri 빌드용)
+    /// This is the resolved path to the bundled client.js file / 번들된 client.js 파일의 해결된 경로
+    pub client_js_resource_path: Option<String>,
 }
 
 impl Default for ServerConfig {
@@ -41,6 +44,7 @@ impl Default for ServerConfig {
             // Default to debug mode in debug builds, production mode in release builds / 디버그 빌드에서는 디버그 모드, 릴리스 빌드에서는 프로덕션 모드
             dev_mode: cfg!(debug_assertions),
             enable_reactotron_server: false,
+            client_js_resource_path: None,
         }
     }
 }
@@ -75,6 +79,7 @@ impl ServerConfig {
             enable_reactotron_server: std::env::var("ENABLE_REACTOTRON_SERVER")
                 .map(|v| v == "true")
                 .unwrap_or(false),
+            client_js_resource_path: None, // Resource path is set by Tauri app, not from env / 리소스 경로는 Tauri 앱에서 설정되며 환경 변수에서 가져오지 않음
         }
     }
 }

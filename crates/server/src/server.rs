@@ -27,7 +27,7 @@ pub async fn run_server_with_socket_server(
 
     // Create HTTP router / HTTP 라우터 생성
     // Pass the RwLock to the router state / 라우터 state에 RwLock 전달
-    let app = create_router(config.dev_mode)
+    let app = create_router(config.dev_mode, config.client_js_resource_path.clone())
         .layer(
             ServiceBuilder::new()
                 .layer(CorsLayer::permissive())
