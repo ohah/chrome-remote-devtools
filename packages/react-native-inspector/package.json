@@ -16,14 +16,14 @@
     "directory": "packages/react-native-inspector"
   },
   "files": [
+    "ChromeRemoteDevToolsInspector.podspec",
+    "react-native.config.js",
     "README.md",
     "android/",
+    "cpp/",
     "dist/",
     "ios/",
-    "src/",
-    "react-native.config.js",
-    "ChromeRemoteDevToolsInspector.podspec",
-    "cpp/"
+    "src/"
   ],
   "sideEffects": true,
   "main": "dist/index.js",
