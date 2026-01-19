@@ -26,13 +26,13 @@ Chrome Remote DevTools enables remote debugging of web pages by implementing CDP
 ### 3-Tier Structure
 
 ```
-[Target Web Page] ←→ [Bun Relay Server] ←→ [Inspector (Web/Desktop)]
-    (client)            (server)              (inspector)
+[Target Web Page] ←→ [Rust WebSocket Relay Server] ←→ [Inspector (Web/Desktop)]
+    (client)                    (server)                      (inspector)
 ```
 
 ### Package Structure
 
-- **@ohah/chrome-remote-devtools-server**: WebSocket relay server (TypeScript/Bun)
+- **chrome-remote-devtools-server** (Rust): WebSocket relay server (standalone or embedded in Tauri)
 - **@ohah/chrome-remote-devtools-client**: CDP client (JavaScript, loaded in web pages)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, shared for web/desktop)
 
@@ -42,7 +42,7 @@ Chrome Remote DevTools enables remote debugging of web pages by implementing CDP
 
 ## Tech Stack
 
-- **Backend**: Bun (TypeScript runtime), WebSocket (ws package)
+- **Backend**: Rust (WebSocket server), TypeScript (client)
 - **Frontend**: React + Vite, TypeScript, Tauri (for desktop app)
 - **DevTools**: devtools-frontend (Google open source, forked)
 - **Tools**: oxlint/oxfmt, rustfmt/clippy, mise (tool version management)
@@ -102,8 +102,8 @@ rustc --version
 Start the development servers:
 
 ```bash
-# Start WebSocket relay server
-bun run dev:server
+# Start WebSocket relay server (Rust)
+cargo run --bin chrome-remote-devtools-server -- --port 8080
 
 # Start Inspector (web version)
 bun run dev:inspector
@@ -117,14 +117,14 @@ bun run dev:docs
 
 ### Server Log Configuration
 
-Server logs are **disabled by default** to reduce console noise. Enable them using environment variables:
+Server logs are **disabled by default** to reduce console noise. Enable them using command-line options:
 
 ```bash
 # Enable all logs
-LOG_ENABLED=true bun run dev:server
+cargo run --bin chrome-remote-devtools-server -- --log-enabled
 
 # Enable and filter logs by specific CDP methods
-LOG_ENABLED=true LOG_METHODS=Runtime.consoleAPICalled,Network.requestWillBeSent bun run dev:server
+cargo run --bin chrome-remote-devtools-server -- --log-enabled --log-methods "Runtime.consoleAPICalled,Network.requestWillBeSent"
 ```
 
 **Note**: Logs are automatically disabled in production builds. See [CONTRIBUTING.md](CONTRIBUTING.md#server-log-configuration--서버-로그-설정) for details.
@@ -149,7 +149,7 @@ bash scripts/build.sh
 
 ```bash
 # Development servers
-bun run dev:server          # WebSocket server only
+cargo run --bin chrome-remote-devtools-server  # Rust WebSocket server only
 bun run dev:inspector       # Inspector web only
 bun run dev:inspector:tauri  # Inspector desktop
 bun run dev:docs            # Documentation site
@@ -168,8 +168,9 @@ bun run build:devtools      # Build Redux DevTools plugin and devtools-frontend
 
 ```
 chrome-remote-devtools/
+├── crates/
+│   └── server/          # WebSocket relay server (Rust)
 ├── packages/
-│   ├── server/          # WebSocket relay server
 │   ├── client/          # CDP client (for web pages)
 │   └── inspector/       # Inspector UI (React + Vite, web/desktop)
 ├── document/            # RSPress documentation site
