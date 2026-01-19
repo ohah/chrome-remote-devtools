@@ -38,10 +38,9 @@ Chrome DevTools Protocol (CDP)을 활용하여 원격 크롬 브라우저를 제
 ## 기술 스택
 
 ### 백엔드
-- **Bun** (TypeScript 런타임)
-- **TypeScript** (서버 및 클라이언트)
-- **WebSocket** (ws 패키지)
-- **Rust** (Tauri 백엔드만)
+- **Rust** (WebSocket 서버 및 Tauri 백엔드)
+- **TypeScript** (클라이언트)
+- **WebSocket** (axum WebSocket)
 
 ### 프론트엔드
 - **React** + **Vite** (Inspector)
@@ -64,12 +63,12 @@ Chrome DevTools Protocol (CDP)을 활용하여 원격 크롬 브라우저를 제
 
 ### 3-Tier 구조
 ```
-[디버깅 대상 웹페이지] ←→ [Bun 중계 서버] ←→ [Inspector (웹/데스크탑)]
-     (client)              (server)              (inspector)
+[디버깅 대상 웹페이지] ←→ [Rust WebSocket 중계 서버] ←→ [Inspector (웹/데스크탑)]
+     (client)                    (server)                      (inspector)
 ```
 
 ### 패키지 구조
-- **@ohah/chrome-remote-devtools-server**: WebSocket 중계 서버 (TypeScript/Bun)
+- **chrome-remote-devtools-server** (Rust): WebSocket 중계 서버 (독립 실행형 또는 Tauri에 내장)
 - **@ohah/chrome-remote-devtools-client**: CDP 클라이언트 (JavaScript, 웹페이지에 로드)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, 웹/데스크탑 공유)
 
@@ -83,8 +82,9 @@ Chrome DevTools Protocol (CDP)을 활용하여 원격 크롬 브라우저를 제
 
 ```
 chrome-remote-devtools/
+├── crates/
+│   └── server/          # WebSocket 중계 서버 (Rust)
 ├── packages/
-│   ├── server/          # WebSocket 중계 서버
 │   ├── client/          # CDP 클라이언트 (웹페이지용)
 │   └── inspector/       # Inspector UI (React + Vite, 웹/데스크탑)
 ├── document/            # RSPress 문서 페이지
@@ -121,7 +121,7 @@ chrome-remote-devtools/
 
 ```bash
 # 개발 서버 시작
-bun run dev:server          # 서버만
+cargo run --bin chrome-remote-devtools-server  # Rust 서버만
 bun run dev:inspector       # Inspector 웹만
 bun run dev:inspector:tauri  # Inspector 데스크탑
 bun run dev:docs            # 문서 페이지 (document 패키지)
@@ -251,7 +251,9 @@ function 연결상태업데이트() {
 
 ## 주요 파일 위치
 
-- 서버: `packages/server/src/index.ts`
+- 서버: `crates/server/src/` (Rust)
+  - 메인 바이너리: `crates/server/src/main.rs`
+  - 라이브러리: `crates/server/src/lib.rs`
 - 클라이언트: `packages/client/src/index.ts`
 - Inspector: `packages/inspector/src/`
 - DevTools: `devtools/devtools-frontend/front_end/`
@@ -313,7 +315,7 @@ function 연결상태업데이트() {
 ```
 feat(server): add WebSocket relay server
 
-- Implement basic WebSocket server for CDP message relay
+- Implement Rust WebSocket server for CDP message relay
 - Support multiple client connections
 - Add connection state management
 ```

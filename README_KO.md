@@ -26,13 +26,13 @@ Chrome Remote DevTools는 클라이언트 사이드에서 CDP를 구현하고 We
 ### 3-Tier 구조
 
 ```
-[디버깅 대상 웹페이지] ←→ [Bun 중계 서버] ←→ [Inspector (웹/데스크탑)]
-     (client)              (server)              (inspector)
+[디버깅 대상 웹페이지] ←→ [Rust WebSocket 중계 서버] ←→ [Inspector (웹/데스크탑)]
+     (client)                    (server)                      (inspector)
 ```
 
 ### 패키지 구조
 
-- **@ohah/chrome-remote-devtools-server**: WebSocket 중계 서버 (TypeScript/Bun)
+- **chrome-remote-devtools-server** (Rust): WebSocket 중계 서버 (독립 실행형 또는 Tauri에 내장)
 - **@ohah/chrome-remote-devtools-client**: CDP 클라이언트 (JavaScript, 웹페이지에 로드)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, 웹/데스크탑 공유)
 
@@ -42,7 +42,7 @@ Chrome Remote DevTools는 클라이언트 사이드에서 CDP를 구현하고 We
 
 ## 기술 스택
 
-- **백엔드**: Bun (TypeScript 런타임), WebSocket (ws 패키지)
+- **백엔드**: Rust (WebSocket 서버), TypeScript (클라이언트)
 - **프론트엔드**: React + Vite, TypeScript, Tauri (데스크탑 앱용)
 - **DevTools**: devtools-frontend (Google 오픈소스, 포크 사용)
 - **도구**: oxlint/oxfmt, rustfmt/clippy, mise (도구 버전 관리)
@@ -102,8 +102,8 @@ rustc --version
 개발 서버를 시작합니다:
 
 ```bash
-# WebSocket 중계 서버 시작
-bun run dev:server
+# WebSocket 중계 서버 시작 (Rust)
+cargo run --bin chrome-remote-devtools-server -- --port 8080
 
 # Inspector 웹 버전 시작
 bun run dev:inspector
@@ -135,7 +135,7 @@ bash scripts/build.sh
 
 ```bash
 # 개발 서버
-bun run dev:server          # 서버만
+cargo run --bin chrome-remote-devtools-server  # Rust WebSocket 서버만
 bun run dev:inspector       # Inspector 웹만
 bun run dev:inspector:tauri  # Inspector 데스크탑
 bun run dev:docs            # 문서 페이지
@@ -154,8 +154,9 @@ bun run build:devtools      # Redux DevTools 플러그인 및 devtools-frontend 
 
 ```
 chrome-remote-devtools/
+├── crates/
+│   └── server/          # WebSocket 중계 서버 (Rust)
 ├── packages/
-│   ├── server/          # WebSocket 중계 서버
 │   ├── client/          # CDP 클라이언트 (웹페이지용)
 │   └── inspector/       # Inspector UI (React + Vite, 웹/데스크탑)
 ├── document/            # RSPress 문서 페이지
