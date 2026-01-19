@@ -232,11 +232,11 @@ The Redux panel is available in the DevTools panel view. It uses:
 
 ### React Native Integration
 
-For React Native apps, use the middleware from `@ohah/chrome-remote-devtools-react-native`:
+For React Native apps, use the middleware from `@ohah/chrome-remote-devtools-inspector-react-native`:
 
 ```typescript
 // Redux middleware
-import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-react-native/redux';
+import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-inspector-react-native/redux';
 
 const store = createStore(
   rootReducer,
@@ -244,7 +244,7 @@ const store = createStore(
 );
 
 // Zustand middleware
-import { chromeDevtools } from '@ohah/chrome-remote-devtools-react-native/zustand';
+import { chromeDevtools } from '@ohah/chrome-remote-devtools-inspector-react-native/zustand';
 
 const useStore = create(
   chromeDevtools((set) => ({ ... }), { name: 'MyStore' })

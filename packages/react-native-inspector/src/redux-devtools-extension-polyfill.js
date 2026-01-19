@@ -38,7 +38,7 @@ console.log(
     // This ensures correct resolution regardless of where the polyfill is loaded from / 이것은 polyfill이 어디서 로드되든 올바른 resolve를 보장합니다
     const {
       installReduxDevToolsPolyfill,
-    } = require('@ohah/chrome-remote-devtools-react-native/redux-devtools-extension');
+    } = require('@ohah/chrome-remote-devtools-inspector-react-native/redux-devtools-extension');
 
     // Install polyfill immediately / 즉시 polyfill 설치
     // Always install, even if extension exists, to ensure consistency / 일관성을 위해 extension이 존재해도 설치

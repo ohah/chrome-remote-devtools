@@ -1,6 +1,6 @@
 {
-  "name": "@ohah/chrome-remote-devtools-react-native",
-  "version": "0.1.0",
+  "name": "@ohah/chrome-remote-devtools-inspector-react-native",
+  "version": "0.1.0-rc.1",
   "description": "Chrome Remote DevTools Inspector Plugin for React Native",
   "keywords": [
     "debugging",
@@ -20,7 +20,10 @@
     "android/",
     "dist/",
     "ios/",
-    "src/"
+    "src/",
+    "react-native.config.js",
+    "ChromeRemoteDevToolsInspector.podspec",
+    "cpp/"
   ],
   "sideEffects": true,
   "main": "dist/index.js",

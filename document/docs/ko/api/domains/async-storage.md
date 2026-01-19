@@ -104,7 +104,7 @@ AsyncStorage 인스턴스의 모든 항목이 제거되었을 때 발생합니�
 React Native 앱에서 AsyncStorage 인스턴스를 등록하려면:
 
 ```typescript
-import { registerAsyncStorageDevTools } from '@ohah/chrome-remote-devtools-react-native';
+import { registerAsyncStorageDevTools } from '@ohah/chrome-remote-devtools-inspector-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 기본 AsyncStorage 인스턴스 등록

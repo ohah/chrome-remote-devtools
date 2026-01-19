@@ -22,7 +22,7 @@ function withReduxDevTools(config) {
   try {
     // Try to resolve from package name first / 패키지 이름으로 먼저 해석 시도
     polyfillPath = requirePolyfill.resolve(
-      '@ohah/chrome-remote-devtools-react-native/src/redux-devtools-extension-polyfill.js'
+      '@ohah/chrome-remote-devtools-inspector-react-native/src/redux-devtools-extension-polyfill.js'
     );
   } catch {
     // Fallback to relative path from __dirname / __dirname에서 상대 경로로 폴백

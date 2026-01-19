@@ -56,7 +56,7 @@ Emitted when a Redux message is received from the application. Matches Redux Dev
 To use Redux DevTools in a React Native app:
 
 ```typescript
-import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-react-native/redux';
+import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-inspector-react-native/redux';
 import { createStore, applyMiddleware } from 'redux';
 import rootReducer from './reducers';
 
@@ -76,7 +76,7 @@ const store = createStore(
 To use with Zustand:
 
 ```typescript
-import { chromeDevtools } from '@ohah/chrome-remote-devtools-react-native/zustand';
+import { chromeDevtools } from '@ohah/chrome-remote-devtools-inspector-react-native/zustand';
 import { create } from 'zustand';
 
 const useStore = create(
@@ -96,7 +96,7 @@ You need to add Redux DevTools Extension polyfill to your Metro configuration:
 
 ```javascript
 // metro.config.js
-const { withChromeRemoteDevToolsRedux } = require('@ohah/chrome-remote-devtools-react-native/metro');
+const { withChromeRemoteDevToolsRedux } = require('@ohah/chrome-remote-devtools-inspector-react-native/metro');
 
 module.exports = withChromeRemoteDevToolsRedux(metroConfig);
 ```

@@ -2832,7 +2832,7 @@ PODS:
 
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
-  - ChromeRemoteDevToolsInspector (from `../../../packages/react-native-inspector`)
+  - "ChromeRemoteDevToolsInspector (from `../node_modules/@ohah/chrome-remote-devtools-inspector-react-native`)"
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - fast_float (from `../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -2931,7 +2931,7 @@ EXTERNAL SOURCES:
   boost:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
   ChromeRemoteDevToolsInspector:
-    :path: "../../../packages/react-native-inspector"
+    :path: "../node_modules/@ohah/chrome-remote-devtools-inspector-react-native"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   fast_float:
