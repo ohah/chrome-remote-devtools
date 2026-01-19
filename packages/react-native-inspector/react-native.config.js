@@ -41,9 +41,7 @@ const podspecPath = isMonorepo
   ? path.resolve(__dirname, 'ChromeRemoteDevToolsInspector.podspec')
   : './ChromeRemoteDevToolsInspector.podspec';
 
-const androidSourceDir = isMonorepo
-  ? path.resolve(__dirname, 'android')
-  : './android';
+const androidSourceDir = isMonorepo ? path.resolve(__dirname, 'android') : './android';
 
 module.exports = {
   ios: {
