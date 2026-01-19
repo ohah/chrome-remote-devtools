@@ -14,7 +14,10 @@ use tokio::fs;
 use tokio::sync::RwLock;
 
 /// Create HTTP router / HTTP 라우터 생성
-pub fn create_router(dev_mode: bool) -> Router<Arc<RwLock<SocketServer>>> {
+pub fn create_router(
+    dev_mode: bool,
+    client_js_resource_path: Option<String>,
+) -> Router<Arc<RwLock<SocketServer>>> {
     let mut router = Router::new()
         .route("/json", get(get_all_clients))
         .route("/json/clients", get(get_all_clients_detailed))
@@ -25,10 +28,13 @@ pub fn create_router(dev_mode: bool) -> Router<Arc<RwLock<SocketServer>>> {
         .route("/remote/debug/*path", get(handle_websocket_upgrade))
         .route("/", get(handle_root_websocket_upgrade));
 
-    // Only add /client.js route in development mode / 개발 모드에서만 /client.js 라우트 추가
-    if dev_mode {
-        router = router.route("/client.js", get(serve_client_script));
-    }
+    // Always add /client.js route / 항상 /client.js 라우트 추가
+    // Pass client_js_resource_path to the handler / 핸들러에 client_js_resource_path 전달
+    let resource_path = client_js_resource_path.clone();
+    router = router.route("/client.js", get(move || {
+        let path = resource_path.clone();
+        async move { serve_client_script(path).await }
+    }));
 
     router
 }
@@ -228,13 +234,24 @@ async fn get_client(
 }
 
 /// Serve client script / 클라이언트 스크립트 서빙
-/// Note: This endpoint is only available in development mode / 주의: 이 엔드포인트는 개발 모드에서만 사용 가능
-/// In production (Tauri build), the client script is not included / 운영 환경(Tauri 빌드)에서는 클라이언트 스크립트가 포함되지 않음
-async fn serve_client_script() -> Result<Response, StatusCode> {
-    // Check if running in development mode / 개발 모드에서 실행 중인지 확인
-    // In development, try to serve the client script from the source directory / 개발 환경에서는 소스 디렉토리에서 클라이언트 스크립트 서빙 시도
-    // In production (Tauri), this file won't be available / 운영 환경(Tauri)에서는 이 파일을 사용할 수 없음
+/// This endpoint is always available / 이 엔드포인트는 항상 사용 가능
+/// Uses resource path in production, falls back to file system in development / 프로덕션에서는 리소스 경로 사용, 개발 환경에서는 파일 시스템으로 폴백
+async fn serve_client_script(
+    client_js_resource_path: Option<String>,
+) -> Result<Response, StatusCode> {
+    // Try resource path first (for Tauri production builds) / 먼저 리소스 경로 시도 (Tauri 프로덕션 빌드용)
+    if let Some(resource_path) = client_js_resource_path {
+        if let Ok(content) = fs::read_to_string(&resource_path).await {
+            return Ok((
+                StatusCode::OK,
+                [(header::CONTENT_TYPE, "application/javascript")],
+                content,
+            )
+                .into_response());
+        }
+    }
 
+    // Fallback: try to read from file system (for development) / 폴백: 파일 시스템에서 읽기 시도 (개발용)
     // Try IIFE format first (for script tags) / 먼저 IIFE 형식 시도 (script 태그용)
     let iife_path = PathBuf::from("packages/client/dist/index.iife.js");
     if let Ok(content) = fs::read_to_string(&iife_path).await {
@@ -257,11 +274,11 @@ async fn serve_client_script() -> Result<Response, StatusCode> {
             .into_response());
     }
 
-    // Fallback: warning if not built or in production / Fallback: 빌드되지 않았거나 운영 환경인 경우 경고 메시지
+    // Fallback: warning if not built / Fallback: 빌드되지 않은 경우 경고 메시지
     Ok((
         StatusCode::OK,
         [(header::CONTENT_TYPE, "application/javascript")],
-        "console.error('Client script not found. This endpoint is only available in development mode. Please build: cd packages/client && bun run build');",
+        "console.error('Client script not found. Please build: cd packages/client && bun run build');",
     )
         .into_response())
 }
