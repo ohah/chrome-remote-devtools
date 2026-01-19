@@ -101,7 +101,7 @@ This guide shows how to use Chrome Remote DevTools in React Native apps.
 
 Install the React Native Inspector package:
 
-<PackageManagerTabs command="install @ohah/chrome-remote-devtools-react-native" />
+<PackageManagerTabs command="install @ohah/chrome-remote-devtools-inspector-react-native" />
 
 ### Metro Configuration
 
@@ -110,7 +110,7 @@ Add Redux DevTools Extension polyfill to your Metro configuration:
 ```javascript
 // metro.config.js
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
-const { withChromeRemoteDevToolsRedux } = require('@ohah/chrome-remote-devtools-react-native/metro');
+const { withChromeRemoteDevToolsRedux } = require('@ohah/chrome-remote-devtools-inspector-react-native/metro');
 
 const config = getDefaultConfig(__dirname);
 
@@ -122,7 +122,7 @@ module.exports = withChromeRemoteDevToolsRedux(config);
 Connect to the server from your React Native app:
 
 ```typescript
-import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-react-native';
+import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-inspector-react-native';
 
 // Connect to server
 ChromeRemoteDevToolsInspector.connect('localhost', 8080)
@@ -146,7 +146,7 @@ ChromeRemoteDevToolsInspector.connect(serverHost, 8080);
 If using Redux, add the middleware:
 
 ```typescript
-import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-react-native/redux';
+import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-inspector-react-native/redux';
 import { createStore, applyMiddleware } from 'redux';
 
 const store = createStore(
@@ -165,7 +165,7 @@ const store = createStore(
 To inspect MMKV or AsyncStorage, register them:
 
 ```typescript
-import { registerMMKVDevTools } from '@ohah/chrome-remote-devtools-react-native';
+import { registerMMKVDevTools } from '@ohah/chrome-remote-devtools-inspector-react-native';
 import { createMMKV } from 'react-native-mmkv';
 
 const storage = createMMKV({ id: 'user-storage' });
@@ -173,7 +173,7 @@ registerMMKVDevTools(storage);
 ```
 
 ```typescript
-import { registerAsyncStorageDevTools } from '@ohah/chrome-remote-devtools-react-native';
+import { registerAsyncStorageDevTools } from '@ohah/chrome-remote-devtools-inspector-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 registerAsyncStorageDevTools(AsyncStorage);

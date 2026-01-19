@@ -16,21 +16,6 @@ const resolvePackage = (packageName) => {
 
 const config = {
   dependencies: {
-    '@ohah/chrome-remote-devtools-react-native': {
-      platforms: {
-        ios: {
-          podspecPath: path.resolve(
-            __dirname,
-            '../../packages/react-native-inspector/ChromeRemoteDevToolsInspector.podspec'
-          ),
-        },
-        android: {
-          sourceDir: path.resolve(__dirname, '../../packages/react-native-inspector/android'),
-          packageImportPath:
-            'import com.ohah.chromeremotedevtools.ChromeRemoteDevToolsInspectorPackage;',
-        },
-      },
-    },
     'react-native-nitro-modules': {
       root: resolvePackage('react-native-nitro-modules'),
     },

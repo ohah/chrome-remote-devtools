@@ -2,7 +2,7 @@ const { getMetroConfig } = require('@craby/devkit');
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const {
   withChromeRemoteDevToolsRedux,
-} = require('@ohah/chrome-remote-devtools-react-native/metro');
+} = require('@ohah/chrome-remote-devtools-inspector-react-native/metro');
 
 /**
  * Metro configuration

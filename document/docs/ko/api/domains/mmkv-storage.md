@@ -104,7 +104,7 @@ MMKV 인스턴스의 모든 항목이 제거되었을 때 발생합니다.
 React Native 앱에서 MMKV 인스턴스를 등록하려면:
 
 ```typescript
-import { registerMMKVDevTools } from '@ohah/chrome-remote-devtools-react-native';
+import { registerMMKVDevTools } from '@ohah/chrome-remote-devtools-inspector-react-native';
 import { createMMKV } from 'react-native-mmkv';
 
 const userStorage = createMMKV({ id: 'user-storage' });

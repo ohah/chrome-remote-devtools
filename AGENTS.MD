@@ -71,6 +71,7 @@ Chrome DevTools Protocol (CDP)을 활용하여 원격 크롬 브라우저를 제
 - **chrome-remote-devtools-server** (Rust): WebSocket 중계 서버 (독립 실행형 또는 Tauri에 내장)
 - **@ohah/chrome-remote-devtools-client**: CDP 클라이언트 (JavaScript, 웹페이지에 로드)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, 웹/데스크탑 공유)
+- **@ohah/chrome-remote-devtools-inspector-react-native**: React Native Inspector 플러그인 (네이티브 모듈 포함)
 
 ### 통신 흐름
 1. 클라이언트(`client`)가 WebSocket으로 서버에 연결

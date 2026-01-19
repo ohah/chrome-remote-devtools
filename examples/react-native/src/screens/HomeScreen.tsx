@@ -5,7 +5,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { ConsoleTestTab } from '../components/ConsoleTestTab';
 import { NetworkTestTab } from '../components/NetworkTestTab';
 import { HookControls } from '../components/HookControls';
-import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-react-native';
+import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-inspector-react-native';
 
 const Tab = createMaterialTopTabNavigator();
 

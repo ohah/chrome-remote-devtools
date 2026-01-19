@@ -110,7 +110,7 @@
       "name": "chrome-remote-devtools-react-native-example",
       "version": "0.0.1",
       "dependencies": {
-        "@ohah/chrome-remote-devtools-react-native": "workspace:*",
+        "@ohah/chrome-remote-devtools-inspector-react-native": "workspace:*",
         "@ohah/redux-devtools-plugin": "workspace:*",
         "@react-native-async-storage/async-storage": "2.2.0",
         "@react-native/new-app-screen": "0.83.1",
@@ -219,8 +219,8 @@
       },
     },
     "packages/react-native-inspector": {
-      "name": "@ohah/chrome-remote-devtools-react-native",
-      "version": "0.1.0",
+      "name": "@ohah/chrome-remote-devtools-inspector-react-native",
+      "version": "0.1.0-rc.1",
       "dependencies": {
         "@babel/runtime": "^7.25.0",
       },
@@ -733,7 +733,7 @@
 
     "@ohah/chrome-remote-devtools-inspector": ["@ohah/chrome-remote-devtools-inspector@workspace:packages/inspector"],
 
-    "@ohah/chrome-remote-devtools-react-native": ["@ohah/chrome-remote-devtools-react-native@workspace:packages/react-native-inspector"],
+    "@ohah/chrome-remote-devtools-inspector-react-native": ["@ohah/chrome-remote-devtools-inspector-react-native@workspace:packages/react-native-inspector"],
 
     "@ohah/chrome-remote-devtools-server": ["@ohah/chrome-remote-devtools-server@workspace:packages/server"],
 
@@ -3519,7 +3519,7 @@
 
     "@ohah/chrome-remote-devtools-inspector/@types/node": ["@types/node@25.0.8", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-powIePYMmC3ibL0UJ2i2s0WIbq6cg6UyVFQxSCpaPxxzAaziRfimGivjdF943sSGV6RADVbk0Nvlm5P/FB44Zg=="],
 
-    "@ohah/chrome-remote-devtools-react-native/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+    "@ohah/chrome-remote-devtools-inspector-react-native/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "@ohah/chrome-remote-devtools-server/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 

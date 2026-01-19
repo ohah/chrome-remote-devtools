@@ -104,7 +104,7 @@ Emitted when all items in an MMKV instance are cleared.
 To register MMKV instances in your React Native app:
 
 ```typescript
-import { registerMMKVDevTools } from '@ohah/chrome-remote-devtools-react-native';
+import { registerMMKVDevTools } from '@ohah/chrome-remote-devtools-inspector-react-native';
 import { createMMKV } from 'react-native-mmkv';
 
 const userStorage = createMMKV({ id: 'user-storage' });

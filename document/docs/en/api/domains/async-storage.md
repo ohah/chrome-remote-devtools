@@ -104,7 +104,7 @@ Emitted when all items in an AsyncStorage instance are cleared.
 To register AsyncStorage instances in your React Native app:
 
 ```typescript
-import { registerAsyncStorageDevTools } from '@ohah/chrome-remote-devtools-react-native';
+import { registerAsyncStorageDevTools } from '@ohah/chrome-remote-devtools-inspector-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Register default AsyncStorage instance

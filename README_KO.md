@@ -218,11 +218,11 @@ Redux 패널은 DevTools panel view에서 사용할 수 있습니다. 다음을 
 
 ### React Native 통합
 
-React Native 앱에서는 `@ohah/chrome-remote-devtools-react-native`의 미들웨어를 사용합니다:
+React Native 앱에서는 `@ohah/chrome-remote-devtools-inspector-react-native`의 미들웨어를 사용합니다:
 
 ```typescript
 // Redux 미들웨어
-import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-react-native/redux';
+import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-inspector-react-native/redux';
 
 const store = createStore(
   rootReducer,
@@ -230,7 +230,7 @@ const store = createStore(
 );
 
 // Zustand 미들웨어
-import { chromeDevtools } from '@ohah/chrome-remote-devtools-react-native/zustand';
+import { chromeDevtools } from '@ohah/chrome-remote-devtools-inspector-react-native/zustand';
 
 const useStore = create(
   chromeDevtools((set) => ({ ... }), { name: 'MyStore' })

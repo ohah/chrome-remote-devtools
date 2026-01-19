@@ -5,7 +5,7 @@
 
 import 'react-native-gesture-handler';
 // Note: Redux DevTools Extension is auto-initialized on import / 참고: Redux DevTools Extension은 import 시 자동 초기화됩니다
-import '@ohah/chrome-remote-devtools-react-native';
+import '@ohah/chrome-remote-devtools-inspector-react-native';
 import React, { useEffect } from 'react';
 import { StatusBar, useColorScheme, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -15,7 +15,7 @@ import {
   ChromeRemoteDevToolsInspectorProvider,
   registerMMKVDevTools,
   registerAsyncStorageDevTools,
-} from '@ohah/chrome-remote-devtools-react-native';
+} from '@ohah/chrome-remote-devtools-inspector-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { store } from './store/redux/store';
 import { userStorage, cacheStorage, defaultStorage, legacyStorage } from './store/mmkv/storage';

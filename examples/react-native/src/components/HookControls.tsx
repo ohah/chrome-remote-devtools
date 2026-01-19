@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-react-native';
+import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-inspector-react-native';
 
 interface HookControlsProps {
   consoleHookEnabled: boolean;

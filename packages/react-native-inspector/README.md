@@ -5,11 +5,11 @@ Chrome Remote DevTools Inspector Plugin for React Native / React Native용 Chrom
 ## Installation / 설치
 
 ```bash
-npm install @ohah/chrome-remote-devtools-react-native
+npm install @ohah/chrome-remote-devtools-inspector-react-native
 # or
-yarn add @ohah/chrome-remote-devtools-react-native
+yarn add @ohah/chrome-remote-devtools-inspector-react-native
 # or
-bun add @ohah/chrome-remote-devtools-react-native
+bun add @ohah/chrome-remote-devtools-inspector-react-native
 ```
 
 ## Usage / 사용법
@@ -17,7 +17,7 @@ bun add @ohah/chrome-remote-devtools-react-native
 ### Basic Usage / 기본 사용법
 
 ```typescript
-import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-react-native';
+import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-inspector-react-native';
 
 // Connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연결
 ChromeRemoteDevToolsInspector.connect('localhost', 8080)
