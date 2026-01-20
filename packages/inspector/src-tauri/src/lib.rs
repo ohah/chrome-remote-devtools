@@ -2,6 +2,7 @@
 use chrome_remote_devtools_server::{ServerConfig, ServerHandle, ShutdownStatus};
 use std::io::{self, Write};
 use std::sync::{Arc, OnceLock};
+use tauri::Manager;
 use tokio::sync::RwLock;
 
 // Global server handle / 전역 서버 핸들
@@ -27,6 +28,7 @@ async fn start_server(port: u16, host: String) -> Result<(), String> {
         log_file: None,
         dev_mode: cfg!(debug_assertions), // Enable dev mode only in debug builds / 디버그 빌드에서만 개발 모드 활성화
         enable_reactotron_server: false,  // Default to false / 기본값은 false
+        client_js_resource_path: None, // Not available in command context / 명령 컨텍스트에서는 사용 불가
     };
 
     server.start(config).await.map_err(|e| e.to_string())?;
@@ -105,6 +107,7 @@ async fn start_reactotron_server(port: u16, host: String) -> Result<String, Stri
         log_file: None,
         dev_mode: cfg!(debug_assertions),
         enable_reactotron_server: true,
+        client_js_resource_path: None, // Not available in command context / 명령 컨텍스트에서는 사용 불가
     };
 
     eprintln!("[reactotron] 🚀 Starting server with Reactotron enabled...");
@@ -170,6 +173,7 @@ async fn stop_reactotron_server(port: u16, host: String) -> Result<String, Strin
         log_file: None,
         dev_mode: cfg!(debug_assertions),
         enable_reactotron_server: false,
+        client_js_resource_path: None, // Not available in command context / 명령 컨텍스트에서는 사용 불가
     };
 
     eprintln!("[reactotron] 🚀 Starting server with Reactotron disabled on port 8080...");
@@ -230,6 +234,17 @@ pub fn run() {
                 .resolve("index.iife.js", tauri::path::BaseDirectory::Resource)
                 .ok()
                 .map(|p| p.to_string_lossy().to_string());
+
+            // Log resource path resolution for debugging / 디버깅을 위한 리소스 경로 해결 로깅
+            if let Some(ref path) = client_js_path {
+                eprintln!("[tauri] ✅ Resolved client.js resource path: {}", path);
+                let _ = io::stderr().flush();
+            } else {
+                eprintln!(
+                    "[tauri] ⚠️ Failed to resolve client.js resource path, will use fallback"
+                );
+                let _ = io::stderr().flush();
+            }
 
             // Start server after Tauri runtime is ready / Tauri 런타임이 준비된 후 서버 시작
             let server_handle_clone = server_handle.clone();

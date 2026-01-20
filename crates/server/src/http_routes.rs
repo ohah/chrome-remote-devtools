@@ -28,13 +28,19 @@ pub fn create_router(
         .route("/remote/debug/*path", get(handle_websocket_upgrade))
         .route("/", get(handle_root_websocket_upgrade));
 
-    // Always add /client.js route / 항상 /client.js 라우트 추가
-    // Pass client_js_resource_path to the handler / 핸들러에 client_js_resource_path 전달
-    let resource_path = client_js_resource_path.clone();
-    router = router.route("/client.js", get(move || {
-        let path = resource_path.clone();
-        async move { serve_client_script(path).await }
-    }));
+    // Add /client.js route if dev_mode is enabled or resource path is provided / dev_mode가 활성화되었거나 리소스 경로가 제공되면 /client.js 라우트 추가
+    // In production (Tauri), resource path is provided / 프로덕션(Tauri)에서는 리소스 경로가 제공됨
+    // In development, dev_mode enables the endpoint / 개발 환경에서는 dev_mode가 엔드포인트를 활성화함
+    if dev_mode || client_js_resource_path.is_some() {
+        let resource_path = client_js_resource_path.clone();
+        router = router.route(
+            "/client.js",
+            get(move |State(server): State<Arc<RwLock<SocketServer>>>| {
+                let path = resource_path.clone();
+                async move { serve_client_script(server, path).await }
+            }),
+        );
+    }
 
     router
 }
@@ -234,45 +240,234 @@ async fn get_client(
 }
 
 /// Serve client script / 클라이언트 스크립트 서빙
-/// This endpoint is always available / 이 엔드포인트는 항상 사용 가능
-/// Uses resource path in production, falls back to file system in development / 프로덕션에서는 리소스 경로 사용, 개발 환경에서는 파일 시스템으로 폴백
+/// Uses resource path in production (Tauri), falls back to file system in development / 프로덕션에서는 리소스 경로 사용 (Tauri), 개발 환경에서는 파일 시스템으로 폴백
 async fn serve_client_script(
+    server: Arc<RwLock<SocketServer>>,
     client_js_resource_path: Option<String>,
 ) -> Result<Response, StatusCode> {
+    let logger = {
+        let server_guard = server.read().await;
+        server_guard.logger.clone()
+    };
+
+    logger.log(
+        crate::logging::LogType::Server,
+        "http-routes",
+        "📥 /client.js requested",
+        None,
+        None,
+    );
+
     // Try resource path first (for Tauri production builds) / 먼저 리소스 경로 시도 (Tauri 프로덕션 빌드용)
-    if let Some(resource_path) = client_js_resource_path {
-        if let Ok(content) = fs::read_to_string(&resource_path).await {
+    if let Some(resource_path) = &client_js_resource_path {
+        logger.log(
+            crate::logging::LogType::Server,
+            "http-routes",
+            &format!("🔍 Trying resource path: {}", resource_path),
+            None,
+            None,
+        );
+        if let Ok(content) = fs::read_to_string(resource_path).await {
+            logger.log(
+                crate::logging::LogType::Server,
+                "http-routes",
+                "✅ Loaded from resource path",
+                None,
+                None,
+            );
             return Ok((
                 StatusCode::OK,
                 [(header::CONTENT_TYPE, "application/javascript")],
                 content,
             )
                 .into_response());
+        } else {
+            logger.log(
+                crate::logging::LogType::Server,
+                "http-routes",
+                "⚠️ Resource path failed, trying fallback",
+                None,
+                None,
+            );
         }
+    } else {
+        logger.log(
+            crate::logging::LogType::Server,
+            "http-routes",
+            "ℹ️ No resource path, using file system fallback",
+            None,
+            None,
+        );
     }
 
     // Fallback: try to read from file system (for development) / 폴백: 파일 시스템에서 읽기 시도 (개발용)
-    // Try IIFE format first (for script tags) / 먼저 IIFE 형식 시도 (script 태그용)
-    let iife_path = PathBuf::from("packages/client/dist/index.iife.js");
-    if let Ok(content) = fs::read_to_string(&iife_path).await {
-        return Ok((
-            StatusCode::OK,
-            [(header::CONTENT_TYPE, "application/javascript")],
-            content,
-        )
-            .into_response());
+    // Server runs from project root in bun dev / bun dev에서 서버는 프로젝트 루트에서 실행됨
+    // For Tauri, find project root from executable location / Tauri의 경우 실행 파일 위치에서 프로젝트 루트 찾기
+    let current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+
+    // Try to find project root by looking for Cargo.toml or package.json / Cargo.toml 또는 package.json을 찾아 프로젝트 루트 찾기
+    // Start from current dir, then try executable's parent directories / 현재 디렉토리에서 시작, 그 다음 실행 파일의 부모 디렉토리 시도
+    let mut search_paths = vec![current_dir.clone()];
+
+    // Also try from executable location (for Tauri) / 실행 파일 위치에서도 시도 (Tauri용)
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            search_paths.push(exe_dir.to_path_buf());
+            // Also try parent directories of executable / 실행 파일의 부모 디렉토리도 시도
+            let mut exe_parent = exe_dir.to_path_buf();
+            for _ in 0..5 {
+                if let Some(parent) = exe_parent.parent() {
+                    exe_parent = parent.to_path_buf();
+                    search_paths.push(exe_parent.clone());
+                } else {
+                    break;
+                }
+            }
+        }
     }
 
-    // Fallback: try index.js if iife doesn't exist / Fallback: iife가 없으면 index.js 시도
-    let js_path = PathBuf::from("packages/client/dist/index.js");
-    if let Ok(content) = fs::read_to_string(&js_path).await {
+    // Find project root by looking for Cargo.toml (preferred) or package.json with packages/client / Cargo.toml(우선) 또는 packages/client가 있는 package.json을 찾아 프로젝트 루트 찾기
+    // Cargo.toml is at the root, while package.json exists in subdirectories too / Cargo.toml은 루트에만 있고, package.json은 하위 디렉토리에도 존재함
+    let mut project_root: Option<PathBuf> = None;
+    for search_path in &search_paths {
+        let mut current = search_path.clone();
+        for _ in 0..10 {
+            // Prefer Cargo.toml with packages/client directory (root has both) / packages/client 디렉토리가 있는 Cargo.toml 우선 (루트에 둘 다 있음)
+            let has_cargo_toml = current.join("Cargo.toml").exists();
+            let has_packages_client = current.join("packages/client").exists();
+            if has_cargo_toml && has_packages_client {
+                logger.log(
+                    crate::logging::LogType::Server,
+                    "http-routes",
+                    &format!(
+                        "🔍 Found Cargo.toml with packages/client at: {}",
+                        current.display()
+                    ),
+                    None,
+                    None,
+                );
+                project_root = Some(current);
+                break;
+            }
+            // Also check for package.json with packages/client directory / packages/client 디렉토리가 있는 package.json도 확인
+            let has_package_json = current.join("package.json").exists();
+            if has_package_json && has_packages_client {
+                logger.log(
+                    crate::logging::LogType::Server,
+                    "http-routes",
+                    &format!(
+                        "🔍 Found package.json with packages/client at: {}",
+                        current.display()
+                    ),
+                    None,
+                    None,
+                );
+                project_root = Some(current);
+                break;
+            }
+            if let Some(parent) = current.parent() {
+                current = parent.to_path_buf();
+            } else {
+                break;
+            }
+        }
+        if project_root.is_some() {
+            break;
+        }
+    }
+
+    // Build list of paths to try / 시도할 경로 목록 구성
+    // Use project root if found, otherwise return error / 프로젝트 루트를 찾았으면 사용, 없으면 에러 반환
+    let dev_paths = if let Some(ref root) = project_root {
+        vec![root.join("packages/client/dist/index.iife.js")]
+    } else {
+        // Project root not found, return error / 프로젝트 루트를 찾지 못함, 에러 반환
+        logger.log(
+            crate::logging::LogType::Server,
+            "http-routes",
+            "❌ Project root not found, cannot locate client.js",
+            None,
+            None,
+        );
         return Ok((
             StatusCode::OK,
             [(header::CONTENT_TYPE, "application/javascript")],
-            content,
+            "console.error('Client script not found. Please build: cd packages/client && bun run build');",
         )
             .into_response());
+    };
+
+    // Try each path / 각 경로 시도
+    logger.log(
+        crate::logging::LogType::Server,
+        "http-routes",
+        &format!("🔍 Current dir: {}", current_dir.display()),
+        None,
+        None,
+    );
+
+    if let Some(ref root) = project_root {
+        logger.log(
+            crate::logging::LogType::Server,
+            "http-routes",
+            &format!("🔍 Project root: {} (found: true)", root.display()),
+            None,
+            None,
+        );
+    } else {
+        logger.log(
+            crate::logging::LogType::Server,
+            "http-routes",
+            "🔍 Project root: not found (found: false)",
+            None,
+            None,
+        );
     }
+
+    for dev_path in &dev_paths {
+        let exists = dev_path.exists();
+        logger.log(
+            crate::logging::LogType::Server,
+            "http-routes",
+            &format!("🔍 Trying: {} (exists: {})", dev_path.display(), exists),
+            None,
+            None,
+        );
+        if let Ok(content) = fs::read_to_string(dev_path).await {
+            logger.log(
+                crate::logging::LogType::Server,
+                "http-routes",
+                &format!(
+                    "✅ Successfully loaded client.js from: {}",
+                    dev_path.display()
+                ),
+                None,
+                None,
+            );
+            return Ok((
+                StatusCode::OK,
+                [(header::CONTENT_TYPE, "application/javascript")],
+                content,
+            )
+                .into_response());
+        } else if exists {
+            logger.log(
+                crate::logging::LogType::Server,
+                "http-routes",
+                &format!("⚠️ File exists but failed to read: {}", dev_path.display()),
+                None,
+                None,
+            );
+        }
+    }
+
+    logger.log(
+        crate::logging::LogType::Server,
+        "http-routes",
+        "❌ Failed to find client.js in any location",
+        None,
+        None,
+    );
 
     // Fallback: warning if not built / Fallback: 빌드되지 않은 경우 경고 메시지
     Ok((
