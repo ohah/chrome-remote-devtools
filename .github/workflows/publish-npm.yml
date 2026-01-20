@@ -5,15 +5,17 @@ on:
     tags:
       - 'chrome-remote-devtools-client-v*'
       - 'chrome-remote-devtools-server-v*'
+      - 'chrome-remote-devtools-rn-inspector-v*'
   workflow_dispatch:
     inputs:
       package:
-        description: 'Package to publish (client or server)'
+        description: 'Package to publish (client, server, or react-native-inspector)'
         required: true
         type: choice
         options:
           - client
           - server
+          - react-native-inspector
       version:
         description: 'Version to publish (e.g., 1.0.0)'
         required: true
@@ -48,6 +50,8 @@ jobs:
               PACKAGE_NAME="chrome-remote-devtools-client"
             elif [ "$PACKAGE_INPUT" = "server" ]; then
               PACKAGE_NAME="chrome-remote-devtools-server"
+            elif [ "$PACKAGE_INPUT" = "react-native-inspector" ]; then
+              PACKAGE_NAME="chrome-remote-devtools-inspector-react-native"
             else
               echo "Unknown package: $PACKAGE_INPUT"
               exit 1
@@ -66,6 +70,9 @@ jobs:
             elif [[ "$TAG_NAME" == chrome-remote-devtools-server-v* ]]; then
               PACKAGE_NAME="chrome-remote-devtools-server"
               VERSION="${TAG_NAME#chrome-remote-devtools-server-v}"
+            elif [[ "$TAG_NAME" == chrome-remote-devtools-rn-inspector-v* ]]; then
+              PACKAGE_NAME="chrome-remote-devtools-inspector-react-native"
+              VERSION="${TAG_NAME#chrome-remote-devtools-rn-inspector-v}"
             else
               echo "Unknown tag format: $TAG_NAME"
               exit 1
@@ -147,6 +154,44 @@ jobs:
 
       - name: Publish to npm
         working-directory: packages/server
+        run: |
+          npm publish --provenance --access public --tag latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-react-native-inspector:
+    name: Publish React Native Inspector
+    needs: detect-package
+    if: |
+      needs.detect-package.outputs.should-publish == 'true' &&
+      needs.detect-package.outputs.package-name == 'chrome-remote-devtools-inspector-react-native'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build react-native-inspector package
+        run: cd packages/react-native-inspector && bun run build
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npm
+        working-directory: packages/react-native-inspector
         run: |
           npm publish --provenance --access public --tag latest
         env:
