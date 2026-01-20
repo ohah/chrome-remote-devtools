@@ -15,6 +15,7 @@ pub fn test_config(port: u16) -> ServerConfig {
         log_file: None,
         dev_mode: true,
         enable_reactotron_server: false,
+        client_js_resource_path: None, // Not needed for tests / 테스트에는 필요 없음
     }
 }
 
