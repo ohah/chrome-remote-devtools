@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ChromeRemoteDevToolsInspector'
-  s.version          = '0.1.0'
+  s.version          = '0.1.0-rc.1'
   s.summary          = 'Chrome Remote DevTools Inspector Plugin for React Native / React Native용 Chrome Remote DevTools Inspector 플러그인'
   s.description      = <<-DESC
   Custom Inspector plugin that connects React Native Inspector to Chrome Remote DevTools server.
