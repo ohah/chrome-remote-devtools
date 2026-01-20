@@ -1,6 +1,6 @@
 // MMKV messaging types / MMKV 메시징 타입
 
-import { MMKVEntry } from './types';
+import type { MMKVEntry } from './types';
 
 /**
  * MMKV snapshot event / MMKV 스냅샷 이벤트

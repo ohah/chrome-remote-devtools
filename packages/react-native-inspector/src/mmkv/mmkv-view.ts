@@ -1,8 +1,7 @@
 // MMKV view / MMKV 뷰
 // Wraps MMKV instance to provide unified interface / MMKV 인스턴스를 래핑하여 통일된 인터페이스 제공
 
-import type { MMKV } from './utils';
-import { MMKVEntry, MMKVEntryValue } from './types';
+import type { MMKV, MMKVEntry, MMKVEntryValue } from './types';
 import { looksLikeGarbled } from './is-garbled';
 import { getMMKVAdapter } from './mmkv-adapter';
 

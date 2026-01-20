@@ -1,8 +1,7 @@
 // AsyncStorage view / AsyncStorage 뷰
 // Wraps AsyncStorage instance to provide unified interface / AsyncStorage 인스턴스를 래핑하여 통일된 인터페이스 제공
 
-import type { AsyncStorageType } from './utils';
-import { AsyncStorageEntry } from './types';
+import type { AsyncStorageType, AsyncStorageEntry } from './types';
 
 /**
  * AsyncStorage view interface / AsyncStorage 뷰 인터페이스
