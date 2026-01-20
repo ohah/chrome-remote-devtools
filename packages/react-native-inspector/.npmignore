@@ -1,0 +1,28 @@
+# Build artifacts / 빌드 아티팩트
+android/.cxx/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Development files / 개발 파일
+*.log
+.DS_Store
+node_modules/
+.vscode/
+.idea/
+
+# Test files / 테스트 파일
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Source maps (optional, if you want to exclude them) / 소스맵 (선택사항)
+*.map

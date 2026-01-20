@@ -19,11 +19,14 @@
     "ChromeRemoteDevToolsInspector.podspec",
     "react-native.config.js",
     "README.md",
-    "android/",
+    "android/build.gradle",
+    "android/CMakeLists.txt",
+    "android/gradle.properties",
     "cpp/",
     "dist/",
     "ios/",
-    "src/"
+    "src/",
+    "android/src/"
   ],
   "sideEffects": true,
   "main": "dist/index.js",
@@ -49,7 +52,8 @@
   "scripts": {
     "build": "tsdown",
     "build:clean": "rm -rf dist",
-    "test": "bun test src/__tests__"
+    "test": "bun test src/__tests__",
+    "prepublishOnly": "bun run build"
   },
   "dependencies": {
     "@babel/runtime": "^7.25.0"
