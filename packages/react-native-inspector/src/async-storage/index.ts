@@ -3,8 +3,8 @@
 
 import { getServerInfo } from '../server-info';
 import { getAsyncStorageView, type AsyncStorageView } from './async-storage-view';
-import { normalizeStoragesConfigProperty, type AsyncStorageType } from './utils';
-import type { AsyncStorageEntry } from './types';
+import { normalizeStoragesConfigProperty } from './utils';
+import type { AsyncStorageType, AsyncStorageEntry } from './types';
 import { registerCDPMessageHandler } from '../cdp-message-handler';
 
 // Store AsyncStorage views / AsyncStorage 뷰 저장

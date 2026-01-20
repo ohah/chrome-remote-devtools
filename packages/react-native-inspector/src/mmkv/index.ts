@@ -3,8 +3,8 @@
 
 import { getServerInfo } from '../server-info';
 import { getMMKVView, type MMKVView } from './mmkv-view';
-import { normalizeStoragesConfigProperty, type MMKV } from './utils';
-import type { MMKVEntry } from './types';
+import { normalizeStoragesConfigProperty } from './utils';
+import type { MMKV, MMKVEntry } from './types';
 import { registerCDPMessageHandler } from '../cdp-message-handler';
 
 // Store MMKV views / MMKV 뷰 저장

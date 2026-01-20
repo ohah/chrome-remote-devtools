@@ -1,7 +1,8 @@
 // MMKV adapter / MMKV 어댑터
 // Provides unified interface based on MMKV v4 (default), with v3 (legacy) compatibility / MMKV v4 (기본)를 베이스로 한 통일된 인터페이스 제공, v3 (하위 호환) 지원
 
-import { isMMKVV4, type MMKV } from './utils';
+import { isMMKVV4 } from './utils';
+import type { MMKV } from './types';
 
 /**
  * MMKV adapter interface (v4-based) / MMKV 어댑터 인터페이스 (v4 베이스)
