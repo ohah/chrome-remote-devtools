@@ -1,6 +1,6 @@
 // Client connection handler / 클라이언트 연결 핸들러
 use super::message_processor::process_client_message;
-use super::{Client, DevTools};
+use super::{Client, DevTools, SocketServer};
 use crate::logging::{LogType, Logger};
 use crate::react_native::ReactNativeInspectorConnectionManager;
 use axum::extract::ws::{Message, WebSocket};
@@ -10,6 +10,32 @@ use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::RwLock;
 
+/// Response body information extracted from CDP message / CDP 메시지에서 추출한 응답 본문 정보
+struct ResponseBodyInfo<'a> {
+    request_id: &'a str,
+    body: &'a str,
+}
+
+/// Extract response body from Network.responseReceived CDP message / Network.responseReceived CDP 메시지에서 응답 본문 추출
+fn extract_response_body<'a>(cdp_message: &'a serde_json::Value) -> Option<ResponseBodyInfo<'a>> {
+    // Check if this is a Network.responseReceived event / Network.responseReceived 이벤트인지 확인
+    let method = cdp_message.get("method")?.as_str()?;
+    if method != "Network.responseReceived" {
+        return None;
+    }
+
+    // Extract request ID and response body / 요청 ID와 응답 본문 추출
+    let params = cdp_message.get("params")?.as_object()?;
+    let request_id = params.get("requestId")?.as_str()?;
+    let body = params
+        .get("response")?
+        .as_object()?
+        .get("body")?
+        .as_str()?;
+
+    Some(ResponseBodyInfo { request_id, body })
+}
+
 /// Handle client WebSocket connection / 클라이언트 WebSocket 연결 처리
 pub async fn handle_client_connection(
     ws: WebSocket,
@@ -18,6 +44,7 @@ pub async fn handle_client_connection(
     clients: Arc<RwLock<std::collections::HashMap<String, Arc<Client>>>>,
     devtools: Arc<RwLock<std::collections::HashMap<String, Arc<DevTools>>>>,
     rn_manager: Arc<ReactNativeInspectorConnectionManager>,
+    socket_server: Arc<RwLock<SocketServer>>,
     logger: Arc<Logger>,
 ) {
     logger.log(LogType::Client, &id, "connected", None, None);
@@ -84,6 +111,29 @@ pub async fn handle_client_connection(
             match msg {
                 Ok(Message::Text(text)) => {
                     let data = process_client_message(&text, &client_id_for_msg, &logger_for_msg);
+
+                    // Parse CDP message and store response body if it's Network.responseReceived / CDP 메시지 파싱 및 Network.responseReceived인 경우 응답 본문 저장
+                    if let Ok(cdp_message) = serde_json::from_str::<serde_json::Value>(&data) {
+                        if let Some(info) = extract_response_body(&cdp_message) {
+                            // Store response body in server's response_bodies map / 서버의 response_bodies 맵에 응답 본문 저장
+                            {
+                                let server = socket_server.read().await;
+                                let mut response_bodies = server.response_bodies.write().await;
+                                response_bodies.insert(info.request_id.to_string(), info.body.to_string());
+                            }
+
+                            logger_for_msg.log(
+                                LogType::Client,
+                                &client_id_for_msg,
+                                &format!("💾 Stored response body for requestId: {}", info.request_id),
+                                Some(&serde_json::json!({
+                                    "requestId": info.request_id,
+                                    "bodyLength": info.body.len(),
+                                })),
+                                Some("store_response_body"),
+                            );
+                        }
+                    }
 
                     // Send to DevTools / DevTools로 전송
                     let devtools = devtools_for_msg.read().await;

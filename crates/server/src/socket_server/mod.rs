@@ -329,6 +329,7 @@ impl SocketServer {
                         server_guard.clients.clone(),
                         server_guard.devtools.clone(),
                         server_guard.react_native_inspector_manager.clone(),
+                        server.clone(),
                         server_guard.logger.clone(),
                     )
                     .await;
