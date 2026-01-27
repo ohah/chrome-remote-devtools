@@ -32,8 +32,8 @@ try {
 console.log('📦 Copying client.js to resources...');
 try {
   const fs = require('fs');
-  const src = path.join(projectRoot, 'packages/client/dist/index.iife.js');
-  const dest = path.join(__dirname, 'resources/index.iife.js');
+  const src = path.join(projectRoot, 'packages/client/dist/index.global.js');
+  const dest = path.join(__dirname, 'resources/index.global.js');
   
   if (!fs.existsSync(src)) {
     console.error(`Error: Client.js not found at ${src}`);
