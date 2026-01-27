@@ -27,11 +27,7 @@ fn extract_response_body<'a>(cdp_message: &'a serde_json::Value) -> Option<Respo
     // Extract request ID and response body / 요청 ID와 응답 본문 추출
     let params = cdp_message.get("params")?.as_object()?;
     let request_id = params.get("requestId")?.as_str()?;
-    let body = params
-        .get("response")?
-        .as_object()?
-        .get("body")?
-        .as_str()?;
+    let body = params.get("response")?.as_object()?.get("body")?.as_str()?;
 
     Some(ResponseBodyInfo { request_id, body })
 }
@@ -119,13 +115,17 @@ pub async fn handle_client_connection(
                             {
                                 let server = socket_server.read().await;
                                 let mut response_bodies = server.response_bodies.write().await;
-                                response_bodies.insert(info.request_id.to_string(), info.body.to_string());
+                                response_bodies
+                                    .insert(info.request_id.to_string(), info.body.to_string());
                             }
 
                             logger_for_msg.log(
                                 LogType::Client,
                                 &client_id_for_msg,
-                                &format!("💾 Stored response body for requestId: {}", info.request_id),
+                                &format!(
+                                    "💾 Stored response body for requestId: {}",
+                                    info.request_id
+                                ),
                                 Some(&serde_json::json!({
                                     "requestId": info.request_id,
                                     "bodyLength": info.body.len(),
