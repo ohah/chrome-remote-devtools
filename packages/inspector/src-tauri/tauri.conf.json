@@ -5,6 +5,11 @@
   "identifier": "com.ohah.chrome-remote-devtools",
   "build": {
     "devUrl": "http://localhost:3420",
+    "beforeDevCommand": {
+      "script": "bun before-build.js",
+      "cwd": ".",
+      "wait": true
+    },
     "beforeBuildCommand": {
       "script": "bun before-build.js",
       "cwd": ".",
@@ -38,7 +43,7 @@
       "icons/icon.ico"
     ],
     "resources": [
-      "resources/index.iife.js"
+      "resources/index.global.js"
     ]
   }
 }
