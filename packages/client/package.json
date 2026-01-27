@@ -11,27 +11,26 @@
     "src"
   ],
   "type": "module",
-  "main": "./dist/index.esm.js",
-  "module": "./dist/index.esm.js",
-  "browser": "./dist/index.esm.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "browser": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.esm.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
     },
-    "./iife": "./dist/index.iife.js"
+    "./iife": "./dist/index.global.js"
   },
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bun run build:esm && bun run build:iife && bun run build:types",
-    "build:esm": "bun build src/index.ts --target browser --format esm --minify --outfile dist/index.esm.js",
-    "build:iife": "bun build src/index.ts --target browser --format iife --minify --outfile dist/index.iife.js",
-    "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist",
-    "build:watch": "bun run scripts/build-watch.ts",
-    "build:esm:watch": "bun build src/index.ts --target browser --format esm --minify --outfile dist/index.esm.js --watch",
-    "build:iife:watch": "bun build src/index.ts --target browser --format iife --minify --outfile dist/index.iife.js --watch",
+    "build": "bunup",
+    "build:esm": "bunup --format esm",
+    "build:iife": "bunup --format iife",
+    "build:watch": "bunup --watch",
+    "build:esm:watch": "bunup --format esm --watch",
+    "build:iife:watch": "bunup --format iife --watch",
     "prepublishOnly": "bun run build",
     "clean": "rm -rf dist",
     "test": "bun test"
@@ -43,6 +42,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "bunup": "0.16.20",
     "fake-indexeddb": "^6.2.5",
     "typescript": "^5.0.0"
   }

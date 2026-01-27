@@ -21,7 +21,7 @@ const esmProcess = spawn(
     'esm',
     '--minify',
     '--outfile',
-    'dist/index.esm.js',
+    'dist/index.js',
     '--watch',
   ],
   {
@@ -41,7 +41,7 @@ const iifeProcess = spawn(
     'iife',
     '--minify',
     '--outfile',
-    'dist/index.iife.js',
+    'dist/index.global.js',
     '--watch',
   ],
   {
