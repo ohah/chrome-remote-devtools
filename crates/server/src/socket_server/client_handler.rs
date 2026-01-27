@@ -33,6 +33,7 @@ fn extract_response_body<'a>(cdp_message: &'a serde_json::Value) -> Option<Respo
 }
 
 /// Handle client WebSocket connection / 클라이언트 WebSocket 연결 처리
+#[allow(clippy::too_many_arguments)]
 pub async fn handle_client_connection(
     ws: WebSocket,
     id: String,
@@ -100,6 +101,7 @@ pub async fn handle_client_connection(
     let clients_for_msg = clients.clone();
     let devtools_for_msg = devtools.clone();
     let rn_manager_for_msg = rn_manager.clone();
+    let socket_server_for_msg = socket_server.clone();
     let logger_for_msg = logger.clone();
     let client_id_for_msg = id.clone();
     tokio::spawn(async move {
@@ -113,7 +115,7 @@ pub async fn handle_client_connection(
                         if let Some(info) = extract_response_body(&cdp_message) {
                             // Store response body in server's response_bodies map / 서버의 response_bodies 맵에 응답 본문 저장
                             {
-                                let server = socket_server.read().await;
+                                let server = socket_server_for_msg.read().await;
                                 let mut response_bodies = server.response_bodies.write().await;
                                 response_bodies
                                     .insert(info.request_id.to_string(), info.body.to_string());
