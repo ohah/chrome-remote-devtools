@@ -34,19 +34,19 @@ try {
   const fs = require('fs');
   const src = path.join(projectRoot, 'packages/client/dist/index.global.js');
   const dest = path.join(__dirname, 'resources/index.global.js');
-  
+
   if (!fs.existsSync(src)) {
     console.error(`Error: Client.js not found at ${src}`);
     console.error('Please build client first: cd packages/client && bun run build');
     process.exit(1);
   }
-  
+
   // Create resources directory if it doesn't exist / resources 디렉토리가 없으면 생성
   const destDir = path.dirname(dest);
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
   }
-  
+
   // Copy file / 파일 복사
   fs.copyFileSync(src, dest);
   console.log(`✅ Successfully copied client.js from ${src} to ${dest}`);
