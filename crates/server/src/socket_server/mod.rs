@@ -212,52 +212,52 @@ impl SocketServer {
         // Reactotron clients connect to ws://host:port (no path) / Reactotron 클라이언트는 ws://host:port로 연결 (경로 없음)
         {
             let server_guard = server.read().await;
-            if (path.is_empty() || path == "/") && server_guard.reactotron_server.is_some() {
-                eprintln!("[reactotron] 🔌 WebSocket connection attempt on root path (path: '{}', reactotron_server enabled: true)", path);
-                server_guard.logger.log(
-                    LogType::Server,
-                    "reactotron",
-                    &format!(
-                        "Reactotron WebSocket connection attempt on root path (path: '{}')",
-                        path
-                    ),
-                    Some(&serde_json::json!({
-                        "path": path,
-                        "queryParams": query_params,
-                    })),
-                    None,
-                );
-                // reactotron_server.is_some() already checked above, so unwrap is safe / 위에서 이미 reactotron_server.is_some()을 체크했으므로 unwrap은 안전함
-                let reactotron_server = server_guard.reactotron_server.as_ref().unwrap();
-                let connection_id = reactotron_server.next_connection_id().await;
-                let address = query_params
-                    .get("address")
-                    .cloned()
-                    .unwrap_or_else(|| "unknown".to_string());
-                eprintln!("[reactotron] 🚀 Routing to Reactotron handler (connection_id: {}, address: {})", connection_id, address);
-                server_guard.logger.log(
-                    LogType::Server,
-                    "reactotron",
-                    &format!(
-                        "Routing to Reactotron handler (connection_id: {}, address: {})",
-                        connection_id, address
-                    ),
-                    None,
-                    None,
-                );
-                crate::reactotron_server::handle_reactotron_websocket(
-                    ws,
-                    address,
-                    connection_id,
-                    reactotron_server.connections.clone(),
-                    reactotron_server.subscriptions.clone(),
-                    Some(server.clone()),
-                    server_guard.logger.clone(),
-                )
-                .await;
-                return;
-            } else if (path.is_empty() || path == "/") && server_guard.reactotron_server.is_none() {
-                eprintln!("[reactotron] ⚠️ WebSocket connection on root path but Reactotron server is disabled (path: '{}')", path);
+            if path.is_empty() || path == "/" {
+                if let Some(reactotron_server) = server_guard.reactotron_server.as_ref() {
+                    eprintln!("[reactotron] 🔌 WebSocket connection attempt on root path (path: '{}', reactotron_server enabled: true)", path);
+                    server_guard.logger.log(
+                        LogType::Server,
+                        "reactotron",
+                        &format!(
+                            "Reactotron WebSocket connection attempt on root path (path: '{}')",
+                            path
+                        ),
+                        Some(&serde_json::json!({
+                            "path": path,
+                            "queryParams": query_params,
+                        })),
+                        None,
+                    );
+                    let connection_id = reactotron_server.next_connection_id().await;
+                    let address = query_params
+                        .get("address")
+                        .cloned()
+                        .unwrap_or_else(|| "unknown".to_string());
+                    eprintln!("[reactotron] 🚀 Routing to Reactotron handler (connection_id: {}, address: {})", connection_id, address);
+                    server_guard.logger.log(
+                        LogType::Server,
+                        "reactotron",
+                        &format!(
+                            "Routing to Reactotron handler (connection_id: {}, address: {})",
+                            connection_id, address
+                        ),
+                        None,
+                        None,
+                    );
+                    crate::reactotron_server::handle_reactotron_websocket(
+                        ws,
+                        address,
+                        connection_id,
+                        reactotron_server.connections.clone(),
+                        reactotron_server.subscriptions.clone(),
+                        Some(server.clone()),
+                        server_guard.logger.clone(),
+                    )
+                    .await;
+                    return;
+                } else {
+                    eprintln!("[reactotron] ⚠️ WebSocket connection on root path but Reactotron server is disabled (path: '{}')", path);
+                }
             }
         }
 
