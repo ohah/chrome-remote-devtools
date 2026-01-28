@@ -127,7 +127,7 @@ export function createHttpRouter(socketServer: SocketServer) {
       // Serve built client script for testing / 테스트를 위한 빌드된 클라이언트 스크립트 서빙
       try {
         // Try IIFE format first (for script tags) / 먼저 IIFE 형식 시도 (script 태그용)
-        const clientScriptPath = join(__dirname, '../../client/dist/index.global.js');
+        const clientScriptPath = join(__dirname, '../../client/dist/index.iife.js');
         const clientScript = readFileSync(clientScriptPath, 'utf-8');
         res.writeHead(200, {
           'Content-Type': 'application/javascript',

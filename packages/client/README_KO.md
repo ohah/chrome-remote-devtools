@@ -29,7 +29,7 @@ useEffect(() => {
 ### HTML / IIFE
 
 ```html
-<script src="node_modules/@ohah/chrome-remote-devtools-client/dist/index.global.js"></script>
+<script src="node_modules/@ohah/chrome-remote-devtools-client/dist/index.iife.js"></script>
 <script>
   ChromeRemoteDevTools.init({
     serverUrl: 'wss://your-server.com',
@@ -44,7 +44,7 @@ useEffect(() => {
 또는 CDN에서 로드 (배포 후):
 
 ```html
-<script src="https://unpkg.com/@ohah/chrome-remote-devtools-client/dist/index.global.js"></script>
+<script src="https://unpkg.com/@ohah/chrome-remote-devtools-client/dist/index.iife.js"></script>
 <script>
   ChromeRemoteDevTools.init({
     serverUrl: 'wss://your-server.com',
@@ -146,7 +146,7 @@ await ChromeRemoteDevTools.exportEvents();
 이 패키지는 여러 빌드 형식을 제공합니다:
 
 - **ESM** (`dist/index.js`) - React, Vite, Webpack 등용
-- **IIFE** (`dist/index.global.js`) - 직접 script 태그용
+- **IIFE** (`dist/index.iife.js`) - 직접 script 태그용
 - **TypeScript 타입** (`dist/index.d.ts`) - 타입 정의
 
 ## 라이선스

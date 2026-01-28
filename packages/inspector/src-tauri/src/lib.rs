@@ -231,7 +231,7 @@ pub fn run() {
             // Resolve client.js resource path / client.js 리소스 경로 해결
             let client_js_path = app
                 .path()
-                .resolve("index.global.js", tauri::path::BaseDirectory::Resource)
+                .resolve("index.iife.js", tauri::path::BaseDirectory::Resource)
                 .ok()
                 .map(|p| p.to_string_lossy().to_string());
 
