@@ -21,16 +21,16 @@
       "import": "./dist/index.js",
       "require": "./dist/index.js"
     },
-    "./iife": "./dist/index.global.js"
+    "./iife": "./dist/index.iife.js"
   },
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bunup && bun run scripts/add-ignore-list-to-sourcemaps.ts",
-    "build:esm": "bunup --format esm && bun run scripts/add-ignore-list-to-sourcemaps.ts",
-    "build:iife": "bunup --format iife && bun run scripts/add-ignore-list-to-sourcemaps.ts",
-    "build:watch": "bunup --watch",
-    "build:esm:watch": "bunup --format esm --watch",
-    "build:iife:watch": "bunup --format iife --watch",
+    "build": "tsdown",
+    "build:esm": "tsdown --format esm",
+    "build:iife": "tsdown --format iife",
+    "build:watch": "tsdown --watch",
+    "build:esm:watch": "tsdown --format esm --watch",
+    "build:iife:watch": "tsdown --format iife --watch",
     "prepublishOnly": "bun run build",
     "clean": "rm -rf dist",
     "test": "bun test"
@@ -42,8 +42,8 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "bunup": "0.16.20",
     "fake-indexeddb": "^6.2.5",
+    "tsdown": "0.20.1",
     "typescript": "^5.0.0"
   }
 }

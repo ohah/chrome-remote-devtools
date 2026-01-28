@@ -41,7 +41,7 @@ const iifeProcess = spawn(
     'iife',
     '--minify',
     '--outfile',
-    'dist/index.global.js',
+    'dist/index.iife.js',
     '--watch',
   ],
   {

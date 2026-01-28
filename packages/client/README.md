@@ -29,7 +29,7 @@ useEffect(() => {
 ### HTML / IIFE
 
 ```html
-<script src="node_modules/@ohah/chrome-remote-devtools-client/dist/index.global.js"></script>
+<script src="node_modules/@ohah/chrome-remote-devtools-client/dist/index.iife.js"></script>
 <script>
   ChromeRemoteDevTools.init({
     serverUrl: 'wss://your-server.com',
@@ -44,7 +44,7 @@ useEffect(() => {
 Or load from CDN (when published):
 
 ```html
-<script src="https://unpkg.com/@ohah/chrome-remote-devtools-client/dist/index.global.js"></script>
+<script src="https://unpkg.com/@ohah/chrome-remote-devtools-client/dist/index.iife.js"></script>
 <script>
   ChromeRemoteDevTools.init({
     serverUrl: 'wss://your-server.com',
@@ -146,7 +146,7 @@ await ChromeRemoteDevTools.exportEvents();
 This package provides multiple build formats:
 
 - **ESM** (`dist/index.js`) - For React, Vite, Webpack, etc.
-- **IIFE** (`dist/index.global.js`) - For direct script tags
+- **IIFE** (`dist/index.iife.js`) - For direct script tags
 - **TypeScript types** (`dist/index.d.ts`) - Type definitions
 
 ## License
