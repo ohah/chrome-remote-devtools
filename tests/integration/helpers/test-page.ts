@@ -7,7 +7,7 @@ export function createTestPageHTML(content: string, serverUrl: string): string {
 <html>
 <head>
   <title>Test Page</title>
-  <script src="${serverUrl}/client.js" 
+  <script src="${serverUrl}/client.js"
     onload="window.__clientScriptLoaded = true; console.log('[test-page] client.js loaded');"
     onerror="console.error('[test-page] Failed to load client.js from:', '${serverUrl}/client.js');"></script>
   <script>
@@ -21,7 +21,7 @@ export function createTestPageHTML(content: string, serverUrl: string): string {
         var scriptLoaded = window.__clientScriptLoaded || document.readyState === 'complete';
         var chromeRemoteDevToolsExists = typeof ChromeRemoteDevTools !== 'undefined';
         var chromeRemoteDevToolsInitExists = chromeRemoteDevToolsExists && ChromeRemoteDevTools && typeof ChromeRemoteDevTools.init === 'function';
-        
+
         if (scriptLoaded && chromeRemoteDevToolsInitExists) {
           console.log('[test-page] Initializing ChromeRemoteDevTools with serverUrl:', '${wsUrl}');
           // Call init and handle errors / init 호출 및 오류 처리
@@ -39,8 +39,8 @@ export function createTestPageHTML(content: string, serverUrl: string): string {
           });
         } else if (maxRetries > 0) {
           if (retryCount % 20 === 0) {
-            console.log('[test-page] Waiting for ChromeRemoteDevTools... (retry ' + retryCount + '/' + maxRetries + 
-              ', scriptLoaded: ' + scriptLoaded + 
+            console.log('[test-page] Waiting for ChromeRemoteDevTools... (retry ' + retryCount + '/' + maxRetries +
+              ', scriptLoaded: ' + scriptLoaded +
               ', ChromeRemoteDevTools: ' + (chromeRemoteDevToolsExists ? 'exists' : 'undefined') +
               ', init: ' + (chromeRemoteDevToolsInitExists ? 'exists' : 'missing') + ')');
           }
