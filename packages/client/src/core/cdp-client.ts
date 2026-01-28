@@ -3,7 +3,7 @@ import ChromeDomain from '../cdp';
 import type { RrwebConfig } from '../config/rrweb-config';
 import { WebSocketClient } from '../connection/websocket-client';
 import { PostMessageHandler } from '../connection/postmessage-handler';
-import { initRrwebRecording, type RrwebRecorderHandle } from '../initialization/rrweb-init';
+import type { RrwebRecorderHandle } from '../initialization/rrweb-init';
 import { keepScreenDisplay } from '../initialization/client-init';
 
 /**
@@ -40,7 +40,15 @@ export class CDPClient {
       },
       async (socket, domain) => {
         // Initialize rrweb recording / rrweb 녹화 초기화
-        this.rrwebRecorder = await initRrwebRecording(socket, rrwebConfig, domain);
+        // Use dynamic import to avoid bundling issues with workspace dependencies / workspace 의존성 번들링 문제를 피하기 위해 동적 import 사용
+        if (rrwebConfig.enable) {
+          try {
+            const { initRrwebRecording } = await import('../initialization/rrweb-init');
+            this.rrwebRecorder = await initRrwebRecording(socket, rrwebConfig, domain);
+          } catch (error) {
+            console.error('Failed to load rrweb initialization / rrweb 초기화 로드 실패:', error);
+          }
+        }
       }
     );
 
