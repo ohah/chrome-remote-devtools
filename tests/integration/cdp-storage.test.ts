@@ -169,12 +169,13 @@ test.describe('Storage Domain Integration', () => {
     // Get storage key first / 먼저 storage key 가져오기
     const getStorageKeyMessage = createStorageGetStorageKeyMessage();
     inspector.send(getStorageKeyMessage);
-    const storageKeyResponse = await inspector.receive();
+    // Use waitForCDPResponse to skip events and get the response / 이벤트를 건너뛰고 응답을 받기 위해 waitForCDPResponse 사용
+    const storageKeyResponse = await waitForCDPResponse(
+      () => inspector.receive(),
+      getStorageKeyMessage.id
+    );
 
-    let storageKey: string | undefined;
-    if (isCDPResponse(storageKeyResponse) && storageKeyResponse.id === getStorageKeyMessage.id) {
-      storageKey = (storageKeyResponse.result as { storageKey?: string })?.storageKey;
-    }
+    const storageKey = (storageKeyResponse?.result as { storageKey?: string })?.storageKey;
 
     expect(storageKey).toBeTruthy();
     if (!storageKey) {
@@ -262,12 +263,13 @@ test.describe('Storage Domain Integration', () => {
     // Get storage key / storage key 가져오기
     const getStorageKeyMessage = createStorageGetStorageKeyMessage();
     inspector.send(getStorageKeyMessage);
-    const storageKeyResponse = await inspector.receive();
+    // Use waitForCDPResponse to skip events and get the response / 이벤트를 건너뛰고 응답을 받기 위해 waitForCDPResponse 사용
+    const storageKeyResponse = await waitForCDPResponse(
+      () => inspector.receive(),
+      getStorageKeyMessage.id
+    );
 
-    let storageKey: string | undefined;
-    if (isCDPResponse(storageKeyResponse) && storageKeyResponse.id === getStorageKeyMessage.id) {
-      storageKey = (storageKeyResponse.result as { storageKey?: string })?.storageKey;
-    }
+    const storageKey = (storageKeyResponse?.result as { storageKey?: string })?.storageKey;
 
     expect(storageKey).toBeTruthy();
     if (!storageKey) {
@@ -381,12 +383,13 @@ test.describe('Storage Domain Integration', () => {
     // Get storage key / storage key 가져오기
     const getStorageKeyMessage = createStorageGetStorageKeyMessage();
     inspector.send(getStorageKeyMessage);
-    const storageKeyResponse = await inspector.receive();
+    // Use waitForCDPResponse to skip events and get the response / 이벤트를 건너뛰고 응답을 받기 위해 waitForCDPResponse 사용
+    const storageKeyResponse = await waitForCDPResponse(
+      () => inspector.receive(),
+      getStorageKeyMessage.id
+    );
 
-    let storageKey: string | undefined;
-    if (isCDPResponse(storageKeyResponse) && storageKeyResponse.id === getStorageKeyMessage.id) {
-      storageKey = (storageKeyResponse.result as { storageKey?: string })?.storageKey;
-    }
+    const storageKey = (storageKeyResponse?.result as { storageKey?: string })?.storageKey;
 
     expect(storageKey).toBeTruthy();
     if (!storageKey) {
@@ -484,12 +487,13 @@ test.describe('Storage Domain Integration', () => {
     // Get storage key / storage key 가져오기
     const getStorageKeyMessage = createStorageGetStorageKeyMessage();
     inspector.send(getStorageKeyMessage);
-    const storageKeyResponse = await inspector.receive();
+    // Use waitForCDPResponse to skip events and get the response / 이벤트를 건너뛰고 응답을 받기 위해 waitForCDPResponse 사용
+    const storageKeyResponse = await waitForCDPResponse(
+      () => inspector.receive(),
+      getStorageKeyMessage.id
+    );
 
-    let storageKey: string | undefined;
-    if (isCDPResponse(storageKeyResponse) && storageKeyResponse.id === getStorageKeyMessage.id) {
-      storageKey = (storageKeyResponse.result as { storageKey?: string })?.storageKey;
-    }
+    const storageKey = (storageKeyResponse?.result as { storageKey?: string })?.storageKey;
 
     expect(storageKey).toBeTruthy();
     if (!storageKey) {
