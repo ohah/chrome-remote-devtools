@@ -11,6 +11,8 @@ export default defineConfig({
   external: ['@babel/runtime', '@rrweb/types'],
   // Force bundling of workspace dependencies and their transitive deps / workspace 의존성과 그 하위 의존성 강제 번들링
   noExternal: ['@ohah/chrome-remote-devtools-client-rrweb', '@rrweb/record'],
+  // Allow bundling node_modules dependencies / node_modules 의존성 번들링 허용
+  skipNodeModulesBundle: false,
   // Global name for IIFE build / IIFE 빌드의 전역 이름
   globalName: 'ChromeRemoteDevTools',
   clean: true,
