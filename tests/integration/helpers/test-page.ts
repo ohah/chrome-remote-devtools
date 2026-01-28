@@ -7,28 +7,38 @@ export function createTestPageHTML(content: string, serverUrl: string): string {
 <html>
 <head>
   <title>Test Page</title>
-  <script src="${serverUrl}/client.js"></script>
+  <script src="${serverUrl}/client.js" onload="window.__clientScriptLoaded = true;"></script>
   <script>
     // Wait for script to load before initializing / 스크립트 로드 후 초기화
     (function() {
-      var maxRetries = 100;
+      var maxRetries = 200; // Increase retries for slower environments / 느린 환경을 위해 재시도 증가
       function initClient() {
-        if (typeof ChromeRemoteDevTools !== 'undefined') {
+        // Check if script is loaded and ChromeRemoteDevTools is available / 스크립트가 로드되었고 ChromeRemoteDevTools가 사용 가능한지 확인
+        if ((window.__clientScriptLoaded || document.readyState === 'complete') && 
+            typeof ChromeRemoteDevTools !== 'undefined' && 
+            ChromeRemoteDevTools && 
+            typeof ChromeRemoteDevTools.init === 'function') {
+          // Call init and handle errors / init 호출 및 오류 처리
           ChromeRemoteDevTools.init({
             serverUrl: '${wsUrl}',
+          }).catch(function(error) {
+            console.error('Failed to initialize ChromeRemoteDevTools:', error);
           });
         } else if (maxRetries > 0) {
           maxRetries--;
           setTimeout(initClient, 50);
         } else {
-          console.error('ChromeRemoteDevTools failed to load after multiple attempts.');
+          console.error('ChromeRemoteDevTools failed to load after multiple attempts. ' +
+            'Script loaded: ' + window.__clientScriptLoaded + ', ' +
+            'ChromeRemoteDevTools: ' + typeof ChromeRemoteDevTools);
         }
       }
       // Start initialization / 초기화 시작
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initClient);
       } else {
-        initClient();
+        // If document is already loaded, wait a bit for script to load / 문서가 이미 로드된 경우 스크립트 로드를 위해 잠시 대기
+        setTimeout(initClient, 100);
       }
     })();
   </script>
