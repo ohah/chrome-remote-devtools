@@ -379,7 +379,7 @@ async fn serve_client_script(
     // Build list of paths to try / 시도할 경로 목록 구성
     // Use project root if found, otherwise return error / 프로젝트 루트를 찾았으면 사용, 없으면 에러 반환
     let dev_paths = if let Some(ref root) = project_root {
-        vec![root.join("packages/client/dist/index.iife.js")]
+        vec![root.join("packages/client/dist/index.global.js")]
     } else {
         // Project root not found, return error / 프로젝트 루트를 찾지 못함, 에러 반환
         logger.log(
