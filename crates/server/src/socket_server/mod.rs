@@ -228,10 +228,7 @@ impl SocketServer {
                     None,
                 );
                 // reactotron_server.is_some() already checked above, so unwrap is safe / 위에서 이미 reactotron_server.is_some()을 체크했으므로 unwrap은 안전함
-                let reactotron_server = server_guard
-                    .reactotron_server
-                    .as_ref()
-                    .expect("Reactotron server should be Some when path matches root and reactotron_server.is_some() is true");
+                let reactotron_server = server_guard.reactotron_server.as_ref().unwrap();
                 let connection_id = reactotron_server.next_connection_id().await;
                 let address = query_params
                     .get("address")
