@@ -19,6 +19,16 @@ import { createTestPageHTML, waitForDebugId } from './helpers/test-page';
 
 test.describe('Storage Domain Integration', () => {
   test('should get storage key / storage key 가져오기', async ({ page, serverUrl, wsUrl }) => {
+    // Log console messages for debugging / 디버깅을 위해 콘솔 메시지 로깅
+    page.on('console', (msg) => {
+      console.log(`[Browser Console] ${msg.type()}: ${msg.text()}`);
+    });
+
+    // Log page errors / 페이지 오류 로깅
+    page.on('pageerror', (error) => {
+      console.error(`[Page Error]: ${error.message}`);
+    });
+
     // Create test page with client script / 클라이언트 스크립트가 있는 테스트 페이지 생성
     const testPageHTML = createTestPageHTML(
       `
@@ -47,8 +57,42 @@ test.describe('Storage Domain Integration', () => {
 
     await page.goto(testUrl, { waitUntil: 'networkidle' });
 
+    // Wait a bit for scripts to load / 스크립트 로드를 위해 잠시 대기
+    await page.waitForTimeout(1000);
+
+    // Check if client.js was loaded / client.js가 로드되었는지 확인
+    const clientJsLoaded = await page.evaluate(() => {
+      return window.__clientScriptLoaded === true;
+    });
+    console.log('[Test] client.js loaded:', clientJsLoaded);
+
+    // Check if ChromeRemoteDevTools is available / ChromeRemoteDevTools가 사용 가능한지 확인
+    const chromeRemoteDevToolsAvailable = await page.evaluate(() => {
+      return (
+        typeof ChromeRemoteDevTools !== 'undefined' &&
+        ChromeRemoteDevTools &&
+        typeof ChromeRemoteDevTools.init === 'function'
+      );
+    });
+    console.log('[Test] ChromeRemoteDevTools available:', chromeRemoteDevToolsAvailable);
+
     // Wait for debug_id to be stored in sessionStorage / sessionStorage에 debug_id가 저장될 때까지 대기
     const clientId = await waitForDebugId(page);
+
+    // Log final state for debugging / 디버깅을 위해 최종 상태 로깅
+    const finalState = await page.evaluate(() => {
+      return {
+        debugId: sessionStorage.getItem('debug_id'),
+        scriptLoaded: window.__clientScriptLoaded,
+        chromeRemoteDevTools: typeof ChromeRemoteDevTools,
+        hasInit:
+          typeof ChromeRemoteDevTools !== 'undefined' &&
+          ChromeRemoteDevTools &&
+          typeof ChromeRemoteDevTools.init === 'function',
+      };
+    });
+    console.log('[Test] Final state:', JSON.stringify(finalState, null, 2));
+
     expect(clientId).toBeTruthy();
 
     if (!clientId) return;
