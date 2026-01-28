@@ -25,9 +25,9 @@
   },
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bunup",
-    "build:esm": "bunup --format esm",
-    "build:iife": "bunup --format iife",
+    "build": "bunup && bun run scripts/add-ignore-list-to-sourcemaps.ts",
+    "build:esm": "bunup --format esm && bun run scripts/add-ignore-list-to-sourcemaps.ts",
+    "build:iife": "bunup --format iife && bun run scripts/add-ignore-list-to-sourcemaps.ts",
     "build:watch": "bunup --watch",
     "build:esm:watch": "bunup --format esm --watch",
     "build:iife:watch": "bunup --format iife --watch",

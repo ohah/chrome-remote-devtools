@@ -6,4 +6,5 @@ export default defineConfig({
   format: ['esm', 'iife'],
   minify: true,
   outDir: 'dist',
+  sourcemap: 'linked', // Generate separate .map files / 별도의 .map 파일 생성
 });
