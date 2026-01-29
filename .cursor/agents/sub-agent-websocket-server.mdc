@@ -1,0 +1,47 @@
+---
+alwaysApply: false
+name: sub-agent-websocket-server
+model: inherit
+description: 서브 에이전트 - WebSocket 서버. Rust/Node WebSocket 중계·메시지 라우팅·연결 관리 시 적용
+---
+
+# WebSocket 서버 관점
+
+이 룰은 WebSocket 중계 서버(Rust crates/server, 또는 Node packages/server) 및 CDP 메시지 라우팅·연결 관리 작업 시 적용한다.
+
+## 1. 아키텍처·역할
+
+- **3-Tier**: [클라이언트] ←→ [WebSocket 서버] ←→ [Inspector]. 서버는 CDP 메시지를 양방향으로 전달하는 프록시 역할만 수행한다.
+- **Rust 서버**: `crates/server/` (독립 실행형 또는 Tauri 내장). axum WebSocket 사용.
+- **Node 서버**: `packages/server/` (TypeScript). React Native Inspector용 소켓·연결 핸들러 포함.
+
+## 2. 연결·생명주기
+
+- **클라이언트 연결**: 디버깅 대상(웹페이지·RN 앱)이 WebSocket으로 서버에 연결. 클라이언트 ID·세션을 식별한다.
+- **Inspector 연결**: Inspector가 WebSocket으로 서버에 연결. 클라이언트별 디버그 채널(예: `/remote/debug/devtools/devtools-{clientId}`)로 라우팅한다.
+- **준비 전 send**: 연결 완료 전 메시지는 큐에 넣거나 no-op. readyState 확인 후에만 전달한다.
+- **연결 해제**: 클라이언트/Inspector disconnect 시 참조·리스너·타이머 정리. 닫힌 소켓에 send 하지 않는다.
+
+## 3. 메시지 라우팅
+
+- **라우팅 규칙**: 클라이언트 ↔ Inspector 간 1:1 또는 N:1 매핑. 메시지에 clientId·sessionId가 있으면 해당 채널로만 전달한다.
+- **파싱**: 수신 WebSocket 메시지는 JSON 파싱. 파싱 실패 시 로그·복구(무시 또는 에러 응답) 처리. 한 메시지 실패가 다른 연결에 영향을 주지 않도록 한다.
+- **직렬화**: 전달 시 JSON.stringify. 순환 참조·BigInt 등은 서버에서 생성하지 않도록 하거나, 직렬화 전에 정규화한다.
+
+## 4. 리소스·에러
+
+- **이벤트 리스너**: onopen, onmessage, onclose, onerror 등 등록한 리스너가 연결 종료 시 제거되거나 소켓을 닫는다.
+- **타이머**: 재시도·폴링용 setTimeout/setInterval은 clearTimeout/clearInterval로 정리한다.
+- **에러 메시지**: 연결 대상, 시도 횟수, 실패 이유 등 문맥을 포함해 로그·응답에 넣는다.
+
+## 5. 테스트·문서
+
+- **테스트**: message-routing, socket-server, http-api 등 기존 서버 테스트가 통과하는지 확인한다.
+- **Rust**: cargo fmt, cargo clippy 통과. 커밋 전 필수 작업(AGENTS.md) 준수.
+
+## 체크리스트 (WebSocket 서버)
+
+- [ ] 클라이언트·Inspector 연결·해제 시 참조·리스너·타이머가 정리되는가?
+- [ ] 메시지 라우팅이 clientId·세션 규칙과 일치하는가?
+- [ ] JSON 파싱 실패·직렬화 이슈가 격리·처리되는가?
+- [ ] 서버 테스트·Rust 품질 검사가 통과하는가?
