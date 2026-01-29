@@ -46,8 +46,19 @@ function withReduxDevTools(config) {
     ? config.serializer.getModulesRunBeforeMainModule()
     : [];
 
+  // Exclude Rust cargo target/ from Metro watcher / Metro 감시에서 Rust cargo target/ 제외
+  // Fixes ENOENT when Metro watches monorepo and target/debug/deps/.tmp* is created/deleted / 모노레포 감시 시 target/debug/deps/.tmp* 생성·삭제로 인한 ENOENT 해결
+  const existingBlockList = Array.isArray(config.resolver?.blockList)
+    ? config.resolver.blockList
+    : [];
+  const blockList = [...existingBlockList, /[/\\]target[/\\]/];
+
   return {
     ...config,
+    resolver: {
+      ...config.resolver,
+      blockList,
+    },
     serializer: {
       ...config.serializer,
       // Add polyfill to modules that run before main module / main 모듈 전에 실행되는 모듈에 polyfill 추가
