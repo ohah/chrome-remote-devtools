@@ -5,6 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  *
  * Modified for Chrome Remote DevTools / Chrome Remote DevTools용으로 수정됨
+ *
+ * DEPRECATED: This JSI/native network hook is no longer used. Use the JavaScript-only
+ * network hook in packages/react-native-inspector/src/network/ instead.
+ * 디프리케이티드: 이 JSI/네이티브 네트워크 훅은 더 이상 사용하지 않습니다. 대신
+ * packages/react-native-inspector/src/network/ 의 JavaScript 전용 네트워크 훅을 사용하세요.
  */
 
 #include "NetworkHook.h"
