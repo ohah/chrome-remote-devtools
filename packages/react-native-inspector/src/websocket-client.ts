@@ -70,7 +70,7 @@ export function connectWebSocket(serverHost: string, serverPort: number): Promis
           }
         };
 
-        socket.onclose = (event) => {
+        socket.onclose = (_event) => {
           if (!resolved) {
             if (attempt >= maxRetries) {
               resolved = true;
@@ -101,11 +101,17 @@ export function connectWebSocket(serverHost: string, serverPort: number): Promis
 
 /**
  * Get CDP sender function when WebSocket is connected / WebSocket 연결 시 CDP 전송 함수 반환
+ * Returned sender checks sendFn and ws at call time and no-ops when connection is down / 반환된 sender는 호출 시점에 sendFn과 ws를 검사하고 연결이 끊어졌으면 no-op
  * @returns (host, port, message) => void or null if not connected / 연결 시 전송 함수, 미연결 시 null
  */
 export function getCDPSender(): ((host: string, port: number, message: string) => void) | null {
   if (sendFn == null) return null;
-  return (_host: string, _port: number, message: string) => sendFn!(message);
+  return (_host: string, _port: number, message: string) => {
+    const currentSend = sendFn;
+    if (currentSend == null) return;
+    if (ws == null || ws.readyState !== WebSocket.OPEN) return;
+    currentSend(message);
+  };
 }
 
 /**

@@ -22,12 +22,14 @@ export async function connect(serverHostParam: string, serverPortParam: number):
 
   const maxRetries = 3;
   const retryDelay = 1000;
+  let connected = false;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       await connectWebSocket(serverHostParam, serverPortParam);
+      connected = true;
       break;
-    } catch (err) {
+    } catch (_err) {
       if (attempt < maxRetries) {
         console.warn(
           `[ChromeRemoteDevTools] Connection attempt ${attempt}/${maxRetries} failed, retrying in ${retryDelay}ms...`
@@ -43,6 +45,8 @@ export async function connect(serverHostParam: string, serverPortParam: number):
       }
     }
   }
+
+  if (!connected) return;
 
   const cdpSender = getCDPSender();
   const sender =
@@ -87,33 +91,49 @@ export async function openDebugger(
 
 /**
  * Enable console hook / console 훅 활성화
+ * Not implemented in JS-only layer; console hooks will be added later / JS 전용 레이어에서는 미구현, 추후 추가 예정
  * @returns Promise that resolves to true if enabling succeeded / 활성화가 성공하면 true로 resolve되는 Promise
  */
 export async function enableConsoleHook(): Promise<boolean> {
+  console.warn(
+    '[ChromeRemoteDevTools] enableConsoleHook is not implemented in JavaScript-only layer yet.'
+  );
   return false;
 }
 
 /**
  * Disable console hook / console 훅 비활성화
+ * Not implemented in JS-only layer / JS 전용 레이어에서는 미구현
  * @returns Promise that resolves to true if disabling succeeded / 비활성화가 성공하면 true로 resolve되는 Promise
  */
 export async function disableConsoleHook(): Promise<boolean> {
+  console.warn(
+    '[ChromeRemoteDevTools] disableConsoleHook is not implemented in JavaScript-only layer yet.'
+  );
   return false;
 }
 
 /**
  * Enable network hook / 네트워크 훅 활성화
+ * Not implemented in JS-only layer yet / JS 전용 레이어에서는 아직 미구현
  * @returns Promise that resolves to true if enabling succeeded / 활성화가 성공하면 true로 resolve되는 Promise
  */
 export async function enableNetworkHook(): Promise<boolean> {
+  console.warn(
+    '[ChromeRemoteDevTools] enableNetworkHook is not implemented in JavaScript-only layer yet.'
+  );
   return false;
 }
 
 /**
  * Disable network hook / 네트워크 훅 비활성화
+ * Not implemented in JS-only layer yet / JS 전용 레이어에서는 아직 미구현
  * @returns Promise that resolves to true if disabling succeeded / 비활성화가 성공하면 true로 resolve되는 Promise
  */
 export async function disableNetworkHook(): Promise<boolean> {
+  console.warn(
+    '[ChromeRemoteDevTools] disableNetworkHook is not implemented in JavaScript-only layer yet.'
+  );
   return false;
 }
 
