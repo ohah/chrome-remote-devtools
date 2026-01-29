@@ -368,12 +368,13 @@ refactor(inspector): reorganize component structure
    - 포맷팅 오류가 있으면 자동으로 수정되므로, 수정된 파일을 함께 커밋해야 합니다
    - 포맷팅 검사를 통과한 후에만 커밋을 진행합니다
 
-2. **린트 검사** (선택사항):
+2. **린트 검사** (필수):
    ```bash
    bun run lint
    ```
    - `bun lint` 명령어로 코드 품질을 검사합니다
    - 린트 오류가 있으면 수정 후 커밋합니다
+   - 린트 검사를 통과한 후에만 커밋을 진행합니다
 
 #### Rust 코드 작업 시
 
@@ -403,7 +404,7 @@ refactor(inspector): reorganize component structure
 **TypeScript/JavaScript 코드**:
 - [ ] `bun run format` 실행하여 포맷팅 검사 및 수정
 - [ ] 포맷팅으로 변경된 파일이 있으면 함께 스테이징
-- [ ] (선택) `bun run lint` 실행하여 린트 검사
+- [ ] `bun run lint` 실행하여 린트 검사
 - [ ] 모든 검사를 통과한 후 커밋 진행
 
 **Rust 코드**:
