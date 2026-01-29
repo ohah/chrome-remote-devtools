@@ -51,7 +51,10 @@ export const getMMKVView = (storageId: string, storage: MMKV, blacklist?: RegExp
       // Ordering is important here!
       const stringValue = mmkv.getString(key);
 
-      if (stringValue !== undefined && stringValue.length > 0) {
+      // NOTE: Empty string is a valid MMKV string value / 참고: 빈 문자열은 유효한 MMKV string 값입니다
+      // If we treat "" as "missing", initial values can't be loaded and change events look like deletes
+      // / ""을 "없음"으로 취급하면 초기값을 못 불러오고 변경 이벤트가 삭제처럼 보일 수 있습니다
+      if (stringValue !== undefined) {
         if (looksLikeGarbled(stringValue)) {
           // This is most-likely a buffer as it contains non-printable characters
           return {
