@@ -37,7 +37,7 @@ description: 서브 에이전트 - WebSocket 서버. Rust/Node WebSocket 중계�
 ## 5. 테스트·문서
 
 - **테스트**: message-routing, socket-server, http-api 등 기존 서버 테스트가 통과하는지 확인한다.
-- **Rust**: cargo fmt, cargo clippy 통과. 커밋 전 필수 작업(AGENTS.md) 준수.
+- **Rust**: cargo fmt, cargo clippy 통과. 커밋 전 필수 작업(AGENTS.MD) 준수.
 
 ## 체크리스트 (WebSocket 서버)
 

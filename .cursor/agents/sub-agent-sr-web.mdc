@@ -28,7 +28,7 @@ description: 서브 에이전트 - sr-web. sr-web 프로젝트/웹앱 관련 작
 
 ## 4. 커밋·배포
 
-- **커밋**: scope·메시지는 프로젝트 커밋 규칙(AGENTS.md)을 따른다. sr-web 전용 변경은 subject에 sr-web을 포함할 수 있다.
+- **커밋**: scope·메시지는 프로젝트 커밋 규칙(AGENTS.MD)을 따른다. sr-web 전용 변경은 subject에 sr-web을 포함할 수 있다.
 - **배포**: 빌드·배포 파이프라인이 있다면 sr-web 관련 스텝이 정상 동작하는지 확인한다.
 
 ## 체크리스트 (sr-web)

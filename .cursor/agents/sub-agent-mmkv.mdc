@@ -36,5 +36,5 @@ description: 서브 에이전트 - MMKV. MMKV 스토리지 검사·CDP MMKVStora
 
 - [ ] registerMMKVDevTools 사용법이 문서와 일치하는가?
 - [ ] MMKVStorage 도메인 메서드·이벤트가 스키마·Inspector와 일치하는가?
-- [ ] mmkv 소스 경로·직렬화 규칙이 AGENTS.md·문서와 맞는가?
+- [ ] mmkv 소스 경로·직렬화 규칙이 AGENTS.MD·문서와 맞는가?
 - [ ] 키 필터·민감 데이터 처리 정책이 적용·문서화되어 있는가?
