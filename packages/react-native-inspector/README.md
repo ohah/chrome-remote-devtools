@@ -50,6 +50,10 @@ Check if packager is disconnected / Packager 연결이 끊어졌는지 확인
 
 Open debugger / 디버거 열기
 
+## JS-only (no native build) / JS 전용 (네이티브 빌드 없음)
+
+Console and network hooks run in JavaScript only; the main flow uses a JS WebSocket. Native code is in `android.disabled/`, `ios.disabled/`, and `*.podspec.disabled` so **autolinking does not pick it up** — no Kotlin/Swift is built for this package. / 콘솔·네트워크 훅은 JavaScript만 사용하며, 메인 흐름은 JS WebSocket을 사용합니다. 네이티브 코드는 `android.disabled/`, `ios.disabled/`, `*.podspec.disabled`에 있어 **autolinking에서 제외**되며, 이 패키지에 대한 Kotlin/Swift 빌드는 수행되지 않습니다.
+
 ## TurboModule Support / TurboModule 지원
 
 This package supports both Legacy Modules and TurboModules (New Architecture) / 이 패키지는 Legacy Module과 TurboModule (New Architecture)을 모두 지원합니다.

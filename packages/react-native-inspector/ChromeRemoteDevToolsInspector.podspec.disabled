@@ -27,10 +27,16 @@ Pod::Spec.new do |s|
 
   # npm 패키지 구조에 맞게 경로 수정 / 경로 수정 for npm package structure
   # Include TurboModule files (Objective-C++ only, no Swift) / TurboModule 파일 포함 (Objective-C++만, Swift 없음)
-  # Also include common C++ files / 공통 C++ 파일도 포함
+  #
+  # iOS: C++ console/network hooks are EXCLUDED from build / iOS: C++ 콘솔·네트워크 훅은 빌드에서 제외됨
+  # Console/network hooks are JavaScript-only (src/console/, src/network/). C++ JSI code (cpp/) is deprecated.
+  # The .mm code uses __has_include("ConsoleHook.h") / __has_include("NetworkHook.h"); when cpp/ is not
+  # included, those fail and the stub paths (return false, empty) are used.
+  # 콘솔·네트워크 훅은 JavaScript 전용(src/console/, src/network/). C++ JSI(cpp/)는 디프리케이트.
+  # .mm 코드는 __has_include("ConsoleHook.h")/NetworkHook.h 로 분기하며, cpp/ 미포함 시 스텁 경로 사용.
+  # cpp/**/*.{h,cpp} excluded: deprecated; console/network are JS-only / cpp/ 제외: 디프리케이트, 콘솔·네트워크는 JS 전용
   s.source_files = [
-    'ios/ChromeRemoteDevToolsInspector/**/*.{h,mm}',
-    'cpp/**/*.{h,cpp}'  # Common C++ code / 공통 C++ 코드
+    'ios/ChromeRemoteDevToolsInspector/**/*.{h,mm}'
   ]
   s.public_header_files = 'ios/ChromeRemoteDevToolsInspector/**/*.h'
 
@@ -42,9 +48,7 @@ Pod::Spec.new do |s|
     'DEFINES_MODULE' => 'YES',
     'CLANG_ENABLE_MODULES' => 'YES',
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
-    'HEADER_SEARCH_PATHS' => [
-      '"$(PODS_TARGET_SRCROOT)/cpp"',  # Common C++ code / 공통 C++ 코드
-    ]
+    # HEADER_SEARCH_PATHS for cpp/ removed; cpp/ is excluded from build / cpp/ 제외로 HEADER_SEARCH_PATHS 제거
   }
 
   # Use install_modules_dependencies to automatically add React Native dependencies / install_modules_dependencies를 사용하여 React Native 의존성 자동 추가
