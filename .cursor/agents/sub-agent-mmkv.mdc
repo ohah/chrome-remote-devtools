@@ -1,0 +1,40 @@
+---
+alwaysApply: false
+name: sub-agent-mmkv
+model: inherit
+description: 서브 에이전트 - MMKV. MMKV 스토리지 검사·CDP MMKVStorage 도메인·Inspector 연동 시 적용
+---
+
+# MMKV 관점
+
+이 룰은 MMKV 스토리지 검사·수정, CDP MMKVStorage 도메인, `registerMMKVDevTools` 및 Inspector UI 연동 작업 시 적용한다.
+
+## 1. 등록·노출
+
+- **등록 API**: `registerMMKVDevTools(instance)` 또는 `registerMMKVDevTools(instance, keyFilter)`. React Native 앱에서 MMKV 인스턴스를 등록해야 DevTools에서 검사 가능하다.
+- **키 필터**: 민감 키 제외 시 정규식 등 keyFilter 옵션을 사용. 문서의 예(`/^_/` 등)와 동일한 방식으로 적용한다.
+- **인스턴스 ID**: 여러 MMKV 인스턴스는 instanceId로 구분. CDP 이벤트·메서드 인자에 instanceId가 일관되게 전달되도록 한다.
+
+## 2. CDP MMKVStorage 도메인
+
+- **메서드**: enable, getMMKVItems, setMMKVItem, removeMMKVItem, clear (document/docs의 MMKVStorage 도메인 문서 준수).
+- **이벤트**: mmkvInstanceCreated, mmkvItemAdded, mmkvItemUpdated, mmkvItemRemoved, mmkvItemsCleared. payload에 instanceId 포함.
+- **타입**: 파라미터·반환 타입이 프로토콜 타입·Inspector 쪽 mmkv-adapter·messaging과 맞는지 확인한다.
+
+## 3. 구현 위치
+
+- **클라이언트**: `packages/react-native-inspector/src/mmkv/` (index, mmkv-adapter, messaging, mmkv-view, types, utils 등).
+- **직렬화·깨진 문자**: is-garbled, 직렬화 불가 값 처리 등 문서화된 규칙을 따른다.
+- **React Native 전용**: MMKVStorage 도메인은 RN 전용. 웹 클라이언트에서는 사용하지 않는다.
+
+## 4. 보안·성능
+
+- **민감 데이터**: 키 필터로 제외하거나, 값 마스킹 정책을 문서화한다.
+- **대용량**: 항목 수가 많을 때 getMMKVItems 등은 페이지네이션·제한을 고려한다.
+
+## 체크리스트 (MMKV)
+
+- [ ] registerMMKVDevTools 사용법이 문서와 일치하는가?
+- [ ] MMKVStorage 도메인 메서드·이벤트가 스키마·Inspector와 일치하는가?
+- [ ] mmkv 소스 경로·직렬화 규칙이 AGENTS.md·문서와 맞는가?
+- [ ] 키 필터·민감 데이터 처리 정책이 적용·문서화되어 있는가?

@@ -1,0 +1,46 @@
+---
+alwaysApply: false
+name: sub-agent-web-chrome-debugger
+model: inherit
+description: 서브 에이전트 - 웹 크롬 디버거. 웹페이지용 CDP 클라이언트·Inspector·devtools-frontend 연동 시 적용
+---
+
+# 웹 크롬 디버거 관점
+
+이 룰은 웹페이지를 디버깅 대상으로 하는 CDP 클라이언트, Inspector, devtools-frontend 연동(웹 크롬 디버거) 작업 시 적용한다. React Native가 아닌 일반 웹 환경을 대상으로 할 때 사용한다.
+
+## 1. 클라이언트·대상
+
+- **대상**: 브라우저에서 열린 웹페이지. 해당 페이지에 주입된 CDP 클라이언트(`@ohah/chrome-remote-devtools-client`)가 WebSocket으로 서버에 연결한다.
+- **패키지**: `packages/client/` — CDP 도메인 구현, connection(websocket-client, postmessage-handler), core(cdp-client) 등.
+- **초기화**: 클라이언트는 페이지 로드 시 초기화되고, 서버 URL·디버그 ID 등은 설정·환경에 맞게 주입한다.
+
+## 2. CDP 도메인
+
+- **도메인 구현**: client의 cdp/domain, cdp/common 등. Chrome 도메인(Page, Network, Runtime, Console 등)을 프로토콜에 맞게 구현한다.
+- **메시지 형식**: id, method, params, result, error 등 CDP 메시지 형식을 준수. 직렬화·파싱은 JSON 기반으로 일관되게 한다.
+- **참조**: chobitsu, devtools-protocol 등 reference/ 내 참조와 프로토콜 스키마를 맞춘다.
+
+## 3. Inspector·DevTools
+
+- **Inspector**: `packages/inspector/` — React + Vite. 웹 또는 Tauri 데스크탑으로 실행. 서버에 WebSocket 연결 후 클라이언트별 디버그 세션을 연다.
+- **devtools-frontend**: iframe으로 devtools-frontend를 로드. URL은 서버가 제공하는 WebSocket 엔드포인트(예: `/devtools-frontend/?ws=...`)와 일치시킨다.
+- **연결 흐름**: client(웹페이지) → server ← Inspector(웹/데스크탑) → iframe(devtools-frontend). 서버가 client–Inspector 간 메시지를 중계한다.
+
+## 4. 연결·상태
+
+- **readyState**: WebSocket 연결이 열린 뒤에만 send. 연결 해제 후 send는 하지 않는다.
+- **재연결**: 클라이언트·Inspector 재연결 시 이전 세션 정리 후 새 연결. 동시에 두 개 이상의 활성 연결이 혼선을 일으키지 않도록 한다.
+- **에러 처리**: 파싱 실패·연결 끊김은 로그·복구 동작으로 처리. 한 클라이언트 오류가 다른 클라이언트에 영향을 주지 않도록 한다.
+
+## 5. 문서·테스트
+
+- **문서**: document/docs, README의 웹 디버거 사용법·아키텍처가 client–server–Inspector 흐름과 맞는지 확인한다.
+- **테스트**: client의 __tests__(cdp-client, websocket-client, chrome-domain 등)가 통과하는지 확인한다.
+
+## 체크리스트 (웹 크롬 디버거)
+
+- [ ] client 패키지의 CDP 도메인·연결 로직이 프로토콜·서버와 일치하는가?
+- [ ] Inspector·devtools-frontend iframe URL·WebSocket이 서버 스펙과 맞는가?
+- [ ] 연결·재연결·에러 경로가 정리·처리되는가?
+- [ ] 웹 디버거 관련 문서·테스트가 갱신되어 있는가?

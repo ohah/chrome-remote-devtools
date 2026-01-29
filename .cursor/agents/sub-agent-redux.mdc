@@ -1,0 +1,40 @@
+---
+alwaysApply: false
+name: sub-agent-redux
+model: inherit
+description: 서브 에이전트 - Redux. Redux DevTools 미들웨어·CDP 도메인·Inspector 패널 연동 시 적용
+---
+
+# Redux 관점
+
+이 룰은 Redux 상태·액션 추적, Redux DevTools 미들웨어, CDP Redux 도메인 및 Inspector 패널 연동 작업 시 적용한다.
+
+## 1. 미들웨어·연동
+
+- **패키지**: `@ohah/chrome-remote-devtools-inspector-react-native/redux`의 `createReduxDevToolsMiddleware` 사용.
+- **스토어**: `createStore`(또는 Redux Toolkit)에 `applyMiddleware(createReduxDevToolsMiddleware(...))` 형태로 적용. 문서의 Redux 도메인 예제와 일치시킨다.
+- **폴리필**: `redux-devtools-extension` 호환 폴리필(`redux-devtools-extension-polyfill.js`, `redux-devtools-extension.ts`)이 있는 경우, Extension API 대신 CDP 채널을 사용하도록 유지한다.
+
+## 2. CDP Redux 도메인
+
+- **도메인 스키마**: Redux 도메인 메서드·이벤트는 document/docs의 Redux 도메인 문서 및 프로토콜 타입과 맞춘다.
+- **액션·상태 직렬화**: 액션 객체·상태 트리는 JSON 직렬화 가능하게. 직렬화 불가 값은 제외하거나 대체 표현을 정의한다.
+- **이벤트 전송**: 디스패치·상태 변경 시 CDP 이벤트를 보내고, Inspector 쪽 Redux 패널이 동일 프로토콜로 수신하도록 한다.
+- **탭 비활성 시 수신**: Redux 탭이 활성화되기 전에도 이벤트를 수신·버퍼링해야 한다. 이 동작은 **Chrome DevTools 프론트엔드(devtools-frontend)** 에서 구현한다.
+
+## 3. Inspector·플러그인
+
+- **플러그인**: `packages/redux-devtools-plugin`이 Redux 패널 UI·CDP 메시지 핸들링을 담당. `@redux-devtools/app` 기반 UI와 CDP 메시지 핸들러를 일치시킨다.
+- **참조**: reference/redux-devtools 등 레퍼런스와 공식 Redux DevTools Extension 동작을 참고하되, CDP 경로로 대체된 부분만 수정한다.
+
+## 4. 테스트·문서
+
+- **테스트**: `redux-devtools-extension.test.ts` 등 기존 테스트가 통과하는지 확인. 미들웨어·직렬화 경로에 대한 단위 테스트를 유지한다.
+- **문서**: document/docs의 Redux 도메인·설치 방법이 실제 API·패키지 경로와 맞는지 확인한다.
+
+## 체크리스트 (Redux)
+
+- [ ] 미들웨어 적용 방식이 문서·예제와 동일한가?
+- [ ] Redux 도메인 메서드·이벤트가 프로토콜·Inspector 패널과 일치하는가?
+- [ ] 액션·상태 직렬화가 안전하고, 플러그인과 프로토콜이 맞는가?
+- [ ] 기존 Redux 관련 테스트·문서가 갱신되었는가?

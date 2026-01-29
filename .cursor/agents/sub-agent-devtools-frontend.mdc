@@ -1,0 +1,40 @@
+---
+alwaysApply: false
+name: sub-agent-devtools-frontend
+model: inherit
+description: 서브 에이전트 - Chrome DevTools 프론트엔드. devtools-frontend 포크·패널·CDP 연동 작업 시 적용
+---
+
+# Chrome DevTools 프론트엔드 관점
+
+이 룰은 Chrome DevTools 프론트엔드(`devtools/devtools-frontend`) 포크, 패널 추가·수정, CDP 연동 작업 시 적용한다.
+
+## 1. 소스·빌드
+
+- **경로**: `devtools/devtools-frontend/` (Google 오픈소스 포크). 프론트 엔드 UI·패널은 `front_end/` 아래에 있다.
+- **Nice-PLQ 방식**: 빌드 없이 소스 직접 서빙하는 구성을 유지. 빌드가 필요할 때는 문서(README, document/docs)의 devtools-frontend 빌드 절차를 따른다.
+- **의존성**: 상위 문서의 "Clone reference repositories", "devtools-frontend 빌드" 단계를 지키고, 필요 시 `out/Default/gen/front_end` 등 산출물 경로를 확인한다.
+
+## 2. 패널·UI
+
+- **패널 추가**: 새 패널은 기존 패널 등록 방식과 동일하게. iframe·WebSocket URL은 Inspector가 제공하는 엔드포인트와 맞춘다.
+- **스타일·토큰**: design_system_tokens.css, application_tokens.css 등 DevTools 디자인 시스템을 따른다. 문서는 `devtools-frontend/docs/` 참고.
+- **CDP 연동**: DevTools 프론트는 WebSocket으로 서버에 연결해 CDP 메시지를 주고받는다. 메시지 형식·도메인은 프로토콜 스키마와 일치시킨다.
+- **프로토콜·PDL**: 프로토콜 변경은 **PDL(Protocol Definition Language)** 에 항상 반영한다. PDL 업데이트 시 **문서(document/docs 등)도 함께** 갱신한다.
+
+## 3. Inspector 연동
+
+- **iframe**: Inspector는 iframe으로 devtools-frontend를 로드. URL 예: `/devtools-frontend/?ws=...`
+- **WebSocket**: iframe 내부에서 서버로의 WebSocket 연결로 CDP 세션이 수립된다. 클라이언트 ID·경로 규칙은 서버·Inspector와 동일하게 유지한다.
+
+## 4. 수정 범위
+
+- **포크 변경**: 업스트림과의 차이는 최소화. 커스텀 패널·연동 로직만 추가하고, 기존 패널 동작을 바꿀 때는 영향 범위를 명시한다.
+- **문서**: devtools-frontend 관련 빌드·실행 방법이 바뀌면 document/docs, README를 갱신한다.
+
+## 체크리스트 (DevTools Frontend)
+
+- [ ] 변경이 `devtools/devtools-frontend` 구조와 빌드 방식에 맞는가?
+- [ ] 새 패널·UI가 디자인 토큰·기존 패널 패턴을 따르는가?
+- [ ] iframe·WebSocket URL이 Inspector·서버 스펙과 일치하는가?
+- [ ] 포크 변경이 문서화되어 있고, 문서가 갱신되었는가?

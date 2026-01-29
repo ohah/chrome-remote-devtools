@@ -1,0 +1,39 @@
+---
+alwaysApply: false
+name: sub-agent-sr-web
+model: inherit
+description: 서브 에이전트 - sr-web. sr-web 프로젝트/웹앱 관련 작업 시 적용
+---
+
+# sr-web 관점
+
+이 룰은 sr-web 프로젝트 또는 sr-web 웹앱 관련 개발·연동·설정 작업 시 적용한다.
+
+## 1. 범위·역할
+
+- **sr-web**: 프로젝트 내 sr-web 관련 코드·설정·문서를 다룰 때 이 룰을 참고한다.
+- **연동**: Chrome Remote DevTools·Inspector·CDP와 연동하는 경우, client/server/Inspector 아키텍처 및 WebSocket·CDP 규칙을 따른다.
+- **설정**: 빌드·환경 변수·API 엔드포인트 등이 프로젝트 표준과 일치하는지 확인한다.
+
+## 2. 코드·구조
+
+- **위치**: sr-web 전용 소스·설정이 있는 경로는 프로젝트 구조에 맞게 유지한다. 새로 추가 시 기존 패키지·폴더 규칙을 따른다.
+- **의존성**: 패키지 의존성은 버전·호환성을 명시하고, 불필요한 의존성은 제거한다.
+- **타입·린트**: TypeScript/JavaScript 코드는 프로젝트의 format·lint 규칙을 따른다.
+
+## 3. 테스트·문서
+
+- **테스트**: sr-web 관련 로직에 대한 단위·통합 테스트를 유지하고, 변경 시 테스트를 추가·수정한다.
+- **문서**: sr-web 전용 설정·사용법이 있다면 README·document/docs에 반영하고, 변경 시 함께 갱신한다.
+
+## 4. 커밋·배포
+
+- **커밋**: scope·메시지는 프로젝트 커밋 규칙(AGENTS.md)을 따른다. sr-web 전용 변경은 subject에 sr-web을 포함할 수 있다.
+- **배포**: 빌드·배포 파이프라인이 있다면 sr-web 관련 스텝이 정상 동작하는지 확인한다.
+
+## 체크리스트 (sr-web)
+
+- [ ] sr-web 관련 코드·설정이 프로젝트 구조·규칙에 맞는가?
+- [ ] Chrome Remote DevTools 연동 시 client/server/Inspector 규칙을 따르는가?
+- [ ] 테스트·문서가 갱신되어 있는가?
+- [ ] 커밋·배포 정책에 맞게 반영되어 있는가?
