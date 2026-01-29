@@ -33,7 +33,12 @@ When creating or suggesting git commits, follow these rules. Full details in `AG
 
 ## Post-commit (required)
 
-After committing: compare the current branch with `main` (or `MAIN`); write a summary to an MD file with a **title** (e.g. branch name or commit subject) and **content** (diff/changes vs main). **Do not commit this MD file** (add to `.gitignore` or leave unstaged).
+After committing: write a summary to an MD file. The file must include:
+
+1. **Title** (e.g. branch name or commit subject)
+2. **Work content**: what was done — goals, changes, and outcomes in prose (PR-style). If tests were added or updated, mention that (e.g. "Tests were added for …" or "Test coverage includes …").
+
+**Do not commit this MD file** (add to `.gitignore` or leave unstaged).
 
 ## Examples
 
