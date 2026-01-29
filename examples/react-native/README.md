@@ -231,6 +231,12 @@ examples/react-native/
 └── tsconfig.json     # TypeScript configuration
 ```
 
+## Native build (inspector JS-only) / 네이티브 빌드 (인스펙터 JS 전용)
+
+This example app excludes `@ohah/chrome-remote-devtools-inspector-react-native` from the native build via `react-native.config.js` (`platforms: { android: null, ios: null }`). Only the inspector's JavaScript code (WebSocket, console/network hooks) runs; no Kotlin or Swift from that package is built. If you remove that config, the app will link and build the package's `android/` and `ios/` again.
+
+이 예제 앱은 `react-native.config.js`에서 `@ohah/chrome-remote-devtools-inspector-react-native`를 네이티브 빌드에서 제외합니다(`platforms: { android: null, ios: null }`). 인스펙터의 JavaScript(WebSocket, 콘솔/네트워크 훅)만 실행되며, 해당 패키지의 Kotlin/Swift는 빌드되지 않습니다. 해당 설정을 제거하면 앱이 패키지의 `android/`, `ios/`를 다시 링크·빌드합니다.
+
 ## Troubleshooting
 
 ### Connection Issues
@@ -238,6 +244,25 @@ examples/react-native/
 - **Cannot connect to server**: Ensure the Chrome Remote DevTools server is running (`bun run dev:server`)
 - **WebSocket connection failed**: Check that the server URL is correct and the server is accessible
 - **Network error**: For Android emulator, use `ws://10.0.2.2:8080` instead of `ws://localhost:8080`
+
+### Metro bundler: "No host header" or ENOENT watch on `target/`
+
+When running Metro in the monorepo you may see:
+
+- **Error: No host header was found** — Metro 0.83+ requires a `Host` header on requests. Some clients or tools may omit it.
+- **ENOENT: no such file or directory, watch '.../target/debug/deps/.tmp...'** — Metro is watching the Rust `target/` directory; temporary cargo files cause watch errors.
+
+**Fixes:**
+
+1. **Exclude `target/` from Metro** — The `@ohah/chrome-remote-devtools-inspector-react-native` Metro config already adds a `blockList` for `target/`. If you still see ENOENT, ensure you are using the latest package and that Metro is loading this config.
+
+2. **Use the custom server when "No host header" appears** — Start Metro with the wrapper that injects a `Host` header:
+   ```sh
+   cd examples/react-native
+   bun run start:with-host
+   # or: node scripts/start-with-host.js
+   ```
+   Then run the app as usual (`bun run android` / `bun run ios`).
 
 ### iOS CocoaPods Installation Issues
 

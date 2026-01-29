@@ -44,22 +44,15 @@ android {
     targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
     buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
-    externalNativeBuild {
-      cmake {
-        cppFlags "-frtti -fexceptions -Wall -Wextra -fstack-protector-all", "-DFOLLY_NO_CONFIG", "-DFOLLY_MOBILE=1"
-        arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-        abiFilters (*reactNativeArchitectures())
-
-        buildTypes {
-          debug {
-            cppFlags "-O1 -g"
-          }
-          release {
-            cppFlags "-O2"
-          }
-        }
-      }
-    }
+    // Native (JNI/C++) build DISABLED: CDP/console/network use JavaScript layer only / 네이티브(JNI/C++) 빌드 비활성화: CDP·콘솔·네트워크는 JavaScript 레이어만 사용
+    // externalNativeBuild {
+    //   cmake {
+    //     cppFlags "-frtti -fexceptions -Wall -Wextra -fstack-protector-all", "-DFOLLY_NO_CONFIG", "-DFOLLY_MOBILE=1"
+    //     arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+    //     abiFilters (*reactNativeArchitectures())
+    //     buildTypes { debug { cppFlags "-O1 -g" }; release { cppFlags "-O2" } }
+    //   }
+    // }
   }
 
   compileOptions {
@@ -71,11 +64,10 @@ android {
     jvmTarget = "17"
   }
 
-  externalNativeBuild {
-    cmake {
-      path "CMakeLists.txt"
-    }
-  }
+  // Native (JNI/C++) build DISABLED: no native layer; Kotlin stubs only / 네이티브(JNI/C++) 빌드 비활성화; Kotlin 스텁만 사용
+  // externalNativeBuild {
+  //   cmake { path "CMakeLists.txt" }
+  // }
 
   packagingOptions {
     excludes = [
