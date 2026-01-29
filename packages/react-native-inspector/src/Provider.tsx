@@ -1,5 +1,5 @@
 // Chrome Remote DevTools Inspector Provider / Chrome Remote DevTools Inspector Provider
-// This component checks JSI injection status and connects to the server / 이 컴포넌트는 JSI 주입 상태를 확인하고 서버에 연결합니다
+// This component connects to the server via WebSocket (JavaScript layer) / 이 컴포넌트는 WebSocket(JavaScript 레이어)으로 서버에 연결합니다
 
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
@@ -21,13 +21,13 @@ export interface ChromeRemoteDevToolsInspectorProviderProps {
   children: React.ReactNode;
   /** Auto-connect on mount / 마운트 시 자동 연결 */
   autoConnect?: boolean;
-  /** Show JSI injection status UI / JSI 주입 상태 UI 표시 */
+  /** Show connection status UI (WebSocket) / 연결 상태 UI 표시 (WebSocket) */
   showStatusUI?: boolean;
 }
 
 /**
  * Chrome Remote DevTools Inspector Provider / Chrome Remote DevTools Inspector Provider
- * This component sets up Redux DevTools Extension implementation and connects to the server / 이 컴포넌트는 Redux DevTools Extension 구현을 설정하고 서버에 연결합니다
+ * This component sets up Redux DevTools Extension and connects to the server via WebSocket / 이 컴포넌트는 Redux DevTools Extension을 설정하고 WebSocket으로 서버에 연결합니다
  */
 export function ChromeRemoteDevToolsInspectorProvider({
   serverHost = 'localhost',
@@ -38,7 +38,6 @@ export function ChromeRemoteDevToolsInspectorProvider({
 }: ChromeRemoteDevToolsInspectorProviderProps): React.JSX.Element {
   const initializedRef = useRef(false);
   const connectionRef = useRef<Promise<void> | null>(null);
-  const [jsiInjected] = useState<boolean>(true); // Extension is always available now / Extension이 이제 항상 사용 가능함
   const [connectionStatus, setConnectionStatus] = useState<
     'disconnected' | 'connecting' | 'connected'
   >('disconnected');
@@ -49,11 +48,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
 
     // Only initialize once / 한 번만 초기화
     if (!initializedRef.current) {
-      console.log('[ChromeRemoteDevTools] Initializing Provider', {
-        serverHost,
-        serverPort,
-        jsiInjected,
-      });
+      console.log('[ChromeRemoteDevTools] Initializing Provider', { serverHost, serverPort });
       initializedRef.current = true;
     } else {
       // Update server info if changed / 변경된 경우 서버 정보 업데이트
@@ -61,7 +56,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
     }
 
     // Auto-connect if enabled / 활성화된 경우 자동 연결
-    if (autoConnect && !connectionRef.current && jsiInjected !== false) {
+    if (autoConnect && !connectionRef.current) {
       setConnectionStatus('connecting');
       connectionRef.current = connect(serverHost, serverPort)
         .then(() => {
@@ -77,37 +72,17 @@ export function ChromeRemoteDevToolsInspectorProvider({
 
     // Cleanup function / 정리 함수
     return () => {
-      // Note: Connection cleanup is handled by the native module / 참고: 연결 정리는 네이티브 모듈에서 처리됨
       if (!autoConnect) {
         connectionRef.current = null;
       }
     };
-  }, [serverHost, serverPort, autoConnect, jsiInjected]);
+  }, [serverHost, serverPort, autoConnect]);
 
   return (
     <>
       {children}
       {showStatusUI && (
         <View style={styles.statusContainer}>
-          <View style={styles.statusRow}>
-            <Text style={styles.statusLabel}>JSI Injection:</Text>
-            <Text
-              style={[
-                styles.statusValue,
-                jsiInjected === true
-                  ? styles.statusSuccess
-                  : jsiInjected === false
-                    ? styles.statusError
-                    : styles.statusPending,
-              ]}
-            >
-              {jsiInjected === true
-                ? '✅ Success'
-                : jsiInjected === false
-                  ? '❌ Failed'
-                  : '⏳ Checking...'}
-            </Text>
-          </View>
           <View style={styles.statusRow}>
             <Text style={styles.statusLabel}>Connection:</Text>
             <Text

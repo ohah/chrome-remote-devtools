@@ -2,6 +2,8 @@
  * React Native Autolinking configuration / React Native Autolinking 설정
  * This file configures how React Native CLI links this package / React Native CLI가 이 패키지를 링크하는 방법을 설정합니다
  * Supports both monorepo workspace and npm package installations / 모노레포 workspace와 npm 패키지 설치 모두 지원
+ *
+ * Native (TurboModule) linking is disabled; module.exports is empty / 네이티브(TurboModule) 링크는 비활성화됨, module.exports는 빈 객체
  */
 
 const path = require('path');
@@ -43,12 +45,5 @@ const podspecPath = isMonorepo
 
 const androidSourceDir = isMonorepo ? path.resolve(__dirname, 'android') : './android';
 
-module.exports = {
-  ios: {
-    podspecPath,
-  },
-  android: {
-    sourceDir: androidSourceDir,
-    packageImportPath: 'import com.ohah.chromeremotedevtools.ChromeRemoteDevToolsInspectorPackage;',
-  },
-};
+// Native linking disabled; export empty so no native module is linked / 네이티브 링크 비활성화, 빈 객체 export로 네이티브 모듈 미링크
+module.exports = {};
