@@ -1,13 +1,7 @@
 // CDP message utilities / CDP 메시지 유틸리티
-// Send CDP messages to Inspector WebSocket / Inspector WebSocket으로 CDP 메시지 전송
+// Send CDP messages via JavaScript WebSocket / JavaScript WebSocket으로 CDP 메시지 전송
 
-import { NativeModules, TurboModuleRegistry } from 'react-native';
-import type { Spec } from './NativeChromeRemoteDevToolsInspector';
-
-// Try to get TurboModule first (New Architecture), fallback to Legacy Module / TurboModule을 먼저 시도 (New Architecture), Legacy Module로 폴백
-const TurboModule = TurboModuleRegistry.get<Spec>('ChromeRemoteDevToolsInspector');
-const LegacyModule = NativeModules.ChromeRemoteDevToolsInspector;
-const ChromeRemoteDevToolsInspector = TurboModule || LegacyModule;
+import { getCDPSender } from './websocket-client';
 
 /**
  * Send CDP message to Inspector WebSocket / Inspector WebSocket으로 CDP 메시지 전송
@@ -21,11 +15,8 @@ export async function sendCDPMessage(
   serverPort: number,
   message: unknown
 ): Promise<void> {
-  if (!ChromeRemoteDevToolsInspector) {
-    throw new Error(
-      'ChromeRemoteDevToolsInspector native module is not available / ChromeRemoteDevToolsInspector 네이티브 모듈을 사용할 수 없습니다'
-    );
-  }
+  const sender = getCDPSender();
+  if (sender == null) return;
   const messageStr = JSON.stringify(message);
-  return ChromeRemoteDevToolsInspector.sendCDPMessage(serverHost, serverPort, messageStr);
+  sender(serverHost, serverPort, messageStr);
 }

@@ -16,17 +16,10 @@
     "directory": "packages/react-native-inspector"
   },
   "files": [
-    "ChromeRemoteDevToolsInspector.podspec",
     "react-native.config.js",
     "README.md",
-    "android/build.gradle",
-    "android/CMakeLists.txt",
-    "android/gradle.properties",
-    "cpp/",
     "dist/",
-    "ios/",
-    "src/",
-    "android/src/"
+    "src/"
   ],
   "sideEffects": true,
   "main": "dist/index.js",

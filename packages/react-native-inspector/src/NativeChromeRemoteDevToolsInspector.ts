@@ -2,12 +2,10 @@
  * TurboModule spec file for Chrome Remote DevTools Inspector / Chrome Remote DevTools Inspector용 TurboModule spec 파일
  * This file defines the TypeScript interface for the native module / 네이티브 모듈의 TypeScript 인터페이스를 정의합니다
  *
- * Note: This is a spec file for React Native codegen / 참고: React Native codegen용 spec 파일입니다
- * For New Architecture (TurboModules), this file is used to generate native bindings / New Architecture (TurboModules)의 경우, 이 파일은 네이티브 바인딩을 생성하는 데 사용됩니다
+ * Note: Native module loading is disabled; WebSocket/console/network will be implemented in JavaScript layer / 참고: 네이티브 모듈 로딩은 비활성화됨, WebSocket/콘솔/네트워크는 JavaScript 레이어에서 구현 예정
  */
 
 import type { TurboModule } from 'react-native';
-import { TurboModuleRegistry } from 'react-native';
 
 /**
  * TurboModule spec interface / TurboModule spec 인터페이스
@@ -87,7 +85,6 @@ export interface Spec extends TurboModule {
 }
 
 /**
- * Get TurboModule instance / TurboModule 인스턴스 가져오기
- * This will use TurboModuleRegistry for New Architecture, or fallback to NativeModules / New Architecture의 경우 TurboModuleRegistry를 사용하고, 그렇지 않으면 NativeModules로 폴백합니다
+ * Native module is not loaded; use null. WebSocket/console/network will be implemented in JavaScript layer / 네이티브 모듈은 로드하지 않음, null 사용. WebSocket/콘솔/네트워크는 JavaScript 레이어에서 구현 예정
  */
-export default TurboModuleRegistry.getEnforcing<Spec>('ChromeRemoteDevToolsInspector');
+export default null as Spec | null;
