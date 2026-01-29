@@ -36,5 +36,6 @@ Open a PR for the current branch. Follow these steps.
 
 ## Notes
 
+- **Language**: Write the PR **title** and **body** in **English**.
 - Ensure commits follow project rules and `branch-summary.md` is up to date before creating the PR.
 - Do not commit `branch-summary.md`; use it only as the PR description source.
