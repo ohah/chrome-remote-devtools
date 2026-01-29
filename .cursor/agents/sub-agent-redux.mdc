@@ -11,9 +11,9 @@ description: 서브 에이전트 - Redux. Redux DevTools 미들웨어·CDP 도�
 
 ## 1. 미들웨어·연동
 
-- **패키지**: `@ohah/chrome-remote-devtools-inspector-react-native/redux`의 `createReduxDevToolsMiddleware` 사용.
-- **스토어**: `createStore`(또는 Redux Toolkit)에 `applyMiddleware(createReduxDevToolsMiddleware(...))` 형태로 적용. 문서의 Redux 도메인 예제와 일치시킨다.
-- **폴리필**: `redux-devtools-extension` 호환 폴리필(`redux-devtools-extension-polyfill.js`, `redux-devtools-extension.ts`)이 있는 경우, Extension API 대신 CDP 채널을 사용하도록 유지한다.
+- **패키지**: `@ohah/chrome-remote-devtools-inspector-react-native/redux-devtools-extension` 엔트리포인트를 사용해 Redux DevTools Extension 호환 API(`composeWithDevTools`, `devToolsEnhancer` 등)를 쓴다.
+- **스토어**: `createStore`(또는 Redux Toolkit)에 Redux DevTools Extension 호환 **enhancer**를 적용한다. 예) `const enhancer = composeWithDevTools(applyMiddleware(...)); const store = createStore(reducer, enhancer);` 처럼 문서의 Redux 도메인 예제와 일치시킨다.
+- **폴리필**: 이 패키지의 `redux-devtools-extension` 모듈(예: `redux-devtools-extension-polyfill.js`, `redux-devtools-extension.ts`)은 실제 Chrome Extension 대신 CDP 채널을 사용하도록 구현된 폴리필이므로, 애플리케이션 코드는 표준 Redux DevTools Extension API만 사용하도록 유지한다.
 
 ## 2. CDP Redux 도메인
 

@@ -1,6 +1,8 @@
 ---
-description: 서브 에이전트 - 버그 헌터 시점. 코드 검토·수정 시 버그 가능성을 집중적으로 점검할 때 적용
 alwaysApply: false
+name: sub-agent-bug-hunter
+model: inherit
+description: 서브 에이전트 - 버그 헌터 시점. 코드 검토·수정 시 버그 가능성을 집중적으로 점검할 때 적용
 ---
 
 # 버그 헌터 시점 (Bug Hunter Perspective)

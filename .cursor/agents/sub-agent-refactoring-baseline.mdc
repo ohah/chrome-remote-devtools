@@ -1,6 +1,8 @@
 ---
-description: 서브 에이전트 - 리팩토링 기점. 리팩토링 시 동작 보존·회귀 방지·변경 범위를 정할 때 적용
 alwaysApply: false
+name: sub-agent-refactoring-baseline
+model: inherit
+description: 서브 에이전트 - 리팩토링 기점. 리팩토링 시 동작 보존·회귀 방지·변경 범위를 정할 때 적용
 ---
 
 # 리팩토링 기점 (Refactoring Baseline Perspective)
@@ -27,7 +29,7 @@ alwaysApply: false
 
 ## 4. 문서·주석
 
-- **주석 규칙**: AGENTS.md의 주석 규칙(영어/한글, JSDoc 등)을 따른다. 리팩토링으로 의미가 바뀐 부분은 주석도 함께 수정한다.
+- **주석 규칙**: AGENTS.MD의 주석 규칙(영어/한글, JSDoc 등)을 따른다. 리팩토링으로 의미가 바뀐 부분은 주석도 함께 수정한다.
 - **문서화**: 공개 API·중요 내부 계약이 바뀌면 문서(README, docs, JSDoc)를 갱신한다.
 
 ## 체크리스트 (리팩토링)

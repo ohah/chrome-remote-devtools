@@ -37,5 +37,5 @@ description: 서브 에이전트 - React Native Inspector. RN 앱 원격 디버�
 
 - [ ] 새 인터셉션·훅이 JSI 레벨에서만 동작하고, 원본 함수가 보존되는가?
 - [ ] CDP 메시지·커스텀 도메인이 프로토콜·Inspector와 맞는가?
-- [ ] 네트워크/콘솔 훅 파일 위치와 AGENTS.md 안내가 일치하는가?
+- [ ] 네트워크/콘솔 훅 파일 위치와 AGENTS.MD 안내가 일치하는가?
 - [ ] RN·Metro·네이티브 빌드 설정이 문서와 맞는가?
