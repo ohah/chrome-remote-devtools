@@ -71,7 +71,7 @@ Chrome DevTools Protocol (CDP)을 활용하여 원격 크롬 브라우저를 제
 - **chrome-remote-devtools-server** (Rust): WebSocket 중계 서버 (독립 실행형 또는 Tauri에 내장)
 - **@ohah/chrome-remote-devtools-client**: CDP 클라이언트 (JavaScript, 웹페이지에 로드)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, 웹/데스크탑 공유)
-- **@ohah/chrome-remote-devtools-inspector-react-native**: React Native Inspector 플러그인 (네이티브 모듈 포함)
+- **@ohah/chrome-remote-devtools-inspector-react-native**: React Native Inspector 플러그인 (JavaScript 레이어 콘솔·네트워크 훅, MMKV/Redux 등)
 
 ### 통신 흐름
 1. 클라이언트(`client`)가 WebSocket으로 서버에 연결
@@ -257,6 +257,10 @@ function 연결상태업데이트() {
   - 라이브러리: `crates/server/src/lib.rs`
 - 클라이언트: `packages/client/src/index.ts`
 - Inspector: `packages/inspector/src/`
+- React Native Inspector: `packages/react-native-inspector/src/`
+  - 콘솔 훅(JS): `src/console/`
+  - 네트워크 훅(JS): `src/network/`
+  - MMKV/AsyncStorage/Redux: `src/mmkv/`, `src/async-storage/`, `src/redux-devtools-extension.ts`
 - DevTools: `devtools/devtools-frontend/front_end/`
 - 문서: `document/docs/`
 
@@ -419,53 +423,60 @@ refactor(inspector): reorganize component structure
 
 ### 기본 원칙
 
-**중요**: React Native의 모든 이벤트 인터셉션은 **JSI (JavaScript Interface) 레벨에서만** 처리합니다.
+**중요**: React Native의 콘솔·네트워크 인터셉션은 **JavaScript 레벨에서만** 처리합니다.
 
-1. **JSI 레벨 우선**: 모든 이벤트 인터셉션(네트워크, 콘솔, 디버깅 등)은 JSI 레벨에서 처리
-2. **네이티브 레벨 제한**: 네이티브 레벨 인터셉터는 사용하지 않음
-3. **함수 래핑 방식**: JavaScript 함수를 래핑하여 이벤트 정보 수집
+1. **JavaScript 레벨 우선**: 콘솔·네트워크 이벤트 인터셉션은 JavaScript(함수 래핑)로만 구현
+2. **네이티브/JSI 사용 안 함**: 콘솔·네트워크 훅은 C++/JSI 네이티브 코드를 사용하지 않음 (해당 코드는 디프리케이티드)
+3. **함수 래핑 방식**: `console`, `XMLHttpRequest`, `fetch` 등을 JavaScript에서 래핑하여 이벤트 수집 및 CDP 전송
 
-### 네트워크 인터셉션
+### 네트워크 인터셉션 (JavaScript)
 
 #### 구현 방식
 
-**XMLHttpRequest 인터셉션**:
-- `open()` 메서드 훅: method, url 정보 수집
-- `setRequestHeader()` 메서드 훅: headers 정보 수집
-- `send()` 메서드 훅: body 정보 수집 및 요청 전송 이벤트 발생
-- `load` 이벤트 리스너 추가: 응답 정보 수집 및 응답 수신 이벤트 발생
+**XMLHttpRequest 인터셉션** (`packages/react-native-inspector/src/network/`):
+- `open()` 메서드 래핑: method, url 수집
+- `setRequestHeader()` 래핑: headers 수집
+- `send()` 래핑: body 수집 및 `Network.requestWillBeSent` 전송
+- load/error/abort 또는 `readystatechange`에서 `Network.loadingFinished` 전송
 
 **fetch 인터셉션**:
-- `fetch()` 함수 래핑: 요청 정보 수집 및 요청 전송 이벤트 발생
-- Promise의 `then()` 훅: 응답 정보 수집 및 응답 수신 이벤트 발생
+- `fetch()` 함수 래핑: 요청 정보 수집 및 `Network.requestWillBeSent` 전송
+- Promise `then`에서 응답 수신 시 `Network.loadingFinished` 전송
 
-### 콘솔 인터셉션
+### 콘솔 인터셉션 (JavaScript)
 
 #### 구현 방식
 
-**console 메서드 인터셉션**:
-- `console.log()`, `console.warn()`, `console.error()` 등 모든 console 메서드 훅
-- 원본 메서드를 백업하고 래핑된 함수로 교체
-- 콘솔 메시지를 CDP 형식으로 변환하여 전송
+**console 메서드 인터셉션** (`packages/react-native-inspector/src/console/`):
+- `console.log`, `console.warn`, `console.error`, `console.info`, `console.debug` 등 래핑
+- 원본 메서드 백업 후 래핑 함수로 교체
+- 인자를 CDP RemoteObject 형식으로 변환하여 `Runtime.consoleAPICalled` 전송
 
 ### 코드 구조 원칙
 
-1. **모듈화**: 이벤트 정보 수집 로직을 별도 함수로 분리
-2. **이벤트 전송 분리**: CDP 이벤트 전송 로직을 별도 함수로 분리
-3. **에러 처리**: 모든 JSI 호출은 try-catch로 감싸서 안전하게 처리
-4. **원본 함수 보존**: 원본 함수를 백업하여 정상 동작 보장
-5. **JSI 레벨 일관성**: 모든 인터셉션은 JSI 레벨에서 일관되게 처리
+1. **모듈화**: 수집 로직과 CDP 전송 로직을 별도 함수/모듈로 분리
+2. **이벤트 전송 분리**: CDP 전송은 `getServerInfo`·CDP sender를 통해 일관되게 수행
+3. **에러 처리**: 래핑 내부는 try-catch로 보호하여 원본 동작에 영향 없도록 함
+4. **원본 함수 보존**: 원본을 저장해 두고, 비활성화 시 복원
 
 #### 제한사항
 
-- **함수 래핑 필수**: 이벤트 정보를 얻기 위해 함수 래핑이 필요
-- **이벤트 리스너만으로는 부족**: 요청 정보를 얻기 위해서는 함수 호출을 가로채야 함
-- **성능 고려**: 함수 래핑은 성능에 영향을 줄 수 있으므로 최소한의 로직만 수행
+- **함수 래핑 필수**: 이벤트 정보를 얻기 위해 래핑이 필요
+- **성능**: 래핑 로직은 최소화하여 성능 영향을 줄임
 
 ### 파일 위치
 
-- 네트워크 훅: `packages/react-native-inspector/cpp/NetworkHook.cpp`
-- 네트워크 훅 헤더: `packages/react-native-inspector/cpp/NetworkHook.h`
-- 콘솔 훅: `packages/react-native-inspector/cpp/ConsoleHook.cpp`
-- 콘솔 훅 헤더: `packages/react-native-inspector/cpp/ConsoleHook.h`
+#### JavaScript (사용)
+
+- **콘솔 훅**: `packages/react-native-inspector/src/console/`
+  - `console-hook.ts`, `value-to-remote-object.ts`, `index.ts`
+- **네트워크 훅**: `packages/react-native-inspector/src/network/`
+  - `network-hook.ts`, `index.ts`
+- **기타**: `src/mmkv/`, `src/async-storage/`, `src/redux-devtools-extension.ts` 등
+
+#### C++/JSI (디프리케이티드 · 사용하지 않음)
+
+- **콘솔 훅 (Deprecated)**: `packages/react-native-inspector/cpp/ConsoleHook.cpp`, `ConsoleHook.h`, `cpp/console/`
+- **네트워크 훅 (Deprecated)**: `packages/react-native-inspector/cpp/NetworkHook.cpp`, `NetworkHook.h`, `cpp/network/`
+- 위 JSI/네이티브 훅 코드는 더 이상 사용하지 않으며, JavaScript 훅으로 대체됨.
 

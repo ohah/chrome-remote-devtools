@@ -5,6 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  *
  * Modified for Chrome Remote DevTools / Chrome Remote DevTools용으로 수정됨
+ *
+ * DEPRECATED: This JSI/native console hook is no longer used. Use the JavaScript-only
+ * console hook in packages/react-native-inspector/src/console/ instead.
+ * 디프리케이티드: 이 JSI/네이티브 콘솔 훅은 더 이상 사용하지 않습니다. 대신
+ * packages/react-native-inspector/src/console/ 의 JavaScript 전용 콘솔 훅을 사용하세요.
  */
 
 #pragma once

@@ -9,6 +9,20 @@ import {
 } from './redux-devtools-extension';
 import { setMMKVCDPSender, setMMKVConnectionReady } from './mmkv';
 import { setAsyncStorageCDPSender, setAsyncStorageConnectionReady } from './async-storage';
+import {
+  setConsoleCDPSender,
+  setConsoleConnectionReady,
+  enableConsoleHook as enableConsoleHookImpl,
+  disableConsoleHook as disableConsoleHookImpl,
+  isConsoleHookEnabled as isConsoleHookEnabledImpl,
+} from './console';
+import {
+  setNetworkCDPSender,
+  setNetworkConnectionReady,
+  enableNetworkHook as enableNetworkHookImpl,
+  disableNetworkHook as disableNetworkHookImpl,
+  isNetworkHookEnabled as isNetworkHookEnabledImpl,
+} from './network';
 import { connectWebSocket, getCDPSender } from './websocket-client';
 
 /**
@@ -57,9 +71,13 @@ export async function connect(serverHostParam: string, serverPortParam: number):
   setReduxCDPMessageSender(sender);
   setMMKVCDPSender(sender);
   setAsyncStorageCDPSender(sender);
+  setConsoleCDPSender(sender);
+  setNetworkCDPSender(sender);
   setReduxServerConnection(serverHostParam, serverPortParam);
   setMMKVConnectionReady();
   setAsyncStorageConnectionReady();
+  setConsoleConnectionReady();
+  setNetworkConnectionReady();
 }
 
 /**
@@ -90,51 +108,35 @@ export async function openDebugger(
 ): Promise<void> {}
 
 /**
- * Enable console hook / console 훅 활성화
- * Not implemented in JS-only layer; console hooks will be added later / JS 전용 레이어에서는 미구현, 추후 추가 예정
+ * Enable console hook (JavaScript layer) / console 훅 활성화 (JavaScript 레이어)
  * @returns Promise that resolves to true if enabling succeeded / 활성화가 성공하면 true로 resolve되는 Promise
  */
 export async function enableConsoleHook(): Promise<boolean> {
-  console.warn(
-    '[ChromeRemoteDevTools] enableConsoleHook is not implemented in JavaScript-only layer yet.'
-  );
-  return false;
+  return enableConsoleHookImpl();
 }
 
 /**
  * Disable console hook / console 훅 비활성화
- * Not implemented in JS-only layer / JS 전용 레이어에서는 미구현
  * @returns Promise that resolves to true if disabling succeeded / 비활성화가 성공하면 true로 resolve되는 Promise
  */
 export async function disableConsoleHook(): Promise<boolean> {
-  console.warn(
-    '[ChromeRemoteDevTools] disableConsoleHook is not implemented in JavaScript-only layer yet.'
-  );
-  return false;
+  return disableConsoleHookImpl();
 }
 
 /**
- * Enable network hook / 네트워크 훅 활성화
- * Not implemented in JS-only layer yet / JS 전용 레이어에서는 아직 미구현
+ * Enable network hook (JavaScript layer) / 네트워크 훅 활성화 (JavaScript 레이어)
  * @returns Promise that resolves to true if enabling succeeded / 활성화가 성공하면 true로 resolve되는 Promise
  */
 export async function enableNetworkHook(): Promise<boolean> {
-  console.warn(
-    '[ChromeRemoteDevTools] enableNetworkHook is not implemented in JavaScript-only layer yet.'
-  );
-  return false;
+  return enableNetworkHookImpl();
 }
 
 /**
  * Disable network hook / 네트워크 훅 비활성화
- * Not implemented in JS-only layer yet / JS 전용 레이어에서는 아직 미구현
  * @returns Promise that resolves to true if disabling succeeded / 비활성화가 성공하면 true로 resolve되는 Promise
  */
 export async function disableNetworkHook(): Promise<boolean> {
-  console.warn(
-    '[ChromeRemoteDevTools] disableNetworkHook is not implemented in JavaScript-only layer yet.'
-  );
-  return false;
+  return disableNetworkHookImpl();
 }
 
 /**
@@ -142,7 +144,7 @@ export async function disableNetworkHook(): Promise<boolean> {
  * @returns Promise that resolves to true if enabled / 활성화되어 있으면 true로 resolve되는 Promise
  */
 export async function isConsoleHookEnabled(): Promise<boolean> {
-  return false;
+  return isConsoleHookEnabledImpl();
 }
 
 /**
@@ -150,7 +152,7 @@ export async function isConsoleHookEnabled(): Promise<boolean> {
  * @returns Promise that resolves to true if enabled / 활성화되어 있으면 true로 resolve되는 Promise
  */
 export async function isNetworkHookEnabled(): Promise<boolean> {
-  return false;
+  return isNetworkHookEnabledImpl();
 }
 
 export { sendCDPMessage } from './cdp-message';
