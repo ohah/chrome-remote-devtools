@@ -16,16 +16,23 @@ Open a PR for the current branch. Follow these steps.
    git push
    ```
 
-2. **Create the PR** using GitHub CLI:
+2. **Create or update the PR** using GitHub CLI:
+   - **If the branch is not yet on origin**, or no PR exists for this branch → **create**:
 
    ```bash
    gh pr create --fill
    ```
 
-   - `--fill` uses the first commit message as PR title and body. To use a custom body from `branch-summary.md`:
+   To use a custom body from `branch-summary.md`:
 
    ```bash
    gh pr create --title "refactor/jsi-to-javascript" --body-file branch-summary.md
+   ```
+
+   - **If the branch is already pushed and a PR exists** → **edit** (update title/body):
+
+   ```bash
+   gh pr edit --title "chore(config): add cursor sub-agent rules" --body-file branch-summary.md
    ```
 
    Or paste the contents of `branch-summary.md` when prompted.
