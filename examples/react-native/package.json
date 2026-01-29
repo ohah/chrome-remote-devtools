@@ -8,6 +8,7 @@
     "ios:release": "react-native run-ios --mode Release",
     "ios": "react-native run-ios",
     "start": "react-native start",
+    "start:with-host": "node scripts/start-with-host.js",
     "build:android": "cd android && ./gradlew assembleRelease",
     "build:ios": "cd ios && xcodebuild -workspace ChromeRemoteDevTools.xcworkspace -scheme ChromeRemoteDevTools -configuration Release -destination 'generic/platform=iOS' archive",
     "postinstall": "node scripts/apply-cmake-patches.js"
