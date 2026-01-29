@@ -26,7 +26,12 @@ Review Copilot feedback on a branch/PR and apply the suggested changes. The user
    - List what was changed and what was skipped (and why, if relevant).
    - If the user did not provide a link yet, ask for the branch or PR link so the review can be fetched.
 
+5. **Update PR content** (after applying Copilot review):
+   - Add to `branch-summary.md` (or the PR description source) a short section describing what Copilot suggested and what was applied (e.g. "Copilot review: applied AGENTS.MD casing, frontmatter name/model, Redux export alignment").
+   - If the branch is already pushed and a PR exists, suggest or run `gh pr edit --body-file branch-summary.md` so the PR description reflects the Copilot review work. Do not commit `branch-summary.md`; it is used only for the PR body.
+
 ## Notes
 
 - Always wait for or ask for the branch/PR link (or the review text) before applying feedback.
 - Do not commit automatically; let the user review the diff and run `/commit` if they want to commit.
+- After applying Copilot review, always update the PR content (branch-summary.md) and optionally refresh the PR body with `gh pr edit --body-file branch-summary.md`.
