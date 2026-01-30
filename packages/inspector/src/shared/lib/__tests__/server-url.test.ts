@@ -53,7 +53,8 @@ describe('server-url', () => {
 
   test('resetReactotronServerUrl clears Reactotron URL / Reactotron URL 리셋', () => {
     setReactotronMode(true);
-    setReactotronServerUrl('http://localhost:9090');
+    setReactotronServerUrl('http://localhost:8888');
+    expect(getServerUrl()).toBe('http://localhost:8888');
     resetReactotronServerUrl();
     expect(getServerUrl()).toBe('http://localhost:9090');
   });
