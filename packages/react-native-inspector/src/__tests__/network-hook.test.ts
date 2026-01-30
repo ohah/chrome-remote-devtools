@@ -49,23 +49,33 @@ describe('network-hook', () => {
   });
 
   test('when sender is null, no CDP is sent / sender가 null이면 CDP 미전송', async () => {
+    disableNetworkHook();
     setNetworkCDPSender(null as any);
     setNetworkConnectionReady();
     enableNetworkHook();
     mockSender.mockClear();
+    const origFetch = (globalThis as any).fetch;
+    (globalThis as any).fetch = () => Promise.resolve(new Response('ok'));
     const res = await fetch('http://example.com/');
+    (globalThis as any).fetch = origFetch;
+    disableNetworkHook();
     expect(res).toBeDefined();
     expect(mockSender).not.toHaveBeenCalled();
   });
 
   test('when server info not set, no CDP is sent / 서버 정보 미설정 시 CDP 미전송', async () => {
+    disableNetworkHook();
     (globalThis as any).__ChromeRemoteDevToolsServerHost = undefined;
     (globalThis as any).__ChromeRemoteDevToolsServerPort = undefined;
     setNetworkCDPSender(mockSender);
     setNetworkConnectionReady();
     enableNetworkHook();
     mockSender.mockClear();
+    const origFetch = (globalThis as any).fetch;
+    (globalThis as any).fetch = () => Promise.resolve(new Response('ok'));
     const res = await fetch('http://example.com/');
+    (globalThis as any).fetch = origFetch;
+    disableNetworkHook();
     expect(res).toBeDefined();
     expect(mockSender).not.toHaveBeenCalled();
   });
