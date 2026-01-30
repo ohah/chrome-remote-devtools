@@ -1,8 +1,13 @@
-# Commit changes following project rules
+---
+description: Commit message format and pre-commit checklist for this project
+alwaysApply: true
+---
 
-When creating or suggesting git commits, follow these rules. Full details in `AGENTS.md`.
+# Commit Rules
 
-## Message format
+Apply when creating or suggesting git commits. Full details in `AGENTS.md`.
+
+## Message Format
 
 ```
 <type>(<scope>): <subject>
@@ -25,6 +30,22 @@ When creating or suggesting git commits, follow these rules. Full details in `AG
 3. Each commit should be independently meaningful
 4. Prefer small, logical units
 
+## Examples
+
+```
+feat(server): add WebSocket relay server
+
+- Implement Rust WebSocket server for CDP message relay
+- Support multiple client connections
+```
+
+```
+refactor(inspector): move react-native inspector to JavaScript-only layer
+
+- Remove native TurboModule installation
+- Add JavaScript WebSocket client
+```
+
 ## Pre-commit (required)
 
 Use [mise](https://mise.jdx.dev/) for tool versions (see `.mise.toml`). Run commands via `mise exec --` so format/lint use the project’s bun/rust.
@@ -41,19 +62,3 @@ After committing: write a summary to an MD file. The file must include:
 2. **Work content**: what was done — goals, changes, and outcomes in prose (PR-style). If tests were added or updated, mention that (e.g. "Tests were added for …" or "Test coverage includes …").
 
 **Do not commit this MD file** (add to `.gitignore` or leave unstaged).
-
-## Examples
-
-```
-feat(server): add WebSocket relay server
-
-- Implement Rust WebSocket server for CDP message relay
-- Support multiple client connections
-```
-
-```
-refactor(inspector): move react-native inspector to JavaScript-only layer
-
-- Remove native TurboModule installation
-- Add JavaScript WebSocket client
-```

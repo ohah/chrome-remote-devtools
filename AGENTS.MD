@@ -376,9 +376,11 @@ refactor(inspector): reorganize component structure
 
 #### TypeScript/JavaScript 코드 작업 시
 
+도구 버전은 [mise](https://mise.jdx.dev/)로 관리됩니다 (`.mise.toml`). 포맷/린트는 `mise exec --`로 실행하여 프로젝트의 bun을 사용합니다.
+
 1. **코드 포맷팅 검사 및 적용**:
    ```bash
-   bun run format
+   mise exec -- bun run format
    ```
    - `bun format` 명령어로 코드 포맷팅을 검사하고 자동으로 수정합니다
    - 포맷팅 오류가 있으면 자동으로 수정되므로, 수정된 파일을 함께 커밋해야 합니다
@@ -386,7 +388,7 @@ refactor(inspector): reorganize component structure
 
 2. **린트 검사** (필수):
    ```bash
-   bun run lint
+   mise exec -- bun run lint
    ```
    - `bun lint` 명령어로 코드 품질을 검사합니다
    - 린트 오류가 있으면 수정 후 커밋합니다
@@ -394,22 +396,22 @@ refactor(inspector): reorganize component structure
 
 #### Rust 코드 작업 시
 
-**중요**: Rust 코드를 수정한 경우 반드시 다음 명령어를 실행해야 합니다.
+**중요**: Rust 코드를 수정한 경우 반드시 다음 명령어를 실행해야 합니다. 도구 버전은 mise로 관리되므로 `mise exec --`로 실행합니다.
 
 1. **코드 포맷팅 검사**:
    ```bash
-   cargo fmt --all -- --check
+   mise exec -- cargo fmt --all -- --check
    ```
    - Rust 코드 포맷팅을 검사합니다
    - 포맷팅 오류가 있으면 다음 명령어로 자동 수정:
      ```bash
-     cargo fmt --all
+     mise exec -- cargo fmt --all
      ```
    - 수정된 파일을 함께 커밋해야 합니다
 
 2. **코드 품질 검사**:
    ```bash
-   cargo clippy --all-targets --all-features -- -D warnings
+   mise exec -- cargo clippy --all-targets --all-features -- -D warnings
    ```
    - Clippy로 코드 품질을 검사합니다
    - 경고(`warnings`)가 있으면 모두 수정해야 합니다
@@ -418,16 +420,16 @@ refactor(inspector): reorganize component structure
 **커밋 전 체크리스트**:
 
 **TypeScript/JavaScript 코드**:
-- [ ] `bun run format` 실행하여 포맷팅 검사 및 수정
+- [ ] `mise exec -- bun run format` 실행하여 포맷팅 검사 및 수정
 - [ ] 포맷팅으로 변경된 파일이 있으면 함께 스테이징
-- [ ] `bun run lint` 실행하여 린트 검사
+- [ ] `mise exec -- bun run lint` 실행하여 린트 검사
 - [ ] 모든 검사를 통과한 후 커밋 진행
 
 **Rust 코드**:
-- [ ] `cargo fmt --all -- --check` 실행하여 포맷팅 검사
-- [ ] 포맷팅 오류가 있으면 `cargo fmt --all` 실행하여 수정
+- [ ] `mise exec -- cargo fmt --all -- --check` 실행하여 포맷팅 검사
+- [ ] 포맷팅 오류가 있으면 `mise exec -- cargo fmt --all` 실행하여 수정
 - [ ] 수정된 파일을 함께 스테이징
-- [ ] `cargo clippy --all-targets --all-features -- -D warnings` 실행하여 코드 품질 검사
+- [ ] `mise exec -- cargo clippy --all-targets --all-features -- -D warnings` 실행하여 코드 품질 검사
 - [ ] 모든 경고를 수정
 - [ ] 모든 검사를 통과한 후 커밋 진행
 
