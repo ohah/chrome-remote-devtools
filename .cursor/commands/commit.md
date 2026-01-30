@@ -27,9 +27,9 @@ When creating or suggesting git commits, follow these rules. Full details in `AG
 
 ## Pre-commit (required)
 
-**TypeScript/JavaScript**: Run `bun run format`; run `bun run lint`; stage any changed files; then commit.
+**TypeScript/JavaScript**: Run `bun run format`; run `bun run lint`; stage any changed files; then commit. If format or lint fails (e.g. command not found or wrong version), run with mise: `mise exec -- bun run format`, `mise exec -- bun run lint`.
 
-**Rust**: Run `cargo fmt --all -- --check` (fix with `cargo fmt --all` if needed); run `cargo clippy --all-targets --all-features -- -D warnings` and fix all warnings; then commit.
+**Rust**: Run `cargo fmt --all -- --check` (fix with `cargo fmt --all` if needed); run `cargo clippy --all-targets --all-features -- -D warnings` and fix all warnings; then commit. If those fail, run with mise: `mise exec -- cargo fmt --all`, `mise exec -- cargo clippy --all-targets --all-features -- -D warnings`.
 
 ## Post-commit (required)
 
