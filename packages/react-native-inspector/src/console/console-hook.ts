@@ -23,8 +23,11 @@ const CONSOLE_METHODS = [
   'table',
   'group',
   'groupCollapsed',
+  'groupEnd',
   'count',
+  'countReset',
   'assert',
+  'clear',
   'profile',
   'profileEnd',
   'timeStamp',
@@ -92,7 +95,9 @@ function createWrappedMethod(methodName: ConsoleMethodName): (...args: unknown[]
   const cdpType = CDP_TYPE_MAP[methodName] ?? 'log';
   return function (this: unknown, ...args: unknown[]) {
     try {
-      original.apply(this, args);
+      if (typeof original === 'function') {
+        original.apply(this, args);
+      }
     } finally {
       try {
         const remoteArgs = args.map(valueToRemoteObject);
@@ -116,7 +121,7 @@ function installHooks(): boolean {
     const fn = c[methodName as keyof Console];
     if (typeof fn === 'function') {
       originalConsole[methodName] = fn as (...args: unknown[]) => void;
-      (c as Record<string, (...args: unknown[]) => void>)[methodName] =
+      (c as unknown as Record<string, (...args: unknown[]) => void>)[methodName] =
         createWrappedMethod(methodName);
     }
   }
@@ -135,7 +140,7 @@ function uninstallHooks(): boolean {
   for (const methodName of CONSOLE_METHODS) {
     const original = originalConsole[methodName];
     if (original) {
-      (c as Record<string, (...args: unknown[]) => void>)[methodName] = original;
+      (c as unknown as Record<string, (...args: unknown[]) => void>)[methodName] = original;
     }
   }
   isHooked = false;
