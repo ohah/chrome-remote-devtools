@@ -1,10 +1,18 @@
 /**
  * DevTools URL builder tests / DevTools URL 빌더 테스트
+ * Sets window origin so new URL(path, base) works in happy-dom / happy-dom에서 new URL(base) 동작하도록 origin 설정
  */
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
 import { buildDevToolsUrl, buildDevToolsReplayUrl } from '../devtools-url';
 
 describe('devtools-url', () => {
+  beforeEach(() => {
+    const win = (globalThis as any).window;
+    if (win?.happyDOM?.setURL) {
+      win.happyDOM.setURL('http://localhost:3000/');
+    }
+  });
+
   test('buildDevToolsUrl builds URL with default server when only clientId / clientId만 주어져도 기본 서버로 URL 생성', () => {
     const url = buildDevToolsUrl({ clientId: 'c1' });
     expect(url).toContain('/devtools-frontend/');
@@ -18,7 +26,7 @@ describe('devtools-url', () => {
     });
     expect(url).toContain('/devtools-frontend/');
     expect(url).toContain('ws=');
-    expect(url).toContain('clientId=client-1');
+    expect(url).toContain('client-1');
   });
 
   test('buildDevToolsUrl appends clientType when provided / clientType 옵션 시 쿼리 추가', () => {

@@ -34,12 +34,15 @@ describe('utils', () => {
   });
 
   test('getExtensionStatus returns true when extension with connect is set / connect 있는 extension 설정 시 true', () => {
-    const connect = () => () => {};
-    (global as any).__REDUX_DEVTOOLS_EXTENSION__ = connect;
+    const extension = { connect: () => () => {} };
+    (global as any).__REDUX_DEVTOOLS_EXTENSION__ = extension;
+    if (typeof (global as any).window !== 'undefined') {
+      (global as any).window.__REDUX_DEVTOOLS_EXTENSION__ = extension;
+    }
     const status = getExtensionStatus();
     expect(status.extensionExists).toBe(true);
     expect(status.hasConnect).toBe(true);
-    expect(status.isFunction).toBe(true);
+    expect(status.isFunction).toBe(false);
   });
 
   test('getExtensionStatus hasCompose when COMPOSE__ is set / COMPOSE__ 설정 시 hasCompose true', () => {
