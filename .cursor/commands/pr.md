@@ -1,48 +1,88 @@
-# Create a Pull Request
+# Create or Update a Pull Request
 
-Open a PR for the current branch. Follow these steps.
+Create or update a PR for the current branch. Follow the steps below.
 
-## Steps
+## What the agent should do
 
-1. **Push the branch** (if not already pushed):
+1. **Check current branch and PR status**: `git branch --show-current`, `gh pr list --head <current-branch> --state all`
+2. **Determine base**: If the user specifies a base branch (e.g. "base is main", "base feat/xyz"), use that as the merge target.
+   - **If current branch equals base** → Create a new branch from the current one and open a PR with that new branch as head (see "When base and current branch are the same").
+   - Otherwise use the specified base.
+3. **Prepare body**: If `branch-summary.md` exists and fills the required sections (Purpose, Description, How to test, etc., or Title + Work content), use it as the PR body. If sections are missing, fill them before use.
+4. **Create or update PR**:
+   - No open PR → `gh pr create --head <current-branch> --base <base> --title "<title>" --body-file branch-summary.md`
+   - Open PR exists → Update body (and base via PATCH if base was specified and PR is open).
+5. **Push**: If there are unpushed commits, run `git push origin <current-branch>`.
+6. **Labels**: After creating or updating the PR, check `gh label list` and add labels that match the PR (e.g. feat, fix, docs).
+
+## Base branch (apply when user specifies it)
+
+- If the user **specifies a base branch** (e.g. "base is main", "base feat/menu-board"), **always** use that branch as the merge target (base).
+- **On create**: Pass `--base <user-specified-branch>` to `gh pr create`.
+- **On update**: If the PR is **open**, update the base via REST PATCH. If the PR is **closed**, base cannot be changed (update body only).
+  ```bash
+  gh api repos/ohah/chrome-remote-devtools/pulls/<PR-number> -X PATCH -f body=@branch-summary.md -f base="<user-specified-branch>"
+  ```
+  (If 422 on base change, treat as closed PR and PATCH body only.)
+
+## When base and current branch are the same
+
+- If the user set base=XXX and **the current branch is also XXX**, self-merge is not allowed. **Create a new branch** from the current one and use that as the PR head.
+- Steps:
+  1. From the current branch (XXX), create a new branch: `git checkout -b feat/xxx-description` (name it by the work).
+  2. If there are uncommitted changes, stage and commit (and push) on the new branch.
+  3. `gh pr create --head <new-branch> --base XXX --title "..." --body-file branch-summary.md --assignee @me`
+  4. Push the new branch: `git push -u origin <new-branch>`
+
+## Order of operations
+
+1. **Read user input**: If a base branch is specified, set base accordingly (see above).
+2. **Create or update PR with GitHub CLI**:
+   - If the branch is already pushed → use `--head <branch-name>` when creating.
+   - If base is specified → always pass `--base <base>` on create, or include base in PATCH on update (when PR is open).
 
    ```bash
-   git push -u origin $(git branch --show-current)
+   gh pr create --head $(git branch --show-current) --base <base> --title "<title>" --body-file branch-summary.md
    ```
 
-   If the branch exists on origin, use:
+   - If a PR already exists → Update body. If base was specified and PR is open, PATCH body and base.
 
    ```bash
-   git push
+   # body only:
+   gh api repos/ohah/chrome-remote-devtools/pulls/<PR-number> -X PATCH -f body=@branch-summary.md
+   # body + base:
+   gh api repos/ohah/chrome-remote-devtools/pulls/<PR-number> -X PATCH -f body=@branch-summary.md -f base="<base>"
    ```
 
-2. **Create or update the PR** using GitHub CLI:
-   - **If the branch is not yet on origin**, or no PR exists for this branch → **create**:
+3. **Push**: After create/update, if there are unpushed commits, push so the PR has the latest commits.
 
    ```bash
-   gh pr create --fill
+   git push origin $(git branch --show-current)
    ```
 
-   To use a custom body from `branch-summary.md`:
+4. **If `gh` is not available**: Install [GitHub CLI](https://cli.github.com/) or open the PR in the browser (repo → Compare & pull request for the branch) and paste the contents of `branch-summary.md` as the description.
 
-   ```bash
-   gh pr create --title "refactor/jsi-to-javascript" --body-file branch-summary.md
-   ```
+5. **Labels**: On create use `--label <name>` (multiple allowed). On update use `gh pr edit <PR-number> --add-label <name>`. Choose labels from `gh label list` that fit the PR (e.g. feat, fix, docs, config).
 
-   - **If the branch is already pushed and a PR exists** → **edit** (update title/body):
+## PR title rules
 
-   ```bash
-   gh pr edit --title "chore(config): add cursor sub-agent rules" --body-file branch-summary.md
-   ```
+- **If the user provides a title**: Use it as-is.
+- **If the user provides an issue ref** (e.g. `/pr fixes #123`): Use a prefix like `[#123]` and a short subject.
+- **If neither**: Use a short, imperative subject in English (e.g. from the first line of branch-summary or the main change). Prefer lowercase start and no trailing period.
 
-   Or paste the contents of `branch-summary.md` when prompted.
+## PR body format
 
-3. **If `gh` is not installed**: Install [GitHub CLI](https://cli.github.com/), or open the PR manually:
-   - Go to the repo on GitHub → "Compare & pull request" for the current branch, or "New pull request" and choose the branch.
-   - Use `branch-summary.md` (Summary, What changed, Why) as the PR description.
+Use `branch-summary.md` as the PR body. It should include at least:
+
+- **Title** (or Purpose): What this PR is for.
+- **Work content** (or Description): What was changed and why, in prose. If tests were added or updated, say so (e.g. "Tests were added for …" or "Test coverage includes …").
+
+If the repo has `.github/PULL_REQUEST_TEMPLATE.md`, align `branch-summary.md` with its sections (Purpose, Description, How to test, Additional info, Screenshots, etc.) when writing or updating it.
 
 ## Notes
 
-- **Language**: Write the PR **title** and **body** in **English**.
-- Ensure commits follow project rules and `branch-summary.md` is up to date before creating the PR.
-- Do not commit `branch-summary.md`; use it only as the PR description source.
+- **Language**: Use **English** for PR title and body (per project rules).
+- **Base**: If the user specifies a base branch, always use it for create/update (and create a new head branch when base and current branch are the same).
+- **Body**: Keep `branch-summary.md` up to date and use it only for the PR description; do not commit it unless the project says otherwise.
+- **Push**: After updating the PR body, push any unpushed commits so the PR reflects the latest code.
+- **Labels**: Use `gh label list` and attach labels that match the PR type (feat, fix, docs, etc.).
