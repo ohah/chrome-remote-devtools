@@ -2,6 +2,7 @@
  * Network hook tests / 네트워크 훅 테스트
  * Covers CDP sender, connection ready, enable/disable, XHR/fetch and Network.requestWillBeSent·loadingFinished / CDP 전송·연결·활성화/비활성화·XHR/fetch 훅
  */
+import { createServer } from 'http';
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import {
   setNetworkCDPSender,
@@ -122,5 +123,49 @@ describe('network-hook', () => {
     );
     expect(loadingFinished).toBeDefined();
     expect(JSON.parse(loadingFinished![2] as string).params.encodedDataLength).toBe(0);
+  });
+
+  test('XHR sends requestWillBeSent and loadingFinished with real request to own server / 본인 API 서버로 실제 XHR 요청 시 requestWillBeSent·loadingFinished 전송', async () => {
+    const body = 'ok';
+    const httpServer = createServer((_req, res) => {
+      res.writeHead(200, { 'Content-Length': String(body.length) });
+      res.end(body);
+    });
+    await new Promise<void>((resolve) => {
+      httpServer.listen(0, '127.0.0.1', () => resolve());
+    });
+    const port = (httpServer.address() as { port: number }).port;
+    const baseUrl = `http://127.0.0.1:${port}`;
+    const url = `${baseUrl}/xhr`;
+    const win = (globalThis as any).window;
+    if (win?.happyDOM?.setURL) {
+      win.happyDOM.setURL(baseUrl + '/');
+    }
+    setNetworkCDPSender(mockSender);
+    setNetworkConnectionReady();
+    enableNetworkHook();
+    mockSender.mockClear();
+    const xhr = new (globalThis as any).XMLHttpRequest();
+    await new Promise<void>((resolve, reject) => {
+      xhr.onload = () => resolve();
+      xhr.onerror = () => reject(new Error('XHR error'));
+      xhr.open('GET', url);
+      xhr.setRequestHeader('X-Custom', 'value');
+      xhr.send();
+    });
+    httpServer.close();
+    const requestSent = mockSender.mock.calls.find(
+      (c) => JSON.parse(c![2] as string).method === 'Network.requestWillBeSent'
+    );
+    const loadingFinished = mockSender.mock.calls.find(
+      (c) => JSON.parse(c![2] as string).method === 'Network.loadingFinished'
+    );
+    expect(requestSent).toBeDefined();
+    expect(loadingFinished).toBeDefined();
+    const params = JSON.parse(requestSent![2] as string).params;
+    expect(params.request.url).toBe(url);
+    expect(params.request.method).toBe('GET');
+    expect(params.request.headers?.['X-Custom']).toBe('value');
+    disableNetworkHook();
   });
 });
