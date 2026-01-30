@@ -407,14 +407,12 @@ describe('Redux DevTools Extension Polyfill', () => {
   describe('installReduxDevToolsPolyfill skip paths', () => {
     test('should skip install when JSI version already injected / JSI 버전 이미 주입 시 설치 건너뜀', () => {
       installReduxDevToolsPolyfill();
-      const extBefore = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
       globalObj.__REDUX_DEVTOOLS_EXTENSION_JSI_INJECTED__ = true;
       globalObj.__REDUX_DEVTOOLS_EXTENSION__ = null;
 
       installReduxDevToolsPolyfill();
 
       expect(globalObj.__REDUX_DEVTOOLS_EXTENSION__).toBeNull();
-      globalObj.__REDUX_DEVTOOLS_EXTENSION__ = extBefore;
     });
   });
 
