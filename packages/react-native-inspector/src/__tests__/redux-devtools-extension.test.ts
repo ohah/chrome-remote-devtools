@@ -7,6 +7,8 @@ import {
   getPendingActions,
   clearPendingActions,
   resetConnectionState,
+  replaceWithJSIVersion,
+  composeWithDevTools,
 } from '../redux-devtools-extension';
 import { getGlobalObj } from '../utils';
 
@@ -30,8 +32,14 @@ describe('Redux DevTools Extension Polyfill', () => {
     if (globalObj.__REDUX_DEVTOOLS_EXTENSION__) {
       delete globalObj.__REDUX_DEVTOOLS_EXTENSION__;
     }
+    if (globalObj.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) {
+      delete globalObj.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
+    }
     if (globalObj.__REDUX_DEVTOOLS_EXTENSION_JS_POLYFILL__) {
       delete globalObj.__REDUX_DEVTOOLS_EXTENSION_JS_POLYFILL__;
+    }
+    if (globalObj.__REDUX_DEVTOOLS_EXTENSION_JSI_INJECTED__) {
+      delete globalObj.__REDUX_DEVTOOLS_EXTENSION_JSI_INJECTED__;
     }
     clearPendingActions();
   });
@@ -280,6 +288,269 @@ describe('Redux DevTools Extension Polyfill', () => {
       if (initMessage) {
         const parsed = JSON.parse(initMessage.message);
         expect(parsed.params.instanceId).toBe(123);
+      }
+    });
+  });
+
+  describe('getPendingActions', () => {
+    test('should return a copy of pending actions / pending actions의 복사본 반환', () => {
+      installReduxDevToolsPolyfill();
+      resetConnectionState();
+      setCDPMessageSender(() => {});
+
+      const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+      const connection = extension.connect({ name: 'TestStore' });
+      connection.send({ type: 'TEST' }, {});
+
+      const pending = getPendingActions();
+      expect(pending.length).toBe(1);
+      pending.length = 0;
+      expect(getPendingActions().length).toBe(1);
+    });
+  });
+
+  describe('connection.subscribe and connection.error', () => {
+    test('subscribe should return unsubscribe function / subscribe는 unsubscribe 함수 반환', () => {
+      installReduxDevToolsPolyfill();
+      const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+      const connection = extension.connect({ name: 'TestStore' });
+
+      const unsubscribe = connection.subscribe(() => {});
+      expect(typeof unsubscribe).toBe('function');
+      expect(() => unsubscribe()).not.toThrow();
+    });
+
+    test('error should send ERROR message when connected / 연결 시 error는 ERROR 메시지 전송', () => {
+      installReduxDevToolsPolyfill();
+      setServerConnection('localhost', 8080);
+
+      const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+      const connection = extension.connect({ name: 'TestStore' });
+      connection.init({});
+      connection.error('Test error');
+
+      const errorMessage = sentMessages.find((msg) => {
+        const parsed = JSON.parse(msg.message);
+        return parsed.params?.type === 'ERROR';
+      });
+      expect(errorMessage).toBeDefined();
+      if (errorMessage) {
+        const parsed = JSON.parse(errorMessage.message);
+        expect(parsed.params.error).toBe('Test error');
+      }
+    });
+  });
+
+  describe('notifyExtensionReady', () => {
+    test('should re-send INIT for all active connections when connected / 연결 시 활성 연결에 INIT 재전송', () => {
+      installReduxDevToolsPolyfill();
+      setServerConnection('localhost', 8080);
+
+      const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+      const connection = extension.connect({ name: 'NotifyTest' });
+      connection.init({ count: 42 });
+
+      sentMessages.length = 0;
+      extension.notifyExtensionReady();
+
+      const initMessages = sentMessages.filter((msg) => {
+        const parsed = JSON.parse(msg.message);
+        return parsed.params?.type === 'INIT' && parsed.params?.payload === '{"count":42}';
+      });
+      expect(initMessages.length).toBeGreaterThan(0);
+    });
+
+    test('should do nothing when not connected / 미연결 시 아무 작업 안 함', () => {
+      installReduxDevToolsPolyfill();
+      resetConnectionState();
+      setCDPMessageSender(() => {});
+
+      const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+      const connection = extension.connect({ name: 'NotifyTest' });
+      connection.init({ count: 0 });
+
+      sentMessages.length = 0;
+      extension.notifyExtensionReady();
+      expect(sentMessages.length).toBe(0);
+    });
+  });
+
+  describe('replaceWithJSIVersion', () => {
+    test('should replace global extension with JSI extension / global extension을 JSI extension으로 교체', () => {
+      installReduxDevToolsPolyfill();
+      const jsiExtension = {
+        connect: () => ({}),
+        __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: () => () => {},
+      };
+
+      replaceWithJSIVersion(jsiExtension);
+
+      expect(globalObj.__REDUX_DEVTOOLS_EXTENSION__).toBe(jsiExtension);
+      expect(globalObj.__REDUX_DEVTOOLS_EXTENSION_JSI_INJECTED__).toBe(true);
+      expect(globalObj.__REDUX_DEVTOOLS_EXTENSION_JS_POLYFILL__).toBeUndefined();
+    });
+
+    test('should replace compose when JSI provides it / JSI가 compose 제공 시 교체', () => {
+      installReduxDevToolsPolyfill();
+      const jsiCompose = () => () => () => {};
+      const jsiExtension = {
+        connect: () => ({}),
+        __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: jsiCompose,
+      };
+
+      replaceWithJSIVersion(jsiExtension);
+
+      expect(globalObj.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toBe(jsiCompose);
+    });
+  });
+
+  describe('installReduxDevToolsPolyfill skip paths', () => {
+    test('should skip install when JSI version already injected / JSI 버전 이미 주입 시 설치 건너뜀', () => {
+      installReduxDevToolsPolyfill();
+      const extBefore = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+      globalObj.__REDUX_DEVTOOLS_EXTENSION_JSI_INJECTED__ = true;
+      globalObj.__REDUX_DEVTOOLS_EXTENSION__ = null;
+
+      installReduxDevToolsPolyfill();
+
+      expect(globalObj.__REDUX_DEVTOOLS_EXTENSION__).toBeNull();
+      globalObj.__REDUX_DEVTOOLS_EXTENSION__ = extBefore;
+    });
+  });
+
+  describe('composeWithDevTools', () => {
+    test('should return enhancer when called with options / 옵션으로 호출 시 enhancer 반환', () => {
+      installReduxDevToolsPolyfill();
+      const compose = globalObj.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?? composeWithDevTools;
+      const enhancer = compose({ name: 'ComposedStore' })();
+
+      expect(typeof enhancer).toBe('function');
+    });
+
+    test('should compose enhancers and connect store to DevTools / enhancer 합성 및 store DevTools 연결', () => {
+      installReduxDevToolsPolyfill();
+      setServerConnection('localhost', 8080);
+
+      const compose = globalObj.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?? composeWithDevTools;
+      const reducer = (state: number = 0, action: { type: string }) =>
+        action.type === 'INC' ? state + 1 : state;
+      const createStore = (r: typeof reducer, preloaded: number) => {
+        let state = preloaded ?? 0;
+        const listeners: Array<() => void> = [];
+        return {
+          getState: () => state,
+          dispatch: (action: { type: string }) => {
+            state = r(state, action);
+            listeners.forEach((l) => l());
+            return action;
+          },
+          subscribe: (l: () => void) => {
+            listeners.push(l);
+            return () => {
+              const i = listeners.indexOf(l);
+              if (i >= 0) listeners.splice(i, 1);
+            };
+          },
+          replaceReducer: () => {},
+        };
+      };
+
+      const storeFactory = compose({ name: 'ComposedStore' })()(createStore);
+      const store = storeFactory(reducer, 0);
+
+      expect(store).toBeDefined();
+      expect(store.getState()).toBe(0);
+
+      store.dispatch({ type: 'INC' });
+
+      const actionMessage = sentMessages.find((msg) => {
+        const parsed = JSON.parse(msg.message);
+        return parsed.params?.type === 'ACTION';
+      });
+      expect(actionMessage).toBeDefined();
+    });
+
+    test('should work when called with enhancers only / enhancer만으로 호출 시 동작', () => {
+      installReduxDevToolsPolyfill();
+      const compose = globalObj.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?? composeWithDevTools;
+      const enhancer = compose()();
+
+      expect(typeof enhancer).toBe('function');
+    });
+  });
+
+  describe('Redux Toolkit enhancer (function form)', () => {
+    test('should create store and connect to DevTools when extension called as function / extension을 함수로 호출 시 store 생성 및 DevTools 연결', () => {
+      installReduxDevToolsPolyfill();
+      setServerConnection('localhost', 8080);
+
+      const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+      const reducer = (state: number = 0) => state;
+      const createStore = (r: typeof reducer, preloaded: number) => ({
+        getState: () => preloaded ?? 0,
+        dispatch: () => ({}),
+        subscribe: () => () => {},
+        replaceReducer: () => {},
+      });
+
+      const enhancer = extension({ name: 'RTKStore' });
+      const createStoreWithDevTools = enhancer(createStore);
+      const store = createStoreWithDevTools(reducer, 0);
+
+      expect(store).toBeDefined();
+      const initMessage = sentMessages.find((msg) => {
+        const parsed = JSON.parse(msg.message);
+        return parsed.params?.type === 'INIT';
+      });
+      expect(initMessage).toBeDefined();
+    });
+  });
+
+  describe('flush pending action normalization', () => {
+    test('should normalize pending action with null to @@ZUSTAND/SET when flushed / flush 시 null pending 액션을 @@ZUSTAND/SET로 정규화', () => {
+      installReduxDevToolsPolyfill();
+      resetConnectionState();
+      setCDPMessageSender(mockCDPSender);
+
+      const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+      const connection = extension.connect({ name: 'FlushTest' });
+      connection.send(null, { x: 1 });
+      expect(getPendingActions().length).toBe(1);
+
+      setServerConnection('localhost', 8080);
+
+      const actionMessage = sentMessages.find((msg) => {
+        const parsed = JSON.parse(msg.message);
+        return parsed.params?.type === 'ACTION';
+      });
+      expect(actionMessage).toBeDefined();
+      if (actionMessage) {
+        const parsed = JSON.parse(actionMessage.message);
+        const action = parsed.params.action ? JSON.parse(parsed.params.action) : null;
+        expect(action?.type).toBe('@@ZUSTAND/SET');
+      }
+    });
+
+    test('should normalize pending action object without type when flushed / flush 시 type 없는 액션 객체 정규화', () => {
+      installReduxDevToolsPolyfill();
+      resetConnectionState();
+      setCDPMessageSender(mockCDPSender);
+
+      const extension = globalObj.__REDUX_DEVTOOLS_EXTENSION__;
+      const connection = extension.connect({ name: 'FlushTest' });
+      connection.send({ payload: 1 } as any, { x: 1 });
+      setServerConnection('localhost', 8080);
+
+      const actionMessage = sentMessages.find((msg) => {
+        const parsed = JSON.parse(msg.message);
+        return parsed.params?.type === 'ACTION';
+      });
+      expect(actionMessage).toBeDefined();
+      if (actionMessage) {
+        const parsed = JSON.parse(actionMessage.message);
+        const action = parsed.params.action ? JSON.parse(parsed.params.action) : null;
+        expect(action?.type).toBe('@@ZUSTAND/SET');
+        expect(action?.payload).toBe(1);
       }
     });
   });
