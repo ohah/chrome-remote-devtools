@@ -137,6 +137,18 @@ bun run build               # 전체 빌드
 bun run build:docs          # 문서 빌드 (document 패키지)
 ```
 
+### 이 레포 PR·push (ohah 전용)
+
+이 레포(ohah/chrome-remote-devtools)에서 push·PR은 **ohah** GitHub 계정을 쓴다.
+
+- **SSH remote**: push가 ohah SSH 키를 쓰도록 origin을 `github.com-private` 로 맞춘다. `~/.ssh/config` 에 `Host github.com-private` 가 ohah용 키를 쓰도록 설정되어 있어야 한다.
+  ```bash
+  git remote set-url origin git@github.com-private:ohah/chrome-remote-devtools.git
+  ```
+- **gh**: PR 생성·수정 전에 `gh auth switch --hostname github.com --user ohah` 로 ohah로 전환한다. 작업 후 원래 계정으로 복원한다.
+
+자세한 절차는 `.cursor/commands/init-pr.md`, `.cursor/commands/pr.md` 를 참고한다.
+
 ## 코딩 스타일 가이드라인
 
 ### 주석 규칙

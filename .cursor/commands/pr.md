@@ -34,18 +34,24 @@ Create or update a PR for the current branch. Follow the steps below.
   3. `gh pr create --head <new-branch> --base XXX --title "..." --body-file branch-summary.md --assignee @me`
   4. Push the new branch: `git push -u origin <new-branch>`
 
-## gh account for this repo (ohah only)
+## gh account and SSH remote for this repo (ohah only)
 
-This repo (ohah/chrome-remote-devtools) uses the **ohah** GitHub account for push and PR. No `git remote set-url` change; only `gh auth switch` is used.
+This repo (ohah/chrome-remote-devtools) uses the **ohah** GitHub account for push and PR.
 
-- **Before** any push or `gh pr create` / `gh api .../pulls/...` PATCH: get current user with `gh api user -q .login`. If the result is not `ohah`, run `gh auth switch --hostname github.com --user ohah` and **remember the previous login** (e.g. `PREV_GH_USER=<that value>`).
+- **SSH remote**: So that `git push` authenticates as ohah, origin must use the SSH host `github.com-private` (see `~/.ssh/config`). Before any push, ensure origin is set to:
+  ```bash
+  git remote set-url origin git@github.com-private:ohah/chrome-remote-devtools.git
+  ```
+  (If it is already that URL, skip.)
+- **gh auth switch**: Before any push or `gh pr create` / `gh api .../pulls/...` PATCH: get current user with `gh api user -q .login`. If the result is not `ohah`, run `gh auth switch --hostname github.com --user ohah` and **remember the previous login** (e.g. `PREV_GH_USER=<that value>`).
 - **After** all push and gh PR operations are done: if you switched to ohah, restore the previous account with `gh auth switch --hostname github.com --user <PREV_GH_USER>` so the global gh account is unchanged.
 
 ## Order of operations
 
 1. **Read user input**: If a base branch is specified, set base accordingly (see above).
-2. **gh account**: Get current user: `gh api user -q .login`. If not `ohah`, run `gh auth switch --hostname github.com --user ohah` and store the previous login so you can switch back later.
-3. **Create or update PR with GitHub CLI**:
+2. **SSH remote**: Ensure origin is `git@github.com-private:ohah/chrome-remote-devtools.git` so push uses ohah’s SSH key; if not, run `git remote set-url origin git@github.com-private:ohah/chrome-remote-devtools.git`.
+3. **gh account**: Get current user: `gh api user -q .login`. If not `ohah`, run `gh auth switch --hostname github.com --user ohah` and store the previous login so you can switch back later.
+4. **Create or update PR with GitHub CLI**:
    - If the branch is already pushed → use `--head <branch-name>` when creating.
    - If base is specified → always pass `--base <base>` on create, or include base in PATCH on update (when PR is open).
 
@@ -62,17 +68,17 @@ This repo (ohah/chrome-remote-devtools) uses the **ohah** GitHub account for pus
    gh api repos/ohah/chrome-remote-devtools/pulls/<PR-number> -X PATCH -f body=@branch-summary.md -f base="<base>"
    ```
 
-4. **Push**: After create/update, if there are unpushed commits, push so the PR has the latest commits.
+5. **Push**: After create/update, if there are unpushed commits, push so the PR has the latest commits.
 
    ```bash
    git push origin $(git branch --show-current)
    ```
 
-5. **If `gh` is not available**: Install [GitHub CLI](https://cli.github.com/) or open the PR in the browser (repo → Compare & pull request for the branch) and paste the contents of `branch-summary.md` as the description.
+6. **If `gh` is not available**: Install [GitHub CLI](https://cli.github.com/) or open the PR in the browser (repo → Compare & pull request for the branch) and paste the contents of `branch-summary.md` as the description.
 
-6. **Labels**: On create use `--label <name>` (multiple allowed). On update use `gh pr edit <PR-number> --add-label <name>`. Choose labels from `gh label list` that fit the PR (e.g. feat, fix, docs, config).
+7. **Labels**: On create use `--label <name>` (multiple allowed). On update use `gh pr edit <PR-number> --add-label <name>`. Choose labels from `gh label list` that fit the PR (e.g. feat, fix, docs, config).
 
-7. **Restore gh account**: If you switched to ohah in step 2, run `gh auth switch --hostname github.com --user <previous-login>` to restore the original gh account.
+8. **Restore gh account**: If you switched to ohah in step 2, run `gh auth switch --hostname github.com --user <previous-login>` to restore the original gh account.
 
 ## PR title rules
 
