@@ -79,4 +79,12 @@ describe('valueToRemoteObject', () => {
     expect(out.description!.length).toBeLessThanOrEqual(103);
     expect(out.description).toContain('...');
   });
+
+  test('object that throws on JSON.stringify returns fallback description / JSON.stringify 시 예외 시 폴백 설명 반환', () => {
+    const circular: Record<string, unknown> = {};
+    circular.self = circular;
+    const out = valueToRemoteObject(circular) as RemoteObject;
+    expect(out.type).toBe('object');
+    expect(out.description).toBe('Object');
+  });
 });
