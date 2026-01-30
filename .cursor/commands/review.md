@@ -5,9 +5,20 @@ Fetch the PR for the current branch, have the AI review the code and description
 - **Summary review**: Write a review body in English covering: whether the PR purpose and description match the changes, what’s done well, improvement suggestions (bugs, edge cases, performance, tests), and testing notes.
 - **Line-level suggestions**: For concrete code changes, add inline comments on the right file/line with a short explanation and, when applicable, a ` ```suggestion ``` ` block so the author can apply it on GitHub.
 
+## gh account for this repo (ohah only)
+
+This repo (ohah/chrome-remote-devtools) uses the **ohah** GitHub account for posting reviews.
+
+- **Before** submitting the review (`gh api .../reviews` or `gh pr comment`): get current user with `gh api user -q .login`. If the result is not `ohah`, run `gh auth switch --hostname github.com --user ohah` and **remember the previous login** (e.g. `PREV_GH_USER=<that value>`).
+- **After** submitting the review: if you switched to ohah, restore the previous account with `gh auth switch --hostname github.com --user <PREV_GH_USER>` so the global gh account is unchanged.
+
 ## Order of operations
 
-1. **Find the PR for the current branch**
+1. **Branch and gh account (this repo / ohah only)**
+   - Run from the repo root. The review targets the **current branch**'s PR.
+   - Get current gh user: `gh api user -q .login`. If not `ohah`, run `gh auth switch --hostname github.com --user ohah` and store the previous login so you can restore later.
+
+2. **Find the PR for the current branch**
    - If there is no PR, say "There is no PR for the current branch" and stop.
 
    ```bash
@@ -16,13 +27,13 @@ Fetch the PR for the current branch, have the AI review the code and description
 
    - If that fails (no PR): `gh pr list --head $(git branch --show-current)` to confirm.
 
-2. **Gather PR details and diff**
+3. **Gather PR details and diff**
    - PR meta and body: `gh pr view`
    - Changed files: `gh pr diff --name-only`
    - Full diff: `gh pr diff`
    - Use this to build context for the review.
 
-3. **Write the AI review (summary + line suggestions)**
+4. **Write the AI review (summary + line suggestions)**
    - **Summary body** (in English):
      - **Purpose and description**: Do the PR purpose and description match the changes?
      - **What’s done well**: Structure, naming, conventions, consistency.
@@ -33,10 +44,10 @@ Fetch the PR for the current branch, have the AI review the code and description
      - **side**: `"RIGHT"`
      - **body**: Short explanation; if the change is a concrete code edit, include a ` ```suggestion ``` ` block so GitHub shows "Commit suggestion".
 
-4. **Submit the review (summary + inlines together when there are inlines)**
-   - **4-a. When there is at least one inline suggestion**
+5. **Submit the review (summary + inlines together when there are inlines)**
+   - **5-a. When there is at least one inline suggestion**
      Submit **one** review that includes both the **body** and the **comments** array.
-     - **body**: The summary written in step 3 (what’s done well, improvement summary, testing notes).
+     - **body**: The summary written in step 4 (what’s done well, improvement summary, testing notes).
      - **comments**: One entry per suggestion, e.g.:
        - **path**: Repo-root-relative path
        - **line**: Line number on the **new (right)** side. Verify against the actual file.
@@ -65,20 +76,22 @@ Fetch the PR for the current branch, have the AI review the code and description
        ```
      - You can delete `review-payload.json` after submitting.
 
-   - **4-b. When there are no inline suggestions**
+   - **5-b. When there are no inline suggestions**
      Post only the summary as a single comment:
 
      ```bash
      gh pr comment $(gh pr view --json number -q .number) --body-file review-comment.md
      ```
 
-     (Write the summary from step 3 into `review-comment.md` first. You can delete it after posting.)
+     (Write the summary from step 4 into `review-comment.md` first. You can delete it after posting.)
 
-   - **Rule**: If there are line-level suggestions, use 4-a (one review with body + comments). If not, use 4-b (comment only).
+   - **Rule**: If there are line-level suggestions, use 5-a (one review with body + comments). If not, use 5-b (comment only).
+
+6. **Restore gh account (this repo / ohah only)**: If you switched to ohah in step 1, run `gh auth switch --hostname github.com --user <PREV_GH_USER>` to restore the original gh account.
 
 ## Notes
 
-- Run from the repo root with `gh` authenticated.
+- Run from the repo root with `gh` authenticated. This repo (ohah/chrome-remote-devtools): use ohah for posting reviews; switch gh before submit and restore after (see "gh account for this repo" and step 1, step 6).
 - If the current branch has no PR, do not post a review; only output the message above.
 - **Inline comments**: `line` must be the line number on the **new (right)** side of the diff; `side` is `"RIGHT"`. Wrong line numbers can cause 422; confirm against the actual file.
 - **Suggestion blocks**: In the comment body, put the suggested code between ` ```suggestion ` and ` ``` ` so GitHub shows "Commit suggestion".

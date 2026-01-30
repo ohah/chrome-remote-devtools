@@ -1,17 +1,25 @@
 # Apply GitHub Copilot review feedback
 
-Review Copilot feedback on a branch/PR and apply the suggested changes. The user will provide the branch or PR link.
+Review Copilot feedback on a branch/PR and apply the suggested changes.
 
 ## Input
 
-- **Branch/PR link**: User provides the link (e.g. `https://github.com/owner/repo/pull/123` or branch URL). Use it to locate the PR and the Copilot review.
+- **Branch/PR link** (optional): User may provide the link (e.g. `https://github.com/owner/repo/pull/123`). If not provided, use GitHub CLI to find the PR for the **current branch**:
+  ```bash
+  gh pr view --json number,url  # from repo root; fails if no PR for current branch
+  # or
+  gh pr list --head $(git branch --show-current) --state open --json number,url
+  ```
+  - If exactly one PR exists for the current branch, use that PR. If none or multiple, ask the user for the PR link (or pasted review text).
+- **Review text**: User may paste Copilot review text directly; use that as the source of feedback.
 
 ## Steps
 
 1. **Get the review**:
-   - If the user pasted the PR link: open or fetch the PR and find the GitHub Copilot review (summary and/or file comments).
+   - If the user pasted a PR link: open or fetch that PR and find the GitHub Copilot review (summary and/or file comments).
+   - If the user did **not** provide a link: run `gh pr view` from the repo root (or `gh pr list --head $(git branch --show-current) --state open`). If one PR is found for the current branch, use that PR; otherwise say "No PR for the current branch" or "Multiple PRs found" and ask for the PR link.
    - If the user pasted the review text directly: use that as the source of feedback.
-   - If you have GitHub CLI: `gh pr view <number> --repo <owner/repo>` and check the PR conversation for Copilot review, or use the web URL the user gave.
+   - With the PR: use `gh pr view <number>` or the web URL to check the PR conversation for Copilot review.
 
 2. **Read the feedback**:
    - Summarize what Copilot suggested (e.g. style, security, logic, tests).
@@ -24,7 +32,7 @@ Review Copilot feedback on a branch/PR and apply the suggested changes. The user
 
 4. **Reply to the user**:
    - List what was changed and what was skipped (and why, if relevant).
-   - If the user did not provide a link yet, ask for the branch or PR link so the review can be fetched.
+   - Ask for the PR link (or pasted review text) only when no PR was found for the current branch via `gh pr view` / `gh pr list`, or when the user needs to specify a different PR.
 
 5. **Update PR content** (after applying Copilot review):
    - Add to `branch-summary.md` (or the PR description source) a short section describing what Copilot suggested and what was applied (e.g. "Copilot review: applied AGENTS.MD casing, frontmatter name/model, Redux export alignment").
@@ -37,7 +45,7 @@ Review Copilot feedback on a branch/PR and apply the suggested changes. The user
 
 ## Notes
 
-- Always wait for or ask for the branch/PR link (or the review text) before applying feedback.
+- **PR source**: If the user did not provide a link, first run `gh pr view` (or `gh pr list --head $(git branch --show-current)`) to see if the current branch has a PR; use it when exactly one is found. Ask for the PR link or pasted review text only when no PR is found or the user must specify a different PR.
 - Do not commit automatically; let the user review the diff and run `/commit` if they want to commit.
 - After applying Copilot review, always update the PR content (branch-summary.md) and optionally refresh the PR body with `gh pr edit --body-file branch-summary.md`.
 - After applying feedback, resolve the addressed review threads on GitHub (web "Resolve conversation" or `gh api graphql` with `resolveReviewThread` and the thread ID).
