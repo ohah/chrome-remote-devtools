@@ -17,6 +17,12 @@ export async function sendCDPMessage(
 ): Promise<void> {
   const sender = getCDPSender();
   if (sender == null) return;
-  const messageStr = JSON.stringify(message);
+  let messageStr: string;
+  try {
+    messageStr = JSON.stringify(message);
+  } catch (e) {
+    console.error('[CDPMessage] Failed to stringify message (e.g. circular ref, BigInt):', e);
+    throw e;
+  }
   sender(serverHost, serverPort, messageStr);
 }
