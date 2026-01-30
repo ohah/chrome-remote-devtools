@@ -79,74 +79,78 @@ function sendLoadingFinished(requestId: string, encodedDataLength: number): void
 
 /**
  * Hook XMLHttpRequest / XMLHttpRequest 훅
+ * Uses a subclass so instanceof XMLHttpRequest is preserved / instanceof XMLHttpRequest 보존
  */
 function hookXHR(): void {
   const globalObj =
-    typeof global !== 'undefined' ? global : typeof window !== 'undefined' ? window : {};
+    typeof globalThis !== 'undefined' ? globalThis : typeof global !== 'undefined' ? global : {};
   const XHR = (globalObj as any).XMLHttpRequest;
   if (!XHR || (XHR as any).__ChromeRemoteDevToolsHooked) return;
   originalXHR = XHR;
-  const OriginalXHR = XHR;
-  (globalObj as any).XMLHttpRequest = function (this: XMLHttpRequest) {
-    const xhr = new OriginalXHR();
-    let requestId: string | null = null;
-    let method = 'GET';
-    let url = '';
-    const headers: Record<string, string> = {};
-    const originalOpen = xhr.open.bind(xhr);
-    xhr.open = function (m: string, u: string, ...rest: unknown[]) {
-      method = m;
-      url = u;
-      return originalOpen(m, u, ...rest);
-    };
-    const originalSetRequestHeader = xhr.setRequestHeader.bind(xhr);
-    xhr.setRequestHeader = function (name: string, value: string) {
-      headers[name] = value;
-      return originalSetRequestHeader(name, value);
-    };
-    const originalSend = xhr.send.bind(xhr);
-    xhr.send = function (body?: Document | XMLHttpRequestBodyInit | null) {
-      requestId = nextRequestId('xhr');
-      const post =
-        body === undefined || body === null
-          ? undefined
-          : typeof body === 'string'
-            ? body
-            : body instanceof ArrayBuffer || ArrayBuffer.isView(body)
-              ? '[binary]'
-              : String(body);
-      try {
-        sendRequestWillBeSent(requestId, url, method, headers, post, 'XHR');
-      } catch (_e) {
-        // Ignore CDP send errors / CDP 전송 오류 무시
-      }
-      const onDone = () => {
-        if (requestId) {
-          try {
-            const length =
-              typeof xhr.responseText === 'string' ? new Blob([xhr.responseText]).size : 0;
-            sendLoadingFinished(requestId, length);
-          } catch (_e) {
-            sendLoadingFinished(requestId, 0);
-          }
-          requestId = null;
-        }
+  const OriginalXHR = XHR as typeof XMLHttpRequest;
+  class HookedXHR extends OriginalXHR {
+    constructor() {
+      super();
+      let requestId: string | null = null;
+      let method = 'GET';
+      let url = '';
+      const headers: Record<string, string> = {};
+      const xhr = this;
+      const originalOpen = xhr.open.bind(xhr);
+      xhr.open = function (m: string, u: string, ...rest: unknown[]) {
+        method = m;
+        url = u;
+        return originalOpen(m, u, ...(rest as [boolean?, string?, string?]));
       };
-      if (xhr.addEventListener) {
-        xhr.addEventListener('load', onDone);
-        xhr.addEventListener('error', onDone);
-        xhr.addEventListener('abort', onDone);
-      } else {
-        const prevOnReadyStateChange = xhr.onreadystatechange;
-        xhr.onreadystatechange = function (ev) {
-          if (xhr.readyState === 4) onDone();
-          if (prevOnReadyStateChange) prevOnReadyStateChange.call(this, ev);
+      const originalSetRequestHeader = xhr.setRequestHeader.bind(xhr);
+      xhr.setRequestHeader = function (name: string, value: string) {
+        headers[name] = value;
+        return originalSetRequestHeader(name, value);
+      };
+      const originalSend = xhr.send.bind(xhr);
+      xhr.send = function (body?: Document | ArrayBuffer | Blob | string | FormData | null) {
+        requestId = nextRequestId('xhr');
+        const post =
+          body === undefined || body === null
+            ? undefined
+            : typeof body === 'string'
+              ? body
+              : body instanceof ArrayBuffer || ArrayBuffer.isView(body)
+                ? '[binary]'
+                : String(body);
+        try {
+          sendRequestWillBeSent(requestId, url, method, headers, post, 'XHR');
+        } catch (_e) {
+          // Ignore CDP send errors / CDP 전송 오류 무시
+        }
+        const onDone = () => {
+          if (requestId) {
+            try {
+              const length =
+                typeof xhr.responseText === 'string' ? new Blob([xhr.responseText]).size : 0;
+              sendLoadingFinished(requestId, length);
+            } catch (_e) {
+              sendLoadingFinished(requestId, 0);
+            }
+            requestId = null;
+          }
         };
-      }
-      return originalSend(body);
-    };
-    return xhr;
-  };
+        if (xhr.addEventListener) {
+          xhr.addEventListener('load', onDone);
+          xhr.addEventListener('error', onDone);
+          xhr.addEventListener('abort', onDone);
+        } else {
+          const prevOnReadyStateChange = xhr.onreadystatechange;
+          xhr.onreadystatechange = function (ev) {
+            if (xhr.readyState === 4) onDone();
+            if (prevOnReadyStateChange) prevOnReadyStateChange.call(this, ev);
+          };
+        }
+        return originalSend(body);
+      };
+    }
+  }
+  (globalObj as any).XMLHttpRequest = HookedXHR;
   (globalObj as any).XMLHttpRequest.__ChromeRemoteDevToolsHooked = true;
 }
 
@@ -155,7 +159,7 @@ function hookXHR(): void {
  */
 function hookFetch(): void {
   const globalObj =
-    typeof global !== 'undefined' ? global : typeof window !== 'undefined' ? window : {};
+    typeof globalThis !== 'undefined' ? globalThis : typeof global !== 'undefined' ? global : {};
   const origFetch = (globalObj as any).fetch;
   if (!origFetch || (origFetch as any).__ChromeRemoteDevToolsHooked) return;
   originalFetch = origFetch;
@@ -191,14 +195,10 @@ function hookFetch(): void {
     return origFetch.call(this, input, init).then(
       (response: Response) => {
         try {
-          response
-            .clone()
-            .text()
-            .then((text) => {
-              const encodedDataLength = new Blob([text]).size;
-              sendLoadingFinished(requestId, encodedDataLength);
-            })
-            .catch(() => sendLoadingFinished(requestId, 0));
+          // Use Content-Length header when available; avoid consuming body (clone/text breaks binary / large responses)
+          const contentLength = response.headers.get('content-length');
+          const encodedDataLength = contentLength !== null ? parseInt(contentLength, 10) || 0 : 0;
+          sendLoadingFinished(requestId, encodedDataLength);
         } catch {
           sendLoadingFinished(requestId, 0);
         }
@@ -219,7 +219,7 @@ function hookFetch(): void {
 function uninstallHooks(): boolean {
   if (!isHooked) return true;
   const globalObj =
-    typeof global !== 'undefined' ? global : typeof window !== 'undefined' ? window : {};
+    typeof globalThis !== 'undefined' ? globalThis : typeof global !== 'undefined' ? global : {};
   if (originalXHR) {
     (globalObj as any).XMLHttpRequest = originalXHR;
     originalXHR = null;
