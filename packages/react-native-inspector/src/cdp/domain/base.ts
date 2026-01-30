@@ -3,6 +3,9 @@
 
 import { getServerInfo } from '../../server-info';
 
+/** Original console.error at module load; used in sendCDPEvent catch to avoid re-entering console hook / 모듈 로드 시점의 console.error; sendCDPEvent catch에서 콘솔 훅 재진입 방지 */
+const originalConsoleError = console.error.bind(console);
+
 /** CDP event payload (method + params), same shape as web BaseDomain.send(data) / CDP 이벤트 페이로드 (웹 BaseDomain.send(data)와 동일) */
 export interface CDPEventMessage {
   method: string;
@@ -41,6 +44,9 @@ export function sendCDPEvent(data: CDPEventMessage): void {
     const messageStr = JSON.stringify(data);
     cdpEventSender(serverInfo.host, serverInfo.port, messageStr);
   } catch (e) {
-    console.error('[CDPMessage] Failed to stringify CDP event (e.g. circular ref, BigInt):', e);
+    originalConsoleError(
+      '[CDPMessage] Failed to stringify CDP event (e.g. circular ref, BigInt):',
+      e
+    );
   }
 }
