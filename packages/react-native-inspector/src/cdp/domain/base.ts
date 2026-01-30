@@ -22,10 +22,11 @@ export function setCDPEventSender(sender: CDPEventSender | null): void {
 }
 
 /**
- * Mark connection ready for CDP events / CDP 이벤트용 연결 준비 완료 표시
+ * Mark connection ready for CDP events (or reset when false, e.g. in tests) / CDP 이벤트용 연결 준비 표시 (false 시 초기화, 테스트 등)
+ * @param ready true to mark ready, false to reset / true면 준비 완료, false면 초기화
  */
-export function setCDPConnectionReady(): void {
-  isCDPConnectionReady = true;
+export function setCDPConnectionReady(ready: boolean = true): void {
+  isCDPConnectionReady = ready;
 }
 
 /**
