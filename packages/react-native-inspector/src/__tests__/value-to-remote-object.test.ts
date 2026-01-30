@@ -3,7 +3,7 @@
  * Covers conversion of JS values to CDP RemoteObject for Runtime.consoleAPICalled / Runtime.consoleAPICalled용 RemoteObject 변환
  */
 import { describe, test, expect } from 'bun:test';
-import { valueToRemoteObject, type RemoteObject } from '../console/value-to-remote-object';
+import { valueToRemoteObject, type RemoteObject } from '../cdp/common/value-to-remote-object';
 
 describe('valueToRemoteObject', () => {
   test('converts null to object subtype null / null을 object subtype null로 변환', () => {

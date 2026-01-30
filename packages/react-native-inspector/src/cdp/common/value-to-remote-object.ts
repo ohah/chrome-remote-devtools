@@ -1,5 +1,5 @@
 // Convert JS value to CDP RemoteObject / JS 값을 CDP RemoteObject로 변환
-// Used for Runtime.consoleAPICalled args / Runtime.consoleAPICalled args에 사용
+// Used for Runtime.consoleAPICalled args (aligned with web client common/remoteObject) / Runtime.consoleAPICalled args에 사용 (웹 클라이언트 common/remoteObject와 동일)
 
 /**
  * CDP RemoteObject shape for console args / 콘솔 args용 CDP RemoteObject 형태

@@ -1,7 +1,15 @@
 // CDP message utilities / CDP 메시지 유틸리티
-// Send CDP messages via JavaScript WebSocket / JavaScript WebSocket으로 CDP 메시지 전송
+// Re-exports event send path from cdp/domain/base; raw send via WebSocket here / cdp/domain/base에서 이벤트 전송 경로 re-export, WebSocket 원시 전송은 여기
 
 import { getCDPSender } from './websocket-client';
+
+export {
+  sendCDPEvent,
+  setCDPEventSender,
+  setCDPConnectionReady,
+  type CDPEventMessage,
+  type CDPEventSender,
+} from './cdp/domain/base';
 
 /**
  * Send CDP message to Inspector WebSocket / Inspector WebSocket으로 CDP 메시지 전송
