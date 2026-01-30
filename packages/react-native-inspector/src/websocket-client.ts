@@ -4,6 +4,8 @@ import { handleCDPMessage } from './cdp-message-handler';
 
 let ws: WebSocket | null = null;
 let sendFn: ((message: string) => void) | null = null;
+let retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
+let disconnectRequested = false;
 
 /**
  * Build WebSocket URL for inspector device / inspector device용 WebSocket URL 생성
@@ -26,6 +28,7 @@ function buildInspectorDeviceUrl(serverHost: string, serverPort: number): string
  * @returns Promise that resolves when connected / 연결되면 resolve되는 Promise
  */
 export function connectWebSocket(serverHost: string, serverPort: number): Promise<void> {
+  disconnectRequested = false;
   return new Promise((resolve, reject) => {
     const maxRetries = 3;
     const retryDelay = 1000;
@@ -33,6 +36,7 @@ export function connectWebSocket(serverHost: string, serverPort: number): Promis
     let resolved = false;
 
     const tryConnect = () => {
+      if (disconnectRequested) return;
       attempt++;
       const url = buildInspectorDeviceUrl(serverHost, serverPort);
 
@@ -78,7 +82,7 @@ export function connectWebSocket(serverHost: string, serverPort: number): Promis
             } else {
               ws = null;
               sendFn = null;
-              setTimeout(tryConnect, retryDelay);
+              retryTimeoutId = setTimeout(tryConnect, retryDelay);
               return;
             }
           }
@@ -90,7 +94,7 @@ export function connectWebSocket(serverHost: string, serverPort: number): Promis
           resolved = true;
           reject(err);
         } else {
-          setTimeout(tryConnect, retryDelay);
+          retryTimeoutId = setTimeout(tryConnect, retryDelay);
         }
       }
     };
@@ -123,8 +127,14 @@ export function isWebSocketConnected(): boolean {
 
 /**
  * Disconnect WebSocket / WebSocket 연결 해제
+ * Cancels any pending retry so reconnect does not run after disconnect / 대기 중인 재시도를 취소하여 disconnect 후 재연결이 일어나지 않도록 함
  */
 export function disconnectWebSocket(): void {
+  disconnectRequested = true;
+  if (retryTimeoutId != null) {
+    clearTimeout(retryTimeoutId);
+    retryTimeoutId = null;
+  }
   if (ws != null) {
     ws.close();
     ws = null;
