@@ -16,6 +16,7 @@ describe('cdp/domain/base', () => {
 
   afterEach(() => {
     setCDPEventSender(null);
+    setCDPConnectionReady(false);
     (globalThis as any).__ChromeRemoteDevToolsServerHost = undefined;
     (globalThis as any).__ChromeRemoteDevToolsServerPort = undefined;
   });
