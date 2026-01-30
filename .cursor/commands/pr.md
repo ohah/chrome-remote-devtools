@@ -5,15 +5,16 @@ Create or update a PR for the current branch. Follow the steps below.
 ## What the agent should do
 
 1. **Check current branch and PR status**: `git branch --show-current`, `gh pr list --head <current-branch> --state all`
-2. **Determine base**: If the user specifies a base branch (e.g. "base is main", "base feat/xyz"), use that as the merge target.
+2. **If an open PR already exists for the current branch**: Do not create a new branch or a new PR. Add new commits to the current branch and push; the existing PR will automatically include them. Optionally update the PR body (and labels) via PATCH.
+3. **Determine base**: If the user specifies a base branch (e.g. "base is main", "base feat/xyz"), use that as the merge target.
    - **If current branch equals base** → Create a new branch from the current one and open a PR with that new branch as head (see "When base and current branch are the same").
    - Otherwise use the specified base.
-3. **Prepare body**: If `branch-summary.md` exists and fills the required sections (Purpose, Description, How to test, etc., or Title + Work content), use it as the PR body. If sections are missing, fill them before use.
-4. **Create or update PR**:
+4. **Prepare body**: If `branch-summary.md` exists and fills the required sections (Purpose, Description, How to test, etc., or Title + Work content), use it as the PR body. If sections are missing, fill them before use.
+5. **Create or update PR**:
    - No open PR → `gh pr create --head <current-branch> --base <base> --title "<title>" --body-file branch-summary.md`
    - Open PR exists → Update body (and base via PATCH if base was specified and PR is open).
-5. **Push**: If there are unpushed commits, run `git push origin <current-branch>`.
-6. **Labels**: After creating or updating the PR, check `gh label list` and add labels that match the PR (e.g. feat, fix, docs).
+6. **Push**: If there are unpushed commits, run `git push origin <current-branch>`.
+7. **Labels**: After creating or updating the PR, check `gh label list` and add labels that match the PR (e.g. feat, fix, docs).
 
 ## Base branch (apply when user specifies it)
 
@@ -97,6 +98,7 @@ If the repo has `.github/PULL_REQUEST_TEMPLATE.md`, align `branch-summary.md` wi
 
 ## Notes
 
+- **Existing PR**: If the current branch already has an open PR, do not create a new branch or new PR. Push new commits to the same branch so they are added to that PR; update body/labels if needed.
 - **Language**: Use **English** for PR title and body (per project rules).
 - **Base**: If the user specifies a base branch, always use it for create/update (and create a new head branch when base and current branch are the same).
 - **Body**: Keep `branch-summary.md` up to date and use it only for the PR description; do not commit it unless the project says otherwise.
