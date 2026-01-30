@@ -1,0 +1,45 @@
+// CDP event send path (aligned with web BaseDomain.send) / CDP 이벤트 전송 경로 (웹 BaseDomain.send와 동일)
+// Same role as web client BaseDomain.send / 웹 클라이언트 BaseDomain.send와 동일한 역할
+
+import { getServerInfo } from '../../server-info';
+
+/** CDP event payload (method + params), same shape as web BaseDomain.send(data) / CDP 이벤트 페이로드 (웹 BaseDomain.send(data)와 동일) */
+export interface CDPEventMessage {
+  method: string;
+  params?: unknown;
+}
+
+export type CDPEventSender = (host: string, port: number, message: string) => void;
+
+let cdpEventSender: CDPEventSender | null = null;
+let isCDPConnectionReady = false;
+
+/**
+ * Set CDP event sender (used by runtime/network hooks) / CDP 이벤트 전송자 설정 (runtime·network 훅에서 사용)
+ */
+export function setCDPEventSender(sender: CDPEventSender | null): void {
+  cdpEventSender = sender;
+}
+
+/**
+ * Mark connection ready for CDP events / CDP 이벤트용 연결 준비 완료 표시
+ */
+export function setCDPConnectionReady(): void {
+  isCDPConnectionReady = true;
+}
+
+/**
+ * Send CDP event (method + params) to server / CDP 이벤트를 서버로 전송
+ * Same code shape as web client BaseDomain.send / 웹 클라이언트 BaseDomain.send와 동일한 형태
+ */
+export function sendCDPEvent(data: CDPEventMessage): void {
+  if (!cdpEventSender || !isCDPConnectionReady) return;
+  const serverInfo = getServerInfo();
+  if (!serverInfo) return;
+  try {
+    const messageStr = JSON.stringify(data);
+    cdpEventSender(serverInfo.host, serverInfo.port, messageStr);
+  } catch (e) {
+    console.error('[CDPMessage] Failed to stringify CDP event (e.g. circular ref, BigInt):', e);
+  }
+}

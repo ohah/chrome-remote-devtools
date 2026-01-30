@@ -1,7 +1,7 @@
 // Chrome Remote DevTools React Native Inspector Plugin (JavaScript layer only)
 // Chrome Remote DevTools React Native Inspector 플러그인 (JavaScript 레이어만)
 
-import { sendCDPMessage } from './cdp-message';
+import { sendCDPMessage, setCDPEventSender, setCDPConnectionReady } from './cdp-message';
 import { setServerInfo } from './server-info';
 import {
   setCDPMessageSender as setReduxCDPMessageSender,
@@ -10,15 +10,11 @@ import {
 import { setMMKVCDPSender, setMMKVConnectionReady } from './mmkv';
 import { setAsyncStorageCDPSender, setAsyncStorageConnectionReady } from './async-storage';
 import {
-  setConsoleCDPSender,
-  setConsoleConnectionReady,
   enableConsoleHook as enableConsoleHookImpl,
   disableConsoleHook as disableConsoleHookImpl,
   isConsoleHookEnabled as isConsoleHookEnabledImpl,
 } from './console';
 import {
-  setNetworkCDPSender,
-  setNetworkConnectionReady,
   enableNetworkHook as enableNetworkHookImpl,
   disableNetworkHook as disableNetworkHookImpl,
   isNetworkHookEnabled as isNetworkHookEnabledImpl,
@@ -71,13 +67,11 @@ export async function connect(serverHostParam: string, serverPortParam: number):
   setReduxCDPMessageSender(sender);
   setMMKVCDPSender(sender);
   setAsyncStorageCDPSender(sender);
-  setConsoleCDPSender(sender);
-  setNetworkCDPSender(sender);
+  setCDPEventSender(sender);
+  setCDPConnectionReady();
   setReduxServerConnection(serverHostParam, serverPortParam);
   setMMKVConnectionReady();
   setAsyncStorageConnectionReady();
-  setConsoleConnectionReady();
-  setNetworkConnectionReady();
 }
 
 /**

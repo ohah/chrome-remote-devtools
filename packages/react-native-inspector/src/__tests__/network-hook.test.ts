@@ -3,13 +3,8 @@
  * Covers CDP sender, connection ready, enable/disable, XHR/fetch and Network.requestWillBeSent·loadingFinished / CDP 전송·연결·활성화/비활성화·XHR/fetch 훅
  */
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
-import {
-  setNetworkCDPSender,
-  setNetworkConnectionReady,
-  enableNetworkHook,
-  disableNetworkHook,
-  isNetworkHookEnabled,
-} from '../network/network-hook';
+import { setCDPEventSender, setCDPConnectionReady } from '../cdp-message';
+import { enableNetworkHook, disableNetworkHook, isNetworkHookEnabled } from '../cdp/domain/network';
 
 describe('network-hook', () => {
   let mockSender: ReturnType<typeof mock>;
@@ -22,7 +17,7 @@ describe('network-hook', () => {
 
   afterEach(() => {
     disableNetworkHook();
-    setNetworkCDPSender(null as any);
+    setCDPEventSender(null);
     (globalThis as any).__ChromeRemoteDevToolsServerHost = undefined;
     (globalThis as any).__ChromeRemoteDevToolsServerPort = undefined;
   });
@@ -32,16 +27,16 @@ describe('network-hook', () => {
   });
 
   test('enableNetworkHook installs hooks and isNetworkHookEnabled is true / 활성화 시 훅 설치 및 true', () => {
-    setNetworkCDPSender(mockSender);
-    setNetworkConnectionReady();
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
     const ok = enableNetworkHook();
     expect(ok).toBe(true);
     expect(isNetworkHookEnabled()).toBe(true);
   });
 
   test('disableNetworkHook restores originals and isNetworkHookEnabled is false / 비활성화 시 원본 복원 및 false', () => {
-    setNetworkCDPSender(mockSender);
-    setNetworkConnectionReady();
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
     enableNetworkHook();
     const ok = disableNetworkHook();
     expect(ok).toBe(true);
@@ -50,8 +45,8 @@ describe('network-hook', () => {
 
   test('when sender is null, no CDP is sent / sender가 null이면 CDP 미전송', async () => {
     disableNetworkHook();
-    setNetworkCDPSender(null as any);
-    setNetworkConnectionReady();
+    setCDPEventSender(null);
+    setCDPConnectionReady();
     enableNetworkHook();
     mockSender.mockClear();
     const origFetch = (globalThis as any).fetch;
@@ -67,8 +62,8 @@ describe('network-hook', () => {
     disableNetworkHook();
     (globalThis as any).__ChromeRemoteDevToolsServerHost = undefined;
     (globalThis as any).__ChromeRemoteDevToolsServerPort = undefined;
-    setNetworkCDPSender(mockSender);
-    setNetworkConnectionReady();
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
     enableNetworkHook();
     mockSender.mockClear();
     const origFetch = (globalThis as any).fetch;
@@ -86,8 +81,8 @@ describe('network-hook', () => {
     });
     const origFetch = (globalThis as any).fetch;
     (globalThis as any).fetch = () => Promise.resolve(res);
-    setNetworkCDPSender(mockSender);
-    setNetworkConnectionReady();
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
     enableNetworkHook();
     mockSender.mockClear();
     await fetch('http://example.com/');
@@ -110,8 +105,8 @@ describe('network-hook', () => {
     const res = new Response('body', { headers: {} });
     const origFetch = (globalThis as any).fetch;
     (globalThis as any).fetch = () => Promise.resolve(res);
-    setNetworkCDPSender(mockSender);
-    setNetworkConnectionReady();
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
     enableNetworkHook();
     mockSender.mockClear();
     await fetch('http://example.com/');
