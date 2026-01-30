@@ -9,6 +9,14 @@ description: 서브 에이전트 - PR 리뷰 시점. PR 목적·설명 일치, �
 
 이 룰은 PR을 검토하고 리뷰(요약 + 인라인 제안)를 작성할 때 적용한다.
 
+## 0. 브랜치·권한 (이 레포 ohah 전용)
+
+- **대상 브랜치**: 리뷰는 **현재 브랜치**의 PR에 대해 수행한다. `gh pr view` / `gh pr diff` 는 현재 브랜치 기준이다.
+- **gh 계정**: 이 레포(ohah/chrome-remote-devtools)에서 리뷰를 **제출**할 때는 **ohah** GitHub 계정을 쓴다.
+  - 리뷰 제출 전: `gh api user -q .login` 으로 현재 사용자 확인. ohah 가 아니면 `gh auth switch --hostname github.com --user ohah` 로 전환하고, 이전 로그인을 기억해 둔다.
+  - 리뷰 제출 후: ohah 로 전환했었다면 `gh auth switch --hostname github.com --user <이전_계정>` 으로 복원하여 전역 gh 설정이 바뀌지 않게 한다.
+- 자세한 절차는 `.cursor/commands/review.md` 의 "gh account for this repo", "Order of operations" 1번을 참고한다.
+
 ## 1. 목적·설명 일치
 
 - **Purpose / Work content**: PR 본문의 목적·설명이 실제 변경(코드·파일)과 맞는지 확인한다.
@@ -41,6 +49,7 @@ description: 서브 에이전트 - PR 리뷰 시점. PR 목적·설명 일치, �
 
 ## 체크리스트 (리뷰)
 
+- [ ] (이 레포) 현재 브랜치의 PR인지 확인했는가? 리뷰 제출 전 ohah로 전환·제출 후 복원했는가?
 - [ ] PR 목적·설명과 변경 내용이 일치하는가?
 - [ ] 잘된 점(구조·네이밍·일관성)을 요약했는가?
 - [ ] 개선 제안(버그·엣지케이스·성능·테스트)을 구체적으로 적었는가?

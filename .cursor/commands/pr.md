@@ -78,7 +78,7 @@ This repo (ohah/chrome-remote-devtools) uses the **ohah** GitHub account for pus
 
 7. **Labels**: On create use `--label <name>` (multiple allowed). On update use `gh pr edit <PR-number> --add-label <name>`. Choose labels from `gh label list` that fit the PR (e.g. feat, fix, docs, config).
 
-8. **Restore gh account**: If you switched to ohah in step 2, run `gh auth switch --hostname github.com --user <previous-login>` to restore the original gh account.
+8. **Restore gh account**: If you switched to ohah in step 3, run `gh auth switch --hostname github.com --user <previous-login>` to restore the original gh account.
 
 ## PR title rules
 
