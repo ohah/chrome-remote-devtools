@@ -1,15 +1,39 @@
 // Universal CDP message handler system / 범용 CDP 메시지 핸들러 시스템
 // Allows any domain to register handlers for CDP commands / 모든 도메인이 CDP 명령에 대한 핸들러를 등록할 수 있음
 
+import { sendCDPResponse } from './cdp/domain/base';
+import { sendExecutionContextCreated } from './cdp/domain/runtime';
+import { getObjectProperties } from './cdp/common/get-object-properties';
+import { releaseObject } from './cdp/common/object-store';
+import { getServerInfo } from './server-info';
+
 type CDPMessageHandler = (message: {
   method: string;
   params?: unknown;
   id?: number;
 }) => void | Promise<void>;
 
+/** Minimal frame tree for React Native (no real page); DevTools uses this to fire CachedResourcesLoaded and init Console / React Native용 최소 프레임 트리, DevTools가 CachedResourcesLoaded 발생·Console 초기화에 사용 */
+const PAGE_GET_RESOURCE_TREE_RESULT = {
+  frameTree: {
+    frame: {
+      id: '1',
+      mimeType: 'application/javascript',
+      securityOrigin: 'react-native://',
+      url: 'react-native://',
+    },
+    resources: [] as unknown[],
+  },
+};
+
 // Store registered handlers / 등록된 핸들러 저장
 // Key format: "Domain.method" (e.g., "MMKVStorage.getMMKVItems") / 키 형식: "Domain.method" (예: "MMKVStorage.getMMKVItems")
 const handlers: Map<string, CDPMessageHandler> = new Map();
+
+/**
+ * No-op; kept for API compatibility. executionContextCreated is sent on every Runtime.enable. / API 호환용 no-op. Runtime.enable마다 executionContextCreated 전송함.
+ */
+export function resetExecutionContextSentForReconnect(): void {}
 
 /**
  * Register CDP message handler / CDP 메시지 핸들러 등록
@@ -52,20 +76,54 @@ export function handleCDPMessage(message: {
     return;
   }
 
+  // When DevTools sends Runtime.enable (DevTools connected to this client), send Runtime.executionContextCreated immediately, same as web client / DevTools가 Runtime.enable 보낼 때마다 executionContextCreated 즉시 전송 (웹 클라이언트와 동일)
+  if (message.method === 'Runtime.enable') {
+    sendExecutionContextCreated();
+  }
+
+  // Page.getResourceTree: DevTools sends this once when ResourceTreeModel is created; responding lets CachedResourcesLoaded fire so ConsoleModel inits without 2s fallback / ResourceTreeModel 생성 시 DevTools가 한 번 보냄, 응답 시 CachedResourcesLoaded 발생해 ConsoleModel이 2초 폴백 없이 초기화됨
+  if (message.method === 'Page.getResourceTree' && typeof message.id === 'number') {
+    if (getServerInfo()) {
+      sendCDPResponse(message.id, PAGE_GET_RESOURCE_TREE_RESULT);
+    }
+    return;
+  }
+
+  // Runtime.getProperties: DevTools calls when user expands object in Console (same as web client) / 콘솔에서 객체 펼칠 때 DevTools가 호출 (웹과 동일)
+  if (message.method === 'Runtime.getProperties' && typeof message.id === 'number') {
+    const params = message.params as { objectId?: string } | undefined;
+    const objectId = params?.objectId;
+    if (objectId && getServerInfo()) {
+      const result = getObjectProperties(objectId);
+      sendCDPResponse(message.id, { result });
+    }
+    return;
+  }
+
+  // Runtime.releaseObject: DevTools calls when object is no longer needed (same as web client) / 객체 해제 시 DevTools가 호출 (웹과 동일)
+  if (message.method === 'Runtime.releaseObject' && typeof message.id === 'number') {
+    const params = message.params as { objectId?: string } | undefined;
+    const objectId = params?.objectId;
+    if (objectId) {
+      releaseObject(objectId);
+    }
+    if (getServerInfo()) {
+      sendCDPResponse(message.id, {});
+    }
+    return;
+  }
+
   // Find handler for this method / 이 메서드에 대한 핸들러 찾기
   // Route based on method name / 메서드 이름을 기준으로 라우팅
   const handler = handlers.get(message.method);
   if (!handler) {
-    // No handler registered - this is normal for commands we don't handle / 핸들러가 등록되지 않음 - 처리하지 않는 명령의 경우 정상
-    console.log(
-      `[CDPMessageHandler] No handler registered for ${message.method} / ${message.method}에 대한 핸들러가 등록되지 않음`
-    );
+    // No handler registered - normal for DevTools commands we don't implement (e.g. Inspector.enable, Target.setAutoAttach). Do not log to avoid flooding console. / 핸들러 없음 - 구현하지 않는 DevTools 명령(Inspector.enable, Target.setAutoAttach 등)은 정상. 콘솔 플러딩 방지를 위해 로그하지 않음
     return;
   }
 
   try {
-    // Call handler / 핸들러 호출
-    const result = handler(message);
+    // Call handler / 핸들러 호출 (method already checked above / 위에서 method 검사됨)
+    const result = handler(message as { method: string; params?: unknown; id?: number });
     // Handle async handlers / 비동기 핸들러 처리
     if (result && typeof result.then === 'function') {
       result.catch((error: unknown) => {
@@ -97,9 +155,9 @@ function handleCDPMessageFromNative(messageJson: string): void {
  */
 function updateGlobalHandler(): void {
   const globalObj =
-    typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {};
+    typeof globalThis !== 'undefined' ? globalThis : typeof global !== 'undefined' ? global : {};
   // Native code calls this with JSON string / 네이티브 코드가 JSON 문자열로 호출
-  (globalObj as any).__CDP_MESSAGE_HANDLER__ = handleCDPMessageFromNative;
+  (globalObj as Record<string, unknown>).__CDP_MESSAGE_HANDLER__ = handleCDPMessageFromNative;
 }
 
 // Initialize global handler on module load / 모듈 로드 시 전역 핸들러 초기화

@@ -15,6 +15,7 @@ import {
   ChromeRemoteDevToolsInspectorProvider,
   registerMMKVDevTools,
   registerAsyncStorageDevTools,
+  type AsyncStorageType,
 } from '@ohah/chrome-remote-devtools-inspector-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { store } from './store/redux/store';
@@ -43,13 +44,14 @@ function App() {
   // Register AsyncStorage DevTools / AsyncStorage DevTools 등록
   useEffect(() => {
     try {
-      registerAsyncStorageDevTools(AsyncStorage);
+      registerAsyncStorageDevTools(AsyncStorage as unknown as AsyncStorageType);
     } catch (error) {
       console.error('[App] Error registering AsyncStorage DevTools:', error);
       // Don't block app startup / 앱 시작을 막지 않음
     }
   }, []);
 
+  // Use localhost; on Android emulator run once: adb reverse tcp:8080 tcp:8080 / localhost 사용; Android 에뮬에서는 한 번 실행: adb reverse tcp:8080 tcp:8080
   return (
     <ChromeRemoteDevToolsInspectorProvider serverHost="localhost" serverPort={8080}>
       <SafeAreaProvider>

@@ -1,6 +1,6 @@
 // WebSocket client for Chrome Remote DevTools (JavaScript layer) / Chrome Remote DevTools용 WebSocket 클라이언트 (JavaScript 레이어)
 
-import { handleCDPMessage } from './cdp-message-handler';
+import { handleCDPMessage, resetExecutionContextSentForReconnect } from './cdp-message-handler';
 
 let ws: WebSocket | null = null;
 let sendFn: ((message: string) => void) | null = null;
@@ -10,24 +10,28 @@ let disconnectRequested = false;
 /**
  * Build WebSocket URL for inspector device / inspector device용 WebSocket URL 생성
  * Matches server path: /remote/debug/inspector/device?name=...&app=...&device=...
+ * @param deviceId Stable device ID (from getStableDeviceId) / getStableDeviceId로 얻은 안정적 device ID
  */
-function buildInspectorDeviceUrl(serverHost: string, serverPort: number): string {
+function buildInspectorDeviceUrl(serverHost: string, serverPort: number, deviceId: string): string {
   const deviceName = encodeURIComponent('React Native');
   const appName = encodeURIComponent('react-native');
-  const deviceId = encodeURIComponent(
-    'js-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2)
-  );
+  const deviceIdEnc = encodeURIComponent(deviceId);
   const host = serverPort === 80 || serverPort === 443 ? serverHost : `${serverHost}:${serverPort}`;
-  return `ws://${host}/remote/debug/inspector/device?name=${deviceName}&app=${appName}&device=${deviceId}`;
+  return `ws://${host}/remote/debug/inspector/device?name=${deviceName}&app=${appName}&device=${deviceIdEnc}`;
 }
 
 /**
  * Connect to Chrome Remote DevTools server via WebSocket / WebSocket으로 Chrome Remote DevTools 서버에 연결
  * @param serverHost Server host / 서버 호스트
  * @param serverPort Server port / 서버 포트
+ * @param deviceId Stable device ID (same value across reloads when persisted) / 리로드 후에도 동일하게 유지할 device ID
  * @returns Promise that resolves when connected / 연결되면 resolve되는 Promise
  */
-export function connectWebSocket(serverHost: string, serverPort: number): Promise<void> {
+export function connectWebSocket(
+  serverHost: string,
+  serverPort: number,
+  deviceId: string
+): Promise<void> {
   disconnectRequested = false;
   return new Promise((resolve, reject) => {
     const maxRetries = 3;
@@ -38,7 +42,7 @@ export function connectWebSocket(serverHost: string, serverPort: number): Promis
     const tryConnect = () => {
       if (disconnectRequested) return;
       attempt++;
-      const url = buildInspectorDeviceUrl(serverHost, serverPort);
+      const url = buildInspectorDeviceUrl(serverHost, serverPort, deviceId);
 
       try {
         const socket = new WebSocket(url);
@@ -75,6 +79,7 @@ export function connectWebSocket(serverHost: string, serverPort: number): Promis
         };
 
         socket.onclose = (_event) => {
+          resetExecutionContextSentForReconnect();
           if (!resolved) {
             if (attempt >= maxRetries) {
               resolved = true;
@@ -131,6 +136,7 @@ export function isWebSocketConnected(): boolean {
  */
 export function disconnectWebSocket(): void {
   disconnectRequested = true;
+  resetExecutionContextSentForReconnect();
   if (retryTimeoutId != null) {
     clearTimeout(retryTimeoutId);
     retryTimeoutId = null;

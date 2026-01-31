@@ -47,44 +47,67 @@ describe('valueToRemoteObject', () => {
     expect(out.description).toMatch(/function/);
   });
 
-  test('converts array to object subtype array / array를 object subtype array로 변환', () => {
-    expect(valueToRemoteObject([1, 2])).toEqual({
-      type: 'object',
-      subtype: 'array',
-      description: 'Array',
-      value: undefined,
-    });
+  test('converts array to object subtype array with objectId and preview (like web) / array를 objectId·preview와 함께 변환 (웹과 동일)', () => {
+    const out = valueToRemoteObject([1, 2]) as RemoteObject;
+    expect(out.type).toBe('object');
+    expect(out.subtype).toBe('array');
+    expect(out.objectId).toBeDefined();
+    expect(out.description).toBe('[1,2]');
+    expect(out.preview).toBeDefined();
+    expect(out.preview!.type).toBe('object');
+    expect(out.preview!.subtype).toBe('array');
+    expect(out.preview!.properties).toHaveLength(2);
+    expect(out.preview!.properties[0]).toEqual({ name: '0', type: 'number', value: '1' });
+    expect(out.preview!.properties[1]).toEqual({ name: '1', type: 'number', value: '2' });
   });
 
-  test('converts Error to object subtype error with message / Error를 message와 함께 변환', () => {
+  test('converts Error to object subtype error with objectId and preview / Error를 objectId·preview와 함께 변환', () => {
     const err = new Error('oops');
-    expect(valueToRemoteObject(err)).toEqual({
-      type: 'object',
-      subtype: 'error',
-      description: 'oops',
+    const out = valueToRemoteObject(err) as RemoteObject;
+    expect(out.type).toBe('object');
+    expect(out.subtype).toBe('error');
+    expect(out.objectId).toBeDefined();
+    expect(out.description).toBe('oops');
+    expect(out.preview).toBeDefined();
+    expect(out.preview!.properties).toBeDefined();
+  });
+
+  test('converts plain object to type object with objectId, JSON description and preview (like web) / 일반 객체를 objectId·JSON description·preview로 변환 (웹과 동일)', () => {
+    const obj = { a: 1, status: 'ok' };
+    const out = valueToRemoteObject(obj) as RemoteObject;
+    expect(out.type).toBe('object');
+    expect(out.objectId).toBeDefined();
+    expect(out.description).toBe('{"a":1,"status":"ok"}');
+    expect(out.preview).toBeDefined();
+    expect(out.preview!.properties).toHaveLength(2);
+    expect(out.preview!.properties.find((p) => p.name === 'a')).toEqual({
+      name: 'a',
+      type: 'number',
+      value: '1',
+    });
+    expect(out.preview!.properties.find((p) => p.name === 'status')).toEqual({
+      name: 'status',
+      type: 'string',
+      value: 'ok',
     });
   });
 
-  test('converts plain object to type object with JSON description / 일반 객체를 JSON description으로 변환', () => {
-    const obj = { a: 1 };
+  test('object with many keys sets overflow and limits properties / 많은 키는 overflow 설정·properties 제한', () => {
+    const obj: Record<string, number> = {};
+    for (let i = 0; i < 30; i++) obj[`k${i}`] = i;
     const out = valueToRemoteObject(obj) as RemoteObject;
-    expect(out.type).toBe('object');
-    expect(out.description).toBe('{"a":1}');
+    expect(out.preview).toBeDefined();
+    expect(out.preview!.overflow).toBe(true);
+    expect(out.preview!.properties.length).toBeLessThanOrEqual(20);
   });
 
-  test('truncates long object description to 100 chars / 긴 객체 설명은 100자로 자름', () => {
-    const obj = { x: 'a'.repeat(150) };
-    const out = valueToRemoteObject(obj) as RemoteObject;
-    expect(out.type).toBe('object');
-    expect(out.description!.length).toBeLessThanOrEqual(103);
-    expect(out.description).toContain('...');
-  });
-
-  test('object that throws on JSON.stringify returns fallback description / JSON.stringify 시 예외 시 폴백 설명 반환', () => {
+  test('object that throws on JSON.stringify returns fallback description with objectId / JSON.stringify 예외 시 objectId·폴백 description', () => {
     const circular: Record<string, unknown> = {};
     circular.self = circular;
     const out = valueToRemoteObject(circular) as RemoteObject;
     expect(out.type).toBe('object');
+    expect(out.objectId).toBeDefined();
     expect(out.description).toBe('Object');
+    expect(out.preview).toBeDefined();
   });
 });

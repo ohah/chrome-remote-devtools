@@ -33,9 +33,11 @@ describe('cdp-message-handler', () => {
     expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('no method'));
   });
 
-  test('handleCDPMessage logs and returns when no handler registered / 핸들러 미등록 시 로그 후 반환', () => {
+  test('handleCDPMessage returns without logging when no handler registered / 핸들러 미등록 시 로그 없이 반환 (콘솔 플러딩 방지)', () => {
     handleCDPMessage({ method: 'Domain.unknownMethod', id: 1 });
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('No handler registered'));
+    expect(consoleLogSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('No handler registered')
+    );
   });
 
   test('registerCDPMessageHandler and handleCDPMessage call handler / 등록된 핸들러 호출', () => {
