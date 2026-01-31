@@ -175,8 +175,8 @@ npm run ios
 ## Usage
 
 1. **Connect to Server**:
-   - Enter the server WebSocket URL (default: `ws://localhost:8080` for iOS, `ws://10.0.2.2:8080` for Android emulator)
-   - Click "Connect" to establish connection
+   - On Android emulator/USB device, run once: `adb reverse tcp:8080 tcp:8080`. Then use default `ws://localhost:8080`.
+   - Enter the server WebSocket URL (default: `ws://localhost:8080`) and click "Connect" to establish connection
 
 2. **Start Recording**:
    - Once connected, click "Start Recording" to begin session recording
@@ -191,13 +191,13 @@ npm run ios
 
 ### Server URL
 
-The default server URL is `ws://localhost:8080` for iOS and `ws://10.0.2.2:8080` for Android emulator. You can change this in the app's UI or modify the default in `src/App.tsx`:
+The example uses `localhost:8080` for both iOS and Android. On **Android emulator or USB device**, run once so that `localhost` reaches the host PC (same as Reactotron):
 
-```typescript
-const [serverUrl, setServerUrl] = useState<string>(
-  Platform.OS === 'android' ? 'ws://10.0.2.2:8080' : 'ws://localhost:8080'
-);
+```bash
+adb reverse tcp:8080 tcp:8080
 ```
+
+Then reload the app. You can change the server in the app's UI or in `src/App.tsx` (`ChromeRemoteDevToolsInspectorProvider serverHost/serverPort`).
 
 ### Rrweb Configuration
 
@@ -243,7 +243,7 @@ This example app excludes `@ohah/chrome-remote-devtools-inspector-react-native` 
 
 - **Cannot connect to server**: Ensure the Chrome Remote DevTools server is running (`bun run dev:server`)
 - **WebSocket connection failed**: Check that the server URL is correct and the server is accessible
-- **Network error**: For Android emulator, use `ws://10.0.2.2:8080` instead of `ws://localhost:8080`
+- **Android emulator / USB device**: Run `adb reverse tcp:8080 tcp:8080` once so that `localhost:8080` in the app reaches the host PC (Android 5.x+)
 
 ### Metro bundler: "No host header" or ENOENT watch on `target/`
 

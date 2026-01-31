@@ -63,10 +63,11 @@ const CDP_TYPE_MAP: Record<string, string> = {
 const originalConsole: Record<string, (...args: unknown[]) => void> = {};
 
 /**
- * Send Runtime.consoleAPICalled event (same shape as web client Runtime) / Runtime.consoleAPICalled 이벤트 전송 (웹 Runtime과 동일 형태)
+ * Send Runtime.consoleAPICalled event (same shape as CDP / Reactotron: timestamp in milliseconds) / Runtime.consoleAPICalled 이벤트 전송 (CDP·Reactotron과 동일: timestamp 밀리초)
+ * DevTools Console expects timestamp in milliseconds; seconds can cause messages not to show / DevTools 콘솔은 밀리초 단위 timestamp 기대, 초 단위면 메시지가 안 보일 수 있음
  */
 function sendConsoleAPICalled(type: string, args: RemoteObject[]): void {
-  const timestamp = Date.now() / 1000;
+  const timestamp = Date.now();
   sendCDPEvent({
     method: Event.consoleAPICalled,
     params: {
@@ -103,8 +104,10 @@ function createWrappedMethod(methodName: ConsoleMethodName): (...args: unknown[]
 
 /**
  * Install console hooks / 콘솔 훅 설치
+ * Idempotent: if already hooked, skip so original is not overwritten / 이미 훅이 설치되어 있으면 건너뜀 (원본 덮어쓰기 방지)
  */
 function installHooks(): boolean {
+  if (isHooked) return true;
   if (typeof global === 'undefined') return false;
   const g = global as typeof globalThis & { console?: Console };
   if (!g.console) return false;
@@ -158,4 +161,26 @@ export function disableConsoleHook(): boolean {
  */
 export function isConsoleHookEnabled(): boolean {
   return isHooked;
+}
+
+/**
+ * Send Runtime.executionContextCreated so DevTools registers context before console messages
+ * / DevTools가 콘솔 메시지 전에 실행 컨텍스트를 등록하도록 Runtime.executionContextCreated 전송
+ * Called by client after WebSocket connect (aligned with C++/iOS: 100ms after connect)
+ * / WebSocket 연결 후 클라이언트에서 호출 (C++/iOS와 동일: 연결 후 100ms)
+ */
+export function sendExecutionContextCreated(): void {
+  // Do not log here: it would go through console hook and send Runtime.consoleAPICalled before executionContextCreated, so DevTools might drop it / 여기서 로그하면 훅을 타 executionContextCreated보다 먼저 consoleAPICalled가 전송되어 DevTools가 무시할 수 있음
+  sendCDPEvent({
+    method: Event.executionContextCreated,
+    params: {
+      context: {
+        id: 1,
+        uniqueId: '1',
+        origin: 'react-native://',
+        name: 'React Native',
+        auxData: { isDefault: true },
+      },
+    },
+  });
 }

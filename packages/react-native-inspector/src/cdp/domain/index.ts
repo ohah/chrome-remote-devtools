@@ -2,10 +2,16 @@
 export { Event, type CDPEventMethod } from './protocol';
 export {
   sendCDPEvent,
+  sendCDPResponse,
   setCDPEventSender,
   setCDPConnectionReady,
   type CDPEventMessage,
   type CDPEventSender,
 } from './base';
-export { enableConsoleHook, disableConsoleHook, isConsoleHookEnabled } from './runtime';
+export {
+  enableConsoleHook,
+  disableConsoleHook,
+  isConsoleHookEnabled,
+  sendExecutionContextCreated,
+} from './runtime';
 export { enableNetworkHook, disableNetworkHook, isNetworkHookEnabled } from './network';

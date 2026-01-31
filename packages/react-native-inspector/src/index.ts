@@ -20,15 +20,32 @@ import {
   isNetworkHookEnabled as isNetworkHookEnabledImpl,
 } from './network';
 import { connectWebSocket, getCDPSender } from './websocket-client';
+import { getStableDeviceId } from './device-id';
+import type { AsyncStorageType } from './async-storage/types';
+
+/**
+ * Connect options: optional AsyncStorage for stable device ID across app reloads / 연결 옵션: 앱 리로드 후에도 동일 device ID 유지 시 AsyncStorage 선택
+ */
+export interface ConnectOptions {
+  /** When provided, device ID is stored here so it stays the same after app reload / 제공 시 device ID를 저장하여 앱 리로드 후에도 동일하게 유지 */
+  asyncStorage?: AsyncStorageType;
+}
 
 /**
  * Connect to Chrome Remote DevTools server via WebSocket (JavaScript) / WebSocket(JavaScript)으로 Chrome Remote DevTools 서버에 연결
  * @param serverHostParam Server host (e.g., "localhost" or "192.168.1.100") / 서버 호스트
  * @param serverPortParam Server port (e.g., 8080) / 서버 포트
+ * @param options Optional: asyncStorage for stable device ID across app reloads / (선택) 앱 리로드 후에도 동일 device ID용 asyncStorage
  * @returns Promise that resolves when connection is established / 연결이 설정되면 resolve되는 Promise
  */
-export async function connect(serverHostParam: string, serverPortParam: number): Promise<void> {
+export async function connect(
+  serverHostParam: string,
+  serverPortParam: number,
+  options?: ConnectOptions
+): Promise<void> {
   setServerInfo(serverHostParam, serverPortParam);
+
+  const deviceId = await getStableDeviceId(options?.asyncStorage);
 
   const maxRetries = 3;
   const retryDelay = 1000;
@@ -36,7 +53,7 @@ export async function connect(serverHostParam: string, serverPortParam: number):
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      await connectWebSocket(serverHostParam, serverPortParam);
+      await connectWebSocket(serverHostParam, serverPortParam, deviceId);
       connected = true;
       break;
     } catch (_err) {
@@ -56,7 +73,12 @@ export async function connect(serverHostParam: string, serverPortParam: number):
     }
   }
 
-  if (!connected) return;
+  if (!connected) {
+    throw new Error(
+      `Failed to connect to server after ${maxRetries} attempts. Server should be running on ${serverHostParam}:${serverPortParam}. ` +
+        'On device/emulator use the host PC IP (e.g. 192.168.x.x) instead of localhost.'
+    );
+  }
 
   const cdpSender = getCDPSender();
   const sender =
@@ -72,6 +94,12 @@ export async function connect(serverHostParam: string, serverPortParam: number):
   setReduxServerConnection(serverHostParam, serverPortParam);
   setMMKVConnectionReady();
   setAsyncStorageConnectionReady();
+
+  // Enable console and network hooks so CDP events are sent to the server / 콘솔·네트워크 훅 활성화하여 CDP 이벤트가 서버로 전송되도록 함
+  enableConsoleHookImpl();
+  enableNetworkHookImpl();
+
+  // Runtime.executionContextCreated is sent when DevTools activates (on Runtime.enable), not on connect / Runtime.executionContextCreated는 연결 시가 아니라 DevTools 활성화 시(Runtime.enable 수신 시) 전송됨
 }
 
 /**
@@ -160,6 +188,7 @@ export type { MMKVEntry, MMKVEntryType, MMKVEntryValue } from './mmkv/types';
 
 export { registerAsyncStorageDevTools, unregisterAsyncStorageDevTools } from './async-storage';
 export type {
+  AsyncStorageType,
   AsyncStorageEntry,
   AsyncStorageEntryType,
   AsyncStorageEntryValue,
@@ -179,3 +208,7 @@ export default {
   isConsoleHookEnabled,
   isNetworkHookEnabled,
 };
+
+// Install console and network hooks when package loads so user code (e.g. button handlers) uses wrapped console/network; connect() sets the sender later / 패키지 로드 시 훅 설치하여 버튼 등 사용자 코드가 래핑된 console·network 사용; connect()에서 sender 설정
+enableConsoleHookImpl();
+enableNetworkHookImpl();

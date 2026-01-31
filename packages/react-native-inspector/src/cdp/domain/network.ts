@@ -2,13 +2,26 @@
 
 import { Event } from './protocol';
 import { sendCDPEvent } from './base';
+import { registerCDPMessageHandler } from '../../cdp-message-handler';
+import { getServerInfo } from '../../server-info';
+import { getCDPSender } from '../../websocket-client';
 
 let isHooked = false;
 let requestIdCounter = 0;
 
+/** Store response body for Network.getResponseBody / Network.getResponseBody용 응답 본문 저장 */
+const responseData = new Map<string, string>();
+
 /** Original global XMLHttpRequest and fetch for restore / 복원용 원본 전역 XMLHttpRequest·fetch */
 let originalXHR: typeof XMLHttpRequest | null = null;
 let originalFetch: typeof fetch | null = null;
+
+/**
+ * Get stored response body for requestId (for Network.getResponseBody) / requestId에 대한 저장된 응답 본문 가져오기
+ */
+export function getStoredResponseBody(requestId: string): string {
+  return responseData.get(requestId) ?? '';
+}
 
 function nextRequestId(prefix: string): string {
   requestIdCounter += 1;
@@ -66,6 +79,102 @@ function sendLoadingFinished(requestId: string, encodedDataLength: number): void
 }
 
 /**
+ * Send Network.loadingFailed event (same params as C++ NetworkEventSender) / Network.loadingFailed 이벤트 전송 (C++와 동일 파라미터)
+ * DevTools requires type to match request and finish the request / DevTools가 요청 매칭 및 종료에 type 사용
+ */
+function sendLoadingFailed(
+  requestId: string,
+  errorText: string,
+  canceled: boolean,
+  type: string
+): void {
+  sendCDPEvent({
+    method: Event.loadingFailed,
+    params: {
+      requestId,
+      timestamp: getTimestamp(),
+      type,
+      errorText: errorText || 'Network error',
+      canceled,
+    },
+  });
+}
+
+/** Recent fetch (url, method, time) to dedupe XHR when fetch uses XHR under the hood / fetch가 내부적으로 XHR 사용 시 중복 기록 방지 */
+const recentFetches: Array<{ url: string; method: string; time: number }> = [];
+const RECENT_FETCH_MS = 200;
+
+function markFetchStarted(url: string, method: string): void {
+  const now = Date.now();
+  while (recentFetches.length > 0 && recentFetches[0]!.time < now - RECENT_FETCH_MS) {
+    recentFetches.shift();
+  }
+  recentFetches.push({ url, method, time: now });
+}
+
+function isLikelyFetchPolyfill(url: string, method: string): boolean {
+  const now = Date.now();
+  return recentFetches.some(
+    (f) => f.url === url && f.method === method && now - f.time < RECENT_FETCH_MS
+  );
+}
+
+/** CDP-style header key: capitalize first letter and letter after hyphen / CDP 스타일 헤더 키 */
+function headerKeyCase(key: string): string {
+  return key.replace(/^\S|-./g, (s) => s.toUpperCase());
+}
+
+/**
+ * Parse response header string into Record (same shape as web client) / 응답 헤더 문자열을 Record로 파싱
+ */
+function formatResponseHeader(header: string): Record<string, string> {
+  const headers: Record<string, string> = {};
+  const lines = header.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const idx = trimmed.indexOf(':');
+    if (idx < 0) continue;
+    const key = trimmed.slice(0, idx).trim();
+    const val = trimmed.slice(idx + 1).trim();
+    if (key) {
+      headers[headerKeyCase(key)] = val;
+    }
+  }
+  return headers;
+}
+
+/**
+ * Send Network.responseReceived event (response headers, status, mimeType) / Network.responseReceived 이벤트 전송 (응답 헤더·상태·mimeType)
+ */
+function sendResponseReceived(
+  requestId: string,
+  type: string,
+  url: string,
+  status: number,
+  statusText: string,
+  headers: Record<string, string>,
+  mimeType: string
+): void {
+  sendCDPEvent({
+    method: Event.responseReceived,
+    params: {
+      requestId,
+      loaderId: requestId,
+      timestamp: getTimestamp(),
+      type,
+      response: {
+        url,
+        status,
+        statusText,
+        headers,
+        mimeType,
+      },
+    },
+  });
+}
+
+/**
  * Hook XMLHttpRequest / XMLHttpRequest 훅
  * Uses a subclass so instanceof XMLHttpRequest is preserved / instanceof XMLHttpRequest 보존
  */
@@ -97,7 +206,9 @@ function hookXHR(): void {
       };
       const originalSend = xhr.send.bind(xhr);
       xhr.send = function (body?: Document | ArrayBuffer | Blob | string | FormData | null) {
-        requestId = nextRequestId('xhr');
+        const rid = nextRequestId('xhr');
+        requestId = rid;
+        const skipRecording = isLikelyFetchPolyfill(url, method);
         const post =
           body === undefined || body === null
             ? undefined
@@ -106,31 +217,139 @@ function hookXHR(): void {
               : body instanceof ArrayBuffer || ArrayBuffer.isView(body)
                 ? '[binary]'
                 : String(body);
-        try {
-          sendRequestWillBeSent(requestId, url, method, headers, post, 'XHR');
-        } catch (_e) {
-          // Ignore CDP send errors / CDP 전송 오류 무시
-        }
-        const onDone = () => {
-          if (requestId) {
-            try {
-              const length =
-                typeof xhr.responseText === 'string' ? new Blob([xhr.responseText]).size : 0;
-              sendLoadingFinished(requestId, length);
-            } catch (_e) {
-              sendLoadingFinished(requestId, 0);
-            }
-            requestId = null;
+        if (!skipRecording) {
+          try {
+            sendRequestWillBeSent(rid, url, method, headers, post, 'XHR');
+          } catch (_e) {
+            // Ignore CDP send errors / CDP 전송 오류 무시
           }
+        }
+        let handled = false;
+        const finish = () => {
+          requestId = null;
+        };
+        const onLoad = () => {
+          if (!requestId || handled) return;
+          handled = true;
+          if (skipRecording) {
+            finish();
+            return;
+          }
+          // Match C++ XHRHook: status === 0 means network error (DNS failure, connection refused, etc.) / C++ XHRHook과 동일: status === 0이면 네트워크 에러
+          // Send loadingFailed only with type; do not send responseReceived/loadingFinished so DevTools shows failed, not pending / type 포함 loadingFailed만 전송
+          if (xhr.status === 0) {
+            try {
+              sendLoadingFailed(rid, 'Network error', false, 'XHR');
+            } catch (_e) {
+              // Ignore CDP send errors / CDP 전송 오류 무시
+            }
+            finish();
+            return;
+          }
+          try {
+            const text = typeof xhr.responseText === 'string' ? xhr.responseText : '';
+            responseData.set(rid, text);
+            const rawHeaders =
+              typeof xhr.getAllResponseHeaders === 'function' ? xhr.getAllResponseHeaders() : '';
+            const respHeaders = formatResponseHeader(rawHeaders);
+            const mimeType =
+              typeof xhr.getResponseHeader === 'function'
+                ? xhr.getResponseHeader('content-type') || 'text/plain'
+                : 'text/plain';
+            sendResponseReceived(
+              rid,
+              'XHR',
+              url,
+              xhr.status,
+              xhr.statusText || '',
+              respHeaders,
+              mimeType
+            );
+            const length = text.length ? new Blob([text]).size : 0;
+            sendLoadingFinished(rid, length);
+          } catch (_e) {
+            sendLoadingFinished(rid, 0);
+          }
+          finish();
+        };
+        const onError = () => {
+          if (!requestId || handled) return;
+          handled = true;
+          if (!skipRecording) {
+            try {
+              sendLoadingFailed(rid, 'Network error', false, 'XHR');
+            } catch (_e) {
+              // Ignore CDP send errors / CDP 전송 오류 무시
+            }
+          }
+          finish();
+        };
+        const onAbort = () => {
+          if (!requestId || handled) return;
+          handled = true;
+          if (!skipRecording) {
+            try {
+              sendLoadingFailed(rid, 'Request aborted', true, 'XHR');
+            } catch (_e) {
+              // Ignore CDP send errors / CDP 전송 오류 무시
+            }
+          }
+          finish();
+        };
+        // Match C++ XHRHook: use readystatechange as PRIMARY (DONE=4 first), then load/error/abort / C++와 동일: readystatechange를 주 로직으로
+        const onReadyStateChange = () => {
+          if (xhr.readyState !== 4) return;
+          if (!requestId || handled) return;
+          handled = true;
+          if (skipRecording) {
+            finish();
+            return;
+          }
+          // C++: status === 0 -> loadingFailed only, no responseReceived/loadingFinished / C++와 동일
+          if (xhr.status === 0) {
+            try {
+              sendLoadingFailed(rid, 'Network error', false, 'XHR');
+            } catch (_e) {
+              // Ignore CDP send errors / CDP 전송 오류 무시
+            }
+            finish();
+            return;
+          }
+          try {
+            const text = typeof xhr.responseText === 'string' ? xhr.responseText : '';
+            responseData.set(rid, text);
+            const rawHeaders =
+              typeof xhr.getAllResponseHeaders === 'function' ? xhr.getAllResponseHeaders() : '';
+            const respHeaders = formatResponseHeader(rawHeaders);
+            const mimeType =
+              typeof xhr.getResponseHeader === 'function'
+                ? xhr.getResponseHeader('content-type') || 'text/plain'
+                : 'text/plain';
+            sendResponseReceived(
+              rid,
+              'XHR',
+              url,
+              xhr.status,
+              xhr.statusText || '',
+              respHeaders,
+              mimeType
+            );
+            const length = text.length ? new Blob([text]).size : 0;
+            sendLoadingFinished(rid, length);
+          } catch (_e) {
+            sendLoadingFinished(rid, 0);
+          }
+          finish();
         };
         if (xhr.addEventListener) {
-          xhr.addEventListener('load', onDone);
-          xhr.addEventListener('error', onDone);
-          xhr.addEventListener('abort', onDone);
+          xhr.addEventListener('readystatechange', onReadyStateChange);
+          xhr.addEventListener('load', onLoad);
+          xhr.addEventListener('error', onError);
+          xhr.addEventListener('abort', onAbort);
         } else {
           const prevOnReadyStateChange = xhr.onreadystatechange;
           xhr.onreadystatechange = function (ev) {
-            if (xhr.readyState === 4) onDone();
+            onReadyStateChange();
             if (prevOnReadyStateChange) prevOnReadyStateChange.call(this, ev);
           };
         }
@@ -175,6 +394,7 @@ function hookFetch(): void {
       postData = typeof body === 'string' ? body : '[binary]';
     }
     const requestId = nextRequestId('fetch');
+    markFetchStarted(url, method);
     try {
       sendRequestWillBeSent(requestId, url, method, headers, postData, 'Fetch');
     } catch (_e) {
@@ -182,18 +402,46 @@ function hookFetch(): void {
     }
     return origFetch.call(this, input, init).then(
       (response: Response) => {
-        try {
-          // Use Content-Length header when available; avoid consuming body (clone/text breaks binary / large responses)
-          const contentLength = response.headers.get('content-length');
-          const encodedDataLength = contentLength !== null ? parseInt(contentLength, 10) || 0 : 0;
-          sendLoadingFinished(requestId, encodedDataLength);
-        } catch {
-          sendLoadingFinished(requestId, 0);
-        }
+        const cloned = response.clone();
+        const respHeaders: Record<string, string> = {};
+        response.headers.forEach((v, k) => {
+          respHeaders[headerKeyCase(k)] = v;
+        });
+        const mimeType = response.headers.get('content-type') || 'text/plain';
+        sendResponseReceived(
+          requestId,
+          'Fetch',
+          url,
+          response.status,
+          response.statusText || '',
+          respHeaders,
+          mimeType
+        );
+        cloned
+          .text()
+          .then((body) => {
+            responseData.set(requestId, body);
+            const contentLength = response.headers.get('content-length');
+            const encodedDataLength =
+              contentLength !== null ? parseInt(contentLength, 10) || body.length : body.length;
+            sendLoadingFinished(requestId, encodedDataLength);
+          })
+          .catch(() => {
+            sendLoadingFinished(requestId, 0);
+          });
         return response;
       },
       (err: unknown) => {
-        sendLoadingFinished(requestId, 0);
+        try {
+          sendLoadingFailed(
+            requestId,
+            err instanceof Error ? err.message : 'Request failed',
+            false,
+            'Fetch'
+          );
+        } catch (_e) {
+          // Ignore CDP send errors / CDP 전송 오류 무시
+        }
         throw err;
       }
     );
@@ -222,8 +470,10 @@ function uninstallHooks(): boolean {
 
 /**
  * Install network hooks / 네트워크 훅 설치
+ * Idempotent: if already hooked, skip / 이미 훅이 설치되어 있으면 건너뜀
  */
 function installHooks(): boolean {
+  if (isHooked) return true;
   try {
     hookXHR();
     hookFetch();
@@ -254,3 +504,18 @@ export function disableNetworkHook(): boolean {
 export function isNetworkHookEnabled(): boolean {
   return isHooked;
 }
+
+// Register Network.getResponseBody so DevTools can request response body / DevTools가 응답 본문을 요청할 수 있도록 Network.getResponseBody 핸들러 등록
+registerCDPMessageHandler('Network.getResponseBody', (message) => {
+  const id = message.id;
+  const params = message.params as { requestId?: string } | undefined;
+  const requestId = params?.requestId;
+  if (id === undefined || typeof requestId !== 'string') return;
+  const body = getStoredResponseBody(requestId);
+  const serverInfo = getServerInfo();
+  const sender = getCDPSender();
+  if (serverInfo && sender) {
+    const response = { id, result: { body, base64Encoded: false } };
+    sender(serverInfo.host, serverInfo.port, JSON.stringify(response));
+  }
+});

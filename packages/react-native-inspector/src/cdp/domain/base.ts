@@ -33,16 +33,54 @@ export function setCDPConnectionReady(ready: boolean = true): void {
 }
 
 /**
- * Send CDP event (method + params) to server / CDP 이벤트를 서버로 전송
- * Same code shape as web client BaseDomain.send / 웹 클라이언트 BaseDomain.send와 동일한 형태
+ * Send CDP command response (id + result) to server; used for Page.getResourceTree etc. / CDP 명령 응답(id+result) 전송, Page.getResourceTree 등에 사용
  */
-export function sendCDPEvent(data: CDPEventMessage): void {
+export function sendCDPResponse(id: number, result: unknown): void {
   if (!cdpEventSender || !isCDPConnectionReady) return;
   const serverInfo = getServerInfo();
   if (!serverInfo) return;
   try {
+    const messageStr = JSON.stringify({ id, result });
+    cdpEventSender(serverInfo.host, serverInfo.port, messageStr);
+  } catch (e) {
+    originalConsoleError('[CDPMessage] Failed to stringify CDP response:', e);
+  }
+}
+
+/**
+ * Send CDP event (method + params) to server / CDP 이벤트를 서버로 전송
+ * Same code shape as web client BaseDomain.send / 웹 클라이언트 BaseDomain.send와 동일한 형태
+ */
+export function sendCDPEvent(data: CDPEventMessage): void {
+  const isExecutionContext = data.method === 'Runtime.executionContextCreated';
+  if (!cdpEventSender || !isCDPConnectionReady) {
+    if (isExecutionContext) {
+      originalConsoleError(
+        '[ChromeRemoteDevTools] executionContextCreated not sent: sender=%s connectionReady=%s / 전송 안 함',
+        !!cdpEventSender,
+        isCDPConnectionReady
+      );
+    }
+    return;
+  }
+  const serverInfo = getServerInfo();
+  if (!serverInfo) {
+    if (isExecutionContext) {
+      originalConsoleError(
+        '[ChromeRemoteDevTools] executionContextCreated not sent: no serverInfo / serverInfo 없음'
+      );
+    }
+    return;
+  }
+  try {
     const messageStr = JSON.stringify(data);
     cdpEventSender(serverInfo.host, serverInfo.port, messageStr);
+    // Use originalConsoleError so this log is not sent as Runtime.consoleAPICalled (avoids extra CDP message and keeps app console first) / 훅을 타지 않게 해서 Runtime.consoleAPICalled로 전송되지 않도록 함
+    if (isExecutionContext) {
+      originalConsoleError(
+        `[ChromeRemoteDevTools] executionContextCreated sent to ${serverInfo.host}:${serverInfo.port} / 전송 완료`
+      );
+    }
   } catch (e) {
     originalConsoleError(
       '[CDPMessage] Failed to stringify CDP event (e.g. circular ref, BigInt):',

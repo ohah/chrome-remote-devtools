@@ -49,7 +49,7 @@ describe('websocket-client', () => {
   });
 
   test('connectWebSocket resolves and getCDPSender returns sender / 연결 후 sender 반환', async () => {
-    await connectWebSocket('localhost', 8080);
+    await connectWebSocket('localhost', 8080, 'js-test-device-id');
     const sender = getCDPSender();
     expect(sender).not.toBeNull();
     sender!('host', 8080, '{"method":"test"}');
@@ -57,7 +57,7 @@ describe('websocket-client', () => {
   });
 
   test('sender no-ops after disconnect / 연결 해제 후 sender는 no-op', async () => {
-    await connectWebSocket('localhost', 8080);
+    await connectWebSocket('localhost', 8080, 'js-test-device-id');
     const sender = getCDPSender();
     expect(sender).not.toBeNull();
     disconnectWebSocket();
@@ -70,7 +70,7 @@ describe('websocket-client', () => {
   });
 
   test('isWebSocketConnected returns true after connect / 연결 후 true', async () => {
-    await connectWebSocket('localhost', 8080);
+    await connectWebSocket('localhost', 8080, 'js-test-device-id');
     expect(isWebSocketConnected()).toBe(true);
   });
 });

@@ -12,9 +12,9 @@ type MMKVV4 = {
   addOnValueChangedListener(callback: (key: string) => void): { remove: () => void };
 };
 
-// MMKV v3 type (legacy support, has 'id' property and 'delete' method) / MMKV v3 타입 (하위 호환 지원, 'id' 속성과 'delete' 메서드 있음)
+// MMKV v3 type (legacy support; id optional so library MMKV with private id is assignable) / MMKV v3 타입 (하위 호환, id 선택적이라 private id인 라이브러리 MMKV 할당 가능)
 type MMKVV3 = {
-  id: string;
+  id?: string;
   set(key: string, value: boolean | string | number | ArrayBuffer): void;
   getBoolean(key: string): boolean | undefined;
   getString(key: string): string | undefined;
