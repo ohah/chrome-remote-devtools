@@ -1,9 +1,12 @@
 /**
  * CDP message handler tests / CDP 메시지 핸들러 테스트
- * Covers registerCDPMessageHandler, handleCDPMessage, global handler / 핸들러 등록·처리·전역 핸들러
+ * Covers registerCDPMessageHandler, handleCDPMessage, global handler, Runtime.enable, Page.getResourceTree, Runtime.getProperties, Runtime.releaseObject / 핸들러 등록·처리·전역·Runtime·Page
  */
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { registerCDPMessageHandler, handleCDPMessage } from '../cdp-message-handler';
+import { setServerInfo } from '../server-info';
+import { setCDPEventSender, setCDPConnectionReady } from '../cdp/domain/base';
+import { getOrCreateObjectId, getObject } from '../cdp/common/object-store';
 
 describe('cdp-message-handler', () => {
   let consoleWarnSpy: ReturnType<typeof mock>;
@@ -24,8 +27,10 @@ describe('cdp-message-handler', () => {
   });
 
   afterEach(() => {
-    // Handlers are retained; tests use unique method names to avoid collisions.
-    // 전역 핸들러는 모듈이 설정하므로 초기화하지 않음.
+    setCDPEventSender(null);
+    setCDPConnectionReady(false);
+    (globalThis as any).__ChromeRemoteDevToolsServerHost = undefined;
+    (globalThis as any).__ChromeRemoteDevToolsServerPort = undefined;
   });
 
   test('handleCDPMessage warns and returns when message has no method / method 없으면 경고 후 반환', () => {
@@ -101,5 +106,80 @@ describe('cdp-message-handler', () => {
     expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Unregistered handler'));
     handleCDPMessage({ method: 'Test.unreg' });
     expect(handler).not.toHaveBeenCalled();
+  });
+
+  test('Runtime.enable triggers sendExecutionContextCreated (sender called) / Runtime.enable 시 executionContextCreated 전송', () => {
+    const mockSender = mock(() => {});
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    handleCDPMessage({ method: 'Runtime.enable' });
+    expect(mockSender).toHaveBeenCalled();
+    const messageStr = mockSender.mock.calls[0]![2] as string;
+    const parsed = JSON.parse(messageStr);
+    expect(parsed.method).toBe('Runtime.executionContextCreated');
+  });
+
+  test('Page.getResourceTree with id sends CDP response with frameTree / Page.getResourceTree 시 frameTree 응답', () => {
+    const mockSender = mock(() => {});
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    handleCDPMessage({ method: 'Page.getResourceTree', id: 99 });
+    expect(mockSender).toHaveBeenCalled();
+    const messageStr = mockSender.mock.calls[0]![2] as string;
+    const parsed = JSON.parse(messageStr);
+    expect(parsed.id).toBe(99);
+    expect(parsed.result).toBeDefined();
+    expect(parsed.result.frameTree).toBeDefined();
+    expect(parsed.result.frameTree.frame.url).toBe('react-native://');
+  });
+
+  test('Runtime.getProperties with objectId sends result (PropertyDescriptor[]) / Runtime.getProperties objectId 시 result 전송', () => {
+    const mockSender = mock(() => {});
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    const obj = { foo: 42 };
+    const objectId = getOrCreateObjectId(obj);
+    handleCDPMessage({ method: 'Runtime.getProperties', id: 1, params: { objectId } });
+    expect(mockSender).toHaveBeenCalled();
+    const messageStr = mockSender.mock.calls[0]![2] as string;
+    const parsed = JSON.parse(messageStr);
+    expect(parsed.id).toBe(1);
+    expect(Array.isArray(parsed.result.result)).toBe(true);
+    const fooDesc = parsed.result.result.find((p: { name: string }) => p.name === 'foo');
+    expect(fooDesc).toBeDefined();
+    expect(fooDesc.value.type).toBe('number');
+    expect(fooDesc.value.value).toBe(42);
+  });
+
+  test('Runtime.getProperties without objectId sends empty result / Runtime.getProperties objectId 없으면 빈 result', () => {
+    const mockSender = mock(() => {});
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    handleCDPMessage({ method: 'Runtime.getProperties', id: 2, params: {} });
+    expect(mockSender).toHaveBeenCalled();
+    const messageStr = mockSender.mock.calls[0]![2] as string;
+    const parsed = JSON.parse(messageStr);
+    expect(parsed.id).toBe(2);
+    expect(parsed.result.result).toEqual([]);
+  });
+
+  test('Runtime.releaseObject sends empty result and releases object / Runtime.releaseObject 시 result 전송 및 객체 해제', () => {
+    const mockSender = mock(() => {});
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    const obj = { toRelease: true };
+    const objectId = getOrCreateObjectId(obj);
+    handleCDPMessage({ method: 'Runtime.releaseObject', id: 3, params: { objectId } });
+    expect(mockSender).toHaveBeenCalled();
+    const messageStr = mockSender.mock.calls[0]![2] as string;
+    const parsed = JSON.parse(messageStr);
+    expect(parsed.id).toBe(3);
+    expect(parsed.result).toEqual({});
+    expect(getObject(objectId)).toBeUndefined();
   });
 });

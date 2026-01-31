@@ -3,7 +3,13 @@
  * Covers setCDPEventSender, setCDPConnectionReady, sendCDPEvent (aligned with web BaseDomain.send) / setCDPEventSender·setCDPConnectionReady·sendCDPEvent 동작
  */
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
-import { setCDPEventSender, setCDPConnectionReady, sendCDPEvent } from '../cdp/domain/base';
+import {
+  setCDPEventSender,
+  setCDPConnectionReady,
+  sendCDPEvent,
+  sendCDPResponse,
+} from '../cdp/domain/base';
+import { setServerInfo } from '../server-info';
 
 describe('cdp/domain/base', () => {
   let mockSender: ReturnType<typeof mock>;
@@ -19,6 +25,29 @@ describe('cdp/domain/base', () => {
     setCDPConnectionReady(false);
     (globalThis as any).__ChromeRemoteDevToolsServerHost = undefined;
     (globalThis as any).__ChromeRemoteDevToolsServerPort = undefined;
+  });
+
+  test('sendCDPResponse calls sender with id and result when ready / 준비 시 sendCDPResponse가 id·result로 sender 호출', () => {
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    sendCDPResponse(42, { frameTree: { frame: { id: '1' } } });
+    expect(mockSender).toHaveBeenCalledTimes(1);
+    const [host, port, messageStr] = mockSender.mock.calls[0]!;
+    expect(host).toBe('localhost');
+    expect(port).toBe(8080);
+    const parsed = JSON.parse(messageStr);
+    expect(parsed.id).toBe(42);
+    expect(parsed.result).toEqual({ frameTree: { frame: { id: '1' } } });
+  });
+
+  test('sendCDPResponse does not call sender when server info not set / serverInfo 미설정 시 sendCDPResponse 미호출', () => {
+    (globalThis as any).__ChromeRemoteDevToolsServerHost = undefined;
+    (globalThis as any).__ChromeRemoteDevToolsServerPort = undefined;
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    sendCDPResponse(1, {});
+    expect(mockSender).not.toHaveBeenCalled();
   });
 
   test('sendCDPEvent does not call sender when sender is null / sender가 null이면 sendCDPEvent가 sender 호출 안 함', () => {
