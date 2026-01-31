@@ -136,8 +136,8 @@ describe('network-hook', () => {
     if (win?.happyDOM?.setURL) {
       win.happyDOM.setURL(baseUrl + '/');
     }
-    setNetworkCDPSender(mockSender);
-    setNetworkConnectionReady();
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
     enableNetworkHook();
     mockSender.mockClear();
     const xhr = new (globalThis as any).XMLHttpRequest();

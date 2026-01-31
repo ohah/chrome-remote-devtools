@@ -10,7 +10,17 @@ let isHooked = false;
 let requestIdCounter = 0;
 
 /** Store response body for Network.getResponseBody / Network.getResponseBody용 응답 본문 저장 */
+/** Max entries to avoid unbounded growth (align with RN/DevTools-style limits) / 무한 증가 방지 (RN·DevTools 수준 제한) */
+const MAX_RESPONSE_DATA_ENTRIES = 100;
 const responseData = new Map<string, string>();
+
+function setResponseData(requestId: string, body: string): void {
+  responseData.set(requestId, body);
+  if (responseData.size > MAX_RESPONSE_DATA_ENTRIES) {
+    const oldestKey = responseData.keys().next().value as string | undefined;
+    if (oldestKey !== undefined) responseData.delete(oldestKey);
+  }
+}
 
 /** Original global XMLHttpRequest and fetch for restore / 복원용 원본 전역 XMLHttpRequest·fetch */
 let originalXHR: typeof XMLHttpRequest | null = null;
@@ -248,7 +258,7 @@ function hookXHR(): void {
           }
           try {
             const text = typeof xhr.responseText === 'string' ? xhr.responseText : '';
-            responseData.set(rid, text);
+            setResponseData(rid, text);
             const rawHeaders =
               typeof xhr.getAllResponseHeaders === 'function' ? xhr.getAllResponseHeaders() : '';
             const respHeaders = formatResponseHeader(rawHeaders);
@@ -317,7 +327,7 @@ function hookXHR(): void {
           }
           try {
             const text = typeof xhr.responseText === 'string' ? xhr.responseText : '';
-            responseData.set(rid, text);
+            setResponseData(rid, text);
             const rawHeaders =
               typeof xhr.getAllResponseHeaders === 'function' ? xhr.getAllResponseHeaders() : '';
             const respHeaders = formatResponseHeader(rawHeaders);
@@ -420,10 +430,10 @@ function hookFetch(): void {
         cloned
           .text()
           .then((body) => {
-            responseData.set(requestId, body);
+            setResponseData(requestId, body);
             const contentLength = response.headers.get('content-length');
             const encodedDataLength =
-              contentLength !== null ? parseInt(contentLength, 10) || body.length : body.length;
+              contentLength !== null ? parseInt(contentLength, 10) || body.length : 0;
             sendLoadingFinished(requestId, encodedDataLength);
           })
           .catch(() => {
