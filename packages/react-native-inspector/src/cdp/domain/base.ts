@@ -75,12 +75,7 @@ export function sendCDPEvent(data: CDPEventMessage): void {
   try {
     const messageStr = JSON.stringify(data);
     cdpEventSender(serverInfo.host, serverInfo.port, messageStr);
-    // Use originalConsoleError so this log is not sent as Runtime.consoleAPICalled (avoids extra CDP message and keeps app console first) / 훅을 타지 않게 해서 Runtime.consoleAPICalled로 전송되지 않도록 함
-    if (isExecutionContext) {
-      originalConsoleError(
-        `[ChromeRemoteDevTools] executionContextCreated sent to ${serverInfo.host}:${serverInfo.port} / 전송 완료`
-      );
-    }
+    // Do not log success here: console.error would show red error overlay in RN / 성공 로그 생략: console.error 시 RN에서 빨간 에러 오버레이 표시됨
   } catch (e) {
     originalConsoleError(
       '[CDPMessage] Failed to stringify CDP event (e.g. circular ref, BigInt):',

@@ -93,8 +93,8 @@ export function handleCDPMessage(message: {
   if (message.method === 'Runtime.getProperties' && typeof message.id === 'number') {
     const params = message.params as { objectId?: string } | undefined;
     const objectId = params?.objectId;
-    if (objectId && getServerInfo()) {
-      const result = getObjectProperties(objectId);
+    if (getServerInfo()) {
+      const result = objectId ? getObjectProperties(objectId) : [];
       sendCDPResponse(message.id, { result });
     }
     return;
