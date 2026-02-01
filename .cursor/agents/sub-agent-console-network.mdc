@@ -7,7 +7,7 @@ description: 서브 에이전트 - 콘솔·네트워크 전문. 웹·브라우�
 
 # 콘솔·네트워크 전문 (Console & Network Expert)
 
-이 룰은 **웹·브라우저 클라이언트**와 **React Native Inspector**를 포함한 모든 클라이언트의 **console 훅**과 **Network 훅**(XMLHttpRequest·fetch)을 다룰 때 적용한다.
+이 룰은 **웹·브라우저 클라이언트**와 **React Native Inspector**를 포함한 모든 클라이언트의 **console 훅**과 **Network 훅**(XMLHttpRequest·fetch)을 다룰 때 적용한다. 현재 React Native Inspector(`packages/react-native-inspector`)에서만 Object API 패턴이 적용되어 있으며, 웹 클라이언트(`packages/client`)는 추후 동일 패턴으로 맞출 수 있다.
 
 ## 1. 훅 설치·복원 방식 (Object API)
 

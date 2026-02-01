@@ -196,6 +196,7 @@ function sendResponseReceived(
 function hookXHR(): void {
   const globalObj =
     typeof globalThis !== 'undefined' ? globalThis : typeof global !== 'undefined' ? global : {};
+  // Flag is set on the constructor after defineProperty succeeds; skip if already hooked / defineProperty 성공 후 생성자에 플래그 설정, 이미 훅된 경우 스킵
   const XHR = (globalObj as any).XMLHttpRequest;
   if (!XHR || (XHR as any).__ChromeRemoteDevToolsHooked) return;
   const desc = Object.getOwnPropertyDescriptor(globalObj, 'XMLHttpRequest');
@@ -385,6 +386,9 @@ function hookXHR(): void {
       configurable: true,
     });
   } catch (_e) {
+    // Reset cached originals on failure so a retry does not use partially-hooked values / 실패 시 캐시 초기화하여 재시도 시 훅된 값 사용 방지
+    originalXHR = null;
+    originalXHRDescriptor = undefined;
     return;
   }
   (globalObj as any).XMLHttpRequest.__ChromeRemoteDevToolsHooked = true;
@@ -506,7 +510,6 @@ function uninstallHooks(): boolean {
   try {
     if (originalXHRDescriptor) {
       Object.defineProperty(globalObj, 'XMLHttpRequest', originalXHRDescriptor);
-      originalXHRDescriptor = undefined;
     } else if (originalXHR) {
       Object.defineProperty(globalObj, 'XMLHttpRequest', {
         value: originalXHR,
@@ -515,10 +518,8 @@ function uninstallHooks(): boolean {
         configurable: true,
       });
     }
-    originalXHR = null;
     if (originalFetchDescriptor) {
       Object.defineProperty(globalObj, 'fetch', originalFetchDescriptor);
-      originalFetchDescriptor = undefined;
     } else if (originalFetch) {
       Object.defineProperty(globalObj, 'fetch', {
         value: originalFetch,
@@ -527,7 +528,11 @@ function uninstallHooks(): boolean {
         configurable: true,
       });
     }
+    // Only clear backups after both restorations succeed / 두 복원 모두 성공한 후에만 백업 클리어
+    originalXHR = null;
+    originalXHRDescriptor = undefined;
     originalFetch = null;
+    originalFetchDescriptor = undefined;
   } catch (_e) {
     return false;
   }
