@@ -825,6 +825,7 @@ export function DevToolsPlayground({
       consoleError: '콘솔 에러 메시지',
       consoleWarn: '콘솔 경고 메시지',
       consoleInfo: '콘솔 정보 메시지',
+      consoleObject: '확장 가능 객체 (클릭하여 펼치기/접기 테스트)',
       networkSuccess: '네트워크 요청 성공',
       networkFailed: '네트워크 요청 실패',
       testData: '테스트 데이터',
@@ -848,6 +849,7 @@ export function DevToolsPlayground({
       consoleError: 'Console error message',
       consoleWarn: 'Console warning message',
       consoleInfo: 'Console info message',
+      consoleObject: 'Expandable object (click to test expand/collapse)',
       networkSuccess: 'Network request successful',
       networkFailed: 'Network request failed',
       testData: 'Test data',
@@ -891,6 +893,8 @@ export function DevToolsPlayground({
     console.error(t.consoleError);
     console.warn(t.consoleWarn);
     console.info(t.consoleInfo);
+    // Expandable object for testing console row click (e.g. Safari/WebKit) / 콘솔 행 클릭 테스트용 확장 가능 객체 (Safari/WebKit 등)
+    console.log(t.consoleObject, { count: 1, status: 'ok' });
   };
 
   /**
