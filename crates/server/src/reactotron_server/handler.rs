@@ -155,7 +155,7 @@ pub async fn handle_reactotron_websocket(
                 let connections = rn_manager.get_all_connections().await;
                 for conn in connections {
                     if conn.client_id.as_ref() == Some(&client_id) {
-                        rn_manager.remove_connection(&conn.id).await;
+                        rn_manager.remove_connection(&conn.id, None).await;
                         logger_clone.log(
                             LogType::Reactotron,
                             &client_id,
@@ -359,7 +359,7 @@ async fn handle_incoming_message(
                     };
 
                     // Create React Native Inspector connection / React Native Inspector 연결 생성
-                    let inspector_id = rn_manager
+                    let (inspector_id, _tx_id) = rn_manager
                         .create_connection(connection_info, tx_string)
                         .await;
 
