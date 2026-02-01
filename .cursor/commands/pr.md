@@ -10,11 +10,13 @@ Create or update a PR for the current branch. Follow the steps below.
    - **If current branch equals base** → Create a new branch from the current one and open a PR with that new branch as head (see "When base and current branch are the same").
    - Otherwise use the specified base.
 4. **Prepare body**: If `branch-summary.md` exists and fills the required sections (Purpose, Description, How to test, etc., or Title + Work content), use it as the PR body. If sections are missing, fill them before use.
-5. **Create or update PR**:
-   - No open PR → `gh pr create --head <current-branch> --base <base> --title "<title>" --body-file branch-summary.md`
+5. **Link related issues**: Run `gh issue list --state open --limit 50` (repo: ohah/chrome-remote-devtools). If any issue is **related** to this PR (branch name, PR title, or body content matches the issue title/description), add to the PR body a line such as `Relates to #<number>` or `Fixes #<number>` so the issue is linked in the repo’s Development / issue tab. Prefer appending to `branch-summary.md` before create, or include in the body when PATCHing an existing PR.
+6. **Create or update PR**:
+   - No open PR → `gh pr create --head <current-branch> --base <base> --title "<title>" --body-file branch-summary.md --assignee @me`
    - Open PR exists → Update body (and base via PATCH if base was specified and PR is open).
-6. **Push**: If there are unpushed commits, run `git push origin <current-branch>`.
-7. **Labels**: After creating or updating the PR, check `gh label list` and add labels that match the PR (e.g. feat, fix, docs).
+7. **Push**: If there are unpushed commits, run `git push origin <current-branch>`.
+8. **Assignee**: When creating a PR, always add `--assignee @me` so the PR is assigned to the current gh user (ohah when using this repo).
+9. **Labels**: After creating or updating the PR, check `gh label list` and **add labels that match the PR type** (e.g. feat → enhancement, fix → bug, docs → documentation, chore/refactor → refactor). Attach labels automatically; do not skip.
 
 ## Base branch (apply when user specifies it)
 
@@ -52,12 +54,13 @@ This repo (ohah/chrome-remote-devtools) uses the **ohah** GitHub account for pus
 1. **Read user input**: If a base branch is specified, set base accordingly (see above).
 2. **SSH remote**: Ensure origin is `git@github.com-private:ohah/chrome-remote-devtools.git` so push uses ohah’s SSH key; if not, run `git remote set-url origin git@github.com-private:ohah/chrome-remote-devtools.git`.
 3. **gh account**: Get current user: `gh api user -q .login`. If not `ohah`, run `gh auth switch --hostname github.com --user ohah` and store the previous login so you can switch back later.
-4. **Create or update PR with GitHub CLI**:
+4. **Link related issues**: Run `gh issue list --state open --limit 50`. If any issue title or description is **related** to this PR (branch name, PR title, or branch-summary content), append to `branch-summary.md` a line such as `Relates to #<number>` or `Fixes #<number>` so the issue is linked in the repo’s Development / issue tab. Do this before create; when updating an existing PR, include the line in the body when PATCHing.
+5. **Create or update PR with GitHub CLI**:
    - If the branch is already pushed → use `--head <branch-name>` when creating.
    - If base is specified → always pass `--base <base>` on create, or include base in PATCH on update (when PR is open).
 
    ```bash
-   gh pr create --head $(git branch --show-current) --base <base> --title "<title>" --body-file branch-summary.md
+   gh pr create --head $(git branch --show-current) --base <base> --title "<title>" --body-file branch-summary.md --assignee @me
    ```
 
    - If a PR already exists → Update body. If base was specified and PR is open, PATCH body and base.
@@ -69,17 +72,19 @@ This repo (ohah/chrome-remote-devtools) uses the **ohah** GitHub account for pus
    gh api repos/ohah/chrome-remote-devtools/pulls/<PR-number> -X PATCH -f body=@branch-summary.md -f base="<base>"
    ```
 
-5. **Push**: After create/update, if there are unpushed commits, push so the PR has the latest commits.
+6. **Push**: After create/update, if there are unpushed commits, push so the PR has the latest commits.
 
    ```bash
    git push origin $(git branch --show-current)
    ```
 
-6. **If `gh` is not available**: Install [GitHub CLI](https://cli.github.com/) or open the PR in the browser (repo → Compare & pull request for the branch) and paste the contents of `branch-summary.md` as the description.
+7. **If `gh` is not available**: Install [GitHub CLI](https://cli.github.com/) or open the PR in the browser (repo → Compare & pull request for the branch) and paste the contents of `branch-summary.md` as the description.
 
-7. **Labels**: On create use `--label <name>` (multiple allowed). On update use `gh pr edit <PR-number> --add-label <name>`. Choose labels from `gh label list` that fit the PR (e.g. feat, fix, docs, config).
+8. **Assignee**: On create always pass `--assignee @me` so the PR is assigned to you (the current gh user).
 
-8. **Restore gh account**: If you switched to ohah in step 3, run `gh auth switch --hostname github.com --user <previous-login>` to restore the original gh account.
+9. **Labels**: On create pass `--label <name>` (multiple allowed). On update use `gh pr edit <PR-number> --add-label <name>`. **Always attach at least one label** from `gh label list` that fits the PR type (e.g. feat → enhancement, fix → bug, docs → documentation, chore/refactor → refactor). Do this automatically; do not skip.
+
+10. **Restore gh account**: If you switched to ohah in step 3, run `gh auth switch --hostname github.com --user <previous-login>` to restore the original gh account.
 
 ## PR title rules
 
@@ -103,4 +108,6 @@ If the repo has `.github/PULL_REQUEST_TEMPLATE.md`, align `branch-summary.md` wi
 - **Base**: If the user specifies a base branch, always use it for create/update (and create a new head branch when base and current branch are the same).
 - **Body**: Keep `branch-summary.md` up to date and use it only for the PR description; do not commit it unless the project says otherwise.
 - **Push**: After updating the PR body, push any unpushed commits so the PR reflects the latest code.
-- **Labels**: Use `gh label list` and attach labels that match the PR type (feat, fix, docs, etc.).
+- **Assignee**: Always use `--assignee @me` when creating a PR so the PR is assigned to you (the current gh user).
+- **Labels**: Use `gh label list` and **attach at least one label** that matches the PR type (feat → enhancement, fix → bug, docs → documentation, chore/refactor → refactor). Do this automatically on create and when updating; do not skip.
+- **Link related issues**: Before create (or when updating body), run `gh issue list --state open --limit 50`. If any issue is **related** to this PR (branch name, title, or body matches the issue), append to the PR body a line such as `Relates to #<number>` or `Fixes #<number>` so the issue appears in the repo’s Development / “Link an issue” tab. Do this automatically; do not skip when a related issue is found.
