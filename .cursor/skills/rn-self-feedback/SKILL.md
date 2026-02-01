@@ -15,7 +15,7 @@ When you change React Native or Inspector code and need to verify behavior, use 
 
 ## Prerequisites
 
-- **MCP setup**: User has run `bun run setup-mcp` so `.cursor/mcp.json` has the correct `mise` path for `tauri` and `maestro`.
+- **MCP setup**: MCP is configured so the `tauri` and `maestro` servers use the correct `mise` path. If this repo provides it, run `bun run setup-mcp` once per machine.
 - **Tauri MCP**: Inspector (Tauri) app running in debug (`bun run dev:inspector:tauri`) so Tauri MCP can connect.
 - **Maestro MCP**: Maestro available via mise (`.mise.toml`); Maestro MCP enabled in Cursor.
 
@@ -32,6 +32,6 @@ When you change React Native or Inspector code and need to verify behavior, use 
 
 ## Notes
 
-- MCP tools are provided by the `maestro` and `tauri` servers in `.cursor/mcp.json`. Call them when you need to run or inspect the RN/Inspector stack.
+- MCP tools are provided by the configured `maestro` and `tauri` servers in your MCP configuration. Call them when you need to run or inspect the RN/Inspector stack.
 - If Tauri MCP cannot connect, confirm Inspector is running with `bun run dev:inspector:tauri` (debug build).
-- If Maestro MCP fails, confirm `bun run setup-mcp` was run and Maestro is installed via mise.
+- If Maestro MCP fails, ensure MCP is configured (e.g. run `bun run setup-mcp` if available) and Maestro is installed via mise.
