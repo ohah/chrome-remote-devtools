@@ -53,7 +53,7 @@ Open debugger / 디버거 열기
 
 ## Troubleshooting: Connection fails with "localhost" / 연결 문제: localhost로 연결 실패
 
-**Why "Connection attempt 1/3 failed" and then "Connected to server"?**  
+**Why "Connection attempt 1/3 failed" and then "Connected to server"?**
 **왜 "Connection attempt 1/3 failed" 후 "Connected to server"가 뜨나요?**
 
 Previously, `connect()` resolved even when all retries failed, so the Provider showed "Connected" incorrectly. This is now fixed: `connect()` **rejects** when all retries fail, so you will see the real error in `.catch()` and no false "Connected to server". / 이전에는 재시도가 모두 실패해도 `connect()`가 resolve되어 Provider가 잘못 "연결됨"으로 표시했습니다. 이제 수정되었습니다: 재시도가 모두 실패하면 `connect()`가 **reject**되므로 `.catch()`에서 실제 에러를 보게 되고, 잘못된 "Connected to server"는 표시되지 않습니다.
