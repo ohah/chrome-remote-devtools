@@ -16,7 +16,7 @@ export const IFRAME_SANDBOX_DEVTOOLS =
   'allow-scripts allow-same-origin allow-forms allow-popups allow-modals';
 
 /**
- * iframe allow attribute: grant all Permissions Policy features (for DevTools iframes) /
+ * iframe allow attribute: grant all Permissions Policy features (for DevTools iframes).
  * iframe allow 속성: 모든 Permissions Policy 기능 허용 (DevTools iframe용)
  */
 export const IFRAME_ALLOW_ALL_PERMISSIONS =
