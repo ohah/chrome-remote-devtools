@@ -37,7 +37,7 @@ pub async fn handle_react_native_inspector_websocket(
     };
 
     // Create inspector connection / Inspector 연결 생성
-    let inspector_id = rn_manager
+    let (inspector_id, tx_id) = rn_manager
         .create_connection(connection_info, tx.clone())
         .await;
 
@@ -80,6 +80,7 @@ pub async fn handle_react_native_inspector_websocket(
     let rn_manager_for_msg = rn_manager.clone();
     let logger_for_msg = logger.clone();
     let inspector_id_for_msg = inspector_id.clone();
+    let tx_id_for_msg = tx_id;
     tokio::spawn(async move {
         while let Some(msg) = receiver.next().await {
             match msg {
@@ -259,7 +260,7 @@ pub async fn handle_react_native_inspector_websocket(
                         None,
                     );
                     rn_manager_for_msg
-                        .remove_connection(&inspector_id_for_msg)
+                        .remove_connection(&inspector_id_for_msg, Some(tx_id_for_msg))
                         .await;
                     break;
                 }
@@ -270,10 +271,17 @@ pub async fn handle_react_native_inspector_websocket(
                         "websocket error",
                         Some(&e.to_string()),
                     );
+                    rn_manager_for_msg
+                        .remove_connection(&inspector_id_for_msg, Some(tx_id_for_msg))
+                        .await;
                     break;
                 }
                 _ => {}
             }
         }
+        // Stream ended without Close frame / Close 프레임 없이 스트림 종료
+        rn_manager_for_msg
+            .remove_connection(&inspector_id_for_msg, Some(tx_id_for_msg))
+            .await;
     });
 }
