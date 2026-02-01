@@ -793,14 +793,24 @@ export class TreeElement {
     }
     treeElementToggled(event) {
         const element = event.currentTarget;
-        if (!element || treeElementBylistItemNode.get(element) !== this || element.hasSelection()) {
+        if (!element || treeElementBylistItemNode.get(element) !== this) {
             return;
+        }
+        // For expandable nodes, never skip toggle for selection so WebKit/Safari works (hasSelection/isCollapsed may behave differently there). / 확장 가능 노드는 selection으로 토글 스킵하지 않음 (WebKit/Safari에서 hasSelection·isCollapsed 동작 차이 대응)
+        if (!this.expandable) {
+            if (element.hasSelection()) {
+                const sel = element.getComponentSelection();
+                if (sel && !sel.isCollapsed) {
+                    return;
+                }
+            }
         }
         console.assert(Boolean(this.treeOutline));
         const showSelectionOnKeyboardFocus = this.treeOutline ? this.treeOutline.showSelectionOnKeyboardFocus : false;
         const toggleOnClick = this.toggleOnClick && (showSelectionOnKeyboardFocus || !this.selectable);
         const isInTriangle = this.isEventWithinDisclosureTriangle(event);
-        if (!toggleOnClick && !isInTriangle) {
+        // For expandable nodes, allow toggle on any row click so WebKit/Safari works (isInTriangle/toggleOnClick may fail there). / 확장 가능 노드는 행 클릭 시 토글 허용 (WebKit/Safari에서 isInTriangle·toggleOnClick 미동작 대응)
+        if (!this.expandable && !toggleOnClick && !isInTriangle) {
             return;
         }
         if (this.expanded) {
