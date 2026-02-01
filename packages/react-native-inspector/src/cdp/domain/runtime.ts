@@ -135,6 +135,11 @@ function installHooks(): boolean {
   try {
     Object.defineProperties(c, descriptors);
   } catch (_e) {
+    // Reset backups on failure so next installHooks does not use inconsistent state / 실패 시 백업 초기화하여 다음 설치 시 일관된 상태 유지
+    for (const methodName of CONSOLE_METHODS) {
+      delete originalDescriptors[methodName];
+      delete originalConsole[methodName];
+    }
     return false;
   }
   isHooked = true;
@@ -154,14 +159,17 @@ function uninstallHooks(): boolean {
     const desc = originalDescriptors[methodName];
     if (desc) {
       toRestore[methodName] = desc;
-      delete originalDescriptors[methodName];
     }
-    delete originalConsole[methodName];
   }
   try {
     Object.defineProperties(c, toRestore);
   } catch (_e) {
     return false;
+  }
+  // Only clear backups after successful restoration / 복원 성공 후에만 백업 클리어
+  for (const methodName of CONSOLE_METHODS) {
+    delete originalDescriptors[methodName];
+    delete originalConsole[methodName];
   }
   isHooked = false;
   return true;
