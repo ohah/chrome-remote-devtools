@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "tauri": {
+      "command": "/Users/yoon/.local/bin/mise",
+      "args": ["exec", "--", "npx", "-y", "@hypothesi/tauri-mcp-server"]
+    },
+    "maestro": {
+      "command": "/Users/yoon/.local/bin/mise",
+      "args": ["exec", "--", "maestro", "mcp"]
+    }
+  }
+}
