@@ -280,6 +280,9 @@ pub async fn handle_react_native_inspector_websocket(
             }
         }
         // Stream ended without Close frame / Close 프레임 없이 스트림 종료
+        // Passing Some(tx_id_for_msg) ensures we only remove if this handler is still current.
+        // If a reconnection happened, current_tx_id would have been updated, so this is a no-op.
+        // / Some(tx_id_for_msg)로 이 핸들러가 아직 현재일 때만 제거; 재연결 시 current_tx_id가 바뀌어 no-op.
         rn_manager_for_msg
             .remove_connection(&inspector_id_for_msg, Some(tx_id_for_msg))
             .await;
