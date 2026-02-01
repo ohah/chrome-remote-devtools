@@ -22032,14 +22032,22 @@ var TreeElement = class {
   }
   treeElementToggled(event) {
     const element = event.currentTarget;
-    if (!element || treeElementBylistItemNode.get(element) !== this || element.hasSelection()) {
+    if (!element || treeElementBylistItemNode.get(element) !== this) {
       return;
+    }
+    if (!this.expandable) {
+      if (element.hasSelection()) {
+        const sel = element.getComponentSelection();
+        if (sel && !sel.isCollapsed) {
+          return;
+        }
+      }
     }
     console.assert(Boolean(this.treeOutline));
     const showSelectionOnKeyboardFocus = this.treeOutline ? this.treeOutline.showSelectionOnKeyboardFocus : false;
     const toggleOnClick = this.toggleOnClick && (showSelectionOnKeyboardFocus || !this.selectable);
     const isInTriangle = this.isEventWithinDisclosureTriangle(event);
-    if (!toggleOnClick && !isInTriangle) {
+    if (!this.expandable && !toggleOnClick && !isInTriangle) {
       return;
     }
     if (this.expanded) {
