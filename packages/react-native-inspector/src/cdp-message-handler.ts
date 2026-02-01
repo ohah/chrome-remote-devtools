@@ -5,7 +5,7 @@ import { sendCDPResponse } from './cdp/domain/base';
 import { handleRuntimeAddBinding, handleRuntimeEvaluate } from './cdp/domain/runtime-evaluate';
 import { sendExecutionContextCreated } from './cdp/domain/runtime';
 import { getObjectProperties } from './cdp/common/get-object-properties';
-import { releaseObject } from './cdp/common/object-store';
+import { getObject, releaseObject } from './cdp/common/object-store';
 import { getServerInfo } from './server-info';
 
 type CDPMessageHandler = (message: {
@@ -26,6 +26,105 @@ const PAGE_GET_RESOURCE_TREE_RESULT = {
     resources: [] as unknown[],
   },
 };
+
+/**
+ * Map CDP CallArgument[] to JS values (value / objectId lookup / unserializableValue) / CDP CallArgument[]를 JS 값으로 변환
+ */
+function callArgumentsToValues(
+  args: Array<{ value?: unknown; objectId?: string; unserializableValue?: string }> | undefined
+): unknown[] {
+  if (!args || args.length === 0) return [];
+  return args.map((arg) => {
+    if (arg.value !== undefined) return arg.value;
+    if (arg.objectId !== undefined) return getObject(arg.objectId);
+    if (arg.unserializableValue !== undefined) {
+      switch (arg.unserializableValue) {
+        case 'undefined':
+          return undefined;
+        case 'NaN':
+          return NaN;
+        case 'Infinity':
+          return Infinity;
+        case '-Infinity':
+          return -Infinity;
+        default:
+          return undefined;
+      }
+    }
+    return undefined;
+  });
+}
+
+/**
+ * Handle Runtime.callFunctionOn: run function on stored object (e.g. toStringForClipboard for Copy object), send CDP result / Runtime.callFunctionOn 처리: 저장된 객체에 함수 실행 후 CDP 결과 전송
+ */
+function handleRuntimeCallFunctionOn(message: {
+  id: number;
+  params?: {
+    objectId?: string;
+    functionDeclaration?: string;
+    arguments?: Array<{ value?: unknown; objectId?: string; unserializableValue?: string }>;
+    returnByValue?: boolean;
+  };
+}): void {
+  const id = typeof message.id === 'number' ? message.id : Number(message.id);
+  if (!Number.isFinite(id)) return;
+  const params = message.params ?? {};
+  const { functionDeclaration, returnByValue } = params;
+  const objectId = params.objectId != null ? String(params.objectId) : undefined;
+
+  if (!objectId || !functionDeclaration) {
+    sendCDPResponse(id, {
+      exceptionDetails: {
+        text: 'Runtime.callFunctionOn requires objectId and functionDeclaration',
+      },
+    });
+    return;
+  }
+
+  const obj = getObject(objectId);
+  if (obj === undefined) {
+    console.warn(
+      `[ChromeRemoteDevTools] Runtime.callFunctionOn: objectId "${objectId}" not found in object store (Copy object may fail) / objectId가 객체 저장소에 없음`
+    );
+    sendCDPResponse(id, {
+      exceptionDetails: { text: `Runtime.callFunctionOn: objectId ${objectId} not found` },
+    });
+    return;
+  }
+
+  try {
+    // oxlint-disable-next-line no-eval -- intentional: run CDP functionDeclaration in app context (Copy object) / CDP functionDeclaration 앱 컨텍스트에서 실행 (Copy object)
+    const fn = eval(`(${functionDeclaration})`) as (this: unknown, ...args: unknown[]) => unknown;
+    const args = callArgumentsToValues(params.arguments);
+    const returnValue = fn.apply(obj, args);
+
+    if (returnByValue) {
+      if (returnValue === undefined) {
+        sendCDPResponse(id, { result: { type: 'undefined' } });
+      } else if (typeof returnValue === 'string') {
+        console.log(
+          '[ChromeRemoteDevTools] Sending Runtime.callFunctionOn response (Copy object): id=',
+          id,
+          ', valueLength=',
+          returnValue.length
+        );
+        sendCDPResponse(id, { result: { type: 'string', value: returnValue } });
+      } else if (typeof returnValue === 'number') {
+        sendCDPResponse(id, { result: { type: 'number', value: returnValue } });
+      } else if (typeof returnValue === 'boolean') {
+        sendCDPResponse(id, { result: { type: 'boolean', value: returnValue } });
+      } else {
+        sendCDPResponse(id, { result: { type: 'object', value: returnValue } });
+      }
+    } else {
+      sendCDPResponse(id, { result: { type: 'object', value: returnValue } });
+    }
+  } catch (e) {
+    const text = e instanceof Error ? e.message : String(e);
+    sendCDPResponse(id, { exceptionDetails: { text } });
+  }
+}
 
 // Store registered handlers / 등록된 핸들러 저장
 // Key format: "Domain.method" (e.g., "MMKVStorage.getMMKVItems") / 키 형식: "Domain.method" (예: "MMKVStorage.getMMKVItems")
@@ -128,6 +227,29 @@ export function handleCDPMessage(message: {
   if (message.method === 'Runtime.addBinding' && typeof message.id === 'number') {
     if (getServerInfo()) {
       handleRuntimeAddBinding(message as { id: number; params?: { name?: string } });
+    }
+    return;
+  }
+
+  // Runtime.callFunctionOn: run function on object (e.g. toStringForClipboard for Copy object) / 객체에 함수 실행 (예: Copy object용 toStringForClipboard)
+  if (
+    message.method === 'Runtime.callFunctionOn' &&
+    message.id !== undefined &&
+    message.id !== null
+  ) {
+    const id = typeof message.id === 'number' ? message.id : Number(message.id);
+    if (Number.isFinite(id) && getServerInfo()) {
+      handleRuntimeCallFunctionOn(
+        message as {
+          id: number;
+          params?: {
+            objectId?: string;
+            functionDeclaration?: string;
+            arguments?: Array<{ value?: unknown; objectId?: string; unserializableValue?: string }>;
+            returnByValue?: boolean;
+          };
+        }
+      );
     }
     return;
   }

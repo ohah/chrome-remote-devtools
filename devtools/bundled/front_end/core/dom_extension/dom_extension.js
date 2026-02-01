@@ -82,7 +82,16 @@ Node.prototype.getComponentSelection = function() {
   while (parent && parent.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) {
     parent = parent.parentNode;
   }
-  return parent instanceof ShadowRoot ? parent.getSelection() : this.window().getSelection();
+  if (parent instanceof ShadowRoot && typeof parent.getSelection === "function") {
+    try {
+      const selection = parent.getSelection();
+      if (selection != null) {
+        return selection;
+      }
+    } catch {
+    }
+  }
+  return this.window().getSelection();
 };
 Node.prototype.hasSelection = function() {
   if (this instanceof Element) {

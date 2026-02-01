@@ -186,6 +186,35 @@ describe('cdp-message-handler', () => {
     expect(getObject(objectId)).toBeUndefined();
   });
 
+  test('Runtime.callFunctionOn runs function on object and returns value (Copy object) / Runtime.callFunctionOn 객체에 함수 실행 후 값 반환 (Copy object)', () => {
+    const mockSender = mock(() => {});
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    const obj = { foo: 1, bar: 'baz' };
+    const objectId = getOrCreateObjectId(obj);
+    handleCDPMessage({
+      method: 'Runtime.callFunctionOn',
+      id: 42,
+      params: {
+        objectId,
+        functionDeclaration:
+          'function (data) { return JSON.stringify(this, null, data.indent || ""); }',
+        arguments: [{ value: { indent: '  ' } }],
+        returnByValue: true,
+      },
+    });
+    expect(mockSender).toHaveBeenCalled();
+    const messageStr = mockSender.mock.calls[0]![2] as string;
+    const parsed = JSON.parse(messageStr);
+    expect(parsed.id).toBe(42);
+    expect(parsed.result).toBeDefined();
+    expect(parsed.result.result).toBeDefined();
+    expect(parsed.result.result.type).toBe('string');
+    expect(parsed.result.result.value).toContain('"foo": 1');
+    expect(parsed.result.result.value).toContain('"bar": "baz"');
+  });
+
   test('Runtime.evaluate returns expression value (for React DevTools waitForFuseboxDispatcher) / Runtime.evaluate가 표현식 값을 반환 (React DevTools waitForFuseboxDispatcher용)', () => {
     const mockSender = mock(() => {});
     setServerInfo('localhost', 8080);

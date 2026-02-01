@@ -4,7 +4,7 @@ import { Activity } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { buildDevToolsUrl } from '@/shared/lib/devtools-url';
-import { IFRAME_ALLOW_ALL_PERMISSIONS } from '@/shared/lib/constants';
+import { IFRAME_ALLOW_ALL_PERMISSIONS, IFRAME_SANDBOX_DEVTOOLS } from '@/shared/lib/constants';
 import { clientQueries } from '@/entities/client';
 import { useServerUrl } from '@/shared/lib';
 import { Tabs, type Tab } from '@/components/tabs';
@@ -93,29 +93,64 @@ function DevToolsPage() {
     }
   }, [serverUrl, previousServerUrl]);
 
-  // Handle postMessage from DevTools iframe to open external links / DevTools iframe에서 외부 링크 열기 위한 postMessage 처리
+  // Handle postMessage from DevTools iframe (external links, clipboard) / DevTools iframe postMessage (외부 링크, 클립보드)
   useEffect(() => {
+    const copyInParent = async (text: string): Promise<void> => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tauriWindow = window as any;
+      try {
+        if (typeof tauriWindow?.__TAURI__?.clipboardManager?.writeText === 'function') {
+          await tauriWindow.__TAURI__.clipboardManager.writeText(text);
+          console.log('[DevTools] copyInParent: copied via Tauri clipboard');
+          return;
+        }
+      } catch {
+        // Fall through / 다음 방식 시도
+      }
+      try {
+        if (typeof navigator?.clipboard?.writeText === 'function') {
+          await navigator.clipboard.writeText(text);
+          console.log('[DevTools] copyInParent: copied via Clipboard API');
+          return;
+        }
+      } catch {
+        // Fall through to execCommand / execCommand로 폴백
+      }
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        console.log('[DevTools] copyInParent: copied via execCommand');
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    };
+
     const handleMessage = async (event: MessageEvent) => {
-      // Only handle OPEN_EXTERNAL_LINK messages / OPEN_EXTERNAL_LINK 메시지만 처리
       if (event.data?.type === 'OPEN_EXTERNAL_LINK' && event.data?.url) {
         const url = event.data.url as string;
-
-        // Check if running in Tauri / Tauri 환경인지 확인
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const tauriWindow = window as any;
         if (typeof window !== 'undefined' && tauriWindow.__TAURI__?.shell) {
           try {
-            // Use Tauri shell API to open external links / Tauri shell API를 사용하여 외부 링크 열기
             await tauriWindow.__TAURI__.shell.open(url);
           } catch (err) {
             console.error('Failed to open link with Tauri:', err);
-            // Fallback to window.open if Tauri API fails / Tauri API 실패 시 window.open으로 폴백
             window.open(url, '_blank', 'noopener,noreferrer');
           }
         } else {
-          // Use standard window.open for web environment / 웹 환경에서는 표준 window.open 사용
           window.open(url, '_blank', 'noopener,noreferrer');
         }
+        return;
+      }
+      if (event.data?.type === 'COPY_TEXT' && typeof event.data?.text === 'string') {
+        const text = event.data.text as string;
+        console.log('[DevTools] COPY_TEXT received from iframe, length=', text.length);
+        await copyInParent(text);
       }
     };
 
@@ -276,6 +311,7 @@ function DevToolsPage() {
                   src={devtoolsUrl}
                   className="w-full h-full border-none"
                   title={title}
+                  sandbox={IFRAME_SANDBOX_DEVTOOLS}
                   allow={IFRAME_ALLOW_ALL_PERMISSIONS}
                 />
               </div>

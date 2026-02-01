@@ -419,7 +419,23 @@ var InspectorFrontendHostStub = class {
     if (text === void 0 || text === null) {
       return;
     }
-    void navigator.clipboard.writeText(text);
+    const doCopy = () => {
+      if (typeof navigator?.clipboard?.writeText === "function") {
+        void navigator.clipboard.writeText(text);
+      }
+    };
+    const button = document.createElement("button");
+    button.type = "button";
+    button.style.position = "fixed";
+    button.style.left = "-9999px";
+    button.style.opacity = "0";
+    button.style.pointerEvents = "none";
+    button.addEventListener("click", () => {
+      doCopy();
+      button.remove();
+    });
+    document.body.appendChild(button);
+    button.click();
   }
   openInNewTab(url) {
     if (Common2.ParsedURL.schemeIs(url, "javascript:")) {
