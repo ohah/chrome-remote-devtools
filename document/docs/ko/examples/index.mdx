@@ -21,6 +21,7 @@ import { PackageManagerTabs } from '@theme';
 - `console.error()` - 에러 메시지
 - `console.warn()` - 경고 메시지
 - `console.info()` - 정보 메시지
+- `console.log(..., { count, status })` - 확장 가능 객체 (Console에서 행 또는 화살표 클릭으로 펼치기/접기; Safari/WebKit 테스트용)
 
 DevTools를 연 상태에서 이 버튼을 클릭하면 Console 패널에서 각 메시지가 다른 색상과 아이콘으로 표시되는 것을 확인할 수 있습니다.
 
@@ -192,6 +193,8 @@ console.log('일반 로그 메시지');
 console.error('에러 메시지');
 console.warn('경고 메시지');
 console.info('정보 메시지');
+// 확장 가능 객체 (Console에서 클릭하여 펼치기/접기)
+console.log('객체:', { count: 1, status: 'ok' });
 ```
 
 ### 네트워크 요청 보내기

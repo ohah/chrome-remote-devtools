@@ -21,6 +21,7 @@ Click the **Test Console** button to output various levels of console messages:
 - `console.error()` - Error messages
 - `console.warn()` - Warning messages
 - `console.info()` - Info messages
+- `console.log(..., { count, status })` - Expandable object (click the row or arrow in Console to expand/collapse; useful for testing Safari/WebKit)
 
 With DevTools open, clicking this button will show each message with different colors and icons in the Console panel.
 
@@ -192,6 +193,8 @@ console.log('General log message');
 console.error('Error message');
 console.warn('Warning message');
 console.info('Info message');
+// Expandable object (click in Console to expand/collapse)
+console.log('Object:', { count: 1, status: 'ok' });
 ```
 
 ### Send Network Request
