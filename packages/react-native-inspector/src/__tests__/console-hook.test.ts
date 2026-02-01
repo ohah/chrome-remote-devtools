@@ -96,4 +96,30 @@ describe('console-hook', () => {
     const payload = JSON.parse(mockSender.mock.calls[0]![2] as string);
     expect(payload.params.type).toBe('error');
   });
+
+  test('enableConsoleHook uses defineProperties and disable restores original descriptor / defineProperties로 설치·복원 시 원본 descriptor 복원', () => {
+    const c = globalThis.console;
+    const descBefore = Object.getOwnPropertyDescriptor(c, 'log');
+    expect(descBefore?.value).toBeDefined();
+    const originalLog = descBefore!.value;
+
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    enableConsoleHook();
+    const descAfter = Object.getOwnPropertyDescriptor(c, 'log');
+    expect(descAfter?.value).not.toBe(originalLog);
+
+    disableConsoleHook();
+    const descRestored = Object.getOwnPropertyDescriptor(c, 'log');
+    expect(descRestored?.value).toBe(originalLog);
+  });
+
+  test('enableConsoleHook is idempotent: second enable leaves same wrapper / 두 번째 enable 시 동일 래퍼 유지', () => {
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    enableConsoleHook();
+    const firstLog = globalThis.console.log;
+    enableConsoleHook();
+    expect(globalThis.console.log).toBe(firstLog);
+  });
 });
