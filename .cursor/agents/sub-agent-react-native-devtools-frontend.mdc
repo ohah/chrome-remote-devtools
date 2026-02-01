@@ -48,8 +48,8 @@ description: 서브 에이전트 - React Native DevTools Frontend 레퍼런스 �
 | **Network** | ✅ | ✅ | |
 | **Elements** | ✅ | ✅ | RN에서는 DOM 없이 제한적일 수 있음 |
 | **Sources** | ✅ | ✅ | |
-| **React DevTools – Components** | ✅ react_devtools | ❌ | 누락 |
-| **React DevTools – Profiler** | ✅ react_devtools | ❌ | 누락 |
+| **React DevTools – Components** | ✅ react_devtools | ✅ | 이식 완료. clientType/clientId 분기, CSP, CSS wrapper, Runtime.evaluate 반환값 적용 |
+| **React DevTools – Profiler** | ✅ react_devtools | ✅ | 동일 |
 | **Application** | ✅ | ✅ | |
 
 **범위 외 (동일 구현 목표와 무관)**:
@@ -57,16 +57,20 @@ description: 서브 에이전트 - React Native DevTools Frontend 레퍼런스 �
 - **Session Replay**: 우리에만 있음. **RN에서는 현재 노출되지 않음** (RN 클라이언트용 탭에 포함하지 않음).
 - **MMKV, Redux, AsyncStorage 등**: 우리가 추가한 확장. 지원 여부는 추가 확장이라 **동일 구현 목표와 무관** (있으면 유지, 없어도 RN DevTools 동일화 목표에는 영향 없음).
 
-## 4. 현재 누락된 것 (우선 반영 대상)
+## 4. 구현 완료 (react_devtools)
 
-- **react_devtools**: Components / Profiler 패널. 레퍼런스의 `panels/react_devtools/` 및 `front_end/third_party/react-devtools` 의존성 검토 후 이식.
+- **react_devtools**: Components / Profiler 패널 이식 완료. 레퍼런스의 `panels/react_devtools/`, `models/react_native/`, `third_party/react-devtools` 반영. 렌더링·기능 동작을 위해 아래 적용됨.
+  - **조건 분기**: `clientType === 'react-native'` 또는 `clientId.startsWith('rn-inspector-')` 일 때만 표시. Inspector에서 DevTools URL에 `clientId`·`clientType` 전달.
+  - **CSP**: entrypoint HTML에 `script-src 'unsafe-eval' blob:`, `worker-src 'self' blob:` 추가 (third_party 번들의 `new Function()`·Worker from Blob 허용).
+  - **CSS**: `#clearView()` 가 `<style>` 을 지우지 않도록 content wrapper div 사용; loader/에러/DevTools UI는 wrapper에만 렌더.
+  - **RN 앱 쪽**: `react-native-inspector` 에서 `Runtime.evaluate` 는 **표현식 값을 반환** (예: `globalThis.__FUSEBOX_... != undefined` → true/false), `Runtime.addBinding`·`Runtime.bindingCalled` 처리. 상세는 `document/docs/en/guide/react-devtools-components-profiler.md` 의 "Implementation status and fixes" 참고.
 
-**RN 분기는 이미 적용됨.** `devtools_app` URL에 `clientType` 전달되고, 각 패널 메타에서 `Runtime.queryParam('clientType')` 으로 RN일 때 표시/숨김 처리함. 예: `elements-meta.ts`, `application-meta.ts` → RN이면 숨김; `storage-meta.ts`, `redux-meta.ts` → RN일 때만 표시; `session_replay-meta.ts` → RN이면 숨김. react_devtools 이식 시에도 동일하게 `clientType === 'react-native'` 일 때만 등록하면 됨. (레퍼런스처럼 개별 뷰 `maybeRemoveViewExtension` 은 필요 시 추가.)
+**RN 분기 (공통).** `devtools_app` URL에 `clientType` 전달되고, 각 패널 메타에서 `Runtime.queryParam('clientType')` / `queryParam('clientId')` 로 RN일 때 표시/숨김. react_devtools 는 위 조건으로 등록 완료.
 
 ## 5. 앞으로 해야 할 것 (정리)
 
 1. **레퍼런스 동기화**: `reference/react-native-devtools-frontend` 브랜치를 주기적으로 최신화하고, 우리 포크와 diff 해서 패널·entrypoint 변경사항 추적.
-2. **react_devtools 이식**: React DevTools 패널(Components, Profiler) 및 third_party 의존성 이식, CDP/호스트 연동 점검. 등록 시 `clientType === 'react-native'` 일 때만 표시하도록 분기 (기존 패널과 동일).
+2. **react_devtools 유지·업그레이드**: 레퍼런스나 third_party(react-devtools-fusebox) 업데이트 시 우리 쪽 패널·CSP·wrapper 로직과 호환되는지 점검.
 3. **실험·SDK 연동** (필요 시): 레퍼런스에서 쓰는 실험/모델이 우리 구조에 맞게 연동되는지 필요 시 검토. (무엇인지·언제 쓰는지는 아래 "실험·SDK 연동이란?" 참고.)
 
 ## 5-1. 실험·SDK 연동이란? (언제 쓰는지)
@@ -83,12 +87,12 @@ description: 서브 에이전트 - React Native DevTools Frontend 레퍼런스 �
   - 쓰는 곳: rn_welcome 메타데이터 표시, Timeline에서 RN 앱 메타데이터·스크린샷 토글, FuseboxFeatureObserver/FuseboxAppMetadataObserver에서 메타데이터/시스템 상태 구독.
   - 언제: RN(Fusebox) 백엔드가 ReactNativeApplication 도메인을 보낼 때. 우리 클라이언트가 해당 도메인을 안 보내면 이 모델은 비어 있거나 불필요할 수 있음.
 
-**우리 프로젝트**: 단일 `devtools_app` + `clientType` 이므로, react_devtools 이식 시 `clientType=react-native` 일 때만 실험 켜기·분기하면 됨. ReactNativeApplication 도메인은 우리 RN 클라이언트에 없으면 도입하지 않아도 됨.
+**우리 프로젝트**: 단일 `devtools_app` + `clientType` 이므로, react_devtools 는 `clientType=react-native`(및 clientId fallback) 일 때만 표시하도록 분기 완료. ReactNativeApplication 도메인은 우리 RN 클라이언트에 없으면 도입하지 않아도 됨.
 
 ## 6. 체크리스트 (React Native DevTools Frontend)
 
 - [ ] 요청 시 레퍼런스 브랜치 최신화·검증·비교를 수행했는가?
 - [ ] 위 탭/패널 비교표를 기준으로 누락·차이를 구체적으로 적었는가?
-- [ ] react_devtools 이식 시 레퍼런스 라이선스·헤더(Chromium + Meta)를 준수하는가?
-- [ ] 변경이 `devtools/devtools-frontend` 빌드·Nice-PLQ 방식과 맞는가?
-- [ ] react_devtools 등록 시 `clientType === 'react-native'` 일 때만 표시하도록 분기했는가? (기존 패널 분기는 이미 적용됨.)
+- [x] react_devtools 이식: 레퍼런스 라이선스·헤더(Chromium + Meta) 준수, 빌드·Nice-PLQ 방식과 맞음.
+- [x] react_devtools 등록: `clientType === 'react-native'` 또는 `clientId.startsWith('rn-inspector-')` 일 때만 표시 (기존 패널 분기와 동일).
+- [ ] react_devtools/레퍼런스 업데이트 시 CSP·wrapper·Runtime 연동 호환 여부 점검했는가?
