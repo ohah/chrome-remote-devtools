@@ -120,3 +120,25 @@ Alternatively, copy the existing `package/` (and `react-devtools.ts`, `README.md
 | **third_party/react-devtools**      | Obtain from reference copy or build from react repo react-devtools-fusebox.                                                                           |
 
 Once the RN side exposes the same dispatcher + binding contract as the reference, the existing `ReactDevToolsBindingsModel` and panels should work with minimal changes.
+
+---
+
+## Implementation status and fixes
+
+Rendering and functionality work with the following in place:
+
+1. **react-native-inspector**
+   - **Runtime.evaluate** must return the **expression value** (e.g. `globalThis.__FUSEBOX_REACT_DEVTOOLS_DISPATCHER__ != undefined` → `true`/`false`). The frontend polls this; returning `undefined` causes timeout and an empty panel. Use `(0, eval)(expr)` or equivalent so the expression result is returned.
+   - **Runtime.addBinding** and **Runtime.bindingCalled**: handle and register the binding name; when the app invokes the binding, send a CDP `Runtime.bindingCalled` event.
+
+2. **Inspector**
+   - Pass **clientId** (and **clientType**) in the DevTools iframe URL so the panel condition (`clientType === 'react-native'` or `clientId.startsWith('rn-inspector-')`) shows the Components/Profiler tabs for RN clients.
+
+3. **DevTools iframe (CSP)**
+   - The third_party React DevTools bundle uses `new Function()` and `new Worker(URL.createObjectURL(new Blob([...])))`. Add to the entrypoint HTML CSP:
+     - **script-src**: `'unsafe-eval'`, `blob:`
+     - **worker-src**: `'self'`, `blob:`
+   - Otherwise you get `EvalError: Refused to evaluate...` or `SecurityError: The operation is insecure`.
+
+4. **React DevTools panel CSS**
+   - `#clearView()` must not remove the `<style>` injected by `registerRequiredCSS(ReactDevTools.CSS)`. Use a **content wrapper** div: append only the wrapper to `contentElement`, clear only the wrapper in `#clearView()`, and pass the wrapper to `initializeComponents` / `initializeProfiler`. Keep the `<style>` as a sibling of the wrapper so it is never removed.

@@ -182,4 +182,46 @@ describe('cdp-message-handler', () => {
     expect(parsed.result).toEqual({});
     expect(getObject(objectId)).toBeUndefined();
   });
+
+  test('Runtime.evaluate returns expression value (for React DevTools waitForFuseboxDispatcher) / Runtime.evaluate가 표현식 값을 반환 (React DevTools waitForFuseboxDispatcher용)', () => {
+    const mockSender = mock(() => {});
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    handleCDPMessage({
+      method: 'Runtime.evaluate',
+      id: 10,
+      params: { expression: '1 + 2' },
+    });
+    expect(mockSender).toHaveBeenCalled();
+    const messageStr = mockSender.mock.calls[0]![2] as string;
+    const parsed = JSON.parse(messageStr);
+    expect(parsed.id).toBe(10);
+    expect(parsed.result).toBeDefined();
+    expect(parsed.result.result).toBeDefined();
+    expect(parsed.result.result.type).toBe('number');
+    expect(parsed.result.result.value).toBe(3);
+  });
+
+  test('Runtime.evaluate comparison returns boolean (e.g. globalThis.x != undefined) / Runtime.evaluate 비교식은 boolean 반환', () => {
+    const mockSender = mock(() => {});
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    handleCDPMessage({
+      method: 'Runtime.evaluate',
+      id: 11,
+      params: {
+        expression: 'globalThis.__FUSEBOX_REACT_DEVTOOLS_DISPATCHER__ != undefined',
+        returnByValue: true,
+      },
+    });
+    expect(mockSender).toHaveBeenCalled();
+    const messageStr = mockSender.mock.calls[0]![2] as string;
+    const parsed = JSON.parse(messageStr);
+    expect(parsed.id).toBe(11);
+    expect(parsed.result?.result?.type).toBe('boolean');
+    // In test env the global may or may not have the dispatcher; we only assert the shape
+    expect(typeof parsed.result?.result?.value).toBe('boolean');
+  });
 });

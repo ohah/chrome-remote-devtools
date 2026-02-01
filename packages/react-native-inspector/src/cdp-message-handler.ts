@@ -2,6 +2,7 @@
 // Allows any domain to register handlers for CDP commands / 모든 도메인이 CDP 명령에 대한 핸들러를 등록할 수 있음
 
 import { sendCDPResponse } from './cdp/domain/base';
+import { handleRuntimeAddBinding, handleRuntimeEvaluate } from './cdp/domain/runtime-evaluate';
 import { sendExecutionContextCreated } from './cdp/domain/runtime';
 import { getObjectProperties } from './cdp/common/get-object-properties';
 import { releaseObject } from './cdp/common/object-store';
@@ -109,6 +110,24 @@ export function handleCDPMessage(message: {
     }
     if (getServerInfo()) {
       sendCDPResponse(message.id, {});
+    }
+    return;
+  }
+
+  // Runtime.evaluate: run expression in app JS context for React DevTools (Fusebox) / React DevTools(Fusebox)용 앱 JS 컨텍스트에서 표현식 실행
+  if (message.method === 'Runtime.evaluate' && typeof message.id === 'number') {
+    if (getServerInfo()) {
+      handleRuntimeEvaluate(
+        message as { id: number; params?: { expression?: string; returnByValue?: boolean } }
+      );
+    }
+    return;
+  }
+
+  // Runtime.addBinding: register binding so app can send Runtime.bindingCalled (React DevTools Fusebox) / 앱이 bindingCalled 전송할 수 있도록 바인딩 등록
+  if (message.method === 'Runtime.addBinding' && typeof message.id === 'number') {
+    if (getServerInfo()) {
+      handleRuntimeAddBinding(message as { id: number; params?: { name?: string } });
     }
     return;
   }

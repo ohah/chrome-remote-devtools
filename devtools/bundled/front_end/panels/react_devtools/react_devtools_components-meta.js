@@ -28,7 +28,14 @@ UI.ViewManager.registerViewExtension({
   commandPrompt: i18nLazyString(UIStrings.command),
   persistence: "permanent",
   order: 1010,
-  condition: () => Root.Runtime.Runtime.queryParam("clientType") === "react-native",
+  condition: () => {
+    const clientType = Root.Runtime.Runtime.queryParam("clientType");
+    if (clientType === "react-native" || clientType === "reactotron") {
+      return true;
+    }
+    const clientId = Root.Runtime.Runtime.queryParam("clientId");
+    return typeof clientId === "string" && clientId.startsWith("rn-inspector-");
+  },
   async loadView() {
     const Module = await loadModule();
     return new Module.ReactDevToolsComponentsView.ReactDevToolsComponentsViewImpl();
