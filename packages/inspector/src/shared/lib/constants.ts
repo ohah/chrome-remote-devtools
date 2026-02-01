@@ -9,6 +9,13 @@ export const GITHUB_REPO_URL = 'https://github.com/ohah/chrome-remote-devtools';
 export const DEVTOOLS_FRONTEND_PATH = '/devtools-frontend/devtools_app.html';
 
 /**
+ * iframe allow attribute: grant all Permissions Policy features (for DevTools iframes) /
+ * iframe allow 속성: 모든 Permissions Policy 기능 허용 (DevTools iframe용)
+ */
+export const IFRAME_ALLOW_ALL_PERMISSIONS =
+  'accelerometer *; ambient-light-sensor *; autoplay *; bluetooth *; camera *; display-capture *; encrypted-media *; fullscreen *; gamepad *; geolocation *; gyroscope *; hid *; identity-credentials-get *; idle-detection *; local-fonts *; magnetometer *; microphone *; midi *; payment *; picture-in-picture *; publickey-credentials-create *; publickey-credentials-get *; screen-wake-lock *; serial *; usb *; web-share *; window-management *; xr-spatial-tracking *; clipboard-read *; clipboard-write *; storage-access *';
+
+/**
  * DevTools configuration parameters / DevTools 설정 파라미터
  */
 export const DEVTOOLS_CONFIG = {

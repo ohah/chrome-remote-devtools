@@ -4,6 +4,7 @@ import { Activity } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { buildDevToolsUrl } from '@/shared/lib/devtools-url';
+import { IFRAME_ALLOW_ALL_PERMISSIONS } from '@/shared/lib/constants';
 import { clientQueries } from '@/entities/client';
 import { useServerUrl } from '@/shared/lib';
 import { Tabs, type Tab } from '@/components/tabs';
@@ -270,7 +271,13 @@ function DevToolsPage() {
           return (
             <Activity key={item.key} mode={isActive ? 'visible' : 'hidden'}>
               <div className="absolute inset-0 w-full h-full">
-                <iframe ref={iframeRef} src={devtoolsUrl} className="w-full h-full border-none" title={title} />
+                <iframe
+                  ref={iframeRef}
+                  src={devtoolsUrl}
+                  className="w-full h-full border-none"
+                  title={title}
+                  allow={IFRAME_ALLOW_ALL_PERMISSIONS}
+                />
               </div>
             </Activity>
           );
