@@ -112,19 +112,20 @@ impl ReactNativeInspectorConnectionManager {
 
         // Create new connection / 새 연결 생성
         let id = existing_id.unwrap_or_else(|| {
+            let timestamp_millis = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_else(|_| std::time::Duration::from_millis(0))
+                .as_millis();
             format!(
                 "rn-inspector-{}-{}",
-                std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .unwrap()
-                    .as_millis(),
+                timestamp_millis,
                 Uuid::new_v4().simple()
             )
         });
 
-        if device_id.is_some() {
+        if let Some(ref did) = device_id {
             let mut map = self.device_id_to_id.write().await;
-            map.insert(device_id.clone().unwrap(), id.clone());
+            map.insert(did.clone(), id.clone());
         }
 
         self.logger.log(
