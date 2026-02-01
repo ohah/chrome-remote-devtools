@@ -39,12 +39,9 @@ export function buildDevToolsUrl(options: BuildDevToolsUrlOptions): string {
   const wsUrl = `${serverHost}/remote/debug/devtools/${devtoolsId}?clientId=${clientId}`;
   params.append('ws', wsUrl);
 
-  // Generate random instance ID for localStorage isolation / localStorage 격리를 위한 랜덤 인스턴스 ID 생성
-  // Use random value to ensure each DevTools instance has completely isolated storage
-  // / 각 DevTools 인스턴스가 완전히 격리된 스토리지를 가지도록 랜덤 값 사용
-  // Generate random string: timestamp + random number / 랜덤 문자열 생성: 타임스탬프 + 랜덤 숫자
-  const randomInstance = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
-  params.append('instance', randomInstance);
+  // Stable instance ID per clientId so iframe src never changes on re-render (no reload) / clientId당 고정 instance로 리렌더 시 src 변경·리로드 방지
+  const stableInstance = `stable-${clientId}`;
+  params.append('instance', stableInstance);
 
   // Client type parameter / 클라이언트 타입 파라미터
   if (clientType) {

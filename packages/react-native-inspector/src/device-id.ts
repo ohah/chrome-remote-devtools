@@ -31,17 +31,35 @@ function generateDeviceId(): string {
   return 'js-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
 }
 
+const STORAGE_READY_DELAY_MS = 300;
+const STORAGE_READY_RETRIES = 2;
+/** Short delay before first read on cold start so native AsyncStorage can be ready / 콜드 스타트 시 네이티브 AsyncStorage 준비를 위한 첫 읽기 전 짧은 대기 */
+const COLD_START_INITIAL_DELAY_MS = 100;
+
 /**
- * Get stable device ID / 안정적 device ID 반환
- * Uses AsyncStorage when provided or when @react-native-async-storage/async-storage is installed, so ID persists across app reloads / 전달된 AsyncStorage 또는 앱에 설치된 AsyncStorage 사용 시 앱 리로드 후에도 유지
- * Otherwise same ID only for reconnects (in-memory) / 없으면 재연결 시에만 동일 ID (메모리)
+ * Get stable device ID from AsyncStorage only (no in-memory fallback) / AsyncStorage에서만 안정적 device ID 반환 (메모리 fallback 없음)
+ * Requires AsyncStorage so ID persists across app restarts and same device is not shown as multiple tabs / 앱 재시작 후에도 동일 ID 유지·같은 기기가 여러 탭으로 나오지 않도록 AsyncStorage 필수
+ * On cold start waits briefly and retries so native module has time to be ready / 콜드 스타트 시 짧은 대기 후 재시도하여 네이티브 모듈 준비 시간 확보
  * @param storage Optional AsyncStorage; when omitted, tries to use app's AsyncStorage / (선택) 생략 시 앱의 AsyncStorage 자동 사용 시도
  * @returns Promise resolving to device ID string / device ID 문자열로 resolve되는 Promise
+ * @throws When AsyncStorage is not available or all read/write attempts fail / AsyncStorage 없거나 모든 읽기·쓰기 시도 실패 시
  */
 export async function getStableDeviceId(storage?: AsyncStorageType): Promise<string> {
   const effectiveStorage = storage ?? getOptionalAsyncStorage();
-  if (effectiveStorage != null) {
+  if (effectiveStorage == null) {
+    throw new Error(
+      '[ChromeRemoteDevTools] AsyncStorage is required for stable device ID. ' +
+        'Install @react-native-async-storage/async-storage and ensure it is linked, or pass asyncStorage in connect(options).'
+    );
+  }
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= STORAGE_READY_RETRIES; attempt++) {
     try {
+      if (attempt === 0 && cachedDeviceId == null) {
+        await new Promise((r) => setTimeout(r, COLD_START_INITIAL_DELAY_MS));
+      } else if (attempt > 0) {
+        await new Promise((r) => setTimeout(r, STORAGE_READY_DELAY_MS));
+      }
       const existing = await effectiveStorage.getItem(STORAGE_KEY);
       if (existing != null && existing.length > 0) {
         cachedDeviceId = existing;
@@ -51,11 +69,18 @@ export async function getStableDeviceId(storage?: AsyncStorageType): Promise<str
       await effectiveStorage.setItem(STORAGE_KEY, id);
       cachedDeviceId = id;
       return id;
-    } catch {
-      // Fallback to in-memory if storage fails / 스토리지 실패 시 메모리 fallback
+    } catch (err) {
+      lastError = err;
+      if (attempt === STORAGE_READY_RETRIES) {
+        throw new Error(
+          '[ChromeRemoteDevTools] Failed to read or write device ID from AsyncStorage after retries. ' +
+            'Ensure AsyncStorage is linked and native module is ready.',
+          { cause: err }
+        );
+      }
     }
   }
-  if (cachedDeviceId != null) return cachedDeviceId;
-  cachedDeviceId = generateDeviceId();
-  return cachedDeviceId;
+  throw new Error('[ChromeRemoteDevTools] Failed to get stable device ID from AsyncStorage.', {
+    cause: lastError,
+  });
 }
