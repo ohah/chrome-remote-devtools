@@ -1,6 +1,6 @@
 /**
  * CDP message handler tests / CDP 메시지 핸들러 테스트
- * Covers registerCDPMessageHandler, handleCDPMessage, global handler, Runtime.enable, Page.getResourceTree, Runtime.getProperties, Runtime.releaseObject / 핸들러 등록·처리·전역·Runtime·Page
+ * Covers registerCDPMessageHandler, handleCDPMessage, global handler, Runtime.enable, Page.getResourceTree, Runtime.getProperties, Runtime.releaseObject, Runtime.addBinding, Runtime.bindingCalled / 핸들러 등록·처리·전역·Runtime·Page·addBinding·bindingCalled
  */
 import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { registerCDPMessageHandler, handleCDPMessage } from '../cdp-message-handler';
@@ -31,6 +31,9 @@ describe('cdp-message-handler', () => {
     setCDPConnectionReady(false);
     (globalThis as any).__ChromeRemoteDevToolsServerHost = undefined;
     (globalThis as any).__ChromeRemoteDevToolsServerPort = undefined;
+    // Clean up binding installed by Runtime.addBinding tests / Runtime.addBinding 테스트에서 설치한 바인딩 제거
+    delete (globalThis as any).testBindingAddBinding;
+    delete (globalThis as any).testBindingPayloadObject;
   });
 
   test('handleCDPMessage warns and returns when message has no method / method 없으면 경고 후 반환', () => {
@@ -223,5 +226,49 @@ describe('cdp-message-handler', () => {
     expect(parsed.result?.result?.type).toBe('boolean');
     // In test env the global may or may not have the dispatcher; we only assert the shape
     expect(typeof parsed.result?.result?.value).toBe('boolean');
+  });
+
+  test('Runtime.addBinding sends result and calling binding sends Runtime.bindingCalled / Runtime.addBinding 응답 후 바인딩 호출 시 bindingCalled 전송', () => {
+    const mockSender = mock(() => {});
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    handleCDPMessage({
+      method: 'Runtime.addBinding',
+      id: 1,
+      params: { name: 'testBindingAddBinding' },
+    });
+    expect(mockSender).toHaveBeenCalled();
+    const responseStr = mockSender.mock.calls[0]![2] as string;
+    const response = JSON.parse(responseStr);
+    expect(response.id).toBe(1);
+    expect(response.result).toEqual({});
+    (globalThis as any).testBindingAddBinding('hello');
+    expect(mockSender).toHaveBeenCalledTimes(2);
+    const eventStr = mockSender.mock.calls[1]![2] as string;
+    const event = JSON.parse(eventStr);
+    expect(event.method).toBe('Runtime.bindingCalled');
+    expect(event.params.name).toBe('testBindingAddBinding');
+    expect(event.params.payload).toBe('hello');
+    expect(event.params.executionContextId).toBe(1);
+  });
+
+  test('Runtime.addBinding binding called with object sends JSON string payload / addBinding 바인딩에 객체 전달 시 payload는 JSON 문자열', () => {
+    const mockSender = mock(() => {});
+    setServerInfo('localhost', 8080);
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    handleCDPMessage({
+      method: 'Runtime.addBinding',
+      id: 2,
+      params: { name: 'testBindingPayloadObject' },
+    });
+    const payload = { domain: 'react-devtools', message: { event: 'ping' } };
+    (globalThis as any).testBindingPayloadObject(payload);
+    expect(mockSender).toHaveBeenCalled();
+    const eventStr = mockSender.mock.calls[mockSender.mock.calls.length - 1]![2] as string;
+    const event = JSON.parse(eventStr);
+    expect(event.method).toBe('Runtime.bindingCalled');
+    expect(event.params.payload).toBe(JSON.stringify(payload));
   });
 });
