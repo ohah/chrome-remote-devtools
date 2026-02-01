@@ -77,7 +77,9 @@ function main(): void {
   }
 
   let updated = 0;
+  const MISE_SERVER_KEYS = new Set(['tauri', 'maestro']);
   for (const key of Object.keys(mcp.mcpServers)) {
+    if (!MISE_SERVER_KEYS.has(key)) continue;
     const server = mcp.mcpServers[key];
     if (server && typeof server.command === 'string') {
       server.command = misePath;
