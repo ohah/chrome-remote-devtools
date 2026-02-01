@@ -59,8 +59,11 @@ const CDP_TYPE_MAP: Record<string, string> = {
   timeLog: 'log',
 };
 
-/** Original console methods backup / 원본 console 메서드 백업 */
+/** Original console methods backup (for wrapper to call) / 원본 console 메서드 백업 (래퍼에서 호출용) */
 const originalConsole: Record<string, (...args: unknown[]) => void> = {};
+
+/** Original property descriptors for restore via defineProperties / defineProperties로 복원할 원본 프로퍼티 설명자 */
+const originalDescriptors: Record<string, PropertyDescriptor> = {};
 
 /**
  * Send Runtime.consoleAPICalled event (same shape as CDP / Reactotron: timestamp in milliseconds) / Runtime.consoleAPICalled 이벤트 전송 (CDP·Reactotron과 동일: timestamp 밀리초)
@@ -103,7 +106,7 @@ function createWrappedMethod(methodName: ConsoleMethodName): (...args: unknown[]
 }
 
 /**
- * Install console hooks / 콘솔 훅 설치
+ * Install console hooks via Object.defineProperties / Object.defineProperties로 콘솔 훅 설치
  * Idempotent: if already hooked, skip so original is not overwritten / 이미 훅이 설치되어 있으면 건너뜀 (원본 덮어쓰기 방지)
  */
 function installHooks(): boolean {
@@ -112,31 +115,53 @@ function installHooks(): boolean {
   const g = global as typeof globalThis & { console?: Console };
   if (!g.console) return false;
   const c = g.console;
+  const descriptors: PropertyDescriptorMap = {};
   for (const methodName of CONSOLE_METHODS) {
     const fn = c[methodName as keyof Console];
     if (typeof fn === 'function') {
+      const desc = Object.getOwnPropertyDescriptor(c, methodName);
+      if (desc) {
+        originalDescriptors[methodName] = desc;
+      }
       originalConsole[methodName] = fn as (...args: unknown[]) => void;
-      (c as unknown as Record<string, (...args: unknown[]) => void>)[methodName] =
-        createWrappedMethod(methodName);
+      descriptors[methodName] = {
+        value: createWrappedMethod(methodName),
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      };
     }
+  }
+  try {
+    Object.defineProperties(c, descriptors);
+  } catch (_e) {
+    return false;
   }
   isHooked = true;
   return true;
 }
 
 /**
- * Restore original console methods / 원본 console 메서드 복원
+ * Restore original console methods via Object.defineProperties / Object.defineProperties로 원본 console 메서드 복원
  */
 function uninstallHooks(): boolean {
   if (typeof global === 'undefined' || !isHooked) return false;
   const g = global as typeof globalThis & { console?: Console };
   if (!g.console) return false;
   const c = g.console;
+  const toRestore: PropertyDescriptorMap = {};
   for (const methodName of CONSOLE_METHODS) {
-    const original = originalConsole[methodName];
-    if (original) {
-      (c as unknown as Record<string, (...args: unknown[]) => void>)[methodName] = original;
+    const desc = originalDescriptors[methodName];
+    if (desc) {
+      toRestore[methodName] = desc;
+      delete originalDescriptors[methodName];
     }
+    delete originalConsole[methodName];
+  }
+  try {
+    Object.defineProperties(c, toRestore);
+  } catch (_e) {
+    return false;
   }
   isHooked = false;
   return true;
