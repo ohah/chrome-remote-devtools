@@ -143,9 +143,9 @@ function DevToolsPage() {
         return idToKey;
       });
       setStableKeys((prevKeys) => {
-        let keysNext = prevKeys;
+        const keysNext = [...prevKeys];
         next.forEach((_, key) => {
-          if (!keysNext.includes(key)) keysNext = keysNext.concat(key);
+          if (!keysNext.includes(key)) keysNext.push(key);
         });
         return keysNext;
       });
