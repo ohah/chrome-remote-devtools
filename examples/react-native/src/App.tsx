@@ -52,8 +52,13 @@ function App() {
   }, []);
 
   // Use localhost; on Android emulator run once: adb reverse tcp:8080 tcp:8080 / localhost 사용; Android 에뮬에서는 한 번 실행: adb reverse tcp:8080 tcp:8080
+  // asyncStorage required for stable device ID (no fallback) / 안정적 device ID용 asyncStorage 필수 (fallback 없음)
   return (
-    <ChromeRemoteDevToolsInspectorProvider serverHost="localhost" serverPort={8080}>
+    <ChromeRemoteDevToolsInspectorProvider
+      serverHost="localhost"
+      serverPort={8080}
+      asyncStorage={AsyncStorage as unknown as AsyncStorageType}
+    >
       <SafeAreaProvider>
         <View style={styles.container}>
           <Provider store={store}>

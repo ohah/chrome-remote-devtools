@@ -13,15 +13,8 @@ describe('device-id', () => {
     // So we test: without storage we get same ID on second call; with storage we get stored ID.
   });
 
-  test('getStableDeviceId without storage returns id in js-xxx format / storage 없으면 js-xxx 형식', async () => {
-    const id = await getStableDeviceId();
-    expect(id).toMatch(/^js-[a-z0-9]+-[a-z0-9]+$/);
-  });
-
-  test('getStableDeviceId without storage returns same id on second call / storage 없어도 두 번째 호출 시 동일 ID', async () => {
-    const id1 = await getStableDeviceId();
-    const id2 = await getStableDeviceId();
-    expect(id1).toBe(id2);
+  test('getStableDeviceId without storage throws / storage 없으면 throw', async () => {
+    await expect(getStableDeviceId()).rejects.toThrow('AsyncStorage is required');
   });
 
   test('getStableDeviceId with storage returns stored id on second call / storage 있으면 두 번째 호출 시 저장된 ID', async () => {
