@@ -216,9 +216,16 @@ pub fn run() {
     let reactotron_enabled = Arc::new(RwLock::new(false));
     REACTOTRON_ENABLED.set(reactotron_enabled).ok();
 
-    tauri::Builder::default()
+    let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_clipboard_manager::init());
+
+    #[cfg(debug_assertions)]
+    {
+        builder = builder.plugin(tauri_plugin_mcp_bridge::init());
+    }
+
+    builder
         .invoke_handler(tauri::generate_handler![
             greet,
             start_server,

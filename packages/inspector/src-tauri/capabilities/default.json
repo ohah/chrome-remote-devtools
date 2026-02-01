@@ -6,6 +6,7 @@
     "main"
   ],
   "permissions": [
+    "mcp-bridge:default",
     "core:default",
     "opener:default",
     "core:window:default",
