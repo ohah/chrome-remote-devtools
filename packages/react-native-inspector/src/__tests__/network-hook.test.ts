@@ -163,4 +163,40 @@ describe('network-hook', () => {
     expect(params.request.headers?.['X-Custom']).toBe('value');
     disableNetworkHook();
   });
+
+  test('enableNetworkHook uses defineProperty: XMLHttpRequest replaced and disable restores original / defineProperty로 XHR 교체·복원', () => {
+    const origXHR = (globalThis as any).XMLHttpRequest;
+    expect(origXHR).toBeDefined();
+
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    enableNetworkHook();
+    expect((globalThis as any).XMLHttpRequest).not.toBe(origXHR);
+
+    disableNetworkHook();
+    expect((globalThis as any).XMLHttpRequest).toBe(origXHR);
+  });
+
+  test('enableNetworkHook uses defineProperty: fetch replaced and disable restores original / defineProperty로 fetch 교체·복원', () => {
+    const origFetch = (globalThis as any).fetch;
+    expect(origFetch).toBeDefined();
+
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    enableNetworkHook();
+    expect((globalThis as any).fetch).not.toBe(origFetch);
+
+    disableNetworkHook();
+    expect((globalThis as any).fetch).toBe(origFetch);
+  });
+
+  test('enableNetworkHook is idempotent: second enable leaves same wrapper / 두 번째 enable 시 동일 래퍼 유지', () => {
+    setCDPEventSender(mockSender);
+    setCDPConnectionReady();
+    enableNetworkHook();
+    const firstFetch = (globalThis as any).fetch;
+    enableNetworkHook();
+    expect((globalThis as any).fetch).toBe(firstFetch);
+    disableNetworkHook();
+  });
 });
