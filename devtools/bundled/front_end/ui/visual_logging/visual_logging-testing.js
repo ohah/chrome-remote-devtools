@@ -3409,6 +3409,7 @@ var knownContextValues = /* @__PURE__ */ new Set([
   "self",
   "self-xss-warning",
   "send",
+  "sendFeedback",
   "sensors",
   "sensors.manage-locations",
   "sensors.reset-device-orientiation",

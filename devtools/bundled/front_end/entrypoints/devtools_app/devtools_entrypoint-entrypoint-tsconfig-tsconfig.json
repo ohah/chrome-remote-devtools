@@ -123,6 +123,12 @@
       "path": "../../panels/session_replay/meta-tsconfig.json"
     },
     {
+      "path": "../../panels/react_devtools/components_meta-tsconfig.json"
+    },
+    {
+      "path": "../../panels/react_devtools/profiler_meta-tsconfig.json"
+    },
+    {
       "path": "../../panels/redux/meta-tsconfig.json"
     },
     {

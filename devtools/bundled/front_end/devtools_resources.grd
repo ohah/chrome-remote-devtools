@@ -640,6 +640,7 @@
       <include file="models/persistence/persistence-meta.js" name="MODELS_PERSISTENCE_PERSISTENCE_META_JS" resource_path="models/persistence/persistence-meta.js" type="BINDATA" compress="false"/>
       <include file="models/persistence/persistence.js" name="MODELS_PERSISTENCE_PERSISTENCE_JS" resource_path="models/persistence/persistence.js" type="BINDATA" compress="false"/>
       <include file="models/project_settings/project_settings.js" name="MODELS_PROJECT_SETTINGS_PROJECT_SETTINGS_JS" resource_path="models/project_settings/project_settings.js" type="BINDATA" compress="false"/>
+      <include file="models/react_native/react_native.js" name="MODELS_REACT_NATIVE_REACT_NATIVE_JS" resource_path="models/react_native/react_native.js" type="BINDATA" compress="false"/>
       <include file="models/source_map_scopes/source_map_scopes.js" name="MODELS_SOURCE_MAP_SCOPES_SOURCE_MAP_SCOPES_JS" resource_path="models/source_map_scopes/source_map_scopes.js" type="BINDATA" compress="false"/>
       <include file="models/stack_trace/stack_trace.js" name="MODELS_STACK_TRACE_STACK_TRACE_JS" resource_path="models/stack_trace/stack_trace.js" type="BINDATA" compress="false"/>
       <include file="models/stack_trace/stack_trace_impl.js" name="MODELS_STACK_TRACE_STACK_TRACE_IMPL_JS" resource_path="models/stack_trace/stack_trace_impl.js" type="BINDATA" compress="false"/>
@@ -760,6 +761,9 @@
       <include file="panels/search/search.js" name="PANELS_SEARCH_SEARCH_JS" resource_path="panels/search/search.js" type="BINDATA" compress="false"/>
       <include file="panels/session_replay/session_replay-meta.js" name="PANELS_SESSION_REPLAY_SESSION_REPLAY_META_JS" resource_path="panels/session_replay/session_replay-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/session_replay/session_replay.js" name="PANELS_SESSION_REPLAY_SESSION_REPLAY_JS" resource_path="panels/session_replay/session_replay.js" type="BINDATA" compress="false"/>
+      <include file="panels/react_devtools/react_devtools_components-meta.js" name="PANELS_REACT_DEVTOOLS_REACT_DEVTOOLS_COMPONENTS_META_JS" resource_path="panels/react_devtools/react_devtools_components-meta.js" type="BINDATA" compress="false"/>
+      <include file="panels/react_devtools/react_devtools_profiler-meta.js" name="PANELS_REACT_DEVTOOLS_REACT_DEVTOOLS_PROFILER_META_JS" resource_path="panels/react_devtools/react_devtools_profiler-meta.js" type="BINDATA" compress="false"/>
+      <include file="panels/react_devtools/react_devtools.js" name="PANELS_REACT_DEVTOOLS_REACT_DEVTOOLS_JS" resource_path="panels/react_devtools/react_devtools.js" type="BINDATA" compress="false"/>
       <include file="panels/security/security-meta.js" name="PANELS_SECURITY_SECURITY_META_JS" resource_path="panels/security/security-meta.js" type="BINDATA" compress="false"/>
       <include file="panels/security/security.js" name="PANELS_SECURITY_SECURITY_JS" resource_path="panels/security/security.js" type="BINDATA" compress="false"/>
       <include file="panels/sensors/sensors-meta.js" name="PANELS_SENSORS_SENSORS_META_JS" resource_path="panels/sensors/sensors-meta.js" type="BINDATA" compress="false"/>
@@ -824,6 +828,7 @@
       <include file="third_party/lit/lit.js" name="THIRD_PARTY_LIT_LIT_JS" resource_path="third_party/lit/lit.js" type="BINDATA" compress="false"/>
       <include file="third_party/marked/marked.js" name="THIRD_PARTY_MARKED_MARKED_JS" resource_path="third_party/marked/marked.js" type="BINDATA" compress="false"/>
       <include file="third_party/puppeteer-replay/puppeteer-replay.js" name="THIRD_PARTY_PUPPETEER_REPLAY_PUPPETEER_REPLAY_JS" resource_path="third_party/puppeteer-replay/puppeteer-replay.js" type="BINDATA" compress="false"/>
+      <include file="third_party/react-devtools/react-devtools.js" name="THIRD_PARTY_REACT_DEVTOOLS_REACT_DEVTOOLS_JS" resource_path="third_party/react-devtools/react-devtools.js" type="BINDATA" compress="false"/>
       <include file="third_party/rrweb-replay/rrweb-replay.js" name="THIRD_PARTY_RRWEB_REPLAY_RRWEB_REPLAY_JS" resource_path="third_party/rrweb-replay/rrweb-replay.js" type="BINDATA" compress="false"/>
       <include file="third_party/puppeteer/puppeteer.js" name="THIRD_PARTY_PUPPETEER_PUPPETEER_JS" resource_path="third_party/puppeteer/puppeteer.js" type="BINDATA" compress="false"/>
       <include file="third_party/source-map-scopes-codec/source-map-scopes-codec.js" name="THIRD_PARTY_SOURCE_MAP_SCOPES_CODEC_SOURCE_MAP_SCOPES_CODEC_JS" resource_path="third_party/source-map-scopes-codec/source-map-scopes-codec.js" type="BINDATA" compress="false"/>
