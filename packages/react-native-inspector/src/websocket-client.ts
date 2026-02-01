@@ -50,6 +50,7 @@ export function connectWebSocket(
         sendFn = null;
 
         socket.onopen = () => {
+          if (disconnectRequested) return;
           sendFn = (message: string) => {
             if (socket.readyState === WebSocket.OPEN) socket.send(message);
           };
@@ -80,19 +81,17 @@ export function connectWebSocket(
 
         socket.onclose = (_event) => {
           resetExecutionContextSentForReconnect();
+          ws = null;
+          sendFn = null;
+          if (disconnectRequested) return;
           if (!resolved) {
             if (attempt >= maxRetries) {
               resolved = true;
               reject(new Error('WebSocket connection failed / WebSocket 연결 실패'));
             } else {
-              ws = null;
-              sendFn = null;
               retryTimeoutId = setTimeout(tryConnect, retryDelay);
-              return;
             }
           }
-          ws = null;
-          sendFn = null;
         };
       } catch (err) {
         if (!resolved && attempt >= maxRetries) {
