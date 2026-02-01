@@ -47,6 +47,8 @@ export function buildDevToolsUrl(options: BuildDevToolsUrlOptions): string {
   if (clientType) {
     params.append('clientType', clientType);
   }
+  // Client ID (used by DevTools for RN panel condition fallback) / 클라이언트 ID (DevTools RN 패널 조건 fallback용)
+  params.append('clientId', clientId);
 
   // DevTools configuration parameters / DevTools 설정 파라미터
   Object.entries(DEVTOOLS_CONFIG).forEach(([key, value]) => {

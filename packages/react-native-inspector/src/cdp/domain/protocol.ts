@@ -6,6 +6,7 @@ export const Event = {
   executionContextCreated: 'Runtime.executionContextCreated',
   consoleAPICalled: 'Runtime.consoleAPICalled',
   exceptionThrown: 'Runtime.exceptionThrown',
+  bindingCalled: 'Runtime.bindingCalled',
 
   // Network events / Network 이벤트
   requestWillBeSent: 'Network.requestWillBeSent',

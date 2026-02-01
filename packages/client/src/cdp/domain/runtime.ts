@@ -84,7 +84,8 @@ export default class Runtime extends BaseDomain {
     silent?: boolean;
   }): { result: unknown } | void {
     try {
-      const fun = eval(`(() => ${functionDeclaration})()`);
+      // Use indirect eval to avoid bundler/minifier warnings and strict-mode issues / 번들러·미니파이어 경고 및 strict 모드 이슈 방지를 위해 indirect eval 사용
+      const fun = (0, eval)(`(() => ${functionDeclaration})()`);
       const resolvedArgs = (args || []).map((v) => {
         if ('value' in v) return v.value;
         if ('objectId' in v && v.objectId) return getObjectById(v.objectId);

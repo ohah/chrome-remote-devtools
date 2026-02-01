@@ -3608,7 +3608,14 @@ UI15.ViewManager.registerViewExtension({
   commandPrompt: i18nLazyString28(UIStrings28.command),
   persistence: "permanent",
   order: 1010,
-  condition: () => Root7.Runtime.Runtime.queryParam("clientType") === "react-native",
+  condition: () => {
+    const clientType = Root7.Runtime.Runtime.queryParam("clientType");
+    if (clientType === "react-native" || clientType === "reactotron") {
+      return true;
+    }
+    const clientId = Root7.Runtime.Runtime.queryParam("clientId");
+    return typeof clientId === "string" && clientId.startsWith("rn-inspector-");
+  },
   async loadView() {
     const Module = await loadModule();
     return new Module.ReactDevToolsComponentsView.ReactDevToolsComponentsViewImpl();
@@ -3645,7 +3652,14 @@ UI16.ViewManager.registerViewExtension({
   commandPrompt: i18nLazyString29(UIStrings29.command),
   persistence: "permanent",
   order: 1011,
-  condition: () => Root8.Runtime.Runtime.queryParam("clientType") === "react-native",
+  condition: () => {
+    const clientType = Root8.Runtime.Runtime.queryParam("clientType");
+    if (clientType === "react-native" || clientType === "reactotron") {
+      return true;
+    }
+    const clientId = Root8.Runtime.Runtime.queryParam("clientId");
+    return typeof clientId === "string" && clientId.startsWith("rn-inspector-");
+  },
   async loadView() {
     const Module = await loadModule2();
     return new Module.ReactDevToolsProfilerView.ReactDevToolsProfilerViewImpl();
