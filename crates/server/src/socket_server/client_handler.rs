@@ -135,10 +135,31 @@ pub async fn handle_client_connection(
                                 Some("store_response_body"),
                             );
                         }
+
+                        // Log CDP command responses (e.g. Runtime.callFunctionOn) when forwarding to DevTools / DevTools로 전달하는 CDP 명령 응답 로깅 (Copy object 추적용)
+                        if cdp_message.get("id").is_some() && cdp_message.get("result").is_some() {
+                            let id = cdp_message.get("id");
+                            let result = cdp_message.get("result");
+                            let has_nested_result = result.and_then(|r| r.get("result")).is_some();
+                            logger_for_msg.log(
+                                LogType::Client,
+                                &client_id_for_msg,
+                                &format!(
+                                    "📤 Forwarding CDP response to DevTools: id={:?}, result.result={} (e.g. callFunctionOn)",
+                                    id,
+                                    has_nested_result
+                                ),
+                                None,
+                                Some("cdp_response_forward"),
+                            );
+                        }
                     }
 
                     // Send to DevTools / DevTools로 전송
                     let devtools = devtools_for_msg.read().await;
+                    let response_id = serde_json::from_str::<serde_json::Value>(&data)
+                        .ok()
+                        .and_then(|v| v.get("id").cloned());
                     for devtool in devtools.values() {
                         if devtool.client_id.as_ref() == Some(&client_id_for_msg) {
                             if let Err(e) = devtool.sender.send(data.clone()) {
@@ -147,6 +168,17 @@ pub async fn handle_client_connection(
                                     &client_id_for_msg,
                                     &format!("failed to send to devtools {}", devtool.id),
                                     Some(&e.to_string()),
+                                );
+                            } else if response_id.is_some() {
+                                logger_for_msg.log(
+                                    LogType::DevTools,
+                                    &devtool.id,
+                                    &format!(
+                                        "✅ Sent CDP response id={:?} to devtools (Copy object 등)",
+                                        response_id
+                                    ),
+                                    None,
+                                    Some("cdp_response_to_devtools"),
                                 );
                             }
                         }

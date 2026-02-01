@@ -71,31 +71,51 @@ export default class Runtime extends BaseDomain {
     objectRelease(params);
   }
 
-  // Call function on object / 객체에서 함수 호출
+  // Call function on object (e.g. toStringForClipboard for Copy object) / 객체에서 함수 호출 (예: Copy object용 toStringForClipboard)
   callFunctionOn({
     functionDeclaration,
     objectId,
     arguments: args,
     silent,
+    returnByValue,
   }: {
     functionDeclaration: string;
     objectId?: string;
-    arguments?: Array<{ value?: unknown; objectId?: string }>;
+    arguments?: Array<{ value?: unknown; objectId?: string; unserializableValue?: string }>;
     silent?: boolean;
+    returnByValue?: boolean;
   }): { result: unknown } | void {
     try {
       // Use indirect eval to avoid bundler/minifier warnings and strict-mode issues / 번들러·미니파이어 경고 및 strict 모드 이슈 방지를 위해 indirect eval 사용
-      const fun = (0, eval)(`(() => ${functionDeclaration})()`);
+      const fun = (0, eval)(`(${functionDeclaration})`) as (
+        this: unknown,
+        ...a: unknown[]
+      ) => unknown;
       const resolvedArgs = (args || []).map((v) => {
-        if ('value' in v) return v.value;
-        if ('objectId' in v && v.objectId) return getObjectById(v.objectId);
+        if (v && 'value' in v) return v.value;
+        if (v && 'objectId' in v && v.objectId) return getObjectById(v.objectId);
+        if (v && 'unserializableValue' in v && v.unserializableValue) {
+          switch (v.unserializableValue) {
+            case 'undefined':
+              return undefined;
+            case 'NaN':
+              return NaN;
+            case 'Infinity':
+              return Infinity;
+            case '-Infinity':
+              return -Infinity;
+            default:
+              return undefined;
+          }
+        }
         return undefined;
       });
 
-      const thisArg = objectId ? getObjectById(objectId) : null;
-      const result = fun.apply(thisArg, resolvedArgs);
+      const thisArg = objectId ? getObjectById(objectId) : undefined;
+      const result = fun.apply(thisArg ?? null, resolvedArgs);
 
-      if (silent) {
+      // When returnByValue is true (e.g. Copy object), always return result so DevTools gets the string / returnByValue가 true일 때(예: Copy object) 항상 결과 반환해 DevTools가 문자열 수신
+      if (silent && !returnByValue) {
         return;
       }
 
@@ -103,7 +123,7 @@ export default class Runtime extends BaseDomain {
         result: objectFormat(result),
       };
     } catch (error) {
-      if (silent) {
+      if (silent && !returnByValue) {
         return;
       }
       return {

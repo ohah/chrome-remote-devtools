@@ -9,6 +9,13 @@ export const GITHUB_REPO_URL = 'https://github.com/ohah/chrome-remote-devtools';
 export const DEVTOOLS_FRONTEND_PATH = '/devtools-frontend/devtools_app.html';
 
 /**
+ * iframe sandbox attribute for DevTools iframes (scripts, same-origin, forms, popups, modals) /
+ * DevTools iframe용 sandbox 속성 (scripts, same-origin, forms, popups, modals)
+ */
+export const IFRAME_SANDBOX_DEVTOOLS =
+  'allow-scripts allow-same-origin allow-forms allow-popups allow-modals';
+
+/**
  * iframe allow attribute: grant all Permissions Policy features (for DevTools iframes) /
  * iframe allow 속성: 모든 Permissions Policy 기능 허용 (DevTools iframe용)
  */

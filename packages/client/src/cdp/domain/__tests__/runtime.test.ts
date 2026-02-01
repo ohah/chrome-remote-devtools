@@ -180,4 +180,16 @@ describe('Runtime Domain', () => {
     });
     expect(callResult).toBeUndefined();
   });
+
+  test('should return result when silent and returnByValue (Copy object) / silent + returnByValue 시 결과 반환 (Copy object)', () => {
+    const callResult = runtime.callFunctionOn({
+      functionDeclaration: 'function() { return 42; }',
+      arguments: [],
+      silent: true,
+      returnByValue: true,
+    });
+    expect(callResult).toBeDefined();
+    expect(callResult).toHaveProperty('result');
+    expect(callResult!.result).toBeDefined();
+  });
 });

@@ -19,6 +19,7 @@ tauri-build.workspace = true
 # Tauri 의존성
 tauri.workspace = true
 tauri-plugin-opener.workspace = true
+tauri-plugin-clipboard-manager.workspace = true
 
 # 워크스페이스 공통 의존성
 serde.workspace = true
@@ -27,4 +28,3 @@ tokio.workspace = true
 
 # 서버 라이브러리 의존성 추가
 chrome-remote-devtools-server = { path = "../../../crates/server" }
-

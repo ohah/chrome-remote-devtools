@@ -9758,14 +9758,26 @@ var SourcesPanel = class _SourcesPanel extends UI18.Panel.Panel {
         inspectorFrontendHost.copyText(remoteObject.description);
       }, { jslogContext: "copy-primitive" });
     } else if (remoteObject.type === "object") {
-      const copyDecodedValueHandler = async () => {
-        const result = await remoteObject.callFunctionJSON(toStringForClipboard, [{
+      let preparedCopyResult = null;
+      void remoteObject.callFunctionJSON(toStringForClipboard, [{
+        value: {
+          subtype: remoteObject.subtype,
+          indent
+        }
+      }]).then((result) => {
+        preparedCopyResult = result ?? null;
+      });
+      const copyDecodedValueHandler = () => {
+        if (preparedCopyResult !== null) {
+          inspectorFrontendHost.copyText(preparedCopyResult);
+          return;
+        }
+        void remoteObject.callFunctionJSON(toStringForClipboard, [{
           value: {
             subtype: remoteObject.subtype,
             indent
           }
-        }]);
-        inspectorFrontendHost.copyText(result);
+        }]).then(inspectorFrontendHost.copyText.bind(inspectorFrontendHost));
       };
       ctxMenuClipboardSection.appendItem(i18nString16(UIStrings17.copyS, { PH1: String(copyContextMenuTitle) }), copyDecodedValueHandler, { jslogContext: "copy-object" });
     } else if (remoteObject.type === "function") {
