@@ -43,7 +43,8 @@
     "test:maestro:ios": "MAESTRO_APP_ID=org.reactjs.native.example.ChromeRemoteDevTools maestro test .maestro",
     "test:maestro:ios:build": "cd examples/react-native && bun run ios:release && cd ../.. && bun run test:maestro:ios",
     "test:maestro:studio": "maestro studio",
-    "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts"
+    "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts",
+    "setup-mcp": "bun run .cursor/scripts/set-mcp-mise-path.ts"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.0.11",
