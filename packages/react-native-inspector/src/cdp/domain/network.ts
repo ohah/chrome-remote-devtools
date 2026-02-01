@@ -1,4 +1,5 @@
 // Network domain (XHR/fetch hook, aligned with web client domain/network.ts) / Network 도메인 (XHR·fetch 훅, 웹 domain/network.ts와 동일 구조)
+/// <reference lib="dom" />
 
 import { Event } from './protocol';
 import { sendCDPEvent } from './base';
@@ -22,9 +23,13 @@ function setResponseData(requestId: string, body: string): void {
   }
 }
 
-/** Original global XMLHttpRequest and fetch for restore / 복원용 원본 전역 XMLHttpRequest·fetch */
+/** Original global XMLHttpRequest and fetch (for wrapper use / restore value) / 복원용 원본 전역 XMLHttpRequest·fetch */
 let originalXHR: typeof XMLHttpRequest | null = null;
 let originalFetch: typeof fetch | null = null;
+
+/** Original property descriptors for restore via defineProperty / defineProperty로 복원할 원본 프로퍼티 설명자 */
+let originalXHRDescriptor: PropertyDescriptor | undefined;
+let originalFetchDescriptor: PropertyDescriptor | undefined;
 
 /**
  * Get stored response body for requestId (for Network.getResponseBody) / requestId에 대한 저장된 응답 본문 가져오기
@@ -185,7 +190,7 @@ function sendResponseReceived(
 }
 
 /**
- * Hook XMLHttpRequest / XMLHttpRequest 훅
+ * Hook XMLHttpRequest via Object.defineProperty / Object.defineProperty로 XMLHttpRequest 훅
  * Uses a subclass so instanceof XMLHttpRequest is preserved / instanceof XMLHttpRequest 보존
  */
 function hookXHR(): void {
@@ -193,6 +198,10 @@ function hookXHR(): void {
     typeof globalThis !== 'undefined' ? globalThis : typeof global !== 'undefined' ? global : {};
   const XHR = (globalObj as any).XMLHttpRequest;
   if (!XHR || (XHR as any).__ChromeRemoteDevToolsHooked) return;
+  const desc = Object.getOwnPropertyDescriptor(globalObj, 'XMLHttpRequest');
+  if (desc) {
+    originalXHRDescriptor = desc;
+  }
   originalXHR = XHR;
   const OriginalXHR = XHR as typeof XMLHttpRequest;
   class HookedXHR extends OriginalXHR {
@@ -207,7 +216,8 @@ function hookXHR(): void {
       xhr.open = function (m: string, u: string, ...rest: unknown[]) {
         method = m;
         url = u;
-        return originalOpen(m, u, ...(rest as [boolean?, string?, string?]));
+        const [async = true, user, password] = rest as [boolean?, string?, string?];
+        return originalOpen(m, u, async, user, password);
       };
       const originalSetRequestHeader = xhr.setRequestHeader.bind(xhr);
       xhr.setRequestHeader = function (name: string, value: string) {
@@ -367,20 +377,37 @@ function hookXHR(): void {
       };
     }
   }
-  (globalObj as any).XMLHttpRequest = HookedXHR;
+  try {
+    Object.defineProperty(globalObj, 'XMLHttpRequest', {
+      value: HookedXHR,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+  } catch (_e) {
+    return;
+  }
   (globalObj as any).XMLHttpRequest.__ChromeRemoteDevToolsHooked = true;
 }
 
 /**
- * Hook fetch / fetch 훅
+ * Hook fetch via Object.defineProperty / Object.defineProperty로 fetch 훅
  */
 function hookFetch(): void {
   const globalObj =
     typeof globalThis !== 'undefined' ? globalThis : typeof global !== 'undefined' ? global : {};
   const origFetch = (globalObj as any).fetch;
   if (!origFetch || (origFetch as any).__ChromeRemoteDevToolsHooked) return;
+  const desc = Object.getOwnPropertyDescriptor(globalObj, 'fetch');
+  if (desc) {
+    originalFetchDescriptor = desc;
+  }
   originalFetch = origFetch;
-  (globalObj as any).fetch = function (input: RequestInfo | URL, init?: RequestInit) {
+  const wrappedFetch = function (
+    this: typeof globalThis,
+    input: RequestInfo | URL,
+    init?: RequestInit
+  ) {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     const method = (init?.method as string) || 'GET';
     const headers: Record<string, string> = {};
@@ -410,7 +437,7 @@ function hookFetch(): void {
     } catch (_e) {
       // Ignore CDP send errors / CDP 전송 오류 무시
     }
-    return origFetch.call(this, input, init).then(
+    return origFetch.call(this as typeof globalThis, input, init).then(
       (response: Response) => {
         const cloned = response.clone();
         const respHeaders: Record<string, string> = {};
@@ -456,23 +483,53 @@ function hookFetch(): void {
       }
     );
   };
-  (globalObj as any).fetch.__ChromeRemoteDevToolsHooked = true;
+  (wrappedFetch as any).__ChromeRemoteDevToolsHooked = true;
+  try {
+    Object.defineProperty(globalObj, 'fetch', {
+      value: wrappedFetch,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+  } catch (_e) {
+    // Restore not applied if defineProperty fails / defineProperty 실패 시 복원 미적용
+  }
 }
 
 /**
- * Restore original XMLHttpRequest and fetch / 원본 XMLHttpRequest·fetch 복원
+ * Restore original XMLHttpRequest and fetch via Object.defineProperty / Object.defineProperty로 원본 복원
  */
 function uninstallHooks(): boolean {
   if (!isHooked) return true;
   const globalObj =
     typeof globalThis !== 'undefined' ? globalThis : typeof global !== 'undefined' ? global : {};
-  if (originalXHR) {
-    (globalObj as any).XMLHttpRequest = originalXHR;
+  try {
+    if (originalXHRDescriptor) {
+      Object.defineProperty(globalObj, 'XMLHttpRequest', originalXHRDescriptor);
+      originalXHRDescriptor = undefined;
+    } else if (originalXHR) {
+      Object.defineProperty(globalObj, 'XMLHttpRequest', {
+        value: originalXHR,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    }
     originalXHR = null;
-  }
-  if (originalFetch) {
-    (globalObj as any).fetch = originalFetch;
+    if (originalFetchDescriptor) {
+      Object.defineProperty(globalObj, 'fetch', originalFetchDescriptor);
+      originalFetchDescriptor = undefined;
+    } else if (originalFetch) {
+      Object.defineProperty(globalObj, 'fetch', {
+        value: originalFetch,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    }
     originalFetch = null;
+  } catch (_e) {
+    return false;
   }
   isHooked = false;
   return true;

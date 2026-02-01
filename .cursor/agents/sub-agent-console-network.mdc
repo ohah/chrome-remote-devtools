@@ -1,0 +1,43 @@
+---
+alwaysApply: false
+name: sub-agent-console-network
+model: inherit
+description: 서브 에이전트 - 콘솔·네트워크 전문. 웹·브라우저·RN 등 모든 클라이언트의 console 훅·Network 훅(XHR/fetch) 설계·리팩토링 시 적용
+---
+
+# 콘솔·네트워크 전문 (Console & Network Expert)
+
+이 룰은 **웹·브라우저 클라이언트**와 **React Native Inspector**를 포함한 모든 클라이언트의 **console 훅**과 **Network 훅**(XMLHttpRequest·fetch)을 다룰 때 적용한다.
+
+## 1. 훅 설치·복원 방식 (Object API)
+
+- **console**: `Object.defineProperties(console, descriptors)`로 한 번에 메서드 훅 설치. 원본은 `Object.getOwnPropertyDescriptor(console, methodName)`로 백업하고, 복원 시 `Object.defineProperties(console, originalDescriptors)`로 원래 descriptor 복원.
+- **global 프로퍼티 (XMLHttpRequest, fetch)**: `Object.defineProperty(globalObj, 'XMLHttpRequest', descriptor)` / `Object.defineProperty(globalObj, 'fetch', descriptor)`로 설치·복원. descriptor는 `{ value, writable: true, enumerable: true, configurable: true }` 형태로 명시.
+- **직접 대입 지양**: `obj[name] = fn` 대신 위 Object API를 사용해 의도를 명확히 하고, 필요 시 원본 descriptor를 보존·복원한다.
+
+## 2. 콘솔 훅 (Runtime 도메인)
+
+- **위치**: 웹·브라우저 `packages/client/src/cdp/domain/runtime.ts`, RN `packages/react-native-inspector/src/cdp/domain/runtime.ts`
+- **메서드 목록**: CONSOLE_METHODS (log, info, warn, error, debug, trace, dir, dirxml, table, group, groupCollapsed, groupEnd, count, countReset, assert, clear, profile, profileEnd, timeStamp, time, timeEnd, timeLog).
+- **CDP 이벤트**: Runtime.consoleAPICalled (type, args, executionContextId, timestamp, stackTrace). timestamp는 밀리초.
+- **원본 보존**: 훅 설치 전 원본 함수·descriptor 백업. 비멱등 방지(이미 훅된 경우 원본 덮어쓰지 않음).
+
+## 3. 네트워크 훅 (Network 도메인)
+
+- **위치**: 웹·브라우저 `packages/client/src/cdp/domain/network.ts`, RN `packages/react-native-inspector/src/cdp/domain/network.ts`
+- **XMLHttpRequest**: 서브클래스 방식으로 instance 보존. open/setRequestHeader/send 래핑, requestWillBeSent·responseReceived·loadingFinished·loadingFailed CDP 이벤트 전송. fetch 내부 XHR 중복 방지(recentFetches).
+- **fetch**: 전역 fetch 래핑. 동일 CDP 이벤트 전송. 복원 시 원본 fetch로 `Object.defineProperty`로 복원.
+- **전역 훅 표시**: `__ChromeRemoteDevToolsHooked` 플래그로 이미 훅된 경우 스킵 (비멱등).
+
+## 4. 에러·안전성
+
+- **CDP 전송 실패**: 훅 내부에서 sendCDPEvent 실패 시 try-catch로 무시. 원본 동작(console 출력·XHR/fetch)은 항상 실행.
+- **configurable: false**: 일부 환경에서 console/global 프로퍼티가 non-configurable일 수 있음. defineProperty/defineProperties 실패 시 무시하거나 false 반환.
+
+## 체크리스트 (콘솔·네트워크)
+
+- [ ] console 훅 설치·복원이 Object.defineProperties와 getOwnPropertyDescriptor 기반인가?
+- [ ] XMLHttpRequest·fetch 설치·복원이 Object.defineProperty 기반인가?
+- [ ] 원본 descriptor 또는 원본 함수가 복원 시 사용되는가?
+- [ ] CDP 전송 실패가 원본 동작을 막지 않는가?
+- [ ] 비멱등(이미 훅된 경우 스킵)이 보장되는가?
