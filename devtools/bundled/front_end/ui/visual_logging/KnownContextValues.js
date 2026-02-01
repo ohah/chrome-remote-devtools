@@ -3375,6 +3375,7 @@ export const knownContextValues = new Set([
     'self',
     'self-xss-warning',
     'send',
+    'sendFeedback',
     'sensors',
     'sensors.manage-locations',
     'sensors.reset-device-orientiation',

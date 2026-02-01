@@ -11741,6 +11741,27 @@
   "panels/protocol_monitor/ProtocolMonitor.ts | type": {
     "message": "Type"
   },
+  "panels/react_devtools/react_devtools_components-meta.ts | command": {
+    "message": "Show React DevTools Components panel"
+  },
+  "panels/react_devtools/react_devtools_components-meta.ts | title": {
+    "message": "Components ⚛"
+  },
+  "panels/react_devtools/react_devtools_profiler-meta.ts | command": {
+    "message": "Show React DevTools Profiler panel"
+  },
+  "panels/react_devtools/react_devtools_profiler-meta.ts | title": {
+    "message": "Profiler ⚛"
+  },
+  "panels/react_devtools/ReactDevToolsComponentsView.ts | title": {
+    "message": "⚛️ Components (React DevTools)"
+  },
+  "panels/react_devtools/ReactDevToolsProfilerView.ts | title": {
+    "message": "⚛️ Profiler (React DevTools)"
+  },
+  "panels/react_devtools/ReactDevToolsViewBase.ts | sendFeedback": {
+    "message": "[FB-only] Send feedback"
+  },
   "panels/recorder/components/CreateRecordingView.ts | cancelRecording": {
     "message": "Cancel recording"
   },

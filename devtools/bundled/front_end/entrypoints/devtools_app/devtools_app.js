@@ -3578,11 +3578,85 @@ UI14.ViewManager.registerViewExtension({
   }
 });
 
-// gen/front_end/panels/redux/redux-meta.js
+// gen/front_end/panels/react_devtools/react_devtools_components-meta.js
 import * as i18n55 from "./../../core/i18n/i18n.js";
 import * as Root7 from "./../../core/root/root.js";
-import * as SDK22 from "./../../core/sdk/sdk.js";
 import * as UI15 from "./../../ui/legacy/legacy.js";
+var UIStrings28 = {
+  /**
+   * @description React DevTools panel title
+   */
+  title: "Components \u269B",
+  /**
+   * @description Command for showing the React DevTools panel
+   */
+  command: "Show React DevTools Components panel"
+};
+var str_28 = i18n55.i18n.registerUIStrings("panels/react_devtools/react_devtools_components-meta.ts", UIStrings28);
+var i18nLazyString28 = i18n55.i18n.getLazilyComputedLocalizedString.bind(void 0, str_28);
+var loadedModule;
+async function loadModule() {
+  if (!loadedModule) {
+    loadedModule = await import("./../../panels/react_devtools/react_devtools.js");
+  }
+  return loadedModule;
+}
+UI15.ViewManager.registerViewExtension({
+  location: "panel",
+  id: "react-devtools-components",
+  title: i18nLazyString28(UIStrings28.title),
+  commandPrompt: i18nLazyString28(UIStrings28.command),
+  persistence: "permanent",
+  order: 1010,
+  condition: () => Root7.Runtime.Runtime.queryParam("clientType") === "react-native",
+  async loadView() {
+    const Module = await loadModule();
+    return new Module.ReactDevToolsComponentsView.ReactDevToolsComponentsViewImpl();
+  }
+});
+
+// gen/front_end/panels/react_devtools/react_devtools_profiler-meta.js
+import * as i18n57 from "./../../core/i18n/i18n.js";
+import * as Root8 from "./../../core/root/root.js";
+import * as UI16 from "./../../ui/legacy/legacy.js";
+var UIStrings29 = {
+  /**
+   * @description React DevTools panel title
+   */
+  title: "Profiler \u269B",
+  /**
+   * @description Command for showing the React DevTools panel
+   */
+  command: "Show React DevTools Profiler panel"
+};
+var str_29 = i18n57.i18n.registerUIStrings("panels/react_devtools/react_devtools_profiler-meta.ts", UIStrings29);
+var i18nLazyString29 = i18n57.i18n.getLazilyComputedLocalizedString.bind(void 0, str_29);
+var loadedModule2;
+async function loadModule2() {
+  if (!loadedModule2) {
+    loadedModule2 = await import("./../../panels/react_devtools/react_devtools.js");
+  }
+  return loadedModule2;
+}
+UI16.ViewManager.registerViewExtension({
+  location: "panel",
+  id: "react-devtools-profiler",
+  title: i18nLazyString29(UIStrings29.title),
+  commandPrompt: i18nLazyString29(UIStrings29.command),
+  persistence: "permanent",
+  order: 1011,
+  condition: () => Root8.Runtime.Runtime.queryParam("clientType") === "react-native",
+  async loadView() {
+    const Module = await loadModule2();
+    return new Module.ReactDevToolsProfilerView.ReactDevToolsProfilerViewImpl();
+  }
+});
+
+// gen/front_end/panels/redux/redux-meta.js
+import * as i18n59 from "./../../core/i18n/i18n.js";
+import * as Root9 from "./../../core/root/root.js";
+import * as SDK22 from "./../../core/sdk/sdk.js";
+import * as UI17 from "./../../ui/legacy/legacy.js";
 import * as SDK8 from "./../../core/sdk/sdk.js";
 function getReduxExtensionBridge() {
   const win = window;
@@ -4040,7 +4114,7 @@ setTimeout(() => {
     initializeReduxBridge();
   }
 }, 100);
-var UIStrings28 = {
+var UIStrings30 = {
   /**
    * @description Label for the Redux pane / Redux 패널 레이블
    */
@@ -4050,8 +4124,8 @@ var UIStrings28 = {
    */
   showRedux: "Show Redux"
 };
-var str_28 = i18n55.i18n.registerUIStrings("panels/redux/redux-meta.ts", UIStrings28);
-var i18nLazyString28 = i18n55.i18n.getLazilyComputedLocalizedString.bind(void 0, str_28);
+var str_30 = i18n59.i18n.registerUIStrings("panels/redux/redux-meta.ts", UIStrings30);
+var i18nLazyString30 = i18n59.i18n.getLazilyComputedLocalizedString.bind(void 0, str_30);
 var loadedReduxModule;
 async function loadReduxModule() {
   if (!loadedReduxModule) {
@@ -4059,16 +4133,16 @@ async function loadReduxModule() {
   }
   return loadedReduxModule;
 }
-UI15.ViewManager.registerViewExtension({
+UI17.ViewManager.registerViewExtension({
   location: "panel",
   id: "redux-view",
-  title: i18nLazyString28(UIStrings28.redux),
-  commandPrompt: i18nLazyString28(UIStrings28.showRedux),
+  title: i18nLazyString30(UIStrings30.redux),
+  commandPrompt: i18nLazyString30(UIStrings30.showRedux),
   order: 1001,
   persistence: "permanent",
   hasToolbar: false,
   condition: () => {
-    const clientType = Root7.Runtime.Runtime.queryParam("clientType");
+    const clientType = Root9.Runtime.Runtime.queryParam("clientType");
     return clientType === "react-native";
   },
   async loadView() {
@@ -4078,10 +4152,10 @@ UI15.ViewManager.registerViewExtension({
 });
 
 // gen/front_end/panels/storage/storage-meta.js
-import * as i18n57 from "./../../core/i18n/i18n.js";
-import * as Root8 from "./../../core/root/root.js";
-import * as UI16 from "./../../ui/legacy/legacy.js";
-var UIStrings29 = {
+import * as i18n61 from "./../../core/i18n/i18n.js";
+import * as Root10 from "./../../core/root/root.js";
+import * as UI18 from "./../../ui/legacy/legacy.js";
+var UIStrings31 = {
   /**
    * @description Label for the Storage pane / Storage 패널 레이블
    */
@@ -4091,8 +4165,8 @@ var UIStrings29 = {
    */
   showStorage: "Show Storage"
 };
-var str_29 = i18n57.i18n.registerUIStrings("panels/storage/storage-meta.ts", UIStrings29);
-var i18nLazyString29 = i18n57.i18n.getLazilyComputedLocalizedString.bind(void 0, str_29);
+var str_31 = i18n61.i18n.registerUIStrings("panels/storage/storage-meta.ts", UIStrings31);
+var i18nLazyString31 = i18n61.i18n.getLazilyComputedLocalizedString.bind(void 0, str_31);
 var loadedStorageModule;
 async function loadStorageModule() {
   if (!loadedStorageModule) {
@@ -4100,16 +4174,16 @@ async function loadStorageModule() {
   }
   return loadedStorageModule;
 }
-UI16.ViewManager.registerViewExtension({
+UI18.ViewManager.registerViewExtension({
   location: "panel",
   id: "storage-view",
-  title: i18nLazyString29(UIStrings29.storage),
-  commandPrompt: i18nLazyString29(UIStrings29.showStorage),
+  title: i18nLazyString31(UIStrings31.storage),
+  commandPrompt: i18nLazyString31(UIStrings31.showStorage),
   order: 1003,
   persistence: "permanent",
   hasToolbar: false,
   condition: () => {
-    const clientType = Root8.Runtime.Runtime.queryParam("clientType");
+    const clientType = Root10.Runtime.Runtime.queryParam("clientType");
     return clientType === "react-native";
   },
   async loadView() {
@@ -4119,8 +4193,8 @@ UI16.ViewManager.registerViewExtension({
 });
 
 // gen/front_end/entrypoints/devtools_app/devtools_app.prebundle.js
-import * as Root9 from "./../../core/root/root.js";
+import * as Root11 from "./../../core/root/root.js";
 import * as Main from "./../main/main.js";
-self.runtime = Root9.Runtime.Runtime.instance({ forceNew: true });
+self.runtime = Root11.Runtime.Runtime.instance({ forceNew: true });
 new Main.MainImpl.MainImpl();
 //# sourceMappingURL=devtools_app.js.map

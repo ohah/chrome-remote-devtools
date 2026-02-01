@@ -1,0 +1,94 @@
+---
+alwaysApply: false
+name: sub-agent-react-native-devtools-frontend
+model: inherit
+description: 서브 에이전트 - React Native DevTools Frontend 레퍼런스 전문가. 요청 시 레퍼런스 최신화·검증·비교 후 RN DevTools 탭/패널 동일 구현 개선점 제안
+---
+
+# React Native DevTools Frontend 레퍼런스 전문가
+
+이 룰은 **레퍼런스 `reference/react-native-devtools-frontend`** 와 **우리 `devtools/devtools-frontend`** 를 비교해, React Native DevTools에 있는 탭/패널을 동일하게 구현하는 작업 시 적용한다.
+
+## 1. 요청 시마다 수행할 작업
+
+1. **레퍼런스 브랜치 최신화**
+   - `reference/react-native-devtools-frontend` 가 서브모듈이면 `git submodule update --remote reference/react-native-devtools-frontend` 또는 해당 레포에서 `git pull` 로 최신화.
+   - 단독 클론이면 해당 경로에서 `git fetch && git checkout <기본 브랜치> && git pull` 로 최신화.
+
+2. **검증**
+   - 레퍼런스의 entrypoint·패널 등록이 빌드/실행 가능한지 확인 (필요 시 `scripts/` 또는 문서의 빌드 절차 참고).
+   - 우리 쪽 `devtools/devtools-frontend` 의 패널·entrypoint 목록과 비교 가능한 상태로 정리.
+
+3. **비교**
+   - 아래 "탭/패널 비교" 표를 기준으로 레퍼런스와 우리 구현을 비교.
+   - 차이점·누락·추가 개선점을 구체적으로 정리해 제안.
+
+4. **개선점 제안**
+   - 누락된 패널/탭: 이식 우선순위, 의존성(예: react-devtools), 작업 범위 요약.
+   - 이미 있는 패널: RN 환경에서의 동작 차이(예: Elements 제한), 설정/실험 플래그 연동 여부.
+   - 진입점: 레퍼런스는 `rn_inspector` / `rn_fusebox` 를 쓰는 반면 우리는 단일 `devtools_app` + `clientType` 이므로, RN 전용 UI/패널 셋을 쓸지 여부와 방법을 제안.
+
+## 2. 레퍼런스 구조 요약
+
+- **경로**: `reference/react-native-devtools-frontend/`
+- **진입점**: `front_end/entrypoints/rn_inspector/rn_inspector.ts`, `front_end/entrypoints/rn_fusebox/rn_fusebox.ts`
+- **RN 전용 패널**:
+  - `front_end/panels/rn_welcome/` — React Native Welcome (실험: `REACT_NATIVE_SPECIFIC_UI`)
+  - `front_end/panels/react_devtools/` — React DevTools (Components, Profiler)
+- **RN에서 비활성화하는 뷰**: network.blocked-urls, network.config, coverage, linear-memory-inspector, rendering, issues-pane, sensors, devices, emulation-locations, throttling-conditions (참고: `rn_fusebox.ts`)
+- **실험/모델**: `RNExperiments.RNExperimentsImpl.setIsReactNativeEntryPoint(true)`, `REACT_NATIVE_SPECIFIC_UI`, `JS_HEAP_PROFILER_ENABLE`, `ReactNativeApplicationModel` — 아래 "실험·SDK 연동이란?" 참고.
+
+## 3. 탭/패널 비교 (목표: RN DevTools와 동일하게)
+
+**동일 구현 대상** (레퍼런스 RN DevTools와 맞출 핵심 탭):
+
+| 패널/탭 | 레퍼런스 RN DevTools | 우리 devtools-frontend | 비고 |
+|---------|----------------------|-------------------------|------|
+| **Console** | ✅ | ✅ | |
+| **Network** | ✅ | ✅ | |
+| **Elements** | ✅ | ✅ | RN에서는 DOM 없이 제한적일 수 있음 |
+| **Sources** | ✅ | ✅ | |
+| **React DevTools – Components** | ✅ react_devtools | ❌ | 누락 |
+| **React DevTools – Profiler** | ✅ react_devtools | ❌ | 누락 |
+| **Application** | ✅ | ✅ | |
+
+**범위 외 (동일 구현 목표와 무관)**:
+- **Welcome / rn_welcome**: 상관없음. 레퍼런스에 있어도 우리 쪽 동일 구현 우선순위에 넣지 않음.
+- **Session Replay**: 우리에만 있음. **RN에서는 현재 노출되지 않음** (RN 클라이언트용 탭에 포함하지 않음).
+- **MMKV, Redux, AsyncStorage 등**: 우리가 추가한 확장. 지원 여부는 추가 확장이라 **동일 구현 목표와 무관** (있으면 유지, 없어도 RN DevTools 동일화 목표에는 영향 없음).
+
+## 4. 현재 누락된 것 (우선 반영 대상)
+
+- **react_devtools**: Components / Profiler 패널. 레퍼런스의 `panels/react_devtools/` 및 `front_end/third_party/react-devtools` 의존성 검토 후 이식.
+
+**RN 분기는 이미 적용됨.** `devtools_app` URL에 `clientType` 전달되고, 각 패널 메타에서 `Runtime.queryParam('clientType')` 으로 RN일 때 표시/숨김 처리함. 예: `elements-meta.ts`, `application-meta.ts` → RN이면 숨김; `storage-meta.ts`, `redux-meta.ts` → RN일 때만 표시; `session_replay-meta.ts` → RN이면 숨김. react_devtools 이식 시에도 동일하게 `clientType === 'react-native'` 일 때만 등록하면 됨. (레퍼런스처럼 개별 뷰 `maybeRemoveViewExtension` 은 필요 시 추가.)
+
+## 5. 앞으로 해야 할 것 (정리)
+
+1. **레퍼런스 동기화**: `reference/react-native-devtools-frontend` 브랜치를 주기적으로 최신화하고, 우리 포크와 diff 해서 패널·entrypoint 변경사항 추적.
+2. **react_devtools 이식**: React DevTools 패널(Components, Profiler) 및 third_party 의존성 이식, CDP/호스트 연동 점검. 등록 시 `clientType === 'react-native'` 일 때만 표시하도록 분기 (기존 패널과 동일).
+3. **실험·SDK 연동** (필요 시): 레퍼런스에서 쓰는 실험/모델이 우리 구조에 맞게 연동되는지 필요 시 검토. (무엇인지·언제 쓰는지는 아래 "실험·SDK 연동이란?" 참고.)
+
+## 5-1. 실험·SDK 연동이란? (언제 쓰는지)
+
+레퍼런스는 **RN 전용 진입점**(`rn_inspector`, `rn_fusebox`)에서 아래를 씁니다.
+
+- **실험 플래그 `REACT_NATIVE_SPECIFIC_UI`**
+  - 의미: "Show React Native-specific UI". RN 전용 UI를 켜는 스위치.
+  - 쓰는 곳: rn_welcome 패널 표시, Timeline에서 Insights 탭 숨김·Performance Issues 탭 표시, Network/Profiler 등에서 RN 전용 분기, 일부 핸들러에서 RN일 때 다른 동작.
+  - 언제: RN 진입점 로드 시 `enableExperimentsByDefault([REACT_NATIVE_SPECIFIC_UI, ...])` 로 기본 켬. 일반 inspector에서는 끄거나 설정에서 켤 수 있음.
+
+- **SDK 모델 `ReactNativeApplicationModel`**
+  - 의미: CDP **ReactNativeApplication** 도메인과 연동하는 모델. 앱 메타데이터·시스템 상태·트레이스 요청 등 Fusebox/RN 백엔드 이벤트를 담음.
+  - 쓰는 곳: rn_welcome 메타데이터 표시, Timeline에서 RN 앱 메타데이터·스크린샷 토글, FuseboxFeatureObserver/FuseboxAppMetadataObserver에서 메타데이터/시스템 상태 구독.
+  - 언제: RN(Fusebox) 백엔드가 ReactNativeApplication 도메인을 보낼 때. 우리 클라이언트가 해당 도메인을 안 보내면 이 모델은 비어 있거나 불필요할 수 있음.
+
+**우리 프로젝트**: 단일 `devtools_app` + `clientType` 이므로, react_devtools 이식 시 `clientType=react-native` 일 때만 실험 켜기·분기하면 됨. ReactNativeApplication 도메인은 우리 RN 클라이언트에 없으면 도입하지 않아도 됨.
+
+## 6. 체크리스트 (React Native DevTools Frontend)
+
+- [ ] 요청 시 레퍼런스 브랜치 최신화·검증·비교를 수행했는가?
+- [ ] 위 탭/패널 비교표를 기준으로 누락·차이를 구체적으로 적었는가?
+- [ ] react_devtools 이식 시 레퍼런스 라이선스·헤더(Chromium + Meta)를 준수하는가?
+- [ ] 변경이 `devtools/devtools-frontend` 빌드·Nice-PLQ 방식과 맞는가?
+- [ ] react_devtools 등록 시 `clientType === 'react-native'` 일 때만 표시하도록 분기했는가? (기존 패널 분기는 이미 적용됨.)

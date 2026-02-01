@@ -1,0 +1,37 @@
+// gen/front_end/panels/react_devtools/react_devtools_components-meta.prebundle.js
+import * as i18n from "./../../core/i18n/i18n.js";
+import * as Root from "./../../core/root/root.js";
+import * as UI from "./../../ui/legacy/legacy.js";
+var UIStrings = {
+  /**
+   * @description React DevTools panel title
+   */
+  title: "Components \u269B",
+  /**
+   * @description Command for showing the React DevTools panel
+   */
+  command: "Show React DevTools Components panel"
+};
+var str_ = i18n.i18n.registerUIStrings("panels/react_devtools/react_devtools_components-meta.ts", UIStrings);
+var i18nLazyString = i18n.i18n.getLazilyComputedLocalizedString.bind(void 0, str_);
+var loadedModule;
+async function loadModule() {
+  if (!loadedModule) {
+    loadedModule = await import("./react_devtools.js");
+  }
+  return loadedModule;
+}
+UI.ViewManager.registerViewExtension({
+  location: "panel",
+  id: "react-devtools-components",
+  title: i18nLazyString(UIStrings.title),
+  commandPrompt: i18nLazyString(UIStrings.command),
+  persistence: "permanent",
+  order: 1010,
+  condition: () => Root.Runtime.Runtime.queryParam("clientType") === "react-native",
+  async loadView() {
+    const Module = await loadModule();
+    return new Module.ReactDevToolsComponentsView.ReactDevToolsComponentsViewImpl();
+  }
+});
+//# sourceMappingURL=react_devtools_components-meta.js.map
