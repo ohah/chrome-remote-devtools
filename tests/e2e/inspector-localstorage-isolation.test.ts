@@ -264,8 +264,8 @@ async function navigateToClientTab(page: Page, clientId: string): Promise<void> 
   // Wait for React to render / React 렌더링 대기
   await page.waitForTimeout(2000);
 
-  // Wait for page to be fully loaded / 페이지가 완전히 로드될 때까지 대기
-  await page.waitForLoadState('networkidle');
+  // Wait for DOM; do not use networkidle because Inspector keeps SSE (EventSource) open / DOM 대기; SSE 연결 때문에 networkidle 사용 안 함
+  await page.waitForLoadState('domcontentloaded');
 
   // Wait for iframe to appear / iframe이 나타날 때까지 대기
   await waitForDevToolsIframe(page, clientId);
@@ -275,7 +275,8 @@ async function navigateToClientTab(page: Page, clientId: string): Promise<void> 
 async function setupServerUrl(page: Page, serverUrl: string): Promise<void> {
   // Navigate to main page / 메인 페이지로 이동
   await page.goto(INSPECTOR_URL);
-  await page.waitForLoadState('networkidle');
+  // Do not use networkidle: after load Inspector opens SSE (EventSource) so network never idles / SSE 연결 때문에 networkidle 사용 안 함
+  await page.waitForLoadState('domcontentloaded');
 
   // Set server URL in localStorage using zustand persist format / zustand persist 형식으로 localStorage에 서버 URL 설정
   // zustand persist stores data as JSON with version / zustand persist는 버전과 함께 JSON으로 데이터 저장
@@ -296,7 +297,7 @@ async function setupServerUrl(page: Page, serverUrl: string): Promise<void> {
 
   // Reload page to apply server URL / 서버 URL 적용을 위해 페이지 새로고침
   await page.reload();
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 
   // Verify server URL is set correctly / 서버 URL이 올바르게 설정되었는지 확인
   const storedUrl = await page.evaluate(() => {
