@@ -32,14 +32,9 @@ async function sendAllSnapshots(): Promise<void> {
     return;
   }
 
-  console.log(`[AsyncStorageDevTools] Sending snapshots for ${asyncStorageViews.size} storages`);
-
   for (const [id, view] of asyncStorageViews.entries()) {
     try {
       const entries = await view.getAllEntries();
-      console.log(
-        `[AsyncStorageDevTools] Sending snapshot for ${view.getId()}: ${entries.length} entries`
-      );
       sendSnapshot(view.getId(), entries);
     } catch (error) {
       console.error(`[AsyncStorageDevTools] Error sending snapshot for ${view.getId()}:`, error);
@@ -54,7 +49,6 @@ export function setAsyncStorageCDPSender(
   sender: (host: string, port: number, message: string) => void
 ): void {
   cdpMessageSender = sender;
-  console.log('[AsyncStorageDevTools] CDP sender set');
 }
 
 /**
@@ -62,9 +56,6 @@ export function setAsyncStorageCDPSender(
  */
 export function setAsyncStorageConnectionReady(): void {
   isConnected = true;
-  console.log(
-    `[AsyncStorageDevTools] Connection ready, asyncStorageViews: ${asyncStorageViews ? asyncStorageViews.size : 0} storages`
-  );
 }
 
 /**
@@ -112,11 +103,6 @@ function sendSnapshot(instanceId: string, entries: AsyncStorageEntry[]): void {
       newValue: valueStr,
     });
   });
-
-  // Debug log / 디버그 로그
-  console.log(
-    `[AsyncStorageDevTools] Sent snapshot for ${instanceId}: ${entries.length} entries / ${instanceId}에 대한 스냅샷 전송: ${entries.length}개 엔트리`
-  );
 }
 
 /**
@@ -265,19 +251,12 @@ export function registerAsyncStorageDevTools(
       }
     });
 
-    console.log(
-      `[AsyncStorageDevTools] Registered ${asyncStorageViews.size} storages, waiting for DevTools enable signal`
-    );
-
     // Register CDP message handlers / CDP 메시지 핸들러 등록
     // Route based on method name / 메서드 이름을 기준으로 라우팅
     unregisterHandlers = [
       // Handle enable command from DevTools - send all snapshots when DevTools panel opens
       // DevTools에서 enable 명령 처리 - DevTools 패널이 열리면 모든 스냅샷 전송
       registerCDPMessageHandler('AsyncStorageStorage.enable', () => {
-        console.log(
-          '[AsyncStorageDevTools] Received enable command from DevTools, sending snapshots'
-        );
         void sendAllSnapshots();
       }),
 
@@ -309,9 +288,6 @@ export function registerAsyncStorageDevTools(
               },
             };
             cdpMessageSender(serverInfo.host, serverInfo.port, JSON.stringify(response));
-            console.log(
-              `[AsyncStorageDevTools] Sent getAsyncStorageItems response for ${params.instanceId}: ${cdpEntries.length} entries / ${params.instanceId}에 대한 getAsyncStorageItems 응답 전송: ${cdpEntries.length}개 엔트리`
-            );
           }
         }
       }),
@@ -366,10 +342,6 @@ export function registerAsyncStorageDevTools(
         }
       }),
     ];
-
-    console.log(
-      '[AsyncStorageDevTools] Registered CDP message handlers / CDP 메시지 핸들러 등록됨'
-    );
   } catch (error) {
     console.error('[AsyncStorageDevTools] Error registering AsyncStorage DevTools:', error);
     // Don't throw - allow app to continue / throw하지 않음 - 앱이 계속 작동하도록 함

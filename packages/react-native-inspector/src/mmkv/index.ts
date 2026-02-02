@@ -20,24 +20,17 @@ let unregisterHandlers: Array<() => void> = [];
  */
 function sendAllSnapshots(): void {
   if (!mmkvViews || !cdpMessageSender || !isConnected) {
-    console.warn(
-      `[MMKVDevTools] Cannot send snapshots: mmkvViews=${!!mmkvViews}, cdpMessageSender=${!!cdpMessageSender}, isConnected=${isConnected}`
-    );
     return;
   }
 
   const serverInfo = getServerInfo();
   if (!serverInfo) {
-    console.warn('[MMKVDevTools] serverInfo not available');
     return;
   }
-
-  console.log(`[MMKVDevTools] Sending snapshots for ${mmkvViews.size} storages`);
 
   mmkvViews.forEach((view) => {
     try {
       const entries = view.getAllEntries();
-      console.log(`[MMKVDevTools] Sending snapshot for ${view.getId()}: ${entries.length} entries`);
       sendSnapshot(view.getId(), entries);
     } catch (error) {
       console.error(`[MMKVDevTools] Error sending snapshot for ${view.getId()}:`, error);
@@ -52,7 +45,6 @@ export function setMMKVCDPSender(
   sender: (host: string, port: number, message: string) => void
 ): void {
   cdpMessageSender = sender;
-  console.log('[MMKVDevTools] CDP sender set');
 }
 
 /**
@@ -60,9 +52,6 @@ export function setMMKVCDPSender(
  */
 export function setMMKVConnectionReady(): void {
   isConnected = true;
-  console.log(
-    `[MMKVDevTools] Connection ready, mmkvViews: ${mmkvViews ? mmkvViews.size : 0} storages`
-  );
 }
 
 /**
@@ -117,13 +106,9 @@ function sendSnapshot(instanceId: string, entries: ReturnType<MMKVView['getAllEn
       instanceId,
       key: entry.key,
       newValue: valueStr,
+      valueType: entry.type,
     });
   });
-
-  // Debug log / 디버그 로그
-  console.log(
-    `[MMKVDevTools] Sent snapshot for ${instanceId}: ${entries.length} entries / ${instanceId}에 대한 스냅샷 전송: ${entries.length}개 엔트리`
-  );
 }
 
 /**
@@ -139,6 +124,7 @@ function sendSetEntry(instanceId: string, entry: ReturnType<MMKVView['get']>): v
     instanceId,
     key: entry.key,
     newValue: valueStr,
+    valueType: entry.type,
   });
 }
 
@@ -201,17 +187,12 @@ export function registerMMKVDevTools(
       }
     });
 
-    console.log(
-      `[MMKVDevTools] Registered ${mmkvViews.size} storages, waiting for DevTools enable signal`
-    );
-
     // Register CDP message handlers / CDP 메시지 핸들러 등록
     // Route based on method name / 메서드 이름을 기준으로 라우팅
     unregisterHandlers = [
       // Handle enable command from DevTools - send all snapshots when DevTools panel opens
       // DevTools에서 enable 명령 처리 - DevTools 패널이 열리면 모든 스냅샷 전송
       registerCDPMessageHandler('MMKVStorage.enable', () => {
-        console.log('[MMKVDevTools] Received enable command from DevTools, sending snapshots');
         sendAllSnapshots();
       }),
 
@@ -227,9 +208,10 @@ export function registerMMKVDevTools(
         }
 
         const entries = view.getAllEntries();
-        const cdpEntries: Array<[string, string]> = entries.map((entry) => [
+        const cdpEntries: Array<[string, string, string]> = entries.map((entry) => [
           entry.key,
           entryValueToString(entry),
+          entry.type,
         ]);
 
         // Send CDP response with id / id를 포함한 CDP 응답 전송
@@ -243,15 +225,17 @@ export function registerMMKVDevTools(
               },
             };
             cdpMessageSender(serverInfo.host, serverInfo.port, JSON.stringify(response));
-            console.log(
-              `[MMKVDevTools] Sent getMMKVItems response for ${params.instanceId}: ${cdpEntries.length} entries / ${params.instanceId}에 대한 getMMKVItems 응답 전송: ${cdpEntries.length}개 엔트리`
-            );
           }
         }
       }),
 
       registerCDPMessageHandler('MMKVStorage.setMMKVItem', (message) => {
-        const params = message.params as { instanceId?: string; key?: string; value?: string };
+        const params = message.params as {
+          instanceId?: string;
+          key?: string;
+          value?: string;
+          valueType?: 'string' | 'number' | 'boolean' | 'buffer';
+        };
         if (
           !params?.instanceId ||
           params.key === undefined ||
@@ -266,7 +250,32 @@ export function registerMMKVDevTools(
           return;
         }
 
-        // Try to infer type from string value / 문자열 값에서 타입 추론 시도
+        const valueType = params.valueType;
+
+        if (valueType === 'number') {
+          const numValue = Number(params.value);
+          view.set(params.key, isNaN(numValue) ? 0 : numValue);
+          return;
+        }
+        if (valueType === 'boolean') {
+          view.set(params.key, params.value === 'true');
+          return;
+        }
+        if (valueType === 'buffer') {
+          try {
+            const arr = JSON.parse(params.value) as number[];
+            view.set(params.key, Array.isArray(arr) ? arr : []);
+          } catch {
+            view.set(params.key, []);
+          }
+          return;
+        }
+
+        // string or undefined: use as string, or infer for backward compat
+        if (valueType === 'string') {
+          view.set(params.key, params.value);
+          return;
+        }
         const numValue = Number(params.value);
         if (!isNaN(numValue) && String(numValue) === params.value) {
           view.set(params.key, numValue);
@@ -308,8 +317,6 @@ export function registerMMKVDevTools(
         });
       }),
     ];
-
-    console.log('[MMKVDevTools] Registered CDP message handlers / CDP 메시지 핸들러 등록됨');
   } catch (error) {
     console.error('[MMKVDevTools] Error registering MMKV DevTools:', error);
     // Don't throw - allow app to continue / throw하지 않음 - 앱이 계속 작동하도록 함
