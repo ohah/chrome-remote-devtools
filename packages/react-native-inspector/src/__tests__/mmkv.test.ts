@@ -62,7 +62,7 @@ describe('mmkv CDP handler', () => {
     });
     expect(mockMMKV.set).toHaveBeenCalledWith('k', true);
 
-    (mockMMKV.set as ReturnType<typeof mock>).mockClear();
+    mockMMKV.set.mockClear();
     handleCDPMessage({
       method: 'MMKVStorage.setMMKVItem',
       params: { instanceId: 'inst1', key: 'k', value: 'false', valueType: 'boolean' },
@@ -83,7 +83,7 @@ describe('mmkv CDP handler', () => {
       id: 1,
     });
     expect(mockMMKV.set).toHaveBeenCalledTimes(1);
-    const [, value] = (mockMMKV.set as ReturnType<typeof mock>).mock.calls[0] ?? [];
+    const [, value] = mockMMKV.set.mock.calls[0] ?? [];
     expect(value).toBeInstanceOf(ArrayBuffer);
     expect(new Uint8Array(value as ArrayBuffer)).toEqual(new Uint8Array([1, 2, 3]));
   });
@@ -99,7 +99,7 @@ describe('mmkv CDP handler', () => {
       },
       id: 1,
     });
-    const [, value] = (mockMMKV.set as ReturnType<typeof mock>).mock.calls[0] ?? [];
+    const [, value] = mockMMKV.set.mock.calls[0] ?? [];
     expect(value).toBeInstanceOf(ArrayBuffer);
     expect(new Uint8Array(value as ArrayBuffer).length).toBe(0);
   });
