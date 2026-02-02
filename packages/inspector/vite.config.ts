@@ -84,6 +84,8 @@ function serveDevtoolsFrontend() {
         if (existsSync(filePath) && statSync(filePath).isFile()) {
           try {
             const content = readFileSync(filePath);
+            // Disable cache in dev so rebuilt devtools-frontend is always loaded / 개발 시 캐시 비활성화로 빌드 후 항상 최신 devtools-frontend 로드
+            res.setHeader('Cache-Control', 'no-store');
             // Set appropriate content type / 적절한 Content-Type 설정
             if (ext === '.css') {
               res.setHeader('Content-Type', 'text/css');
