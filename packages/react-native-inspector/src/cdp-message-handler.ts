@@ -186,12 +186,6 @@ function handleRuntimeCallFunctionOn(message: {
       if (returnValue === undefined) {
         sendCDPResponse(id, { result: { type: 'undefined' } });
       } else if (typeof returnValue === 'string') {
-        console.log(
-          '[ChromeRemoteDevTools] Sending Runtime.callFunctionOn response (Copy object): id=',
-          id,
-          ', valueLength=',
-          returnValue.length
-        );
         sendCDPResponse(id, { result: { type: 'string', value: returnValue } });
       } else if (typeof returnValue === 'number') {
         sendCDPResponse(id, { result: { type: 'number', value: returnValue } });
@@ -272,7 +266,7 @@ export function handleCDPMessage(message: {
     return;
   }
 
-  // Page.getResourceContent: DevTools requests source content by URL; respond from cached sourcemap (base64) when available / DevTools가 URL로 소스 내용 요청; 캐시된 소스맵에서 base64로 응답
+  // Page.getResourceContent: DevTools requests source content by URL; respond from cache or fetch URL so error HTML (e.g. "Cannot GET /_prelude_") is shown / DevTools가 URL로 소스 요청; 캐시 또는 URL fetch로 응답해 오류 HTML 표시
   if (message.method === 'Page.getResourceContent' && typeof message.id === 'number') {
     const params = message.params as { url?: string } | undefined;
     const url = params?.url ?? '';
@@ -283,6 +277,17 @@ export function handleCDPMessage(message: {
           content: base64EncodeUtf8(content),
           base64Encoded: true,
         });
+      } else if (url && /^https?:\/\//i.test(url)) {
+        const requestId = message.id;
+        // Fetch URL so Sources panel shows actual response (e.g. Metro "Cannot GET /_prelude_" HTML) / Sources에 실제 응답(예: Metro 오류 HTML) 표시
+        fetch(url)
+          .then((res) => res.text())
+          .then((text) => {
+            sendCDPResponse(requestId, { content: text, base64Encoded: false });
+          })
+          .catch(() => {
+            sendCDPResponse(requestId, { content: '', base64Encoded: false });
+          });
       } else {
         sendCDPResponse(message.id, { content: '', base64Encoded: false });
       }

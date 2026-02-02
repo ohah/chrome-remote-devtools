@@ -15,7 +15,7 @@ license = "MIT"
 # WebSocket & HTTP
 tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = "0.24"
-axum = { version = "0.7", features = ["ws", "http1", "http2", "macros"] }
+axum = { version = "0.7", features = ["ws", "http1", "http2", "macros", "json"] }
 axum-server = { version = "0.8", features = ["tls-rustls"] }
 tower = "0.5"
 tower-http = { version = "0.6", features = ["cors", "trace"] }

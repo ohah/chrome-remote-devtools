@@ -18,6 +18,7 @@ pub async fn handle_react_native_inspector_websocket(
     query_params: HashMap<String, String>,
     devtools: Arc<RwLock<std::collections::HashMap<String, Arc<DevTools>>>>,
     rn_manager: Arc<ReactNativeInspectorConnectionManager>,
+    socket_server: Arc<RwLock<super::SocketServer>>,
     logger: Arc<Logger>,
 ) {
     let device_name = query_params.get("name").cloned();
@@ -58,6 +59,12 @@ pub async fn handle_react_native_inspector_websocket(
         None,
     );
 
+    // Notify SSE subscribers that client list changed / 클라이언트 목록 변경 시 SSE 구독자에게 알림
+    {
+        let server_guard = socket_server.read().await;
+        server_guard.notify_clients_changed();
+    }
+
     // Spawn task to send messages to React Native Inspector / React Native Inspector로 메시지 전송 태스크
     let logger_clone = logger.clone();
     let inspector_id_for_send = inspector_id.clone();
@@ -78,6 +85,7 @@ pub async fn handle_react_native_inspector_websocket(
     // Handle incoming messages from React Native Inspector / React Native Inspector로부터 들어오는 메시지 처리
     let devtools_for_msg = devtools.clone();
     let rn_manager_for_msg = rn_manager.clone();
+    let socket_server_for_msg = socket_server.clone();
     let logger_for_msg = logger.clone();
     let inspector_id_for_msg = inspector_id.clone();
     let tx_id_for_msg = tx_id;
@@ -262,6 +270,8 @@ pub async fn handle_react_native_inspector_websocket(
                     rn_manager_for_msg
                         .remove_connection(&inspector_id_for_msg, Some(tx_id_for_msg))
                         .await;
+                    let server_guard = socket_server_for_msg.read().await;
+                    server_guard.notify_clients_changed();
                     break;
                 }
                 Err(e) => {
@@ -274,6 +284,8 @@ pub async fn handle_react_native_inspector_websocket(
                     rn_manager_for_msg
                         .remove_connection(&inspector_id_for_msg, Some(tx_id_for_msg))
                         .await;
+                    let server_guard = socket_server_for_msg.read().await;
+                    server_guard.notify_clients_changed();
                     break;
                 }
                 _ => {}
@@ -287,5 +299,7 @@ pub async fn handle_react_native_inspector_websocket(
         rn_manager_for_msg
             .remove_connection(&inspector_id_for_msg, Some(tx_id_for_msg))
             .await;
+        let server_guard = socket_server_for_msg.read().await;
+        server_guard.notify_clients_changed();
     });
 }
