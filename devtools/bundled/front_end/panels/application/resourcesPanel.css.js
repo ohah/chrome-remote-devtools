@@ -80,6 +80,15 @@ export default `/*
   border-bottom: 1px solid var(--sys-color-divider);
 }
 
+/* MMKV Storage: Type column (select only) / MMKV 스토리지: 타입 열 */
+.storage-view .mmkv-type-cell {
+  min-width: 80px;
+}
+
+.storage-view .mmkv-type-select {
+  min-width: 80px;
+}
+
 .database-query-group-messages {
   overflow-y: auto;
 }

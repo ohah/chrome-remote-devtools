@@ -12,6 +12,8 @@ import { AsyncStorageStorageModel } from '../application/AsyncStorageStorageMode
 import { MMKVStorageItemsView } from '../application/MMKVStorageItemsView.js';
 import { MMKVStorageModel } from '../application/MMKVStorageModel.js';
 let storagePanelInstance;
+let mmkvStoragePanelInstance;
+let asyncStorageStoragePanelInstance;
 export class StoragePanel extends UI.Panel.PanelWithSidebar {
     visibleView;
     pendingViewPromise;
@@ -105,6 +107,154 @@ export class StoragePanel extends UI.Panel.PanelWithSidebar {
     }
     showCategoryView(categoryName, categoryHeadline, categoryDescription, _categoryLink) {
         // Create a simple category view / 간단한 카테고리 뷰 생성
+        const categoryView = new UI.Widget.VBox();
+        categoryView.element.classList.add('storage-category-view');
+        const headline = categoryView.element.createChild('div', 'storage-category-headline');
+        headline.textContent = categoryHeadline;
+        const description = categoryView.element.createChild('div', 'storage-category-description');
+        description.textContent = categoryDescription;
+        this.showView(categoryView);
+    }
+}
+/** MMKV-only panel / MMKV 전용 패널 */
+export class MMKVStoragePanel extends UI.Panel.PanelWithSidebar {
+    visibleView;
+    pendingViewPromise;
+    storageViews;
+    storageViewToolbar;
+    mmkvStorageView;
+    sidebar;
+    constructor() {
+        super('storage-mmkv');
+        this.visibleView = null;
+        this.pendingViewPromise = null;
+        const mainContainer = new UI.Widget.VBox();
+        mainContainer.setMinimumSize(100, 0);
+        this.storageViews = mainContainer.element.createChild('div', 'vbox flex-auto');
+        this.storageViewToolbar = mainContainer.element.createChild('devtools-toolbar', 'resources-toolbar');
+        this.splitWidget().setMainWidget(mainContainer);
+        this.mmkvStorageView = null;
+        this.sidebar = new MMKVOnlyStoragePanelSidebar(this);
+        this.sidebar.show(this.panelSidebarElement());
+    }
+    static instance(opts = { forceNew: null }) {
+        const { forceNew } = opts;
+        if (!mmkvStoragePanelInstance || forceNew) {
+            mmkvStoragePanelInstance = new MMKVStoragePanel();
+        }
+        return mmkvStoragePanelInstance;
+    }
+    focus() {
+        this.sidebar.focus();
+    }
+    showView(view) {
+        this.pendingViewPromise = null;
+        if (this.visibleView === view) {
+            return;
+        }
+        if (this.visibleView) {
+            this.visibleView.detach();
+        }
+        if (view) {
+            view.show(this.storageViews);
+        }
+        this.visibleView = view;
+        this.storageViewToolbar.removeToolbarItems();
+        this.storageViewToolbar.classList.toggle('hidden', true);
+        if (view instanceof UI.View.SimpleView) {
+            void view.toolbarItems().then(items => {
+                items.map(item => this.storageViewToolbar.appendToolbarItem(item));
+                this.storageViewToolbar.classList.toggle('hidden', !items.length);
+            });
+        }
+    }
+    showMMKVStorage(mmkvStorage) {
+        if (!mmkvStorage) {
+            return;
+        }
+        if (!this.mmkvStorageView) {
+            this.mmkvStorageView = new MMKVStorageItemsView(mmkvStorage);
+        }
+        else {
+            this.mmkvStorageView.setStorage(mmkvStorage);
+        }
+        this.showView(this.mmkvStorageView);
+    }
+    showCategoryView(_categoryName, categoryHeadline, categoryDescription, _categoryLink) {
+        const categoryView = new UI.Widget.VBox();
+        categoryView.element.classList.add('storage-category-view');
+        const headline = categoryView.element.createChild('div', 'storage-category-headline');
+        headline.textContent = categoryHeadline;
+        const description = categoryView.element.createChild('div', 'storage-category-description');
+        description.textContent = categoryDescription;
+        this.showView(categoryView);
+    }
+}
+/** AsyncStorage-only panel / AsyncStorage 전용 패널 */
+export class AsyncStorageStoragePanel extends UI.Panel.PanelWithSidebar {
+    visibleView;
+    pendingViewPromise;
+    storageViews;
+    storageViewToolbar;
+    asyncStorageStorageView;
+    sidebar;
+    constructor() {
+        super('storage-async-storage');
+        this.visibleView = null;
+        this.pendingViewPromise = null;
+        const mainContainer = new UI.Widget.VBox();
+        mainContainer.setMinimumSize(100, 0);
+        this.storageViews = mainContainer.element.createChild('div', 'vbox flex-auto');
+        this.storageViewToolbar = mainContainer.element.createChild('devtools-toolbar', 'resources-toolbar');
+        this.splitWidget().setMainWidget(mainContainer);
+        this.asyncStorageStorageView = null;
+        this.sidebar = new AsyncStorageOnlyStoragePanelSidebar(this);
+        this.sidebar.show(this.panelSidebarElement());
+    }
+    static instance(opts = { forceNew: null }) {
+        const { forceNew } = opts;
+        if (!asyncStorageStoragePanelInstance || forceNew) {
+            asyncStorageStoragePanelInstance = new AsyncStorageStoragePanel();
+        }
+        return asyncStorageStoragePanelInstance;
+    }
+    focus() {
+        this.sidebar.focus();
+    }
+    showView(view) {
+        this.pendingViewPromise = null;
+        if (this.visibleView === view) {
+            return;
+        }
+        if (this.visibleView) {
+            this.visibleView.detach();
+        }
+        if (view) {
+            view.show(this.storageViews);
+        }
+        this.visibleView = view;
+        this.storageViewToolbar.removeToolbarItems();
+        this.storageViewToolbar.classList.toggle('hidden', true);
+        if (view instanceof UI.View.SimpleView) {
+            void view.toolbarItems().then(items => {
+                items.map(item => this.storageViewToolbar.appendToolbarItem(item));
+                this.storageViewToolbar.classList.toggle('hidden', !items.length);
+            });
+        }
+    }
+    showAsyncStorageStorage(asyncStorageStorage) {
+        if (!asyncStorageStorage) {
+            return;
+        }
+        if (!this.asyncStorageStorageView) {
+            this.asyncStorageStorageView = new AsyncStorageStorageItemsView(asyncStorageStorage);
+        }
+        else {
+            this.asyncStorageStorageView.setStorage(asyncStorageStorage);
+        }
+        this.showView(this.asyncStorageStorageView);
+    }
+    showCategoryView(_categoryName, categoryHeadline, categoryDescription, _categoryLink) {
         const categoryView = new UI.Widget.VBox();
         categoryView.element.classList.add('storage-category-view');
         const headline = categoryView.element.createChild('div', 'storage-category-headline');
@@ -277,6 +427,169 @@ export class StoragePanelSidebar extends UI.Widget.VBox {
         }
         else {
             // Multiple instances, remove from expandable category / 여러 인스턴스, 확장 가능한 카테고리에서 제거
+            this.asyncStorageListTreeElement.removeChild(treeElement);
+            this.asyncStorageStorageTreeElements.delete(asyncStorageStorage);
+            if (wasSelected && this.asyncStorageListTreeElement.childCount() > 0) {
+                const firstChild = this.asyncStorageListTreeElement.childAt(0);
+                if (firstChild) {
+                    firstChild.select();
+                }
+            }
+        }
+    }
+}
+/** MMKV-only sidebar: flat list (no expandable parent) / MMKV 전용 사이드바: 한 단계 목록 */
+class MMKVOnlyStoragePanelSidebar extends UI.Widget.VBox {
+    panel;
+    sidebarTree;
+    mmkvStorageTreeElements;
+    constructor(panel) {
+        super();
+        this.panel = panel;
+        this.element.classList.add('storage-panel-sidebar');
+        this.sidebarTree = new UI.TreeOutline.TreeOutlineInShadow();
+        this.sidebarTree.element.classList.add('storage-panel-sidebar-tree');
+        this.sidebarTree.setFocusable(true);
+        this.element.appendChild(this.sidebarTree.element);
+        this.mmkvStorageTreeElements = new Map();
+        SDK.TargetManager.TargetManager.instance().observeModels(MMKVStorageModel, {
+            modelAdded: (model) => this.mmkvStorageModelAdded(model),
+            modelRemoved: (model) => this.mmkvStorageModelRemoved(model),
+        }, { scoped: true });
+    }
+    focus() {
+        this.sidebarTree.focus();
+    }
+    mmkvStorageModelAdded(model) {
+        model.addEventListener("MMKVStorageAdded" /* MMKVStorageModelEvents.MMKV_STORAGE_ADDED */, this.mmkvStorageAdded, this);
+        model.addEventListener("MMKVStorageRemoved" /* MMKVStorageModelEvents.MMKV_STORAGE_REMOVED */, this.mmkvStorageRemoved, this);
+        model.enable();
+        for (const storage of model.storages()) {
+            this.addMMKVStorage(storage);
+        }
+    }
+    mmkvStorageModelRemoved(model) {
+        model.removeEventListener("MMKVStorageAdded" /* MMKVStorageModelEvents.MMKV_STORAGE_ADDED */, this.mmkvStorageAdded, this);
+        model.removeEventListener("MMKVStorageRemoved" /* MMKVStorageModelEvents.MMKV_STORAGE_REMOVED */, this.mmkvStorageRemoved, this);
+        for (const storage of model.storages()) {
+            this.removeMMKVStorage(storage);
+        }
+    }
+    mmkvStorageAdded = (event) => {
+        this.addMMKVStorage(event.data);
+    };
+    addMMKVStorage(mmkvStorage) {
+        if (this.mmkvStorageTreeElements.has(mmkvStorage)) {
+            return;
+        }
+        const mmkvStorageTreeElement = new MMKVStorageTreeElement(this.panel, mmkvStorage);
+        this.mmkvStorageTreeElements.set(mmkvStorage, mmkvStorageTreeElement);
+        function comparator(a, b) {
+            return a.titleAsText().toLocaleLowerCase().localeCompare(b.titleAsText().toLocaleLowerCase());
+        }
+        this.sidebarTree.appendChild(mmkvStorageTreeElement, comparator);
+    }
+    mmkvStorageRemoved = (event) => {
+        this.removeMMKVStorage(event.data);
+    };
+    removeMMKVStorage(mmkvStorage) {
+        const treeElement = this.mmkvStorageTreeElements.get(mmkvStorage);
+        if (!treeElement) {
+            return;
+        }
+        const wasSelected = treeElement.selected;
+        this.sidebarTree.removeChild(treeElement);
+        this.mmkvStorageTreeElements.delete(mmkvStorage);
+        if (wasSelected && this.sidebarTree.rootElement().childCount() > 0) {
+            const firstChild = this.sidebarTree.rootElement().childAt(0);
+            if (firstChild) {
+                firstChild.select();
+            }
+        }
+    }
+}
+/** AsyncStorage-only sidebar / AsyncStorage 전용 사이드바 */
+class AsyncStorageOnlyStoragePanelSidebar extends UI.Widget.VBox {
+    panel;
+    sidebarTree;
+    asyncStorageListTreeElement;
+    asyncStorageStorageTreeElements;
+    constructor(panel) {
+        super();
+        this.panel = panel;
+        this.element.classList.add('storage-panel-sidebar');
+        this.sidebarTree = new UI.TreeOutline.TreeOutlineInShadow();
+        this.sidebarTree.element.classList.add('storage-panel-sidebar-tree');
+        this.sidebarTree.setFocusable(true);
+        this.element.appendChild(this.sidebarTree.element);
+        this.asyncStorageStorageTreeElements = new Map();
+        this.asyncStorageListTreeElement = new ExpandableStoragePanelTreeElement(this.panel, 'AsyncStorage', 'No AsyncStorage detected', 'On this page you can view, add, edit, and delete AsyncStorage key-value pairs.', 'async-storage');
+        const asyncStorageIcon = createIcon('table');
+        this.asyncStorageListTreeElement.setLeadingIcons([asyncStorageIcon]);
+        this.sidebarTree.appendChild(this.asyncStorageListTreeElement);
+        SDK.TargetManager.TargetManager.instance().observeModels(AsyncStorageStorageModel, {
+            modelAdded: (model) => this.asyncStorageStorageModelAdded(model),
+            modelRemoved: (model) => this.asyncStorageStorageModelRemoved(model),
+        }, { scoped: true });
+    }
+    focus() {
+        this.sidebarTree.focus();
+    }
+    asyncStorageStorageModelAdded(model) {
+        model.addEventListener("AsyncStorageStorageAdded" /* AsyncStorageStorageModelEvents.ASYNC_STORAGE_ADDED */, this.asyncStorageStorageAdded, this);
+        model.addEventListener("AsyncStorageStorageRemoved" /* AsyncStorageStorageModelEvents.ASYNC_STORAGE_REMOVED */, this.asyncStorageStorageRemoved, this);
+        model.enable();
+        for (const storage of model.storages()) {
+            this.addAsyncStorageStorage(storage);
+        }
+    }
+    asyncStorageStorageModelRemoved(model) {
+        model.removeEventListener("AsyncStorageStorageAdded" /* AsyncStorageStorageModelEvents.ASYNC_STORAGE_ADDED */, this.asyncStorageStorageAdded, this);
+        model.removeEventListener("AsyncStorageStorageRemoved" /* AsyncStorageStorageModelEvents.ASYNC_STORAGE_REMOVED */, this.asyncStorageStorageRemoved, this);
+        for (const storage of model.storages()) {
+            this.removeAsyncStorageStorage(storage);
+        }
+    }
+    asyncStorageStorageAdded = (event) => {
+        this.addAsyncStorageStorage(event.data);
+    };
+    addAsyncStorageStorage(asyncStorageStorage) {
+        if (this.asyncStorageStorageTreeElements.has(asyncStorageStorage)) {
+            return;
+        }
+        if (this.asyncStorageStorageTreeElements.size === 0) {
+            this.sidebarTree.removeChild(this.asyncStorageListTreeElement);
+            const asyncStorageStorageTreeElement = new AsyncStorageStorageTreeElement(this.panel, asyncStorageStorage);
+            this.asyncStorageStorageTreeElements.set(asyncStorageStorage, asyncStorageStorageTreeElement);
+            this.sidebarTree.appendChild(asyncStorageStorageTreeElement);
+            asyncStorageStorageTreeElement.select();
+        }
+        else {
+            const asyncStorageStorageTreeElement = new AsyncStorageStorageTreeElement(this.panel, asyncStorageStorage);
+            this.asyncStorageStorageTreeElements.set(asyncStorageStorage, asyncStorageStorageTreeElement);
+            function comparator(a, b) {
+                return a.titleAsText().toLocaleLowerCase().localeCompare(b.titleAsText().toLocaleLowerCase());
+            }
+            this.asyncStorageListTreeElement.appendChild(asyncStorageStorageTreeElement, comparator);
+        }
+    }
+    asyncStorageStorageRemoved = (event) => {
+        this.removeAsyncStorageStorage(event.data);
+    };
+    removeAsyncStorageStorage(asyncStorageStorage) {
+        const treeElement = this.asyncStorageStorageTreeElements.get(asyncStorageStorage);
+        if (!treeElement) {
+            return;
+        }
+        const wasSelected = treeElement.selected;
+        if (this.asyncStorageStorageTreeElements.size === 1) {
+            this.sidebarTree.removeChild(treeElement);
+            this.asyncStorageStorageTreeElements.delete(asyncStorageStorage);
+            const asyncStorageIcon = createIcon('table');
+            this.asyncStorageListTreeElement.setLeadingIcons([asyncStorageIcon]);
+            this.sidebarTree.appendChild(this.asyncStorageListTreeElement);
+        }
+        else {
             this.asyncStorageListTreeElement.removeChild(treeElement);
             this.asyncStorageStorageTreeElements.delete(asyncStorageStorage);
             if (wasSelected && this.asyncStorageListTreeElement.childCount() > 0) {

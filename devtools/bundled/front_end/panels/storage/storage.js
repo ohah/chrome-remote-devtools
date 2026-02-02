@@ -7,6 +7,8 @@ var __export = (target, all) => {
 // gen/front_end/panels/storage/StoragePanel.js
 var StoragePanel_exports = {};
 __export(StoragePanel_exports, {
+  AsyncStorageStoragePanel: () => AsyncStorageStoragePanel,
+  MMKVStoragePanel: () => MMKVStoragePanel,
   StoragePanel: () => StoragePanel,
   StoragePanelSidebar: () => StoragePanelSidebar
 });
@@ -722,114 +724,451 @@ var AsyncStorageStorageDispatcher = class {
 // gen/front_end/panels/application/MMKVStorageItemsView.js
 import * as Common4 from "./../../core/common/common.js";
 import * as i18n7 from "./../../core/i18n/i18n.js";
+import * as Geometry2 from "./../../models/geometry/geometry.js";
 import * as TextUtils2 from "./../../models/text_utils/text_utils.js";
 import * as SourceFrame2 from "./../../ui/legacy/components/source_frame/source_frame.js";
 import * as UI4 from "./../../ui/legacy/legacy.js";
+import { Directives as LitDirectives2, html as html3, nothing as nothing2, render as render3 } from "./../../ui/lit/lit.js";
 import * as VisualLogging4 from "./../../ui/visual_logging/visual_logging.js";
 import * as ApplicationComponents4 from "./../application/components/components.js";
+var { ARIAUtils: ARIAUtils5 } = UI4;
+var { EmptyWidget: EmptyWidget4 } = UI4.EmptyWidget;
+var { VBox: VBox2, widgetConfig: widgetConfig2 } = UI4.Widget;
+var { Size: Size2 } = Geometry2;
+var { repeat: repeat2 } = LitDirectives2;
+var MMKV_VALUE_TYPES = ["string", "number", "boolean", "buffer"];
+function parseValueType(s) {
+  return MMKV_VALUE_TYPES.includes(s) ? s : null;
+}
 var UIStrings4 = {
   /**
    * @description Name for the "MMKV Storage Items" table that shows the content of the MMKV Storage.
    */
   mmkvStorageItems: "MMKV Storage Items",
   /**
-   * @description Text for announcing that the "MMKV Storage Items" table was cleared, that is, all
-   * entries were deleted.
+   * @description Text for announcing that the "MMKV Storage Items" table was cleared.
    */
   mmkvStorageItemsCleared: "MMKV Storage Items cleared",
   /**
    * @description Text for announcing a MMKV Storage key/value item has been deleted
    */
-  mmkvStorageItemDeleted: "The storage item was deleted."
+  mmkvStorageItemDeleted: "The storage item was deleted.",
+  /**
+   * @description Text that shows in the Application Panel if no value is selected for preview
+   */
+  noPreviewSelected: "No value selected",
+  /**
+   * @description Preview text when viewing storage in Application panel
+   */
+  selectAValueToPreview: "Select a value to preview",
+  /**
+   * @description Text for announcing number of entries after filtering
+   * @example {5} PH1
+   */
+  numberEntries: "Number of entries shown in table: {PH1}",
+  /**
+   * @description Column header for key
+   */
+  key: "Key",
+  /**
+   * @description Column header for type
+   */
+  type: "Type",
+  /**
+   * @description Column header for value
+   */
+  value: "Value",
+  /**
+   * @description Warning when value is invalid for number type
+   */
+  invalidNumberValue: "Invalid number: value must be a valid number.",
+  /**
+   * @description Warning when value is invalid for buffer type
+   */
+  invalidBufferValue: "Invalid buffer: value must be a JSON array of numbers (e.g. [0,1,2]).",
+  /**
+   * @description Warning when value is invalid for boolean type
+   */
+  invalidBooleanValue: 'Invalid boolean: value must be "true" or "false".'
 };
 var str_4 = i18n7.i18n.registerUIStrings("panels/application/MMKVStorageItemsView.ts", UIStrings4);
 var i18nString4 = i18n7.i18n.getLocalizedString.bind(void 0, str_4);
-var MMKVStorageItemsView = class extends KeyValueStorageItemsView {
-  mmkvStorage;
-  eventListeners;
-  get storage() {
-    return this.mmkvStorage;
+var MAX_VALUE_LENGTH2 = 4096;
+function validateValueForType(value, valueType) {
+  if (valueType === "string") {
+    return { valid: true };
   }
+  if (valueType === "number") {
+    const trimmed = value.trim();
+    if (trimmed === "") {
+      return { valid: false, message: i18nString4(UIStrings4.invalidNumberValue) };
+    }
+    const n = Number(trimmed);
+    if (!Number.isFinite(n)) {
+      return { valid: false, message: i18nString4(UIStrings4.invalidNumberValue) };
+    }
+    return { valid: true };
+  }
+  if (valueType === "boolean") {
+    if (value !== "true" && value !== "false") {
+      return { valid: false, message: i18nString4(UIStrings4.invalidBooleanValue) };
+    }
+    return { valid: true };
+  }
+  if (valueType === "buffer") {
+    const trimmed = value.trim();
+    if (trimmed === "") {
+      return { valid: false, message: i18nString4(UIStrings4.invalidBufferValue) };
+    }
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (!Array.isArray(parsed)) {
+        return { valid: false, message: i18nString4(UIStrings4.invalidBufferValue) };
+      }
+      for (let i = 0; i < parsed.length; i++) {
+        const v = parsed[i];
+        if (typeof v !== "number" || !Number.isInteger(v) || v < 0 || v > 255) {
+          return { valid: false, message: i18nString4(UIStrings4.invalidBufferValue) };
+        }
+      }
+      return { valid: true };
+    } catch {
+      return { valid: false, message: i18nString4(UIStrings4.invalidBufferValue) };
+    }
+  }
+  return { valid: true };
+}
+var MMKVStorageItemsView = class extends UI4.Widget.VBox {
+  #mmkvStorage;
+  #eventListeners = [];
+  #items = [];
+  #selectedKey = null;
+  #isSortOrderAscending = true;
+  #toolbar;
+  #preview;
+  #previewValue = null;
+  #metadataView;
   constructor(mmkvStorage) {
-    const metadataView = new ApplicationComponents4.StorageMetadataView.StorageMetadataView();
-    metadataView.getTitle = () => mmkvStorage.instanceId;
-    super(i18nString4(UIStrings4.mmkvStorageItems), "mmkv-storage", true, void 0, metadataView);
-    this.mmkvStorage = mmkvStorage;
+    super();
+    this.#mmkvStorage = mmkvStorage;
+    this.#metadataView = new ApplicationComponents4.StorageMetadataView.StorageMetadataView();
+    this.#metadataView.getTitle = () => mmkvStorage.instanceId;
+    this.#preview = new EmptyWidget4(i18nString4(UIStrings4.noPreviewSelected), i18nString4(UIStrings4.selectAValueToPreview));
     this.element.classList.add("storage-view", "table");
-    this.showPreview(null, null);
-    this.eventListeners = [];
     this.setStorage(mmkvStorage);
+    this.showPreview(null, null);
+    this.performUpdate();
   }
-  createPreview(key, value) {
-    const url = `mmkv://${this.mmkvStorage.instanceId}/${key}`;
-    const provider = TextUtils2.StaticContentProvider.StaticContentProvider.fromString(url, Common4.ResourceType.resourceTypes.XHR, value);
-    return SourceFrame2.PreviewFactory.PreviewFactory.createPreview(provider, "text/plain");
+  get storage() {
+    return this.#mmkvStorage;
   }
   setStorage(mmkvStorage) {
-    Common4.EventTarget.removeEventListeners(this.eventListeners);
-    this.mmkvStorage = mmkvStorage;
+    Common4.EventTarget.removeEventListeners(this.#eventListeners);
+    this.#mmkvStorage = mmkvStorage;
+    this.#metadataView.getTitle = () => mmkvStorage.instanceId;
     this.element.setAttribute("jslog", `${VisualLogging4.pane().context("mmkv-storage-data")}`);
-    this.eventListeners = [
-      this.mmkvStorage.addEventListener("MMKVItemsCleared", this.mmkvStorageItemsCleared, this),
-      this.mmkvStorage.addEventListener("MMKVItemRemoved", this.mmkvStorageItemRemoved, this),
-      this.mmkvStorage.addEventListener("MMKVItemAdded", this.mmkvStorageItemAdded, this),
-      this.mmkvStorage.addEventListener("MMKVItemUpdated", this.mmkvStorageItemUpdated, this)
+    this.#eventListeners = [
+      mmkvStorage.addEventListener("MMKVItemsCleared", this.#itemsCleared, this),
+      mmkvStorage.addEventListener("MMKVItemRemoved", this.#itemRemoved, this),
+      mmkvStorage.addEventListener("MMKVItemAdded", this.#itemAdded, this),
+      mmkvStorage.addEventListener("MMKVItemUpdated", this.#itemUpdated, this)
     ];
     this.refreshItems();
   }
-  mmkvStorageItemsCleared() {
-    if (!this.isShowing()) {
-      return;
-    }
-    this.itemsCleared();
-  }
-  itemsCleared() {
-    super.itemsCleared();
-    UI4.ARIAUtils.LiveAnnouncer.alert(i18nString4(UIStrings4.mmkvStorageItemsCleared));
-  }
-  mmkvStorageItemRemoved(event) {
-    if (!this.isShowing()) {
-      return;
-    }
-    this.itemRemoved(event.data.key);
-  }
-  itemRemoved(key) {
-    super.itemRemoved(key);
-    UI4.ARIAUtils.LiveAnnouncer.alert(i18nString4(UIStrings4.mmkvStorageItemDeleted));
-  }
-  mmkvStorageItemAdded(event) {
-    if (!this.isShowing()) {
-      return;
-    }
-    this.itemAdded(event.data.key, event.data.value);
-  }
-  mmkvStorageItemUpdated(event) {
-    if (!this.isShowing()) {
-      return;
-    }
-    this.itemUpdated(event.data.key, event.data.value);
+  wasShown() {
+    super.wasShown();
+    this.refreshItems();
   }
   refreshItems() {
     void this.#refreshItems();
   }
   async #refreshItems() {
-    const items = await this.mmkvStorage.getItems();
-    if (!items || !this.toolbar) {
+    const entries = await this.#mmkvStorage.getItems();
+    if (!entries || !this.#toolbar) {
       return;
     }
-    const { filterRegex } = this.toolbar;
-    const filteredItems = items.map((item) => ({ key: item[0], value: item[1] })).filter((item) => filterRegex?.test(`${item.key} ${item.value}`) ?? true);
-    this.showItems(filteredItems);
+    const filterRegex = this.#toolbar.filterRegex;
+    const items = entries.map((row) => {
+      const key = row[0] ?? "";
+      const value = row[1] ?? "";
+      const rawType = row[2];
+      const valueType = (typeof rawType === "string" ? parseValueType(rawType) : null) ?? "string";
+      return { key, value, valueType };
+    }).filter((item) => filterRegex?.test(`${item.key} ${item.value} ${item.valueType}`) ?? true);
+    this.#showItems(items);
+  }
+  #showItems(items) {
+    const sortDirection = this.#isSortOrderAscending ? 1 : -1;
+    this.#items = [...items].sort((a, b) => sortDirection * (a.key > b.key ? 1 : a.key < b.key ? -1 : 0));
+    const selected = this.#items.find((item) => item.key === this.#selectedKey);
+    if (!selected) {
+      this.#selectedKey = null;
+    } else {
+      void this.#previewEntry(selected);
+    }
+    this.performUpdate();
+    this.#toolbar?.setCanDeleteSelected(Boolean(this.#selectedKey));
+    ARIAUtils5.LiveAnnouncer.alert(i18nString4(UIStrings4.numberEntries, { PH1: this.#items.length }));
+  }
+  #itemsCleared() {
+    if (!this.isShowing()) {
+      return;
+    }
+    this.#items = [];
+    this.#selectedKey = null;
+    this.performUpdate();
+    this.#toolbar?.setCanDeleteSelected(false);
+    UI4.ARIAUtils.LiveAnnouncer.alert(i18nString4(UIStrings4.mmkvStorageItemsCleared));
+  }
+  #itemRemoved(event) {
+    if (!this.isShowing()) {
+      return;
+    }
+    const key = event.data.key;
+    const index = this.#items.findIndex((item) => item.key === key);
+    if (index !== -1) {
+      this.#items.splice(index, 1);
+      if (this.#selectedKey === key) {
+        this.#selectedKey = this.#items.length ? this.#items[0].key : null;
+      }
+      this.performUpdate();
+    }
+    this.#toolbar?.setCanDeleteSelected(Boolean(this.#selectedKey));
+    UI4.ARIAUtils.LiveAnnouncer.alert(i18nString4(UIStrings4.mmkvStorageItemDeleted));
+  }
+  #itemAdded(event) {
+    if (!this.isShowing()) {
+      return;
+    }
+    const { key, value, valueType: rawType } = event.data;
+    const valueType = (typeof rawType === "string" ? parseValueType(rawType) : null) ?? "string";
+    if (this.#items.some((item) => item.key === key)) {
+      return;
+    }
+    this.#items.push({ key, value, valueType });
+    this.#items.sort((a, b) => (this.#isSortOrderAscending ? 1 : -1) * (a.key > b.key ? 1 : -1));
+    this.performUpdate();
+  }
+  #itemUpdated(event) {
+    if (!this.isShowing()) {
+      return;
+    }
+    const { key, value, valueType: rawType } = event.data;
+    const item = this.#items.find((i) => i.key === key);
+    if (!item) {
+      return;
+    }
+    item.value = value;
+    item.valueType = (typeof rawType === "string" ? parseValueType(rawType) : null) ?? item.valueType;
+    this.performUpdate();
+    if (this.#selectedKey === key) {
+      void this.#previewEntry(item);
+    }
   }
   deleteAllItems() {
-    this.mmkvStorage.clear();
-    this.mmkvStorageItemsCleared();
+    this.#mmkvStorage.clear();
+    this.#itemsCleared();
   }
-  removeItem(key) {
-    this.mmkvStorage?.removeItem(key);
+  #deleteCallback(key) {
+    this.#mmkvStorage.removeItem(key);
   }
-  setItem(key, value) {
-    this.mmkvStorage?.setItem(key, value);
+  #createCallback(key, value, valueType) {
+    const validation = validateValueForType(value, valueType);
+    if (!validation.valid) {
+      UI4.ARIAUtils.LiveAnnouncer.alert(validation.message ?? "Invalid value");
+      return;
+    }
+    this.#mmkvStorage.setItem(key, value, valueType);
+    this.#removeDupes(key, value);
+    void this.#previewEntry({ key, value, valueType });
+  }
+  #editingCallback(key, value, valueType, columnId, valueBeforeEditing, newText) {
+    if (columnId === "key") {
+      this.#mmkvStorage.removeItem(key);
+      this.#mmkvStorage.setItem(newText, value, valueType);
+      this.#removeDupes(newText, value);
+      void this.#previewEntry({ key: newText, value, valueType });
+      return;
+    }
+    if (columnId === "type") {
+      const newType = parseValueType(newText);
+      if (newType === null) {
+        this.performUpdate();
+        return;
+      }
+      const validation = validateValueForType(value, newType);
+      if (!validation.valid) {
+        UI4.ARIAUtils.LiveAnnouncer.alert(validation.message ?? "Invalid value");
+        this.performUpdate();
+        return;
+      }
+      this.#mmkvStorage.setItem(key, value, newType);
+      const item = this.#items.find((i) => i.key === key);
+      if (item) {
+        item.valueType = newType;
+      }
+      this.performUpdate();
+      return;
+    }
+    if (columnId === "value") {
+      const validation = validateValueForType(newText, valueType);
+      if (!validation.valid) {
+        UI4.ARIAUtils.LiveAnnouncer.alert(validation.message ?? "Invalid value");
+        this.performUpdate();
+        return;
+      }
+      this.#mmkvStorage.setItem(key, newText, valueType);
+      void this.#previewEntry({ key, value: newText, valueType });
+    }
+  }
+  #removeDupes(key, value) {
+    for (let i = this.#items.length - 1; i >= 0; i--) {
+      const child = this.#items[i];
+      if (child.key === key && child.value !== value) {
+        this.#items.splice(i, 1);
+      }
+    }
+  }
+  deleteSelectedItem() {
+    if (!this.#selectedKey) {
+      return;
+    }
+    this.#deleteCallback(this.#selectedKey);
+  }
+  #previewEntry(entry) {
+    if (entry?.value !== void 0) {
+      this.#selectedKey = entry.key;
+      return this.createPreview(entry.key, entry.value).then((preview) => {
+        if (this.#selectedKey === entry.key) {
+          this.showPreview(preview, entry.value);
+        }
+      });
+    }
+    this.#selectedKey = null;
+    this.showPreview(null, null);
+    return Promise.resolve();
+  }
+  showPreview(preview, value) {
+    if (this.#preview && this.#previewValue === value) {
+      return;
+    }
+    if (this.#preview) {
+      this.#preview.detach();
+    }
+    if (!preview) {
+      preview = new EmptyWidget4(i18nString4(UIStrings4.noPreviewSelected), i18nString4(UIStrings4.selectAValueToPreview));
+    }
+    this.#previewValue = value;
+    this.#preview = preview;
+    this.performUpdate();
+  }
+  createPreview(key, value) {
+    const url = `mmkv://${this.#mmkvStorage.instanceId}/${key}`;
+    const provider = TextUtils2.StaticContentProvider.StaticContentProvider.fromString(url, Common4.ResourceType.resourceTypes.XHR, value);
+    return SourceFrame2.PreviewFactory.PreviewFactory.createPreview(provider, "text/plain");
+  }
+  performUpdate() {
+    const that = this;
+    const setToolbar = (toolbar2) => {
+      that.#toolbar?.removeEventListener("DeleteSelected", that.deleteSelectedItem, that);
+      that.#toolbar?.removeEventListener("DeleteAll", that.deleteAllItems, that);
+      that.#toolbar?.removeEventListener("Refresh", that.refreshItems, that);
+      that.#toolbar = toolbar2;
+      that.#toolbar.addEventListener("DeleteSelected", that.deleteSelectedItem, that);
+      that.#toolbar.addEventListener("DeleteAll", that.deleteAllItems, that);
+      that.#toolbar.addEventListener("Refresh", that.refreshItems, that);
+    };
+    render3(
+      // clang-format off
+      html3`
+        <devtools-widget
+          .widgetConfig=${widgetConfig2(StorageItemsToolbar, { metadataView: this.#metadataView })}
+          class=flex-none
+          ${UI4.Widget.widgetRef(StorageItemsToolbar, setToolbar)}
+        ></devtools-widget>
+        <devtools-split-view sidebar-position="second" name="mmkv-storage-split-view-state">
+          <devtools-widget
+            slot="main"
+            .widgetConfig=${widgetConfig2(VBox2, { minimumSize: new Size2(0, 50) })}
+          >
+            <devtools-data-grid
+              .name=${"mmkv-storage-datagrid"}
+              striped
+              style="flex: auto"
+              @sort=${(e) => {
+        this.#isSortOrderAscending = e.detail.ascending;
+        this.performUpdate();
+      }}
+              @refresh=${() => this.refreshItems()}
+              @create=${(e) => {
+        this.#createCallback(e.detail.key, e.detail.value, "string");
+      }}
+              @deselect=${() => {
+        this.#selectedKey = null;
+        this.#toolbar?.setCanDeleteSelected(false);
+        this.showPreview(null, null);
+        this.performUpdate();
+      }}
+            >
+              <table>
+                <tr>
+                  <th id="key" sortable editable>${i18nString4(UIStrings4.key)}</th>
+                  <th id="value" editable>${i18nString4(UIStrings4.value)}</th>
+                  <th id="type">${i18nString4(UIStrings4.type)}</th>
+                </tr>
+                ${repeat2(this.#items, (item) => item.key, (item) => html3`
+                  <tr
+                    data-key=${item.key}
+                    data-value=${item.value}
+                    data-value-type=${item.valueType}
+                    @select=${() => {
+        this.#selectedKey = item.key;
+        this.#toolbar?.setCanDeleteSelected(true);
+        void this.#previewEntry(item);
+      }}
+                    @edit=${(e) => {
+        this.#editingCallback(item.key, item.value, item.valueType, e.detail.columnId, e.detail.valueBeforeEditing, e.detail.newText);
+      }}
+                    @delete=${() => this.#deleteCallback(item.key)}
+                    selected=${this.#selectedKey === item.key || nothing2}
+                  >
+                    <td>${item.key}</td>
+                    <td>${item.value.substring(0, MAX_VALUE_LENGTH2)}</td>
+                    <td @click=${(e) => e.stopPropagation()}>
+                      <select
+                        class="mmkv-type-select"
+                        .value=${item.valueType}
+                        @change=${(e) => {
+        const select = e.target;
+        const newType = parseValueType(select.value);
+        if (newType !== null) {
+          this.#editingCallback(item.key, item.value, item.valueType, "type", item.valueType, newType);
+        }
+      }}
+                      >
+                        ${MMKV_VALUE_TYPES.map((t) => html3`<option value=${t}>${t}</option>`)}
+                      </select>
+                    </td>
+                  </tr>
+                `)}
+                <tr placeholder></tr>
+              </table>
+            </devtools-data-grid>
+          </devtools-widget>
+          <devtools-widget
+            slot="sidebar"
+            .widgetConfig=${widgetConfig2(VBox2, { minimumSize: new Size2(0, 50) })}
+            jslog=${VisualLogging4.pane("preview").track({ resize: true })}
+          >
+            ${this.#preview?.element}
+          </devtools-widget>
+        </devtools-split-view>`,
+      // clang-format on
+      this.contentElement
+    );
+  }
+  get toolbar() {
+    return this.#toolbar;
   }
 };
 
@@ -850,8 +1189,8 @@ var MMKVStorage = class extends Common5.ObjectWrapper.ObjectWrapper {
   getItems() {
     return this.model.agent.invoke_getMMKVItems({ instanceId: this.instanceId }).then(({ entries }) => entries);
   }
-  setItem(key, value) {
-    void this.model.agent.invoke_setMMKVItem({ instanceId: this.instanceId, key, value });
+  setItem(key, value, valueType) {
+    void this.model.agent.invoke_setMMKVItem({ instanceId: this.instanceId, key, value, valueType });
   }
   removeItem(key) {
     void this.model.agent.invoke_removeMMKVItem({ instanceId: this.instanceId, key });
@@ -895,20 +1234,20 @@ var MMKVStorageModel = class extends SDK2.SDKModel.SDKModel {
     const eventData = { key };
     mmkvStorage.dispatchEventToListeners("MMKVItemRemoved", eventData);
   }
-  mmkvItemAdded({ instanceId, key, newValue }) {
+  mmkvItemAdded({ instanceId, key, newValue, valueType }) {
     let mmkvStorage = this.storageForInstanceId(instanceId);
     if (!mmkvStorage) {
       mmkvStorage = this.addStorage(instanceId);
     }
-    const eventData = { key, value: newValue };
+    const eventData = { key, value: newValue, valueType };
     mmkvStorage.dispatchEventToListeners("MMKVItemAdded", eventData);
   }
-  mmkvItemUpdated({ instanceId, key, oldValue, newValue }) {
+  mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType }) {
     const mmkvStorage = this.storageForInstanceId(instanceId);
     if (!mmkvStorage) {
       return;
     }
-    const eventData = { key, oldValue, value: newValue };
+    const eventData = { key, oldValue, value: newValue, valueType };
     mmkvStorage.dispatchEventToListeners("MMKVItemUpdated", eventData);
   }
   mmkvInstanceCreated({ instanceId }) {
@@ -943,11 +1282,11 @@ var MMKVStorageDispatcher = class {
   mmkvItemRemoved({ instanceId, key }) {
     this.model.mmkvItemRemoved({ instanceId, key });
   }
-  mmkvItemAdded({ instanceId, key, newValue }) {
-    this.model.mmkvItemAdded({ instanceId, key, newValue });
+  mmkvItemAdded({ instanceId, key, newValue, valueType }) {
+    this.model.mmkvItemAdded({ instanceId, key, newValue, valueType });
   }
-  mmkvItemUpdated({ instanceId, key, oldValue, newValue }) {
-    this.model.mmkvItemUpdated({ instanceId, key, oldValue, newValue });
+  mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType }) {
+    this.model.mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType });
   }
   mmkvInstanceCreated({ instanceId }) {
     this.model.mmkvInstanceCreated({ instanceId });
@@ -956,6 +1295,8 @@ var MMKVStorageDispatcher = class {
 
 // gen/front_end/panels/storage/StoragePanel.js
 var storagePanelInstance;
+var mmkvStoragePanelInstance;
+var asyncStorageStoragePanelInstance;
 var StoragePanel = class _StoragePanel extends UI5.Panel.PanelWithSidebar {
   visibleView;
   pendingViewPromise;
@@ -1046,6 +1387,150 @@ var StoragePanel = class _StoragePanel extends UI5.Panel.PanelWithSidebar {
     this.showView(this.asyncStorageStorageView);
   }
   showCategoryView(categoryName, categoryHeadline, categoryDescription, _categoryLink) {
+    const categoryView = new UI5.Widget.VBox();
+    categoryView.element.classList.add("storage-category-view");
+    const headline = categoryView.element.createChild("div", "storage-category-headline");
+    headline.textContent = categoryHeadline;
+    const description = categoryView.element.createChild("div", "storage-category-description");
+    description.textContent = categoryDescription;
+    this.showView(categoryView);
+  }
+};
+var MMKVStoragePanel = class _MMKVStoragePanel extends UI5.Panel.PanelWithSidebar {
+  visibleView;
+  pendingViewPromise;
+  storageViews;
+  storageViewToolbar;
+  mmkvStorageView;
+  sidebar;
+  constructor() {
+    super("storage-mmkv");
+    this.visibleView = null;
+    this.pendingViewPromise = null;
+    const mainContainer = new UI5.Widget.VBox();
+    mainContainer.setMinimumSize(100, 0);
+    this.storageViews = mainContainer.element.createChild("div", "vbox flex-auto");
+    this.storageViewToolbar = mainContainer.element.createChild("devtools-toolbar", "resources-toolbar");
+    this.splitWidget().setMainWidget(mainContainer);
+    this.mmkvStorageView = null;
+    this.sidebar = new MMKVOnlyStoragePanelSidebar(this);
+    this.sidebar.show(this.panelSidebarElement());
+  }
+  static instance(opts = { forceNew: null }) {
+    const { forceNew } = opts;
+    if (!mmkvStoragePanelInstance || forceNew) {
+      mmkvStoragePanelInstance = new _MMKVStoragePanel();
+    }
+    return mmkvStoragePanelInstance;
+  }
+  focus() {
+    this.sidebar.focus();
+  }
+  showView(view) {
+    this.pendingViewPromise = null;
+    if (this.visibleView === view) {
+      return;
+    }
+    if (this.visibleView) {
+      this.visibleView.detach();
+    }
+    if (view) {
+      view.show(this.storageViews);
+    }
+    this.visibleView = view;
+    this.storageViewToolbar.removeToolbarItems();
+    this.storageViewToolbar.classList.toggle("hidden", true);
+    if (view instanceof UI5.View.SimpleView) {
+      void view.toolbarItems().then((items) => {
+        items.map((item) => this.storageViewToolbar.appendToolbarItem(item));
+        this.storageViewToolbar.classList.toggle("hidden", !items.length);
+      });
+    }
+  }
+  showMMKVStorage(mmkvStorage) {
+    if (!mmkvStorage) {
+      return;
+    }
+    if (!this.mmkvStorageView) {
+      this.mmkvStorageView = new MMKVStorageItemsView(mmkvStorage);
+    } else {
+      this.mmkvStorageView.setStorage(mmkvStorage);
+    }
+    this.showView(this.mmkvStorageView);
+  }
+  showCategoryView(_categoryName, categoryHeadline, categoryDescription, _categoryLink) {
+    const categoryView = new UI5.Widget.VBox();
+    categoryView.element.classList.add("storage-category-view");
+    const headline = categoryView.element.createChild("div", "storage-category-headline");
+    headline.textContent = categoryHeadline;
+    const description = categoryView.element.createChild("div", "storage-category-description");
+    description.textContent = categoryDescription;
+    this.showView(categoryView);
+  }
+};
+var AsyncStorageStoragePanel = class _AsyncStorageStoragePanel extends UI5.Panel.PanelWithSidebar {
+  visibleView;
+  pendingViewPromise;
+  storageViews;
+  storageViewToolbar;
+  asyncStorageStorageView;
+  sidebar;
+  constructor() {
+    super("storage-async-storage");
+    this.visibleView = null;
+    this.pendingViewPromise = null;
+    const mainContainer = new UI5.Widget.VBox();
+    mainContainer.setMinimumSize(100, 0);
+    this.storageViews = mainContainer.element.createChild("div", "vbox flex-auto");
+    this.storageViewToolbar = mainContainer.element.createChild("devtools-toolbar", "resources-toolbar");
+    this.splitWidget().setMainWidget(mainContainer);
+    this.asyncStorageStorageView = null;
+    this.sidebar = new AsyncStorageOnlyStoragePanelSidebar(this);
+    this.sidebar.show(this.panelSidebarElement());
+  }
+  static instance(opts = { forceNew: null }) {
+    const { forceNew } = opts;
+    if (!asyncStorageStoragePanelInstance || forceNew) {
+      asyncStorageStoragePanelInstance = new _AsyncStorageStoragePanel();
+    }
+    return asyncStorageStoragePanelInstance;
+  }
+  focus() {
+    this.sidebar.focus();
+  }
+  showView(view) {
+    this.pendingViewPromise = null;
+    if (this.visibleView === view) {
+      return;
+    }
+    if (this.visibleView) {
+      this.visibleView.detach();
+    }
+    if (view) {
+      view.show(this.storageViews);
+    }
+    this.visibleView = view;
+    this.storageViewToolbar.removeToolbarItems();
+    this.storageViewToolbar.classList.toggle("hidden", true);
+    if (view instanceof UI5.View.SimpleView) {
+      void view.toolbarItems().then((items) => {
+        items.map((item) => this.storageViewToolbar.appendToolbarItem(item));
+        this.storageViewToolbar.classList.toggle("hidden", !items.length);
+      });
+    }
+  }
+  showAsyncStorageStorage(asyncStorageStorage) {
+    if (!asyncStorageStorage) {
+      return;
+    }
+    if (!this.asyncStorageStorageView) {
+      this.asyncStorageStorageView = new AsyncStorageStorageItemsView(asyncStorageStorage);
+    } else {
+      this.asyncStorageStorageView.setStorage(asyncStorageStorage);
+    }
+    this.showView(this.asyncStorageStorageView);
+  }
+  showCategoryView(_categoryName, categoryHeadline, categoryDescription, _categoryLink) {
     const categoryView = new UI5.Widget.VBox();
     categoryView.element.classList.add("storage-category-view");
     const headline = categoryView.element.createChild("div", "storage-category-headline");
@@ -1186,6 +1671,165 @@ var StoragePanelSidebar = class extends UI5.Widget.VBox {
   asyncStorageStorageRemoved = (event) => {
     const asyncStorageStorage = event.data;
     this.removeAsyncStorageStorage(asyncStorageStorage);
+  };
+  removeAsyncStorageStorage(asyncStorageStorage) {
+    const treeElement = this.asyncStorageStorageTreeElements.get(asyncStorageStorage);
+    if (!treeElement) {
+      return;
+    }
+    const wasSelected = treeElement.selected;
+    if (this.asyncStorageStorageTreeElements.size === 1) {
+      this.sidebarTree.removeChild(treeElement);
+      this.asyncStorageStorageTreeElements.delete(asyncStorageStorage);
+      const asyncStorageIcon = createIcon("table");
+      this.asyncStorageListTreeElement.setLeadingIcons([asyncStorageIcon]);
+      this.sidebarTree.appendChild(this.asyncStorageListTreeElement);
+    } else {
+      this.asyncStorageListTreeElement.removeChild(treeElement);
+      this.asyncStorageStorageTreeElements.delete(asyncStorageStorage);
+      if (wasSelected && this.asyncStorageListTreeElement.childCount() > 0) {
+        const firstChild = this.asyncStorageListTreeElement.childAt(0);
+        if (firstChild) {
+          firstChild.select();
+        }
+      }
+    }
+  }
+};
+var MMKVOnlyStoragePanelSidebar = class extends UI5.Widget.VBox {
+  panel;
+  sidebarTree;
+  mmkvStorageTreeElements;
+  constructor(panel) {
+    super();
+    this.panel = panel;
+    this.element.classList.add("storage-panel-sidebar");
+    this.sidebarTree = new UI5.TreeOutline.TreeOutlineInShadow();
+    this.sidebarTree.element.classList.add("storage-panel-sidebar-tree");
+    this.sidebarTree.setFocusable(true);
+    this.element.appendChild(this.sidebarTree.element);
+    this.mmkvStorageTreeElements = /* @__PURE__ */ new Map();
+    SDK3.TargetManager.TargetManager.instance().observeModels(MMKVStorageModel, {
+      modelAdded: (model) => this.mmkvStorageModelAdded(model),
+      modelRemoved: (model) => this.mmkvStorageModelRemoved(model)
+    }, { scoped: true });
+  }
+  focus() {
+    this.sidebarTree.focus();
+  }
+  mmkvStorageModelAdded(model) {
+    model.addEventListener("MMKVStorageAdded", this.mmkvStorageAdded, this);
+    model.addEventListener("MMKVStorageRemoved", this.mmkvStorageRemoved, this);
+    model.enable();
+    for (const storage of model.storages()) {
+      this.addMMKVStorage(storage);
+    }
+  }
+  mmkvStorageModelRemoved(model) {
+    model.removeEventListener("MMKVStorageAdded", this.mmkvStorageAdded, this);
+    model.removeEventListener("MMKVStorageRemoved", this.mmkvStorageRemoved, this);
+    for (const storage of model.storages()) {
+      this.removeMMKVStorage(storage);
+    }
+  }
+  mmkvStorageAdded = (event) => {
+    this.addMMKVStorage(event.data);
+  };
+  addMMKVStorage(mmkvStorage) {
+    if (this.mmkvStorageTreeElements.has(mmkvStorage)) {
+      return;
+    }
+    const mmkvStorageTreeElement = new MMKVStorageTreeElement(this.panel, mmkvStorage);
+    this.mmkvStorageTreeElements.set(mmkvStorage, mmkvStorageTreeElement);
+    function comparator(a, b) {
+      return a.titleAsText().toLocaleLowerCase().localeCompare(b.titleAsText().toLocaleLowerCase());
+    }
+    this.sidebarTree.appendChild(mmkvStorageTreeElement, comparator);
+  }
+  mmkvStorageRemoved = (event) => {
+    this.removeMMKVStorage(event.data);
+  };
+  removeMMKVStorage(mmkvStorage) {
+    const treeElement = this.mmkvStorageTreeElements.get(mmkvStorage);
+    if (!treeElement) {
+      return;
+    }
+    const wasSelected = treeElement.selected;
+    this.sidebarTree.removeChild(treeElement);
+    this.mmkvStorageTreeElements.delete(mmkvStorage);
+    if (wasSelected && this.sidebarTree.rootElement().childCount() > 0) {
+      const firstChild = this.sidebarTree.rootElement().childAt(0);
+      if (firstChild) {
+        firstChild.select();
+      }
+    }
+  }
+};
+var AsyncStorageOnlyStoragePanelSidebar = class extends UI5.Widget.VBox {
+  panel;
+  sidebarTree;
+  asyncStorageListTreeElement;
+  asyncStorageStorageTreeElements;
+  constructor(panel) {
+    super();
+    this.panel = panel;
+    this.element.classList.add("storage-panel-sidebar");
+    this.sidebarTree = new UI5.TreeOutline.TreeOutlineInShadow();
+    this.sidebarTree.element.classList.add("storage-panel-sidebar-tree");
+    this.sidebarTree.setFocusable(true);
+    this.element.appendChild(this.sidebarTree.element);
+    this.asyncStorageStorageTreeElements = /* @__PURE__ */ new Map();
+    this.asyncStorageListTreeElement = new ExpandableStoragePanelTreeElement(this.panel, "AsyncStorage", "No AsyncStorage detected", "On this page you can view, add, edit, and delete AsyncStorage key-value pairs.", "async-storage");
+    const asyncStorageIcon = createIcon("table");
+    this.asyncStorageListTreeElement.setLeadingIcons([asyncStorageIcon]);
+    this.sidebarTree.appendChild(this.asyncStorageListTreeElement);
+    SDK3.TargetManager.TargetManager.instance().observeModels(AsyncStorageStorageModel, {
+      modelAdded: (model) => this.asyncStorageStorageModelAdded(model),
+      modelRemoved: (model) => this.asyncStorageStorageModelRemoved(model)
+    }, { scoped: true });
+  }
+  focus() {
+    this.sidebarTree.focus();
+  }
+  asyncStorageStorageModelAdded(model) {
+    model.addEventListener("AsyncStorageStorageAdded", this.asyncStorageStorageAdded, this);
+    model.addEventListener("AsyncStorageStorageRemoved", this.asyncStorageStorageRemoved, this);
+    model.enable();
+    for (const storage of model.storages()) {
+      this.addAsyncStorageStorage(storage);
+    }
+  }
+  asyncStorageStorageModelRemoved(model) {
+    model.removeEventListener("AsyncStorageStorageAdded", this.asyncStorageStorageAdded, this);
+    model.removeEventListener("AsyncStorageStorageRemoved", this.asyncStorageStorageRemoved, this);
+    for (const storage of model.storages()) {
+      this.removeAsyncStorageStorage(storage);
+    }
+  }
+  asyncStorageStorageAdded = (event) => {
+    this.addAsyncStorageStorage(event.data);
+  };
+  addAsyncStorageStorage(asyncStorageStorage) {
+    if (this.asyncStorageStorageTreeElements.has(asyncStorageStorage)) {
+      return;
+    }
+    if (this.asyncStorageStorageTreeElements.size === 0) {
+      this.sidebarTree.removeChild(this.asyncStorageListTreeElement);
+      const asyncStorageStorageTreeElement = new AsyncStorageStorageTreeElement(this.panel, asyncStorageStorage);
+      this.asyncStorageStorageTreeElements.set(asyncStorageStorage, asyncStorageStorageTreeElement);
+      this.sidebarTree.appendChild(asyncStorageStorageTreeElement);
+      asyncStorageStorageTreeElement.select();
+    } else {
+      let comparator = function(a, b) {
+        return a.titleAsText().toLocaleLowerCase().localeCompare(b.titleAsText().toLocaleLowerCase());
+      };
+      const asyncStorageStorageTreeElement = new AsyncStorageStorageTreeElement(this.panel, asyncStorageStorage);
+      this.asyncStorageStorageTreeElements.set(asyncStorageStorage, asyncStorageStorageTreeElement);
+      this.asyncStorageListTreeElement.appendChild(asyncStorageStorageTreeElement, comparator);
+    }
+  }
+  asyncStorageStorageRemoved = (event) => {
+    this.removeAsyncStorageStorage(event.data);
   };
   removeAsyncStorageStorage(asyncStorageStorage) {
     const treeElement = this.asyncStorageStorageTreeElements.get(asyncStorageStorage);

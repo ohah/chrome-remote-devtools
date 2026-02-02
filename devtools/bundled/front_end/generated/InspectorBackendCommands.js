@@ -719,15 +719,16 @@ export function registerCommands(inspectorBackend) {
     // MMKVStorage.
     inspectorBackend.registerEvent("MMKVStorage.mmkvItemsCleared", ["instanceId"]);
     inspectorBackend.registerEvent("MMKVStorage.mmkvItemRemoved", ["instanceId", "key"]);
-    inspectorBackend.registerEvent("MMKVStorage.mmkvItemAdded", ["instanceId", "key", "newValue"]);
-    inspectorBackend.registerEvent("MMKVStorage.mmkvItemUpdated", ["instanceId", "key", "oldValue", "newValue"]);
+    inspectorBackend.registerEvent("MMKVStorage.mmkvItemAdded", ["instanceId", "key", "newValue", "valueType"]);
+    inspectorBackend.registerEvent("MMKVStorage.mmkvItemUpdated", ["instanceId", "key", "oldValue", "newValue", "valueType"]);
     inspectorBackend.registerEvent("MMKVStorage.mmkvInstanceCreated", ["instanceId"]);
     inspectorBackend.registerCommand("MMKVStorage.enable", [], [], "Enables storage tracking, storage events will now be delivered to the client.");
     inspectorBackend.registerCommand("MMKVStorage.getMMKVItems", [{ "name": "instanceId", "type": "string", "optional": false, "description": "", "typeRef": null }], ["entries"], "");
-    inspectorBackend.registerCommand("MMKVStorage.setMMKVItem", [{ "name": "instanceId", "type": "string", "optional": false, "description": "", "typeRef": null }, { "name": "key", "type": "string", "optional": false, "description": "", "typeRef": null }, { "name": "value", "type": "string", "optional": false, "description": "", "typeRef": null }], [], "");
+    inspectorBackend.registerCommand("MMKVStorage.setMMKVItem", [{ "name": "instanceId", "type": "string", "optional": false, "description": "", "typeRef": null }, { "name": "key", "type": "string", "optional": false, "description": "", "typeRef": null }, { "name": "value", "type": "string", "optional": false, "description": "", "typeRef": null }, { "name": "valueType", "type": "string", "optional": true, "description": "One of string, number, boolean, buffer.", "typeRef": null }], [], "");
     inspectorBackend.registerCommand("MMKVStorage.removeMMKVItem", [{ "name": "instanceId", "type": "string", "optional": false, "description": "", "typeRef": null }, { "name": "key", "type": "string", "optional": false, "description": "", "typeRef": null }], [], "");
     inspectorBackend.registerCommand("MMKVStorage.clear", [{ "name": "instanceId", "type": "string", "optional": false, "description": "", "typeRef": null }], [], "");
-    inspectorBackend.registerType("MMKVStorage.Item", [{ "name": "Item", "type": "array", "optional": false, "description": "MMKV Storage item (key-value pair).", "typeRef": "string" }]);
+    inspectorBackend.registerType("MMKVStorage.Item", [{ "name": "Item", "type": "array", "optional": false, "description": "MMKV Storage item: [key, value, valueType]. valueType is string, number, boolean, or buffer.", "typeRef": "string" }]);
+    inspectorBackend.registerType("MMKVStorage.ValueType", [{ "name": "ValueType", "type": "string", "optional": false, "description": "MMKV value type.", "typeRef": null }]);
     // Network.
     inspectorBackend.registerEnum("Network.ResourceType", { Document: "Document", Stylesheet: "Stylesheet", Image: "Image", Media: "Media", Font: "Font", Script: "Script", TextTrack: "TextTrack", XHR: "XHR", Fetch: "Fetch", Prefetch: "Prefetch", EventSource: "EventSource", WebSocket: "WebSocket", Manifest: "Manifest", SignedExchange: "SignedExchange", Ping: "Ping", CSPViolationReport: "CSPViolationReport", Preflight: "Preflight", FedCM: "FedCM", Other: "Other" });
     inspectorBackend.registerEnum("Network.ErrorReason", { Failed: "Failed", Aborted: "Aborted", TimedOut: "TimedOut", AccessDenied: "AccessDenied", ConnectionClosed: "ConnectionClosed", ConnectionReset: "ConnectionReset", ConnectionRefused: "ConnectionRefused", ConnectionAborted: "ConnectionAborted", ConnectionFailed: "ConnectionFailed", NameNotResolved: "NameNotResolved", InternetDisconnected: "InternetDisconnected", AddressUnreachable: "AddressUnreachable", BlockedByClient: "BlockedByClient", BlockedByResponse: "BlockedByResponse" });
