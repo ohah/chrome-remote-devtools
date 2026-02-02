@@ -28,6 +28,82 @@ const PAGE_GET_RESOURCE_TREE_RESULT = {
 };
 
 /**
+ * Cached sourcemap from Metro: sources + sourcesContent so Sources tab can show original files / Metro에서 가져온 소스맵 캐시: Sources 탭에서 원본 파일 표시용
+ */
+let sourceMapCache: {
+  sources: string[];
+  sourcesContent: (string | null)[];
+} | null = null;
+
+/**
+ * Normalize source URL for matching (strip file://, collapse slashes) / 소스 URL 정규화 (file:// 제거, 슬래시 정리)
+ */
+function normalizeSourceUrl(url: string): string {
+  let s = url.replace(/^file:\/\//, '').replace(/\/+/g, '/');
+  if (s.startsWith('/') === false && !/^[a-z]+:\/\//i.test(url)) s = '/' + s;
+  return s;
+}
+
+/**
+ * Get source content by URL from cached sourcemap (for Page.getResourceContent) / 캐시된 소스맵에서 URL로 소스 내용 반환
+ */
+function getSourceContentByUrl(url: string): string | null {
+  if (!sourceMapCache) return null;
+  const normalized = normalizeSourceUrl(url);
+  const idx = sourceMapCache.sources.findIndex(
+    (s) => s === url || normalizeSourceUrl(s) === normalized
+  );
+  if (idx < 0) return null;
+  return sourceMapCache.sourcesContent[idx] ?? null;
+}
+
+/** Base64 alphabet for inline encoding (RN may not have btoa) / 인라인 base64 인코딩용 (RN에 btoa 없을 수 있음) */
+const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+/**
+ * Encode UTF-8 string to base64 without btoa/Buffer (works in React Native) / btoa/Buffer 없이 UTF-8 문자열을 base64로 인코딩 (RN에서 동작)
+ */
+function base64EncodeUtf8(str: string): string {
+  if (typeof btoa !== 'undefined') {
+    try {
+      return btoa(unescape(encodeURIComponent(str)));
+    } catch {
+      // fall through to manual encode
+    }
+  }
+  const bytes: number[] = [];
+  for (let i = 0; i < str.length; i++) {
+    let c = str.charCodeAt(i);
+    if (c < 0x80) bytes.push(c);
+    else if (c < 0x800) {
+      bytes.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+    } else if (c < 0xd800 || c >= 0xe000) {
+      bytes.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+    } else {
+      const low = str.charCodeAt(++i);
+      const u = ((c & 0x3ff) << 10) | (low & 0x3ff);
+      bytes.push(
+        0xf0 | (u >> 18),
+        0x80 | ((u >> 12) & 0x3f),
+        0x80 | ((u >> 6) & 0x3f),
+        0x80 | (u & 0x3f)
+      );
+    }
+  }
+  let out = '';
+  for (let i = 0; i < bytes.length; i += 3) {
+    const a = bytes[i];
+    const b = bytes[i + 1];
+    const c = bytes[i + 2];
+    out += BASE64_CHARS[a >> 2];
+    out += BASE64_CHARS[((a & 3) << 4) | ((b ?? 0) >> 4)];
+    out += b === undefined ? '=' : BASE64_CHARS[((b & 15) << 2) | ((c ?? 0) >> 6)];
+    out += c === undefined ? '=' : BASE64_CHARS[c & 63];
+  }
+  return out;
+}
+
+/**
  * Map CDP CallArgument[] to JS values (value / objectId lookup / unserializableValue) / CDP CallArgument[]를 JS 값으로 변환
  */
 function callArgumentsToValues(
