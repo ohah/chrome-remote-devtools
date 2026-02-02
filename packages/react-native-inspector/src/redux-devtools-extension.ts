@@ -108,9 +108,9 @@ function sendCDPMessage(message: object): void {
   try {
     const messageStr = JSON.stringify(message);
     const result = sendCDPMessageFn(serverHost, serverPort, messageStr);
-    // Handle Promise if returned / Promise가 반환되면 처리
+    // Handle Promise/thenable if returned / Promise 또는 thenable이 반환되면 처리
     if (result && typeof result.then === 'function') {
-      (result as Promise<void>).catch((error: unknown) => {
+      Promise.resolve(result).catch((error: unknown) => {
         console.error('[ReduxDevToolsPolyfill] ❌ Failed to send CDP message:', error);
       });
     }
