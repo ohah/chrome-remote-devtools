@@ -39,8 +39,6 @@ function withReduxDevTools(config) {
     }
   }
 
-  console.log('[MetroConfig] ✅ Redux DevTools polyfill will be injected at:', polyfillPath);
-
   // Get existing modules that run before main / main 전에 실행되는 기존 모듈 가져오기
   const existingModules = config.serializer?.getModulesRunBeforeMainModule
     ? config.serializer.getModulesRunBeforeMainModule()
@@ -80,7 +78,6 @@ function withReduxDevTools(config) {
       getModulesRunBeforeMainModule: () => {
         // Add our polyfill module first / polyfill 모듈을 먼저 추가
         const modules = [polyfillPath, ...existingModules];
-        console.log('[MetroConfig] 📦 Modules to run before main:', modules.length, modules);
         return modules;
       },
     },
