@@ -321,6 +321,7 @@ panels/application/IndexedDBViews.test.js
 panels/application/InterestGroupStorageView.test.js
 panels/application/InterestGroupTreeElement.test.js
 panels/application/KeyValueStorageItemsView.test.js
+panels/application/MMKVStorageItemsView.test.js
 panels/application/OriginTrialTreeView.test.js
 panels/application/PreloadingTreeElement.test.js
 panels/application/ReportingApiView.test.js

@@ -8,7 +8,7 @@ export declare class MMKVStorage extends Common.ObjectWrapper.ObjectWrapper<MMKV
     constructor(model: MMKVStorageModel, instanceId: string);
     get instanceId(): string;
     getItems(): Promise<Protocol.MMKVStorage.Item[] | null>;
-    setItem(key: string, value: string): void;
+    setItem(key: string, value: string, valueType?: Protocol.MMKVStorage.ValueType): void;
     removeItem(key: string): void;
     clear(): void;
 }
@@ -25,11 +25,13 @@ export declare namespace MMKVStorage {
     interface MmkvItemAddedEvent {
         key: string;
         value: string;
+        valueType?: Protocol.MMKVStorage.ValueType;
     }
     interface MmkvItemUpdatedEvent {
         key: string;
         oldValue: string;
         value: string;
+        valueType?: Protocol.MMKVStorage.ValueType;
     }
     interface EventTypes {
         [Events.MMKV_ITEMS_CLEARED]: void;
@@ -46,8 +48,8 @@ export declare class MMKVStorageModel extends SDK.SDKModel.SDKModel<EventTypes> 
     enable(): void;
     mmkvItemsCleared({ instanceId }: Protocol.MMKVStorage.MmkvItemsClearedEvent): void;
     mmkvItemRemoved({ instanceId, key }: Protocol.MMKVStorage.MmkvItemRemovedEvent): void;
-    mmkvItemAdded({ instanceId, key, newValue }: Protocol.MMKVStorage.MmkvItemAddedEvent): void;
-    mmkvItemUpdated({ instanceId, key, oldValue, newValue }: Protocol.MMKVStorage.MmkvItemUpdatedEvent): void;
+    mmkvItemAdded({ instanceId, key, newValue, valueType }: Protocol.MMKVStorage.MmkvItemAddedEvent): void;
+    mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType }: Protocol.MMKVStorage.MmkvItemUpdatedEvent): void;
     mmkvInstanceCreated({ instanceId }: Protocol.MMKVStorage.MmkvInstanceCreatedEvent): void;
     private addStorage;
     private storageForInstanceId;
@@ -66,7 +68,7 @@ export declare class MMKVStorageDispatcher implements ProtocolProxyApi.MMKVStora
     constructor(model: MMKVStorageModel);
     mmkvItemsCleared({ instanceId }: Protocol.MMKVStorage.MmkvItemsClearedEvent): void;
     mmkvItemRemoved({ instanceId, key }: Protocol.MMKVStorage.MmkvItemRemovedEvent): void;
-    mmkvItemAdded({ instanceId, key, newValue }: Protocol.MMKVStorage.MmkvItemAddedEvent): void;
-    mmkvItemUpdated({ instanceId, key, oldValue, newValue }: Protocol.MMKVStorage.MmkvItemUpdatedEvent): void;
+    mmkvItemAdded({ instanceId, key, newValue, valueType }: Protocol.MMKVStorage.MmkvItemAddedEvent): void;
+    mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType }: Protocol.MMKVStorage.MmkvItemUpdatedEvent): void;
     mmkvInstanceCreated({ instanceId }: Protocol.MMKVStorage.MmkvInstanceCreatedEvent): void;
 }

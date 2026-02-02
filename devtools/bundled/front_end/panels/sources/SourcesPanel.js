@@ -911,16 +911,12 @@ export class SourcesPanel extends UI.Panel.Panel {
             }, { jslogContext: 'copy-primitive' });
         }
         // We are trying to copy a remote object.
-        // Pre-fetch string when menu opens so click handler can copy synchronously (Safari requires user gesture 직후). /
+        // Pre-fetch string when menu opens so click handler can copy synchronously (Safari requires user gesture).
         // 메뉴가 열릴 때 문자열을 미리 가져와서, 클릭 시 동기적으로만 복사 (Safari는 사용자 제스처 직후만 허용)
         else if (remoteObject.type === 'object') {
             let preparedCopyResult = null;
-            void remoteObject.callFunctionJSON(toStringForClipboard, [{
-                    value: {
-                        subtype: remoteObject.subtype,
-                        indent,
-                    },
-                }]).then(result => {
+            const copyArg = { value: { subtype: remoteObject.subtype, indent } };
+            void remoteObject.callFunctionJSON(toStringForClipboard, [copyArg]).then(result => {
                 preparedCopyResult = result ?? null;
             });
             const copyDecodedValueHandler = () => {
@@ -928,12 +924,7 @@ export class SourcesPanel extends UI.Panel.Panel {
                     inspectorFrontendHost.copyText(preparedCopyResult);
                     return;
                 }
-                void remoteObject.callFunctionJSON(toStringForClipboard, [{
-                        value: {
-                            subtype: remoteObject.subtype,
-                            indent,
-                        },
-                    }]).then(inspectorFrontendHost.copyText.bind(inspectorFrontendHost));
+                void remoteObject.callFunctionJSON(toStringForClipboard, [copyArg]).then(inspectorFrontendHost.copyText.bind(inspectorFrontendHost));
             };
             ctxMenuClipboardSection.appendItem(i18nString(UIStrings.copyS, { PH1: String(copyContextMenuTitle) }), copyDecodedValueHandler, { jslogContext: 'copy-object' });
         }

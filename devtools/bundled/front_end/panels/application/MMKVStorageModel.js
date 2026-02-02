@@ -47,8 +47,8 @@ export class MMKVStorage extends Common.ObjectWrapper.ObjectWrapper {
         // Handler routes based on method name / 핸들러가 메서드 이름을 기준으로 라우팅
         return this.model.agent.invoke_getMMKVItems({ instanceId: this.instanceId }).then(({ entries }) => entries);
     }
-    setItem(key, value) {
-        void this.model.agent.invoke_setMMKVItem({ instanceId: this.instanceId, key, value });
+    setItem(key, value, valueType) {
+        void this.model.agent.invoke_setMMKVItem({ instanceId: this.instanceId, key, value, valueType });
     }
     removeItem(key) {
         void this.model.agent.invoke_removeMMKVItem({ instanceId: this.instanceId, key });
@@ -89,21 +89,21 @@ export class MMKVStorageModel extends SDK.SDKModel.SDKModel {
         const eventData = { key };
         mmkvStorage.dispatchEventToListeners("MMKVItemRemoved" /* MMKVStorage.Events.MMKV_ITEM_REMOVED */, eventData);
     }
-    mmkvItemAdded({ instanceId, key, newValue }) {
+    mmkvItemAdded({ instanceId, key, newValue, valueType }) {
         let mmkvStorage = this.storageForInstanceId(instanceId);
         if (!mmkvStorage) {
             // Create storage if it doesn't exist / 존재하지 않으면 스토리지 생성
             mmkvStorage = this.addStorage(instanceId);
         }
-        const eventData = { key, value: newValue };
+        const eventData = { key, value: newValue, valueType };
         mmkvStorage.dispatchEventToListeners("MMKVItemAdded" /* MMKVStorage.Events.MMKV_ITEM_ADDED */, eventData);
     }
-    mmkvItemUpdated({ instanceId, key, oldValue, newValue }) {
+    mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType }) {
         const mmkvStorage = this.storageForInstanceId(instanceId);
         if (!mmkvStorage) {
             return;
         }
-        const eventData = { key, oldValue, value: newValue };
+        const eventData = { key, oldValue, value: newValue, valueType };
         mmkvStorage.dispatchEventToListeners("MMKVItemUpdated" /* MMKVStorage.Events.MMKV_ITEM_UPDATED */, eventData);
     }
     mmkvInstanceCreated({ instanceId }) {
@@ -139,11 +139,11 @@ export class MMKVStorageDispatcher {
     mmkvItemRemoved({ instanceId, key }) {
         this.model.mmkvItemRemoved({ instanceId, key });
     }
-    mmkvItemAdded({ instanceId, key, newValue }) {
-        this.model.mmkvItemAdded({ instanceId, key, newValue });
+    mmkvItemAdded({ instanceId, key, newValue, valueType }) {
+        this.model.mmkvItemAdded({ instanceId, key, newValue, valueType });
     }
-    mmkvItemUpdated({ instanceId, key, oldValue, newValue }) {
-        this.model.mmkvItemUpdated({ instanceId, key, oldValue, newValue });
+    mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType }) {
+        this.model.mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType });
     }
     mmkvInstanceCreated({ instanceId }) {
         this.model.mmkvInstanceCreated({ instanceId });

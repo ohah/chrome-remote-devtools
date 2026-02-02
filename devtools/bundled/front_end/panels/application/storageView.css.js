@@ -87,4 +87,5 @@ export default `/*
   margin-left: 10px;
 }
 
+
 /*# sourceURL=${import.meta.resolve('./storageView.css')} */`;

@@ -10,13 +10,21 @@ import type * as Storage from './storage.js';
 
 const UIStrings = {
   /**
-   * @description Label for the Storage pane / Storage 패널 레이블
+   * @description Label for the MMKV pane / MMKV 패널 레이블
    */
-  storage: 'Storage',
+  mmkv: 'MMKV',
   /**
-   * @description Command for showing the 'Storage' pane / 'Storage' 패널 표시 명령
+   * @description Command for showing the 'MMKV' pane / 'MMKV' 패널 표시 명령
    */
-  showStorage: 'Show Storage',
+  showMMKV: 'Show MMKV',
+  /**
+   * @description Label for the AsyncStorage pane / AsyncStorage 패널 레이블
+   */
+  asyncStorage: 'AsyncStorage',
+  /**
+   * @description Command for showing the 'AsyncStorage' pane / 'AsyncStorage' 패널 표시 명령
+   */
+  showAsyncStorage: 'Show AsyncStorage',
 } as const;
 const str_ = i18n.i18n.registerUIStrings('panels/storage/storage-meta.ts', UIStrings);
 const i18nLazyString = i18n.i18n.getLazilyComputedLocalizedString.bind(undefined, str_);
@@ -30,21 +38,39 @@ async function loadStorageModule(): Promise<typeof Storage> {
   return loadedStorageModule;
 }
 
+function storageCondition(): boolean {
+  const clientType = Root.Runtime.Runtime.queryParam('clientType');
+  return clientType === 'react-native';
+}
+
+// MMKV panel / MMKV 패널
 UI.ViewManager.registerViewExtension({
   location: UI.ViewManager.ViewLocationValues.PANEL,
-  id: 'storage-view',
-  title: i18nLazyString(UIStrings.storage),
-  commandPrompt: i18nLazyString(UIStrings.showStorage),
+  id: 'storage-mmkv-view',
+  title: i18nLazyString(UIStrings.mmkv),
+  commandPrompt: i18nLazyString(UIStrings.showMMKV),
   order: 1003,
   persistence: UI.ViewManager.ViewPersistence.PERMANENT,
   hasToolbar: false,
-  condition: () => {
-    // Show only for React Native / React Native에서만 표시
-    const clientType = Root.Runtime.Runtime.queryParam('clientType');
-    return clientType === 'react-native';
-  },
+  condition: storageCondition,
   async loadView() {
     const Storage = await loadStorageModule();
-    return Storage.StoragePanel.StoragePanel.instance();
+    return Storage.StoragePanel.MMKVStoragePanel.instance();
+  },
+});
+
+// AsyncStorage panel / AsyncStorage 패널
+UI.ViewManager.registerViewExtension({
+  location: UI.ViewManager.ViewLocationValues.PANEL,
+  id: 'storage-async-storage-view',
+  title: i18nLazyString(UIStrings.asyncStorage),
+  commandPrompt: i18nLazyString(UIStrings.showAsyncStorage),
+  order: 1004,
+  persistence: UI.ViewManager.ViewPersistence.PERMANENT,
+  hasToolbar: false,
+  condition: storageCondition,
+  async loadView() {
+    const Storage = await loadStorageModule();
+    return Storage.StoragePanel.AsyncStorageStoragePanel.instance();
   },
 });
