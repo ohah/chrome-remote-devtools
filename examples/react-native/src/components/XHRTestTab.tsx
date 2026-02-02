@@ -7,37 +7,7 @@ import React from 'react';
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { PayloadView } from './PayloadView';
-
-interface NetworkStatus {
-  method: string;
-  status: 'success' | 'error' | null;
-  request?: {
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    body?: string;
-  };
-  response?: {
-    status: number;
-    statusText: string;
-    headers: Record<string, string>;
-    body?: unknown;
-  };
-}
-
-/** Test headers with various values / 다양한 값으로 헤더 테스트 */
-const getTestHeaders = () => ({
-  'Content-Type': 'application/json',
-  Authorization: 'Bearer test-token-12345',
-  'X-Request-ID': `req-${Date.now()}`,
-  'X-Custom-Header': 'custom-value',
-  'User-Agent': 'ReactNative-Test/1.0',
-  Accept: 'application/json, text/plain, */*',
-  'Accept-Language': 'en-US,en;q=0.9',
-  'X-API-Version': 'v1',
-  'X-Client-Type': 'mobile',
-  'X-Device-ID': 'device-12345',
-});
+import { type NetworkStatus, getTestHeaders } from '../utils/network-test';
 
 export const XHRTestTab: React.FC = () => {
   const [xhrStatus, setXhrStatus] = useState<NetworkStatus>({
