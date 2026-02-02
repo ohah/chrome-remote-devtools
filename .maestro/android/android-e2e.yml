@@ -1,0 +1,15 @@
+# Android e2e: id tap on bottom tabs / Android e2e: 하단 탭 id 탭
+# Runs only in Android workflow; id tap works on Android (no 60-level snapshot limit) / Android 워크플로에서만 실행; Android에서는 id 탭 동작
+appId: ${MAESTRO_APP_ID}
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    id: 'tab-console'
+- assertVisible:
+    text: 'Console'
+- tapOn:
+    id: 'tab-network'
+- assertVisible:
+    text: 'Network'

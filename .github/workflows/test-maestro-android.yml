@@ -186,7 +186,7 @@ jobs:
             cd "$GITHUB_WORKSPACE/examples/react-native/android"
             adb install -r "$(find . -name "*.apk" -path "*/outputs/apk/release/*" | head -n 1)"
             cd $GITHUB_WORKSPACE
-            MAESTRO_APP_ID=com.chromeremotedevtools MAESTRO_DRIVER_STARTUP_TIMEOUT=600000 maestro test .maestro
+            MAESTRO_APP_ID=com.chromeremotedevtools MAESTRO_DRIVER_STARTUP_TIMEOUT=600000 maestro test .maestro .maestro/android
         continue-on-error: true
 
       - name: Check test results
