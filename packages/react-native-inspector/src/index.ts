@@ -178,6 +178,7 @@ export async function isNetworkHookEnabled(): Promise<boolean> {
 }
 
 export { sendCDPMessage } from './cdp-message';
+export { setSourceMapCache } from './cdp-message-handler';
 export { setServerInfo, getServerInfo } from './server-info';
 export { getGlobalObj, getExtensionStatus } from './utils';
 export { ChromeRemoteDevToolsInspectorProvider } from './Provider';

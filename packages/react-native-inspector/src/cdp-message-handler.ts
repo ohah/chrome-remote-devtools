@@ -45,6 +45,13 @@ function normalizeSourceUrl(url: string): string {
 }
 
 /**
+ * Set sourcemap cache (call when Metro source map is available; e.g. from bundle load) / 소스맵 캐시 설정 (Metro 소스맵 사용 가능 시 호출, 예: 번들 로드 시)
+ */
+export function setSourceMapCache(sources: string[], sourcesContent: (string | null)[]): void {
+  sourceMapCache = { sources, sourcesContent };
+}
+
+/**
  * Get source content by URL from cached sourcemap (for Page.getResourceContent) / 캐시된 소스맵에서 URL로 소스 내용 반환
  */
 function getSourceContentByUrl(url: string): string | null {
@@ -92,7 +99,7 @@ function base64EncodeUtf8(str: string): string {
   }
   let out = '';
   for (let i = 0; i < bytes.length; i += 3) {
-    const a = bytes[i];
+    const a = bytes[i] ?? 0;
     const b = bytes[i + 1];
     const c = bytes[i + 2];
     out += BASE64_CHARS[a >> 2];
@@ -261,6 +268,24 @@ export function handleCDPMessage(message: {
   if (message.method === 'Page.getResourceTree' && typeof message.id === 'number') {
     if (getServerInfo()) {
       sendCDPResponse(message.id, PAGE_GET_RESOURCE_TREE_RESULT);
+    }
+    return;
+  }
+
+  // Page.getResourceContent: DevTools requests source content by URL; respond from cached sourcemap (base64) when available / DevTools가 URL로 소스 내용 요청; 캐시된 소스맵에서 base64로 응답
+  if (message.method === 'Page.getResourceContent' && typeof message.id === 'number') {
+    const params = message.params as { url?: string } | undefined;
+    const url = params?.url ?? '';
+    if (getServerInfo()) {
+      const content = getSourceContentByUrl(url);
+      if (content != null) {
+        sendCDPResponse(message.id, {
+          content: base64EncodeUtf8(content),
+          base64Encoded: true,
+        });
+      } else {
+        sendCDPResponse(message.id, { content: '', base64Encoded: false });
+      }
     }
     return;
   }
