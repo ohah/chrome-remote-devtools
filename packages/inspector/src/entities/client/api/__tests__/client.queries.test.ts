@@ -1,7 +1,6 @@
 // Client queries factory tests / 클라이언트 쿼리 팩토리 테스트
 import { describe, test, expect } from 'bun:test';
 import { clientQueries } from '../client.queries';
-import { CLIENT_REFRESH_INTERVAL } from '@/shared/lib';
 
 describe('clientQueries', () => {
   test('should have correct query key structure / 올바른 쿼리 키 구조를 가져야 함', () => {
@@ -22,12 +21,6 @@ describe('clientQueries', () => {
     expect(typeof listOptions.queryFn).toBe('function');
   });
 
-  test('should have refetchInterval configured / refetchInterval이 설정되어 있어야 함', () => {
-    const listOptions = clientQueries.list();
-
-    expect(listOptions.refetchInterval).toBe(CLIENT_REFRESH_INTERVAL);
-  });
-
   test('should have staleTime configured / staleTime이 설정되어 있어야 함', () => {
     const listOptions = clientQueries.list();
 
@@ -46,7 +39,6 @@ describe('clientQueries', () => {
 
     expect(listOptions).toHaveProperty('queryKey');
     expect(listOptions).toHaveProperty('queryFn');
-    expect(listOptions).toHaveProperty('refetchInterval');
     expect(listOptions).toHaveProperty('staleTime');
   });
 });

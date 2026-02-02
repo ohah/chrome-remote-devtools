@@ -5,3 +5,4 @@
 export type { Client } from './model/types';
 export { clientQueries } from './api/client.queries';
 export { getClients, GetClientsError } from './api/get-clients';
+export { useClientsListSSE } from './api/use-clients-list-sse';

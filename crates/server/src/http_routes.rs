@@ -3,15 +3,18 @@ use crate::socket_server::SocketServer;
 use axum::extract::ws::WebSocketUpgrade;
 use axum::extract::{Path, Query, State};
 use axum::http::{header, StatusCode};
+use axum::response::sse::{Event, Sse};
 use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{get, post};
 use axum::Router;
 use serde_json::{json, Value};
 use std::collections::HashMap;
+use std::convert::Infallible;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::fs;
-use tokio::sync::RwLock;
+use tokio::sync::{mpsc, RwLock};
+use tokio_stream::wrappers::UnboundedReceiverStream;
 
 /// Create HTTP router / HTTP 라우터 생성
 pub fn create_router(
@@ -21,6 +24,7 @@ pub fn create_router(
     let mut router = Router::new()
         .route("/json", get(get_all_clients))
         .route("/json/clients", get(get_all_clients_detailed))
+        .route("/json/clients/events", get(sse_clients_events))
         .route("/json/inspectors", get(get_all_inspectors))
         .route("/json/client/:id", get(get_client))
         .route("/inspector/device", get(handle_inspector_device_http))
@@ -59,145 +63,48 @@ async fn get_all_clients_detailed(
     State(server): State<Arc<RwLock<SocketServer>>>,
 ) -> Result<Json<Value>, StatusCode> {
     let server = server.read().await;
-    let all_clients_info = server.get_all_clients().await;
+    let value = server.get_clients_list_value().await;
+    Ok(Json(value))
+}
 
-    // Log all clients for debugging / 디버깅을 위해 모든 클라이언트 로깅
-    server.logger.log(
-        crate::logging::LogType::Server,
-        "http-routes",
-        &format!(
-            "📋 get_all_clients_detailed: Found {} total clients",
-            all_clients_info.len()
-        ),
-        Some(&serde_json::json!({
-            "total": all_clients_info.len(),
-            "clients": all_clients_info.iter().map(|c| serde_json::json!({
-                "id": c.id,
-                "url": c.url,
-                "title": c.title,
-            })).collect::<Vec<_>>(),
-        })),
-        Some("get_all_clients_detailed"),
-    );
+/// SSE stream for client list changes / 클라이언트 목록 변경 SSE 스트림
+/// Sends current list on connect, then on each client connect/disconnect / 연결 시 현재 목록 전송, 이후 클라이언트 연결/해제 시마다 전송
+async fn sse_clients_events(
+    State(server): State<Arc<RwLock<SocketServer>>>,
+) -> Sse<UnboundedReceiverStream<Result<Event, Infallible>>> {
+    let (tx, rx) = mpsc::unbounded_channel();
+    let server_clone = server.clone();
 
-    // Get React Native Inspector connections first (includes Reactotron clients registered as RN) / 먼저 React Native Inspector 연결 가져오기 (RN으로 등록된 Reactotron 클라이언트 포함)
-    let rn_inspectors = server
-        .react_native_inspector_manager
-        .get_all_connections()
-        .await;
+    tokio::spawn(async move {
+        // Send initial client list / 초기 클라이언트 목록 전송
+        let payload = {
+            let s = server_clone.read().await;
+            s.get_clients_list_value().await
+        };
+        if let Ok(data) = serde_json::to_string(&payload) {
+            let _ = tx.send(Ok(Event::default().data(data)));
+        }
 
-    // Create a set of React Native Inspector client IDs to avoid duplicates / 중복을 피하기 위해 React Native Inspector 클라이언트 ID 집합 생성
-    let rn_client_ids: std::collections::HashSet<String> = rn_inspectors
-        .iter()
-        .filter_map(|inspector| inspector.client_id.clone())
-        .collect();
+        let mut broadcast_rx = {
+            let s = server_clone.read().await;
+            s.subscribe_clients_list()
+        };
 
-    // Separate clients by type / 타입별로 클라이언트 분리
-    let mut regular_clients: Vec<Value> = Vec::new();
-
-    for client in all_clients_info {
-        // Skip Reactotron clients that are registered as React Native Inspector / React Native Inspector로 등록된 Reactotron 클라이언트는 건너뛰기
-        // They will be included in rn_inspector_clients below / 아래의 rn_inspector_clients에 포함됨
-        if let Some(url) = &client.url {
-            if url.starts_with("reactotron://") {
-                // Check if this Reactotron client is registered as React Native Inspector / 이 Reactotron 클라이언트가 React Native Inspector로 등록되었는지 확인
-                if rn_client_ids.contains(&client.id) {
-                    continue; // Skip, will be included in rn_inspector_clients / 건너뛰기, rn_inspector_clients에 포함됨
+        // On each client list change, send updated list / 클라이언트 목록 변경 시마다 갱신된 목록 전송
+        while broadcast_rx.recv().await.is_ok() {
+            let payload = {
+                let s = server_clone.read().await;
+                s.get_clients_list_value().await
+            };
+            if let Ok(data) = serde_json::to_string(&payload) {
+                if tx.send(Ok(Event::default().data(data))).is_err() {
+                    break;
                 }
             }
         }
+    });
 
-        // Regular web client / 일반 웹 클라이언트
-        regular_clients.push(json!({
-            "id": client.id,
-            "type": "web",
-            "url": client.url,
-            "title": client.title,
-            "favicon": client.favicon,
-            "ua": client.ua,
-            "time": client.time,
-        }));
-    }
-
-    // Debug log: Log all RN inspector connections for debugging / 디버깅을 위해 모든 RN Inspector 연결 로깅
-    server.logger.log(
-        crate::logging::LogType::Server,
-        "http-routes",
-        &format!("🔍 Debug: Found {} RN inspectors", rn_inspectors.len()),
-        Some(&serde_json::json!({
-            "inspectors": rn_inspectors.iter().map(|i| serde_json::json!({
-                "id": i.id,
-                "deviceName": i.device_name,
-                "appName": i.app_name,
-                "deviceId": i.device_id,
-                "clientId": i.client_id,
-            })).collect::<Vec<_>>(),
-        })),
-        Some("debug_rn_inspectors"),
-    );
-
-    // Convert React Native Inspector connections to client format / React Native Inspector 연결을 클라이언트 형식으로 변환
-    // Use client_id if available (for Reactotron clients), otherwise use inspector.id / client_id가 있으면 사용 (Reactotron 클라이언트용), 없으면 inspector.id 사용
-    let mut rn_inspector_clients: Vec<Value> = Vec::new();
-    for inspector in rn_inspectors {
-        // Clone client_id to avoid reference issues with json! macro / json! 매크로의 참조 문제를 피하기 위해 client_id 클론
-        let client_id = inspector
-            .client_id
-            .clone()
-            .unwrap_or_else(|| inspector.id.clone());
-
-        // Check if this is actually a Reactotron client by checking the client URL / 클라이언트 URL을 확인하여 실제 Reactotron 클라이언트인지 확인
-        let is_reactotron = if let Some(client_id_str) = &inspector.client_id {
-            if let Some(client) = server.get_client(client_id_str).await {
-                // Check if client URL starts with reactotron:// / 클라이언트 URL이 reactotron://로 시작하는지 확인
-                client
-                    .url
-                    .as_ref()
-                    .map(|url| url.starts_with("reactotron://"))
-                    .unwrap_or(false)
-            } else {
-                false
-            }
-        } else {
-            false
-        };
-
-        // Get title from client if available / 클라이언트에서 title 가져오기 (가능한 경우)
-        let title = if let Some(client_id_str) = &inspector.client_id {
-            if let Some(client) = server.get_client(client_id_str).await {
-                client.title
-            } else {
-                None
-            }
-        } else {
-            None
-        };
-
-        rn_inspector_clients.push(json!({
-            "id": client_id,
-            "type": if is_reactotron { "reactotron" } else { "react-native" },
-            "deviceName": inspector.device_name,
-            "appName": inspector.app_name,
-            "deviceId": inspector.device_id,
-            "title": title,
-        }));
-    }
-
-    server.logger.log(
-        crate::logging::LogType::Server,
-        "http-routes",
-        &format!(
-            "📊 Client breakdown: {} regular, {} React Native (including Reactotron)",
-            regular_clients.len(),
-            rn_inspector_clients.len()
-        ),
-        None,
-        Some("client_breakdown"),
-    );
-
-    let all_clients: Vec<Value> = [regular_clients, rn_inspector_clients].concat();
-
-    Ok(Json(json!({ "clients": all_clients })))
+    Sse::new(UnboundedReceiverStream::new(rx))
 }
 
 /// Get all inspectors / 모든 Inspector 가져오기

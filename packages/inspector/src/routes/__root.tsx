@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { RefreshCw, Minus, Maximize2, X, Eye, EyeOff, Zap, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useClientsListSSE } from '@/entities/client';
 import { useServerUrl } from '@/shared/lib/server-url';
 
 // Reactotron server toggle component / Reactotron 서버 토글 컴포넌트
@@ -352,6 +353,9 @@ function TitleBar() {
 function RootComponent() {
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
   const showTitleBar = isTauri;
+
+  // Subscribe to client list SSE for live updates / 클라이언트 목록 실시간 갱신을 위한 SSE 구독
+  useClientsListSSE();
 
   return (
     <div className="h-screen flex flex-col bg-gray-900">

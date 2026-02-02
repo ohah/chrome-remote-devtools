@@ -10,8 +10,10 @@ use crate::react_native::ReactNativeInspectorConnectionManager;
 use crate::reactotron_server::ReactotronServer;
 use axum::extract::ws::WebSocket;
 use serde::Serialize;
-use std::collections::HashMap;
+use serde_json::{json, Value};
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
+use tokio::sync::broadcast;
 use tokio::sync::mpsc;
 use tokio::sync::RwLock;
 
@@ -64,6 +66,8 @@ pub struct SocketServer {
     pub reactotron_server: Option<Arc<ReactotronServer>>,
     pub logger: Arc<Logger>, // Made public for shared server instances / 공유 서버 인스턴스를 위해 public으로 변경
     response_bodies: Arc<RwLock<HashMap<String, String>>>, // Store response bodies for Network.getResponseBody / Network.getResponseBody를 위한 응답 본문 저장
+    /// Broadcast sender for client list changes (SSE) / 클라이언트 목록 변경 시 브로드캐스트 (SSE용)
+    clients_list_broadcast: broadcast::Sender<()>,
 }
 
 impl SocketServer {
@@ -82,6 +86,7 @@ impl SocketServer {
             eprintln!("[reactotron] ⚠️ Reactotron server is disabled");
         }
 
+        let (clients_list_broadcast, _) = broadcast::channel(32);
         Self {
             clients: Arc::new(RwLock::new(HashMap::new())),
             devtools: Arc::new(RwLock::new(HashMap::new())),
@@ -95,7 +100,82 @@ impl SocketServer {
             },
             logger,
             response_bodies: Arc::new(RwLock::new(HashMap::new())),
+            clients_list_broadcast,
         }
+    }
+
+    /// Notify all SSE subscribers that client list changed / 클라이언트 목록이 변경되었음을 모든 SSE 구독자에게 알림
+    pub fn notify_clients_changed(&self) {
+        let _ = self.clients_list_broadcast.send(());
+    }
+
+    /// Subscribe to client list change notifications (for SSE) / 클라이언트 목록 변경 알림 구독 (SSE용)
+    pub fn subscribe_clients_list(&self) -> broadcast::Receiver<()> {
+        self.clients_list_broadcast.subscribe()
+    }
+
+    /// Get client list as JSON value (same shape as GET /json/clients) / 클라이언트 목록을 JSON 값으로 반환 (GET /json/clients와 동일 형식)
+    pub async fn get_clients_list_value(&self) -> Value {
+        let all_clients_info = self.get_all_clients().await;
+        let rn_inspectors = self
+            .react_native_inspector_manager
+            .get_all_connections()
+            .await;
+        let rn_client_ids: HashSet<String> = rn_inspectors
+            .iter()
+            .filter_map(|i| i.client_id.clone())
+            .collect();
+
+        let mut regular_clients: Vec<Value> = Vec::new();
+        for client in all_clients_info {
+            if let Some(url) = &client.url {
+                if url.starts_with("reactotron://") && rn_client_ids.contains(&client.id) {
+                    continue;
+                }
+            }
+            regular_clients.push(json!({
+                "id": client.id,
+                "type": "web",
+                "url": client.url,
+                "title": client.title,
+                "favicon": client.favicon,
+                "ua": client.ua,
+                "time": client.time,
+            }));
+        }
+
+        let mut rn_inspector_clients: Vec<Value> = Vec::new();
+        for inspector in rn_inspectors {
+            let client_id = inspector
+                .client_id
+                .clone()
+                .unwrap_or_else(|| inspector.id.clone());
+            let (is_reactotron, title) = if let Some(ref cid) = inspector.client_id {
+                if let Some(client) = self.get_client(cid).await {
+                    let is_r = client
+                        .url
+                        .as_ref()
+                        .map(|u| u.starts_with("reactotron://"))
+                        .unwrap_or(false);
+                    (is_r, client.title)
+                } else {
+                    (false, None)
+                }
+            } else {
+                (false, None)
+            };
+            rn_inspector_clients.push(json!({
+                "id": client_id,
+                "type": if is_reactotron { "reactotron" } else { "react-native" },
+                "deviceName": inspector.device_name,
+                "appName": inspector.app_name,
+                "deviceId": inspector.device_id,
+                "title": title,
+            }));
+        }
+
+        let all_clients: Vec<Value> = [regular_clients, rn_inspector_clients].concat();
+        json!({ "clients": all_clients })
     }
 
     /// Enable Reactotron server if not already enabled / Reactotron 서버가 아직 활성화되지 않았으면 활성화
@@ -289,6 +369,7 @@ impl SocketServer {
                     query_params,
                     server_guard.devtools.clone(),
                     server_guard.react_native_inspector_manager.clone(),
+                    server.clone(),
                     server_guard.logger.clone(),
                 )
                 .await;
@@ -437,59 +518,61 @@ impl SocketServer {
     ) -> Option<mpsc::UnboundedSender<String>> {
         let (tx, _rx) = mpsc::unbounded_channel::<String>();
 
-        let mut clients = self.clients.write().await;
+        {
+            let mut clients = self.clients.write().await;
 
-        // Check if client already exists / 클라이언트가 이미 존재하는지 확인
-        if clients.contains_key(&client_id) {
+            // Check if client already exists / 클라이언트가 이미 존재하는지 확인
+            if clients.contains_key(&client_id) {
+                logger.log(
+                    LogType::Reactotron,
+                    &client_id,
+                    &format!("Client {} already registered, updating", client_id),
+                    None,
+                    None,
+                );
+            }
+
+            // Create client struct / 클라이언트 구조체 생성
+            let time_str = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs().to_string())
+                .unwrap_or_else(|_| "0".to_string());
+
+            // Clone values for logging / 로깅을 위해 값 복제
+            let url_for_log = url.clone();
+            let title_for_log = title.clone();
+            let ua_for_log = ua.clone();
+
+            let client = Arc::new(Client {
+                id: client_id.clone(),
+                url: Some(url),
+                title: Some(title),
+                favicon: None,
+                ua: Some(ua),
+                time: Some(time_str),
+                sender: tx.clone(),
+            });
+
+            clients.insert(client_id.clone(), client);
+
+            // Log registration for debugging / 디버깅을 위해 등록 로깅
             logger.log(
                 LogType::Reactotron,
                 &client_id,
-                &format!("Client {} already registered, updating", client_id),
-                None,
-                None,
+                &format!(
+                    "📝 Registered Reactotron client in SocketServer: id={}, url={}, title={}",
+                    client_id, url_for_log, title_for_log
+                ),
+                Some(&serde_json::json!({
+                    "clientId": client_id,
+                    "url": url_for_log,
+                    "title": title_for_log,
+                    "ua": ua_for_log,
+                })),
+                Some("register_reactotron_client"),
             );
         }
-
-        // Create client struct / 클라이언트 구조체 생성
-        let time_str = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| d.as_secs().to_string())
-            .unwrap_or_else(|_| "0".to_string());
-
-        // Clone values for logging / 로깅을 위해 값 복제
-        let url_for_log = url.clone();
-        let title_for_log = title.clone();
-        let ua_for_log = ua.clone();
-
-        let client = Arc::new(Client {
-            id: client_id.clone(),
-            url: Some(url),
-            title: Some(title),
-            favicon: None,
-            ua: Some(ua),
-            time: Some(time_str),
-            sender: tx.clone(),
-        });
-
-        clients.insert(client_id.clone(), client);
-
-        // Log registration for debugging / 디버깅을 위해 등록 로깅
-        logger.log(
-            LogType::Reactotron,
-            &client_id,
-            &format!(
-                "📝 Registered Reactotron client in SocketServer: id={}, url={}, title={}",
-                client_id, url_for_log, title_for_log
-            ),
-            Some(&serde_json::json!({
-                "clientId": client_id,
-                "url": url_for_log,
-                "title": title_for_log,
-                "ua": ua_for_log,
-            })),
-            Some("register_reactotron_client"),
-        );
-
+        self.notify_clients_changed();
         Some(tx)
     }
 
@@ -505,6 +588,8 @@ impl SocketServer {
                 None,
             );
         }
+        drop(clients);
+        self.notify_clients_changed();
     }
 
     /// Send CDP message to DevTools connected to a client / 클라이언트에 연결된 DevTools로 CDP 메시지 전송
