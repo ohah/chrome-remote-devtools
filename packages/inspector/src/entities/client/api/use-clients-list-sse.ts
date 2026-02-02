@@ -32,9 +32,18 @@ export function useClientsListSSE(): void {
       }
     };
 
+    eventSource.onopen = () => {
+      // SSE connection established; EventSource will auto-reconnect on close / SSE 연결 성공; EventSource는 종료 시 자동 재연결
+    };
     eventSource.onmessage = handleMessage;
+    eventSource.onerror = () => {
+      // EventSource auto-reconnects on error; no close() here / 오류 시 EventSource가 자동 재연결하므로 close() 호출 안 함
+    };
 
     return () => {
+      eventSource.onopen = null;
+      eventSource.onmessage = null;
+      eventSource.onerror = null;
       eventSource.close();
     };
   }, [serverUrl, queryClient]);

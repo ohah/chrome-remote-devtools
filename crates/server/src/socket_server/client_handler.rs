@@ -215,6 +215,23 @@ pub async fn handle_client_connection(
                         "websocket error",
                         Some(&e.to_string()),
                     );
+                    let mut clients = clients_for_msg.write().await;
+                    clients.remove(&client_id_for_msg);
+                    let mut devtools = devtools_for_msg.write().await;
+                    let devtools_to_remove: Vec<String> = devtools
+                        .iter()
+                        .filter(|(_, dt)| dt.client_id.as_ref() == Some(&client_id_for_msg))
+                        .map(|(id, _)| id.clone())
+                        .collect();
+                    for dt_id in devtools_to_remove {
+                        devtools.remove(&dt_id);
+                    }
+                    drop(devtools);
+                    drop(clients);
+                    {
+                        let server_guard = socket_server_for_msg.read().await;
+                        server_guard.notify_clients_changed();
+                    }
                     break;
                 }
                 _ => {}
