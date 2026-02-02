@@ -76,6 +76,12 @@ async fn sse_clients_events(
     let server_clone = server.clone();
 
     tokio::spawn(async move {
+        // Subscribe first so we do not miss updates between initial send and subscribe / 구독을 먼저 해서 초기 전송과 구독 사이 업데이트 누락 방지
+        let mut broadcast_rx = {
+            let s = server_clone.read().await;
+            s.subscribe_clients_list()
+        };
+
         // Send initial client list / 초기 클라이언트 목록 전송
         let payload = {
             let s = server_clone.read().await;
@@ -84,11 +90,6 @@ async fn sse_clients_events(
         if let Ok(data) = serde_json::to_string(&payload) {
             let _ = tx.send(Ok(Event::default().data(data)));
         }
-
-        let mut broadcast_rx = {
-            let s = server_clone.read().await;
-            s.subscribe_clients_list()
-        };
 
         // On each client list change, send updated list / 클라이언트 목록 변경 시마다 갱신된 목록 전송
         while broadcast_rx.recv().await.is_ok() {
