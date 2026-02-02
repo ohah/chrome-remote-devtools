@@ -3,64 +3,46 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import HomeScreen from '../screens/HomeScreen';
-import ReduxNavigator from './ReduxNavigator';
-import ZustandNavigator from './ZustandNavigator';
-import MMKVNavigator from './MMKVNavigator';
-import AsyncStorageNavigator from './AsyncStorageNavigator';
+import ConsoleScreen from '../screens/ConsoleScreen';
+import NetworkScreen from '../screens/NetworkScreen';
+import StoreScreen from '../screens/StoreScreen';
+import StorageScreen from '../screens/StorageScreen';
 
 const BottomTab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Home Stack Navigator / Home 스택 네비게이터
-function HomeStack() {
+// Console Stack Navigator / Console 스택 네비게이터
+function ConsoleStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="HomeMain" component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="ConsoleMain" component={ConsoleScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
 
-// Redux Stack Navigator / Redux 스택 네비게이터
-function ReduxStack() {
+// Network Stack Navigator / Network 스택 네비게이터
+function NetworkStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="ReduxMain" component={ReduxNavigator} options={{ headerShown: false }} />
+      <Stack.Screen name="NetworkMain" component={NetworkScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
 
-// Zustand Stack Navigator / Zustand 스택 네비게이터
-function ZustandStack() {
+// Store Stack Navigator / Store 스택 네비게이터
+function StoreStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="ZustandMain"
-        component={ZustandNavigator}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="StoreMain" component={StoreScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
 
-// MMKV Stack Navigator / MMKV 스택 네비게이터
-function MMKVStack() {
+// Storage Stack Navigator / Storage 스택 네비게이터
+function StorageStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="MMKVMain" component={MMKVNavigator} options={{ headerShown: false }} />
-    </Stack.Navigator>
-  );
-}
-
-// AsyncStorage Stack Navigator / AsyncStorage 스택 네비게이터
-function AsyncStorageStack() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="AsyncStorageMain"
-        component={AsyncStorageNavigator}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="StorageMain" component={StorageScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
@@ -75,42 +57,46 @@ export default function AppNavigator() {
       }}
     >
       <BottomTab.Screen
-        name="Home"
-        component={HomeStack}
+        name="Console"
+        component={ConsoleStack}
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size = 24 }) => <Icon name="home" size={size} color={color} />,
+          title: 'Console',
+          tabBarButtonTestID: 'tab-console',
+          tabBarAccessibilityLabel: 'Console',
+          tabBarIcon: ({ color, size = 24 }) => (
+            <Icon name="bug-report" size={size} color={color} />
+          ),
         }}
       />
       <BottomTab.Screen
-        name="Redux"
-        component={ReduxStack}
+        name="Network"
+        component={NetworkStack}
         options={{
-          title: 'Redux',
-          tabBarIcon: ({ color, size = 24 }) => <Icon name="storage" size={size} color={color} />,
+          title: 'Network',
+          tabBarButtonTestID: 'tab-network',
+          tabBarAccessibilityLabel: 'Network',
+          tabBarIcon: ({ color, size = 24 }) => (
+            <Icon name="network-check" size={size} color={color} />
+          ),
         }}
       />
       <BottomTab.Screen
-        name="Zustand"
-        component={ZustandStack}
+        name="Store"
+        component={StoreStack}
         options={{
-          title: 'Zustand',
+          title: 'Store',
+          tabBarButtonTestID: 'tab-store',
+          tabBarAccessibilityLabel: 'Store',
           tabBarIcon: ({ color, size = 24 }) => <Icon name="inventory" size={size} color={color} />,
         }}
       />
       <BottomTab.Screen
-        name="MMKV"
-        component={MMKVStack}
+        name="Storage"
+        component={StorageStack}
         options={{
-          title: 'MMKV',
-          tabBarIcon: ({ color, size = 24 }) => <Icon name="storage" size={size} color={color} />,
-        }}
-      />
-      <BottomTab.Screen
-        name="AsyncStorage"
-        component={AsyncStorageStack}
-        options={{
-          title: 'AsyncStorage',
+          title: 'Storage',
+          tabBarButtonTestID: 'tab-storage',
+          tabBarAccessibilityLabel: 'Storage',
           tabBarIcon: ({ color, size = 24 }) => <Icon name="storage" size={size} color={color} />,
         }}
       />

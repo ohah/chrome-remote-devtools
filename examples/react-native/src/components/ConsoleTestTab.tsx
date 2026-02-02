@@ -125,23 +125,29 @@ export const ConsoleTestTab: React.FC = () => {
           <Text style={styles.buttonText}>Debug</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        style={[styles.button, styles.testAllButton]}
-        onPress={handleRunAllConsoleTests}
-      >
-        <Text style={styles.buttonText}>Run All Tests</Text>
-      </TouchableOpacity>
+      <View style={styles.greenButtonWrap}>
+        <TouchableOpacity
+          style={[styles.button, styles.testAllButton]}
+          onPress={handleRunAllConsoleTests}
+          accessibilityLabel="Run All Console Tests"
+          accessibilityRole="button"
+          activeOpacity={0.8}
+        >
+          <Text style={styles.greenButtonText} numberOfLines={1}>
+            Run All Console Tests
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  /** Fill screen; content at top, rest is grey area / 화면 꽉 채움; 상단에 콘텐츠, 나머지는 회색 영역 */
   container: {
+    flex: 1,
     backgroundColor: '#F5F5F5',
-    borderRadius: 8,
     padding: 16,
-    marginTop: 8,
-    marginBottom: 24,
   },
   title: {
     fontSize: 16,
@@ -167,6 +173,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  /** Green button text: ensure visible on all devices / 초록 버튼 텍스트: 모든 기기에서 보이도록 */
+  greenButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+    backgroundColor: 'transparent',
+  },
   logButton: {
     backgroundColor: '#2196F3',
   },
@@ -182,8 +195,15 @@ const styles = StyleSheet.create({
   debugButton: {
     backgroundColor: '#9C27B0',
   },
+  /** Wrapper so green button does not expand with flex:1 and text stays visible / 초록 버튼이 flex:1로 늘어나지 않도록 래퍼 */
+  greenButtonWrap: {
+    marginTop: 8,
+    alignSelf: 'stretch',
+  },
   testAllButton: {
     backgroundColor: '#4CAF50',
-    marginTop: 8,
+    minHeight: 44,
+    paddingVertical: 12,
+    flex: 0,
   },
 });
