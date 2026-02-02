@@ -38,6 +38,7 @@ jobs:
     permissions:
       pull-requests: write
       checks: write
+      issues: write
 
     steps:
       - name: Checkout code
