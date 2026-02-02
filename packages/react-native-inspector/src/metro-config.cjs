@@ -53,8 +53,21 @@ function withReduxDevTools(config) {
     : [];
   const blockList = [...existingBlockList, /[/\\]target[/\\]/];
 
+  // Include source content in source map so Inspector Sources tab shows original files (e.g. App.tsx) / 소스맵에 원본 포함해 Inspector Sources 탭에 원본 파일 표시
+  const transformer = {
+    ...config.transformer,
+    minifierConfig: {
+      ...config.transformer?.minifierConfig,
+      sourceMap: {
+        ...config.transformer?.minifierConfig?.sourceMap,
+        includeSources: true,
+      },
+    },
+  };
+
   return {
     ...config,
+    transformer,
     resolver: {
       ...config.resolver,
       blockList,
