@@ -134,12 +134,12 @@ function DevToolsPage() {
       if (event.data?.type === 'OPEN_EXTERNAL_LINK' && event.data?.url) {
         const url = event.data.url as string;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const tauriWindow = window as any;
-        if (typeof window !== 'undefined' && tauriWindow.__TAURI__?.shell) {
+        const tauri = (window as any).__TAURI__;
+        if (typeof tauri?.opener?.openUrl === 'function') {
           try {
-            await tauriWindow.__TAURI__.shell.open(url);
+            await tauri.opener.openUrl(url);
           } catch (err) {
-            console.error('Failed to open link with Tauri:', err);
+            console.error('Failed to open link with Tauri opener:', err);
             window.open(url, '_blank', 'noopener,noreferrer');
           }
         } else {
@@ -221,10 +221,10 @@ function DevToolsPage() {
       const isRN = client?.type === 'react-native' || client?.type === 'reactotron';
       if (client) {
         return {
-          id: client.id,
-          label: isRN
-            ? client.deviceName || client.appName || client.title || client.id.slice(0, 8)
-            : client.url || client.id.slice(0, 8),
+            id: client.id,
+            label: isRN
+              ? client.deviceId || client.deviceName || client.appName || client.title || client.id.slice(0, 8)
+              : client.url || client.id.slice(0, 8),
           icon: isRN ? <Smartphone className="w-4 h-4" /> : <Globe className="w-4 h-4" />,
           disconnected: false,
         };
