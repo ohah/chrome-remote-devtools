@@ -55,10 +55,10 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
                   )}
                 </td>
 
-                {/* URL (web) or Device (React Native) / URL (웹) 또는 Device (React Native) */}
+                {/* URL (web) or deviceId (React Native) / URL (웹) 또는 deviceId (React Native) */}
                 <td className="px-4 py-3">
                   {isReactNative ? (
-                    <span className="text-sm text-gray-200">{client.deviceName || '-'}</span>
+                    <span className="text-sm text-gray-200">{client.deviceId || '-'}</span>
                   ) : (
                     (() => {
                       const safeUrl = isWeb ? sanitizeUrl(client.url) : null;
