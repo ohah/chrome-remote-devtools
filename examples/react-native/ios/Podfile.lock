@@ -2682,6 +2682,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - RNDeviceInfo (15.0.1):
+    - React-Core
   - RNGestureHandler (2.30.0):
     - boost
     - DoubleConversion
@@ -2885,6 +2887,7 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios/ReactCodegen`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
+  - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
@@ -3063,6 +3066,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
+  RNDeviceInfo:
+    :path: "../node_modules/react-native-device-info"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNScreens:
@@ -3156,6 +3161,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 1390c0aa7b39e02c7ac9e9c4ad52a4be6c4c2356
   ReactCommon: ac934cb340aee91282ecd6f273a26d24d4c55cae
   RNCAsyncStorage: 29f0230e1a25f36c20b05f65e2eb8958d6526e82
+  RNDeviceInfo: 36d7f232bfe7c9b5c494cb7793230424ed32c388
   RNGestureHandler: cd4be101cfa17ea6bbd438710caa02e286a84381
   RNScreens: ffbb0296608eb3560de641a711bbdb663ed1f6b4
   RNVectorIcons: 791f13226ec4a3fd13062eda9e892159f0981fae
@@ -3165,4 +3171,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: f153786b5b94671348bcdad6daa1fac3b1767c9d
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.16.2
