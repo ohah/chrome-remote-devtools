@@ -123,9 +123,11 @@ React Native 앱에서 서버에 연결합니다:
 
 ```typescript
 import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-inspector-react-native';
+import { getUniqueId } from 'react-native-device-info';
 
-// 서버에 연결
-ChromeRemoteDevToolsInspector.connect('localhost', 8080)
+// deviceId는 필수 (Inspector 연결 목록에 표시됨)
+const deviceId = await getUniqueId();
+ChromeRemoteDevToolsInspector.connect('localhost', 8080, { deviceId })
   .then(() => {
     console.log('✅ Connected to Chrome Remote DevTools');
   })
@@ -138,12 +140,13 @@ ChromeRemoteDevToolsInspector.connect('localhost', 8080)
 
 ```typescript
 const serverHost = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-ChromeRemoteDevToolsInspector.connect(serverHost, 8080);
+const deviceId = await getUniqueId();
+ChromeRemoteDevToolsInspector.connect(serverHost, 8080, { deviceId });
 ```
 
-### Device ID (선택사항)
+### Device ID (필수)
 
-`deviceId`를 생략하면 매번 랜덤 UUID가 생성됩니다(앱 재시작 후 같은 기기가 새 항목으로 보일 수 있음). Inspector 목록에서 **동일 기기 식별자**를 유지하려면 [react-native-device-info](https://www.npmjs.com/package/react-native-device-info)를 설치해 `getUniqueId()`를 넘기세요.
+`deviceId`는 **필수**이며 Tauri/Inspector 연결 목록에 표시됩니다. 앱 재시작 후에도 **동일 기기 식별자**를 유지하려면 [react-native-device-info](https://www.npmjs.com/package/react-native-device-info)를 설치해 `getUniqueId()`를 넘기세요.
 
 <PackageManagerTabs command="install react-native-device-info@15.0.1" />
 
@@ -179,8 +182,8 @@ function App() {
     getUniqueId()
       .then(setDeviceId)
       .catch((err) => {
-        console.warn('getUniqueId 실패, Inspector는 랜덤 UUID 사용:', err);
-        setDeviceId('');
+        console.warn('getUniqueId 실패, 데모용 fallback 사용:', err);
+        setDeviceId('demo-' + Date.now());
       });
   }, []);
 
@@ -188,7 +191,7 @@ function App() {
     registerAsyncStorageDevTools(AsyncStorage as unknown as AsyncStorageType);
   }, []);
 
-  if (deviceId === null) {
+  if (deviceId === null || deviceId === '') {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
@@ -201,7 +204,7 @@ function App() {
     <ChromeRemoteDevToolsInspectorProvider
       serverHost="localhost"
       serverPort={8080}
-      deviceId={deviceId || undefined}
+      deviceId={deviceId}
     >
       {/* 앱 콘텐츠 */}
     </ChromeRemoteDevToolsInspectorProvider>
@@ -209,8 +212,7 @@ function App() {
 }
 ```
 
-- `deviceId`를 생략하거나 `undefined`로 두면 해당 세션에는 랜덤 UUID가 사용됩니다.
-- `react-native-device-info`의 `getUniqueId()`를 넘기면 앱 재시작 후에도 Inspector 목록에서 같은 기기로 표시됩니다.
+- `deviceId`는 필수이며, `react-native-device-info`의 `getUniqueId()`를 넘기면 앱 재시작 후에도 Inspector 목록에서 같은 기기로 표시됩니다.
 
 ### Redux DevTools 사용 (선택사항)
 
