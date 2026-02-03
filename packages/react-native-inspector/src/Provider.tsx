@@ -23,8 +23,8 @@ export interface ChromeRemoteDevToolsInspectorProviderProps {
   autoConnect?: boolean;
   /** Show connection status UI (WebSocket) / 연결 상태 UI 표시 (WebSocket) */
   showStatusUI?: boolean;
-  /** Optional device ID for Inspector list; omitted then random UUID / (선택) Inspector 목록용 기기 ID, 생략 시 랜덤 UUID */
-  deviceId?: string;
+  /** Device ID for Inspector list (required, e.g. from getUniqueId()) / Inspector 목록용 기기 ID (필수, 예: getUniqueId() 결과) */
+  deviceId: string;
 }
 
 /**
@@ -58,8 +58,8 @@ export function ChromeRemoteDevToolsInspectorProvider({
       console.log('[ChromeRemoteDevTools] Updating server info', { serverHost, serverPort });
     }
 
-    // Auto-connect if enabled / 활성화된 경우 자동 연결
-    if (autoConnect && !connectionRef.current) {
+    // Auto-connect if enabled and deviceId is set / deviceId가 있고 자동 연결이 켜져 있으면 연결
+    if (autoConnect && deviceId && !connectionRef.current) {
       setConnectionStatus('connecting');
       connectionRef.current = connect(serverHost, serverPort, { deviceId })
         .then(() => {
