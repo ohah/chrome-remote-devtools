@@ -4,7 +4,7 @@
 import { getServerInfo } from '../server-info';
 import { getMMKVView, type MMKVView } from './mmkv-view';
 import { normalizeStoragesConfigProperty } from './utils';
-import type { MMKV, MMKVEntry } from './types';
+import type { MMKV, MMKVEntry, MMKVStorageInput } from './types';
 import { registerCDPMessageHandler } from '../cdp-message-handler';
 
 // Store MMKV views / MMKV 뷰 저장
@@ -140,19 +140,18 @@ function sendDeleteEntry(instanceId: string, key: string): void {
 
 /**
  * Register MMKV DevTools / MMKV DevTools 등록
- * @param storages MMKV instance(s) to monitor / 모니터링할 MMKV 인스턴스(들)
+ * @param storages MMKV instance(s) to monitor (v4 and v3 library instances accepted) / 모니터링할 MMKV 인스턴스(들), v4·v3 라이브러리 인스턴스 허용
  * @param blacklist Optional RegExp to blacklist properties / 속성을 블랙리스트에 추가할 선택적 RegExp
  */
-export function registerMMKVDevTools(
-  storages: MMKV | MMKV[] | Record<string, MMKV>,
-  blacklist?: RegExp
-): void {
+export function registerMMKVDevTools(storages: MMKVStorageInput, blacklist?: RegExp): void {
   try {
     // Cleanup existing subscriptions / 기존 구독 정리
     unregisterMMKVDevTools();
 
     // Normalize storages / 스토리지 정규화
-    const normalizedStorages = normalizeStoragesConfigProperty(storages);
+    const normalizedStorages = normalizeStoragesConfigProperty(
+      storages as MMKV | MMKV[] | Record<string, MMKV>
+    );
 
     // Create views / 뷰 생성
     mmkvViews = new Map();

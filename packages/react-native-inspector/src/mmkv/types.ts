@@ -31,6 +31,28 @@ type MMKVV3 = {
 export type MMKV = MMKVV4 | MMKVV3;
 
 /**
+ * Input type for registerMMKVDevTools: accepts both react-native-mmkv v4 and v3 instances.
+ * v4 class has private `id` so it is not assignable to MMKVV3; this type omits id so both are accepted.
+ * registerMMKVDevTools용 입력 타입: v4·v3 인스턴스 모두 허용 (v4는 id가 private라 MMKVV3에 할당 불가하므로 id 없이 정의)
+ */
+export type MMKVStorageInput =
+  | MMKVStorageInstance
+  | MMKVStorageInstance[]
+  | Record<string, MMKVStorageInstance>;
+
+type MMKVStorageInstance = {
+  set(key: string, value: boolean | string | number | ArrayBuffer): void;
+  getBoolean(key: string): boolean | undefined;
+  getString(key: string): string | undefined;
+  getNumber(key: string): number | undefined;
+  getBuffer(key: string): ArrayBuffer | undefined;
+  getAllKeys(): string[];
+  addOnValueChangedListener(callback: (key: string) => void): { remove: () => void };
+  remove?(key: string): boolean;
+  delete?(key: string): void;
+};
+
+/**
  * MMKV entry types / MMKV 엔트리 타입
  */
 export type MMKVEntry =
