@@ -2,7 +2,7 @@
 import { createFileRoute, useLocation } from '@tanstack/react-router';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { fileToCDPMessages } from '@/shared/lib/file-to-cdp';
-import { IFRAME_ALLOW_ALL_PERMISSIONS, IFRAME_SANDBOX_DEVTOOLS } from '@/shared/lib/constants';
+import { IFRAME_ALLOW_ALL_PERMISSIONS } from '@/shared/lib/constants';
 import { buildDevToolsReplayUrl } from '@/shared/lib/devtools-url';
 import { createResponseBodyStore } from '@/features/replay/lib/response-body-store';
 import { handleCDPCommand } from '@/features/replay/lib/message-handlers';
@@ -164,19 +164,6 @@ function ReplayPage() {
         } else if (event.data?.type === 'SESSION_REPLAY_HIDDEN') {
           // Handle SessionReplay panel deactivation / SessionReplay 패널 비활성화 처리
           isPanelActiveRef.current = false;
-        } else if (event.data?.type === 'COPY_TEXT' && typeof event.data?.text === 'string') {
-          const text = event.data.text;
-          const textarea = document.createElement('textarea');
-          textarea.value = text;
-          textarea.style.position = 'fixed';
-          textarea.style.opacity = '0';
-          document.body.appendChild(textarea);
-          textarea.select();
-          try {
-            document.execCommand('copy');
-          } finally {
-            document.body.removeChild(textarea);
-          }
         }
       };
 
@@ -248,7 +235,7 @@ function ReplayPage() {
         src={devtoolsUrl || undefined}
         className={`w-full h-full border-none ${devtoolsUrl ? '' : 'hidden'}`}
         title="Replay DevTools"
-        sandbox={IFRAME_SANDBOX_DEVTOOLS}
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
         allow={IFRAME_ALLOW_ALL_PERMISSIONS}
       />
     </div>

@@ -353,7 +353,6 @@ function TitleBar() {
 function RootComponent() {
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
   const showTitleBar = isTauri;
-
   // Subscribe to client list SSE for live updates / 클라이언트 목록 실시간 갱신을 위한 SSE 구독
   useClientsListSSE();
 
