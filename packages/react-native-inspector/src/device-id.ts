@@ -8,7 +8,7 @@
  * @throws When deviceId is missing or empty / deviceId가 없거나 비어 있으면
  */
 export function resolveDeviceId(options: { deviceId: string }): string {
-  const provided = options?.deviceId;
+  const provided = options.deviceId;
   const trimmed = provided != null ? String(provided).trim() : '';
   if (trimmed.length === 0) {
     throw new Error(
