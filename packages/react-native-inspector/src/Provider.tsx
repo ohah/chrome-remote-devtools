@@ -5,7 +5,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { setServerInfo } from './server-info';
 import { connect } from './index';
-import type { AsyncStorageType } from './async-storage/types';
 // Import polyfill to ensure it's installed / polyfill이 설치되도록 import
 // The polyfill is auto-installed when this module is imported / 이 모듈이 import될 때 polyfill이 자동으로 설치됨
 import './redux-devtools-extension';
@@ -24,8 +23,8 @@ export interface ChromeRemoteDevToolsInspectorProviderProps {
   autoConnect?: boolean;
   /** Show connection status UI (WebSocket) / 연결 상태 UI 표시 (WebSocket) */
   showStatusUI?: boolean;
-  /** Optional AsyncStorage so device ID stays the same after app reload / (선택) 앱 리로드 후에도 동일 device ID 유지용 AsyncStorage */
-  asyncStorage?: AsyncStorageType;
+  /** Optional device ID for Inspector list; omitted then random UUID / (선택) Inspector 목록용 기기 ID, 생략 시 랜덤 UUID */
+  deviceId?: string;
 }
 
 /**
@@ -38,7 +37,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
   children,
   autoConnect = true,
   showStatusUI = false,
-  asyncStorage,
+  deviceId,
 }: ChromeRemoteDevToolsInspectorProviderProps): React.JSX.Element {
   const initializedRef = useRef(false);
   const connectionRef = useRef<Promise<void> | null>(null);
@@ -62,7 +61,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
     // Auto-connect if enabled / 활성화된 경우 자동 연결
     if (autoConnect && !connectionRef.current) {
       setConnectionStatus('connecting');
-      connectionRef.current = connect(serverHost, serverPort, { asyncStorage })
+      connectionRef.current = connect(serverHost, serverPort, { deviceId })
         .then(() => {
           console.log('✅ [ChromeRemoteDevTools] Connected to server / 서버에 연결됨');
           setConnectionStatus('connected');
@@ -80,7 +79,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
         connectionRef.current = null;
       }
     };
-  }, [serverHost, serverPort, autoConnect, asyncStorage]);
+  }, [serverHost, serverPort, autoConnect, deviceId]);
 
   return (
     <>
