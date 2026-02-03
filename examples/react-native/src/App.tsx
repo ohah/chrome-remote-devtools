@@ -27,13 +27,13 @@ function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [deviceId, setDeviceId] = useState<string | null>(null);
 
-  // Stable device ID from react-native-device-info for Inspector list / Inspector 목록용 안정적 기기 ID
+  // Stable device ID from react-native-device-info for Inspector list (required) / Inspector 목록용 안정적 기기 ID (필수)
   useEffect(() => {
     getUniqueId()
       .then(setDeviceId)
       .catch((err) => {
-        console.warn('[App] getUniqueId failed, Inspector will use random UUID:', err);
-        setDeviceId('');
+        console.warn('[App] getUniqueId failed, using demo fallback:', err);
+        setDeviceId('demo-' + Date.now());
       });
   }, []);
 
@@ -63,8 +63,8 @@ function App() {
     }
   }, []);
 
-  // Wait for deviceId so Inspector shows same device across reloads / 리로드 후에도 동일 기기로 표시되도록 deviceId 대기
-  if (deviceId === null) {
+  // Wait for deviceId (required for Inspector list) / Inspector 목록용 deviceId 대기 (필수)
+  if (deviceId === null || deviceId === '') {
     return (
       <View style={[styles.container, styles.centered]}>
         <ActivityIndicator size="large" />
@@ -78,7 +78,7 @@ function App() {
     <ChromeRemoteDevToolsInspectorProvider
       serverHost="localhost"
       serverPort={8080}
-      deviceId={deviceId || undefined}
+      deviceId={deviceId}
     >
       <SafeAreaProvider>
         <View style={styles.container}>
