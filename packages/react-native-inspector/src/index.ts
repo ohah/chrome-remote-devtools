@@ -23,24 +23,24 @@ import { connectWebSocket, getCDPSender } from './websocket-client';
 import { resolveDeviceId } from './device-id';
 
 /**
- * Connect options: optional device ID for inspector list / 연결 옵션: Inspector 목록용 device ID (선택)
+ * Connect options: deviceId is required for inspector list / 연결 옵션: Inspector 목록용 deviceId 필수
  */
 export interface ConnectOptions {
-  /** When provided, used as device identifier in Inspector; otherwise a random UUID is generated / 지정 시 Inspector 기기 식별자로 사용, 미지정 시 랜덤 UUID 생성 */
-  deviceId?: string;
+  /** Device identifier shown in Inspector list (required, e.g. from getUniqueId()) / Inspector 목록에 표시되는 기기 식별자 (필수, 예: getUniqueId() 결과) */
+  deviceId: string;
 }
 
 /**
  * Connect to Chrome Remote DevTools server via WebSocket (JavaScript) / WebSocket(JavaScript)으로 Chrome Remote DevTools 서버에 연결
  * @param serverHostParam Server host (e.g., "localhost" or "192.168.1.100") / 서버 호스트
  * @param serverPortParam Server port (e.g., 8080) / 서버 포트
- * @param options Optional: deviceId for device identifier in Inspector; omitted then random UUID / (선택) Inspector 기기 식별자, 생략 시 랜덤 UUID
+ * @param options Must include deviceId for Inspector list / options에 Inspector 목록용 deviceId 필수
  * @returns Promise that resolves when connection is established / 연결이 설정되면 resolve되는 Promise
  */
 export async function connect(
   serverHostParam: string,
   serverPortParam: number,
-  options?: ConnectOptions
+  options: ConnectOptions
 ): Promise<void> {
   setServerInfo(serverHostParam, serverPortParam);
 

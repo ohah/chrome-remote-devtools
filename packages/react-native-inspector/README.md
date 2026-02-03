@@ -18,9 +18,11 @@ bun add @ohah/chrome-remote-devtools-inspector-react-native
 
 ```typescript
 import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-inspector-react-native';
+import { getUniqueId } from 'react-native-device-info';
 
-// Connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연결
-ChromeRemoteDevToolsInspector.connect('localhost', 8080)
+// Connect to Chrome Remote DevTools server (deviceId required for Inspector list) / Chrome Remote DevTools 서버에 연결 (Inspector 목록용 deviceId 필수)
+const deviceId = await getUniqueId();
+ChromeRemoteDevToolsInspector.connect('localhost', 8080, { deviceId })
   .then(() => {
     console.log('✅ Connected to Chrome Remote DevTools');
   })
@@ -31,13 +33,13 @@ ChromeRemoteDevToolsInspector.connect('localhost', 8080)
 
 ### API / API
 
-#### `connect(serverHost: string, serverPort: number, options?: ConnectOptions): Promise<void>`
+#### `connect(serverHost: string, serverPort: number, options: ConnectOptions): Promise<void>`
 
 Connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연결
 
 - `serverHost`: Server host (e.g., "localhost" or "192.168.1.100") / 서버 호스트 (예: "localhost" 또는 "192.168.1.100")
 - `serverPort`: Server port (e.g., 8080) / 서버 포트 (예: 8080)
-- `options.deviceId`: Optional device identifier for the Inspector list. When omitted, a random UUID is generated each time. For a **stable ID across app reloads**, pass a persistent value (e.g. from [react-native-device-info](https://www.npmjs.com/package/react-native-device-info) `getUniqueId()`). / (선택) Inspector 목록용 기기 식별자. 생략 시 매번 랜덤 UUID 생성. **앱 리로드 후에도 동일 ID**를 쓰려면 [react-native-device-info](https://www.npmjs.com/package/react-native-device-info)의 `getUniqueId()` 등으로 얻은 값을 넘기면 됩니다.
+- `options.deviceId`: **Required** device identifier shown in the Inspector connection list. For a **stable ID across app reloads**, pass a persistent value (e.g. from [react-native-device-info](https://www.npmjs.com/package/react-native-device-info) `getUniqueId()`). / **필수** Inspector 연결 목록에 표시되는 기기 식별자. **앱 리로드 후에도 동일 ID**를 쓰려면 [react-native-device-info](https://www.npmjs.com/package/react-native-device-info)의 `getUniqueId()` 등으로 얻은 값을 넘기면 됩니다.
 
 #### `disableDebugger(): Promise<void>`
 
@@ -76,7 +78,7 @@ Then reload the app. The app's `localhost:8080` will reach the host PC's port 80
 
 **Stable device ID across reloads / 리로드 후에도 동일 device ID**
 
-If you omit `deviceId`, a random UUID is used (new ID after each app launch). To keep the **same device** in the Inspector list across reloads, pass a stable identifier. Installing [react-native-device-info](https://www.npmjs.com/package/react-native-device-info) and passing `getUniqueId()` is recommended: / `deviceId`를 생략하면 랜덤 UUID가 사용됩니다(앱 실행마다 새 ID). 리로드 후에도 Inspector 목록에서 **같은 기기**로 보이게 하려면 안정적인 식별자를 넘기세요. [react-native-device-info](https://www.npmjs.com/package/react-native-device-info)를 설치해 `getUniqueId()`를 넘기는 것을 권장합니다:
+`deviceId` is **required** and is shown in the Tauri/Inspector connection list. To keep the **same device** label across reloads, pass a stable identifier. Installing [react-native-device-info](https://www.npmjs.com/package/react-native-device-info) and passing `getUniqueId()` is recommended: / `deviceId`는 **필수**이며 Tauri/Inspector 연결 목록에 표시됩니다. 리로드 후에도 **같은 기기**로 보이게 하려면 안정적인 식별자를 넘기세요. [react-native-device-info](https://www.npmjs.com/package/react-native-device-info)를 설치해 `getUniqueId()`를 넘기는 것을 권장합니다:
 
 - **Programmatic**: `import { getUniqueId } from 'react-native-device-info';` then `connect(host, port, { deviceId: await getUniqueId() })`
 - **Provider**: `<ChromeRemoteDevToolsInspectorProvider serverHost="localhost" serverPort={8080} deviceId={deviceId} />` (e.g. `deviceId` from `getUniqueId()`)
