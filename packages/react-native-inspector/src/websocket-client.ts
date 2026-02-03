@@ -10,7 +10,7 @@ let disconnectRequested = false;
 /**
  * Build WebSocket URL for inspector device / inspector device용 WebSocket URL 생성
  * Matches server path: /remote/debug/inspector/device?name=...&app=...&device=...
- * @param deviceId Stable device ID (from getStableDeviceId) / getStableDeviceId로 얻은 안정적 device ID
+ * @param deviceId Device ID (user-provided or from resolveDeviceId) / 사용자 지정 또는 resolveDeviceId로 얻은 device ID
  */
 function buildInspectorDeviceUrl(serverHost: string, serverPort: number, deviceId: string): string {
   const deviceName = encodeURIComponent('React Native');
@@ -24,7 +24,7 @@ function buildInspectorDeviceUrl(serverHost: string, serverPort: number, deviceI
  * Connect to Chrome Remote DevTools server via WebSocket / WebSocket으로 Chrome Remote DevTools 서버에 연결
  * @param serverHost Server host / 서버 호스트
  * @param serverPort Server port / 서버 포트
- * @param deviceId Stable device ID (same value across reloads when persisted) / 리로드 후에도 동일하게 유지할 device ID
+ * @param deviceId Device identifier for Inspector list / Inspector 목록용 기기 식별자
  * @returns Promise that resolves when connected / 연결되면 resolve되는 Promise
  */
 export function connectWebSocket(

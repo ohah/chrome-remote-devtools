@@ -20,22 +20,21 @@ import {
   isNetworkHookEnabled as isNetworkHookEnabledImpl,
 } from './network';
 import { connectWebSocket, getCDPSender } from './websocket-client';
-import { getStableDeviceId } from './device-id';
-import type { AsyncStorageType } from './async-storage/types';
+import { resolveDeviceId } from './device-id';
 
 /**
- * Connect options: optional AsyncStorage for stable device ID across app reloads / 연결 옵션: 앱 리로드 후에도 동일 device ID 유지 시 AsyncStorage 선택
+ * Connect options: optional device ID for inspector list / 연결 옵션: Inspector 목록용 device ID (선택)
  */
 export interface ConnectOptions {
-  /** When provided, device ID is stored here so it stays the same after app reload / 제공 시 device ID를 저장하여 앱 리로드 후에도 동일하게 유지 */
-  asyncStorage?: AsyncStorageType;
+  /** When provided, used as device identifier in Inspector; otherwise a random UUID is generated / 지정 시 Inspector 기기 식별자로 사용, 미지정 시 랜덤 UUID 생성 */
+  deviceId?: string;
 }
 
 /**
  * Connect to Chrome Remote DevTools server via WebSocket (JavaScript) / WebSocket(JavaScript)으로 Chrome Remote DevTools 서버에 연결
  * @param serverHostParam Server host (e.g., "localhost" or "192.168.1.100") / 서버 호스트
  * @param serverPortParam Server port (e.g., 8080) / 서버 포트
- * @param options Optional: asyncStorage for stable device ID across app reloads / (선택) 앱 리로드 후에도 동일 device ID용 asyncStorage
+ * @param options Optional: deviceId for device identifier in Inspector; omitted then random UUID / (선택) Inspector 기기 식별자, 생략 시 랜덤 UUID
  * @returns Promise that resolves when connection is established / 연결이 설정되면 resolve되는 Promise
  */
 export async function connect(
@@ -45,7 +44,7 @@ export async function connect(
 ): Promise<void> {
   setServerInfo(serverHostParam, serverPortParam);
 
-  const deviceId = await getStableDeviceId(options?.asyncStorage);
+  const deviceId = resolveDeviceId(options);
 
   const maxRetries = 3;
   const retryDelay = 1000;

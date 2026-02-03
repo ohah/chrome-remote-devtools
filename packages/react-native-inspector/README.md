@@ -37,7 +37,7 @@ Connect to Chrome Remote DevTools server / Chrome Remote DevTools 서버에 연�
 
 - `serverHost`: Server host (e.g., "localhost" or "192.168.1.100") / 서버 호스트 (예: "localhost" 또는 "192.168.1.100")
 - `serverPort`: Server port (e.g., 8080) / 서버 포트 (예: 8080)
-- `options.asyncStorage`: Optional AsyncStorage so **device ID stays the same after app reload** (Inspector list shows same device). When omitted, ID is stable only for the current JS process (reconnects only). / (선택) 앱 리로드 후에도 **동일 device ID** 유지 시 사용 (Inspector 목록에서 같은 기기로 표시). 생략 시 현재 JS 프로세스 내에서만 동일 ID (재연결만).
+- `options.deviceId`: Optional device identifier for the Inspector list. When omitted, a random UUID is generated each time. For a **stable ID across app reloads**, pass a persistent value (e.g. from [react-native-device-info](https://www.npmjs.com/package/react-native-device-info) `getUniqueId()`). / (선택) Inspector 목록용 기기 식별자. 생략 시 매번 랜덤 UUID 생성. **앱 리로드 후에도 동일 ID**를 쓰려면 [react-native-device-info](https://www.npmjs.com/package/react-native-device-info)의 `getUniqueId()` 등으로 얻은 값을 넘기면 됩니다.
 
 #### `disableDebugger(): Promise<void>`
 
@@ -76,12 +76,10 @@ Then reload the app. The app's `localhost:8080` will reach the host PC's port 80
 
 **Stable device ID across reloads / 리로드 후에도 동일 device ID**
 
-When the app has `@react-native-async-storage/async-storage` installed, device ID is **persisted across app reloads by default** (no need to pass `asyncStorage`). If the package is not installed, the ID is stable only for reconnects (in-memory). / 앱에 `@react-native-async-storage/async-storage`가 설치되어 있으면 device ID가 **기본으로 앱 리로드 후에도 유지**됩니다 (`asyncStorage`를 넘기지 않아도 됨). 패키지가 없으면 재연결 시에만 동일 ID(메모리)입니다.
+If you omit `deviceId`, a random UUID is used (new ID after each app launch). To keep the **same device** in the Inspector list across reloads, pass a stable identifier. Installing [react-native-device-info](https://www.npmjs.com/package/react-native-device-info) and passing `getUniqueId()` is recommended: / `deviceId`를 생략하면 랜덤 UUID가 사용됩니다(앱 실행마다 새 ID). 리로드 후에도 Inspector 목록에서 **같은 기기**로 보이게 하려면 안정적인 식별자를 넘기세요. [react-native-device-info](https://www.npmjs.com/package/react-native-device-info)를 설치해 `getUniqueId()`를 넘기는 것을 권장합니다:
 
-To use a specific AsyncStorage instance (e.g. wrapped or different module), pass it explicitly: / 특정 AsyncStorage 인스턴스를 쓰려면(래핑된 경우 등) 명시적으로 넘기세요:
-
-- **Programmatic**: `connect(host, port, { asyncStorage: AsyncStorage })`
-- **Provider**: `<ChromeRemoteDevToolsInspectorProvider serverHost="localhost" serverPort={8080} asyncStorage={AsyncStorage} />`
+- **Programmatic**: `import { getUniqueId } from 'react-native-device-info';` then `connect(host, port, { deviceId: await getUniqueId() })`
+- **Provider**: `<ChromeRemoteDevToolsInspectorProvider serverHost="localhost" serverPort={8080} deviceId={deviceId} />` (e.g. `deviceId` from `getUniqueId()`)
 
 **Page.getResourceTree and Console init / Page.getResourceTree와 콘솔 초기화**
 
