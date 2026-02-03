@@ -25,6 +25,7 @@
     "@reduxjs/toolkit": "^2.11.2",
     "react": "19.2.0",
     "react-native": "0.83.1",
+    "react-native-device-info": "15.0.1",
     "react-native-gesture-handler": "^2.30.0",
     "react-native-mmkv": "^4.1.1",
     "react-native-mmkv-v3": "npm:react-native-mmkv@^3.3.0",
