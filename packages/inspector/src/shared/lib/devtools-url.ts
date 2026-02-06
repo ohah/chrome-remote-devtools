@@ -2,9 +2,6 @@
 import { DEVTOOLS_FRONTEND_PATH, DEVTOOLS_CONFIG } from './constants';
 import { getServerUrl } from './server-url';
 
-// Cache-bust value set once when module loads so iframe always fetches latest devtools on app load / 앱 로드 시 최신 devtools를 받도록 모듈 로드 시 한 번만 설정
-const DEVTOOLS_CACHE_BUST = typeof Date !== 'undefined' ? String(Date.now()) : '0';
-
 /**
  * Options for building DevTools URL / DevTools URL 구성 옵션
  */
@@ -58,9 +55,6 @@ export function buildDevToolsUrl(options: BuildDevToolsUrlOptions): string {
     params.append(key, value);
   });
 
-  // Cache-bust so browser always fetches latest devtools after app reload / 앱 새로고침 후 항상 최신 devtools 로드
-  params.append('_v', DEVTOOLS_CACHE_BUST);
-
   return devtoolsUrl.toString();
 }
 
@@ -81,8 +75,6 @@ export function buildDevToolsReplayUrl(): string {
   Object.entries(DEVTOOLS_CONFIG).forEach(([key, value]) => {
     params.append(key, value);
   });
-
-  params.append('_v', DEVTOOLS_CACHE_BUST);
 
   return url.toString();
 }

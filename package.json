@@ -23,6 +23,7 @@
     "format:rust": "cargo fmt --all",
     "format:rust:check": "cargo fmt --all -- --check",
     "build:devtools": "bun run --filter='@ohah/redux-devtools-plugin' build && cd devtools/devtools-frontend && gclient sync && gn gen out/Default && autoninja -C out/Default && cd ../.. && bun run copy:devtools-bundled",
+    "build:devtools:clean": "rm -rf devtools/devtools-frontend/out && bun run build:devtools",
     "build:client": "bun run --filter='@ohah/chrome-remote-devtools-client' build",
     "build:docs": "bun run --filter='docs' build",
     "postinstall": "playwright install --with-deps chromium",
