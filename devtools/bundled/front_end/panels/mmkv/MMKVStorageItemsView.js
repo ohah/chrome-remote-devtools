@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 /* eslint-disable @devtools/no-imperative-dom-api */
+/* eslint-disable @devtools/no-lit-render-outside-of-view */
 /*
  * Copyright (C) 2008 Nokia Inc.  All rights reserved.
  * Copyright (C) 2013 Samsung Electronics. All rights reserved.
@@ -57,8 +58,9 @@ function normalizeValueType(raw) {
     }
     if (typeof raw === 'string') {
         const t = parseValueType(raw);
-        if (t)
+        if (t) {
             return t;
+        }
     }
     return 'string';
 }
@@ -345,7 +347,10 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
     }
     #handleUpdateClick(rowId) {
         const isNew = rowId.startsWith('new-');
-        const fallback = isNew ? { key: '', value: '', valueType: 'string' } : this.#items.find(i => i.key === rowId);
+        const existingItem = this.#items.find(i => i.key === rowId);
+        const fallback = isNew
+            ? { key: '', value: '', valueType: 'string' }
+            : (existingItem ?? { key: '', value: '', valueType: 'string' });
         const draft = this.#getDisplayDraft(rowId, fallback);
         if (!draft.key.trim()) {
             this.#validationErrors.set(rowId, i18nString(UIStrings.keyRequired));
@@ -381,18 +386,6 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
         this.#newRowIds = [...this.#newRowIds, id];
         this.#drafts.set('new-' + id, { key: '', value: '', valueType: 'string' });
         this.performUpdate();
-    }
-    #createCallback(key, value, valueType) {
-        this.#mmkvStorage.setItem(key, value, valueType);
-        this.#removeDupes(key, value);
-    }
-    #removeDupes(key, value) {
-        for (let i = this.#items.length - 1; i >= 0; i--) {
-            const child = this.#items[i];
-            if (child.key === key && child.value !== value) {
-                this.#items.splice(i, 1);
-            }
-        }
     }
     deleteSelectedItem() {
         if (!this.#selectedKey) {
@@ -431,7 +424,7 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
         <devtools-widget
           .widgetConfig=${widgetConfig(VBox, { minimumSize: new Size(0, 50) })}
         >
-            <div class="mmkv-custom-table-container" data-mmkv-view="custom">
+            <div class="mmkv-custom-table-container" data-mmkv-view="custom" aria-label=${i18nString(UIStrings.mmkvStorageItems)}>
               <div class="mmkv-toolbar-row">
                 <button class="mmkv-add-button" @click=${() => this.#handleAddItem()} jslog=${VisualLogging.action('mmkv-storage.add-item').track({ click: true })}>
                   ${i18nString(UIStrings.addItem)}
@@ -454,9 +447,10 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
             return html `
                     <tr
                       class="mmkv-row ${!isNew && this.#selectedKey === row.rowId ? 'mmkv-row-selected' : ''}"
-                      @click=${(e) => {
-                if (isNew)
+                          @click=${(e) => {
+                if (isNew) {
                     return;
+                }
                 e.preventDefault();
                 this.#selectedKey = row.item.key;
                 this.#toolbar?.setCanDeleteSelected(true);
@@ -477,8 +471,9 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
                           @change=${(e) => {
                 const v = e.target.value;
                 const t = parseValueType(v);
-                if (t)
+                if (t) {
                     this.#setDraft(row.rowId, { valueType: t });
+                }
             }}
                           @click=${(e) => e.stopPropagation()}
                         >

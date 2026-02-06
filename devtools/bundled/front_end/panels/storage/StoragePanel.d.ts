@@ -3,11 +3,11 @@ import type * as Platform from '../../core/platform/platform.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { type AsyncStorageStorage } from '../application/AsyncStorageStorageModel.js';
 /** Panel interface for AsyncStorage sidebar / AsyncStorage 사이드바용 패널 인터페이스 */
-export interface IAsyncStorageStoragePanel {
+export interface AsyncStorageStoragePanelContract {
     showView(view: UI.Widget.Widget | null): void;
     showAsyncStorageStorage(asyncStorageStorage: AsyncStorageStorage): void;
 }
-export declare class StoragePanel extends UI.Panel.PanelWithSidebar implements IAsyncStorageStoragePanel {
+export declare class StoragePanel extends UI.Panel.PanelWithSidebar implements AsyncStorageStoragePanelContract {
     visibleView: UI.Widget.Widget | null;
     private pendingViewPromise;
     storageViews: HTMLElement;
@@ -26,7 +26,7 @@ export declare class StoragePanel extends UI.Panel.PanelWithSidebar implements I
     showCategoryView(categoryName: string, categoryHeadline: string, categoryDescription: string, _categoryLink: Platform.DevToolsPath.UrlString | null): void;
 }
 /** AsyncStorage-only panel / AsyncStorage 전용 패널 */
-export declare class AsyncStorageStoragePanel extends UI.Panel.PanelWithSidebar implements IAsyncStorageStoragePanel {
+export declare class AsyncStorageStoragePanel extends UI.Panel.PanelWithSidebar implements AsyncStorageStoragePanelContract {
     visibleView: UI.Widget.Widget | null;
     private pendingViewPromise;
     storageViews: HTMLElement;
