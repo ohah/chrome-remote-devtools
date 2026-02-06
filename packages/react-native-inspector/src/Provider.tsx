@@ -1,13 +1,17 @@
 // Chrome Remote DevTools Inspector Provider / Chrome Remote DevTools Inspector Provider
 // This component connects to the server via WebSocket (JavaScript layer) / 이 컴포넌트는 WebSocket(JavaScript 레이어)으로 서버에 연결합니다
 
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { setServerInfo } from './server-info';
 import { connect } from './index';
+import { setOnConnectionClose } from './websocket-client';
 // Import polyfill to ensure it's installed / polyfill이 설치되도록 import
 // The polyfill is auto-installed when this module is imported / 이 모듈이 import될 때 polyfill이 자동으로 설치됨
 import './redux-devtools-extension';
+
+/** Connection status for WebSocket / WebSocket 연결 상태 */
+type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'failed';
 
 /**
  * Chrome Remote DevTools Inspector Provider Props / Chrome Remote DevTools Inspector Provider Props
@@ -41,9 +45,26 @@ export function ChromeRemoteDevToolsInspectorProvider({
 }: ChromeRemoteDevToolsInspectorProviderProps): React.JSX.Element {
   const initializedRef = useRef(false);
   const connectionRef = useRef<Promise<void> | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<
-    'disconnected' | 'connecting' | 'connected'
-  >('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
+
+  const doConnect = useCallback(() => {
+    if (!deviceId) return;
+    setConnectionStatus('connecting');
+    const promise = connect(serverHost, serverPort, {
+      deviceId,
+      onFailureAttempt: () => setConnectionStatus('failed'),
+    })
+      .then(() => {
+        console.log('✅ [ChromeRemoteDevTools] Connected to server / 서버에 연결됨');
+        setConnectionStatus('connected');
+      })
+      .catch((error) => {
+        console.error('❌ [ChromeRemoteDevTools] Failed to connect to server:', error);
+        setConnectionStatus('failed');
+        connectionRef.current = null;
+      });
+    connectionRef.current = promise;
+  }, [serverHost, serverPort, deviceId]);
 
   useEffect(() => {
     // Set server info / 서버 정보 설정
@@ -60,30 +81,36 @@ export function ChromeRemoteDevToolsInspectorProvider({
 
     // Auto-connect if enabled and deviceId is set / deviceId가 있고 자동 연결이 켜져 있으면 연결
     if (autoConnect && deviceId && !connectionRef.current) {
-      setConnectionStatus('connecting');
-      connectionRef.current = connect(serverHost, serverPort, { deviceId })
-        .then(() => {
-          console.log('✅ [ChromeRemoteDevTools] Connected to server / 서버에 연결됨');
-          setConnectionStatus('connected');
-        })
-        .catch((error) => {
-          console.error('❌ [ChromeRemoteDevTools] Failed to connect to server:', error);
-          setConnectionStatus('disconnected');
-          connectionRef.current = null;
-        });
+      doConnect();
     }
+
+    // Notify when WebSocket disconnects so we can show Connect button / WebSocket 끊김 시 Connect 버튼 표시를 위해 등록
+    setOnConnectionClose(() => setConnectionStatus('failed'));
 
     // Cleanup function / 정리 함수
     return () => {
+      setOnConnectionClose(null);
       if (!autoConnect) {
         connectionRef.current = null;
       }
     };
-  }, [serverHost, serverPort, autoConnect, deviceId]);
+  }, [serverHost, serverPort, autoConnect, deviceId, doConnect]);
 
   return (
     <>
       {children}
+      {/* Connect button when disconnected or after first connection failure / 연결 끊김 또는 첫 연결 실패 시 Connect 버튼 표시 */}
+      {connectionStatus === 'failed' && (
+        <View style={styles.retryContainer}>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => doConnect()}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.retryButtonText}>Connect</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       {showStatusUI && (
         <View style={styles.statusContainer}>
           <View style={styles.statusRow}>
@@ -102,7 +129,9 @@ export function ChromeRemoteDevToolsInspectorProvider({
                 ? '✅ Connected'
                 : connectionStatus === 'connecting'
                   ? '⏳ Connecting...'
-                  : '❌ Disconnected'}
+                  : connectionStatus === 'failed'
+                    ? '❌ Failed (Tap Connect)'
+                    : '❌ Disconnected'}
             </Text>
           </View>
           <View style={styles.statusRow}>
@@ -118,6 +147,23 @@ export function ChromeRemoteDevToolsInspectorProvider({
 }
 
 const styles = StyleSheet.create({
+  retryContainer: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 9999,
+  },
+  retryButton: {
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
   statusContainer: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 50 : 20,
