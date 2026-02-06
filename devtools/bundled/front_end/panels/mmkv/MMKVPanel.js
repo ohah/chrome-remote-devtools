@@ -6,8 +6,8 @@ import * as SDK from '../../core/sdk/sdk.js';
 import { createIcon } from '../../ui/kit/kit.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import * as VisualLogging from '../../ui/visual_logging/visual_logging.js';
-import { MMKVStorageModel } from './MMKVStorageModel.js';
 import { MMKVStorageItemsView } from './MMKVStorageItemsView.js';
+import { MMKVStorageModel } from './MMKVStorageModel.js';
 let mmkvPanelInstance = null;
 export class MMKVPanel extends UI.Panel.PanelWithSidebar {
     visibleView;
@@ -38,10 +38,6 @@ export class MMKVPanel extends UI.Panel.PanelWithSidebar {
     }
     focus() {
         this.sidebar.focus();
-    }
-    wasShown() {
-        super.wasShown();
-        this.sidebar.selectFirstStorageIfNoneSelected();
     }
     showView(view) {
         this.pendingViewPromise = null;
@@ -140,20 +136,6 @@ class MMKVPanelSidebar extends UI.Widget.VBox {
     mmkvStorageRemoved = (event) => {
         this.removeMMKVStorage(event.data);
     };
-    /** Select first storage in sidebar if none selected (e.g. on first panel entry) / 선택된 항목 없으면 첫 목록 선택 */
-    selectFirstStorageIfNoneSelected() {
-        if (this.sidebarTree.selectedTreeElement) {
-            return;
-        }
-        const root = this.sidebarTree.rootElement();
-        if (root.childCount() === 0) {
-            return;
-        }
-        const first = root.childAt(0);
-        if (first) {
-            first.select();
-        }
-    }
     removeMMKVStorage(mmkvStorage) {
         const treeElement = this.mmkvStorageTreeElements.get(mmkvStorage);
         if (!treeElement) {

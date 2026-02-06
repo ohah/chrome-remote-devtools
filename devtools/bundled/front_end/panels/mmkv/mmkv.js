@@ -4,129 +4,8 @@ import { createIcon } from "./../../ui/kit/kit.js";
 import * as UI3 from "./../../ui/legacy/legacy.js";
 import * as VisualLogging3 from "./../../ui/visual_logging/visual_logging.js";
 
-// gen/front_end/panels/mmkv/MMKVStorageModel.js
-import * as Common from "./../../core/common/common.js";
-import * as SDK from "./../../core/sdk/sdk.js";
-var MMKVStorage = class extends Common.ObjectWrapper.ObjectWrapper {
-  model;
-  #instanceId;
-  constructor(model, instanceId) {
-    super();
-    this.model = model;
-    this.#instanceId = instanceId;
-  }
-  get instanceId() {
-    return this.#instanceId;
-  }
-  getItems() {
-    return this.model.agent.invoke_getMMKVItems({ instanceId: this.instanceId }).then((res) => res.entries);
-  }
-  setItem(key, value, valueType) {
-    void this.model.agent.invoke_setMMKVItem({ instanceId: this.instanceId, key, value, valueType });
-  }
-  removeItem(key) {
-    void this.model.agent.invoke_removeMMKVItem({ instanceId: this.instanceId, key });
-  }
-  clear() {
-    void this.model.agent.invoke_clear({ instanceId: this.instanceId });
-  }
-};
-var MMKVStorageModel = class extends SDK.SDKModel.SDKModel {
-  #storages;
-  agent;
-  enabled;
-  constructor(target) {
-    super(target);
-    this.#storages = /* @__PURE__ */ new Map();
-    this.agent = target.mmkvStorageAgent();
-  }
-  enable() {
-    if (this.enabled) {
-      return;
-    }
-    this.target().registerMMKVStorageDispatcher(new MMKVStorageDispatcher(this));
-    void this.agent.invoke_enable();
-    this.enabled = true;
-  }
-  mmkvItemsCleared({ instanceId }) {
-    const mmkvStorage = this.storageForInstanceId(instanceId);
-    if (!mmkvStorage) {
-      return;
-    }
-    mmkvStorage.dispatchEventToListeners(
-      "MMKVItemsCleared"
-      /* MMKVStorage.Events.MMKV_ITEMS_CLEARED */
-    );
-  }
-  mmkvItemRemoved({ instanceId, key }) {
-    const mmkvStorage = this.storageForInstanceId(instanceId);
-    if (!mmkvStorage) {
-      return;
-    }
-    const eventData = { key };
-    mmkvStorage.dispatchEventToListeners("MMKVItemRemoved", eventData);
-  }
-  mmkvItemAdded({ instanceId, key, newValue, valueType }) {
-    let mmkvStorage = this.storageForInstanceId(instanceId);
-    if (!mmkvStorage) {
-      mmkvStorage = this.addStorage(instanceId);
-    }
-    const eventData = { key, value: newValue, valueType };
-    mmkvStorage.dispatchEventToListeners("MMKVItemAdded", eventData);
-  }
-  mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType }) {
-    const mmkvStorage = this.storageForInstanceId(instanceId);
-    if (!mmkvStorage) {
-      return;
-    }
-    const eventData = { key, oldValue, value: newValue, valueType };
-    mmkvStorage.dispatchEventToListeners("MMKVItemUpdated", eventData);
-  }
-  mmkvInstanceCreated({ instanceId }) {
-    this.addStorage(instanceId);
-  }
-  addStorage(instanceId) {
-    const existing = this.#storages.get(instanceId);
-    if (existing) {
-      return existing;
-    }
-    const storage = new MMKVStorage(this, instanceId);
-    this.#storages.set(instanceId, storage);
-    this.dispatchEventToListeners("MMKVStorageAdded", storage);
-    return storage;
-  }
-  storageForInstanceId(instanceId) {
-    return this.#storages.get(instanceId) || null;
-  }
-  storages() {
-    return Array.from(this.#storages.values());
-  }
-};
-SDK.SDKModel.SDKModel.register(MMKVStorageModel, { capabilities: 0, autostart: false });
-var MMKVStorageDispatcher = class {
-  model;
-  constructor(model) {
-    this.model = model;
-  }
-  mmkvItemsCleared({ instanceId }) {
-    this.model.mmkvItemsCleared({ instanceId });
-  }
-  mmkvItemRemoved({ instanceId, key }) {
-    this.model.mmkvItemRemoved({ instanceId, key });
-  }
-  mmkvItemAdded({ instanceId, key, newValue, valueType }) {
-    this.model.mmkvItemAdded({ instanceId, key, newValue, valueType });
-  }
-  mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType }) {
-    this.model.mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType });
-  }
-  mmkvInstanceCreated({ instanceId }) {
-    this.model.mmkvInstanceCreated({ instanceId });
-  }
-};
-
 // gen/front_end/panels/mmkv/MMKVStorageItemsView.js
-import * as Common3 from "./../../core/common/common.js";
+import * as Common2 from "./../../core/common/common.js";
 import * as i18n3 from "./../../core/i18n/i18n.js";
 import * as Geometry from "./../../models/geometry/geometry.js";
 import * as UI2 from "./../../ui/legacy/legacy.js";
@@ -136,7 +15,7 @@ import * as ApplicationComponents2 from "./../application/components/components.
 
 // gen/front_end/panels/application/StorageItemsToolbar.js
 import "./../../ui/legacy/legacy.js";
-import * as Common2 from "./../../core/common/common.js";
+import * as Common from "./../../core/common/common.js";
 import * as i18n from "./../../core/i18n/i18n.js";
 import * as Platform from "./../../core/platform/platform.js";
 import * as Buttons from "./../../ui/components/buttons/buttons.js";
@@ -207,7 +86,7 @@ var DEFAULT_VIEW = (input, _output, target) => {
     target
   );
 };
-var StorageItemsToolbar = class extends Common2.ObjectWrapper.eventMixin(UI.Widget.VBox) {
+var StorageItemsToolbar = class extends Common.ObjectWrapper.eventMixin(UI.Widget.VBox) {
   filterRegex;
   #metadataView;
   #view;
@@ -482,8 +361,9 @@ function normalizeValueType(raw) {
   }
   if (typeof raw === "string") {
     const t = parseValueType(raw);
-    if (t)
+    if (t) {
       return t;
+    }
   }
   return "string";
 }
@@ -617,7 +497,7 @@ var MMKVStorageItemsView = class extends UI2.Widget.VBox {
     return this.#mmkvStorage;
   }
   setStorage(mmkvStorage) {
-    Common3.EventTarget.removeEventListeners(this.#eventListeners);
+    Common2.EventTarget.removeEventListeners(this.#eventListeners);
     this.#mmkvStorage = mmkvStorage;
     this.#metadataView.getTitle = () => mmkvStorage.instanceId;
     this.element.setAttribute("jslog", `${VisualLogging2.pane().context("mmkv-storage-data")}`);
@@ -759,7 +639,8 @@ var MMKVStorageItemsView = class extends UI2.Widget.VBox {
   }
   #handleUpdateClick(rowId) {
     const isNew = rowId.startsWith("new-");
-    const fallback = isNew ? { key: "", value: "", valueType: "string" } : this.#items.find((i) => i.key === rowId);
+    const existingItem = this.#items.find((i) => i.key === rowId);
+    const fallback = isNew ? { key: "", value: "", valueType: "string" } : existingItem ?? { key: "", value: "", valueType: "string" };
     const draft = this.#getDisplayDraft(rowId, fallback);
     if (!draft.key.trim()) {
       this.#validationErrors.set(rowId, i18nString2(UIStrings2.keyRequired));
@@ -794,18 +675,6 @@ var MMKVStorageItemsView = class extends UI2.Widget.VBox {
     this.#newRowIds = [...this.#newRowIds, id];
     this.#drafts.set("new-" + id, { key: "", value: "", valueType: "string" });
     this.performUpdate();
-  }
-  #createCallback(key, value, valueType) {
-    this.#mmkvStorage.setItem(key, value, valueType);
-    this.#removeDupes(key, value);
-  }
-  #removeDupes(key, value) {
-    for (let i = this.#items.length - 1; i >= 0; i--) {
-      const child = this.#items[i];
-      if (child.key === key && child.value !== value) {
-        this.#items.splice(i, 1);
-      }
-    }
   }
   deleteSelectedItem() {
     if (!this.#selectedKey) {
@@ -844,7 +713,7 @@ var MMKVStorageItemsView = class extends UI2.Widget.VBox {
         <devtools-widget
           .widgetConfig=${widgetConfig(VBox, { minimumSize: new Size(0, 50) })}
         >
-            <div class="mmkv-custom-table-container" data-mmkv-view="custom">
+            <div class="mmkv-custom-table-container" data-mmkv-view="custom" aria-label=${i18nString2(UIStrings2.mmkvStorageItems)}>
               <div class="mmkv-toolbar-row">
                 <button class="mmkv-add-button" @click=${() => this.#handleAddItem()} jslog=${VisualLogging2.action("mmkv-storage.add-item").track({ click: true })}>
                   ${i18nString2(UIStrings2.addItem)}
@@ -867,9 +736,10 @@ var MMKVStorageItemsView = class extends UI2.Widget.VBox {
       return html2`
                     <tr
                       class="mmkv-row ${!isNew && this.#selectedKey === row.rowId ? "mmkv-row-selected" : ""}"
-                      @click=${(e) => {
-        if (isNew)
+                          @click=${(e) => {
+        if (isNew) {
           return;
+        }
         e.preventDefault();
         this.#selectedKey = row.item.key;
         this.#toolbar?.setCanDeleteSelected(true);
@@ -890,8 +760,9 @@ var MMKVStorageItemsView = class extends UI2.Widget.VBox {
                           @change=${(e) => {
         const v = e.target.value;
         const t = parseValueType(v);
-        if (t)
+        if (t) {
           this.#setDraft(row.rowId, { valueType: t });
+        }
       }}
                           @click=${(e) => e.stopPropagation()}
                         >
@@ -953,6 +824,127 @@ var MMKVStorageItemsView = class extends UI2.Widget.VBox {
   }
 };
 
+// gen/front_end/panels/mmkv/MMKVStorageModel.js
+import * as Common3 from "./../../core/common/common.js";
+import * as SDK from "./../../core/sdk/sdk.js";
+var MMKVStorage = class extends Common3.ObjectWrapper.ObjectWrapper {
+  model;
+  #instanceId;
+  constructor(model, instanceId) {
+    super();
+    this.model = model;
+    this.#instanceId = instanceId;
+  }
+  get instanceId() {
+    return this.#instanceId;
+  }
+  getItems() {
+    return this.model.agent.invoke_getMMKVItems({ instanceId: this.instanceId }).then((res) => res.entries);
+  }
+  setItem(key, value, valueType) {
+    void this.model.agent.invoke_setMMKVItem({ instanceId: this.instanceId, key, value, valueType });
+  }
+  removeItem(key) {
+    void this.model.agent.invoke_removeMMKVItem({ instanceId: this.instanceId, key });
+  }
+  clear() {
+    void this.model.agent.invoke_clear({ instanceId: this.instanceId });
+  }
+};
+var MMKVStorageModel = class extends SDK.SDKModel.SDKModel {
+  #storages;
+  agent;
+  enabled;
+  constructor(target) {
+    super(target);
+    this.#storages = /* @__PURE__ */ new Map();
+    this.agent = target.mmkvStorageAgent();
+  }
+  enable() {
+    if (this.enabled) {
+      return;
+    }
+    this.target().registerMMKVStorageDispatcher(new MMKVStorageDispatcher(this));
+    void this.agent.invoke_enable();
+    this.enabled = true;
+  }
+  mmkvItemsCleared({ instanceId }) {
+    const mmkvStorage = this.storageForInstanceId(instanceId);
+    if (!mmkvStorage) {
+      return;
+    }
+    mmkvStorage.dispatchEventToListeners(
+      "MMKVItemsCleared"
+      /* MMKVStorage.Events.MMKV_ITEMS_CLEARED */
+    );
+  }
+  mmkvItemRemoved({ instanceId, key }) {
+    const mmkvStorage = this.storageForInstanceId(instanceId);
+    if (!mmkvStorage) {
+      return;
+    }
+    const eventData = { key };
+    mmkvStorage.dispatchEventToListeners("MMKVItemRemoved", eventData);
+  }
+  mmkvItemAdded({ instanceId, key, newValue, valueType }) {
+    let mmkvStorage = this.storageForInstanceId(instanceId);
+    if (!mmkvStorage) {
+      mmkvStorage = this.addStorage(instanceId);
+    }
+    const eventData = { key, value: newValue, valueType };
+    mmkvStorage.dispatchEventToListeners("MMKVItemAdded", eventData);
+  }
+  mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType }) {
+    const mmkvStorage = this.storageForInstanceId(instanceId);
+    if (!mmkvStorage) {
+      return;
+    }
+    const eventData = { key, oldValue, value: newValue, valueType };
+    mmkvStorage.dispatchEventToListeners("MMKVItemUpdated", eventData);
+  }
+  mmkvInstanceCreated({ instanceId }) {
+    this.addStorage(instanceId);
+  }
+  addStorage(instanceId) {
+    const existing = this.#storages.get(instanceId);
+    if (existing) {
+      return existing;
+    }
+    const storage = new MMKVStorage(this, instanceId);
+    this.#storages.set(instanceId, storage);
+    this.dispatchEventToListeners("MMKVStorageAdded", storage);
+    return storage;
+  }
+  storageForInstanceId(instanceId) {
+    return this.#storages.get(instanceId) || null;
+  }
+  storages() {
+    return Array.from(this.#storages.values());
+  }
+};
+SDK.SDKModel.SDKModel.register(MMKVStorageModel, { capabilities: 0, autostart: false });
+var MMKVStorageDispatcher = class {
+  model;
+  constructor(model) {
+    this.model = model;
+  }
+  mmkvItemsCleared({ instanceId }) {
+    this.model.mmkvItemsCleared({ instanceId });
+  }
+  mmkvItemRemoved({ instanceId, key }) {
+    this.model.mmkvItemRemoved({ instanceId, key });
+  }
+  mmkvItemAdded({ instanceId, key, newValue, valueType }) {
+    this.model.mmkvItemAdded({ instanceId, key, newValue, valueType });
+  }
+  mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType }) {
+    this.model.mmkvItemUpdated({ instanceId, key, oldValue, newValue, valueType });
+  }
+  mmkvInstanceCreated({ instanceId }) {
+    this.model.mmkvInstanceCreated({ instanceId });
+  }
+};
+
 // gen/front_end/panels/mmkv/MMKVPanel.js
 var mmkvPanelInstance = null;
 var MMKVPanel = class _MMKVPanel extends UI3.Panel.PanelWithSidebar {
@@ -984,10 +976,6 @@ var MMKVPanel = class _MMKVPanel extends UI3.Panel.PanelWithSidebar {
   }
   focus() {
     this.sidebar.focus();
-  }
-  wasShown() {
-    super.wasShown();
-    this.sidebar.selectFirstStorageIfNoneSelected();
   }
   showView(view) {
     this.pendingViewPromise = null;
@@ -1084,20 +1072,6 @@ var MMKVPanelSidebar = class extends UI3.Widget.VBox {
   mmkvStorageRemoved = (event) => {
     this.removeMMKVStorage(event.data);
   };
-  /** Select first storage in sidebar if none selected (e.g. on first panel entry) / 선택된 항목 없으면 첫 목록 선택 */
-  selectFirstStorageIfNoneSelected() {
-    if (this.sidebarTree.selectedTreeElement) {
-      return;
-    }
-    const root = this.sidebarTree.rootElement();
-    if (root.childCount() === 0) {
-      return;
-    }
-    const first = root.childAt(0);
-    if (first) {
-      first.select();
-    }
-  }
   removeMMKVStorage(mmkvStorage) {
     const treeElement = this.mmkvStorageTreeElements.get(mmkvStorage);
     if (!treeElement) {
