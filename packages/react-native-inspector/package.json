@@ -18,12 +18,9 @@
   "files": [
     "react-native.config.js",
     "README.md",
-    "dist/",
     "src/"
   ],
   "sideEffects": true,
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
   "types": "src/index.ts",
   "react-native": "src/index.ts",
   "exports": {
@@ -59,6 +56,6 @@
   },
   "peerDependencies": {
     "react": ">=18.0.0",
-    "react-native": ">=0.83.0"
+    "react-native": ">=0.76.0"
   }
 }

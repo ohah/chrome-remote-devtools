@@ -1,20 +1,20 @@
 # Chrome Remote DevTools React Native Inspector
 
-**한국어:** [README_KO.md](./README_KO.md)
+**English:** [README.md](./README.md)
 
-## Installation
+## 설치
 
 ```bash
 npm install @ohah/chrome-remote-devtools-inspector-react-native
-# or
+# 또는
 yarn add @ohah/chrome-remote-devtools-inspector-react-native
-# or
+# 또는
 bun add @ohah/chrome-remote-devtools-inspector-react-native
 ```
 
-## Usage
+## 사용법
 
-### Connect
+### 연결
 
 ```typescript
 import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-inspector-react-native';
@@ -26,32 +26,32 @@ ChromeRemoteDevToolsInspector.connect('localhost', 8080, { deviceId });
 
 ### API
 
-- `connect(serverHost, serverPort, { deviceId })` — `deviceId` required
+- `connect(serverHost, serverPort, { deviceId })` — `deviceId` 필수
 - `disableDebugger()`
 - `isPackagerDisconnected()`
 - `openDebugger(serverHost, serverPort, errorMessage)`
 
-### localhost by target
+### 실행 대상별 localhost
 
-| Target                  | Action                                           |
-| ----------------------- | ------------------------------------------------ |
-| iOS Simulator           | Use `localhost`                                  |
-| Android Emulator / USB  | `adb reverse tcp:8080 tcp:8080` then `localhost` |
-| Physical device (Wi‑Fi) | `serverHost="192.168.1.100"` (PC LAN IP)         |
+| 대상                   | 방법                                           |
+| ---------------------- | ---------------------------------------------- |
+| iOS Simulator          | `localhost` 사용                               |
+| Android Emulator / USB | `adb reverse tcp:8080 tcp:8080` 후 `localhost` |
+| 실기 (Wi‑Fi)           | `serverHost="192.168.1.100"` (PC LAN IP)       |
 
-### Console tab empty
+### Console 탭이 비어 있을 때
 
-Console tab → context dropdown → uncheck "Selected context only"; or select "React Native" context.
+Console 탭 → 컨텍스트 드롭다운 → "Selected context only" 해제; 또는 "React Native" 컨텍스트 선택.
 
 ## Redux / Zustand
 
-### 1. Metro config (`metro.config.js`)
+### 1. Metro 설정 (`metro.config.js`)
 
 ```javascript
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const { withChromeRemoteDevToolsRedux } = require('@ohah/chrome-remote-devtools-inspector-react-native/metro');
 
-const config = mergeConfig(getDefaultConfig(__dirname), { /* your options */ });
+const config = mergeConfig(getDefaultConfig(__dirname), { /* 기존 옵션 */ });
 module.exports = withChromeRemoteDevToolsRedux(config);
 ```
 
@@ -64,7 +64,7 @@ import rootReducer from './reducers';
 const store = configureStore({ reducer: rootReducer, devTools: true });
 ```
 
-Vanilla Redux: `import { composeWithDevTools } from '@ohah/chrome-remote-devtools-inspector-react-native/redux-devtools-extension'` then `createStore(reducer, composeWithDevTools(applyMiddleware(...)))`.
+Vanilla Redux: `import { composeWithDevTools } from '@ohah/chrome-remote-devtools-inspector-react-native/redux-devtools-extension'` 후 `createStore(reducer, composeWithDevTools(applyMiddleware(...)))`.
 
 ### 3. Zustand
 
@@ -77,12 +77,12 @@ const useStore = create(
 );
 ```
 
-## Requirements
+## 요구사항
 
 - React Native >= 0.76.0
 - iOS >= 15.1
-- Android (placeholder)
+- Android (플레이스홀더)
 
-## License
+## 라이선스
 
 MIT
