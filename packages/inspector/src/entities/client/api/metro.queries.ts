@@ -19,6 +19,7 @@ export const metroQueries = {
       enabled: !!metroUrl?.trim(),
       staleTime: 3000, // Refetch every 3s considered stale / 3초마다 stale로 간주
       refetchInterval: 5000, // Poll every 5s / 5초마다 폴링
+      // Keep previous list visible while refetching to avoid flicker; list updates every 5s. / 리패치 시 깜빡임 방지; 목록은 5초마다 갱신
       placeholderData: (previousData) => previousData,
     }),
 };

@@ -15,6 +15,7 @@ use std::sync::Arc;
 use tokio::fs;
 use tokio::sync::{mpsc, RwLock};
 use tokio_stream::wrappers::UnboundedReceiverStream;
+use url::Url;
 
 /// Create HTTP router / HTTP 라우터 생성
 pub fn create_router(
@@ -387,18 +388,38 @@ async fn serve_client_script(
         .into_response())
 }
 
+/// Allow only loopback hosts for /metro-resource to mitigate SSRF / SSRF 완화: localhost만 허용
+fn metro_resource_url_allowed(url_str: &str) -> bool {
+    let parsed = match Url::parse(url_str) {
+        Ok(u) => u,
+        Err(_) => return false,
+    };
+    if parsed.scheme() != "http" && parsed.scheme() != "https" {
+        return false;
+    }
+    match parsed.host() {
+        Some(url::Host::Domain(d)) => d == "localhost",
+        Some(url::Host::Ipv4(addr)) => addr.is_loopback(),
+        Some(url::Host::Ipv6(addr)) => addr.is_loopback(),
+        None => false,
+    }
+}
+
 /// Proxy HTTP resource from Metro bundler / Metro 번들러에서 HTTP 리소스 프록시
 /// Used for sourcemaps and other resources that would be blocked by CORS / CORS로 차단될 소스맵 및 기타 리소스에 사용
 /// Sends CORS headers so DevTools iframe (different origin, e.g. Vite or Tauri) can fetch. /
 /// DevTools iframe(다른 origin, 예: Vite 또는 Tauri)이 fetch할 수 있도록 CORS 헤더 전송
+/// Only allows loopback hosts (localhost, 127.0.0.1, ::1) to mitigate SSRF. / SSRF 완화를 위해 loopback 호스트만 허용
 async fn handle_metro_resource(
     Query(params): Query<HashMap<String, String>>,
 ) -> Result<Response, StatusCode> {
     let url = params.get("url").ok_or(StatusCode::BAD_REQUEST)?;
 
-    // Only allow http/https URLs / http/https URL만 허용
     if !url.starts_with("http://") && !url.starts_with("https://") {
         return Err(StatusCode::BAD_REQUEST);
+    }
+    if !metro_resource_url_allowed(url) {
+        return Err(StatusCode::FORBIDDEN);
     }
 
     // Fetch resource from Metro / Metro에서 리소스 가져오기
