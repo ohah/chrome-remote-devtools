@@ -29,6 +29,9 @@ Thumbs.db
 .env
 .env.local
 
+# Generated release notes (used for gh release create) / 생성된 릴리즈 노트
+release-notes-*.md
+
 # mise
 .mise/
 
