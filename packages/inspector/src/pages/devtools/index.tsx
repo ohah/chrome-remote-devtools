@@ -24,6 +24,65 @@ function getClientUniqueKey(client: Client): string {
   return client.id;
 }
 
+/** Parse server URL into host and port for code snippet / 코드 스니펫용 host·port 파싱 */
+function parseServerUrl(url: string | null): { host: string; port: number } {
+  if (!url?.trim()) return { host: 'localhost', port: 8080 };
+  try {
+    const u = new URL(url);
+    const port = u.port ? Number.parseInt(u.port, 10) : u.protocol === 'https:' ? 443 : 80;
+    return { host: u.hostname || 'localhost', port: Number.isNaN(port) ? 8080 : port };
+  } catch {
+    return { host: 'localhost', port: 8080 };
+  }
+}
+
+/** Banner when Profilers mode is selected but no app is connected to our server / Profilers 모드인데 우리 서버에 앱이 연결되지 않았을 때 배너 */
+function ProfilersNoClientBanner({
+  serverUrl,
+  showHowTo,
+  onToggleHowTo,
+}: {
+  serverUrl: string | null;
+  showHowTo: boolean;
+  onToggleHowTo: () => void;
+}) {
+  const { host, port } = parseServerUrl(serverUrl);
+  return (
+    <div className="shrink-0 px-3 py-2 bg-amber-900/80 text-amber-200 text-xs border-b border-amber-700">
+      <p className="mb-1">
+        Connect your React Native app to our server to use Redux / AsyncStorage
+        profilers. When connected, this tab will use the matching client.
+      </p>
+      <button
+        type="button"
+        onClick={onToggleHowTo}
+        className="text-amber-300 underline hover:text-amber-100 focus:outline-none"
+      >
+        {showHowTo ? 'Hide' : 'How to connect'}
+      </button>
+      {showHowTo && (
+        <div className="mt-2 space-y-1 font-mono text-[11px] bg-amber-950/60 p-2 rounded overflow-x-auto">
+          <p className="text-amber-300/90">
+            1) Metro: add withChromeRemoteDevToolsRedux to metro.config.js
+          </p>
+          <p className="text-amber-300/90">
+            2) Wrap your app with ChromeRemoteDevToolsInspectorProvider and set:
+          </p>
+          <pre className="whitespace-pre text-amber-200">
+{`  serverHost="${host}"
+  serverPort={${port}}
+  deviceId={getUniqueId()}  // e.g. react-native-device-info`}
+          </pre>
+          <p className="text-amber-300/90">
+            3) Reload the app; the client will appear in the sidebar and this tab
+            will use it for Profilers.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Export component for route / 라우트용 컴포넌트 export
 export { DevToolsPage as component };
 
@@ -34,10 +93,12 @@ function DevToolsPage() {
   const queryClient = useQueryClient();
   const { serverUrl, metroUrl } = useServerUrl();
   const [showTabs, setShowTabs] = useState(getTabsVisibility);
-  /** Metro tab view mode: Metro debugger iframe vs our Inspector (direct WS) / Metro 탭 뷰 모드 */
+  /** Metro tab view mode: Metro debugger, our Inspector, or our Inspector with profilers (Redux/AsyncStorage) / Metro 탭 뷰 모드 */
   const [metroViewMode, setMetroViewMode] = useState<
-    Record<string, 'metro-debugger' | 'our-inspector'>
+    Record<string, 'metro-debugger' | 'our-inspector' | 'our-inspector-profilers'>
   >({});
+  /** Expand "How to connect" in Profilers-no-client banner / Profilers 배너에서 연결 방법 펼침 */
+  const [showProfilersHowToConnect, setShowProfilersHowToConnect] = useState(false);
 
   // Get all clients for Activity pattern / Activity 패턴을 위한 모든 클라이언트 가져오기
   const { data: clients = [] } = useQuery({
@@ -275,7 +336,32 @@ function DevToolsPage() {
     metroFrontendUrl?: string;
     /** When set, use for our Inspector direct connection (Metro CDP WebSocket) / 우리 인스펙터 직접 연결용 */
     metroWebSocketDebuggerUrl?: string;
+    /** When set (Metro tab + our-inspector-profilers), use this client so Redux/AsyncStorage work / Metro 탭 + 프로파일러 모드일 때 사용할 클라이언트 */
+    matchedClientForProfilers?: Client;
   };
+
+  // Find server client that matches a Metro target (by deviceName or logicalDeviceId) for profilers mode / 프로파일러 모드용 Metro 타깃과 매칭되는 서버 클라이언트
+  const metroKeyToMatchedClient = useMemo((): Map<string, Client> => {
+    const map = new Map<string, Client>();
+    for (const target of metroTargets) {
+      const key = `${METRO_TAB_ID_PREFIX}${target.id}`;
+      const client = filteredClients.find((c) => {
+        if (c.type !== 'react-native' && c.type !== 'reactotron') return false;
+        const cDeviceId = c.deviceId ?? '';
+        const cDeviceName = c.deviceName ?? '';
+        const mDeviceName = target.deviceName ?? '';
+        const mLogicalId = target.reactNative?.logicalDeviceId ?? '';
+        return (
+          (mLogicalId && cDeviceId === mLogicalId) ||
+          (mDeviceName && (cDeviceName === mDeviceName || cDeviceId === mDeviceName)) ||
+          cDeviceName === mDeviceName
+        );
+      });
+      if (client) map.set(key, client);
+    }
+    return map;
+  }, [metroTargets, filteredClients]);
+
   const clientsForIframes = useMemo((): FrameItem[] => {
     return stableKeys.map((key) => {
       const metroTarget = key.startsWith(METRO_TAB_ID_PREFIX)
@@ -290,6 +376,7 @@ function DevToolsPage() {
           title: metroTarget.title,
           metroFrontendUrl: metroTarget.devtoolsFrontendUrl,
           metroWebSocketDebuggerUrl: metroTarget.webSocketDebuggerUrl,
+          matchedClientForProfilers: metroKeyToMatchedClient.get(key),
         };
       }
       const client = filteredClients.find((c) => getClientUniqueKey(c) === key);
@@ -300,7 +387,7 @@ function DevToolsPage() {
       const title = client && 'title' in client ? client.title : undefined;
       return { key, id, type, deviceName, url, title };
     });
-  }, [stableKeys, filteredClients, metroTargets, clientKeyToIdMap]);
+  }, [stableKeys, filteredClients, metroTargets, clientKeyToIdMap, metroKeyToMatchedClient]);
 
   // Handle tab change / 탭 변경 처리
   const handleTabChange = (tabId: string) => {
@@ -330,7 +417,7 @@ function DevToolsPage() {
         </>
       )}
 
-      {/* Metro tab view mode chooser (RN Debugger vs Our Inspector) / Metro 탭 뷰 모드 선택 */}
+      {/* Metro tab view mode chooser: Metro Debugger | Our Inspector | Our Inspector (Profilers) / Metro 탭 뷰 모드 선택 */}
       {clientId?.startsWith(METRO_TAB_ID_PREFIX) && (
         <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 border-b border-gray-700 shrink-0">
           <span className="text-xs text-gray-400">View:</span>
@@ -340,7 +427,7 @@ function DevToolsPage() {
               setMetroViewMode((prev) => ({ ...prev, [clientId]: 'metro-debugger' }))
             }
             className={`px-2.5 py-1 text-xs rounded ${
-              metroViewMode[clientId] !== 'our-inspector'
+              (metroViewMode[clientId] ?? 'metro-debugger') === 'metro-debugger'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
@@ -360,6 +447,23 @@ function DevToolsPage() {
           >
             Our Inspector
           </button>
+          <button
+            type="button"
+            onClick={() =>
+              setMetroViewMode((prev) => ({
+                ...prev,
+                [clientId]: 'our-inspector-profilers',
+              }))
+            }
+            className={`px-2.5 py-1 text-xs rounded ${
+              metroViewMode[clientId] === 'our-inspector-profilers'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+            title="Our Inspector with Redux / AsyncStorage profilers (requires app connected to our server)"
+          >
+            Our Inspector (Profilers)
+          </button>
         </div>
       )}
 
@@ -367,22 +471,39 @@ function DevToolsPage() {
       <div className="flex-1 relative">
         {clientsForIframes.map((item) => {
           const iframeRef = getOrCreateIframeRef(item.key);
+          const mode = metroViewMode[item.key] ?? 'metro-debugger';
           const useOurInspector =
             item.metroWebSocketDebuggerUrl &&
-            metroViewMode[item.key] === 'our-inspector';
-          const iframeSrc = item.metroFrontendUrl
-            ? useOurInspector
-              ? buildDevToolsUrlMetroProxy({
-                  metroWebSocketUrl: item.metroWebSocketDebuggerUrl!,
-                  serverUrl: serverUrl ?? 'http://localhost:8080',
-                  instanceId: item.id,
-                  clientType: 'react-native',
-                })
-              : item.metroFrontendUrl
-            : buildDevToolsUrl({
-                clientId: item.id,
-                clientType: item.type,
+            (mode === 'our-inspector' || mode === 'our-inspector-profilers');
+          const useProfilersWithClient =
+            mode === 'our-inspector-profilers' && item.matchedClientForProfilers;
+          const useProfilersNoClient =
+            mode === 'our-inspector-profilers' && !item.matchedClientForProfilers && item.metroWebSocketDebuggerUrl;
+
+          let iframeSrc: string;
+          if (item.metroFrontendUrl) {
+            if (useProfilersWithClient && item.matchedClientForProfilers) {
+              iframeSrc = buildDevToolsUrl({
+                clientId: item.matchedClientForProfilers.id,
+                serverUrl: serverUrl ?? undefined,
+                clientType: 'react-native',
               });
+            } else if (useOurInspector) {
+              iframeSrc = buildDevToolsUrlMetroProxy({
+                metroWebSocketUrl: item.metroWebSocketDebuggerUrl!,
+                serverUrl: serverUrl ?? 'http://localhost:8080',
+                instanceId: item.id,
+                clientType: 'react-native',
+              });
+            } else {
+              iframeSrc = item.metroFrontendUrl;
+            }
+          } else {
+            iframeSrc = buildDevToolsUrl({
+              clientId: item.id,
+              clientType: item.type,
+            });
+          }
           const isActive = item.id === clientId;
           const title =
             item.deviceName != null
@@ -393,7 +514,17 @@ function DevToolsPage() {
 
           return (
             <Activity key={item.key} mode={isActive ? 'visible' : 'hidden'}>
-              <div className="absolute inset-0 w-full h-full">
+              <div className="absolute inset-0 w-full h-full flex flex-col">
+                {useProfilersNoClient && isActive && (
+                  <ProfilersNoClientBanner
+                    serverUrl={serverUrl}
+                    showHowTo={showProfilersHowToConnect}
+                    onToggleHowTo={() =>
+                      setShowProfilersHowToConnect((prev) => !prev)
+                    }
+                  />
+                )}
+                <div className="flex-1 min-h-0">
                 <iframe
                   ref={iframeRef}
                   src={iframeSrc}
@@ -402,6 +533,7 @@ function DevToolsPage() {
                   sandbox={IFRAME_SANDBOX_DEVTOOLS}
                   allow={IFRAME_ALLOW_ALL_PERMISSIONS}
                 />
+                </div>
               </div>
             </Activity>
           );
