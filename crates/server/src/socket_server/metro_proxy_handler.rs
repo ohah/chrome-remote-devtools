@@ -156,20 +156,12 @@ pub async fn handle_metro_proxy_websocket(
                         &metro_origin_clone,
                         &server_origin_clone,
                     );
-                    if devtools_sink
-                        .send(Message::Text(rewritten))
-                        .await
-                        .is_err()
-                    {
+                    if devtools_sink.send(Message::Text(rewritten)).await.is_err() {
                         break;
                     }
                 }
                 Ok(TungsteniteMessage::Binary(data)) => {
-                    if devtools_sink
-                        .send(Message::Binary(data))
-                        .await
-                        .is_err()
-                    {
+                    if devtools_sink.send(Message::Binary(data)).await.is_err() {
                         break;
                     }
                 }
