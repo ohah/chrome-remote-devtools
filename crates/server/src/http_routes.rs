@@ -389,6 +389,8 @@ async fn serve_client_script(
 
 /// Proxy HTTP resource from Metro bundler / Metro 번들러에서 HTTP 리소스 프록시
 /// Used for sourcemaps and other resources that would be blocked by CORS / CORS로 차단될 소스맵 및 기타 리소스에 사용
+/// Sends CORS headers so DevTools iframe (different origin, e.g. Vite or Tauri) can fetch. /
+/// DevTools iframe(다른 origin, 예: Vite 또는 Tauri)이 fetch할 수 있도록 CORS 헤더 전송
 async fn handle_metro_resource(
     Query(params): Query<HashMap<String, String>>,
 ) -> Result<Response, StatusCode> {
@@ -420,7 +422,15 @@ async fn handle_metro_resource(
         .await
         .map_err(|_| StatusCode::BAD_GATEWAY)?;
 
-    Ok((status, [(header::CONTENT_TYPE, content_type)], body).into_response())
+    // CORS: allow DevTools iframe (Inspector page origin) to fetch; without this, sourcemap load fails. /
+    // CORS: DevTools iframe(Inspector 페이지 origin)이 fetch할 수 있도록 허용; 없으면 소스맵 로드 실패
+    let mut res = (status, [(header::CONTENT_TYPE, content_type)], body).into_response();
+    let headers = res.headers_mut();
+    headers.insert(
+        header::ACCESS_CONTROL_ALLOW_ORIGIN,
+        header::HeaderValue::from_static("*"),
+    );
+    Ok(res)
 }
 
 /// Handle inspector device HTTP GET request / inspector device HTTP GET 요청 처리
