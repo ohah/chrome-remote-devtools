@@ -1,25 +1,32 @@
+const path = require('path');
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const {
   withChromeRemoteDevToolsRedux,
 } = require('@ohah/chrome-remote-devtools-inspector-react-native/metro');
 
+// Monorepo workspace root (two levels up from examples/react-native)
+const workspaceRoot = path.resolve(__dirname, '../..');
+
 /**
  * Metro configuration
  * https://reactnative.dev/docs/metro
- *
- * NOTE: This example uses getDefaultConfig from @react-native/metro-config only.
- * If your project previously used getMetroConfig from @craby/devkit (or similar),
- * that helper may have applied extra defaults (resolvers, watch folders, etc.).
- * Add equivalent settings here or wrap getDefaultConfig in your own helper if needed.
  *
  * @type {import('@react-native/metro-config').MetroConfig}
  */
 const config = getDefaultConfig(__dirname);
 
-// Merge with default config / 기본 config와 병합
-const mergedConfig = mergeConfig(getDefaultConfig(__dirname), config);
+const mergedConfig = mergeConfig(getDefaultConfig(__dirname), {
+  ...config,
+  // Watch the entire monorepo so Metro can resolve workspace packages and hoisted deps
+  watchFolders: [workspaceRoot],
+  resolver: {
+    ...config.resolver,
+    // Allow Metro to resolve modules from both local and root node_modules
+    nodeModulesPaths: [
+      path.resolve(__dirname, 'node_modules'),
+      path.resolve(workspaceRoot, 'node_modules'),
+    ],
+  },
+});
 
-// Apply Chrome Remote DevTools Redux DevTools Extension polyfill / Chrome Remote DevTools Redux DevTools Extension polyfill 적용
-// This injects __REDUX_DEVTOOLS_EXTENSION__ before index.js runs / 이것은 index.js가 실행되기 전에 __REDUX_DEVTOOLS_EXTENSION__을 주입합니다
-// Also adds resolver.blockList for target/ (Rust cargo output) to avoid Metro ENOENT watch errors / target/(Rust cargo 출력)용 resolver.blockList 추가로 Metro ENOENT watch 오류 방지
 module.exports = withChromeRemoteDevToolsRedux(mergedConfig);
