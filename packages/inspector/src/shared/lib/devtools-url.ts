@@ -59,6 +59,103 @@ export function buildDevToolsUrl(options: BuildDevToolsUrlOptions): string {
 }
 
 /**
+ * Options for building DevTools URL with direct WebSocket (e.g. Metro) /
+ * 직접 WebSocket URL로 DevTools URL 구성 옵션 (예: Metro)
+ */
+export interface BuildDevToolsUrlDirectOptions {
+  /** Full WebSocket URL (e.g. Metro webSocketDebuggerUrl) / 전체 WebSocket URL (예: Metro webSocketDebuggerUrl) */
+  webSocketUrl: string;
+  /** Stable id for iframe instance (e.g. metro-{targetId}) / iframe instance용 안정 id (예: metro-{targetId}) */
+  instanceId: string;
+  /** Client type for DevTools UI / DevTools UI용 클라이언트 타입 */
+  clientType?: 'web' | 'react-native' | 'reactotron';
+}
+
+/**
+ * Strip protocol from WebSocket URL for DevTools frontend /
+ * DevTools 프론트엔드는 ws/wss 파라미터에 프로토콜 없이 host+path만 기대하고 자체적으로 ws:// 또는 wss:// 를 붙임
+ * @see devtools-frontend Connections.ts: ws = wsParam ? `ws://${wsParam}` : `wss://${wssParam}`
+ */
+function webSocketUrlWithoutProtocol(fullUrl: string): { param: 'ws' | 'wss'; value: string } {
+  const u = fullUrl.trim();
+  if (u.startsWith('wss://')) {
+    return { param: 'wss', value: u.slice('wss://'.length) };
+  }
+  if (u.startsWith('ws://')) {
+    return { param: 'ws', value: u.slice('ws://'.length) };
+  }
+  return { param: 'ws', value: u };
+}
+
+/**
+ * Build DevTools iframe URL with direct WebSocket URL (no server relay) /
+ * 직접 WebSocket URL로 DevTools iframe URL 구성 (서버 경유 없음)
+ * Used for Metro targets: connect our Inspector directly to Metro's CDP WebSocket. /
+ * Metro 타깃용: 우리 인스펙터가 Metro CDP WebSocket에 직접 연결
+ */
+export function buildDevToolsUrlDirect(options: BuildDevToolsUrlDirectOptions): string {
+  const { webSocketUrl, instanceId, clientType } = options;
+  const devtoolsUrl = new URL(DEVTOOLS_FRONTEND_PATH, window.location.origin);
+  const params = devtoolsUrl.searchParams;
+
+  const { param, value } = webSocketUrlWithoutProtocol(webSocketUrl);
+  params.append(param, value);
+  params.append('instance', `stable-${instanceId}`);
+  params.append('clientId', instanceId);
+  if (clientType) {
+    params.append('clientType', clientType);
+  }
+  Object.entries(DEVTOOLS_CONFIG).forEach(([key, value]) => {
+    params.append(key, value);
+  });
+  return devtoolsUrl.toString();
+}
+
+/**
+ * Options for building DevTools URL with Metro WebSocket proxy /
+ * Metro WebSocket 프록시로 DevTools URL 구성 옵션
+ */
+export interface BuildDevToolsUrlMetroProxyOptions {
+  /** Metro WebSocket URL (e.g. ws://localhost:8081/page/abc) / Metro WebSocket URL */
+  metroWebSocketUrl: string;
+  /** Our server URL (e.g. http://localhost:8080) / 우리 서버 URL */
+  serverUrl: string;
+  /** Stable id for iframe instance (e.g. metro-{targetId}) / iframe instance용 안정 id */
+  instanceId: string;
+  /** Client type for DevTools UI / DevTools UI용 클라이언트 타입 */
+  clientType?: 'web' | 'react-native' | 'reactotron';
+}
+
+/**
+ * Build DevTools iframe URL with Metro WebSocket proxy through our server /
+ * 우리 서버를 통한 Metro WebSocket 프록시로 DevTools iframe URL 구성
+ *
+ * Instead of connecting directly to Metro's WS (which causes CORS issues for sourcemaps),
+ * routes through our server's metro/proxy endpoint which rewrites sourcemap URLs. /
+ * Metro WS에 직접 연결하는 대신 (소스맵 CORS 문제), 서버의 metro/proxy 엔드포인트를 통해 소스맵 URL을 재작성
+ */
+export function buildDevToolsUrlMetroProxy(options: BuildDevToolsUrlMetroProxyOptions): string {
+  const { metroWebSocketUrl, serverUrl, instanceId, clientType } = options;
+  const devtoolsUrl = new URL(DEVTOOLS_FRONTEND_PATH, window.location.origin);
+  const params = devtoolsUrl.searchParams;
+
+  // Build proxy WebSocket URL through our server / 우리 서버를 통한 프록시 WebSocket URL 구성
+  const serverHost = serverUrl.replace(/^https?:\/\//, '');
+  const proxyWsUrl = `${serverHost}/remote/debug/metro/proxy?target=${encodeURIComponent(metroWebSocketUrl)}&serverOrigin=${encodeURIComponent(serverUrl)}`;
+
+  params.append('ws', proxyWsUrl);
+  params.append('instance', `stable-${instanceId}`);
+  params.append('clientId', instanceId);
+  if (clientType) {
+    params.append('clientType', clientType);
+  }
+  Object.entries(DEVTOOLS_CONFIG).forEach(([key, value]) => {
+    params.append(key, value);
+  });
+  return devtoolsUrl.toString();
+}
+
+/**
  * Build DevTools replay mode URL / DevTools replay 모드 URL 구성
  * @returns DevTools replay URL / DevTools replay URL
  */

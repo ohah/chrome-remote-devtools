@@ -29,6 +29,7 @@ pub fn create_router(
         .route("/json/client/:id", get(get_client))
         .route("/inspector/device", get(handle_inspector_device_http))
         .route("/open-debugger", post(handle_open_debugger))
+        .route("/metro-resource", get(handle_metro_resource))
         .route("/remote/debug/*path", get(handle_websocket_upgrade))
         .route("/", get(handle_root_websocket_upgrade));
 
@@ -384,6 +385,42 @@ async fn serve_client_script(
         "console.error('Client script not found. Please build: cd packages/client && bun run build');",
     )
         .into_response())
+}
+
+/// Proxy HTTP resource from Metro bundler / Metro 번들러에서 HTTP 리소스 프록시
+/// Used for sourcemaps and other resources that would be blocked by CORS / CORS로 차단될 소스맵 및 기타 리소스에 사용
+async fn handle_metro_resource(
+    Query(params): Query<HashMap<String, String>>,
+) -> Result<Response, StatusCode> {
+    let url = params.get("url").ok_or(StatusCode::BAD_REQUEST)?;
+
+    // Only allow http/https URLs / http/https URL만 허용
+    if !url.starts_with("http://") && !url.starts_with("https://") {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
+    // Fetch resource from Metro / Metro에서 리소스 가져오기
+    let response = reqwest::get(url)
+        .await
+        .map_err(|_| StatusCode::BAD_GATEWAY)?;
+
+    let status = StatusCode::from_u16(response.status().as_u16())
+        .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
+
+    // Forward Content-Type header / Content-Type 헤더 전달
+    let content_type = response
+        .headers()
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("application/octet-stream")
+        .to_string();
+
+    let body = response
+        .bytes()
+        .await
+        .map_err(|_| StatusCode::BAD_GATEWAY)?;
+
+    Ok((status, [(header::CONTENT_TYPE, content_type)], body).into_response())
 }
 
 /// Handle inspector device HTTP GET request / inspector device HTTP GET 요청 처리

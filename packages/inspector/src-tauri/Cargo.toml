@@ -22,6 +22,8 @@ tauri-plugin-opener.workspace = true
 tauri-plugin-clipboard-manager.workspace = true
 # MCP Bridge for AI assistant (debug only) / AI 어시스턴트용 MCP Bridge (디버그 전용)
 tauri-plugin-mcp-bridge = "0.8"
+# HTTP client for Metro /json/list (avoids CORS in Tauri) / Metro /json/list 조회용 (Tauri에서 CORS 회피)
+tauri-plugin-http = "2"
 
 # 워크스페이스 공통 의존성
 serde.workspace = true

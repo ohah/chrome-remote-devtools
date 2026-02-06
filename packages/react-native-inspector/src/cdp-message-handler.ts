@@ -14,18 +14,36 @@ type CDPMessageHandler = (message: {
   id?: number;
 }) => void | Promise<void>;
 
-/** Minimal frame tree for React Native (no real page); DevTools uses this to fire CachedResourcesLoaded and init Console / React Native용 최소 프레임 트리, DevTools가 CachedResourcesLoaded 발생·Console 초기화에 사용 */
-const PAGE_GET_RESOURCE_TREE_RESULT = {
-  frameTree: {
-    frame: {
-      id: '1',
+/** Dynamic page resources populated by source map fetch / 소스맵 fetch로 채워지는 동적 페이지 리소스 */
+let pageResources: Array<{ url: string; type: string; mimeType: string }> = [];
+
+/**
+ * Update page resources for Page.getResourceTree (called when source map is loaded) / Page.getResourceTree용 리소스 업데이트 (소스맵 로드 시 호출)
+ */
+export function updatePageResources(sources: string[]): void {
+  pageResources = sources
+    .filter((s) => s && s !== '__prelude__')
+    .map((url) => ({
+      url,
+      type: 'Script' as const,
       mimeType: 'application/javascript',
-      securityOrigin: 'react-native://',
-      url: 'react-native://',
+    }));
+}
+
+/** Build minimal frame tree for React Native; includes source files when source map is loaded / React Native용 프레임 트리; 소스맵 로드 시 소스 파일 포함 */
+function getResourceTreeResult() {
+  return {
+    frameTree: {
+      frame: {
+        id: '1',
+        mimeType: 'application/javascript',
+        securityOrigin: 'react-native://',
+        url: 'react-native://',
+      },
+      resources: pageResources,
     },
-    resources: [] as unknown[],
-  },
-};
+  };
+}
 
 /**
  * Cached sourcemap from Metro: sources + sourcesContent so Sources tab can show original files / Metro에서 가져온 소스맵 캐시: Sources 탭에서 원본 파일 표시용
@@ -261,7 +279,7 @@ export function handleCDPMessage(message: {
   // Page.getResourceTree: DevTools sends this once when ResourceTreeModel is created; responding lets CachedResourcesLoaded fire so ConsoleModel inits without 2s fallback / ResourceTreeModel 생성 시 DevTools가 한 번 보냄, 응답 시 CachedResourcesLoaded 발생해 ConsoleModel이 2초 폴백 없이 초기화됨
   if (message.method === 'Page.getResourceTree' && typeof message.id === 'number') {
     if (getServerInfo()) {
-      sendCDPResponse(message.id, PAGE_GET_RESOURCE_TREE_RESULT);
+      sendCDPResponse(message.id, getResourceTreeResult());
     }
     return;
   }

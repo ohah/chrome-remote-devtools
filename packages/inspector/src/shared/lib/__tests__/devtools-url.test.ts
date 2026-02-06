@@ -3,7 +3,7 @@
  * Sets window origin so new URL(path, base) works in happy-dom / happy-dom에서 new URL(base) 동작하도록 origin 설정
  */
 import { describe, test, expect, beforeEach } from 'bun:test';
-import { buildDevToolsUrl, buildDevToolsReplayUrl } from '../devtools-url';
+import { buildDevToolsUrl, buildDevToolsUrlDirect, buildDevToolsReplayUrl } from '../devtools-url';
 
 describe('devtools-url', () => {
   beforeEach(() => {
@@ -35,6 +35,21 @@ describe('devtools-url', () => {
       serverUrl: 'https://host:8443',
       clientType: 'react-native',
     });
+    expect(url).toContain('clientType=react-native');
+  });
+
+  test('buildDevToolsUrlDirect builds URL with direct WebSocket (no protocol in param) / 직접 WS URL로 DevTools URL 생성 (param에는 프로토콜 제외)', () => {
+    const url = buildDevToolsUrlDirect({
+      webSocketUrl: 'ws://localhost:8081/page/abc',
+      instanceId: 'metro-123',
+      clientType: 'react-native',
+    });
+    expect(url).toContain('/devtools-frontend/');
+    // Frontend expects ws param without protocol; it prepends ws:// itself
+    expect(url).toContain('ws=');
+    expect(url).toContain('localhost');
+    expect(url).toContain('8081');
+    expect(url).toContain('instance=stable-metro-123');
     expect(url).toContain('clientType=react-native');
   });
 

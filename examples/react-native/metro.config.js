@@ -1,4 +1,3 @@
-const { getMetroConfig } = require('@craby/devkit');
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const {
   withChromeRemoteDevToolsRedux,
@@ -10,7 +9,7 @@ const {
  *
  * @type {import('@react-native/metro-config').MetroConfig}
  */
-const config = getMetroConfig(__dirname);
+const config = getDefaultConfig(__dirname);
 
 // Merge with default config / 기본 config와 병합
 const mergedConfig = mergeConfig(getDefaultConfig(__dirname), config);

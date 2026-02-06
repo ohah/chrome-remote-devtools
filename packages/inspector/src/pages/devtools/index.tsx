@@ -3,12 +3,16 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Activity } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { buildDevToolsUrl } from '@/shared/lib/devtools-url';
+import { buildDevToolsUrl, buildDevToolsUrlMetroProxy } from '@/shared/lib/devtools-url';
 import { IFRAME_ALLOW_ALL_PERMISSIONS, IFRAME_SANDBOX_DEVTOOLS } from '@/shared/lib/constants';
-import { clientQueries } from '@/entities/client';
+import {
+  clientQueries,
+  metroQueries,
+  METRO_TAB_ID_PREFIX,
+} from '@/entities/client';
 import { useServerUrl } from '@/shared/lib';
 import { Tabs, type Tab } from '@/components/tabs';
-import { Smartphone, Globe } from 'lucide-react';
+import { Smartphone, Globe, Wifi } from 'lucide-react';
 import { getTabsVisibility } from '@/routes/__root';
 import type { Client } from '@/entities/client';
 
@@ -28,15 +32,20 @@ function DevToolsPage() {
   const { clientId } = useParams({ from: '/devtools/$clientId' });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { serverUrl } = useServerUrl();
+  const { serverUrl, metroUrl } = useServerUrl();
   const [showTabs, setShowTabs] = useState(getTabsVisibility);
+  /** Metro tab view mode: Metro debugger iframe vs our Inspector (direct WS) / Metro 탭 뷰 모드 */
+  const [metroViewMode, setMetroViewMode] = useState<
+    Record<string, 'metro-debugger' | 'our-inspector'>
+  >({});
 
   // Get all clients for Activity pattern / Activity 패턴을 위한 모든 클라이언트 가져오기
-  const {
-    data: clients = [],
-  } = useQuery({
+  const { data: clients = [] } = useQuery({
     ...clientQueries.list(),
     enabled: !!serverUrl,
+  });
+  const { data: metroTargets = [] } = useQuery({
+    ...metroQueries.listOptions(metroUrl),
   });
 
   // Track server URL to detect changes / 서버 URL 변경 감지를 위한 추적
@@ -66,8 +75,9 @@ function DevToolsPage() {
       setStableKeys([]);
       setClientKeyToIdMap(new Map());
       setClientIdToKeyMap(new Map());
-      // Remove client queries completely / 클라이언트 쿼리 완전히 제거
+      // Remove client and metro queries completely / 클라이언트·Metro 쿼리 완전히 제거
       queryClient.removeQueries({ queryKey: clientQueries.all() });
+      queryClient.removeQueries({ queryKey: metroQueries.all() });
       // Update previous server URL to current / 이전 서버 URL을 현재로 업데이트
       setPreviousServerUrl(serverUrl);
       // Navigate to home if currently on a devtools page / 현재 DevTools 페이지에 있으면 홈으로 이동
@@ -163,12 +173,16 @@ function DevToolsPage() {
   // Show all clients / 모든 클라이언트 표시
   const filteredClients = clients;
 
-  // Update key->id and id->key mapping; append new keys only / key↔id 매핑, 새 key만 추가
+  // Update key->id and id->key mapping; append new keys only. Include Metro target keys. / key↔id 매핑, 새 key만 추가, Metro 타깃 key 포함
   useEffect(() => {
     const newKeyToIdMap = new Map<string, string>();
     filteredClients.forEach((client) => {
       const key = getClientUniqueKey(client);
       newKeyToIdMap.set(key, client.id);
+    });
+    metroTargets.forEach((target) => {
+      const key = `${METRO_TAB_ID_PREFIX}${target.id}`;
+      newKeyToIdMap.set(key, key);
     });
     setClientKeyToIdMap((prev) => {
       const next = new Map(prev);
@@ -187,7 +201,7 @@ function DevToolsPage() {
       });
       return next;
     });
-  }, [filteredClients]);
+  }, [filteredClients, metroTargets]);
 
   // R refresh: same deviceId, new id → redirect URL to new id so same tab stays selected (no "new" tab) / R 새로고침: deviceId 같고 id만 바뀜 → URL만 새 id로 이동해 같은 탭 유지
   useEffect(() => {
@@ -212,10 +226,21 @@ function DevToolsPage() {
     return newRef;
   };
 
-  // One tab per device key; id/name update when reconnected (no new tab) / 기기(key)당 탭 하나, 재연결 시 id·이름만 갱신
+  // One tab per device key; include Metro targets / 기기(key)당 탭 하나, Metro 타깃 포함
   const tabs: Tab[] = useMemo(() => {
     if (previousServerUrl !== null && previousServerUrl !== serverUrl) return [];
     return stableKeys.map((key) => {
+      const metroTarget = key.startsWith(METRO_TAB_ID_PREFIX)
+        ? metroTargets.find((t) => `${METRO_TAB_ID_PREFIX}${t.id}` === key)
+        : null;
+      if (metroTarget) {
+        return {
+          id: `${METRO_TAB_ID_PREFIX}${metroTarget.id}`,
+          label: metroTarget.deviceName || metroTarget.title || metroTarget.id.slice(0, 8),
+          icon: <Wifi className="w-4 h-4" />,
+          disconnected: false,
+        };
+      }
       const client = filteredClients.find((c) => getClientUniqueKey(c) === key);
       const id = client?.id ?? clientKeyToIdMap.get(key) ?? key;
       const isRN = client?.type === 'react-native' || client?.type === 'reactotron';
@@ -229,7 +254,6 @@ function DevToolsPage() {
           disconnected: false,
         };
       }
-      // Use key as label (deviceId for RN) even when offline; no "(offline)" text, style only / 오프라인에도 key(deviceId) 표시, "(offline)" 문구 없이 스타일만
       return {
         id,
         label: key,
@@ -237,9 +261,9 @@ function DevToolsPage() {
         disconnected: true,
       };
     });
-  }, [stableKeys, filteredClients, clientKeyToIdMap, previousServerUrl, serverUrl]);
+  }, [stableKeys, filteredClients, metroTargets, clientKeyToIdMap, previousServerUrl, serverUrl]);
 
-  // One iframe per key; current id for that key (reconnect = same slot, id/url update) / key당 iframe 하나, 해당 key의 현재 id
+  // One iframe per key; server clients use our DevTools URL, Metro targets use Metro debugger or our Inspector / key당 iframe 하나, 서버는 우리 URL, Metro는 Metro 디버거 또는 우리 인스펙터
   type FrameItem = {
     key: string;
     id: string;
@@ -247,9 +271,27 @@ function DevToolsPage() {
     deviceName?: string;
     url?: string;
     title?: string;
+    /** When set, use for Metro debugger iframe (Metro UI) / Metro 디버거 iframe용 */
+    metroFrontendUrl?: string;
+    /** When set, use for our Inspector direct connection (Metro CDP WebSocket) / 우리 인스펙터 직접 연결용 */
+    metroWebSocketDebuggerUrl?: string;
   };
   const clientsForIframes = useMemo((): FrameItem[] => {
     return stableKeys.map((key) => {
+      const metroTarget = key.startsWith(METRO_TAB_ID_PREFIX)
+        ? metroTargets.find((t) => `${METRO_TAB_ID_PREFIX}${t.id}` === key)
+        : null;
+      if (metroTarget) {
+        return {
+          key,
+          id: `${METRO_TAB_ID_PREFIX}${metroTarget.id}`,
+          type: 'react-native',
+          deviceName: metroTarget.deviceName,
+          title: metroTarget.title,
+          metroFrontendUrl: metroTarget.devtoolsFrontendUrl,
+          metroWebSocketDebuggerUrl: metroTarget.webSocketDebuggerUrl,
+        };
+      }
       const client = filteredClients.find((c) => getClientUniqueKey(c) === key);
       const id = client?.id ?? clientKeyToIdMap.get(key) ?? key;
       const type: FrameItem['type'] = client?.type ?? 'react-native';
@@ -258,7 +300,7 @@ function DevToolsPage() {
       const title = client && 'title' in client ? client.title : undefined;
       return { key, id, type, deviceName, url, title };
     });
-  }, [stableKeys, filteredClients, clientKeyToIdMap]);
+  }, [stableKeys, filteredClients, metroTargets, clientKeyToIdMap]);
 
   // Handle tab change / 탭 변경 처리
   const handleTabChange = (tabId: string) => {
@@ -288,14 +330,59 @@ function DevToolsPage() {
         </>
       )}
 
+      {/* Metro tab view mode chooser (RN Debugger vs Our Inspector) / Metro 탭 뷰 모드 선택 */}
+      {clientId?.startsWith(METRO_TAB_ID_PREFIX) && (
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 border-b border-gray-700 shrink-0">
+          <span className="text-xs text-gray-400">View:</span>
+          <button
+            type="button"
+            onClick={() =>
+              setMetroViewMode((prev) => ({ ...prev, [clientId]: 'metro-debugger' }))
+            }
+            className={`px-2.5 py-1 text-xs rounded ${
+              metroViewMode[clientId] !== 'our-inspector'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Metro Debugger
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setMetroViewMode((prev) => ({ ...prev, [clientId]: 'our-inspector' }))
+            }
+            className={`px-2.5 py-1 text-xs rounded ${
+              metroViewMode[clientId] === 'our-inspector'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Our Inspector
+          </button>
+        </div>
+      )}
+
       {/* One iframe per key; same tab slot when reconnected (id/url update) / key당 iframe 하나, 재연결 시 같은 슬롯(id·url만 갱신) */}
       <div className="flex-1 relative">
         {clientsForIframes.map((item) => {
           const iframeRef = getOrCreateIframeRef(item.key);
-          const devtoolsUrl = buildDevToolsUrl({
-            clientId: item.id,
-            clientType: item.type,
-          });
+          const useOurInspector =
+            item.metroWebSocketDebuggerUrl &&
+            metroViewMode[item.key] === 'our-inspector';
+          const iframeSrc = item.metroFrontendUrl
+            ? useOurInspector
+              ? buildDevToolsUrlMetroProxy({
+                  metroWebSocketUrl: item.metroWebSocketDebuggerUrl!,
+                  serverUrl: serverUrl ?? 'http://localhost:8080',
+                  instanceId: item.id,
+                  clientType: 'react-native',
+                })
+              : item.metroFrontendUrl
+            : buildDevToolsUrl({
+                clientId: item.id,
+                clientType: item.type,
+              });
           const isActive = item.id === clientId;
           const title =
             item.deviceName != null
@@ -309,7 +396,7 @@ function DevToolsPage() {
               <div className="absolute inset-0 w-full h-full">
                 <iframe
                   ref={iframeRef}
-                  src={devtoolsUrl}
+                  src={iframeSrc}
                   className="w-full h-full border-none"
                   title={title}
                   sandbox={IFRAME_SANDBOX_DEVTOOLS}

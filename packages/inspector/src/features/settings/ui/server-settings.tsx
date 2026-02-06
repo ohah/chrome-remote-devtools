@@ -1,6 +1,6 @@
 // Server settings component
 import { useState, useEffect } from 'react';
-import { useServerUrl, DEFAULT_SERVER_URL } from '@/shared/lib';
+import { useServerUrl, DEFAULT_SERVER_URL, DEFAULT_METRO_URL } from '@/shared/lib';
 
 interface ServerSettingsProps {
   /** Callback when settings are saved */
@@ -11,15 +11,20 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
   const {
     normalServerUrl,
     reactotronServerUrl,
+    metroUrl,
     isReactotronMode,
     setNormalServerUrl,
     setReactotronServerUrl,
+    setMetroUrl,
     resetNormalServerUrl,
     resetReactotronServerUrl,
+    resetMetroUrl,
   } = useServerUrl();
   // Use mode-specific URL / 모드별 URL 사용
   const currentModeUrl = isReactotronMode ? reactotronServerUrl : normalServerUrl;
+  const currentMetroUrl = metroUrl ?? '';
   const [serverUrl, setServerUrlValue] = useState(currentModeUrl ?? '');
+  const [metroUrlValue, setMetroUrlValue] = useState(currentMetroUrl || DEFAULT_METRO_URL);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -27,6 +32,9 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
   useEffect(() => {
     setServerUrlValue(currentModeUrl ?? '');
   }, [currentModeUrl, isReactotronMode]);
+  useEffect(() => {
+    setMetroUrlValue(currentMetroUrl || DEFAULT_METRO_URL);
+  }, [currentMetroUrl]);
 
   const handleSave = () => {
     setError(null);
@@ -38,6 +46,11 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
         setReactotronServerUrl(serverUrl);
       } else {
         setNormalServerUrl(serverUrl);
+      }
+      if (metroUrlValue.trim()) {
+        setMetroUrl(metroUrlValue.trim());
+      } else {
+        setMetroUrl(DEFAULT_METRO_URL);
       }
       onSave?.();
       // Show success message briefly / 성공 메시지 간단히 표시
@@ -111,6 +124,43 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
           </p>
         )}
         <p className="mt-2 text-xs text-gray-400">Example: {DEFAULT_SERVER_URL}</p>
+      </div>
+
+      {/* Metro URL for /json/list (React Native targets) / React Native 타깃용 Metro URL */}
+      <div>
+        <label htmlFor="metro-url" className="block text-sm font-medium text-gray-300 mb-2">
+          Metro URL (for RN dev menu targets)
+        </label>
+        <div className="flex gap-2">
+          <input
+            id="metro-url"
+            type="text"
+            value={metroUrlValue}
+            onChange={(e) => {
+              setMetroUrlValue(e.target.value);
+              setError(null);
+            }}
+            placeholder={DEFAULT_METRO_URL}
+            className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label="Metro URL"
+          />
+          {metroUrlValue !== DEFAULT_METRO_URL && (
+            <button
+              type="button"
+              onClick={() => {
+                setMetroUrlValue(DEFAULT_METRO_URL);
+                resetMetroUrl();
+                onSave?.();
+              }}
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+        <p className="mt-2 text-xs text-gray-400">
+          Fetches /json/list to show Metro-connected RN apps in tabs. Example: {DEFAULT_METRO_URL}
+        </p>
       </div>
     </div>
   );
