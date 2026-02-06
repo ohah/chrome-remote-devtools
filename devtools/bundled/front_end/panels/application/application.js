@@ -9707,7 +9707,7 @@ var StorageItemsToolbar = class extends Common13.ObjectWrapper.eventMixin(UI16.W
     this.requestUpdate();
   }
   setCanDeleteSelected(enabled) {
-    this.#deleteSelectedButtonDisabled = enabled;
+    this.#deleteSelectedButtonDisabled = !enabled;
     this.requestUpdate();
   }
   setCanFilter(enabled) {
@@ -13610,15 +13610,6 @@ var resourcesPanel_css_default = `/*
 .storage-view .filter-bar {
   border-top: none;
   border-bottom: 1px solid var(--sys-color-divider);
-}
-
-/* MMKV Storage: Type column (select only) / MMKV \uC2A4\uD1A0\uB9AC\uC9C0: \uD0C0\uC785 \uC5F4 */
-.storage-view .mmkv-type-cell {
-  min-width: 80px;
-}
-
-.storage-view .mmkv-type-select {
-  min-width: 80px;
 }
 
 .database-query-group-messages {

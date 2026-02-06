@@ -106,7 +106,7 @@ function sendSnapshot(instanceId: string, entries: ReturnType<MMKVView['getAllEn
       instanceId,
       key: entry.key,
       newValue: valueStr,
-      valueType: entry.type,
+      valueType: String(entry.type),
     });
   });
 }
@@ -124,7 +124,7 @@ function sendSetEntry(instanceId: string, entry: ReturnType<MMKVView['get']>): v
     instanceId,
     key: entry.key,
     newValue: valueStr,
-    valueType: entry.type,
+    valueType: String(entry.type),
   });
 }
 
@@ -142,6 +142,11 @@ function sendDeleteEntry(instanceId: string, key: string): void {
  * Register MMKV DevTools / MMKV DevTools 등록
  * @param storages MMKV instance(s) to monitor (v4 and v3 library instances accepted) / 모니터링할 MMKV 인스턴스(들), v4·v3 라이브러리 인스턴스 허용
  * @param blacklist Optional RegExp to blacklist properties / 속성을 블랙리스트에 추가할 선택적 RegExp
+ *
+ * Note: Each key (e.g. default, cache, legacy, user) should be a distinct MMKV instance. If you pass the same
+ * MMKV instance under multiple keys, add/edit/delete in DevTools will appear in all sidebar lists because they
+ * share the same backing store. / 각 키(default, cache 등)는 서로 다른 MMKV 인스턴스여야 함. 같은 인스턴스를 여러 키로 등록하면
+ * DevTools에서 추가/수정/삭제 시 모든 사이드바 목록에 반영됨(동일 스토리지 공유).
  */
 export function registerMMKVDevTools(storages: MMKVStorageInput, blacklist?: RegExp): void {
   try {
@@ -207,18 +212,33 @@ export function registerMMKVDevTools(storages: MMKVStorageInput, blacklist?: Reg
         }
 
         const entries = view.getAllEntries();
+        // Protocol Item = string[]; ensure every cell is string so number type is not lost over JSON
+        // / 프로토콜 Item = string[]; JSON 직렬화 시 숫자 등이 바뀌지 않도록 모든 셀을 문자열로 보냄
         const cdpEntries: Array<[string, string, string]> = entries.map((entry) => [
-          entry.key,
+          String(entry.key),
           entryValueToString(entry),
-          entry.type,
+          String(entry.type),
         ]);
 
-        // Send CDP response with id / id를 포함한 CDP 응답 전송
-        if (message.id !== undefined && cdpMessageSender && isConnected) {
+        // Send CDP response with id (use number so DevTools callback matches)
+        // / id를 포함한 CDP 응답 전송 (DevTools 콜백 매칭을 위해 숫자 id 사용)
+        const rawId = message.id;
+        const responseId =
+          typeof rawId === 'number' && Number.isFinite(rawId)
+            ? rawId
+            : typeof rawId === 'string'
+              ? Number(rawId)
+              : undefined;
+        if (
+          responseId !== undefined &&
+          !Number.isNaN(responseId) &&
+          cdpMessageSender &&
+          isConnected
+        ) {
           const serverInfo = getServerInfo();
           if (serverInfo) {
             const response = {
-              id: message.id,
+              id: responseId,
               result: {
                 entries: cdpEntries,
               },
@@ -249,7 +269,9 @@ export function registerMMKVDevTools(storages: MMKVStorageInput, blacklist?: Reg
           return;
         }
 
-        const valueType = params.valueType;
+        // Normalize valueType to string (CDP sends string; ensure correct branch)
+        // / valueType을 문자열로 정규화 (CDP는 문자열 전송; 올바른 분기 보장)
+        const valueType = typeof params.valueType === 'string' ? params.valueType : undefined;
 
         if (valueType === 'number') {
           const numValue = Number(params.value);

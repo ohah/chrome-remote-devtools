@@ -142,7 +142,7 @@ export class StorageItemsToolbar extends Common.ObjectWrapper.eventMixin(UI.Widg
         this.requestUpdate();
     }
     setCanDeleteSelected(enabled) {
-        this.#deleteSelectedButtonDisabled = enabled;
+        this.#deleteSelectedButtonDisabled = !enabled;
         this.requestUpdate();
     }
     setCanFilter(enabled) {

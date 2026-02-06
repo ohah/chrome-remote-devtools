@@ -4165,7 +4165,7 @@ UI17.ViewManager.registerViewExtension({
   }
 });
 
-// gen/front_end/panels/storage/storage-meta.js
+// gen/front_end/panels/mmkv/mmkv-meta.js
 import * as i18n61 from "./../../core/i18n/i18n.js";
 import * as Root10 from "./../../core/root/root.js";
 import * as UI18 from "./../../ui/legacy/legacy.js";
@@ -4177,7 +4177,41 @@ var UIStrings31 = {
   /**
    * @description Command for showing the 'MMKV' pane / 'MMKV' 패널 표시 명령
    */
-  showMMKV: "Show MMKV",
+  showMMKV: "Show MMKV"
+};
+var str_31 = i18n61.i18n.registerUIStrings("panels/mmkv/mmkv-meta.ts", UIStrings31);
+var i18nLazyString31 = i18n61.i18n.getLazilyComputedLocalizedString.bind(void 0, str_31);
+var loadedMMKVModule;
+async function loadMMKVModule() {
+  if (!loadedMMKVModule) {
+    loadedMMKVModule = await import("./../../panels/mmkv/mmkv.js");
+  }
+  return loadedMMKVModule;
+}
+function mmkvCondition() {
+  const clientType = Root10.Runtime.Runtime.queryParam("clientType");
+  return clientType === "react-native";
+}
+UI18.ViewManager.registerViewExtension({
+  location: "panel",
+  id: "mmkv-view",
+  title: i18nLazyString31(UIStrings31.mmkv),
+  commandPrompt: i18nLazyString31(UIStrings31.showMMKV),
+  order: 1003,
+  persistence: "permanent",
+  hasToolbar: false,
+  condition: mmkvCondition,
+  async loadView() {
+    const MMKV = await loadMMKVModule();
+    return MMKV.MMKVPanel.instance();
+  }
+});
+
+// gen/front_end/panels/storage/storage-meta.js
+import * as i18n63 from "./../../core/i18n/i18n.js";
+import * as Root11 from "./../../core/root/root.js";
+import * as UI19 from "./../../ui/legacy/legacy.js";
+var UIStrings32 = {
   /**
    * @description Label for the AsyncStorage pane / AsyncStorage 패널 레이블
    */
@@ -4187,8 +4221,8 @@ var UIStrings31 = {
    */
   showAsyncStorage: "Show AsyncStorage"
 };
-var str_31 = i18n61.i18n.registerUIStrings("panels/storage/storage-meta.ts", UIStrings31);
-var i18nLazyString31 = i18n61.i18n.getLazilyComputedLocalizedString.bind(void 0, str_31);
+var str_32 = i18n63.i18n.registerUIStrings("panels/storage/storage-meta.ts", UIStrings32);
+var i18nLazyString32 = i18n63.i18n.getLazilyComputedLocalizedString.bind(void 0, str_32);
 var loadedStorageModule;
 async function loadStorageModule() {
   if (!loadedStorageModule) {
@@ -4197,28 +4231,14 @@ async function loadStorageModule() {
   return loadedStorageModule;
 }
 function storageCondition() {
-  const clientType = Root10.Runtime.Runtime.queryParam("clientType");
+  const clientType = Root11.Runtime.Runtime.queryParam("clientType");
   return clientType === "react-native";
 }
-UI18.ViewManager.registerViewExtension({
-  location: "panel",
-  id: "storage-mmkv-view",
-  title: i18nLazyString31(UIStrings31.mmkv),
-  commandPrompt: i18nLazyString31(UIStrings31.showMMKV),
-  order: 1003,
-  persistence: "permanent",
-  hasToolbar: false,
-  condition: storageCondition,
-  async loadView() {
-    const Storage = await loadStorageModule();
-    return Storage.StoragePanel.MMKVStoragePanel.instance();
-  }
-});
-UI18.ViewManager.registerViewExtension({
+UI19.ViewManager.registerViewExtension({
   location: "panel",
   id: "storage-async-storage-view",
-  title: i18nLazyString31(UIStrings31.asyncStorage),
-  commandPrompt: i18nLazyString31(UIStrings31.showAsyncStorage),
+  title: i18nLazyString32(UIStrings32.asyncStorage),
+  commandPrompt: i18nLazyString32(UIStrings32.showAsyncStorage),
   order: 1004,
   persistence: "permanent",
   hasToolbar: false,
@@ -4230,8 +4250,8 @@ UI18.ViewManager.registerViewExtension({
 });
 
 // gen/front_end/entrypoints/devtools_app/devtools_app.prebundle.js
-import * as Root11 from "./../../core/root/root.js";
+import * as Root12 from "./../../core/root/root.js";
 import * as Main from "./../main/main.js";
-self.runtime = Root11.Runtime.Runtime.instance({ forceNew: true });
+self.runtime = Root12.Runtime.Runtime.instance({ forceNew: true });
 new Main.MainImpl.MainImpl();
 //# sourceMappingURL=devtools_app.js.map
