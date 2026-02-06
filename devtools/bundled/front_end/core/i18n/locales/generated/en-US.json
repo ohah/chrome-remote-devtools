@@ -4724,42 +4724,6 @@
   "panels/application/KeyValueStorageItemsView.ts | value": {
     "message": "Value"
   },
-  "panels/application/MMKVStorageItemsView.ts | invalidBooleanValue": {
-    "message": "Invalid boolean: value must be \"true\" or \"false\"."
-  },
-  "panels/application/MMKVStorageItemsView.ts | invalidBufferValue": {
-    "message": "Invalid buffer: value must be a JSON array of numbers (e.g. [0,1,2])."
-  },
-  "panels/application/MMKVStorageItemsView.ts | invalidNumberValue": {
-    "message": "Invalid number: value must be a valid number."
-  },
-  "panels/application/MMKVStorageItemsView.ts | key": {
-    "message": "Key"
-  },
-  "panels/application/MMKVStorageItemsView.ts | mmkvStorageItemDeleted": {
-    "message": "The storage item was deleted."
-  },
-  "panels/application/MMKVStorageItemsView.ts | mmkvStorageItems": {
-    "message": "MMKV Storage Items"
-  },
-  "panels/application/MMKVStorageItemsView.ts | mmkvStorageItemsCleared": {
-    "message": "MMKV Storage Items cleared"
-  },
-  "panels/application/MMKVStorageItemsView.ts | noPreviewSelected": {
-    "message": "No value selected"
-  },
-  "panels/application/MMKVStorageItemsView.ts | numberEntries": {
-    "message": "Number of entries shown in table: {PH1}"
-  },
-  "panels/application/MMKVStorageItemsView.ts | selectAValueToPreview": {
-    "message": "Select a value to preview"
-  },
-  "panels/application/MMKVStorageItemsView.ts | type": {
-    "message": "Type"
-  },
-  "panels/application/MMKVStorageItemsView.ts | value": {
-    "message": "Value"
-  },
   "panels/application/OpenedWindowDetailsView.ts | accessToOpener": {
     "message": "Access to opener"
   },
@@ -9148,6 +9112,54 @@
   },
   "panels/media/PlayerPropertiesView.ts | videoPlaybackRoughness": {
     "message": "Video playback roughness"
+  },
+  "panels/mmkv/mmkv-meta.ts | mmkv": {
+    "message": "MMKV"
+  },
+  "panels/mmkv/mmkv-meta.ts | showMMKV": {
+    "message": "Show MMKV"
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | addItem": {
+    "message": "Add item"
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | delete": {
+    "message": "Delete"
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | invalidBooleanValue": {
+    "message": "Invalid boolean: value must be \"true\" or \"false\"."
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | invalidBufferValue": {
+    "message": "Invalid buffer: value must be a JSON array of numbers (e.g. [0,1,2])."
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | invalidNumberValue": {
+    "message": "Invalid number: value must be a valid number."
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | key": {
+    "message": "Key"
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | keyRequired": {
+    "message": "Key is required."
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | mmkvStorageItemDeleted": {
+    "message": "The storage item was deleted."
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | mmkvStorageItems": {
+    "message": "MMKV Storage Items"
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | mmkvStorageItemsCleared": {
+    "message": "MMKV Storage Items cleared"
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | numberEntries": {
+    "message": "Number of entries shown in table: {PH1}"
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | type": {
+    "message": "Type"
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | update": {
+    "message": "Update"
+  },
+  "panels/mmkv/MMKVStorageItemsView.ts | value": {
+    "message": "Value"
   },
   "panels/mobile_throttling/CalibrationController.ts | runningCalibration": {
     "message": "Running CPU calibration, please do not leave this tab or close DevTools."
@@ -14669,14 +14681,8 @@
   "panels/storage/storage-meta.ts | asyncStorage": {
     "message": "AsyncStorage"
   },
-  "panels/storage/storage-meta.ts | mmkv": {
-    "message": "MMKV"
-  },
   "panels/storage/storage-meta.ts | showAsyncStorage": {
     "message": "Show AsyncStorage"
-  },
-  "panels/storage/storage-meta.ts | showMMKV": {
-    "message": "Show MMKV"
   },
   "panels/timeline/AnimationsTrackAppender.ts | animations": {
     "message": "Animations"

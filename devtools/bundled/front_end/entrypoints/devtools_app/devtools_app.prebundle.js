@@ -32,6 +32,7 @@ import '../../panels/session_replay/session_replay-meta.js';
 import '../../panels/react_devtools/react_devtools_components-meta.js';
 import '../../panels/react_devtools/react_devtools_profiler-meta.js';
 import '../../panels/redux/redux-meta.js';
+import '../../panels/mmkv/mmkv-meta.js';
 import '../../panels/storage/storage-meta.js';
 import * as Root from '../../core/root/root.js';
 import * as Main from '../main/main.js';

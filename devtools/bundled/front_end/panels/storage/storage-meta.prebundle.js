@@ -6,14 +6,6 @@ import * as Root from '../../core/root/root.js';
 import * as UI from '../../ui/legacy/legacy.js';
 const UIStrings = {
     /**
-     * @description Label for the MMKV pane / MMKV 패널 레이블
-     */
-    mmkv: 'MMKV',
-    /**
-     * @description Command for showing the 'MMKV' pane / 'MMKV' 패널 표시 명령
-     */
-    showMMKV: 'Show MMKV',
-    /**
      * @description Label for the AsyncStorage pane / AsyncStorage 패널 레이블
      */
     asyncStorage: 'AsyncStorage',
@@ -35,21 +27,6 @@ function storageCondition() {
     const clientType = Root.Runtime.Runtime.queryParam('clientType');
     return clientType === 'react-native';
 }
-// MMKV panel / MMKV 패널
-UI.ViewManager.registerViewExtension({
-    location: "panel" /* UI.ViewManager.ViewLocationValues.PANEL */,
-    id: 'storage-mmkv-view',
-    title: i18nLazyString(UIStrings.mmkv),
-    commandPrompt: i18nLazyString(UIStrings.showMMKV),
-    order: 1003,
-    persistence: "permanent" /* UI.ViewManager.ViewPersistence.PERMANENT */,
-    hasToolbar: false,
-    condition: storageCondition,
-    async loadView() {
-        const Storage = await loadStorageModule();
-        return Storage.StoragePanel.MMKVStoragePanel.instance();
-    },
-});
 // AsyncStorage panel / AsyncStorage 패널
 UI.ViewManager.registerViewExtension({
     location: "panel" /* UI.ViewManager.ViewLocationValues.PANEL */,

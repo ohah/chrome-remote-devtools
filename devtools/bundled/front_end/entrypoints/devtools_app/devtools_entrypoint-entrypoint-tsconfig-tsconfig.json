@@ -132,6 +132,9 @@
       "path": "../../panels/redux/meta-tsconfig.json"
     },
     {
+      "path": "../../panels/mmkv/meta-tsconfig.json"
+    },
+    {
       "path": "../../panels/storage/meta-tsconfig.json"
     },
     {

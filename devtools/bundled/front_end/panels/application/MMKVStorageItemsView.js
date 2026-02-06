@@ -30,23 +30,39 @@
 import * as Common from '../../core/common/common.js';
 import * as i18n from '../../core/i18n/i18n.js';
 import * as Geometry from '../../models/geometry/geometry.js';
-import * as TextUtils from '../../models/text_utils/text_utils.js';
-import * as SourceFrame from '../../ui/legacy/components/source_frame/source_frame.js';
 import * as UI from '../../ui/legacy/legacy.js';
 import { Directives as LitDirectives, html, nothing, render } from '../../ui/lit/lit.js';
 import * as VisualLogging from '../../ui/visual_logging/visual_logging.js';
 import * as ApplicationComponents from './components/components.js';
 import { StorageItemsToolbar } from './StorageItemsToolbar.js';
+import resourcesPanelStyles from './resourcesPanel.css.js';
 const { ARIAUtils } = UI;
-const { EmptyWidget } = UI.EmptyWidget;
 const { VBox, widgetConfig } = UI.Widget;
 const { Size } = Geometry;
 const { repeat } = LitDirectives;
+/** Bump this when changing the view to verify cache / 캐시 확인용: 뷰 수정 시 증가 */
+const MMKV_PANEL_VERSION = 1;
 /** Narrow literal union for MMKV value type / MMKV 값 타입 리터럴 유니온 */
 const MMKV_VALUE_TYPES = ['string', 'number', 'boolean', 'buffer'];
 /** Parse string to ValueType; returns null if not one of the allowed types / 문자열을 ValueType으로 파싱, 허용 타입이 아니면 null */
 function parseValueType(s) {
     return MMKV_VALUE_TYPES.includes(s) ? s : null;
+}
+/**
+ * Normalize raw valueType from CDP (string or boolean) to ValueType.
+ * Handles valueType sent as boolean true/false (e.g. from JSON) so type always shows correctly.
+ * / CDP에서 오는 valueType(문자열 또는 boolean)을 ValueType으로 정규화. JSON 등으로 boolean으로 오면 올바르게 'boolean'으로 표시
+ */
+function normalizeValueType(raw) {
+    if (raw === true || raw === false) {
+        return 'boolean';
+    }
+    if (typeof raw === 'string') {
+        const t = parseValueType(raw);
+        if (t)
+            return t;
+    }
+    return 'string';
 }
 const UIStrings = {
     /**
@@ -61,14 +77,6 @@ const UIStrings = {
      * @description Text for announcing a MMKV Storage key/value item has been deleted
      */
     mmkvStorageItemDeleted: 'The storage item was deleted.',
-    /**
-     * @description Text that shows in the Application Panel if no value is selected for preview
-     */
-    noPreviewSelected: 'No value selected',
-    /**
-     * @description Preview text when viewing storage in Application panel
-     */
-    selectAValueToPreview: 'Select a value to preview',
     /**
      * @description Text for announcing number of entries after filtering
      * @example {5} PH1
@@ -98,6 +106,18 @@ const UIStrings = {
      * @description Warning when value is invalid for boolean type
      */
     invalidBooleanValue: 'Invalid boolean: value must be "true" or "false".',
+    /**
+     * @description Error when key is empty on update
+     */
+    keyRequired: 'Key is required.',
+    /**
+     * @description Update button label
+     */
+    update: 'Update',
+    /**
+     * @description Add item button label
+     */
+    addItem: 'Add item',
 };
 const str_ = i18n.i18n.registerUIStrings('panels/application/MMKVStorageItemsView.ts', UIStrings);
 const i18nString = i18n.i18n.getLocalizedString.bind(undefined, str_);
@@ -151,10 +171,6 @@ export function validateValueForType(value, valueType) {
     }
     return { valid: true };
 }
-/**
- * MMKV Storage Items View with Key, Value, Type columns and type-aware editing.
- * Uses Lit for the UI; does not reuse KeyValueStorageItemsView (Local Storage style) because MMKV has typed values.
- */
 export class MMKVStorageItemsView extends UI.Widget.VBox {
     #mmkvStorage;
     #eventListeners = [];
@@ -162,19 +178,21 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
     #selectedKey = null;
     #isSortOrderAscending = true;
     #toolbar;
-    #preview;
-    #previewValue = null;
     #metadataView;
+    /** Per-row draft (rowId -> draft). rowId is item.key for existing rows, 'new-' + id for new rows. / 행별 드래프트 */
+    #drafts = new Map();
+    /** Per-row validation error shown when Update is clicked with invalid data / Update 클릭 시 잘못된 데이터일 때 표시 */
+    #validationErrors = new Map();
+    /** Ids for "new" placeholder rows (Add item) / 새 항목 추가용 placeholder 행 id 목록 */
+    #newRowIds = [];
     constructor(mmkvStorage) {
         super();
         this.#mmkvStorage = mmkvStorage;
         this.#metadataView = new ApplicationComponents.StorageMetadataView.StorageMetadataView();
         this.#metadataView.getTitle = () => mmkvStorage.instanceId;
-        this.#preview =
-            new EmptyWidget(i18nString(UIStrings.noPreviewSelected), i18nString(UIStrings.selectAValueToPreview));
         this.element.classList.add('storage-view', 'table');
+        this.registerRequiredCSS(resourcesPanelStyles);
         this.setStorage(mmkvStorage);
-        this.showPreview(null, null);
         this.performUpdate();
     }
     get storage() {
@@ -200,21 +218,74 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
     refreshItems() {
         void this.#refreshItems();
     }
-    async #refreshItems() {
-        const entries = await this.#mmkvStorage.getItems();
-        if (!entries || !this.#toolbar) {
-            return;
+    /**
+     * Convert one entry row (array or object) to MMKVItem. Protocol is [key, value, valueType];
+     * some layers may send object { key, value, valueType }. Always normalize valueType.
+     * / 한 행(배열 또는 객체)을 MMKVItem으로 변환. 프로토콜은 [key, value, valueType]; 객체로 올 수도 있음.
+     */
+    #rowToItem(row) {
+        const toStr = (x) => (x !== null && x !== undefined) ? String(x) : '';
+        if (row !== null && typeof row === 'object' && !Array.isArray(row)) {
+            const o = row;
+            // Array-like object from protocol deserialization (e.g. { 0: key, 1: value, 2: valueType }) / 프로토콜 역직렬화로 오는 배열형 객체
+            if ('0' in o || '1' in o || '2' in o) {
+                return this.#rowToItem([o[0], o[1], o[2]]);
+            }
+            const key = toStr(o.key);
+            const value = toStr(o.value);
+            const rawType = o.valueType;
+            if (key === '' && value === '' && rawType === undefined) {
+                console.log('[MMKV] rowToItem(object) -> null', { row: o });
+                return null;
+            }
+            const item = {
+                key,
+                value,
+                valueType: normalizeValueType(rawType),
+            };
+            console.log('[MMKV] rowToItem(object) in:', o, '-> out:', item);
+            return item;
         }
-        const filterRegex = this.#toolbar.filterRegex;
+        const arr = Array.isArray(row) ? row : [];
+        const a = String(arr[0] ?? '');
+        const b = toStr(arr[1]);
+        const c = arr[2];
+        // Protocol: Item = [key, value, valueType]. If value/type are swapped, detect and fix.
+        // Pass raw c/b to normalizeValueType so boolean true/false from JSON is handled.
+        const isType = (s) => typeof s === 'string' && parseValueType(s) !== null;
+        let key;
+        let value;
+        let valueType;
+        if (isType(c)) {
+            key = a;
+            value = b;
+            valueType = normalizeValueType(c);
+        }
+        else if (isType(b)) {
+            key = a;
+            value = toStr(c);
+            valueType = normalizeValueType(b);
+        }
+        else {
+            key = a;
+            value = b;
+            valueType = normalizeValueType(c);
+        }
+        const item = { key, value, valueType };
+        console.log('[MMKV] rowToItem(array) in:', row, '-> out:', item);
+        return item;
+    }
+    async #refreshItems() {
+        const raw = await this.#mmkvStorage.getItems();
+        const entries = Array.isArray(raw) ? raw : [];
+        console.log('[MMKV] getItems() raw:', raw);
+        console.log('[MMKV] raw type:', Array.isArray(raw) ? 'array' : typeof raw, 'length:', entries.length, 'first:', entries[0]);
+        const filterRegex = this.#toolbar?.filterRegex ?? null;
         const items = entries
-            .map((row) => {
-            const key = row[0] ?? '';
-            const value = row[1] ?? '';
-            const rawType = row[2];
-            const valueType = (typeof rawType === 'string' ? parseValueType(rawType) : null) ?? 'string';
-            return { key, value, valueType };
-        })
+            .map((row) => this.#rowToItem(row))
+            .filter((item) => item !== null)
             .filter(item => filterRegex?.test(`${item.key} ${item.value} ${item.valueType}`) ?? true);
+        console.log('[MMKV] #refreshItems final items:', items);
         this.#showItems(items);
     }
     #showItems(items) {
@@ -223,9 +294,6 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
         const selected = this.#items.find(item => item.key === this.#selectedKey);
         if (!selected) {
             this.#selectedKey = null;
-        }
-        else {
-            void this.#previewEntry(selected);
         }
         this.performUpdate();
         this.#toolbar?.setCanDeleteSelected(Boolean(this.#selectedKey));
@@ -237,6 +305,9 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
         }
         this.#items = [];
         this.#selectedKey = null;
+        this.#drafts.clear();
+        this.#validationErrors.clear();
+        this.#newRowIds = [];
         this.performUpdate();
         this.#toolbar?.setCanDeleteSelected(false);
         UI.ARIAUtils.LiveAnnouncer.alert(i18nString(UIStrings.mmkvStorageItemsCleared));
@@ -246,6 +317,8 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
             return;
         }
         const key = event.data.key;
+        this.#drafts.delete(key);
+        this.#validationErrors.delete(key);
         const index = this.#items.findIndex(item => item.key === key);
         if (index !== -1) {
             this.#items.splice(index, 1);
@@ -262,11 +335,11 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
             return;
         }
         const { key, value, valueType: rawType } = event.data;
-        const valueType = (typeof rawType === 'string' ? parseValueType(rawType) : null) ?? 'string';
+        const valueType = normalizeValueType(rawType);
         if (this.#items.some(item => item.key === key)) {
             return;
         }
-        this.#items.push({ key, value, valueType });
+        this.#items.push({ key, value: String(value ?? ''), valueType });
         this.#items.sort((a, b) => (this.#isSortOrderAscending ? 1 : -1) * (a.key > b.key ? 1 : -1));
         this.performUpdate();
     }
@@ -279,13 +352,9 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
         if (!item) {
             return;
         }
-        item.value = value;
-        item.valueType =
-            (typeof rawType === 'string' ? parseValueType(rawType) : null) ?? item.valueType;
+        item.value = String(value ?? '');
+        item.valueType = normalizeValueType(rawType);
         this.performUpdate();
-        if (this.#selectedKey === key) {
-            void this.#previewEntry(item);
-        }
     }
     deleteAllItems() {
         this.#mmkvStorage.clear();
@@ -294,42 +363,64 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
     #deleteCallback(key) {
         this.#mmkvStorage.removeItem(key);
     }
+    /** Get display values for a row (draft if any, else committed item) / 행 표시값 (드래프트 있으면 드래프트, 아니면 저장된 항목) */
+    #getDisplayDraft(rowId, fallback) {
+        return this.#drafts.get(rowId) ?? { ...fallback };
+    }
+    /** Set draft for a row; updates only when user clicks Update / 행 드래프트 설정; Update 클릭 시에만 반영 */
+    #setDraft(rowId, patch) {
+        const fallback = rowId.startsWith('new-')
+            ? { key: '', value: '', valueType: 'string' }
+            : this.#items.find(i => i.key === rowId) ?? { key: '', value: '', valueType: 'string' };
+        const current = this.#getDisplayDraft(rowId, fallback);
+        this.#drafts.set(rowId, { ...current, ...patch });
+        this.#validationErrors.delete(rowId);
+        this.performUpdate();
+    }
+    /** Handle Update button: validate, then setItem only if valid / Update 버튼: 검증 후 유효할 때만 setItem */
+    #handleUpdateClick(rowId) {
+        const isNew = rowId.startsWith('new-');
+        const fallback = isNew ? { key: '', value: '', valueType: 'string' } : this.#items.find(i => i.key === rowId);
+        const draft = this.#getDisplayDraft(rowId, fallback);
+        if (!draft.key.trim()) {
+            this.#validationErrors.set(rowId, i18nString(UIStrings.keyRequired));
+            this.performUpdate();
+            return;
+        }
+        const validation = validateValueForType(draft.value, draft.valueType);
+        if (!validation.valid) {
+            this.#validationErrors.set(rowId, validation.message ?? '');
+            this.performUpdate();
+            return;
+        }
+        this.#validationErrors.delete(rowId);
+        if (isNew) {
+            this.#mmkvStorage.setItem(draft.key.trim(), draft.value, draft.valueType);
+            this.#drafts.delete(rowId);
+            this.#newRowIds = this.#newRowIds.filter(id => 'new-' + id !== rowId);
+            void this.#refreshItems();
+        }
+        else {
+            const originalKey = rowId;
+            if (draft.key.trim() !== originalKey) {
+                this.#mmkvStorage.removeItem(originalKey);
+            }
+            this.#mmkvStorage.setItem(draft.key.trim(), draft.value, draft.valueType);
+            this.#drafts.delete(rowId);
+            void this.#refreshItems();
+        }
+        this.performUpdate();
+    }
+    /** Add a new placeholder row / 새 항목 행 추가 */
+    #handleAddItem() {
+        const id = String(Date.now());
+        this.#newRowIds = [...this.#newRowIds, id];
+        this.#drafts.set('new-' + id, { key: '', value: '', valueType: 'string' });
+        this.performUpdate();
+    }
     #createCallback(key, value, valueType) {
         this.#mmkvStorage.setItem(key, value, valueType);
         this.#removeDupes(key, value);
-        void this.#previewEntry({ key, value, valueType });
-    }
-    #editingCallback(key, value, valueType, columnId, _valueBeforeEditing, newText) {
-        if (columnId === 'key') {
-            this.#mmkvStorage.removeItem(key);
-            this.#mmkvStorage.setItem(newText, value, valueType);
-            this.#removeDupes(newText, value);
-            void this.#previewEntry({ key: newText, value, valueType });
-            return;
-        }
-        if (columnId === 'type') {
-            const newType = parseValueType(newText);
-            if (newType === null) {
-                this.performUpdate();
-                return;
-            }
-            this.#mmkvStorage.setItem(key, value, newType);
-            const item = this.#items.find(i => i.key === key);
-            if (item) {
-                item.valueType = newType;
-            }
-            this.performUpdate();
-            return;
-        }
-        if (columnId === 'value') {
-            this.#mmkvStorage.setItem(key, newText, valueType);
-            const item = this.#items.find(i => i.key === key);
-            if (item) {
-                item.value = newText;
-            }
-            this.performUpdate();
-            void this.#previewEntry({ key, value: newText, valueType });
-        }
     }
     #removeDupes(key, value) {
         for (let i = this.#items.length - 1; i >= 0; i--) {
@@ -345,38 +436,6 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
         }
         this.#deleteCallback(this.#selectedKey);
     }
-    #previewEntry(entry) {
-        if (entry?.value !== undefined) {
-            this.#selectedKey = entry.key;
-            return this.createPreview(entry.key, entry.value).then(preview => {
-                if (this.#selectedKey === entry.key) {
-                    this.showPreview(preview, entry.value);
-                }
-            });
-        }
-        this.#selectedKey = null;
-        this.showPreview(null, null);
-        return Promise.resolve();
-    }
-    showPreview(preview, value) {
-        if (this.#preview && this.#previewValue === value) {
-            return;
-        }
-        if (this.#preview) {
-            this.#preview.detach();
-        }
-        if (!preview) {
-            preview = new EmptyWidget(i18nString(UIStrings.noPreviewSelected), i18nString(UIStrings.selectAValueToPreview));
-        }
-        this.#previewValue = value;
-        this.#preview = preview;
-        this.performUpdate();
-    }
-    createPreview(key, value) {
-        const url = `mmkv://${this.#mmkvStorage.instanceId}/${key}`;
-        const provider = TextUtils.StaticContentProvider.StaticContentProvider.fromString(url, Common.ResourceType.resourceTypes.XHR, value);
-        return SourceFrame.PreviewFactory.PreviewFactory.createPreview(provider, 'text/plain');
-    }
     performUpdate() {
         const that = this;
         const setToolbar = (toolbar) => {
@@ -388,6 +447,15 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
             that.#toolbar.addEventListener("DeleteAll" /* StorageItemsToolbar.Events.DELETE_ALL */, that.deleteAllItems, that);
             that.#toolbar.addEventListener("Refresh" /* StorageItemsToolbar.Events.REFRESH */, that.refreshItems, that);
         };
+        const sortDirection = this.#isSortOrderAscending ? 1 : -1;
+        const sortedItems = [...this.#items].sort((a, b) => sortDirection * (a.key > b.key ? 1 : a.key < b.key ? -1 : 0));
+        const rows = [
+            ...sortedItems.map(item => ({ rowId: item.key, item })),
+            ...this.#newRowIds.map(id => ({
+                rowId: 'new-' + id,
+                item: this.#getDisplayDraft('new-' + id, { key: '', value: '', valueType: 'string' }),
+            })),
+        ];
         render(
         // clang-format off
         html `
@@ -396,83 +464,87 @@ export class MMKVStorageItemsView extends UI.Widget.VBox {
           class=flex-none
           ${UI.Widget.widgetRef(StorageItemsToolbar, setToolbar)}
         ></devtools-widget>
-        <devtools-split-view sidebar-position="second" name="mmkv-storage-split-view-state">
-          <devtools-widget
-            slot="main"
-            .widgetConfig=${widgetConfig(VBox, { minimumSize: new Size(0, 50) })}
-          >
-            <devtools-data-grid
-              .name=${'mmkv-storage-datagrid'}
-              striped
-              style="flex: auto"
-              @sort=${(e) => {
-            this.#isSortOrderAscending = e.detail.ascending;
-            this.performUpdate();
-        }}
-              @refresh=${() => this.refreshItems()}
-              @create=${(e) => {
-            this.#createCallback(e.detail.key, e.detail.value, 'string');
-        }}
-              @deselect=${() => {
-            this.#selectedKey = null;
-            this.#toolbar?.setCanDeleteSelected(false);
-            this.showPreview(null, null);
-            this.performUpdate();
-        }}
-            >
-              <table>
-                <tr>
-                  <th id="key" sortable editable>${i18nString(UIStrings.key)}</th>
-                  <th id="value" editable>${i18nString(UIStrings.value)}</th>
-                  <th id="type">${i18nString(UIStrings.type)}</th>
-                </tr>
-                ${repeat(this.#items, item => item.key, item => html `
-                  <tr
-                    data-key=${item.key}
-                    data-value=${item.value}
-                    data-value-type=${item.valueType}
-                    @select=${() => {
-            this.#selectedKey = item.key;
-            this.#toolbar?.setCanDeleteSelected(true);
-            void this.#previewEntry(item);
-        }}
-                    @edit=${(e) => {
-            this.#editingCallback(item.key, item.value, item.valueType, e.detail.columnId, e.detail.valueBeforeEditing, e.detail.newText);
-        }}
-                    @delete=${() => this.#deleteCallback(item.key)}
-                    selected=${(this.#selectedKey === item.key) || nothing}
-                  >
-                    <td>${item.key}</td>
-                    <td>${item.value.substring(0, MAX_VALUE_LENGTH)}</td>
-                    <td @click=${(e) => e.stopPropagation()} class="mmkv-type-cell">
-                      <select
-                        class="mmkv-type-select"
-                        .value=${item.valueType}
-                        @change=${(e) => {
-            const select = e.target;
-            const newType = parseValueType(select.value);
-            if (newType !== null) {
-                this.#editingCallback(item.key, item.value, item.valueType, 'type', item.valueType, newType);
-            }
-        }}
-                      >
-                        ${MMKV_VALUE_TYPES.map(t => html `<option value=${t}>${t}</option>`)}
-                      </select>
-                    </td>
+        <devtools-widget
+          .widgetConfig=${widgetConfig(VBox, { minimumSize: new Size(0, 50) })}
+        >
+            <div class="mmkv-custom-table-container" data-mmkv-view="custom">
+              <div class="mmkv-toolbar-row">
+                <span class="mmkv-panel-version" title="Cache check: bump in source to verify fresh bundle">MMKV (${MMKV_PANEL_VERSION})</span>
+                <button class="mmkv-add-button" @click=${() => this.#handleAddItem()} jslog=${VisualLogging.action('mmkv-storage.add-item').track({ click: true })}>
+                  ${i18nString(UIStrings.addItem)}
+                </button>
+              </div>
+              <table class="mmkv-custom-table" data-mmkv-table="true">
+                <thead>
+                  <tr>
+                    <th class="mmkv-th-key">${i18nString(UIStrings.key)}</th>
+                    <th class="mmkv-th-type">${i18nString(UIStrings.type)}</th>
+                    <th class="mmkv-th-value">${i18nString(UIStrings.value)}</th>
+                    <th class="mmkv-th-actions">${i18nString(UIStrings.update)}</th>
                   </tr>
-                `)}
-                <tr placeholder></tr>
+                </thead>
+                <tbody>
+                  ${repeat(rows, row => row.rowId, row => {
+            const display = this.#getDisplayDraft(row.rowId, row.item);
+            const err = this.#validationErrors.get(row.rowId);
+            const isNew = row.rowId.startsWith('new-');
+            return html `
+                    <tr
+                      class="mmkv-row ${!isNew && this.#selectedKey === row.rowId ? 'mmkv-row-selected' : ''}"
+                      @click=${(e) => {
+                if (isNew)
+                    return;
+                e.preventDefault();
+                this.#selectedKey = row.item.key;
+                this.#toolbar?.setCanDeleteSelected(true);
+            }}
+                    >
+                      <td class="mmkv-td-key">
+                        <input
+                          class="mmkv-input"
+                          .value=${display.key}
+                          @input=${(e) => this.#setDraft(row.rowId, { key: e.target.value })}
+                          @click=${(e) => e.stopPropagation()}
+                        />
+                      </td>
+                      <td class="mmkv-td-type">
+                        <select
+                          class="mmkv-type-select"
+                          .value=${display.valueType}
+                          @change=${(e) => {
+                const v = e.target.value;
+                const t = parseValueType(v);
+                if (t)
+                    this.#setDraft(row.rowId, { valueType: t });
+            }}
+                          @click=${(e) => e.stopPropagation()}
+                        >
+                          ${MMKV_VALUE_TYPES.map(t => html `<option value=${t}>${t}</option>`)}
+                        </select>
+                      </td>
+                      <td class="mmkv-td-value">
+                        <input
+                          class="mmkv-input mmkv-input-value"
+                          .value=${display.value}
+                          @input=${(e) => this.#setDraft(row.rowId, { value: e.target.value })}
+                          @click=${(e) => e.stopPropagation()}
+                        />
+                      </td>
+                      <td class="mmkv-td-actions">
+                        <button
+                          class="mmkv-update-button"
+                          @click=${(e) => { e.stopPropagation(); this.#handleUpdateClick(row.rowId); }}
+                          jslog=${VisualLogging.action('mmkv-storage.update').track({ click: true })}
+                        >${i18nString(UIStrings.update)}</button>
+                      </td>
+                    </tr>
+                    ${err ? html `<tr class="mmkv-error-row"><td colspan="4" class="mmkv-validation-error">${err}</td></tr>` : nothing}
+                    `;
+        })}
+                </tbody>
               </table>
-            </devtools-data-grid>
-          </devtools-widget>
-          <devtools-widget
-            slot="sidebar"
-            .widgetConfig=${widgetConfig(VBox, { minimumSize: new Size(0, 50) })}
-            jslog=${VisualLogging.pane('preview').track({ resize: true })}
-          >
-            ${this.#preview?.element}
-          </devtools-widget>
-        </devtools-split-view>`, 
+            </div>
+        </devtools-widget>`, 
         // clang-format on
         this.contentElement);
     }
