@@ -5,6 +5,11 @@ appId: ${MAESTRO_APP_ID}
 - launchApp
 - waitForAnimationToEnd:
     timeout: 3000
+# Wait for main UI (tab bar) after deviceId loads; CI emulator can be slow / deviceId 로드 후 메인 UI(탭 바) 대기; CI 에뮬은 느릴 수 있음
+- extendedWaitUntil:
+    visible:
+      id: 'tab-console'
+    timeout: 20000
 - tapOn:
     id: 'tab-console'
 - assertVisible:
