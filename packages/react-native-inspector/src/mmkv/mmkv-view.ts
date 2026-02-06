@@ -47,30 +47,10 @@ export const getMMKVView = (storageId: string, storage: MMKV, blacklist?: RegExp
         return undefined;
       }
 
-      // We are going to go through each type, one by one.
-      // Ordering is important here!
-      const stringValue = mmkv.getString(key);
-
-      // NOTE: Empty string is a valid MMKV string value / 참고: 빈 문자열은 유효한 MMKV string 값입니다
-      // If we treat "" as "missing", initial values can't be loaded and change events look like deletes
-      // / ""을 "없음"으로 취급하면 초기값을 못 불러오고 변경 이벤트가 삭제처럼 보일 수 있습니다
-      if (stringValue !== undefined) {
-        if (looksLikeGarbled(stringValue)) {
-          // This is most-likely a buffer as it contains non-printable characters
-          return {
-            key,
-            type: 'buffer',
-            value: Array.from(new TextEncoder().encode(stringValue)),
-          };
-        }
-
-        return {
-          key,
-          type: 'string',
-          value: stringValue,
-        };
-      }
-
+      // Try type-specific getters in order. Check number/boolean before string so that
+      // values stored as number or boolean are not misread as string (e.g. getString
+      // returning "42" or "true" for a key stored with setNumber/setBoolean).
+      // / 타입별 getter를 순서대로 시도. 숫자/불리언을 문자열보다 먼저 확인해 number/boolean으로 저장된 값이 string으로 잘못 읽히지 않도록 함
       const numberValue = mmkv.getNumber(key);
       if (numberValue !== undefined) {
         return {
@@ -86,6 +66,23 @@ export const getMMKVView = (storageId: string, storage: MMKV, blacklist?: RegExp
           key,
           type: 'boolean',
           value: booleanValue,
+        };
+      }
+
+      const stringValue = mmkv.getString(key);
+      // NOTE: Empty string is a valid MMKV string value / 참고: 빈 문자열은 유효한 MMKV string 값입니다
+      if (stringValue !== undefined) {
+        if (looksLikeGarbled(stringValue)) {
+          return {
+            key,
+            type: 'buffer',
+            value: Array.from(new TextEncoder().encode(stringValue)),
+          };
+        }
+        return {
+          key,
+          type: 'string',
+          value: stringValue,
         };
       }
 
