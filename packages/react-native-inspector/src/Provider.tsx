@@ -45,6 +45,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
 }: ChromeRemoteDevToolsInspectorProviderProps): React.JSX.Element {
   const initializedRef = useRef(false);
   const connectionRef = useRef<Promise<void> | null>(null);
+  const onConnectionCloseRef = useRef<(() => void) | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
 
   const doConnect = useCallback(() => {
@@ -57,6 +58,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
       .then(() => {
         console.log('✅ [ChromeRemoteDevTools] Connected to server / 서버에 연결됨');
         setConnectionStatus('connected');
+        connectionRef.current = null;
       })
       .catch((error) => {
         console.error('❌ [ChromeRemoteDevTools] Failed to connect to server:', error);
@@ -65,6 +67,10 @@ export function ChromeRemoteDevToolsInspectorProvider({
       });
     connectionRef.current = promise;
   }, [serverHost, serverPort, deviceId]);
+
+  const stableOnConnectionClose = useCallback(() => {
+    onConnectionCloseRef.current?.();
+  }, []);
 
   useEffect(() => {
     // Set server info / 서버 정보 설정
@@ -84,17 +90,20 @@ export function ChromeRemoteDevToolsInspectorProvider({
       doConnect();
     }
 
-    // Notify when WebSocket disconnects so we can show Connect button / WebSocket 끊김 시 Connect 버튼 표시를 위해 등록
-    setOnConnectionClose(() => setConnectionStatus('failed'));
+    // Notify when WebSocket disconnects so we can show Connect button (ref avoids stale closure) / WebSocket 끊김 시 Connect 버튼 표시 (ref로 최신 콜백 유지)
+    onConnectionCloseRef.current = () => setConnectionStatus('failed');
+    setOnConnectionClose(stableOnConnectionClose);
 
     // Cleanup function / 정리 함수
     return () => {
       setOnConnectionClose(null);
+      onConnectionCloseRef.current = null;
       if (!autoConnect) {
         connectionRef.current = null;
       }
     };
-  }, [serverHost, serverPort, autoConnect, deviceId, doConnect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- doConnect depends only on serverHost, serverPort, and deviceId, which are already listed
+  }, [serverHost, serverPort, autoConnect, deviceId]);
 
   return (
     <>

@@ -71,7 +71,7 @@ export async function connect(
         await new Promise((r) => setTimeout(r, retryDelayMs));
       } else {
         console.warn(
-          '[ChromeRemoteDevTools] Failed to connect to server after all retries. Tap Retry to try again.'
+          '[ChromeRemoteDevTools] Failed to connect to server after all retries. Tap Connect to try again.'
         );
         console.warn(
           `[ChromeRemoteDevTools] Server should be running on ${serverHostParam}:${serverPortParam}`,
