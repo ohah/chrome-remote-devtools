@@ -14,7 +14,6 @@
     "postinstall": "node scripts/apply-cmake-patches.js"
   },
   "dependencies": {
-    "@babel/runtime": "^7.25.0",
     "@ohah/chrome-remote-devtools-inspector-react-native": "workspace:*",
     "@ohah/redux-devtools-plugin": "workspace:*",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -43,6 +42,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
     "@craby/devkit": "^0.1.0-rc.3",
     "@react-native-community/cli": "20.0.0",
     "@react-native-community/cli-platform-android": "20.0.0",
