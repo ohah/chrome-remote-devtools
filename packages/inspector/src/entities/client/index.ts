@@ -5,4 +5,6 @@
 export type { Client } from './model/types';
 export { clientQueries } from './api/client.queries';
 export { getClients, GetClientsError } from './api/get-clients';
+export { getMetroTargets, METRO_TAB_ID_PREFIX, type MetroTarget } from './api/get-metro-targets';
+export { metroQueries } from './api/metro.queries';
 export { useClientsListSSE } from './api/use-clients-list-sse';

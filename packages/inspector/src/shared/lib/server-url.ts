@@ -7,20 +7,28 @@ interface ServerUrlState {
   normalServerUrl: string | null;
   /** Reactotron server URL (default: http://localhost:9090) / Reactotron 서버 URL (기본값: http://localhost:9090) */
   reactotronServerUrl: string | null;
+  /** Metro bundler URL for /json/list (default: http://localhost:8081) / /json/list용 Metro URL (기본값: http://localhost:8081) */
+  metroUrl: string | null;
   /** Whether Reactotron mode is enabled / Reactotron 모드 활성화 여부 */
   isReactotronMode: boolean;
   /** Set normal server URL / 일반 서버 URL 설정 */
   setNormalServerUrl: (url: string) => void;
   /** Set Reactotron server URL / Reactotron 서버 URL 설정 */
   setReactotronServerUrl: (url: string) => void;
+  /** Set Metro URL / Metro URL 설정 */
+  setMetroUrl: (url: string) => void;
   /** Set Reactotron mode / Reactotron 모드 설정 */
   setReactotronMode: (enabled: boolean) => void;
   /** Reset normal server URL to default / 일반 서버 URL을 기본값으로 재설정 */
   resetNormalServerUrl: () => void;
   /** Reset Reactotron server URL to default / Reactotron 서버 URL을 기본값으로 재설정 */
   resetReactotronServerUrl: () => void;
+  /** Reset Metro URL to default / Metro URL을 기본값으로 재설정 */
+  resetMetroUrl: () => void;
   /** Get current active server URL / 현재 활성 서버 URL 가져오기 */
   getServerUrl: () => string | null;
+  /** Get Metro URL / Metro URL 가져오기 */
+  getMetroUrl: () => string | null;
 }
 
 /**
@@ -31,6 +39,7 @@ const useServerUrlStore = create<ServerUrlState>()(
     (set, get) => ({
       normalServerUrl: null,
       reactotronServerUrl: null,
+      metroUrl: null,
       isReactotronMode: false,
       setNormalServerUrl: (url: string) => {
         // Validate URL format / URL 형식 검증
@@ -50,6 +59,14 @@ const useServerUrlStore = create<ServerUrlState>()(
           throw new Error('Invalid URL format');
         }
       },
+      setMetroUrl: (url: string) => {
+        try {
+          new URL(url);
+          set({ metroUrl: url });
+        } catch {
+          throw new Error('Invalid URL format');
+        }
+      },
       setReactotronMode: (enabled: boolean) => {
         set({ isReactotronMode: enabled });
       },
@@ -59,12 +76,18 @@ const useServerUrlStore = create<ServerUrlState>()(
       resetReactotronServerUrl: () => {
         set({ reactotronServerUrl: null });
       },
+      resetMetroUrl: () => {
+        set({ metroUrl: null });
+      },
       getServerUrl: () => {
         const state = get();
         if (state.isReactotronMode) {
           return state.reactotronServerUrl ?? 'http://localhost:9090';
         }
         return state.normalServerUrl ?? 'http://localhost:8080';
+      },
+      getMetroUrl: () => {
+        return get().metroUrl ?? 'http://localhost:8081';
       },
     }),
     {
@@ -151,12 +174,15 @@ export function useServerUrl() {
     serverUrl: store.getServerUrl(),
     normalServerUrl: store.normalServerUrl,
     reactotronServerUrl: store.reactotronServerUrl,
+    metroUrl: store.getMetroUrl(),
     isReactotronMode: store.isReactotronMode,
     setNormalServerUrl: store.setNormalServerUrl,
     setReactotronServerUrl: store.setReactotronServerUrl,
+    setMetroUrl: store.setMetroUrl,
     setReactotronMode: store.setReactotronMode,
     resetNormalServerUrl: store.resetNormalServerUrl,
     resetReactotronServerUrl: store.resetReactotronServerUrl,
+    resetMetroUrl: store.resetMetroUrl,
     // Backward compatibility / 하위 호환성
     setServerUrl: store.setNormalServerUrl,
     resetServerUrl: store.resetNormalServerUrl,

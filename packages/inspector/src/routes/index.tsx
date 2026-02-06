@@ -3,10 +3,10 @@ import { createFileRoute, useNavigate, useLocation } from '@tanstack/react-route
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { SettingsModal } from '@/features/settings';
-import { clientQueries } from '@/entities/client';
+import { clientQueries, metroQueries, METRO_TAB_ID_PREFIX } from '@/entities/client';
 import { LoadingState, ErrorState } from '@/shared/ui';
 import { useServerUrl } from '@/shared/lib';
-import { Settings, Smartphone, Globe, Upload } from 'lucide-react';
+import { Settings, Smartphone, Globe, Upload, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, type Tab } from '@/components/tabs';
 import { getTabsVisibility } from './__root';
@@ -21,7 +21,7 @@ function ConnectionPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { serverUrl } = useServerUrl();
+  const { serverUrl, metroUrl } = useServerUrl();
   const {
     data: clients = [],
     isLoading,
@@ -31,6 +31,9 @@ function ConnectionPage() {
   } = useQuery({
     ...clientQueries.list(),
     enabled: !!serverUrl, // Only fetch if server URL is set
+  });
+  const { data: metroTargets = [] } = useQuery({
+    ...metroQueries.listOptions(metroUrl),
   });
 
   // Listen to tab visibility changes / 탭 표시 상태 변경 사항 듣기
@@ -47,8 +50,9 @@ function ConnectionPage() {
   // Listen to tab state reset event / 탭 상태 초기화 이벤트 듣기
   useEffect(() => {
     const handleResetTabsState = () => {
-      // Remove client queries completely / 클라이언트 쿼리 완전히 제거
+      // Remove client and metro queries completely / 클라이언트·Metro 쿼리 완전히 제거
       queryClient.removeQueries({ queryKey: clientQueries.all() });
+      queryClient.removeQueries({ queryKey: metroQueries.all() });
     };
     window.addEventListener('reset-tabs-state', handleResetTabsState);
     return () => {
@@ -64,9 +68,9 @@ function ConnectionPage() {
     ? location.pathname.split('/devtools/')[1] || null
     : null;
 
-  // Build tabs from filtered clients / 필터링된 클라이언트로부터 탭 생성
+  // Build tabs: server clients first, then Metro targets / 탭 구성: 서버 클라이언트 먼저, 이어서 Metro 타깃
   const tabs: Tab[] = useMemo(() => {
-    return filteredClients.map((client) => ({
+    const clientTabs: Tab[] = filteredClients.map((client) => ({
       id: client.id,
       label:
         client.type === 'react-native' || client.type === 'reactotron'
@@ -83,7 +87,13 @@ function ConnectionPage() {
           <Globe className="w-4 h-4" />
         ),
     }));
-  }, [filteredClients]);
+    const metroTabs: Tab[] = metroTargets.map((target) => ({
+      id: `${METRO_TAB_ID_PREFIX}${target.id}`,
+      label: target.deviceName || target.title || target.id.slice(0, 8),
+      icon: <Wifi className="w-4 h-4" />,
+    }));
+    return [...clientTabs, ...metroTabs];
+  }, [filteredClients, metroTargets]);
 
   // Handle tab change / 탭 변경 처리
   const handleTabChange = useCallback(
@@ -149,10 +159,10 @@ function ConnectionPage() {
           ) : (
             <div className="flex items-end bg-gray-800 border-b border-gray-700 h-10 px-4">
               <div className="text-sm text-gray-400">
-                {!serverUrl
+                {!serverUrl && !metroUrl
                   ? 'Server URL Required'
-                  : filteredClients.length === 0
-                    ? 'No clients available (check filters)'
+                  : filteredClients.length === 0 && metroTargets.length === 0
+                    ? 'No clients or Metro targets available'
                     : 'No clients available'}
               </div>
             </div>
@@ -175,12 +185,12 @@ function ConnectionPage() {
               Open Settings
             </Button>
           </div>
-        ) : filteredClients.length === 0 && !error ? (
+        ) : filteredClients.length === 0 && metroTargets.length === 0 && !error ? (
           <div className="text-center">
-            <p className="text-gray-400">No clients available</p>
+            <p className="text-gray-400">No clients or Metro targets available</p>
             <p className="text-sm text-gray-500 mt-2">
-              {clients.length === 0
-                ? 'Waiting for clients to connect...'
+              {clients.length === 0 && metroTargets.length === 0
+                ? 'Start Metro (npx react-native start) or connect a client to the server.'
                 : 'Adjust filters in the title bar to show clients'}
             </p>
           </div>

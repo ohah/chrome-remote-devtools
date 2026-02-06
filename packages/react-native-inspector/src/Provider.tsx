@@ -6,6 +6,7 @@ import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native
 import { setServerInfo } from './server-info';
 import { connect } from './index';
 import { setOnConnectionClose } from './websocket-client';
+import { fetchAndCacheSourceMap } from './fetch-source-map';
 // Import polyfill to ensure it's installed / polyfill이 설치되도록 import
 // The polyfill is auto-installed when this module is imported / 이 모듈이 import될 때 polyfill이 자동으로 설치됨
 import './redux-devtools-extension';
@@ -29,6 +30,8 @@ export interface ChromeRemoteDevToolsInspectorProviderProps {
   showStatusUI?: boolean;
   /** Device ID for Inspector list (required, e.g. from getUniqueId()) / Inspector 목록용 기기 ID (필수, 예: getUniqueId() 결과) */
   deviceId: string;
+  /** Metro bundler base URL (e.g. "http://localhost:8081"); auto-detects from NativeModules.SourceCode if omitted / Metro 번들러 기본 URL; 생략 시 NativeModules.SourceCode에서 자동 감지 */
+  metroBaseUrl?: string;
 }
 
 /**
@@ -42,6 +45,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
   autoConnect = true,
   showStatusUI = false,
   deviceId,
+  metroBaseUrl,
 }: ChromeRemoteDevToolsInspectorProviderProps): React.JSX.Element {
   const initializedRef = useRef(false);
   const connectionRef = useRef<Promise<void> | null>(null);
@@ -59,6 +63,8 @@ export function ChromeRemoteDevToolsInspectorProvider({
         console.log('✅ [ChromeRemoteDevTools] Connected to server / 서버에 연결됨');
         setConnectionStatus('connected');
         connectionRef.current = null;
+        // Fetch Metro source map so DevTools Sources panel shows original files / Metro 소스맵 fetch하여 DevTools Sources에 원본 파일 표시
+        fetchAndCacheSourceMap(metroBaseUrl).catch(() => {});
       })
       .catch((error) => {
         console.error('❌ [ChromeRemoteDevTools] Failed to connect to server:', error);
@@ -66,7 +72,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
         connectionRef.current = null;
       });
     connectionRef.current = promise;
-  }, [serverHost, serverPort, deviceId]);
+  }, [serverHost, serverPort, deviceId, metroBaseUrl]);
 
   const stableOnConnectionClose = useCallback(() => {
     onConnectionCloseRef.current?.();

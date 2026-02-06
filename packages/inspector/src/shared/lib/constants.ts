@@ -1,5 +1,7 @@
 // Shared constants / 공유 상수
 export const DEFAULT_SERVER_URL = 'http://localhost:8080';
+/** Default Metro bundler URL for /json/list (React Native) / React Native용 /json/list 기본 Metro URL */
+export const DEFAULT_METRO_URL = 'http://localhost:8081';
 export const CLIENT_REFRESH_INTERVAL = 5000; // 5 seconds
 export const GITHUB_REPO_URL = 'https://github.com/ohah/chrome-remote-devtools';
 

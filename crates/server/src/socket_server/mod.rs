@@ -3,6 +3,7 @@ mod client_handler;
 mod devtools_handler;
 mod message;
 mod message_processor;
+mod metro_proxy_handler;
 mod react_native_handler;
 
 use crate::logging::{LogType, Logger};
@@ -56,6 +57,7 @@ pub struct InspectorInfo {
 
 use client_handler::handle_client_connection;
 use devtools_handler::handle_devtools_connection;
+use metro_proxy_handler::handle_metro_proxy_websocket;
 use react_native_handler::handle_react_native_inspector_websocket;
 
 /// Socket server / 소켓 서버
@@ -373,6 +375,29 @@ impl SocketServer {
                     server_guard.logger.clone(),
                 )
                 .await;
+                return;
+            }
+        }
+
+        // Handle Metro WebSocket proxy / Metro WebSocket 프록시 처리
+        // Proxies WebSocket to Metro bundler, rewriting sourcemap URLs / Metro 번들러로 WebSocket을 프록시하고 소스맵 URL 재작성
+        {
+            let trimmed = path.trim_start_matches('/');
+            if trimmed == "metro/proxy" {
+                let server_guard = server.read().await;
+                server_guard.logger.log(
+                    LogType::Server,
+                    "metro-proxy",
+                    "Routing to Metro proxy handler",
+                    Some(&serde_json::json!({
+                        "path": path,
+                        "queryParams": query_params,
+                    })),
+                    None,
+                );
+                let logger = server_guard.logger.clone();
+                drop(server_guard);
+                handle_metro_proxy_websocket(ws, query_params, logger).await;
                 return;
             }
         }

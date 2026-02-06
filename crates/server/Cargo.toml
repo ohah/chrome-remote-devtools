@@ -33,6 +33,7 @@ clap.workspace = true
 
 # 추가 의존성
 url = "2.5"
+reqwest.workspace = true
 thiserror = "1.0"
 uuid = { version = "1.10", features = ["v4"] }
 flate2 = "1.0"
@@ -40,5 +41,3 @@ futures-util = "0.3"
 tokio-stream = "0.1.18"
 
 [dev-dependencies]
-# Integration test dependencies / 통합 테스트 의존성
-reqwest = { version = "0.12", features = ["json"] }
