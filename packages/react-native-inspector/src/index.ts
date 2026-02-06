@@ -19,7 +19,7 @@ import {
   disableNetworkHook as disableNetworkHookImpl,
   isNetworkHookEnabled as isNetworkHookEnabledImpl,
 } from './network';
-import { connectWebSocket, getCDPSender } from './websocket-client';
+import { connectWebSocket, disconnectWebSocket, getCDPSender } from './websocket-client';
 import { resolveDeviceId } from './device-id';
 
 /**
@@ -28,6 +28,8 @@ import { resolveDeviceId } from './device-id';
 export interface ConnectOptions {
   /** Device identifier shown in Inspector list (required, e.g. from getUniqueId()) / Inspector 목록에 표시되는 기기 식별자 (필수, 예: getUniqueId() 결과) */
   deviceId: string;
+  /** Called on each failed attempt (e.g. to show failed UI from first failure) / 각 연결 실패 시 호출 (예: 첫 실패부터 실패 UI 표시) */
+  onFailureAttempt?: (attempt: number, maxRetries: number) => void;
 }
 
 /**
@@ -45,9 +47,13 @@ export async function connect(
   setServerInfo(serverHostParam, serverPortParam);
 
   const deviceId = resolveDeviceId(options);
+  const { onFailureAttempt } = options;
 
-  const maxRetries = 3;
-  const retryDelay = 1000;
+  // Clear any previous connection and pending retries so reconnect works / 재연결이 되도록 이전 연결·대기 중인 재시도 정리
+  disconnectWebSocket();
+
+  const maxRetries = 5;
+  const retryDelayMs = 5000;
   let connected = false;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -55,18 +61,21 @@ export async function connect(
       await connectWebSocket(serverHostParam, serverPortParam, deviceId);
       connected = true;
       break;
-    } catch (_err) {
+    } catch (err) {
+      onFailureAttempt?.(attempt, maxRetries);
       if (attempt < maxRetries) {
         console.warn(
-          `[ChromeRemoteDevTools] Connection attempt ${attempt}/${maxRetries} failed, retrying in ${retryDelay}ms...`
+          `[ChromeRemoteDevTools] Connection attempt ${attempt}/${maxRetries} failed, retrying in ${retryDelayMs / 1000}s...`,
+          err
         );
-        await new Promise((r) => setTimeout(r, retryDelay));
+        await new Promise((r) => setTimeout(r, retryDelayMs));
       } else {
         console.warn(
-          '[ChromeRemoteDevTools] Failed to connect to server after all retries. DevTools will work in offline mode.'
+          '[ChromeRemoteDevTools] Failed to connect to server after all retries. Tap Retry to try again.'
         );
         console.warn(
-          `[ChromeRemoteDevTools] Server should be running on ${serverHostParam}:${serverPortParam}`
+          `[ChromeRemoteDevTools] Server should be running on ${serverHostParam}:${serverPortParam}`,
+          err
         );
       }
     }

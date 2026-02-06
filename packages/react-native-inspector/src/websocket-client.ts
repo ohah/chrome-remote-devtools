@@ -7,6 +7,9 @@ let sendFn: ((message: string) => void) | null = null;
 let retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
 let disconnectRequested = false;
 
+/** Called when connection closes after having been open (e.g. for showing Connect button) / 연결이 열린 뒤 끊어졌을 때 호출 (예: Connect 버튼 표시) */
+let onConnectionClose: (() => void) | null = null;
+
 /**
  * Build WebSocket URL for inspector device / inspector device용 WebSocket URL 생성
  * Matches server path: /remote/debug/inspector/device?name=...&app=...&device=...
@@ -80,9 +83,13 @@ export function connectWebSocket(
         };
 
         socket.onclose = (_event) => {
+          const wasConnected = sendFn != null;
           resetExecutionContextSentForReconnect();
           ws = null;
           sendFn = null;
+          if (wasConnected && !disconnectRequested) {
+            onConnectionClose?.();
+          }
           if (disconnectRequested) return;
           if (!resolved) {
             if (attempt >= maxRetries) {
@@ -127,6 +134,13 @@ export function getCDPSender(): ((host: string, port: number, message: string) =
  */
 export function isWebSocketConnected(): boolean {
   return ws != null && ws.readyState === WebSocket.OPEN;
+}
+
+/**
+ * Set callback when connection closes after having been open / 연결이 열린 뒤 끊어졌을 때 호출할 콜백 설정
+ */
+export function setOnConnectionClose(callback: (() => void) | null): void {
+  onConnectionClose = callback;
 }
 
 /**
