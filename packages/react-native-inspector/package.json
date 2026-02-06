@@ -40,17 +40,10 @@
     }
   },
   "scripts": {
-    "build": "tsdown",
-    "build:clean": "rm -rf dist",
-    "test": "bun test src/__tests__",
-    "prepublishOnly": "bun run build"
-  },
-  "dependencies": {
-    "@babel/runtime": "^7.25.0"
+    "test": "bun test src/__tests__"
   },
   "devDependencies": {
     "@types/react": "^19.2.7",
-    "tsdown": "^0.16.8",
     "typescript": "^5.9.3",
     "zustand": "^5.0.9"
   },

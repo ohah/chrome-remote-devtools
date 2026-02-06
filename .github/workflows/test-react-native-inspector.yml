@@ -97,7 +97,3 @@ jobs:
                 body: comment
               });
             }
-
-      - name: Build package
-        if: needs.check.outputs.should-run == 'true'
-        run: cd packages/react-native-inspector && bun run build
