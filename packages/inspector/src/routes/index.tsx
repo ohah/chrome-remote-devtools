@@ -70,7 +70,11 @@ function ConnectionPage() {
       id: client.id,
       label:
         client.type === 'react-native' || client.type === 'reactotron'
-          ? client.deviceName || client.appName || client.title || client.id.slice(0, 8)
+          ? client.deviceId ||
+            client.deviceName ||
+            client.appName ||
+            client.title ||
+            client.id.slice(0, 8)
           : client.url || client.id.slice(0, 8),
       icon:
         client.type === 'react-native' || client.type === 'reactotron' ? (
