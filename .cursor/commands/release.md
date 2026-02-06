@@ -4,7 +4,7 @@ Trigger npm publish by creating a version tag and pushing it. The GitHub Action 
 
 ## What the agent should do
 
-1. **Determine package**: If the user specifies a package (e.g. "rn-inspector", "react-native-inspector", "client", "server"), use it. Otherwise default to **react-native-inspector**. Map to script key: react-native-inspector → `rn-inspector`.
+1. **Determine package**: If the user specifies a package (e.g. "rn-inspector", "react-native-inspector", "client", "server"), use it. **If the user did not specify which package to release, ask: "Which package do you want to release? (rn-inspector | client | server)" and do not proceed until the user answers.** Map to script key: react-native-inspector → `rn-inspector`.
 2. **Check version**: Read the package’s `package.json` and confirm `version` is set to the desired release version (e.g. `0.1.0-rc.1`). If the user gave a version (e.g. `/release 0.1.0`), update that package’s `package.json` version and tell the user to commit it before tagging, or run `npm version` in that package and then run the release command.
 3. **SSH remote**: Ensure origin is `git@github.com-private:ohah/chrome-remote-devtools.git` so push uses ohah’s key. If not, run `git remote set-url origin git@github.com-private:ohah/chrome-remote-devtools.git`.
 4. **gh account**: Before push, run `gh api user -q .login`. If not `ohah`, run `gh auth switch --hostname github.com --user ohah` and remember the previous user to switch back after.
