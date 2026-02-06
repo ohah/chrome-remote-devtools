@@ -139,8 +139,13 @@ export function buildDevToolsUrlMetroProxy(options: BuildDevToolsUrlMetroProxyOp
   const devtoolsUrl = new URL(DEVTOOLS_FRONTEND_PATH, window.location.origin);
   const params = devtoolsUrl.searchParams;
 
-  // Build proxy WebSocket URL through our server / 우리 서버를 통한 프록시 WebSocket URL 구성
-  const serverHost = serverUrl.replace(/^https?:\/\//, '');
+  // Build proxy WebSocket URL through our server; use host only so path/trailing slash in serverUrl don't break URL / 우리 서버 경유 프록시 WebSocket URL; serverUrl의 경로·슬래시가 있어도 host만 사용
+  let serverHost: string;
+  try {
+    serverHost = new URL(serverUrl).host;
+  } catch {
+    serverHost = serverUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  }
   const proxyWsUrl = `${serverHost}/remote/debug/metro/proxy?target=${encodeURIComponent(metroWebSocketUrl)}&serverOrigin=${encodeURIComponent(serverUrl)}`;
 
   params.append('ws', proxyWsUrl);

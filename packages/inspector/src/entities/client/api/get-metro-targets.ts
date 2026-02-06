@@ -36,8 +36,13 @@ export interface MetroTarget {
  */
 async function metroFetch(url: string): Promise<Response> {
   if (typeof window !== 'undefined' && (window as Window & { __TAURI__?: unknown }).__TAURI__) {
-    const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
-    return tauriFetch(url, { method: 'GET' }) as Promise<Response>;
+    try {
+      const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
+      return tauriFetch(url, { method: 'GET' }) as Promise<Response>;
+    } catch {
+      // Tauri HTTP plugin unavailable (e.g. not installed); fall back to global fetch / Tauri HTTP 플러그인 없음 시 global fetch 사용
+      return fetch(url);
+    }
   }
   return fetch(url);
 }

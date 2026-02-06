@@ -7,6 +7,11 @@ const {
  * Metro configuration
  * https://reactnative.dev/docs/metro
  *
+ * NOTE: This example uses getDefaultConfig from @react-native/metro-config only.
+ * If your project previously used getMetroConfig from @craby/devkit (or similar),
+ * that helper may have applied extra defaults (resolvers, watch folders, etc.).
+ * Add equivalent settings here or wrap getDefaultConfig in your own helper if needed.
+ *
  * @type {import('@react-native/metro-config').MetroConfig}
  */
 const config = getDefaultConfig(__dirname);
