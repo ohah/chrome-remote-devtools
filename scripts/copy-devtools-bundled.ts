@@ -27,6 +27,11 @@ try {
     force: true,
   });
   console.log('✓ Successfully copied devtools-frontend to bundled');
+  console.log('');
+  console.log('To see changes (e.g. MMKV type/value fix): fully reload Inspector.');
+  console.log('  - Web: close DevTools tab and reopen, or Cmd+Shift+R on Inspector page');
+  console.log('  - Tauri: restart the app (tauri dev or built app)');
+  console.log('');
 } catch (error) {
   console.error('Failed to copy devtools-frontend:', error);
   process.exit(1);
