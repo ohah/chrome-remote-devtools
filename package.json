@@ -45,6 +45,8 @@
     "test:maestro:ios:build": "cd examples/react-native && bun run ios:release && cd ../.. && bun run test:maestro:ios",
     "test:maestro:studio": "maestro studio",
     "copy:devtools-bundled": "bun scripts/copy-devtools-bundled.ts",
+    "release:rn-inspector": "bun scripts/release-rn-inspector.ts",
+    "release": "bun run release:rn-inspector",
     "setup-mcp": "bun run .cursor/scripts/set-mcp-mise-path.ts"
   },
   "devDependencies": {
