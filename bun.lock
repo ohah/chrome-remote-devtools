@@ -139,7 +139,6 @@
         "@babel/core": "^7.25.2",
         "@babel/preset-env": "^7.25.3",
         "@babel/runtime": "^7.25.0",
-        "@craby/devkit": "^0.1.0-rc.3",
         "@react-native-community/cli": "20.0.0",
         "@react-native-community/cli-platform-android": "20.0.0",
         "@react-native-community/cli-platform-ios": "20.0.0",
@@ -225,9 +224,6 @@
     "packages/react-native-inspector": {
       "name": "@ohah/chrome-remote-devtools-inspector-react-native",
       "version": "0.1.0-rc.1",
-      "dependencies": {
-        "@babel/runtime": "^7.25.0",
-      },
       "devDependencies": {
         "@types/react": "^19.2.7",
         "typescript": "^5.9.3",
@@ -519,8 +515,6 @@
     "@braintree/sanitize-url": ["@braintree/sanitize-url@6.0.4", "", {}, "sha512-s3jaWicZd0pkP0jf5ysyHUI/RE7MHos6qlToFcGWXVp+ykHOy77OUMrfbgJ9it2C5bow7OIQwYYaHjk9XlBQ2A=="],
 
     "@bufbuild/protobuf": ["@bufbuild/protobuf@2.10.2", "", {}, "sha512-uFsRXwIGyu+r6AMdz+XijIIZJYpoWeYzILt5yZ2d3mCjQrWUTVpVD9WL/jZAbvp+Ed04rOhrsk7FiTcEDseB5A=="],
-
-    "@craby/devkit": ["@craby/devkit@0.1.0-rc.3", "", { "dependencies": { "oxc-resolver": "^11.11.1" } }, "sha512-sg7aOJgW1LzTuF3HN23zzX94x/LW4VxyPQiMG1W4R9nvPGR0tXK7DRU3qH9TY14fSEmNBpag5I11PUV3fqRzBQ=="],
 
     "@dmsnell/diff-match-patch": ["@dmsnell/diff-match-patch@1.1.0", "", {}, "sha512-yejLPmM5pjsGvxS9gXablUSbInW7H976c/FJ4iQxWIm7/38xBySRemTPDe34lhg1gVLbJntX0+sH0jYfU+PN9A=="],
 
