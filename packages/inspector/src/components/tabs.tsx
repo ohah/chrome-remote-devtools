@@ -38,23 +38,19 @@ export function Tabs({ tabs, activeTabId, onTabChange, className }: TabsProps) {
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
+              title={isDisconnected ? 'Disconnected' : undefined}
               className={cn(
-                'group relative flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors',
+                'group relative flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
                 'border-b-2 border-transparent hover:bg-gray-700/50',
                 isActive && 'bg-gray-900 border-b-2 border-blue-500 text-gray-100',
                 !isActive && 'text-gray-400 hover:text-gray-200',
-                isDisconnected && 'opacity-60' // Visual indicator for disconnected tabs / 연결 해제된 탭의 시각적 표시
+                isDisconnected && 'opacity-60 text-gray-500' // Disabled look for disconnected tabs only; no extra text / 연결 해제된 탭은 색만 비활성화
               )}
               aria-selected={isActive}
               role="tab"
             >
               {tab.icon && <span className="shrink-0">{tab.icon}</span>}
               <span className="whitespace-nowrap">{tab.label}</span>
-              {isDisconnected && (
-                <span className="ml-1 text-xs text-gray-500" title="Disconnected / 연결 해제됨">
-                  (offline)
-                </span>
-              )}
               {/* Reserve space for close button to prevent tab size changes / 탭 크기 변경을 방지하기 위해 닫기 버튼 공간 예약 */}
               <span className="ml-1 w-[18px] flex items-center justify-center">
                 {/* Always show close button but disable functionality / 닫기 버튼은 항상 표시하지만 기능 비활성화 */}

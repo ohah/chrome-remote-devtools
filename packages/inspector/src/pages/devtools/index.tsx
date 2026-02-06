@@ -229,9 +229,10 @@ function DevToolsPage() {
           disconnected: false,
         };
       }
+      // Use key as label (deviceId for RN) even when offline; no "(offline)" text, style only / 오프라인에도 key(deviceId) 표시, "(offline)" 문구 없이 스타일만
       return {
         id,
-        label: `${String(id).slice(0, 8)} (offline)`,
+        label: key,
         icon: <Smartphone className="w-4 h-4" />,
         disconnected: true,
       };
