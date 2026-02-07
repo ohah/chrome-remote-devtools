@@ -137,14 +137,13 @@ pub async fn handle_metro_proxy_websocket(
     }
 
     // --- Register in devtools map to receive app responses via fan-out ---
-    // devtools 맵에 등록하여 팬아웃을 통해 앱 응답을 받음
+    // Always register so that when RN inspector connects later we can associate (no refresh needed)
+    // 앱이 나중에 연결돼도 연동되도록 항상 등록 (새로고침 불필요)
     let (app_tx, mut app_rx) = mpsc::unbounded_channel::<String>();
     let metro_devtools_id = format!("metro-proxy-{}", uuid::Uuid::new_v4().simple());
 
-    // Find the first available RN inspector connection
-    // get_connection is keyed by connection id (ConnectionInfo.id); DevTools.client_id uses client_id
-    // 첫 번째 사용 가능한 RN inspector 연결 찾기.
-    // get_connection은 ConnectionInfo.id로 조회하고, DevTools.client_id에는 client_id 사용
+    // Find the first available RN inspector connection (if any)
+    // 첫 번째 사용 가능한 RN inspector 연결 찾기 (있으면)
     let (rn_connection_id, rn_client_id) = {
         let connections = rn_manager.get_all_connections().await;
         connections
@@ -153,16 +152,16 @@ pub async fn handle_metro_proxy_websocket(
             .unwrap_or((None, None))
     };
 
+    let devtool_entry = Arc::new(DevTools {
+        id: metro_devtools_id.clone(),
+        client_id: rn_client_id.clone(),
+        sender: app_tx.clone(),
+    });
+    {
+        let mut devtools = devtools_map.write().await;
+        devtools.insert(metro_devtools_id.clone(), devtool_entry);
+    }
     if let Some(ref client_id) = rn_client_id {
-        let devtool_entry = Arc::new(DevTools {
-            id: metro_devtools_id.clone(),
-            client_id: Some(client_id.clone()),
-            sender: app_tx.clone(),
-        });
-        {
-            let mut devtools = devtools_map.write().await;
-            devtools.insert(metro_devtools_id.clone(), devtool_entry);
-        }
         logger.log(
             LogType::Server,
             "metro-proxy",
@@ -175,7 +174,6 @@ pub async fn handle_metro_proxy_websocket(
         );
 
         // Request stored events from RN inspector (like enable replay)
-        // RN inspector에 저장된 이벤트 요청 (enable replay 등)
         let methods = vec![
             "Storage.replayStoredEvents",
             "SessionReplay.replayStoredEvents",
@@ -198,32 +196,46 @@ pub async fn handle_metro_proxy_websocket(
         logger.log(
             LogType::Server,
             "metro-proxy",
-            "No RN inspector connection found; custom CDP domains will not be available",
+            "No RN inspector yet; registered as waiting (will associate when app connects)",
             None,
             None,
         );
     }
 
-    // Task: DevTools → Metro / App (multiplex by domain) / DevTools → Metro / App (도메인별 멀티플렉싱)
+    // Task: DevTools → Metro / App (multiplex by domain). Look up client_id from devtools map
+    // per message so that later-associated RN inspector is used without refresh.
+    // DevTools → Metro / App (도메인별 멀티플렉싱). 메시지마다 devtools 맵에서 client_id 조회하여
+    // 나중에 연동된 RN inspector도 새로고침 없이 사용
     let logger_d2m = logger.clone();
     let rn_manager_d2m = rn_manager.clone();
-    let rn_connection_id_d2m = rn_connection_id.clone();
+    let devtools_map_d2m = devtools_map.clone();
+    let metro_devtools_id_d2m = metro_devtools_id.clone();
     let devtools_to_metro = tokio::spawn(async move {
         while let Some(msg) = devtools_stream.next().await {
             match msg {
                 Ok(Message::Text(text)) => {
                     // Try to parse and check if it's a custom domain
                     // 파싱하여 커스텀 도메인인지 확인
+                    // Avoid allocating String: use &str from parsed Value in same scope / String 할당 없이 파싱된 Value의 &str 사용 (Copilot review)
                     let is_custom = serde_json::from_str::<serde_json::Value>(&text)
                         .ok()
-                        .and_then(|v| v.get("method")?.as_str().map(String::from))
-                        .map(|m| is_custom_cdp_domain(&m))
+                        .and_then(|v| {
+                            v.get("method")
+                                .and_then(|m| m.as_str())
+                                .map(is_custom_cdp_domain)
+                        })
                         .unwrap_or(false);
 
                     if is_custom {
-                        // Route to RN app via inspector connection (keyed by connection id)
-                        // inspector 연결을 통해 RN 앱으로 라우팅 (connection id로 조회)
-                        let sent = if let Some(ref conn_id) = rn_connection_id_d2m {
+                        // Look up current client_id from devtools map (so later-associated inspector is used)
+                        // devtools 맵에서 현재 client_id 조회 (나중에 연동된 inspector 사용)
+                        let conn_id = {
+                            let devtools = devtools_map_d2m.read().await;
+                            devtools
+                                .get(&metro_devtools_id_d2m)
+                                .and_then(|d| d.client_id.clone())
+                        };
+                        let sent = if let Some(ref conn_id) = conn_id {
                             if let Some(connection) = rn_manager_d2m.get_connection(conn_id).await {
                                 let sender = connection.sender.read().await;
                                 match sender.send(text.clone()) {
