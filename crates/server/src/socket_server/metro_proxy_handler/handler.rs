@@ -114,17 +114,22 @@ pub async fn handle_metro_proxy_websocket(
     let (app_tx, mut app_rx) = mpsc::unbounded_channel::<String>();
     let metro_devtools_id = format!("metro-proxy-{}", uuid::Uuid::new_v4().simple());
 
-    // Find the first available RN inspector connection to use as client_id
-    // 사용할 client_id로 첫 번째 사용 가능한 RN inspector 연결 찾기
-    let rn_inspector_id = {
+    // Find the first available RN inspector connection
+    // get_connection is keyed by connection id (ConnectionInfo.id); DevTools.client_id uses client_id
+    // 첫 번째 사용 가능한 RN inspector 연결 찾기.
+    // get_connection은 ConnectionInfo.id로 조회하고, DevTools.client_id에는 client_id 사용
+    let (rn_connection_id, rn_client_id) = {
         let connections = rn_manager.get_all_connections().await;
-        connections.first().and_then(|c| c.client_id.clone())
+        connections
+            .first()
+            .map(|c| (Some(c.id.clone()), c.client_id.clone()))
+            .unwrap_or((None, None))
     };
 
-    if let Some(ref inspector_client_id) = rn_inspector_id {
+    if let Some(ref client_id) = rn_client_id {
         let devtool_entry = Arc::new(DevTools {
             id: metro_devtools_id.clone(),
-            client_id: Some(inspector_client_id.clone()),
+            client_id: Some(client_id.clone()),
             sender: app_tx.clone(),
         });
         {
@@ -136,7 +141,7 @@ pub async fn handle_metro_proxy_websocket(
             "metro-proxy",
             &format!(
                 "Registered metro proxy as DevTools (id={}) for RN inspector client_id={}",
-                metro_devtools_id, inspector_client_id
+                metro_devtools_id, client_id
             ),
             None,
             None,
@@ -148,15 +153,17 @@ pub async fn handle_metro_proxy_websocket(
             "Storage.replayStoredEvents",
             "SessionReplay.replayStoredEvents",
         ];
-        if let Some(connection) = rn_manager.get_connection(inspector_client_id).await {
-            let sender = connection.sender.read().await;
-            for method in methods {
-                let message = serde_json::json!({
-                    "method": method,
-                    "params": {},
-                });
-                if let Ok(json_str) = serde_json::to_string(&message) {
-                    let _ = sender.send(json_str);
+        if let Some(ref conn_id) = rn_connection_id {
+            if let Some(connection) = rn_manager.get_connection(conn_id).await {
+                let sender = connection.sender.read().await;
+                for method in methods {
+                    let message = serde_json::json!({
+                        "method": method,
+                        "params": {},
+                    });
+                    if let Ok(json_str) = serde_json::to_string(&message) {
+                        let _ = sender.send(json_str);
+                    }
                 }
             }
         }
@@ -173,7 +180,7 @@ pub async fn handle_metro_proxy_websocket(
     // Task: DevTools → Metro / App (multiplex by domain) / DevTools → Metro / App (도메인별 멀티플렉싱)
     let logger_d2m = logger.clone();
     let rn_manager_d2m = rn_manager.clone();
-    let rn_inspector_id_d2m = rn_inspector_id.clone();
+    let rn_connection_id_d2m = rn_connection_id.clone();
     let devtools_to_metro = tokio::spawn(async move {
         while let Some(msg) = devtools_stream.next().await {
             match msg {
@@ -187,25 +194,40 @@ pub async fn handle_metro_proxy_websocket(
                         .unwrap_or(false);
 
                     if is_custom {
-                        // Route to RN app via inspector connection
-                        // inspector 연결을 통해 RN 앱으로 라우팅
-                        if let Some(ref inspector_id) = rn_inspector_id_d2m {
-                            if let Some(connection) =
-                                rn_manager_d2m.get_connection(inspector_id).await
-                            {
+                        // Route to RN app via inspector connection (keyed by connection id)
+                        // inspector 연결을 통해 RN 앱으로 라우팅 (connection id로 조회)
+                        let sent = if let Some(ref conn_id) = rn_connection_id_d2m {
+                            if let Some(connection) = rn_manager_d2m.get_connection(conn_id).await {
                                 let sender = connection.sender.read().await;
-                                if let Err(e) = sender.send(text.clone()) {
-                                    logger_d2m.log_error(
-                                        LogType::Server,
-                                        "metro-proxy",
-                                        &format!(
-                                            "Failed to send custom CDP to RN inspector: {}",
-                                            e
-                                        ),
-                                        None,
-                                    );
+                                match sender.send(text.clone()) {
+                                    Ok(()) => true,
+                                    Err(e) => {
+                                        logger_d2m.log_error(
+                                            LogType::Server,
+                                            "metro-proxy",
+                                            &format!(
+                                                "Failed to send custom CDP to RN inspector: {}",
+                                                e
+                                            ),
+                                            None,
+                                        );
+                                        false
+                                    }
                                 }
+                            } else {
+                                false
                             }
+                        } else {
+                            false
+                        };
+                        if !sent {
+                            logger_d2m.log(
+                                LogType::Server,
+                                "metro-proxy",
+                                "Custom CDP message dropped: no RN inspector connection available",
+                                None,
+                                None,
+                            );
                         }
                     } else {
                         // Forward standard CDP to Metro / 표준 CDP는 Metro로 전달
