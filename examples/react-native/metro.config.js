@@ -26,6 +26,23 @@ const mergedConfig = mergeConfig(getDefaultConfig(__dirname), {
       path.resolve(__dirname, 'node_modules'),
       path.resolve(workspaceRoot, 'node_modules'),
     ],
+    // Force react/react-native to always resolve from the app root so workspace
+    // packages don't accidentally load a second React instance (dual-React bug)
+    resolveRequest: (context, moduleName, platform) => {
+      if (
+        moduleName === 'react' ||
+        moduleName.startsWith('react/') ||
+        moduleName === 'react-native' ||
+        moduleName.startsWith('react-native/')
+      ) {
+        return context.resolveRequest(
+          { ...context, originModulePath: path.resolve(__dirname, 'index.js') },
+          moduleName,
+          platform
+        );
+      }
+      return context.resolveRequest(context, moduleName, platform);
+    },
   },
 });
 
