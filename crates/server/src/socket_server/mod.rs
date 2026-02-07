@@ -396,8 +396,10 @@ impl SocketServer {
                     None,
                 );
                 let logger = server_guard.logger.clone();
+                let devtools = server_guard.devtools.clone();
+                let rn_manager = server_guard.react_native_inspector_manager.clone();
                 drop(server_guard);
-                handle_metro_proxy_websocket(ws, query_params, logger).await;
+                handle_metro_proxy_websocket(ws, query_params, devtools, rn_manager, logger).await;
                 return;
             }
         }

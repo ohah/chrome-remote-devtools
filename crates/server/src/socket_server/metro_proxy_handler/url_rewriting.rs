@@ -1,218 +1,12 @@
-// Metro WebSocket proxy handler / Metro WebSocket 프록시 핸들러
-// Proxies WebSocket between DevTools and Metro bundler, rewriting sourcemap URLs
-// DevTools와 Metro 번들러 사이의 WebSocket을 프록시하고 소스맵 URL을 재작성
-use crate::logging::{LogType, Logger};
-use axum::extract::ws::{Message, WebSocket};
-use futures_util::{SinkExt, StreamExt};
-use std::collections::HashMap;
-use std::sync::Arc;
-use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
+// URL rewriting utilities for Metro proxy / Metro 프록시용 URL 재작성 유틸리티
+// Rewrites Debugger.scriptParsed URLs to go through our server's resource proxy
+// Debugger.scriptParsed URL을 우리 서버의 리소스 프록시를 통하도록 재작성
+
 use url::Url;
-
-/// Handle Metro WebSocket proxy connection / Metro WebSocket 프록시 연결 처리
-/// Connects to Metro's WebSocket and relays messages bidirectionally,
-/// rewriting Debugger.scriptParsed URLs to go through our server's resource proxy.
-/// Metro WebSocket에 연결하고 메시지를 양방향으로 중계하며,
-/// Debugger.scriptParsed URL을 우리 서버의 리소스 프록시를 통하도록 재작성
-pub async fn handle_metro_proxy_websocket(
-    ws: WebSocket,
-    query_params: HashMap<String, String>,
-    logger: Arc<Logger>,
-) {
-    // Extract required parameters / 필수 파라미터 추출
-    let target = match query_params.get("target") {
-        Some(t) => t.clone(),
-        None => {
-            logger.log_error(
-                LogType::Server,
-                "metro-proxy",
-                "Missing 'target' query parameter",
-                None,
-            );
-            return;
-        }
-    };
-
-    let server_origin = match query_params.get("serverOrigin") {
-        Some(o) => o.clone(),
-        None => {
-            logger.log_error(
-                LogType::Server,
-                "metro-proxy",
-                "Missing 'serverOrigin' query parameter",
-                None,
-            );
-            return;
-        }
-    };
-
-    // Derive Metro HTTP origin from WebSocket URL / WebSocket URL에서 Metro HTTP origin 도출
-    let metro_origin = match derive_metro_origin(&target) {
-        Some(o) => o,
-        None => {
-            logger.log_error(
-                LogType::Server,
-                "metro-proxy",
-                &format!("Failed to parse Metro target URL: {}", target),
-                None,
-            );
-            return;
-        }
-    };
-
-    logger.log(
-        LogType::Server,
-        "metro-proxy",
-        &format!(
-            "Connecting to Metro: target={}, metro_origin={}, server_origin={}",
-            target, metro_origin, server_origin
-        ),
-        None,
-        None,
-    );
-
-    // Connect to Metro's WebSocket / Metro WebSocket에 연결
-    let metro_ws = match tokio_tungstenite::connect_async(&target).await {
-        Ok((ws_stream, _)) => ws_stream,
-        Err(e) => {
-            logger.log_error(
-                LogType::Server,
-                "metro-proxy",
-                &format!("Failed to connect to Metro WebSocket: {}", e),
-                Some(&e.to_string()),
-            );
-            return;
-        }
-    };
-
-    logger.log(
-        LogType::Server,
-        "metro-proxy",
-        "Connected to Metro WebSocket",
-        None,
-        None,
-    );
-
-    // Split both WebSockets / 양쪽 WebSocket 분리
-    let (mut devtools_sink, mut devtools_stream) = ws.split();
-    let (mut metro_sink, mut metro_stream) = metro_ws.split();
-
-    // Task: DevTools → Metro (forward unmodified) / DevTools → Metro (수정 없이 전달)
-    let logger_d2m = logger.clone();
-    let devtools_to_metro = tokio::spawn(async move {
-        while let Some(msg) = devtools_stream.next().await {
-            match msg {
-                Ok(Message::Text(text)) => {
-                    if metro_sink
-                        .send(TungsteniteMessage::Text(text))
-                        .await
-                        .is_err()
-                    {
-                        break;
-                    }
-                }
-                Ok(Message::Binary(data)) => {
-                    if metro_sink
-                        .send(TungsteniteMessage::Binary(data))
-                        .await
-                        .is_err()
-                    {
-                        break;
-                    }
-                }
-                Ok(Message::Close(_)) => {
-                    let _ = metro_sink.send(TungsteniteMessage::Close(None)).await;
-                    break;
-                }
-                Ok(Message::Ping(data)) => {
-                    let _ = metro_sink.send(TungsteniteMessage::Ping(data)).await;
-                }
-                Ok(Message::Pong(data)) => {
-                    let _ = metro_sink.send(TungsteniteMessage::Pong(data)).await;
-                }
-                Err(e) => {
-                    logger_d2m.log_error(
-                        LogType::Server,
-                        "metro-proxy",
-                        "DevTools WebSocket error",
-                        Some(&e.to_string()),
-                    );
-                    break;
-                }
-            }
-        }
-    });
-
-    // Task: Metro → DevTools (rewrite URLs in Debugger.scriptParsed) / Metro → DevTools (Debugger.scriptParsed URL 재작성)
-    let logger_m2d = logger.clone();
-    let metro_origin_clone = metro_origin.clone();
-    let server_origin_clone = server_origin.clone();
-    let metro_to_devtools = tokio::spawn(async move {
-        while let Some(msg) = metro_stream.next().await {
-            match msg {
-                Ok(TungsteniteMessage::Text(text)) => {
-                    let rewritten = rewrite_script_parsed_urls(
-                        &text,
-                        &metro_origin_clone,
-                        &server_origin_clone,
-                    );
-                    if devtools_sink.send(Message::Text(rewritten)).await.is_err() {
-                        break;
-                    }
-                }
-                Ok(TungsteniteMessage::Binary(data)) => {
-                    if devtools_sink.send(Message::Binary(data)).await.is_err() {
-                        break;
-                    }
-                }
-                Ok(TungsteniteMessage::Close(_)) => {
-                    let _ = devtools_sink.send(Message::Close(None)).await;
-                    break;
-                }
-                Ok(TungsteniteMessage::Ping(data)) => {
-                    let _ = devtools_sink.send(Message::Ping(data)).await;
-                }
-                Ok(TungsteniteMessage::Pong(data)) => {
-                    let _ = devtools_sink.send(Message::Pong(data)).await;
-                }
-                Err(e) => {
-                    logger_m2d.log_error(
-                        LogType::Server,
-                        "metro-proxy",
-                        "Metro WebSocket error",
-                        Some(&e.to_string()),
-                    );
-                    break;
-                }
-                _ => {}
-            }
-        }
-    });
-
-    // Wait for either task to finish, then abort the other / 한쪽이 끝나면 다른 쪽 종료
-    let mut d2m = devtools_to_metro;
-    let mut m2d = metro_to_devtools;
-    tokio::select! {
-        _ = &mut d2m => {
-            m2d.abort();
-        }
-        _ = &mut m2d => {
-            d2m.abort();
-        }
-    }
-
-    logger.log(
-        LogType::Server,
-        "metro-proxy",
-        "Metro proxy connection closed",
-        None,
-        None,
-    );
-}
 
 /// Derive HTTP origin from a WebSocket URL / WebSocket URL에서 HTTP origin 도출
 /// e.g. "ws://localhost:8081/page/abc" → "http://localhost:8081"
-fn derive_metro_origin(ws_url: &str) -> Option<String> {
+pub fn derive_metro_origin(ws_url: &str) -> Option<String> {
     let parsed = Url::parse(ws_url).ok()?;
     let scheme = match parsed.scheme() {
         "ws" => "http",
@@ -229,7 +23,11 @@ fn derive_metro_origin(ws_url: &str) -> Option<String> {
 /// Rewrite URLs in Debugger.scriptParsed CDP messages / Debugger.scriptParsed CDP 메시지의 URL 재작성
 /// Rewrites url and sourceMapURL fields to go through our server's /metro-resource proxy
 /// url과 sourceMapURL 필드를 우리 서버의 /metro-resource 프록시를 통하도록 재작성
-fn rewrite_script_parsed_urls(message: &str, metro_origin: &str, server_origin: &str) -> String {
+pub fn rewrite_script_parsed_urls(
+    message: &str,
+    metro_origin: &str,
+    server_origin: &str,
+) -> String {
     // Try to parse as JSON / JSON 파싱 시도
     let mut parsed: serde_json::Value = match serde_json::from_str(message) {
         Ok(v) => v,
