@@ -2,13 +2,40 @@
 // This component connects to the server via WebSocket (JavaScript layer) / 이 컴포넌트는 WebSocket(JavaScript 레이어)으로 서버에 연결합니다
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity, NativeModules } from 'react-native';
 import { setServerInfo } from './server-info';
 import { connect } from './index';
 import { setOnConnectionClose, setOnConnectionOpen } from './websocket-client';
+import { enableConsoleHook, disableConsoleHook } from './cdp/domain/runtime';
+import { enableNetworkHook, disableNetworkHook } from './cdp/domain/network';
 // Import polyfill to ensure it's installed / polyfill이 설치되도록 import
 // The polyfill is auto-installed when this module is imported / 이 모듈이 import될 때 polyfill이 자동으로 설치됨
 import './redux-devtools-extension';
+
+/**
+ * Detect if Metro bundler is running by checking scriptURL / scriptURL로 Metro 번들러 실행 여부 감지
+ * Metro running: http://localhost:8081/index.bundle / Metro 실행 중: http://...
+ * Release build: file:// or undefined / 릴리즈 빌드: file:// 또는 undefined
+ */
+function detectMetroMode(): boolean {
+  try {
+    let scriptURL: string | undefined;
+
+    // Try new way first (RN 0.64+) / 최신 방식 먼저 시도
+    if (NativeModules.SourceCode?.getConstants) {
+      scriptURL = NativeModules.SourceCode.getConstants().scriptURL;
+    } else {
+      // Fallback to old way (RN 0.50+) / 레거시 방식으로 폴백
+      scriptURL = (NativeModules.SourceCode as Record<string, unknown>)?.scriptURL as
+        | string
+        | undefined;
+    }
+
+    return typeof scriptURL === 'string' && scriptURL.startsWith('http');
+  } catch {
+    return false;
+  }
+}
 
 /** Connection status for WebSocket / WebSocket 연결 상태 */
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'failed';
@@ -29,8 +56,6 @@ export interface ChromeRemoteDevToolsInspectorProviderProps {
   showStatusUI?: boolean;
   /** Device ID for Inspector list (required, e.g. from getUniqueId()) / Inspector 목록용 기기 ID (필수, 예: getUniqueId() 결과) */
   deviceId: string;
-  /** Metro bundler base URL (e.g. "http://localhost:8081"); auto-detects from NativeModules.SourceCode if omitted / Metro 번들러 기본 URL; 생략 시 NativeModules.SourceCode에서 자동 감지 */
-  metroBaseUrl?: string;
 }
 
 /**
@@ -44,7 +69,6 @@ export function ChromeRemoteDevToolsInspectorProvider({
   autoConnect = true,
   showStatusUI = false,
   deviceId,
-  metroBaseUrl,
 }: ChromeRemoteDevToolsInspectorProviderProps): React.JSX.Element {
   const initializedRef = useRef(false);
   const connectionRef = useRef<Promise<void> | null>(null);
@@ -54,6 +78,23 @@ export function ChromeRemoteDevToolsInspectorProvider({
   const doConnect = useCallback(() => {
     if (!deviceId) return;
     setConnectionStatus('connecting');
+
+    // Detect Metro mode and enable/disable hooks accordingly / Metro 모드 감지 후 훅 활성화/비활성화
+    const isMetroMode = detectMetroMode();
+    if (isMetroMode) {
+      console.log(
+        '[ChromeRemoteDevTools] Metro detected, using Metro CDP (hooks disabled) / Metro 감지됨, Metro CDP 사용 (훅 비활성화)'
+      );
+      disableConsoleHook();
+      disableNetworkHook();
+    } else {
+      console.log(
+        '[ChromeRemoteDevTools] Release mode, using our hooks / 릴리즈 모드, 우리 훅 사용'
+      );
+      enableConsoleHook();
+      enableNetworkHook();
+    }
+
     const promise = connect(serverHost, serverPort, {
       deviceId,
       onFailureAttempt: () => setConnectionStatus('failed'),
