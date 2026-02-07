@@ -341,7 +341,7 @@ function DevToolsPage() {
               setMetroViewMode((prev) => ({ ...prev, [clientId]: 'our-inspector' }))
             }
             className={`px-2.5 py-1 text-xs rounded ${
-              metroViewMode[clientId] === 'our-inspector'
+              (metroViewMode[clientId] ?? 'our-inspector') === 'our-inspector'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
@@ -354,7 +354,7 @@ function DevToolsPage() {
               setMetroViewMode((prev) => ({ ...prev, [clientId]: 'metro-debugger' }))
             }
             className={`px-2.5 py-1 text-xs rounded ${
-              (metroViewMode[clientId] ?? 'metro-debugger') === 'metro-debugger'
+              (metroViewMode[clientId] ?? 'our-inspector') === 'metro-debugger'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
@@ -368,7 +368,7 @@ function DevToolsPage() {
       <div className="flex-1 relative">
         {clientsForIframes.map((item) => {
           const iframeRef = getOrCreateIframeRef(item.key);
-          const mode = metroViewMode[item.key] ?? 'metro-debugger';
+          const mode = metroViewMode[item.key] ?? 'our-inspector';
           const useOurInspector =
             item.metroWebSocketDebuggerUrl && mode === 'our-inspector';
 
