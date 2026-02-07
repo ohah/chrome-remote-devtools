@@ -35,7 +35,6 @@ export class CDPMessageHandler {
    * Initialize handler with store / store로 핸들러 초기화
    */
   initialize(store: Store<StoreState, StoreAction>): void {
-    console.log('[CDPMessageHandler] Initializing with store');
     this.store = store;
     this.setupMessageListener();
   }
@@ -46,8 +45,6 @@ export class CDPMessageHandler {
    */
   private setupMessageListener(): void {
     this.messageListener = (event: MessageEvent) => {
-      console.log('[CDPMessageHandler] Received message:', event.data);
-
       // ReduxExtensionBridge sends messages in two formats / ReduxExtensionBridge는 두 가지 형식으로 메시지를 보냄
       // 1. {name: "INIT_INSTANCE", instanceId: number}
       // 2. {name: "RELAY", message: {...}}
@@ -55,7 +52,6 @@ export class CDPMessageHandler {
       if (event.data && typeof event.data === 'object') {
         // Check for INIT_INSTANCE format / INIT_INSTANCE 형식 확인
         if (event.data.name === 'INIT_INSTANCE' && event.data.instanceId !== undefined) {
-          console.log('[CDPMessageHandler] Handling INIT_INSTANCE:', event.data.instanceId);
           this.handleCDPMessage({
             type: 'INIT_INSTANCE',
             instanceId: event.data.instanceId,
@@ -63,7 +59,6 @@ export class CDPMessageHandler {
         }
         // Check for RELAY format / RELAY 형식 확인
         else if (event.data.name === 'RELAY' && event.data.message) {
-          console.log('[CDPMessageHandler] Handling RELAY:', event.data.message);
           this.handleCDPMessage(event.data.message as CDPMessageParams);
         }
         // Also check for direct CDP_EVENT format (fallback) / 직접 CDP_EVENT 형식도 확인 (폴백)
@@ -72,16 +67,12 @@ export class CDPMessageHandler {
           event.data.domain === 'Redux' &&
           event.data.params
         ) {
-          console.log('[CDPMessageHandler] Handling CDP_EVENT:', event.data.params);
           this.handleCDPMessage(event.data.params as CDPMessageParams);
-        } else {
-          console.log('[CDPMessageHandler] Unknown message format:', event.data);
         }
       }
     };
 
     window.addEventListener('message', this.messageListener);
-    console.log('[CDPMessageHandler] Message listener set up');
   }
 
   /**
@@ -91,11 +82,8 @@ export class CDPMessageHandler {
    */
   private handleCDPMessage(params: CDPMessageParams): void {
     if (!this.store) {
-      console.warn('[CDPMessageHandler] Store not initialized');
       return;
     }
-
-    console.log('[CDPMessageHandler] Handling CDP message:', params);
 
     try {
       // Convert CDP message to UPDATE_STATE action with Request format / CDP 메시지를 Request 형식의 UPDATE_STATE 액션으로 변환
@@ -161,14 +149,13 @@ export class CDPMessageHandler {
 
       // Dispatch UPDATE_STATE action / UPDATE_STATE 액션 dispatch
       // This is the action type that @redux-devtools/app's api middleware processes / 이것은 @redux-devtools/app의 api middleware가 처리하는 액션 타입
-      console.log('[CDPMessageHandler] Dispatching UPDATE_STATE:', request);
       this.dispatchToApp({
         type: UPDATE_STATE,
         request,
         id: params.instanceId?.toString(),
       } as StoreAction);
-    } catch (error) {
-      console.error('[CDPMessageHandler] Error handling CDP message:', error);
+    } catch {
+      // Ignore parse/dispatch errors / 파싱·dispatch 오류 무시
     }
   }
 
@@ -178,17 +165,13 @@ export class CDPMessageHandler {
    */
   private dispatchToApp(action: StoreAction): void {
     if (!this.store) {
-      console.warn('[CDPMessageHandler] Cannot dispatch - store not initialized');
       return;
     }
 
     try {
-      // Dispatch action to the app's store / 앱의 store에 액션 dispatch
-      console.log('[CDPMessageHandler] Dispatching action to store:', action);
       this.store.dispatch(action);
-      console.log('[CDPMessageHandler] Action dispatched successfully');
-    } catch (error) {
-      console.error('[CDPMessageHandler] Error dispatching to app store:', error);
+    } catch {
+      // Ignore dispatch errors / dispatch 오류 무시
     }
   }
 

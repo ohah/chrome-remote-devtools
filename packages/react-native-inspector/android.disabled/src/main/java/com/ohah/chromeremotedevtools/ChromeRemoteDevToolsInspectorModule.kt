@@ -101,7 +101,7 @@ class ChromeRemoteDevToolsInspectorModule(reactApplicationContext: ReactApplicat
                       const jsonString = atob(base64Json);
                       handler(jsonString);
                     } catch (e) {
-                      console.error('[CDPMessageHandler] Error calling handler:', e);
+                      // Ignore handler errors / 핸들러 오류 무시
                     }
                   }
                 })();
