@@ -331,23 +331,10 @@ function DevToolsPage() {
         </>
       )}
 
-      {/* Metro tab view mode chooser: Metro Debugger | Our Inspector / Metro 탭 뷰 모드 선택 */}
+      {/* Metro tab view mode chooser: Our Inspector | Metro Debugger / Metro 탭 뷰 모드 선택 */}
       {clientId?.startsWith(METRO_TAB_ID_PREFIX) && (
         <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 border-b border-gray-700 shrink-0">
           <span className="text-xs text-gray-400">View:</span>
-          <button
-            type="button"
-            onClick={() =>
-              setMetroViewMode((prev) => ({ ...prev, [clientId]: 'metro-debugger' }))
-            }
-            className={`px-2.5 py-1 text-xs rounded ${
-              (metroViewMode[clientId] ?? 'metro-debugger') === 'metro-debugger'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            Metro Debugger
-          </button>
           <button
             type="button"
             onClick={() =>
@@ -360,6 +347,19 @@ function DevToolsPage() {
             }`}
           >
             Our Inspector
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setMetroViewMode((prev) => ({ ...prev, [clientId]: 'metro-debugger' }))
+            }
+            className={`px-2.5 py-1 text-xs rounded ${
+              (metroViewMode[clientId] ?? 'metro-debugger') === 'metro-debugger'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Metro Debugger
           </button>
         </div>
       )}

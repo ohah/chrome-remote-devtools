@@ -48,6 +48,10 @@ pub fn create_router(
         );
     }
 
+    // Add catch-all route for Metro sourcemap files (must be last) / Metro 소스맵 파일용 catch-all 라우트 추가 (마지막이어야 함)
+    // Handles paths like /[metro-project]/src/... or /[metro-watchFolders]/1/... / /[metro-project]/src/... 또는 /[metro-watchFolders]/1/... 같은 경로 처리
+    router = router.route("/*path", get(handle_metro_sourcemap_file));
+
     router
 }
 
@@ -449,6 +453,59 @@ async fn handle_metro_resource(
     let headers = res.headers_mut();
     headers.insert(
         header::ACCESS_CONTROL_ALLOW_ORIGIN,
+        header::HeaderValue::from_static("*"),
+    );
+    Ok(res)
+}
+
+/// Handle Metro sourcemap file requests (catch-all for /[metro-project]/... paths) / Metro 소스맵 파일 요청 처리 (/[metro-project]/... 경로용 catch-all)
+/// Proxies to Metro bundler with default origin http://localhost:8081 / 기본 origin http://localhost:8081로 Metro 번들러에 프록시
+async fn handle_metro_sourcemap_file(Path(path): Path<String>) -> Result<Response, StatusCode> {
+    // Only handle paths that look like Metro sourcemap paths / Metro 소스맵 경로처럼 보이는 경로만 처리
+    // Examples: /[metro-project]/src/..., /[metro-watchFolders]/1/... / 예시: /[metro-project]/src/..., /[metro-watchFolders]/1/...
+    if !path.starts_with("[metro-") && !path.starts_with("%5Bmetro-") {
+        return Err(StatusCode::NOT_FOUND);
+    }
+
+    // Default Metro origin (user can override with metroBaseUrl prop in RN app) / 기본 Metro origin (RN 앱에서 metroBaseUrl prop으로 재정의 가능)
+    let metro_origin = "http://localhost:8081";
+    let full_url = format!("{}/{}", metro_origin, path);
+
+    // Validate URL is loopback for security / 보안을 위해 loopback URL인지 확인
+    if !metro_resource_url_allowed(&full_url) {
+        return Err(StatusCode::FORBIDDEN);
+    }
+
+    // Fetch from Metro / Metro에서 가져오기
+    let response = reqwest::get(&full_url)
+        .await
+        .map_err(|_| StatusCode::BAD_GATEWAY)?;
+
+    let status = StatusCode::from_u16(response.status().as_u16())
+        .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
+
+    // Forward Content-Type header / Content-Type 헤더 전달
+    let content_type = response
+        .headers()
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("text/plain; charset=utf-8")
+        .to_string();
+
+    let body = response
+        .bytes()
+        .await
+        .map_err(|_| StatusCode::BAD_GATEWAY)?;
+
+    // CORS: allow DevTools to fetch source files / CORS: DevTools가 소스 파일을 fetch할 수 있도록 허용
+    let mut res = (status, [(header::CONTENT_TYPE, content_type)], body).into_response();
+    let headers = res.headers_mut();
+    headers.insert(
+        header::ACCESS_CONTROL_ALLOW_ORIGIN,
+        header::HeaderValue::from_static("*"),
+    );
+    headers.insert(
+        header::ACCESS_CONTROL_EXPOSE_HEADERS,
         header::HeaderValue::from_static("*"),
     );
     Ok(res)
