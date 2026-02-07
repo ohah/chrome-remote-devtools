@@ -36,9 +36,9 @@ describe('cdp-message-handler', () => {
     delete (globalThis as any).testBindingPayloadObject;
   });
 
-  test('handleCDPMessage warns and returns when message has no method / method 없으면 경고 후 반환', () => {
+  test('handleCDPMessage returns when message has no method (no log) / method 없으면 반환 (로그 없음)', () => {
     handleCDPMessage({ params: {} });
-    expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('no method'));
+    expect(consoleWarnSpy).not.toHaveBeenCalled();
   });
 
   test('handleCDPMessage returns without logging when no handler registered / 핸들러 미등록 시 로그 없이 반환 (콘솔 플러딩 방지)', () => {
@@ -61,27 +61,25 @@ describe('cdp-message-handler', () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
-  test('async handler errors are caught and logged / 비동기 핸들러 에러 시 catch 후 로그', async () => {
+  test('async handler errors are caught (no unhandled rejection) / 비동기 핸들러 에러 시 catch (unhandled rejection 없음)', async () => {
     const handler = mock(() => Promise.reject(new Error('async handler error')));
     registerCDPMessageHandler('Test.asyncFail', handler);
     handleCDPMessage({ method: 'Test.asyncFail', id: 1 });
     await new Promise((r) => setTimeout(r, 10));
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Error in handler'),
-      expect.any(Error)
-    );
+    expect(handler).toHaveBeenCalledTimes(1);
+    // No console.error (we swallow to avoid noise); no unhandled rejection
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
-  test('sync handler throw is caught and logged / 동기 핸들러 throw 시 catch 후 로그', () => {
+  test('sync handler throw is caught (no rethrow) / 동기 핸들러 throw 시 catch (재throw 없음)', () => {
     const handler = mock(() => {
       throw new Error('sync throw');
     });
     registerCDPMessageHandler('Test.syncThrow', handler);
     handleCDPMessage({ method: 'Test.syncThrow', id: 1 });
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Error in handler'),
-      expect.any(Error)
-    );
+    expect(handler).toHaveBeenCalledTimes(1);
+    // No console.error (we swallow); handleCDPMessage does not throw
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
   test('global __CDP_MESSAGE_HANDLER__ parses JSON and routes to handler / 전역 핸들러가 JSON 파싱 후 라우팅', () => {
@@ -93,22 +91,20 @@ describe('cdp-message-handler', () => {
     expect(handler).toHaveBeenCalledWith({ method: 'Native.test', id: 1 });
   });
 
-  test('global __CDP_MESSAGE_HANDLER__ invalid JSON logs error / 잘못된 JSON 시 에러 로그', () => {
+  test('global __CDP_MESSAGE_HANDLER__ invalid JSON is ignored (no throw) / 잘못된 JSON 시 무시 (throw 없음)', () => {
     (global as any).__CDP_MESSAGE_HANDLER__('not json');
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to parse message'),
-      expect.any(Error)
-    );
+    // We no longer log; just ensure we don't throw
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
   test('unregister removes handler and updates global / 등록 해제 시 핸들러 제거 및 전역 갱신', () => {
     const handler = mock(() => {});
     const unregister = registerCDPMessageHandler('Test.unreg', handler);
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Registered handler'));
-    unregister();
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Unregistered handler'));
     handleCDPMessage({ method: 'Test.unreg' });
-    expect(handler).not.toHaveBeenCalled();
+    expect(handler).toHaveBeenCalledTimes(1);
+    unregister();
+    handleCDPMessage({ method: 'Test.unreg' });
+    expect(handler).toHaveBeenCalledTimes(1);
   });
 
   test('Runtime.enable triggers sendExecutionContextCreated (sender called) / Runtime.enable 시 executionContextCreated 전송', () => {
