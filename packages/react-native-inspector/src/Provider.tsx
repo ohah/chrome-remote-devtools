@@ -6,7 +6,6 @@ import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native
 import { setServerInfo } from './server-info';
 import { connect } from './index';
 import { setOnConnectionClose, setOnConnectionOpen } from './websocket-client';
-import { fetchAndCacheSourceMap } from './fetch-source-map';
 // Import polyfill to ensure it's installed / polyfill이 설치되도록 import
 // The polyfill is auto-installed when this module is imported / 이 모듈이 import될 때 polyfill이 자동으로 설치됨
 import './redux-devtools-extension';
@@ -63,8 +62,6 @@ export function ChromeRemoteDevToolsInspectorProvider({
         console.log('✅ [ChromeRemoteDevTools] Connected to server / 서버에 연결됨');
         setConnectionStatus('connected');
         connectionRef.current = null;
-        // Fetch Metro source map so DevTools Sources panel shows original files / Metro 소스맵 fetch하여 DevTools Sources에 원본 파일 표시
-        fetchAndCacheSourceMap(metroBaseUrl).catch(() => {});
       })
       .catch((error) => {
         console.error('❌ [ChromeRemoteDevTools] Failed to connect to server:', error);
@@ -72,7 +69,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
         connectionRef.current = null;
       });
     connectionRef.current = promise;
-  }, [serverHost, serverPort, deviceId, metroBaseUrl]);
+  }, [serverHost, serverPort, deviceId]);
 
   const stableOnConnectionClose = useCallback(() => {
     onConnectionCloseRef.current?.();
