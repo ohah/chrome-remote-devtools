@@ -17,6 +17,9 @@ use tokio::sync::mpsc;
 use tokio::sync::RwLock;
 use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
 
+/// CDP id used for inject Runtime.evaluate (reconnect); filter response so we don't forward to DevTools / 주입용 Runtime.evaluate(reconnect) id; 응답은 DevTools로 전달하지 않음
+const INJECT_RECONNECT_CDP_ID: i64 = 2147483646;
+
 /// Handle Metro WebSocket proxy connection / Metro WebSocket 프록시 연결 처리
 /// Connects to Metro's WebSocket and relays messages bidirectionally,
 /// rewriting Debugger.scriptParsed URLs to go through our server's resource proxy.
@@ -108,6 +111,30 @@ pub async fn handle_metro_proxy_websocket(
     // Split both WebSockets / 양쪽 WebSocket 분리
     let (mut devtools_sink, mut devtools_stream) = ws.split();
     let (mut metro_sink, mut metro_stream) = metro_ws.split();
+
+    // Inject Runtime.evaluate in app to call reconnect so app connects to server (Redux/MMKV then work) / 앱에서 reconnect 호출하도록 Runtime.evaluate 주입 → 앱이 서버에 연결 (Redux/MMKV 동작)
+    let inject_reconnect = serde_json::json!({
+        "id": INJECT_RECONNECT_CDP_ID,
+        "method": "Runtime.evaluate",
+        "params": {
+            "expression": "typeof __ChromeRemoteDevToolsReconnect === 'function' && __ChromeRemoteDevToolsReconnect()"
+        }
+    });
+    if let Ok(inject_text) = serde_json::to_string(&inject_reconnect) {
+        if metro_sink
+            .send(TungsteniteMessage::Text(inject_text))
+            .await
+            .is_err()
+        {
+            logger.log(
+                LogType::Server,
+                "metro-proxy",
+                "Failed to send inject reconnect to Metro",
+                None,
+                None,
+            );
+        }
+    }
 
     // --- Register in devtools map to receive app responses via fan-out ---
     // devtools 맵에 등록하여 팬아웃을 통해 앱 응답을 받음
@@ -285,6 +312,14 @@ pub async fn handle_metro_proxy_websocket(
                 msg = metro_stream.next() => {
                     match msg {
                         Some(Ok(TungsteniteMessage::Text(text))) => {
+                            // Skip our inject reconnect response so we don't forward to DevTools / 주입한 reconnect 응답은 DevTools로 전달하지 않음
+                            if serde_json::from_str::<serde_json::Value>(&text)
+                                .ok()
+                                .and_then(|v| v.get("id").and_then(|id| id.as_i64()))
+                                == Some(INJECT_RECONNECT_CDP_ID)
+                            {
+                                continue;
+                            }
                             let rewritten = rewrite_script_parsed_urls(
                                 &text,
                                 &metro_origin_clone,

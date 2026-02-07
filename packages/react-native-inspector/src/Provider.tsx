@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { setServerInfo } from './server-info';
 import { connect } from './index';
-import { setOnConnectionClose } from './websocket-client';
+import { setOnConnectionClose, setOnConnectionOpen } from './websocket-client';
 import { fetchAndCacheSourceMap } from './fetch-source-map';
 // Import polyfill to ensure it's installed / polyfill이 설치되도록 import
 // The polyfill is auto-installed when this module is imported / 이 모듈이 import될 때 polyfill이 자동으로 설치됨
@@ -99,10 +99,13 @@ export function ChromeRemoteDevToolsInspectorProvider({
     // Notify when WebSocket disconnects so we can show Connect button (ref avoids stale closure) / WebSocket 끊김 시 Connect 버튼 표시 (ref로 최신 콜백 유지)
     onConnectionCloseRef.current = () => setConnectionStatus('failed');
     setOnConnectionClose(stableOnConnectionClose);
+    // Notify when WebSocket opens (e.g. reconnect() from server inject) so we clear Connect button / WebSocket 연결 시 Connect 버튼 제거 (예: 서버 주입 reconnect())
+    setOnConnectionOpen(() => setConnectionStatus('connected'));
 
     // Cleanup function / 정리 함수
     return () => {
       setOnConnectionClose(null);
+      setOnConnectionOpen(null);
       onConnectionCloseRef.current = null;
       if (!autoConnect) {
         connectionRef.current = null;

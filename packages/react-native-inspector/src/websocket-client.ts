@@ -10,6 +10,9 @@ let disconnectRequested = false;
 /** Called when connection closes after having been open (e.g. for showing Connect button) / 연결이 열린 뒤 끊어졌을 때 호출 (예: Connect 버튼 표시) */
 let onConnectionClose: (() => void) | null = null;
 
+/** Called when connection opens (e.g. to clear Connect button when reconnect() succeeds) / 연결이 열릴 때 호출 (예: reconnect() 성공 시 Connect 버튼 제거) */
+let onConnectionOpen: (() => void) | null = null;
+
 /**
  * Build WebSocket URL for inspector device / inspector device용 WebSocket URL 생성
  * Matches server path: /remote/debug/inspector/device?name=...&app=...&device=...
@@ -57,6 +60,7 @@ export function connectWebSocket(
           sendFn = (message: string) => {
             if (socket.readyState === WebSocket.OPEN) socket.send(message);
           };
+          onConnectionOpen?.();
           if (!resolved) {
             resolved = true;
             resolve();
@@ -141,6 +145,13 @@ export function isWebSocketConnected(): boolean {
  */
 export function setOnConnectionClose(callback: (() => void) | null): void {
   onConnectionClose = callback;
+}
+
+/**
+ * Set callback when connection opens (e.g. so Provider can clear Connect button when reconnect() succeeds) / 연결이 열릴 때 호출할 콜백 설정 (예: reconnect() 성공 시 Provider가 Connect 버튼 제거)
+ */
+export function setOnConnectionOpen(callback: (() => void) | null): void {
+  onConnectionOpen = callback;
 }
 
 /**
