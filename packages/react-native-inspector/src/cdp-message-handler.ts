@@ -238,9 +238,6 @@ export function resetExecutionContextSentForReconnect(): void {}
  */
 export function registerCDPMessageHandler(method: string, handler: CDPMessageHandler): () => void {
   handlers.set(method, handler);
-  console.log(
-    `[CDPMessageHandler] Registered handler for ${method} / ${method}에 대한 핸들러 등록됨`
-  );
 
   // Update global handler / 전역 핸들러 업데이트
   updateGlobalHandler();
@@ -248,9 +245,6 @@ export function registerCDPMessageHandler(method: string, handler: CDPMessageHan
   // Return unregister function / 등록 해제 함수 반환
   return () => {
     handlers.delete(method);
-    console.log(
-      `[CDPMessageHandler] Unregistered handler for ${method} / ${method}에 대한 핸들러 등록 해제됨`
-    );
     updateGlobalHandler();
   };
 }
@@ -267,7 +261,6 @@ export function handleCDPMessage(message: {
   id?: number;
 }): void {
   if (!message.method) {
-    console.warn('[CDPMessageHandler] Message has no method field / 메시지에 method 필드 없음');
     return;
   }
 
@@ -391,12 +384,12 @@ export function handleCDPMessage(message: {
     const result = handler(message as { method: string; params?: unknown; id?: number });
     // Handle async handlers / 비동기 핸들러 처리
     if (result && typeof result.then === 'function') {
-      result.catch((error: unknown) => {
-        console.error(`[CDPMessageHandler] Error in handler for ${message.method}:`, error);
+      result.catch(() => {
+        // Handler error; avoid unhandled rejection / 핸들러 오류; unhandled rejection 방지
       });
     }
-  } catch (error) {
-    console.error(`[CDPMessageHandler] Error in handler for ${message.method}:`, error);
+  } catch {
+    // Handler threw; already logged by caller if needed / 핸들러에서 throw; 필요 시 호출자에서 로깅
   }
 }
 
@@ -409,8 +402,8 @@ function handleCDPMessageFromNative(messageJson: string): void {
   try {
     const message = JSON.parse(messageJson);
     handleCDPMessage(message);
-  } catch (error) {
-    console.error('[CDPMessageHandler] Failed to parse message from native:', error);
+  } catch {
+    // Invalid JSON from native; ignore / 네이티브에서 잘못된 JSON; 무시
   }
 }
 
