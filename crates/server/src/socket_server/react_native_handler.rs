@@ -47,6 +47,92 @@ pub async fn handle_react_native_inspector_websocket(
         .associate_with_client(&inspector_id, &inspector_id)
         .await;
 
+    // If a metro proxy DevTools was registered with no RN inspector (waiting), associate it now so
+    // Redux/MMKV work without refresh. Also send cached Redux stores so Redux panel shows state.
+    // RN inspector 없이 등록된 metro proxy DevTools가 있으면 지금 연동 (새로고침 없이 Redux/MMKV 동작).
+    // 캐시된 Redux store도 전송해 Redux 패널에 상태 표시.
+    {
+        let mut devtools_guard = devtools.write().await;
+        if let Some((metro_id, old_entry)) = devtools_guard
+            .iter()
+            .find(|(k, v)| k.starts_with("metro-proxy-") && v.client_id.is_none())
+            .map(|(k, v)| (k.clone(), v.clone()))
+        {
+            let metro_sender = old_entry.sender.clone();
+            devtools_guard.insert(
+                metro_id.clone(),
+                Arc::new(DevTools {
+                    id: old_entry.id.clone(),
+                    client_id: Some(inspector_id.clone()),
+                    sender: old_entry.sender.clone(),
+                }),
+            );
+            logger.log(
+                LogType::RnInspector,
+                &inspector_id,
+                &format!(
+                    "Associated waiting metro proxy DevTools ({}) with this inspector",
+                    metro_id
+                ),
+                None,
+                None,
+            );
+            drop(devtools_guard);
+
+            // Send cached Redux stores to this DevTools (same as normal devtools path) so Redux panel works
+            // 캐시된 Redux store를 이 DevTools로 전송 (일반 devtools 경로와 동일) → Redux 패널 동작
+            let rn_manager_redux = rn_manager.clone();
+            let inspector_id_redux = inspector_id.clone();
+            let logger_redux = logger.clone();
+            let metro_id_redux = metro_id.clone();
+            tokio::spawn(async move {
+                tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+                let stores = rn_manager_redux.get_redux_stores(&inspector_id_redux).await;
+                for store in &stores {
+                    let init_instance_msg = serde_json::json!({
+                        "method": "Redux.message",
+                        "params": {
+                            "type": "INIT_INSTANCE",
+                            "instanceId": store.instance_id,
+                            "source": "@devtools-page",
+                        }
+                    });
+                    if let Ok(json_str) = serde_json::to_string(&init_instance_msg) {
+                        let _ = metro_sender.send(json_str);
+                    }
+                    let init_msg = serde_json::json!({
+                        "method": "Redux.message",
+                        "params": {
+                            "type": "INIT",
+                            "instanceId": store.instance_id,
+                            "source": "@devtools-page",
+                            "name": store.name,
+                            "payload": store.payload,
+                            "maxAge": 50,
+                            "timestamp": store.timestamp,
+                        }
+                    });
+                    if let Ok(json_str) = serde_json::to_string(&init_msg) {
+                        let _ = metro_sender.send(json_str);
+                    }
+                }
+                if !stores.is_empty() {
+                    logger_redux.log(
+                        LogType::RnInspector,
+                        &inspector_id_redux,
+                        &format!(
+                            "Sent {} cached Redux store(s) to metro proxy DevTools ({})",
+                            stores.len(),
+                            metro_id_redux
+                        ),
+                        None,
+                        None,
+                    );
+                }
+            });
+        }
+    }
+
     logger.log(
         LogType::RnInspector,
         &inspector_id,
