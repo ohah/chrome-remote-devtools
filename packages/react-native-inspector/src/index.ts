@@ -2,7 +2,7 @@
 // Chrome Remote DevTools React Native Inspector 플러그인 (JavaScript 레이어만)
 
 import { sendCDPMessage, setCDPEventSender, setCDPConnectionReady } from './cdp-message';
-import { setServerInfo } from './server-info';
+import { setServerInfo, getServerInfo } from './server-info';
 import {
   setCDPMessageSender as setReduxCDPMessageSender,
   setServerConnection as setReduxServerConnection,
@@ -19,8 +19,16 @@ import {
   disableNetworkHook as disableNetworkHookImpl,
   isNetworkHookEnabled as isNetworkHookEnabledImpl,
 } from './network';
-import { connectWebSocket, disconnectWebSocket, getCDPSender } from './websocket-client';
+import {
+  connectWebSocket,
+  disconnectWebSocket,
+  getCDPSender,
+  isWebSocketConnected,
+} from './websocket-client';
 import { resolveDeviceId } from './device-id';
+
+/** Last deviceId passed to connect(); used by reconnect() when not passed / connect()에 마지막으로 넘긴 deviceId; reconnect()에서 미지정 시 사용 */
+let lastConnectDeviceId: string | null = null;
 
 /**
  * Connect options: deviceId is required for inspector list / 연결 옵션: Inspector 목록용 deviceId 필수
@@ -47,6 +55,7 @@ export async function connect(
   setServerInfo(serverHostParam, serverPortParam);
 
   const deviceId = resolveDeviceId(options);
+  lastConnectDeviceId = deviceId;
   const { onFailureAttempt } = options;
 
   // Clear any previous connection and pending retries so reconnect works / 재연결이 되도록 이전 연결·대기 중인 재시도 정리
@@ -108,6 +117,35 @@ export async function connect(
   enableNetworkHookImpl();
 
   // Runtime.executionContextCreated is sent when DevTools activates (on Runtime.enable), not on connect / Runtime.executionContextCreated는 연결 시가 아니라 DevTools 활성화 시(Runtime.enable 수신 시) 전송됨
+}
+
+/**
+ * Reconnect options (optional) / 재연결 옵션 (선택)
+ */
+export interface ReconnectOptions {
+  /** Device identifier; if omitted, uses the last deviceId from connect() / 기기 식별자; 생략 시 마지막 connect()의 deviceId 사용 */
+  deviceId?: string;
+}
+
+/**
+ * Reconnect to the server using stored server info and deviceId / 저장된 서버 정보와 deviceId로 재연결
+ * No-op if already connected (safe to call anytime, e.g. from DevTools eval) / 이미 연결된 경우 아무것도 하지 않음 (eval 등에서 무조건 호출해도 안전)
+ * @param options Optional deviceId; if omitted, last connect() deviceId is used / 옵션 deviceId; 생략 시 마지막 connect()의 deviceId 사용
+ * @returns Promise that resolves when reconnected or when already connected (no-op) / 재연결 완료 시 또는 이미 연결된 경우(no-op) resolve
+ */
+export async function reconnect(options?: ReconnectOptions): Promise<void> {
+  if (isWebSocketConnected()) {
+    return;
+  }
+  const serverInfo = getServerInfo();
+  if (!serverInfo) {
+    return;
+  }
+  const deviceId = options?.deviceId ?? lastConnectDeviceId;
+  if (!deviceId) {
+    return;
+  }
+  await connect(serverInfo.host, serverInfo.port, { deviceId });
 }
 
 /**
@@ -206,6 +244,7 @@ export type {
 
 export default {
   connect,
+  reconnect,
   disableDebugger,
   isPackagerDisconnected,
   openDebugger,
@@ -222,3 +261,9 @@ export default {
 // Install console and network hooks when package loads so user code (e.g. button handlers) uses wrapped console/network; connect() sets the sender later / 패키지 로드 시 훅 설치하여 버튼 등 사용자 코드가 래핑된 console·network 사용; connect()에서 sender 설정
 enableConsoleHookImpl();
 enableNetworkHookImpl();
+
+// Expose reconnect on global so DevTools Console can call it without require path (e.g. __ChromeRemoteDevToolsReconnect()) / DevTools Console에서 require 경로 없이 호출할 수 있도록 global에 노출
+declare const global: typeof globalThis;
+if (typeof global !== 'undefined') {
+  (global as any).__ChromeRemoteDevToolsReconnect = reconnect;
+}
