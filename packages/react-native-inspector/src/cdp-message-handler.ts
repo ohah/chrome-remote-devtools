@@ -45,43 +45,6 @@ function getResourceTreeResult() {
   };
 }
 
-/**
- * Cached sourcemap from Metro: sources + sourcesContent so Sources tab can show original files / Metro에서 가져온 소스맵 캐시: Sources 탭에서 원본 파일 표시용
- */
-let sourceMapCache: {
-  sources: string[];
-  sourcesContent: (string | null)[];
-} | null = null;
-
-/**
- * Normalize source URL for matching (strip file://, collapse slashes) / 소스 URL 정규화 (file:// 제거, 슬래시 정리)
- */
-function normalizeSourceUrl(url: string): string {
-  let s = url.replace(/^file:\/\//, '').replace(/\/+/g, '/');
-  if (s.startsWith('/') === false && !/^[a-z]+:\/\//i.test(url)) s = '/' + s;
-  return s;
-}
-
-/**
- * Set sourcemap cache (call when Metro source map is available; e.g. from bundle load) / 소스맵 캐시 설정 (Metro 소스맵 사용 가능 시 호출, 예: 번들 로드 시)
- */
-export function setSourceMapCache(sources: string[], sourcesContent: (string | null)[]): void {
-  sourceMapCache = { sources, sourcesContent };
-}
-
-/**
- * Get source content by URL from cached sourcemap (for Page.getResourceContent) / 캐시된 소스맵에서 URL로 소스 내용 반환
- */
-function getSourceContentByUrl(url: string): string | null {
-  if (!sourceMapCache) return null;
-  const normalized = normalizeSourceUrl(url);
-  const idx = sourceMapCache.sources.findIndex(
-    (s) => s === url || normalizeSourceUrl(s) === normalized
-  );
-  if (idx < 0) return null;
-  return sourceMapCache.sourcesContent[idx] ?? null;
-}
-
 /** Base64 alphabet for inline encoding (RN may not have btoa) / 인라인 base64 인코딩용 (RN에 btoa 없을 수 있음) */
 const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -277,18 +240,12 @@ export function handleCDPMessage(message: {
     return;
   }
 
-  // Page.getResourceContent: DevTools requests source content by URL; respond from cache or fetch URL so error HTML (e.g. "Cannot GET /_prelude_") is shown / DevTools가 URL로 소스 요청; 캐시 또는 URL fetch로 응답해 오류 HTML 표시
+  // Page.getResourceContent: DevTools requests source content by URL; fetch URL so error HTML (e.g. "Cannot GET /_prelude_") is shown / DevTools가 URL로 소스 요청; URL fetch로 응답해 오류 HTML 표시
   if (message.method === 'Page.getResourceContent' && typeof message.id === 'number') {
     const params = message.params as { url?: string } | undefined;
     const url = params?.url ?? '';
     if (getServerInfo()) {
-      const content = getSourceContentByUrl(url);
-      if (content != null) {
-        sendCDPResponse(message.id, {
-          content: base64EncodeUtf8(content),
-          base64Encoded: true,
-        });
-      } else if (url && /^https?:\/\//i.test(url)) {
+      if (url && /^https?:\/\//i.test(url)) {
         const requestId = message.id;
         // Fetch URL so Sources panel shows actual response (e.g. Metro "Cannot GET /_prelude_" HTML) / Sources에 실제 응답(예: Metro 오류 HTML) 표시
         fetch(url)
