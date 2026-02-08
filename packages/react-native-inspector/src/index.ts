@@ -67,7 +67,7 @@ export async function connect(
   disconnectWebSocket();
 
   try {
-    await connectWebSocket(serverHostParam, serverPortParam, deviceId);
+    await connectWebSocket(serverHostParam, serverPortParam, deviceId, { maxRetries: 1 });
   } catch (err) {
     onFailureAttempt?.(1, 1);
     console.warn('[ChromeRemoteDevTools] Failed to connect to server. Tap Connect to try again.');

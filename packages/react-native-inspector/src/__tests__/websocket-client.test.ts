@@ -109,6 +109,25 @@ describe('websocket-client', () => {
     setOnConnectionClose(null);
   });
 
+  test('connectWebSocket with maxRetries 1 rejects after one attempt (no retry) / maxRetries 1이면 한 번만 시도 후 reject', async () => {
+    lastMockWsRef.current = null;
+    (globalThis as any).WebSocket = class MockWebSocketFail {
+      onopen: (() => void) | null = null;
+      onclose: ((_event: unknown) => void) | null = null;
+      close = () => {};
+      constructor(_url: string) {
+        lastMockWsRef.current = this;
+        queueMicrotask(() => {
+          if (this.onclose) this.onclose({});
+        });
+      }
+    };
+    await expect(
+      connectWebSocket('localhost', 8080, 'device-1', { maxRetries: 1 })
+    ).rejects.toThrow(/WebSocket connection failed/);
+    disconnectWebSocket();
+  });
+
   test('setOnConnectionClose: callback not invoked when connection never opened / 연결이 열리기 전 끊기면 콜백 미호출', async () => {
     const onClose = mock(() => {});
     setOnConnectionClose(onClose);
