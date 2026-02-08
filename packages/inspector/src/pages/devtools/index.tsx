@@ -173,13 +173,15 @@ function DevToolsPage() {
   // Show all clients / 모든 클라이언트 표시
   const filteredClients = clients;
 
-  // Update key->id and id->key mapping; append new keys only. Include Metro target keys. / key↔id 매핑, 새 key만 추가, Metro 타깃 key 포함
+  // Update key->id and id->key mapping. When Metro targets exist (__DEV__), only Metro keys; else clients + Metro / Metro 있으면(__DEV__) Metro만, 없으면 클라이언트+Metro
   useEffect(() => {
     const newKeyToIdMap = new Map<string, string>();
-    filteredClients.forEach((client) => {
-      const key = getClientUniqueKey(client);
-      newKeyToIdMap.set(key, client.id);
-    });
+    if (metroTargets.length === 0) {
+      filteredClients.forEach((client) => {
+        const key = getClientUniqueKey(client);
+        newKeyToIdMap.set(key, client.id);
+      });
+    }
     metroTargets.forEach((target) => {
       const key = `${METRO_TAB_ID_PREFIX}${target.id}`;
       newKeyToIdMap.set(key, key);
@@ -202,6 +204,20 @@ function DevToolsPage() {
       return next;
     });
   }, [filteredClients, metroTargets]);
+
+  // When Metro only (__DEV__), redirect non-Metro tab to first Metro tab / Metro만 있을 때(__DEV__) 비-Metro 탭이면 첫 Metro 탭으로 이동
+  useEffect(() => {
+    if (metroTargets.length === 0 || !clientId || clientId.startsWith(METRO_TAB_ID_PREFIX)) return;
+    const first = metroTargets[0];
+    if (first) {
+      navigate({
+        to: '/devtools/$clientId',
+        params: { clientId: `${METRO_TAB_ID_PREFIX}${first.id}` },
+      });
+    } else {
+      navigate({ to: '/' });
+    }
+  }, [clientId, metroTargets, navigate]);
 
   // R refresh: same deviceId, new id → redirect URL to new id so same tab stays selected (no "new" tab) / R 새로고침: deviceId 같고 id만 바뀜 → URL만 새 id로 이동해 같은 탭 유지
   useEffect(() => {

@@ -68,8 +68,16 @@ function ConnectionPage() {
     ? location.pathname.split('/devtools/')[1] || null
     : null;
 
-  // Build tabs: server clients first, then Metro targets / 탭 구성: 서버 클라이언트 먼저, 이어서 Metro 타깃
+  // Build tabs. When Metro targets exist (__DEV__), show only Metro; else server clients + Metro / 탭 구성. Metro 타깃이 있으면(__DEV__) Metro만 노출, 없으면 서버 클라이언트 + Metro
   const tabs: Tab[] = useMemo(() => {
+    const metroTabs: Tab[] = metroTargets.map((target) => ({
+      id: `${METRO_TAB_ID_PREFIX}${target.id}`,
+      label: target.deviceName || target.title || target.id.slice(0, 8),
+      icon: <Wifi className="w-4 h-4" />,
+    }));
+    if (metroTargets.length > 0) {
+      return metroTabs;
+    }
     const clientTabs: Tab[] = filteredClients.map((client) => ({
       id: client.id,
       label:
@@ -86,11 +94,6 @@ function ConnectionPage() {
         ) : (
           <Globe className="w-4 h-4" />
         ),
-    }));
-    const metroTabs: Tab[] = metroTargets.map((target) => ({
-      id: `${METRO_TAB_ID_PREFIX}${target.id}`,
-      label: target.deviceName || target.title || target.id.slice(0, 8),
-      icon: <Wifi className="w-4 h-4" />,
     }));
     return [...clientTabs, ...metroTabs];
   }, [filteredClients, metroTargets]);
