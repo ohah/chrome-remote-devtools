@@ -32,12 +32,16 @@ UI.ViewManager.registerViewExtension({
     persistence: "permanent" /* UI.ViewManager.ViewPersistence.PERMANENT */,
     order: 1011,
     condition: () => {
+        // Show for React Native (Our Inspector and Metro Debugger) / React Native(Our Inspector·Metro Debugger)에서 표시
         const clientType = Root.Runtime.Runtime.queryParam('clientType');
         if (clientType === 'react-native' || clientType === 'reactotron') {
             return true;
         }
+        if (clientType === 'web') {
+            return false;
+        }
         const clientId = Root.Runtime.Runtime.queryParam('clientId');
-        return typeof clientId === 'string' && clientId.startsWith('rn-inspector-');
+        return typeof clientId === 'string' && clientId.length > 0;
     },
     async loadView() {
         const Module = await loadModule();

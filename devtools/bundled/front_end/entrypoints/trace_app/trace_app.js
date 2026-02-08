@@ -5529,6 +5529,7 @@ Common11.Settings.registerSettingExtension({
 // gen/front_end/panels/timeline/timeline-meta.js
 import * as Common12 from "./../../core/common/common.js";
 import * as i18n26 from "./../../core/i18n/i18n.js";
+import * as Root6 from "./../../core/root/root.js";
 import * as SDK5 from "./../../core/sdk/sdk.js";
 import * as UI9 from "./../../ui/legacy/legacy.js";
 var UIStrings13 = {
@@ -5600,6 +5601,22 @@ function maybeRetrieveContextTypes3(getClassCallBack) {
   }
   return getClassCallBack(loadedTimelineModule);
 }
+UI9.ViewManager.registerViewExtension({
+  location: "panel",
+  id: "timeline",
+  title: i18nLazyString13(UIStrings13.performance),
+  commandPrompt: i18nLazyString13(UIStrings13.showPerformance),
+  order: 50,
+  condition: () => {
+    const clientType = Root6.Runtime.Runtime.queryParam("clientType");
+    return clientType === "react-native" || clientType === "reactotron";
+  },
+  async loadView(universe) {
+    const Timeline = await loadTimelineModule();
+    const resourceLoader = universe.context.get(SDK5.PageResourceLoader.PageResourceLoader);
+    return Timeline.TimelinePanel.TimelinePanel.instance({ forceNew: true, resourceLoader });
+  }
+});
 UI9.ActionRegistration.registerActionExtension({
   actionId: "timeline.toggle-recording",
   category: "PERFORMANCE",
@@ -6089,7 +6106,7 @@ UI10.ActionRegistration.registerActionExtension({
 // gen/front_end/ui/legacy/components/perf_ui/perf_ui-meta.js
 import * as Common14 from "./../../core/common/common.js";
 import * as i18n30 from "./../../core/i18n/i18n.js";
-import * as Root6 from "./../../core/root/root.js";
+import * as Root7 from "./../../core/root/root.js";
 import * as UI11 from "./../../ui/legacy/legacy.js";
 var UIStrings15 = {
   /**
