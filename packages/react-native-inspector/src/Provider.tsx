@@ -82,15 +82,9 @@ export function ChromeRemoteDevToolsInspectorProvider({
     // Detect Metro mode and enable/disable hooks accordingly / Metro 모드 감지 후 훅 활성화/비활성화
     const isMetroMode = detectMetroMode();
     if (isMetroMode) {
-      console.log(
-        '[ChromeRemoteDevTools] Metro detected, using Metro CDP (hooks disabled) / Metro 감지됨, Metro CDP 사용 (훅 비활성화)'
-      );
       disableConsoleHook();
       disableNetworkHook();
     } else {
-      console.log(
-        '[ChromeRemoteDevTools] Release mode, using our hooks / 릴리즈 모드, 우리 훅 사용'
-      );
       enableConsoleHook();
       enableNetworkHook();
     }
@@ -98,9 +92,9 @@ export function ChromeRemoteDevToolsInspectorProvider({
     const promise = connect(serverHost, serverPort, {
       deviceId,
       onFailureAttempt: () => setConnectionStatus('failed'),
+      enableHooks: !isMetroMode,
     })
       .then(() => {
-        console.log('✅ [ChromeRemoteDevTools] Connected to server / 서버에 연결됨');
         setConnectionStatus('connected');
         connectionRef.current = null;
       })
@@ -122,11 +116,7 @@ export function ChromeRemoteDevToolsInspectorProvider({
 
     // Only initialize once / 한 번만 초기화
     if (!initializedRef.current) {
-      console.log('[ChromeRemoteDevTools] Initializing Provider', { serverHost, serverPort });
       initializedRef.current = true;
-    } else {
-      // Update server info if changed / 변경된 경우 서버 정보 업데이트
-      console.log('[ChromeRemoteDevTools] Updating server info', { serverHost, serverPort });
     }
 
     // Auto-connect if enabled and deviceId is set / deviceId가 있고 자동 연결이 켜져 있으면 연결

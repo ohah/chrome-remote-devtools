@@ -29,6 +29,8 @@ import { resolveDeviceId } from './device-id';
 
 /** Last deviceId passed to connect(); used by reconnect() when not passed / connect()에 마지막으로 넘긴 deviceId; reconnect()에서 미지정 시 사용 */
 let lastConnectDeviceId: string | null = null;
+/** Last enableHooks from connect(); used by reconnect() so Metro mode stays hook-free / connect()의 마지막 enableHooks; reconnect()에서 Metro 모드 유지 */
+let lastConnectEnableHooks = true;
 
 /**
  * Connect options: deviceId is required for inspector list / 연결 옵션: Inspector 목록용 deviceId 필수
@@ -38,6 +40,8 @@ export interface ConnectOptions {
   deviceId: string;
   /** Called on each failed attempt (e.g. to show failed UI from first failure) / 각 연결 실패 시 호출 (예: 첫 실패부터 실패 UI 표시) */
   onFailureAttempt?: (attempt: number, maxRetries: number) => void;
+  /** When false, do not enable console/network hooks (e.g. Metro mode uses Metro CDP instead) / false면 콘솔·네트워크 훅 미활성화 (예: Metro 모드는 Metro CDP 사용) */
+  enableHooks?: boolean;
 }
 
 /**
@@ -56,43 +60,23 @@ export async function connect(
 
   const deviceId = resolveDeviceId(options);
   lastConnectDeviceId = deviceId;
-  const { onFailureAttempt } = options;
+  const { onFailureAttempt, enableHooks = true } = options;
+  lastConnectEnableHooks = enableHooks;
 
-  // Clear any previous connection and pending retries so reconnect works / 재연결이 되도록 이전 연결·대기 중인 재시도 정리
+  // Clear any previous connection so reconnect works / 재연결이 되도록 이전 연결 정리
   disconnectWebSocket();
 
-  const maxRetries = 5;
-  const retryDelayMs = 5000;
-  let connected = false;
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      await connectWebSocket(serverHostParam, serverPortParam, deviceId);
-      connected = true;
-      break;
-    } catch (err) {
-      onFailureAttempt?.(attempt, maxRetries);
-      if (attempt < maxRetries) {
-        console.warn(
-          `[ChromeRemoteDevTools] Connection attempt ${attempt}/${maxRetries} failed, retrying in ${retryDelayMs / 1000}s...`,
-          err
-        );
-        await new Promise((r) => setTimeout(r, retryDelayMs));
-      } else {
-        console.warn(
-          '[ChromeRemoteDevTools] Failed to connect to server after all retries. Tap Connect to try again.'
-        );
-        console.warn(
-          `[ChromeRemoteDevTools] Server should be running on ${serverHostParam}:${serverPortParam}`,
-          err
-        );
-      }
-    }
-  }
-
-  if (!connected) {
+  try {
+    await connectWebSocket(serverHostParam, serverPortParam, deviceId);
+  } catch (err) {
+    onFailureAttempt?.(1, 1);
+    console.warn('[ChromeRemoteDevTools] Failed to connect to server. Tap Connect to try again.');
+    console.warn(
+      `[ChromeRemoteDevTools] Server should be running on ${serverHostParam}:${serverPortParam}`,
+      err
+    );
     throw new Error(
-      `Failed to connect to server after ${maxRetries} attempts. Server should be running on ${serverHostParam}:${serverPortParam}. ` +
+      `Failed to connect to server. Server should be running on ${serverHostParam}:${serverPortParam}. ` +
         'On device/emulator use the host PC IP (e.g. 192.168.x.x) instead of localhost.'
     );
   }
@@ -112,9 +96,11 @@ export async function connect(
   setMMKVConnectionReady();
   setAsyncStorageConnectionReady();
 
-  // Enable console and network hooks so CDP events are sent to the server / 콘솔·네트워크 훅 활성화하여 CDP 이벤트가 서버로 전송되도록 함
-  enableConsoleHookImpl();
-  enableNetworkHookImpl();
+  // Enable console and network hooks only when not Metro (Metro uses its own CDP for console/network) / Metro가 아닐 때만 콘솔·네트워크 훅 활성화 (Metro는 자체 CDP 사용)
+  if (enableHooks) {
+    enableConsoleHookImpl();
+    enableNetworkHookImpl();
+  }
 
   // Runtime.executionContextCreated is sent when DevTools activates (on Runtime.enable), not on connect / Runtime.executionContextCreated는 연결 시가 아니라 DevTools 활성화 시(Runtime.enable 수신 시) 전송됨
 }
@@ -145,7 +131,10 @@ export async function reconnect(options?: ReconnectOptions): Promise<void> {
   if (!deviceId) {
     return;
   }
-  await connect(serverInfo.host, serverInfo.port, { deviceId });
+  await connect(serverInfo.host, serverInfo.port, {
+    deviceId,
+    enableHooks: lastConnectEnableHooks,
+  });
 }
 
 /**
