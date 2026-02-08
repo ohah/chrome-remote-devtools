@@ -82,7 +82,13 @@ This repo (ohah/chrome-remote-devtools) uses the **ohah** GitHub account for pus
 
 8. **Assignee**: On create always pass `--assignee @me` so the PR is assigned to you (the current gh user).
 
-9. **Labels**: On create pass `--label <name>` (multiple allowed). On update use `gh pr edit <PR-number> --add-label <name>`. **Always attach at least one label** from `gh label list` that fits the PR type (e.g. feat → enhancement, fix → bug, docs → documentation, chore/refactor → refactor). Do this automatically; do not skip.
+9. **Labels**: On create pass `--label <name>` (multiple allowed). On update **do not use** `gh pr edit --add-label` (it triggers Projects classic GraphQL and can fail). Use the Issues Labels REST API instead:
+
+   ```bash
+   echo '{"labels":["enhancement"]}' | gh api repos/ohah/chrome-remote-devtools/issues/<PR-number>/labels -X POST --input -
+   ```
+
+   Replace `enhancement` with the label name(s) to add; for multiple labels use `["bug","enhancement"]`. **Always attach at least one label** from `gh label list` that fits the PR type (e.g. feat → enhancement, fix → bug, docs → documentation, chore/refactor → refactor). Do this automatically; do not skip.
 
 10. **Restore gh account**: If you switched to ohah in step 3, run `gh auth switch --hostname github.com --user <previous-login>` to restore the original gh account.
 
@@ -109,5 +115,5 @@ If the repo has `.github/PULL_REQUEST_TEMPLATE.md`, align `branch-summary.md` wi
 - **Body**: Keep `branch-summary.md` up to date and use it only for the PR description; do not commit it unless the project says otherwise.
 - **Push**: After updating the PR body, push any unpushed commits so the PR reflects the latest code.
 - **Assignee**: Always use `--assignee @me` when creating a PR so the PR is assigned to you (the current gh user).
-- **Labels**: Use `gh label list` and **attach at least one label** that matches the PR type (feat → enhancement, fix → bug, docs → documentation, chore/refactor → refactor). Do this automatically on create and when updating; do not skip.
+- **Labels**: Use `gh label list` and **attach at least one label** that matches the PR type (feat → enhancement, fix → bug, docs → documentation, chore/refactor → refactor). Do this automatically on create and when updating; do not skip. When adding labels to an existing PR, use the REST API above (not `gh pr edit --add-label`) to avoid Projects (classic) GraphQL errors.
 - **Link related issues**: Before create (or when updating body), run `gh issue list --state open --limit 50`. If any issue is **related** to this PR (branch name, title, or body matches the issue), append to the PR body a line such as `Relates to #<number>` or `Fixes #<number>` so the issue appears in the repo’s Development / “Link an issue” tab. Do this automatically; do not skip when a related issue is found.
