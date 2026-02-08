@@ -27,21 +27,31 @@ function buildInspectorDeviceUrl(serverHost: string, serverPort: number, deviceI
 }
 
 /**
+ * Options for connectWebSocket / connectWebSocket 옵션
+ */
+export interface ConnectWebSocketOptions {
+  /** Max connection attempts before rejecting (default 3); use 1 for single attempt / 연결 거부 전 최대 시도 횟수 (기본 3); 1이면 단일 시도 */
+  maxRetries?: number;
+}
+
+/**
  * Connect to Chrome Remote DevTools server via WebSocket / WebSocket으로 Chrome Remote DevTools 서버에 연결
  * @param serverHost Server host / 서버 호스트
  * @param serverPort Server port / 서버 포트
  * @param deviceId Device identifier for Inspector list / Inspector 목록용 기기 식별자
+ * @param options Optional; maxRetries (default 3), use 1 for single attempt from connect() / 선택; maxRetries(기본 3), connect()에서 단일 시도 시 1
  * @returns Promise that resolves when connected / 연결되면 resolve되는 Promise
  */
 export function connectWebSocket(
   serverHost: string,
   serverPort: number,
-  deviceId: string
+  deviceId: string,
+  options: ConnectWebSocketOptions = {}
 ): Promise<void> {
   disconnectRequested = false;
+  const maxRetries = options.maxRetries ?? 3;
+  const retryDelay = 1000;
   return new Promise((resolve, reject) => {
-    const maxRetries = 3;
-    const retryDelay = 1000;
     let attempt = 0;
     let resolved = false;
 
