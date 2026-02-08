@@ -88,13 +88,15 @@ var ThemeSupport = class _ThemeSupport extends EventTarget {
     document2.documentElement.classList.toggle("theme-with-dark-background", this.#themeName === "dark");
     const useChromeTheme = Common.Settings.moduleSetting("chrome-theme-colors").get();
     const isIncognito = Root.Runtime.hostConfig.isOffTheRecord === true;
+    const isHostedMode = Host.InspectorFrontendHost.InspectorFrontendHostInstance.isHostedMode();
     if (isIncognito) {
       document2.documentElement.classList.toggle("baseline-grayscale", true);
-    } else if (useChromeTheme) {
+    } else if (!isHostedMode && useChromeTheme) {
       const selectedTheme = getComputedStyle(document2.body).getPropertyValue("--user-color-source");
       document2.documentElement.classList.toggle("baseline-default", selectedTheme === "baseline-default");
       document2.documentElement.classList.toggle("baseline-grayscale", selectedTheme === "baseline-grayscale");
     } else {
+      document2.documentElement.classList.toggle("baseline-default", false);
       document2.documentElement.classList.toggle("baseline-grayscale", true);
     }
     themeValueByTargetByName.clear();
