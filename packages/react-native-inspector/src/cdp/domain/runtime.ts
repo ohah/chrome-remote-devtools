@@ -32,10 +32,15 @@ const CONSOLE_METHODS = [
   'timeLog',
 ] as const;
 
-/** Methods we hook but do not send to CDP (avoid React Scheduler/Profiler noise in our Console) / 훅은 하되 CDP로 보내지 않음 (우리 Console에 React Scheduler/Profiler 노이즈 방지) */
-const CONSOLE_METHODS_NO_CDP = new Set<string>(['timeStamp', 'time', 'timeEnd', 'timeLog']);
-
 type ConsoleMethodName = (typeof CONSOLE_METHODS)[number];
+
+/** Methods we hook but do not send to CDP (avoid React Scheduler/Profiler noise in our Console) / 훅은 하되 CDP로 보내지 않음 (우리 Console에 React Scheduler/Profiler 노이즈 방지) */
+const CONSOLE_METHODS_NO_CDP = new Set<ConsoleMethodName>([
+  'timeStamp',
+  'time',
+  'timeEnd',
+  'timeLog',
+]);
 
 const CDP_TYPE_MAP: Record<string, string> = {
   log: 'log',

@@ -38,7 +38,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-200 transition-colors"
+            className="cursor-pointer text-gray-400 hover:text-gray-200 transition-colors"
             aria-label="Close settings"
           >
             <svg

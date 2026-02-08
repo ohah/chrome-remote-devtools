@@ -136,7 +136,7 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
         <button
           type="button"
           onClick={handleReset}
-          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
+          className="cursor-pointer px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
         >
           Reset
         </button>
@@ -144,7 +144,7 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
           type="button"
           onClick={handleSave}
           disabled={isSaving || !serverUrl}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+          className="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
         >
           {isSaving ? 'Saving...' : 'Save'}
         </button>
