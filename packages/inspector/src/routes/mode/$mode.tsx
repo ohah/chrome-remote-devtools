@@ -3,12 +3,12 @@ import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState, useRef } from 'react';
 import { ClientTable, ClientFilter, filterClients } from '@/features/client-list';
-import { SettingsModal } from '@/features/settings';
 import { clientQueries } from '@/entities/client';
 import { LoadingState, ErrorState } from '@/shared/ui';
 import { useServerUrl } from '@/shared/lib';
-import { Upload, Settings } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useOpenSettings } from '@/shared/lib';
 
 export const Route = createFileRoute('/mode/$mode')({
   // Validate mode parameter / 모드 파라미터 검증
@@ -27,10 +27,10 @@ export const Route = createFileRoute('/mode/$mode')({
 function ConnectionPage() {
   const { mode } = Route.useParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { serverUrl } = useServerUrl();
+  const openSettings = useOpenSettings();
   const {
     data: clients = [],
     isLoading,
@@ -136,16 +136,6 @@ function ConnectionPage() {
               <Upload className="h-5 w-5" />
               Upload File
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center gap-2 text-gray-400 hover:text-gray-200"
-              aria-label="Open settings"
-            >
-              <Settings className="h-5 w-5" />
-              Settings
-            </Button>
           </div>
         </div>
 
@@ -177,7 +167,7 @@ function ConnectionPage() {
                   Please configure the server URL in Settings to connect to the WebSocket server.
                 </p>
                 <button
-                  onClick={() => setIsSettingsOpen(true)}
+                  onClick={openSettings}
                   className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
                 >
                   Open Settings
@@ -194,9 +184,6 @@ function ConnectionPage() {
           </div>
         </div>
       </div>
-
-      {/* Settings modal */}
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 }

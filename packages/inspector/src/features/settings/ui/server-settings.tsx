@@ -70,7 +70,7 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
 
   const handleReset = () => {
     setError(null);
-    // Reset based on current mode / 현재 모드에 따라 재설정
+    // Reset both Server URL and Metro URL to defaults / 두 설정 모두 기본값으로
     if (isReactotronMode) {
       resetReactotronServerUrl();
       setServerUrlValue('http://localhost:9090');
@@ -78,10 +78,10 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
       resetNormalServerUrl();
       setServerUrlValue('http://localhost:8080');
     }
+    resetMetroUrl();
+    setMetroUrlValue(DEFAULT_METRO_URL);
     onSave?.();
   };
-
-  const hasValue = serverUrl !== null && serverUrl !== '';
 
   return (
     <div className="space-y-4">
@@ -89,35 +89,18 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
         <label htmlFor="server-url" className="block text-sm font-medium text-gray-300 mb-2">
           Server URL
         </label>
-        <div className="flex gap-2">
-          <input
-            id="server-url"
-            type="text"
-            value={serverUrl}
-            onChange={(e) => {
-              setServerUrlValue(e.target.value);
-              setError(null);
-            }}
-            placeholder={DEFAULT_SERVER_URL}
-            className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            aria-label="Server URL"
-          />
-          <button
-            onClick={handleSave}
-            disabled={isSaving || !serverUrl}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
-          >
-            {isSaving ? 'Saving...' : 'Save'}
-          </button>
-          {hasValue && (
-            <button
-              onClick={handleReset}
-              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
-            >
-              Reset
-            </button>
-          )}
-        </div>
+        <input
+          id="server-url"
+          type="text"
+          value={serverUrl}
+          onChange={(e) => {
+            setServerUrlValue(e.target.value);
+            setError(null);
+          }}
+          placeholder={DEFAULT_SERVER_URL}
+          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          aria-label="Server URL"
+        />
         {error && (
           <p className="mt-2 text-sm text-red-400" role="alert">
             {error}
@@ -131,36 +114,40 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
         <label htmlFor="metro-url" className="block text-sm font-medium text-gray-300 mb-2">
           Metro URL (for RN dev menu targets)
         </label>
-        <div className="flex gap-2">
-          <input
-            id="metro-url"
-            type="text"
-            value={metroUrlValue}
-            onChange={(e) => {
-              setMetroUrlValue(e.target.value);
-              setError(null);
-            }}
-            placeholder={DEFAULT_METRO_URL}
-            className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            aria-label="Metro URL"
-          />
-          {metroUrlValue !== DEFAULT_METRO_URL && (
-            <button
-              type="button"
-              onClick={() => {
-                setMetroUrlValue(DEFAULT_METRO_URL);
-                resetMetroUrl();
-                onSave?.();
-              }}
-              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
-            >
-              Reset
-            </button>
-          )}
-        </div>
+        <input
+          id="metro-url"
+          type="text"
+          value={metroUrlValue}
+          onChange={(e) => {
+            setMetroUrlValue(e.target.value);
+            setError(null);
+          }}
+          placeholder={DEFAULT_METRO_URL}
+          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          aria-label="Metro URL"
+        />
         <p className="mt-2 text-xs text-gray-400">
           Fetches /json/list to show Metro-connected RN apps in tabs. Example: {DEFAULT_METRO_URL}
         </p>
+      </div>
+
+      {/* Actions at bottom: apply to all settings / 하단 액션: 전체 설정에 적용 */}
+      <div className="flex justify-end gap-2 pt-2 border-t border-gray-700">
+        <button
+          type="button"
+          onClick={handleReset}
+          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
+        >
+          Reset
+        </button>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving || !serverUrl}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+        >
+          {isSaving ? 'Saving...' : 'Save'}
+        </button>
       </div>
     </div>
   );
