@@ -1,165 +1,12 @@
 // Root route
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState, useCallback } from 'react';
-import { RefreshCw, Minus, Maximize2, X, Eye, EyeOff, Zap, Home } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { RefreshCw, Minus, Maximize2, X, Eye, EyeOff, Home, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useClientsListSSE } from '@/entities/client';
-import { useServerUrl } from '@/shared/lib/server-url';
-
-// Reactotron server toggle component / Reactotron 서버 토글 컴포넌트
-function ReactotronToggle() {
-  const [reactotronEnabled, setReactotronEnabled] = useState(false);
-  const [shutdownStatus, setShutdownStatus] = useState<string | null>(null);
-  const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
-  const navigate = useNavigate();
-  const { setReactotronMode, setNormalServerUrl, setReactotronServerUrl } = useServerUrl(); // Get server URL functions / 서버 URL 함수 가져오기
-
-  // Check Reactotron server status / Reactotron 서버 상태 확인
-  const checkReactotronStatus = useCallback(async () => {
-    if (!isTauri) return;
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      const isRunning = await invoke<boolean>('is_reactotron_server_running');
-      setReactotronEnabled(isRunning);
-      setReactotronMode(isRunning);
-      if (isRunning !== (localStorage.getItem('reactotron-enabled') === 'true')) {
-        localStorage.setItem('reactotron-enabled', String(isRunning));
-      }
-    } catch (error) {
-      console.error('Failed to check Reactotron server status:', error);
-    }
-  }, [isTauri, setReactotronMode]);
-
-  // Load Reactotron state from localStorage / localStorage에서 Reactotron 상태 로드
-  useEffect(() => {
-    const savedReactotron = localStorage.getItem('reactotron-enabled');
-    if (savedReactotron !== null) {
-      const isEnabled = savedReactotron === 'true';
-      setReactotronEnabled(isEnabled);
-      // Set Reactotron mode in store / store에 Reactotron 모드 설정
-      setReactotronMode(isEnabled);
-    } else {
-      // Default to false if not set / 설정되지 않았으면 기본값 false
-      setReactotronMode(false);
-    }
-
-    // Set default server URLs if not set / 설정되지 않았으면 기본 서버 URL 설정
-    // These will be used when switching modes / 모드 전환 시 사용됨
-    setNormalServerUrl('http://localhost:8080');
-    setReactotronServerUrl('http://localhost:9090');
-
-    // Check Reactotron server status on mount / 마운트 시 Reactotron 서버 상태 확인
-    if (isTauri && savedReactotron === 'true') {
-      checkReactotronStatus();
-    }
-  }, [
-    setReactotronMode,
-    setNormalServerUrl,
-    setReactotronServerUrl,
-    checkReactotronStatus,
-    isTauri,
-  ]);
-
-  // Handle Reactotron toggle / Reactotron 토글 처리
-  const handleReactotronToggle = async () => {
-    if (!isTauri) return;
-
-    const newValue = !reactotronEnabled;
-    setReactotronEnabled(newValue);
-    localStorage.setItem('reactotron-enabled', String(newValue));
-    setShutdownStatus(null); // Clear previous status / 이전 상태 클리어
-
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      const port = 9090; // Reactotron default port / Reactotron 기본 포트
-      const host = '0.0.0.0';
-
-      if (newValue) {
-        console.log('[Reactotron] Starting Reactotron server...');
-        const status = await invoke<string>('start_reactotron_server', { port, host });
-        console.log('[Reactotron] ✅ Reactotron server started successfully');
-        setShutdownStatus(status);
-
-        // Set Reactotron mode and server URL / Reactotron 모드 및 서버 URL 설정
-        setReactotronMode(true);
-        setReactotronServerUrl('http://localhost:9090');
-        console.log('[Reactotron] ✅ Reactotron mode enabled, server URL: http://localhost:9090');
-      } else {
-        console.log('[Reactotron] Stopping Reactotron server...');
-        // Use port 8080 for normal server / 일반 서버를 위해 8080 포트 사용
-        const status = await invoke<string>('stop_reactotron_server', { port: 8080, host });
-        console.log('[Reactotron] ✅ Reactotron server stopped successfully');
-        setShutdownStatus(status);
-
-        // Set normal mode and server URL / 일반 모드 및 서버 URL 설정
-        setReactotronMode(false);
-        setNormalServerUrl('http://localhost:8080');
-        console.log('[Reactotron] ✅ Reactotron mode disabled, server URL: http://localhost:8080');
-      }
-
-      // Clear tab information and navigate to home page / 탭 정보 초기화 후 홈 페이지로 이동
-      // Clear closed tabs from localStorage / localStorage에서 닫힌 탭 클리어
-      localStorage.removeItem('closed-tabs');
-      // Dispatch event to reset tab state and invalidate client queries / 탭 상태 초기화 및 클라이언트 쿼리 무효화를 위한 이벤트 발생
-      window.dispatchEvent(new CustomEvent('reset-tabs-state'));
-      // Invalidate client queries to clear cached data / 캐시된 데이터를 지우기 위해 클라이언트 쿼리 무효화
-      const { queryClient } = await import('@/shared/api/query-client');
-      const { clientQueries } = await import('@/entities/client');
-      queryClient.invalidateQueries({ queryKey: clientQueries.all() });
-      navigate({ to: '/' });
-    } catch (error) {
-      console.error('[Reactotron] ❌ Failed to toggle Reactotron server:', error);
-      // Revert state on error / 에러 시 상태 되돌리기
-      setReactotronEnabled(!newValue);
-      localStorage.setItem('reactotron-enabled', String(!newValue));
-      setShutdownStatus(null);
-    }
-  };
-
-  return (
-    <div className="flex items-center gap-0.5 px-0.5 py-0.5 bg-gray-700/30 rounded titlebar-nav-button ml-2">
-      {isTauri && (
-        <Tooltip delayDuration={300}>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleReactotronToggle}
-              className={`cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all ${
-                reactotronEnabled
-                  ? 'bg-gray-600 text-gray-100 shadow-sm hover:bg-gray-500'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 opacity-50'
-              }`}
-              aria-label="Reactotron Server"
-              aria-pressed={reactotronEnabled}
-            >
-              <Zap className="w-3.5 h-3.5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" className="z-[1001]">
-            <div className="space-y-1">
-              <p>Reactotron {reactotronEnabled ? '(enabled)' : '(disabled)'}</p>
-              {shutdownStatus && (
-                <p
-                  className={`text-xs ${
-                    shutdownStatus === 'Graceful'
-                      ? 'text-green-400'
-                      : shutdownStatus === 'WithIssues' || shutdownStatus === 'Timeout'
-                        ? 'text-yellow-400'
-                        : 'text-gray-400'
-                  }`}
-                >
-                  Shutdown: {shutdownStatus}
-                </p>
-              )}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      )}
-    </div>
-  );
-}
+import { SettingsModal } from '@/features/settings';
+import { useSettingsModalStore, useOpenSettings } from '@/shared/lib';
 
 // Tab visibility toggle component / 탭 표시/숨김 토글 컴포넌트
 function TabVisibilityToggle() {
@@ -207,11 +54,11 @@ function TabVisibilityToggle() {
 
 // Title bar component
 function TitleBar() {
+  const openSettings = useOpenSettings();
   const [appWindow, setAppWindow] = useState<ReturnType<
     typeof import('@tauri-apps/api/window').getCurrentWindow
   > | null>(null);
   const navigate = useNavigate();
-
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
   useEffect(() => {
@@ -271,78 +118,99 @@ function TitleBar() {
             <p>Go to home</p>
           </TooltipContent>
         </Tooltip>
-        {/* Reactotron toggle (always show in Tauri) / Reactotron 토글 (Tauri에서 항상 표시) */}
-        {isTauri && <ReactotronToggle />}
+        {/* Reactotron toggle (always show in Tauri) / Reactotron 토글 (Tauri에서 항상 표시) - temporarily hidden / 일시 비표시 */}
+        {/* ReactotronToggle: import from '@/components/ReactotronToggle' when needed */}
         {/* Tab visibility toggle (always show in Tauri) / 탭 표시/숨김 토글 (Tauri에서 항상 표시) */}
         {isTauri && <TabVisibilityToggle />}
       </div>
-      {isTauri && appWindow && (
-        <div className="titlebar-controls flex">
-          {/* Refresh button / 새로고침 버튼 */}
-          <Tooltip>
+      {isTauri && (
+        <div className="flex items-center gap-2">
+          {/* Host/Settings button (right side of title bar) / 타이틀바 우측 호스트 설정 버튼 */}
+          <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-[35px] w-[35px] bg-transparent text-gray-400 hover:bg-white/10"
-                onClick={handleRefresh}
-                aria-label="Refresh"
+                onClick={openSettings}
+                className="titlebar-nav-button cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all text-gray-400 hover:text-gray-200 hover:bg-gray-600/50"
+                aria-label="Host settings"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
+                <Settings className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="z-[1001]">
-              <p>Refresh</p>
+              <p>Host settings (Server URL, Metro URL)</p>
             </TooltipContent>
           </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-[35px] w-[35px] bg-transparent text-gray-400 hover:bg-white/10"
-                onClick={handleMinimize}
-                aria-label="Minimize"
-              >
-                <Minus className="w-3.5 h-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-[1001]">
-              <p>Minimize</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-[35px] w-[35px] bg-transparent text-gray-400 hover:bg-white/10"
-                onClick={handleMaximize}
-                aria-label="Maximize"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-[1001]">
-              <p>Maximize</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-[35px] w-[35px] bg-transparent text-gray-400 hover:bg-red-500 hover:text-white"
-                onClick={handleClose}
-                aria-label="Close"
-              >
-                <X className="w-3.5 h-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-[1001]">
-              <p>Close</p>
-            </TooltipContent>
-          </Tooltip>
+          {appWindow && (
+            <div className="titlebar-controls flex">
+              {/* Refresh button / 새로고침 버튼 */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-[35px] w-[35px] bg-transparent text-gray-400 hover:bg-white/10"
+                    onClick={handleRefresh}
+                    aria-label="Refresh"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="z-[1001]">
+                  <p>Refresh</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-[35px] w-[35px] bg-transparent text-gray-400 hover:bg-white/10"
+                    onClick={handleMinimize}
+                    aria-label="Minimize"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="z-[1001]">
+                  <p>Minimize</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-[35px] w-[35px] bg-transparent text-gray-400 hover:bg-white/10"
+                    onClick={handleMaximize}
+                    aria-label="Maximize"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="z-[1001]">
+                  <p>Maximize</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-[35px] w-[35px] bg-transparent text-gray-400 hover:bg-red-500 hover:text-white"
+                    onClick={handleClose}
+                    aria-label="Close"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="z-[1001]">
+                  <p>Close</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -353,6 +221,10 @@ function TitleBar() {
 function RootComponent() {
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
   const showTitleBar = isTauri;
+  // Only Root subscribes to isSettingsOpen → only Root re-renders when modal toggles / 모달 토글 시 Root만 리렌더
+  const isSettingsOpen = useSettingsModalStore((s) => s.isSettingsOpen);
+  const closeSettings = useSettingsModalStore((s) => s.closeSettings);
+
   // Subscribe to client list SSE for live updates / 클라이언트 목록 실시간 갱신을 위한 SSE 구독
   useClientsListSSE();
 
@@ -362,6 +234,7 @@ function RootComponent() {
       <div className={`flex-1 overflow-hidden ${showTitleBar ? 'pt-[35px]' : ''}`}>
         <Outlet />
       </div>
+      <SettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />
     </div>
   );
 }

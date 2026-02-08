@@ -2,22 +2,22 @@
 import { createFileRoute, useNavigate, useLocation } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import { SettingsModal } from '@/features/settings';
 import { clientQueries, metroQueries, METRO_TAB_ID_PREFIX } from '@/entities/client';
 import { LoadingState, ErrorState } from '@/shared/ui';
 import { useServerUrl } from '@/shared/lib';
-import { Settings, Smartphone, Globe, Upload, Wifi } from 'lucide-react';
+import { Smartphone, Globe, Upload, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, type Tab } from '@/components/tabs';
 import { getTabsVisibility } from './__root';
+import { useOpenSettings } from '@/shared/lib';
 
 export const Route = createFileRoute('/')({
   component: ConnectionPage,
 });
 
 function ConnectionPage() {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showTabs, setShowTabs] = useState(getTabsVisibility);
+  const openSettings = useOpenSettings();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -182,7 +182,7 @@ function ConnectionPage() {
               Please configure the server URL in Settings to connect to the WebSocket server.
             </p>
             <Button
-              onClick={() => setIsSettingsOpen(true)}
+              onClick={openSettings}
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white"
             >
               Open Settings
@@ -209,7 +209,7 @@ function ConnectionPage() {
         ) : null}
       </div>
 
-      {/* Settings button (floating) / 설정 버튼 (플로팅) */}
+      {/* Upload button (floating); Settings moved to title bar / 업로드 버튼 (플로팅); 설정은 타이틀바로 이동 */}
       <div className="absolute bottom-4 right-4 flex gap-2">
         <input
           type="file"
@@ -228,19 +228,7 @@ function ConnectionPage() {
         >
           <Upload className="h-5 w-5" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsSettingsOpen(true)}
-          className="bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-gray-200 border border-gray-700"
-          aria-label="Open settings"
-        >
-          <Settings className="h-5 w-5" />
-        </Button>
       </div>
-
-      {/* Settings modal */}
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 }
