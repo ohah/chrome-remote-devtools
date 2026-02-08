@@ -659,7 +659,12 @@ UI.Toolbar.registerToolbarItem({
 UI.Toolbar.registerToolbarItem({
   actionId: "elements.toggle-element-search",
   location: "main-toolbar-left",
-  order: 0
+  order: 0,
+  // Hide for React Native (no DOM inspect) / React Native에서는 숨김 (DOM 검사 없음)
+  condition: () => {
+    const clientType = Root.Runtime.Runtime.queryParam("clientType");
+    return clientType !== "react-native" && clientType !== "reactotron";
+  }
 });
 UI.UIUtils.registerRenderer({
   contextTypes() {
@@ -2735,6 +2740,7 @@ var i18nLazyString19 = i18n37.i18n.getLazilyComputedLocalizedString.bind(void 0,
 // gen/front_end/panels/timeline/timeline-meta.js
 import * as Common12 from "./../../core/common/common.js";
 import * as i18n39 from "./../../core/i18n/i18n.js";
+import * as Root6 from "./../../core/root/root.js";
 import * as SDK7 from "./../../core/sdk/sdk.js";
 import * as UI9 from "./../../ui/legacy/legacy.js";
 var UIStrings20 = {
@@ -2806,6 +2812,22 @@ function maybeRetrieveContextTypes5(getClassCallBack) {
   }
   return getClassCallBack(loadedTimelineModule);
 }
+UI9.ViewManager.registerViewExtension({
+  location: "panel",
+  id: "timeline",
+  title: i18nLazyString20(UIStrings20.performance),
+  commandPrompt: i18nLazyString20(UIStrings20.showPerformance),
+  order: 50,
+  condition: () => {
+    const clientType = Root6.Runtime.Runtime.queryParam("clientType");
+    return clientType === "react-native" || clientType === "reactotron";
+  },
+  async loadView(universe) {
+    const Timeline = await loadTimelineModule();
+    const resourceLoader = universe.context.get(SDK7.PageResourceLoader.PageResourceLoader);
+    return Timeline.TimelinePanel.TimelinePanel.instance({ forceNew: true, resourceLoader });
+  }
+});
 UI9.ActionRegistration.registerActionExtension({
   actionId: "timeline.toggle-recording",
   category: "PERFORMANCE",
@@ -3539,7 +3561,7 @@ UI13.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/session_replay/session_replay-meta.js
 import * as i18n53 from "./../../core/i18n/i18n.js";
-import * as Root6 from "./../../core/root/root.js";
+import * as Root7 from "./../../core/root/root.js";
 import * as UI14 from "./../../ui/legacy/legacy.js";
 var UIStrings27 = {
   /**
@@ -3569,7 +3591,7 @@ UI14.ViewManager.registerViewExtension({
   persistence: "permanent",
   hasToolbar: false,
   condition: () => {
-    const clientType = Root6.Runtime.Runtime.queryParam("clientType");
+    const clientType = Root7.Runtime.Runtime.queryParam("clientType");
     return clientType !== "react-native";
   },
   async loadView() {
@@ -3580,7 +3602,7 @@ UI14.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/react_devtools/react_devtools_components-meta.js
 import * as i18n55 from "./../../core/i18n/i18n.js";
-import * as Root7 from "./../../core/root/root.js";
+import * as Root8 from "./../../core/root/root.js";
 import * as UI15 from "./../../ui/legacy/legacy.js";
 var UIStrings28 = {
   /**
@@ -3609,12 +3631,15 @@ UI15.ViewManager.registerViewExtension({
   persistence: "permanent",
   order: 1010,
   condition: () => {
-    const clientType = Root7.Runtime.Runtime.queryParam("clientType");
+    const clientType = Root8.Runtime.Runtime.queryParam("clientType");
     if (clientType === "react-native" || clientType === "reactotron") {
       return true;
     }
-    const clientId = Root7.Runtime.Runtime.queryParam("clientId");
-    return typeof clientId === "string" && clientId.startsWith("rn-inspector-");
+    if (clientType === "web") {
+      return false;
+    }
+    const clientId = Root8.Runtime.Runtime.queryParam("clientId");
+    return typeof clientId === "string" && clientId.length > 0;
   },
   async loadView() {
     const Module = await loadModule();
@@ -3624,7 +3649,7 @@ UI15.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/react_devtools/react_devtools_profiler-meta.js
 import * as i18n57 from "./../../core/i18n/i18n.js";
-import * as Root8 from "./../../core/root/root.js";
+import * as Root9 from "./../../core/root/root.js";
 import * as UI16 from "./../../ui/legacy/legacy.js";
 var UIStrings29 = {
   /**
@@ -3653,12 +3678,15 @@ UI16.ViewManager.registerViewExtension({
   persistence: "permanent",
   order: 1011,
   condition: () => {
-    const clientType = Root8.Runtime.Runtime.queryParam("clientType");
+    const clientType = Root9.Runtime.Runtime.queryParam("clientType");
     if (clientType === "react-native" || clientType === "reactotron") {
       return true;
     }
-    const clientId = Root8.Runtime.Runtime.queryParam("clientId");
-    return typeof clientId === "string" && clientId.startsWith("rn-inspector-");
+    if (clientType === "web") {
+      return false;
+    }
+    const clientId = Root9.Runtime.Runtime.queryParam("clientId");
+    return typeof clientId === "string" && clientId.length > 0;
   },
   async loadView() {
     const Module = await loadModule2();
@@ -3668,7 +3696,7 @@ UI16.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/redux/redux-meta.js
 import * as i18n59 from "./../../core/i18n/i18n.js";
-import * as Root9 from "./../../core/root/root.js";
+import * as Root10 from "./../../core/root/root.js";
 import * as SDK22 from "./../../core/sdk/sdk.js";
 import * as UI17 from "./../../ui/legacy/legacy.js";
 import * as SDK8 from "./../../core/sdk/sdk.js";
@@ -4156,7 +4184,7 @@ UI17.ViewManager.registerViewExtension({
   persistence: "permanent",
   hasToolbar: false,
   condition: () => {
-    const clientType = Root9.Runtime.Runtime.queryParam("clientType");
+    const clientType = Root10.Runtime.Runtime.queryParam("clientType");
     return clientType === "react-native";
   },
   async loadView() {
@@ -4167,7 +4195,7 @@ UI17.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/mmkv/mmkv-meta.js
 import * as i18n61 from "./../../core/i18n/i18n.js";
-import * as Root10 from "./../../core/root/root.js";
+import * as Root11 from "./../../core/root/root.js";
 import * as UI18 from "./../../ui/legacy/legacy.js";
 var UIStrings31 = {
   /**
@@ -4189,7 +4217,7 @@ async function loadMMKVModule() {
   return loadedMMKVModule;
 }
 function mmkvCondition() {
-  const clientType = Root10.Runtime.Runtime.queryParam("clientType");
+  const clientType = Root11.Runtime.Runtime.queryParam("clientType");
   return clientType === "react-native";
 }
 UI18.ViewManager.registerViewExtension({
@@ -4209,7 +4237,7 @@ UI18.ViewManager.registerViewExtension({
 
 // gen/front_end/panels/storage/storage-meta.js
 import * as i18n63 from "./../../core/i18n/i18n.js";
-import * as Root11 from "./../../core/root/root.js";
+import * as Root12 from "./../../core/root/root.js";
 import * as UI19 from "./../../ui/legacy/legacy.js";
 var UIStrings32 = {
   /**
@@ -4231,7 +4259,7 @@ async function loadStorageModule() {
   return loadedStorageModule;
 }
 function storageCondition() {
-  const clientType = Root11.Runtime.Runtime.queryParam("clientType");
+  const clientType = Root12.Runtime.Runtime.queryParam("clientType");
   return clientType === "react-native";
 }
 UI19.ViewManager.registerViewExtension({
@@ -4250,8 +4278,8 @@ UI19.ViewManager.registerViewExtension({
 });
 
 // gen/front_end/entrypoints/devtools_app/devtools_app.prebundle.js
-import * as Root12 from "./../../core/root/root.js";
+import * as Root13 from "./../../core/root/root.js";
 import * as Main from "./../main/main.js";
-self.runtime = Root12.Runtime.Runtime.instance({ forceNew: true });
+self.runtime = Root13.Runtime.Runtime.instance({ forceNew: true });
 new Main.MainImpl.MainImpl();
 //# sourceMappingURL=devtools_app.js.map

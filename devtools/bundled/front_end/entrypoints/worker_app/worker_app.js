@@ -1269,6 +1269,7 @@ Common5.Revealer.registerRevealer({
 // gen/front_end/panels/timeline/timeline-meta.js
 import * as Common6 from "./../../core/common/common.js";
 import * as i18n15 from "./../../core/i18n/i18n.js";
+import * as Root4 from "./../../core/root/root.js";
 import * as SDK5 from "./../../core/sdk/sdk.js";
 import * as UI6 from "./../../ui/legacy/legacy.js";
 var UIStrings8 = {
@@ -1340,6 +1341,22 @@ function maybeRetrieveContextTypes4(getClassCallBack) {
   }
   return getClassCallBack(loadedTimelineModule);
 }
+UI6.ViewManager.registerViewExtension({
+  location: "panel",
+  id: "timeline",
+  title: i18nLazyString8(UIStrings8.performance),
+  commandPrompt: i18nLazyString8(UIStrings8.showPerformance),
+  order: 50,
+  condition: () => {
+    const clientType = Root4.Runtime.Runtime.queryParam("clientType");
+    return clientType === "react-native" || clientType === "reactotron";
+  },
+  async loadView(universe) {
+    const Timeline = await loadTimelineModule();
+    const resourceLoader = universe.context.get(SDK5.PageResourceLoader.PageResourceLoader);
+    return Timeline.TimelinePanel.TimelinePanel.instance({ forceNew: true, resourceLoader });
+  }
+});
 UI6.ActionRegistration.registerActionExtension({
   actionId: "timeline.toggle-recording",
   category: "PERFORMANCE",
@@ -1647,8 +1664,8 @@ SDK6.ChildTargetManager.ChildTargetManager.install(async ({ target, waitingForDe
 });
 
 // gen/front_end/entrypoints/worker_app/worker_app.prebundle.js
-import * as Root4 from "./../../core/root/root.js";
+import * as Root5 from "./../../core/root/root.js";
 import * as Main from "./../main/main.js";
-self.runtime = Root4.Runtime.Runtime.instance({ forceNew: true });
+self.runtime = Root5.Runtime.Runtime.instance({ forceNew: true });
 new Main.MainImpl.MainImpl();
 //# sourceMappingURL=worker_app.js.map
