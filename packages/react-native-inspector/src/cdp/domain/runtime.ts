@@ -32,6 +32,9 @@ const CONSOLE_METHODS = [
   'timeLog',
 ] as const;
 
+/** Methods we hook but do not send to CDP (avoid React Scheduler/Profiler noise in our Console) / 훅은 하되 CDP로 보내지 않음 (우리 Console에 React Scheduler/Profiler 노이즈 방지) */
+const CONSOLE_METHODS_NO_CDP = new Set<string>(['timeStamp', 'time', 'timeEnd', 'timeLog']);
+
 type ConsoleMethodName = (typeof CONSOLE_METHODS)[number];
 
 const CDP_TYPE_MAP: Record<string, string> = {
@@ -96,9 +99,11 @@ function createWrappedMethod(methodName: ConsoleMethodName): (...args: unknown[]
       }
     } finally {
       try {
-        const remoteArgs = args.map(valueToRemoteObject);
-        sendConsoleAPICalled(cdpType, remoteArgs);
-      } catch (_e) {
+        if (!CONSOLE_METHODS_NO_CDP.has(methodName)) {
+          const remoteArgs = args.map(valueToRemoteObject);
+          sendConsoleAPICalled(cdpType, remoteArgs);
+        }
+      } catch {
         // Ignore CDP send errors / CDP 전송 오류 무시
       }
     }
