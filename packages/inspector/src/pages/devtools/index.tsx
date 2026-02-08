@@ -187,14 +187,20 @@ function DevToolsPage() {
       newKeyToIdMap.set(key, key);
     });
     setClientKeyToIdMap((prev) => {
-      const next = new Map(prev);
+      // In Metro-only mode replace entirely so old client keys are removed; else merge with prev / Metro만 있을 땐 교체해 기존 클라이언트 키 제거, 아니면 prev와 병합
+      const next =
+        metroTargets.length > 0 ? new Map<string, string>() : new Map(prev);
       newKeyToIdMap.forEach((id, key) => next.set(key, id));
       setClientIdToKeyMap((prevIdToKey) => {
-        const idToKey = new Map(prevIdToKey);
+        const idToKey =
+          metroTargets.length > 0 ? new Map<string, string>() : new Map(prevIdToKey);
         next.forEach((id, key) => idToKey.set(id, key));
         return idToKey;
       });
       setStableKeys((prevKeys) => {
+        if (metroTargets.length > 0) {
+          return Array.from(next.keys());
+        }
         const keysNext = [...prevKeys];
         next.forEach((_, key) => {
           if (!keysNext.includes(key)) keysNext.push(key);
@@ -209,14 +215,10 @@ function DevToolsPage() {
   useEffect(() => {
     if (metroTargets.length === 0 || !clientId || clientId.startsWith(METRO_TAB_ID_PREFIX)) return;
     const first = metroTargets[0];
-    if (first) {
-      navigate({
-        to: '/devtools/$clientId',
-        params: { clientId: `${METRO_TAB_ID_PREFIX}${first.id}` },
-      });
-    } else {
-      navigate({ to: '/' });
-    }
+    navigate({
+      to: '/devtools/$clientId',
+      params: { clientId: `${METRO_TAB_ID_PREFIX}${first!.id}` },
+    });
   }, [clientId, metroTargets, navigate]);
 
   // R refresh: same deviceId, new id → redirect URL to new id so same tab stays selected (no "new" tab) / R 새로고침: deviceId 같고 id만 바뀜 → URL만 새 id로 이동해 같은 탭 유지
