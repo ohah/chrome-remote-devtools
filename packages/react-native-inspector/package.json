@@ -8,6 +8,10 @@
     "inspector",
     "react-native"
   ],
+  "homepage": "https://github.com/ohah/chrome-remote-devtools/tree/main/packages/react-native-inspector#readme",
+  "bugs": {
+    "url": "https://github.com/ohah/chrome-remote-devtools/issues"
+  },
   "license": "MIT",
   "author": "Chrome Remote DevTools",
   "repository": {
@@ -16,11 +20,12 @@
     "directory": "packages/react-native-inspector"
   },
   "files": [
-    "react-native.config.js",
+    "LICENSE",
     "README.md",
     "src/"
   ],
   "sideEffects": true,
+  "main": "./src/index.ts",
   "types": "src/index.ts",
   "react-native": "src/index.ts",
   "exports": {
@@ -29,15 +34,13 @@
       "react-native": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./redux-devtools-extension": {
-      "types": "./src/redux-devtools-extension.ts",
-      "react-native": "./src/redux-devtools-extension.ts",
-      "default": "./src/redux-devtools-extension.ts"
-    },
     "./metro": {
       "require": "./src/metro-config.cjs",
       "default": "./src/metro-config.cjs"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "test": "bun test src/__tests__"

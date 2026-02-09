@@ -14,17 +14,59 @@ bun add @ohah/chrome-remote-devtools-inspector-react-native
 
 ## Usage
 
-### Connect
+### 1. Early import (Redux DevTools auto-init)
+
+Import the package at app entry so the Redux DevTools Extension polyfill runs before any store is created.
 
 ```typescript
-import ChromeRemoteDevToolsInspector from '@ohah/chrome-remote-devtools-inspector-react-native';
-import { getUniqueId } from 'react-native-device-info';
-
-const deviceId = await getUniqueId();
-ChromeRemoteDevToolsInspector.connect('localhost', 8080, { deviceId });
+import '@ohah/chrome-remote-devtools-inspector-react-native';
 ```
 
-### API
+### 2. Provider and device ID
+
+Wrap your app with `ChromeRemoteDevToolsInspectorProvider`. A stable `deviceId` (e.g. from `react-native-device-info`) is required so the Inspector can list devices.
+
+```typescript
+import React, { useEffect, useState } from 'react';
+import {
+  ChromeRemoteDevToolsInspectorProvider,
+  registerMMKVDevTools,
+  registerAsyncStorageDevTools,
+  type AsyncStorageType,
+} from '@ohah/chrome-remote-devtools-inspector-react-native';
+import { getUniqueId } from 'react-native-device-info';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+function App() {
+  const [deviceId, setDeviceId] = useState<string | null>(null);
+
+  useEffect(() => {
+    getUniqueId().then(setDeviceId).catch(() => setDeviceId('demo-' + Date.now()));
+  }, []);
+
+  useEffect(() => {
+    registerMMKVDevTools({ default: myMMKVStorage }); // optional
+  }, []);
+
+  useEffect(() => {
+    registerAsyncStorageDevTools(AsyncStorage as unknown as AsyncStorageType); // optional
+  }, []);
+
+  if (deviceId === null) return <Loading />;
+
+  return (
+    <ChromeRemoteDevToolsInspectorProvider
+      serverHost="localhost"
+      serverPort={8080}
+      deviceId={deviceId}
+    >
+      {/* Your app (e.g. Redux Provider, navigation) */}
+    </ChromeRemoteDevToolsInspectorProvider>
+  );
+}
+```
+
+### 3. Imperative API (optional)
 
 - `connect(serverHost, serverPort, { deviceId })` — `deviceId` required
 - `disableDebugger()`
@@ -64,7 +106,7 @@ import rootReducer from './reducers';
 const store = configureStore({ reducer: rootReducer, devTools: true });
 ```
 
-Vanilla Redux: `import { composeWithDevTools } from '@ohah/chrome-remote-devtools-inspector-react-native/redux-devtools-extension'` then `createStore(reducer, composeWithDevTools(applyMiddleware(...)))`.
+Vanilla Redux: `import { composeWithDevTools } from '@ohah/chrome-remote-devtools-inspector-react-native'` then `createStore(reducer, composeWithDevTools(applyMiddleware(...)))`.
 
 ### 3. Zustand
 
@@ -76,6 +118,8 @@ const useStore = create(
   devtools((set) => ({ count: 0, increment: () => set((s) => ({ count: s.count + 1 })) }), { name: 'MyStore' })
 );
 ```
+
+A full example app (Provider, MMKV, AsyncStorage, Redux, Metro) is in this repo: [examples/react-native](https://github.com/ohah/chrome-remote-devtools/tree/main/examples/react-native).
 
 ## Requirements
 
