@@ -229,6 +229,13 @@ export type {
   AsyncStorageEntryValue,
 } from './async-storage/types';
 
+// Unused by example app; for README Vanilla Redux and polyfill / 예제 앱에서는 미사용; README Vanilla Redux 및 polyfill용
+export {
+  composeWithDevTools,
+  reduxDevToolsExtension,
+  installReduxDevToolsPolyfill,
+} from './redux-devtools-extension';
+
 export default {
   connect,
   reconnect,
