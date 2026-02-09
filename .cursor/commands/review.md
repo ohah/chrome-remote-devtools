@@ -33,12 +33,11 @@ This repo (ohah/chrome-remote-devtools) uses the **ohah** GitHub account for pos
    - Full diff: `gh pr diff`
    - Use this to build context for the review.
 
-4. **Write the AI review (summary + line suggestions)**
-   - **Summary body** (in English):
-     - **Purpose and description**: Do the PR purpose and description match the changes?
-     - **What’s done well**: Structure, naming, conventions, consistency.
-     - **Improvement suggestions**: Potential bugs, edge cases, performance, tests, and other recommendations.
-   - **Line-level suggestions**: For each place that needs a change, prepare an inline comment with:
+4. **Write the AI review (three separate comments)**
+   - **Comment 1 – Main review body** (in English): Purpose and description match; what's done well; improvement suggestions (bugs, edge cases, performance, tests); testing notes. Do **not** include maintainability or fallback in this body.
+   - **Comment 2 – Maintainability perspective**: Apply `.cursor/agents/sub-agent-review-maintainability.mdc`. Write a separate comment body (e.g. "## Maintainability perspective" + bullet findings). Post it as its own PR comment in step 5-c.
+   - **Comment 3 – Unnecessary fallback / scripts perspective**: Apply `.cursor/agents/sub-agent-review-fallback-scripts.mdc`. Write a separate comment body (e.g. "## Unnecessary fallback / scripts perspective" + bullet findings). Post it as its own PR comment in step 5-d.
+   - **Line-level suggestions** (attach only to the main review): For each place that needs a change, prepare an inline comment with:
      - **path**: Repo-root-relative path (e.g. `packages/react-native-inspector/src/websocket-client.ts`)
      - **line**: Line number in the **new (right) side** of the diff.
      - **side**: `"RIGHT"`
@@ -85,13 +84,32 @@ This repo (ohah/chrome-remote-devtools) uses the **ohah** GitHub account for pos
 
      (Write the summary from step 4 into `review-comment.md` first. You can delete it after posting.)
 
-   - **Rule**: If there are line-level suggestions, use 5-a (one review with body + comments). If not, use 5-b (comment only).
+   - **5-c. Post Comment 2 – Maintainability perspective**
+     After 5-a or 5-b, post the maintainability comment as a **separate** PR comment:
+
+     ```bash
+     gh pr comment $(gh pr view --json number -q .number) --body-file maintainability-comment.md
+     ```
+
+     (Write the maintainability body from step 4 into `maintainability-comment.md`. You can delete it after posting.)
+
+   - **5-d. Post Comment 3 – Unnecessary fallback / scripts perspective**
+     After 5-c, post the fallback/scripts comment as a **separate** PR comment:
+
+     ```bash
+     gh pr comment $(gh pr view --json number -q .number) --body-file fallback-comment.md
+     ```
+
+     (Write the fallback/scripts body from step 4 into `fallback-comment.md`. You can delete it after posting.)
+
+   - **Rule**: Post **three comments** in total: (1) main review via 5-a (with inlines) or 5-b (no inlines), (2) maintainability via 5-c, (3) fallback/scripts via 5-d.
 
 6. **Restore gh account (this repo / ohah only)**: If you switched to ohah in step 1, run `gh auth switch --hostname github.com --user <PREV_GH_USER>` to restore the original gh account.
 
 ## Notes
 
 - Run from the repo root with `gh` authenticated. This repo (ohah/chrome-remote-devtools): use ohah for posting reviews; switch gh before submit and restore after (see "gh account for this repo" and step 1, step 6).
+- **Three comments**: The review is posted as three separate PR comments: (1) main review (body + optional inline suggestions), (2) maintainability perspective, (3) unnecessary fallback/scripts perspective.
 - If the current branch has no PR, do not post a review; only output the message above.
 - **Inline comments**: `line` must be the line number on the **new (right)** side of the diff; `side` is `"RIGHT"`. Wrong line numbers can cause 422; confirm against the actual file.
 - **Suggestion blocks**: In the comment body, put the suggested code between ` ```suggestion ` and ` ``` ` so GitHub shows "Commit suggestion".
