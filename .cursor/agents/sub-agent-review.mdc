@@ -2,56 +2,65 @@
 alwaysApply: false
 name: sub-agent-review
 model: inherit
-description: 서브 에이전트 - PR 리뷰 시점. PR 목적·설명 일치, 잘된 점, 개선 제안, 테스트 관점을 점검할 때 적용
+description: Sub-agent for PR review. Apply when checking purpose/description match, what's done well, improvement suggestions, and testing perspective.
 ---
 
-# PR 리뷰 시점 (Review Perspective)
+# PR Review Perspective
 
-이 룰은 PR을 검토하고 리뷰(요약 + 인라인 제안)를 작성할 때 적용한다.
+This rule applies when reviewing a PR and writing the review (summary + inline suggestions).
 
-## 0. 브랜치·권한 (이 레포 ohah 전용)
+## 0. Branch and permissions (this repo, ohah only)
 
-- **대상 브랜치**: 리뷰는 **현재 브랜치**의 PR에 대해 수행한다. `gh pr view` / `gh pr diff` 는 현재 브랜치 기준이다.
-- **gh 계정**: 이 레포(ohah/chrome-remote-devtools)에서 리뷰를 **제출**할 때는 **ohah** GitHub 계정을 쓴다.
-  - 리뷰 제출 전: `gh api user -q .login` 으로 현재 사용자 확인. ohah 가 아니면 `gh auth switch --hostname github.com --user ohah` 로 전환하고, 이전 로그인을 기억해 둔다.
-  - 리뷰 제출 후: ohah 로 전환했었다면 `gh auth switch --hostname github.com --user <이전_계정>` 으로 복원하여 전역 gh 설정이 바뀌지 않게 한다.
-- 자세한 절차는 `.cursor/commands/review.md` 의 "gh account for this repo", "Order of operations" 1번을 참고한다.
+- **Target branch**: The review is performed for the PR of the **current branch**. `gh pr view` / `gh pr diff` use the current branch.
+- **gh account**: When **submitting** the review in this repo (ohah/chrome-remote-devtools), use the **ohah** GitHub account.
+  - Before submitting: Check current user with `gh api user -q .login`. If not ohah, run `gh auth switch --hostname github.com --user ohah` and remember the previous login.
+  - After submitting: If you switched to ohah, restore with `gh auth switch --hostname github.com --user <previous_account>` so global gh settings are unchanged.
+- See `.cursor/commands/review.md` "gh account for this repo" and "Order of operations" step 1 for details.
 
-## 1. 목적·설명 일치
+## 1. Purpose and description match
 
-- **Purpose / Work content**: PR 본문의 목적·설명이 실제 변경(코드·파일)과 맞는지 확인한다.
-- **Scope**: 제목·본문에 나온 범위 밖의 변경이 포함되어 있지 않은지, 또는 포함된 변경이 본문에 누락되지 않았는지 확인한다.
+- **Purpose / Work content**: Verify that the PR body's purpose and description match the actual changes (code and files).
+- **Scope**: Check that no changes outside the scope mentioned in the title/body are included, and that included changes are not missing from the body.
 
-## 2. 잘된 점 (What’s done well)
+## 2. What's done well
 
-- **구조·네이밍**: 디렉터리·파일·함수·변수 네이밍이 프로젝트 컨벤션과 일관된지.
-- **일관성**: 기존 코드 스타일(포맷, 주석, 타입)과 맞는지.
-- **가독성**: 로직이 읽기 쉽고 의도가 드러나는지.
+- **Structure and naming**: Directory, file, function, and variable names are consistent with project conventions.
+- **Consistency**: Matches existing code style (format, comments, types).
+- **Readability**: Logic is easy to follow and intent is clear.
 
-## 3. 개선 제안 (Improvement suggestions)
+## 3. Improvement suggestions
 
-- **버그·엣지케이스**: null/undefined, 빈 배열·문자열, 연결 해제 후 호출 등 경계 조건이 처리되었는지.
-- **예외·에러**: try-catch, Promise reject, 콜백 예외가 적절히 처리·로깅·전파되는지.
-- **성능**: 불필요한 반복, 메모리 누수(타이머·리스너 해제), 대량 데이터 처리 등.
-- **보안**: 외부 입력 파싱·검증, 민감 정보 노출 여부(로그·에러 메시지).
-- **테스트**: 변경된 경로에 대한 테스트·커버리지가 있는지, 회귀 방지가 고려되었는지.
+- **Bugs and edge cases**: Null/undefined, empty arrays/strings, calls after disconnect, etc., are handled at boundaries.
+- **Exceptions and errors**: try-catch, Promise reject, and callback exceptions are handled, logged, or propagated appropriately.
+- **Performance**: Unnecessary loops, leaks (timers/listeners not cleared), and large-data handling.
+- **Security**: Parsing/validation of external input, and whether sensitive data is exposed (logs, error messages).
+- **Tests**: Test coverage for changed paths and regression prevention.
 
-## 4. 인라인 제안 (Line-level suggestions)
+## 4. Line-level suggestions
 
-- **구체적 수정**: 코드 한 줄·몇 줄만 바꾸면 개선되는 경우, 해당 파일·라인에 인라인 코멘트로 제안한다.
-- **형식**: 설명 문장 + (적용 가능한 경우) `` ```suggestion ``` `` 블록으로 제안 코드를 넣어, GitHub "Commit suggestion"으로 적용 가능하게 한다.
-- **라인 번호**: 인라인은 diff의 **새 버전(우측)** 기준 라인 번호를 사용하며, 실제 파일과 맞는지 확인한다.
+- **Concrete fixes**: When changing one or a few lines improves the code, suggest them in an inline comment on the file and line.
+- **Format**: Explanation plus (when applicable) a `` ```suggestion ``` `` block so the suggestion can be applied via GitHub "Commit suggestion".
+- **Line numbers**: Use line numbers from the **new (right) side** of the diff and confirm they match the file.
 
-## 5. 테스트 관점
+## 5. Testing perspective
 
-- **How to test**: 리뷰어가 로컬에서 어떻게 확인할 수 있는지 본문에 있는지, 없으면 요약해서 리뷰에 적는다.
-- **회귀**: 기존 동작을 깨뜨리지 않는지, 필요한 경우 회귀 테스트 방법을 제안한다.
+- **How to test**: Check whether the body explains how a reviewer can verify locally; if not, summarize in the review.
+- **Regression**: Whether existing behavior is preserved; suggest regression test steps when needed.
 
-## 체크리스트 (리뷰)
+## 6. Sub-perspectives (also apply)
 
-- [ ] (이 레포) 현재 브랜치의 PR인지 확인했는가? 리뷰 제출 전 ohah로 전환·제출 후 복원했는가?
-- [ ] PR 목적·설명과 변경 내용이 일치하는가?
-- [ ] 잘된 점(구조·네이밍·일관성)을 요약했는가?
-- [ ] 개선 제안(버그·엣지케이스·성능·테스트)을 구체적으로 적었는가?
-- [ ] 인라인 제안이 있으면 파일·라인·suggestion 블록을 정확히 넣었는가?
-- [ ] 테스트·확인 방법을 리뷰에 포함했는가?
+When reviewing, also apply these two sub-agent perspectives:
+
+- **Maintainability** (`sub-agent-review-maintainability.mdc`): Complexity, duplication, dependency boundaries, docs/types, test maintainability. Check that the code is easy to change and extend over time.
+- **Unnecessary fallback / scripts** (`sub-agent-review-fallback-scripts.mdc`): Call out unjustified fallback paths, duplicate scripts, or excessive defensive code. Suggest removal or simplification when appropriate.
+
+## Checklist (review)
+
+- [ ] (This repo) Confirmed the PR is for the current branch? Switched to ohah before submitting and restored after?
+- [ ] Do the PR purpose and description match the changes?
+- [ ] Summarized what's done well (structure, naming, consistency)?
+- [ ] Wrote concrete improvement suggestions (bugs, edge cases, performance, tests)?
+- [ ] Reviewed maintainability (complexity, duplication, dependencies, docs)?
+- [ ] Called out unnecessary fallbacks, scripts, or defensive code where present?
+- [ ] If there are inline suggestions, used correct file, line, and suggestion block?
+- [ ] Included testing and verification steps in the review?

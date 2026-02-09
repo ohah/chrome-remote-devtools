@@ -1,0 +1,47 @@
+---
+alwaysApply: false
+name: sub-agent-review-maintainability
+model: inherit
+description: Sub-agent for PR review from a maintainability angle. Apply when checking long-term maintainability, complexity, duplication, dependencies, and extensibility.
+---
+
+# PR Review – Maintainability Perspective
+
+This rule applies when reviewing a PR for **maintainability**: whether the code will be easy to modify, extend, and debug later.
+
+## 1. Complexity and readability
+
+- **Function/file length**: If a function or file is too long, consider whether responsibilities should be split or extracted.
+- **Nesting depth**: If conditionals or callbacks are deeply nested, suggest reducing with early returns or helper extraction.
+- **Magic numbers/strings**: Check whether pulling them into constants would clarify intent and centralize change points.
+
+## 2. Duplication and consistency
+
+- **Code duplication**: If the same or similar logic appears in multiple places, consider a shared function or module.
+- **Naming and patterns**: Check consistency with existing project patterns (file names, function names, directory structure).
+- **Config and options**: Check that similar settings are not scattered and are managed in one place where possible.
+
+## 3. Dependencies and coupling
+
+- **Module boundaries**: Check that the impact of a change stays within one module, and that there are no circular references or excessive imports.
+- **External dependencies**: Review whether newly added packages are necessary and that version ranges are reasonable.
+- **Platform/environment branches**: Check that platform- or environment-specific branches are clearly separated and that adding a new platform has predictable touch points.
+
+## 4. Documentation, comments, and types
+
+- **Public API**: Newly exposed functions and types should have JSDoc or comments that explain intent and usage.
+- **Complex logic**: Consider whether "why it was done this way" for business logic or algorithms would help maintenance.
+- **Type definitions**: Check that `any` and type assertions are not overused and that types reflect the contract.
+
+## 5. Tests and regression
+
+- **Coverage of changed paths**: Consider whether unit tests for modified or added code would help prevent regressions.
+- **Test maintainability**: Check that tests are not brittle (e.g., overly coupled to implementation or duplicated setup).
+
+## Checklist (maintainability)
+
+- [ ] Are function/file length and nesting reasonable? Are magic numbers/strings turned into constants?
+- [ ] Is there no duplicated logic, and is naming/pattern consistent with the rest of the project?
+- [ ] Are module boundaries clear and external dependency additions minimal?
+- [ ] Do public APIs and complex logic have docs/comments, and do types reflect the contract?
+- [ ] Are there tests for the changed paths, and is the test code itself maintainable?

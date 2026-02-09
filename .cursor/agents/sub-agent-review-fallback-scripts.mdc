@@ -1,0 +1,46 @@
+---
+alwaysApply: false
+name: sub-agent-review-fallback-scripts
+model: inherit
+description: Sub-agent for PR review that flags unnecessary fallback scripts. Apply when checking whether defensive code, fallbacks, or alternate paths are really needed.
+---
+
+# PR Review – Unnecessary Fallback / Scripts
+
+This rule applies when reviewing a PR for **unnecessarily added fallbacks, alternate paths, or scripts**. Check that "just in case" defensive code does not increase complexity and maintenance cost.
+
+## 1. Need for fallback paths
+
+- **Can it actually happen**: Verify that the conditions that trigger the fallback (e.g., legacy environment, specific OS, network failure) can really occur in this project or target.
+- **Documentation or issue evidence**: An issue or doc like "it failed in this environment" can justify a fallback. Call out fallbacks added with no such justification.
+- **Is there a better alternative**: Consider whether a clear error message plus documentation would be easier to maintain than the fallback.
+
+## 2. Script and automation overlap
+
+- **Overlap with existing scripts**: Check that new scripts do not duplicate the role of existing `package.json` scripts, CI, or tooling.
+- **One-off scripts**: If a script is only run once, consider moving the steps into documentation as manual instructions.
+- **Too many environment branches**: If there are many branches (e.g., "if Windows do A, if Unix do B, else C"), suggest keeping only supported cases and removing or simplifying the rest.
+
+## 3. Excessive defensive code and checks
+
+- **Unnecessary null/undefined checks**: Suggest narrowing types or removing repeated checks for values that cannot occur by type or contract.
+- **Double init or double connect**: Check whether "skip if already present" is really needed or whether a single entry point can be used instead.
+- **Excessive logging/metrics**: Use "have we actually debugged with this log?" as a bar; if not, suggest removal or level adjustment.
+
+## 4. Alternate implementations and polyfills
+
+- **Polyfill scope**: Confirm polyfills match the supported environments (browser, Node, React Native version) and consider removing polyfills for out-of-scope environments.
+- **Maintaining two implementations**: When "if A fails use B" exists, consider removing the B path or making it optional where A alone is sufficient.
+
+## 5. Inline suggestion format
+
+- **When calling out**: In the review body or inline comment, write something like: "This fallback/script appears unnecessary because [reason]. Suggest removing it or simplifying to [alternative]."
+- **Removal suggestion**: When removal is appropriate, use a `` ```suggestion ``` `` block to suggest deleting the block or a simplified version of the code.
+
+## Checklist (fallback / scripts)
+
+- [ ] Do added fallback paths guard against situations that can actually occur? Any "just in case" additions with no justification?
+- [ ] Do new scripts overlap with existing scripts/CI? Can one-off tasks be documented instead of scripted?
+- [ ] Any unnecessary null checks, double init, or excessive logging?
+- [ ] Are polyfills and alternate implementations scoped to supported environments only?
+- [ ] When calling out unnecessary code, did you explain why it's unnecessary and suggest removal or simplification?
