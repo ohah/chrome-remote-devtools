@@ -29,6 +29,7 @@ tauri-plugin-http = "2"
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
+reqwest.workspace = true
 
 # 서버 라이브러리 의존성 추가
 chrome-remote-devtools-server = { path = "../../../crates/server" }

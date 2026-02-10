@@ -5,6 +5,14 @@ use std::sync::{Arc, OnceLock};
 use tauri::Manager;
 use tokio::sync::RwLock;
 
+/// Response for Metro proxy request (no Origin header so Metro security middleware allows) /
+/// Metro 프록시 응답 (Origin 미전송으로 Metro 보안 미들웨어 통과)
+#[derive(serde::Serialize)]
+struct MetroProxyResponse {
+    status: u16,
+    body: String,
+}
+
 // Global server handle / 전역 서버 핸들
 static SERVER_HANDLE: OnceLock<Arc<RwLock<ServerHandle>>> = OnceLock::new();
 
@@ -201,6 +209,17 @@ async fn is_reactotron_server_running() -> bool {
     }
 }
 
+/// Fetch URL from Rust (no Origin header) so Metro securityHeadersMiddleware allows the request /
+/// Rust에서 Origin 헤더 없이 요청해 Metro securityHeadersMiddleware 통과
+#[tauri::command]
+async fn fetch_metro_proxy(url: String) -> Result<MetroProxyResponse, String> {
+    let client = reqwest::Client::new();
+    let resp = client.get(&url).send().await.map_err(|e| e.to_string())?;
+    let status = resp.status().as_u16();
+    let body = resp.text().await.map_err(|e| e.to_string())?;
+    Ok(MetroProxyResponse { status, body })
+}
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -234,7 +253,8 @@ pub fn run() {
             is_server_running,
             start_reactotron_server,
             stop_reactotron_server,
-            is_reactotron_server_running
+            is_reactotron_server_running,
+            fetch_metro_proxy
         ])
         .setup(move |app| {
             // Resolve client.js resource path / client.js 리소스 경로 해결
@@ -300,5 +320,25 @@ mod tests {
     fn test_greet_empty() {
         let result = greet("");
         assert!(result.contains("Hello"));
+    }
+
+    // fetch_metro_proxy returns Err when connection fails (no server on port) /
+    // fetch_metro_proxy는 연결 실패 시(해당 포트에 서버 없음) Err 반환
+    #[tokio::test]
+    async fn test_fetch_metro_proxy_connection_refused_returns_err() {
+        let result = fetch_metro_proxy("http://127.0.0.1:59999/".to_string()).await;
+        assert!(result.is_err());
+    }
+
+    // fetch_metro_proxy returns Ok with status and body for a reachable URL (requires network) /
+    // fetch_metro_proxy는 접근 가능한 URL에 대해 status와 body를 담은 Ok 반환 (네트워크 필요)
+    #[tokio::test]
+    #[ignore = "requires network access to http://example.com"]
+    async fn test_fetch_metro_proxy_success_returns_ok() {
+        let result = fetch_metro_proxy("http://example.com".to_string()).await;
+        assert!(result.is_ok());
+        let resp = result.unwrap();
+        assert_eq!(resp.status, 200);
+        assert!(!resp.body.is_empty());
     }
 }
