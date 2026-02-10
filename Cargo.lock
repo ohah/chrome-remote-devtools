@@ -2239,6 +2239,7 @@ name = "inspector"
 version = "0.1.0"
 dependencies = [
  "chrome-remote-devtools-server",
+ "reqwest",
  "serde",
  "serde_json",
  "tauri",

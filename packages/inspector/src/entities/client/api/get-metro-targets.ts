@@ -31,16 +31,19 @@ export interface MetroTarget {
 }
 
 /**
- * Fetch implementation that uses Tauri HTTP plugin in Tauri app (avoids CORS for Metro),
- * otherwise global fetch / Tauri 앱에서는 Tauri HTTP 플러그인 사용 (Metro CORS 회피), 그 외에는 global fetch
+ * Fetch implementation: in Tauri app uses Rust proxy (no Origin header → Metro securityHeadersMiddleware allows).
+ * Otherwise global fetch / Tauri 앱에서는 Rust 프록시 사용 (Origin 미전송으로 Metro 보안 미들웨어 통과), 그 외에는 global fetch
  */
 async function metroFetch(url: string): Promise<Response> {
   if (typeof window !== 'undefined' && (window as Window & { __TAURI__?: unknown }).__TAURI__) {
     try {
-      const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
-      return tauriFetch(url, { method: 'GET' }) as Promise<Response>;
+      const { invoke } = await import('@tauri-apps/api/core');
+      const { status, body } = await invoke<{ status: number; body: string }>('fetch_metro_proxy', {
+        url,
+      });
+      return new Response(body, { status });
     } catch {
-      // Tauri HTTP plugin unavailable (e.g. not installed); fall back to global fetch / Tauri HTTP 플러그인 없음 시 global fetch 사용
+      // Tauri command unavailable; fall back to global fetch / Tauri 명령 없음 시 global fetch 사용
       return fetch(url);
     }
   }
