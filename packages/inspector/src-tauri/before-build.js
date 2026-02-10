@@ -29,6 +29,42 @@ try {
   process.exit(1);
 }
 
+// Copy devtools-frontend (bundled) into dist so Tauri bundle includes it / dist에 devtools-frontend(bundled) 복사하여 Tauri 번들에 포함
+console.log('📦 Copying devtools-frontend (bundled) to dist...');
+try {
+  const devtoolsBundled = path.join(projectRoot, 'devtools/bundled/front_end');
+  const inspectorDist = path.join(projectRoot, 'packages/inspector/dist');
+  const devtoolsDest = path.join(inspectorDist, 'devtools-frontend');
+
+  if (!fs.existsSync(devtoolsBundled)) {
+    console.error(`Error: devtools bundled not found at ${devtoolsBundled}`);
+    console.error('Run build:devtools first if needed.');
+    process.exit(1);
+  }
+  if (!fs.existsSync(inspectorDist)) {
+    console.error(`Error: inspector dist not found at ${inspectorDist}`);
+    process.exit(1);
+  }
+
+  function copyDirRecursive(src, dest) {
+    fs.mkdirSync(dest, { recursive: true });
+    for (const name of fs.readdirSync(src)) {
+      const srcPath = path.join(src, name);
+      const destPath = path.join(dest, name);
+      if (fs.statSync(srcPath).isDirectory()) {
+        copyDirRecursive(srcPath, destPath);
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+      }
+    }
+  }
+  copyDirRecursive(devtoolsBundled, devtoolsDest);
+  console.log('✅ devtools-frontend copied to dist');
+} catch (error) {
+  console.error('❌ Failed to copy devtools-frontend:', error);
+  process.exit(1);
+}
+
 console.log('📦 Copying client.js to resources...');
 try {
   const fs = require('fs');
