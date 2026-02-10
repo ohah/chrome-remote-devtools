@@ -10,6 +10,106 @@ Chrome Remote DevTools는 클라이언트 사이드에서 CDP를 구현하고 We
 
 ![데모](images/play.gif)
 
+## React Native
+
+**React Native 앱도 Chrome DevTools로 디버깅할 수 있습니다.**
+
+**@ohah/chrome-remote-devtools-inspector-react-native** 플러그인을 사용하면, React Native 앱을 같은 Inspector(콘솔, 네트워크, Redux 등)에 중계 서버를 통해 연결할 수 있습니다. 콘솔/네트워크용 네이티브 모듈 없이, 전부 JavaScript에서 동작합니다.
+
+### 제공 기능
+
+- **콘솔**: DevTools Console 탭에서 `console.log` / `warn` / `error` 확인 및 객체 검사
+- **네트워크**: Network 패널에서 `fetch`, `XMLHttpRequest` 추적
+- **Redux / Zustand**: Chrome Extension과 동일한 Redux DevTools UI, Redux Toolkit·Zustand 지원
+- **MMKV / AsyncStorage**: 선택 사항으로 스토리지 조회·편집용 DevTools 패널
+
+### 빠른 시작 (4단계)
+
+**1. 패키지 설치**
+
+```bash
+npm install @ohah/chrome-remote-devtools-inspector-react-native
+# 또는: yarn add / bun add
+```
+
+**2. 앱 진입 파일**에서 한 번만 import (스토어 생성 전에 Redux DevTools polyfill 실행용)
+
+```typescript
+import '@ohah/chrome-remote-devtools-inspector-react-native';
+```
+
+**3. 앱을 Provider로 감싸기.** Inspector 기기 목록에 보이려면 안정적인 `deviceId`(예: `react-native-device-info`)가 필요합니다.
+
+```typescript
+import { ChromeRemoteDevToolsInspectorProvider } from '@ohah/chrome-remote-devtools-inspector-react-native';
+import { getUniqueId } from 'react-native-device-info';
+
+// 루트 컴포넌트에서:
+const [deviceId, setDeviceId] = useState<string | null>(null);
+useEffect(() => {
+  getUniqueId().then(setDeviceId).catch(() => setDeviceId('device-' + Date.now()));
+}, []);
+
+if (!deviceId) return <Loading />;
+
+return (
+  <ChromeRemoteDevToolsInspectorProvider
+    serverHost="localhost"   // 실기기면 PC IP 사용
+    serverPort={8080}
+    deviceId={deviceId}
+  >
+    {/* 앱 내용 */}
+  </ChromeRemoteDevToolsInspectorProvider>
+);
+```
+
+**4. 중계 서버와 Inspector 실행**
+
+```bash
+# 터미널 1: 중계 서버
+cargo run --bin chrome-remote-devtools-server -- --port 8080
+
+# 터미널 2: Inspector (웹 또는 데스크탑)
+bun run dev:inspector
+# 또는: bun run dev:inspector:tauri
+```
+
+브라우저(또는 Tauri 앱)에서 Inspector를 연 뒤, RN 앱을 실행하면 기기 목록에 표시됩니다. 해당 기기를 선택하면 DevTools(콘솔, 네트워크, Redux 등)를 사용할 수 있습니다.
+
+### 팁
+
+- **iOS 시뮬레이터**: `serverHost="localhost"` 그대로 사용
+- **Android 에뮬레이터**: `adb reverse tcp:8080 tcp:8080` 실행 후 `localhost` 사용
+- **실기기**: `serverHost`를 PC의 LAN IP로 설정 (예: `192.168.1.100`)
+- **Console 탭이 비어 있을 때**: DevTools Console에서 컨텍스트 드롭다운을 열고 "Selected context only" 해제, 또는 "React Native" 컨텍스트 선택
+
+### Redux / Zustand
+
+Metro 설정을 추가하고 Redux Toolkit은 `devTools: true`, Zustand는 `devtools()`를 사용하면 됩니다. Metro 설정과 예시는 [React Native Inspector README](packages/react-native-inspector/README_KO.md)를 참고하세요.
+
+### 상세 문서와 예제
+
+- **패키지 README**: [packages/react-native-inspector/README_KO.md](packages/react-native-inspector/README_KO.md) (설치, Provider, MMKV, AsyncStorage, Metro, Redux/Zustand)
+- **예제 앱**: [examples/react-native](examples/react-native) (이 레포의 전체 설정 예시)
+
+**요구사항**: React Native >= 0.76.0, iOS >= 15.1.
+
+### React Native 실행 화면
+
+| 환영 화면                                     | 콘솔                                     | 네트워크                                     |
+| --------------------------------------------- | ---------------------------------------- | -------------------------------------------- |
+| ![환영 화면](images/react-native/welcome.png) | ![콘솔](images/react-native/console.png) | ![네트워크](images/react-native/network.png) |
+
+| Redux                                   | MMKV                                  | AsyncStorage                                          |
+| --------------------------------------- | ------------------------------------- | ----------------------------------------------------- |
+| ![Redux](images/react-native/redux.png) | ![MMKV](images/react-native/mmkv.png) | ![AsyncStorage](images/react-native/asyncStorage.png) |
+
+| 컴포넌트                                        | 성능                                         | 프로파일러                                      | 소스                                    |
+| ----------------------------------------------- | -------------------------------------------- | ----------------------------------------------- | --------------------------------------- |
+| ![컴포넌트](images/react-native/components.png) | ![성능](images/react-native/performance.png) | ![프로파일러](images/react-native/profiler.png) | ![소스](images/react-native/source.png) |
+
+---
+
 ## 주요 기능
 
 - **연결 관리**: 원격 크롬 인스턴스에 WebSocket 연결 및 자동 재연결
@@ -35,141 +135,32 @@ Chrome Remote DevTools는 클라이언트 사이드에서 CDP를 구현하고 We
 - **chrome-remote-devtools-server** (Rust): WebSocket 중계 서버 (독립 실행형 또는 Tauri에 내장)
 - **@ohah/chrome-remote-devtools-client**: CDP 클라이언트 (JavaScript, 웹페이지에 로드)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, 웹/데스크탑 공유)
+- **@ohah/chrome-remote-devtools-inspector-react-native**: React Native 플러그인 (콘솔, 네트워크, Redux, MMKV, AsyncStorage; JavaScript 훅만 사용)
 
 ### 데이터 저장소
 
 - **IndexedDB**: 브라우저에서 오프라인 로깅 및 세션 리플레이 데이터 저장에 사용
 
-## 기술 스택
-
-- **백엔드**: Rust (WebSocket 서버), TypeScript (클라이언트)
-- **프론트엔드**: React + Vite, TypeScript, Tauri (데스크탑 앱용)
-- **DevTools**: devtools-frontend (Google 오픈소스, 포크 사용)
-- **도구**: oxlint/oxfmt, rustfmt/clippy, mise (도구 버전 관리)
-
-## 사전 요구사항
-
-- [Bun](https://bun.sh) (최신 버전)
-- [Rust](https://www.rust-lang.org/) (stable)
-- [mise](https://mise.jdx.dev/) (도구 버전 관리용)
-- Git
-
-## 설치 방법
-
-### 1. 저장소 클론
-
-```bash
-git clone https://github.com/ohah/chrome-remote-devtools.git
-cd chrome-remote-devtools
-```
-
-### 2. 프로젝트 초기화
-
-초기화 스크립트를 실행하여 의존성과 레퍼런스 저장소를 설정합니다:
-
-```bash
-# OS를 자동으로 감지하여 적절한 스크립트 실행
-bun run init
-
-# 또는 수동으로:
-# Windows:
-scripts\init.bat
-
-# Linux/macOS:
-bash scripts/init.sh
-```
-
-이 스크립트는 다음을 수행합니다:
-
-- Bun 의존성 설치
-- Rust 의존성 설치
-- 레퍼런스 저장소 클론 (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb, redux-devtools)
-
-### 3. 설치 확인
-
-```bash
-# Bun 버전 확인
-bun --version
-
-# Rust 버전 확인
-rustc --version
-```
-
 ## 사용 방법
 
-### 개발
+1. **중계 서버 실행** (기본 포트 8080):
 
-개발 서버를 시작합니다:
+   ```bash
+   cargo run --bin chrome-remote-devtools-server -- --port 8080
+   ```
 
-```bash
-# WebSocket 중계 서버 시작 (Rust)
-cargo run --bin chrome-remote-devtools-server -- --port 8080
+2. **Inspector 실행** (웹 또는 데스크탑):
 
-# Inspector 웹 버전 시작
-bun run dev:inspector
+   ```bash
+   bun run dev:inspector        # 웹
+   bun run dev:inspector:tauri  # 데스크탑 (Tauri)
+   ```
 
-# Inspector 데스크탑 버전 시작 (Tauri)
-bun run dev:inspector:tauri
+3. **클라이언트 연결**:
+   - **웹**: 페이지에 클라이언트 스크립트 로드 (예: `<script src="http://localhost:8080/client.js" data-server-url="http://localhost:8080"></script>`), 브라우저에서 Inspector를 열고 클라이언트를 선택합니다.
+   - **React Native**: 위 [React Native](#react-native) 설정(Provider + 서버 + Inspector)을 사용합니다.
 
-# 문서 사이트 시작
-bun run dev:docs
-```
-
-### 빌드
-
-모든 패키지를 빌드합니다:
-
-```bash
-# OS를 자동으로 감지
-bun run build
-
-# 또는 수동으로:
-# Windows:
-scripts\build.bat
-
-# Linux/macOS:
-bash scripts/build.sh
-```
-
-## 개발 명령어
-
-```bash
-# 개발 서버
-cargo run --bin chrome-remote-devtools-server  # Rust WebSocket 서버만
-bun run dev:inspector       # Inspector 웹만
-bun run dev:inspector:tauri  # Inspector 데스크탑
-bun run dev:docs            # 문서 페이지
-
-# 코드 품질
-bun run lint                # oxlint 실행
-bun run format              # oxfmt로 포맷팅
-bun run format:rust         # rustfmt로 Rust 코드 포맷팅
-
-# 빌드
-bun run build               # 전체 패키지 빌드
-bun run build:devtools      # Redux DevTools 플러그인 및 devtools-frontend 빌드
-```
-
-## 프로젝트 구조
-
-```
-chrome-remote-devtools/
-├── crates/
-│   └── server/          # WebSocket 중계 서버 (Rust)
-├── packages/
-│   ├── client/          # CDP 클라이언트 (웹페이지용)
-│   └── inspector/       # Inspector UI (React + Vite, 웹/데스크탑)
-├── document/            # RSPress 문서 페이지
-├── devtools/
-│   └── devtools-frontend/  # DevTools 프론트엔드
-└── reference/           # 참조 코드 (gitignore)
-    ├── chii/
-    ├── chobitsu/
-    ├── devtools-remote-debugger/
-    ├── devtools-protocol/
-    ├── rrweb/
-    └── redux-devtools/  # Redux DevTools Extension 소스
-```
+소스 빌드, 개발 환경 설정, 전체 명령어는 [CONTRIBUTING.md](CONTRIBUTING.md)([한국어](CONTRIBUTING_KO.md))를 참고하세요.
 
 ## 통신 흐름
 
@@ -182,9 +173,9 @@ chrome-remote-devtools/
 
 기여를 환영합니다! 자세한 내용은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
 
-- [행동 강령](CONTRIBUTING.ko.md#code-of-conduct)
-- [개발 환경 설정](CONTRIBUTING.ko.md#개발-환경-설정)
-- [커밋 가이드라인](CONTRIBUTING.ko.md#커밋-메시지-가이드라인)
+- [행동 강령](CONTRIBUTING_KO.md#code-of-conduct)
+- [개발 환경 설정](CONTRIBUTING_KO.md#개발-환경-설정)
+- [커밋 가이드라인](CONTRIBUTING_KO.md#커밋-메시지-가이드라인)
 
 ## 라이센스
 
@@ -192,21 +183,7 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.
 
 ## Redux DevTools 통합
 
-Chrome Remote DevTools는 공식 Chrome Extension과 동일한 UI를 제공하는 Redux DevTools 패널을 포함합니다. 패널은 `@redux-devtools/app`을 UI로 사용하고 CDP 프로토콜을 통해 통신합니다.
-
-### Redux DevTools 빌드
-
-Redux DevTools 플러그인과 devtools-frontend를 빌드하려면:
-
-```bash
-bun run build:devtools
-```
-
-이 명령은 다음을 수행합니다:
-
-1. `@ohah/redux-devtools-plugin` 패키지 빌드
-2. Redux 패널이 포함된 devtools-frontend 빌드
-3. 빌드된 파일을 `devtools/bundled/`로 복사
+Chrome Remote DevTools는 공식 Chrome Extension과 동일한 UI를 제공하는 Redux DevTools 패널을 포함합니다. 패널은 `@redux-devtools/app`을 UI로 사용하고 CDP 프로토콜을 통해 통신합니다. Redux DevTools 플러그인 및 devtools-frontend 빌드 방법은 [CONTRIBUTING.md](CONTRIBUTING_KO.md#개발-명령어-참고)(`bun run build:devtools`)를 참고하세요.
 
 ### Redux 패널
 
@@ -216,28 +193,9 @@ Redux 패널은 DevTools panel view에서 사용할 수 있습니다. 다음을 
 - **CDP 이벤트**: `Redux.message` 이벤트 리스닝 (INIT, ACTION, STATE 등)
 - **@redux-devtools/app**: Redux DevTools UI 제공
 
-### React Native 통합
+### React Native
 
-React Native 앱에서는 `@ohah/chrome-remote-devtools-inspector-react-native`의 미들웨어를 사용합니다:
-
-```typescript
-// Redux 미들웨어
-import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-inspector-react-native/redux';
-
-const store = createStore(
-  rootReducer,
-  applyMiddleware(createReduxDevToolsMiddleware({ name: 'MyApp' }))
-);
-
-// Zustand 미들웨어
-import { chromeDevtools } from '@ohah/chrome-remote-devtools-inspector-react-native/zustand';
-
-const useStore = create(
-  chromeDevtools((set) => ({ ... }), { name: 'MyStore' })
-);
-```
-
-Redux 액션과 상태 변경은 CDP 메시지로 전송되어 Redux 패널에 표시됩니다.
+React Native에서는 **@ohah/chrome-remote-devtools-inspector-react-native**로 동일한 Redux DevTools UI를 사용할 수 있습니다. [Metro 설정과 Provider](packages/react-native-inspector/README_KO.md)를 한 뒤, Redux Toolkit은 `devTools: true`, Zustand는 `devtools()`를 사용하면 됩니다. 전체 빠른 시작은 위의 [React Native](#react-native) 섹션을 참고하세요.
 
 ## 참조 프로젝트
 
