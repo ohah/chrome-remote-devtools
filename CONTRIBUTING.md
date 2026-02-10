@@ -11,7 +11,10 @@ We welcome contributions from the community and appreciate your efforts to help 
 - [Code of Conduct](#code-of-conduct)
 - [Getting Help](#getting-help)
 - [How to Contribute](#how-to-contribute)
+- [Prerequisites](#prerequisites)
 - [Development Setup](#development-setup)
+- [Project Structure](#project-structure)
+- [Development Commands Reference](#development-commands-reference)
 - [Running Development Servers](#running-development-servers)
 - [Testing](#testing)
 - [Code Quality Checks](#code-quality-checks)
@@ -35,30 +38,101 @@ There are many ways to contribute to Chrome Remote DevTools:
 - **Improve documentation**: Help us improve our docs by fixing typos, adding examples, or clarifying instructions.
 - **Submit pull requests**: Fix bugs, add features, or improve existing code.
 
+## Prerequisites
+
+- [Bun](https://bun.sh) (latest)
+- [Rust](https://www.rust-lang.org/) (stable)
+- [mise](https://mise.jdx.dev/) (for tool version management)
+- Git
+
 ## Development Setup
 
 Chrome Remote DevTools uses [mise](https://mise.jdx.dev/) to manage Rust and Bun versions, ensuring consistent development environments across the team.
 
-### 1. Set up the project
+### 1. Clone and initialize
 
 ```bash
+git clone https://github.com/ohah/chrome-remote-devtools.git
+cd chrome-remote-devtools
+
 # Trust mise and install tools
 mise trust
 mise install
 ```
 
-### 2. Install dependencies
+### 2. Run the init script
+
+The init script installs dependencies and clones reference repositories (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb, redux-devtools):
+
+```bash
+# Automatically detects OS
+bun run init
+
+# Or manually: scripts\init.bat (Windows) or bash scripts/init.sh (Linux/macOS)
+```
+
+### 3. Install dependencies
 
 ```bash
 # Install Bun workspace dependencies
 bun install
 ```
 
-### 3. Build the project
+### 4. Build the project
 
 ```bash
 # Build all packages
 bun run build
+```
+
+### 5. Verify setup
+
+```bash
+bun --version
+rustc --version
+```
+
+## Project Structure
+
+```
+chrome-remote-devtools/
+├── crates/
+│   └── server/          # WebSocket relay server (Rust)
+├── packages/
+│   ├── client/          # CDP client (for web pages)
+│   ├── inspector/       # Inspector UI (React + Vite, web/desktop)
+│   └── react-native-inspector/  # React Native plug-in (Console, Network, Redux, etc.)
+├── document/            # RSPress documentation site
+├── devtools/
+│   └── devtools-frontend/  # DevTools frontend
+└── reference/           # Reference code (gitignored)
+    ├── chii/
+    ├── chobitsu/
+    ├── devtools-remote-debugger/
+    ├── devtools-protocol/
+    ├── rrweb/
+    └── redux-devtools/  # Redux DevTools Extension source
+```
+
+## Development Commands Reference
+
+```bash
+# Development servers
+cargo run --bin chrome-remote-devtools-server  # Rust WebSocket server only
+bun run dev:server         # WebSocket server (convenience)
+bun run dev:inspector      # Inspector web only
+bun run dev:inspector:tauri  # Inspector desktop
+bun run dev:docs           # Documentation site
+bun run dev                # Unified (server + inspector + optional example)
+
+# Code quality
+bun run lint               # Run oxlint
+bun run format             # Format with oxfmt
+bun run format:rust        # Format Rust code with rustfmt
+
+# Build
+bun run build              # Build all packages
+bun run build:devtools     # Build Redux DevTools plugin and devtools-frontend
 ```
 
 ## Building DevTools Frontend

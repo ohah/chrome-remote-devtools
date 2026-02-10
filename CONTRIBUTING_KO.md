@@ -11,7 +11,10 @@ Chrome Remote DevTools 프로젝트에 기여해주셔서 감사합니다!
 - [Code of Conduct](#code-of-conduct)
 - [도움 받기](#도움-받기)
 - [기여 방법](#기여-방법)
+- [사전 요구사항](#사전-요구사항)
 - [개발 환경 설정](#개발-환경-설정)
+- [프로젝트 구조](#프로젝트-구조)
+- [개발 명령어 참고](#개발-명령어-참고)
 - [개발 서버 실행](#개발-서버-실행)
 - [테스트](#테스트)
 - [코드 품질 검사](#코드-품질-검사)
@@ -35,30 +38,101 @@ Chrome Remote DevTools에 기여하는 방법은 여러 가지가 있습니다:
 - **문서 개선**: 오타 수정, 예제 추가, 설명 개선 등으로 문서를 개선해주세요.
 - **Pull Request 제출**: 버그 수정, 기능 추가, 기존 코드 개선을 위한 PR을 제출해주세요.
 
+## 사전 요구사항
+
+- [Bun](https://bun.sh) (최신)
+- [Rust](https://www.rust-lang.org/) (stable)
+- [mise](https://mise.jdx.dev/) (도구 버전 관리용)
+- Git
+
 ## 개발 환경 설정
 
 Chrome Remote DevTools는 [mise](https://mise.jdx.dev/)를 사용하여 Rust와 Bun 버전을 관리하여 팀 전체에서 일관된 개발 환경을 유지합니다.
 
-### 1. 프로젝트 설정
+### 1. 저장소 클론 및 도구 설정
 
 ```bash
+git clone https://github.com/ohah/chrome-remote-devtools.git
+cd chrome-remote-devtools
+
 # mise 신뢰 및 도구 설치
 mise trust
 mise install
 ```
 
-### 2. 의존성 설치
+### 2. 초기화 스크립트 실행
+
+초기화 스크립트는 의존성 설치 및 레퍼런스 저장소(chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb, redux-devtools) 클론을 수행합니다:
+
+```bash
+# OS 자동 감지
+bun run init
+
+# 또는 수동: scripts\init.bat (Windows) / bash scripts/init.sh (Linux/macOS)
+```
+
+### 3. 의존성 설치
 
 ```bash
 # Bun 워크스페이스 의존성 설치
 bun install
 ```
 
-### 3. 프로젝트 빌드
+### 4. 프로젝트 빌드
 
 ```bash
 # 전체 패키지 빌드
 bun run build
+```
+
+### 5. 설정 확인
+
+```bash
+bun --version
+rustc --version
+```
+
+## 프로젝트 구조
+
+```
+chrome-remote-devtools/
+├── crates/
+│   └── server/          # WebSocket 중계 서버 (Rust)
+├── packages/
+│   ├── client/          # CDP 클라이언트 (웹페이지용)
+│   ├── inspector/       # Inspector UI (React + Vite, 웹/데스크탑)
+│   └── react-native-inspector/  # React Native 플러그인 (콘솔, 네트워크, Redux 등)
+├── document/            # RSPress 문서 사이트
+├── devtools/
+│   └── devtools-frontend/  # DevTools 프론트엔드
+└── reference/           # 참조 코드 (gitignore)
+    ├── chii/
+    ├── chobitsu/
+    ├── devtools-remote-debugger/
+    ├── devtools-protocol/
+    ├── rrweb/
+    └── redux-devtools/  # Redux DevTools Extension 소스
+```
+
+## 개발 명령어 참고
+
+```bash
+# 개발 서버
+cargo run --bin chrome-remote-devtools-server  # Rust WebSocket 서버만
+bun run dev:server         # WebSocket 서버 (편의)
+bun run dev:inspector      # Inspector 웹만
+bun run dev:inspector:tauri  # Inspector 데스크탑
+bun run dev:docs           # 문서 사이트
+bun run dev                # 통합 (서버 + Inspector + 선택적 예제)
+
+# 코드 품질
+bun run lint               # oxlint 실행
+bun run format             # oxfmt 포맷팅
+bun run format:rust        # rustfmt로 Rust 포맷팅
+
+# 빌드
+bun run build              # 전체 패키지 빌드
+bun run build:devtools      # Redux DevTools 플러그인 및 devtools-frontend 빌드
 ```
 
 ## DevTools Frontend 빌드

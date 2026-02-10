@@ -10,6 +10,106 @@ Chrome Remote DevTools enables remote debugging of web pages by implementing CDP
 
 ![Demo](images/play.gif)
 
+## React Native
+
+**React Native 앱도 Chrome DevTools로 디버깅할 수 있습니다.**
+
+We provide **@ohah/chrome-remote-devtools-inspector-react-native**, a plug-in that connects your React Native app to the same Inspector (Console, Network, Redux, etc.) over the relay server. No native modules for console/network—everything runs in JavaScript.
+
+### What you get
+
+- **Console**: `console.log` / `warn` / `error` in the DevTools Console tab, with object inspection
+- **Network**: `fetch` and `XMLHttpRequest` in the Network panel
+- **Redux / Zustand**: Same Redux DevTools UI as the Chrome Extension; works with Redux Toolkit and Zustand
+- **MMKV / AsyncStorage**: Optional DevTools panels to view and edit storage
+
+### Quick start (3 steps)
+
+**1. Install the package**
+
+```bash
+npm install @ohah/chrome-remote-devtools-inspector-react-native
+# or: yarn add / bun add
+```
+
+**2. In your app entry file**, import once (so Redux DevTools polyfill runs before any store):
+
+```typescript
+import '@ohah/chrome-remote-devtools-inspector-react-native';
+```
+
+**3. Wrap your app** with the provider. You need a stable `deviceId` (e.g. from `react-native-device-info`) so the Inspector can list your device.
+
+```typescript
+import { ChromeRemoteDevToolsInspectorProvider } from '@ohah/chrome-remote-devtools-inspector-react-native';
+import { getUniqueId } from 'react-native-device-info';
+
+// In your root component:
+const [deviceId, setDeviceId] = useState<string | null>(null);
+useEffect(() => {
+  getUniqueId().then(setDeviceId).catch(() => setDeviceId('device-' + Date.now()));
+}, []);
+
+if (!deviceId) return <Loading />;
+
+return (
+  <ChromeRemoteDevToolsInspectorProvider
+    serverHost="localhost"   // use your PC IP if on a physical device
+    serverPort={8080}
+    deviceId={deviceId}
+  >
+    {/* Your app */}
+  </ChromeRemoteDevToolsInspectorProvider>
+);
+```
+
+**4. Run the relay server and Inspector**
+
+```bash
+# Terminal 1: relay server
+cargo run --bin chrome-remote-devtools-server -- --port 8080
+
+# Terminal 2: Inspector (web or desktop)
+bun run dev:inspector
+# or: bun run dev:inspector:tauri
+```
+
+Then open the Inspector in the browser (or Tauri app), start your RN app, and your device will appear in the client list. Click it to open DevTools (Console, Network, Redux, etc.).
+
+### Tips
+
+- **iOS Simulator**: `serverHost="localhost"` is fine.
+- **Android Emulator**: run `adb reverse tcp:8080 tcp:8080`, then use `localhost`.
+- **Physical device**: set `serverHost` to your computer’s LAN IP (e.g. `192.168.1.100`).
+- **Console tab empty?** In DevTools Console, open the context dropdown and uncheck “Selected context only”, or choose the “React Native” context.
+
+### Redux / Zustand
+
+Add the Metro config and use `devTools: true` (Redux Toolkit) or `devtools()` (Zustand). See the [React Native Inspector README](packages/react-native-inspector/README.md) for Metro snippet and examples.
+
+### Full docs and example
+
+- **Package README**: [packages/react-native-inspector/README.md](packages/react-native-inspector/README.md) (installation, Provider, MMKV, AsyncStorage, Metro, Redux/Zustand)
+- **Example app**: [examples/react-native](examples/react-native) (full setup in this repo)
+
+**Requirements**: React Native >= 0.76.0, iOS >= 15.1.
+
+### React Native screenshots
+
+| Welcome                                     | Console                                     | Network                                     |
+| ------------------------------------------- | ------------------------------------------- | ------------------------------------------- |
+| ![Welcome](images/react-native/welcome.png) | ![Console](images/react-native/console.png) | ![Network](images/react-native/network.png) |
+
+| Redux                                   | MMKV                                  | AsyncStorage                                          |
+| --------------------------------------- | ------------------------------------- | ----------------------------------------------------- |
+| ![Redux](images/react-native/redux.png) | ![MMKV](images/react-native/mmkv.png) | ![AsyncStorage](images/react-native/asyncStorage.png) |
+
+| Components                                        | Performance                                         | Profiler                                      | Source                                    |
+| ------------------------------------------------- | --------------------------------------------------- | --------------------------------------------- | ----------------------------------------- |
+| ![Components](images/react-native/components.png) | ![Performance](images/react-native/performance.png) | ![Profiler](images/react-native/profiler.png) | ![Source](images/react-native/source.png) |
+
+---
+
 ## Features
 
 - **Connection Management**: WebSocket connection to remote Chrome instances with automatic reconnection
@@ -35,155 +135,32 @@ Chrome Remote DevTools enables remote debugging of web pages by implementing CDP
 - **chrome-remote-devtools-server** (Rust): WebSocket relay server (standalone or embedded in Tauri)
 - **@ohah/chrome-remote-devtools-client**: CDP client (JavaScript, loaded in web pages)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, shared for web/desktop)
+- **@ohah/chrome-remote-devtools-inspector-react-native**: React Native plug-in (Console, Network, Redux, MMKV, AsyncStorage via CDP; JavaScript-only hooks)
 
 ### Data Storage
 
 - **IndexedDB**: Used for offline logging and session replay data storage in the browser
 
-## Tech Stack
-
-- **Backend**: Rust (WebSocket server), TypeScript (client)
-- **Frontend**: React + Vite, TypeScript, Tauri (for desktop app)
-- **DevTools**: devtools-frontend (Google open source, forked)
-- **Tools**: oxlint/oxfmt, rustfmt/clippy, mise (tool version management)
-
-## Prerequisites
-
-- [Bun](https://bun.sh) (latest)
-- [Rust](https://www.rust-lang.org/) (stable)
-- [mise](https://mise.jdx.dev/) (for tool version management)
-- Git
-
-## Installation
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/ohah/chrome-remote-devtools.git
-cd chrome-remote-devtools
-```
-
-### 2. Initialize the project
-
-Run the initialization script to set up dependencies and reference repositories:
-
-```bash
-# Automatically detects OS and runs appropriate script
-bun run init
-
-# Or manually:
-# Windows:
-scripts\init.bat
-
-# Linux/macOS:
-bash scripts/init.sh
-```
-
-This will:
-
-- Install Bun dependencies
-- Install Rust dependencies
-- Clone reference repositories (chii, chobitsu, devtools-remote-debugger, devtools-protocol, rrweb, redux-devtools)
-
-### 3. Verify installation
-
-```bash
-# Check Bun version
-bun --version
-
-# Check Rust version
-rustc --version
-```
-
 ## Usage
 
-### Development
+1. **Start the relay server** (default port 8080):
 
-Start the development servers:
+   ```bash
+   cargo run --bin chrome-remote-devtools-server -- --port 8080
+   ```
 
-```bash
-# Start WebSocket relay server (Rust)
-cargo run --bin chrome-remote-devtools-server -- --port 8080
+2. **Start the Inspector** (web or desktop):
 
-# Start Inspector (web version)
-bun run dev:inspector
+   ```bash
+   bun run dev:inspector        # web
+   bun run dev:inspector:tauri  # desktop (Tauri)
+   ```
 
-# Start Inspector (desktop version with Tauri)
-bun run dev:inspector:tauri
+3. **Connect your client**:
+   - **Web**: Load the client script in your page (e.g. `<script src="http://localhost:8080/client.js" data-server-url="http://localhost:8080"></script>`), then open the Inspector in the browser and select the client.
+   - **React Native**: Use the [React Native](#react-native) setup above (Provider + server + Inspector).
 
-# Start documentation site
-bun run dev:docs
-```
-
-### Server Log Configuration
-
-Server logs are **disabled by default** to reduce console noise. Enable them using command-line options:
-
-```bash
-# Enable all logs
-cargo run --bin chrome-remote-devtools-server -- --log-enabled
-
-# Enable and filter logs by specific CDP methods
-cargo run --bin chrome-remote-devtools-server -- --log-enabled --log-methods "Runtime.consoleAPICalled,Network.requestWillBeSent"
-```
-
-**Note**: Logs are automatically disabled in production builds. See [CONTRIBUTING.md](CONTRIBUTING.md#server-log-configuration--서버-로그-설정) for details.
-
-### Build
-
-Build all packages:
-
-```bash
-# Automatically detects OS
-bun run build
-
-# Or manually:
-# Windows:
-scripts\build.bat
-
-# Linux/macOS:
-bash scripts/build.sh
-```
-
-## Development Commands
-
-```bash
-# Development servers
-cargo run --bin chrome-remote-devtools-server  # Rust WebSocket server only
-bun run dev:inspector       # Inspector web only
-bun run dev:inspector:tauri  # Inspector desktop
-bun run dev:docs            # Documentation site
-
-# Code quality
-bun run lint                # Run oxlint
-bun run format              # Format with oxfmt
-bun run format:rust         # Format Rust code with rustfmt
-
-# Build
-bun run build               # Build all packages
-bun run build:devtools      # Build Redux DevTools plugin and devtools-frontend
-```
-
-## Project Structure
-
-```
-chrome-remote-devtools/
-├── crates/
-│   └── server/          # WebSocket relay server (Rust)
-├── packages/
-│   ├── client/          # CDP client (for web pages)
-│   └── inspector/       # Inspector UI (React + Vite, web/desktop)
-├── document/            # RSPress documentation site
-├── devtools/
-│   └── devtools-frontend/  # DevTools frontend
-└── reference/           # Reference code (gitignored)
-    ├── chii/
-    ├── chobitsu/
-    ├── devtools-remote-debugger/
-    ├── devtools-protocol/
-    ├── rrweb/
-    └── redux-devtools/  # Redux DevTools Extension source
-```
+For building from source, development setup, and all commands, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Communication Flow
 
@@ -206,21 +183,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Redux DevTools Integration
 
-Chrome Remote DevTools includes a Redux DevTools panel that provides the same UI as the official Chrome Extension. The panel uses `@redux-devtools/app` for the UI and communicates via CDP protocol.
-
-### Building Redux DevTools
-
-To build the Redux DevTools plugin and devtools-frontend:
-
-```bash
-bun run build:devtools
-```
-
-This will:
-
-1. Build the `@ohah/redux-devtools-plugin` package
-2. Build devtools-frontend with the Redux panel
-3. Copy the built files to `devtools/bundled/`
+Chrome Remote DevTools includes a Redux DevTools panel that provides the same UI as the official Chrome Extension. The panel uses `@redux-devtools/app` for the UI and communicates via CDP protocol. To build the Redux DevTools plugin and devtools-frontend, see [CONTRIBUTING.md](CONTRIBUTING.md#development-commands-reference) (`bun run build:devtools`).
 
 ### Redux Panel
 
@@ -230,28 +193,9 @@ The Redux panel is available in the DevTools panel view. It uses:
 - **CDP Events**: Listens for `Redux.message` events (INIT, ACTION, STATE, etc.)
 - **@redux-devtools/app**: Provides the Redux DevTools UI
 
-### React Native Integration
+### React Native
 
-For React Native apps, use the middleware from `@ohah/chrome-remote-devtools-inspector-react-native`:
-
-```typescript
-// Redux middleware
-import { createReduxDevToolsMiddleware } from '@ohah/chrome-remote-devtools-inspector-react-native/redux';
-
-const store = createStore(
-  rootReducer,
-  applyMiddleware(createReduxDevToolsMiddleware({ name: 'MyApp' }))
-);
-
-// Zustand middleware
-import { chromeDevtools } from '@ohah/chrome-remote-devtools-inspector-react-native/zustand';
-
-const useStore = create(
-  chromeDevtools((set) => ({ ... }), { name: 'MyStore' })
-);
-```
-
-Redux actions and state changes are sent as CDP messages and displayed in the Redux panel.
+For React Native, use the same Redux DevTools UI via **@ohah/chrome-remote-devtools-inspector-react-native**: set up the [Metro config and Provider](packages/react-native-inspector/README.md), then use `devTools: true` (Redux Toolkit) or `devtools()` (Zustand). See the [React Native](#react-native) section above for a full quick start.
 
 ## References
 
@@ -288,6 +232,22 @@ This project is inspired by and references the following projects:
 ### Session Replay Panel
 
 ![Session Replay Panel](images/sessionReplay.png)
+
+### React Native - Welcome
+
+![React Native Welcome](images/react-native/welcome.png)
+
+### React Native - Console
+
+![React Native Console](images/react-native/console.png)
+
+### React Native - Network
+
+![React Native Network](images/react-native/network.png)
+
+### React Native - Redux
+
+![React Native Redux](images/react-native/redux.png)
 
 ## Links
 
