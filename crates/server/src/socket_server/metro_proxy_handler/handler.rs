@@ -20,6 +20,10 @@ use tokio_tungstenite::tungstenite::Message as TungsteniteMessage;
 /// CDP id used for inject Runtime.evaluate (reconnect); filter response so we don't forward to DevTools / 주입용 Runtime.evaluate(reconnect) id; 응답은 DevTools로 전달하지 않음
 const INJECT_RECONNECT_CDP_ID: i64 = 2147483646;
 
+/// Expression injected via Runtime.evaluate so RN app calls __ChromeRemoteDevToolsReconnect / RN 앱에서 __ChromeRemoteDevToolsReconnect 호출하도록 주입하는 표현식
+pub(super) const INJECT_RECONNECT_EXPRESSION: &str =
+    "typeof __ChromeRemoteDevToolsReconnect === 'function' && __ChromeRemoteDevToolsReconnect()";
+
 /// Handle Metro WebSocket proxy connection / Metro WebSocket 프록시 연결 처리
 /// Connects to Metro's WebSocket and relays messages bidirectionally,
 /// rewriting Debugger.scriptParsed URLs to go through our server's resource proxy.
@@ -112,12 +116,15 @@ pub async fn handle_metro_proxy_websocket(
     let (mut devtools_sink, mut devtools_stream) = ws.split();
     let (mut metro_sink, mut metro_stream) = metro_ws.split();
 
-    // Inject Runtime.evaluate in app to call reconnect so app connects to server (Redux/MMKV then work) / 앱에서 reconnect 호출하도록 Runtime.evaluate 주입 → 앱이 서버에 연결 (Redux/MMKV 동작)
+    // Inject Runtime.evaluate in app to call reconnect so app connects to server (Redux/MMKV then work) /
+    // 앱에서 reconnect 호출하도록 Runtime.evaluate 주입 → 앱이 서버에 연결 (Redux/MMKV 동작)
+    // Always send on new metro proxy connection (including Inspector refresh: new DevTools iframe = new connection) /
+    // 새 metro proxy 연결 시마다 전송 (Inspector 새로고침 포함: 새 DevTools iframe = 새 연결)
     let inject_reconnect = serde_json::json!({
         "id": INJECT_RECONNECT_CDP_ID,
         "method": "Runtime.evaluate",
         "params": {
-            "expression": "typeof __ChromeRemoteDevToolsReconnect === 'function' && __ChromeRemoteDevToolsReconnect()"
+            "expression": INJECT_RECONNECT_EXPRESSION
         }
     });
     if let Ok(inject_text) = serde_json::to_string(&inject_reconnect) {
@@ -151,6 +158,26 @@ pub async fn handle_metro_proxy_websocket(
             .map(|c| (Some(c.id.clone()), c.client_id.clone()))
             .unwrap_or((None, None))
     };
+
+    // When existing RN inspector is already connected (e.g. Inspector refresh), send inject again so app
+    // reconnects and Redux/AsyncStorage work / 기존 RN이 이미 연결된 경우(Inspector 새로고침) inject를 한 번 더 전송
+    if rn_connection_id.is_some() {
+        if let Ok(inject_text) = serde_json::to_string(&inject_reconnect) {
+            if metro_sink
+                .send(TungsteniteMessage::Text(inject_text))
+                .await
+                .is_err()
+            {
+                logger.log(
+                    LogType::Server,
+                    "metro-proxy",
+                    "Failed to send second inject reconnect (refresh path) to Metro",
+                    None,
+                    None,
+                );
+            }
+        }
+    }
 
     let devtool_entry = Arc::new(DevTools {
         id: metro_devtools_id.clone(),
@@ -191,6 +218,63 @@ pub async fn handle_metro_proxy_websocket(
                     }
                 }
             }
+        }
+
+        // Send cached Redux stores to this (new) DevTools so Redux/AsyncStorage panel works after refresh /
+        // 새로고침 후에도 Redux/AsyncStorage 패널이 동작하도록 캐시된 Redux store를 이 DevTools로 전송
+        if let Some(ref conn_id) = rn_connection_id {
+            let metro_sender = app_tx.clone();
+            let rn_manager_redux = rn_manager.clone();
+            let logger_redux = logger.clone();
+            let metro_id_redux = metro_devtools_id.clone();
+            let inspector_id_for_redux = conn_id.clone();
+            tokio::spawn(async move {
+                tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+                let stores = rn_manager_redux
+                    .get_redux_stores(&inspector_id_for_redux)
+                    .await;
+                for store in &stores {
+                    let init_instance_msg = serde_json::json!({
+                        "method": "Redux.message",
+                        "params": {
+                            "type": "INIT_INSTANCE",
+                            "instanceId": store.instance_id,
+                            "source": "@devtools-page",
+                        }
+                    });
+                    if let Ok(json_str) = serde_json::to_string(&init_instance_msg) {
+                        let _ = metro_sender.send(json_str);
+                    }
+                    let init_msg = serde_json::json!({
+                        "method": "Redux.message",
+                        "params": {
+                            "type": "INIT",
+                            "instanceId": store.instance_id,
+                            "source": "@devtools-page",
+                            "name": store.name,
+                            "payload": store.payload,
+                            "maxAge": 50,
+                            "timestamp": store.timestamp,
+                        }
+                    });
+                    if let Ok(json_str) = serde_json::to_string(&init_msg) {
+                        let _ = metro_sender.send(json_str);
+                    }
+                }
+                if !stores.is_empty() {
+                    logger_redux.log(
+                        LogType::Server,
+                        "metro-proxy",
+                        &format!(
+                            "Sent {} cached Redux store(s) to new DevTools ({})",
+                            stores.len(),
+                            metro_id_redux
+                        ),
+                        None,
+                        None,
+                    );
+                }
+            });
         }
     } else {
         logger.log(
@@ -412,4 +496,28 @@ pub async fn handle_metro_proxy_websocket(
         None,
         None,
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{INJECT_RECONNECT_CDP_ID, INJECT_RECONNECT_EXPRESSION};
+
+    /// Inject payload must be Runtime.evaluate with expression that calls __ChromeRemoteDevToolsReconnect /
+    /// inject 페이로드는 Runtime.evaluate이며 표현식이 __ChromeRemoteDevToolsReconnect를 호출해야 함
+    #[test]
+    fn inject_reconnect_payload_shape() {
+        let inject = serde_json::json!({
+            "id": INJECT_RECONNECT_CDP_ID,
+            "method": "Runtime.evaluate",
+            "params": {
+                "expression": INJECT_RECONNECT_EXPRESSION
+            }
+        });
+        assert_eq!(inject["method"], "Runtime.evaluate");
+        let expr = inject["params"]["expression"].as_str().unwrap();
+        assert!(
+            expr.contains("__ChromeRemoteDevToolsReconnect"),
+            "expression must call __ChromeRemoteDevToolsReconnect for RN app reconnect"
+        );
+    }
 }
