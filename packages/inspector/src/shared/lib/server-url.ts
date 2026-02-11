@@ -88,12 +88,29 @@ export function parseServerUrlToBind(url: string): { host: string; port: number 
  * @returns Server URL (default http://localhost:8080 when not set) / 서버 URL (미설정 시 기본값)
  */
 const DEFAULT_SERVER_URL = 'http://localhost:8080';
+const DEFAULT_METRO_PORT = 8081;
 
 export function getServerUrl(): string {
   if (typeof window !== 'undefined' && import.meta.env.VITE_SERVER_URL) {
     return import.meta.env.VITE_SERVER_URL as string;
   }
   return useServerUrlStore.getState().getServerUrl() ?? DEFAULT_SERVER_URL;
+}
+
+/**
+ * Get Metro URL port for adb reverse (Server URL and Metro URL both need reverse on Android) /
+ * adb reverse용 Metro 포트 (Android에서 서버·Metro 둘 다 접근하려면 둘 다 reverse 필요)
+ * @returns Port number (default 8081 when not set or invalid) / 포트 번호 (미설정·무효 시 8081)
+ */
+export function getMetroPort(): number {
+  try {
+    const url = useServerUrlStore.getState().getMetroUrl() ?? 'http://localhost:8081';
+    const u = new URL(url);
+    const port = u.port ? parseInt(u.port, 10) : DEFAULT_METRO_PORT;
+    return Number.isNaN(port) || port <= 0 ? DEFAULT_METRO_PORT : port;
+  } catch {
+    return DEFAULT_METRO_PORT;
+  }
 }
 
 /**

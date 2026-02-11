@@ -10,6 +10,7 @@ export {
 } from './constants';
 export {
   getServerUrl,
+  getMetroPort,
   setServerUrl,
   resetServerUrl,
   useServerUrl,
