@@ -87,11 +87,13 @@ export function parseServerUrlToBind(url: string): { host: string; port: number 
  * Get server URL from environment variable or store / 환경 변수 또는 store에서 서버 URL 가져오기
  * @returns Server URL (default http://localhost:8080 when not set) / 서버 URL (미설정 시 기본값)
  */
+const DEFAULT_SERVER_URL = 'http://localhost:8080';
+
 export function getServerUrl(): string {
   if (typeof window !== 'undefined' && import.meta.env.VITE_SERVER_URL) {
-    return import.meta.env.VITE_SERVER_URL;
+    return import.meta.env.VITE_SERVER_URL as string;
   }
-  return useServerUrlStore.getState().getServerUrl();
+  return useServerUrlStore.getState().getServerUrl() ?? DEFAULT_SERVER_URL;
 }
 
 /**
