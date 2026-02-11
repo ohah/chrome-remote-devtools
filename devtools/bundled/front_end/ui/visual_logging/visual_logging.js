@@ -3046,6 +3046,7 @@ var knownContextValues = /* @__PURE__ */ new Set([
   "ratechange",
   "raw-headers",
   "raw-headers-show-more",
+  "react-devtools-components",
   "react-devtools-profiler",
   "read-only",
   "read-write",
