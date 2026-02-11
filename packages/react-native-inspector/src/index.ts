@@ -219,7 +219,7 @@ export { ChromeRemoteDevToolsInspectorProvider } from './Provider';
 export type { ChromeRemoteDevToolsInspectorProviderProps } from './Provider';
 
 export { registerMMKVDevTools, unregisterMMKVDevTools } from './mmkv';
-export type { MMKVEntry, MMKVEntryType, MMKVEntryValue } from './mmkv/types';
+export type { MMKVEntry, MMKVEntryType, MMKVEntryValue, MMKVStorageInput } from './mmkv/types';
 
 export { registerAsyncStorageDevTools, unregisterAsyncStorageDevTools } from './async-storage';
 export type {

@@ -49,9 +49,11 @@ export function setMMKVCDPSender(
 
 /**
  * Mark connection as ready / 연결 준비 완료 표시
+ * Sends all MMKV snapshots so DevTools that already opened the MMKV tab get data (avoids race where enable was sent before connection) / 이미 MMKV 탭을 연 DevTools가 데이터를 받도록 스냅샷 전송 (연결 전 enable 수신 시 누락 방지)
  */
 export function setMMKVConnectionReady(): void {
   isConnected = true;
+  sendAllSnapshots();
 }
 
 /**

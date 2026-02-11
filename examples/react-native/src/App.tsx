@@ -16,6 +16,7 @@ import {
   registerMMKVDevTools,
   registerAsyncStorageDevTools,
   type AsyncStorageType,
+  type MMKVStorageInput,
 } from '@ohah/chrome-remote-devtools-inspector-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUniqueId } from 'react-native-device-info';
@@ -39,14 +40,16 @@ function App() {
 
   // Register MMKV DevTools / MMKV DevTools 등록
   // v4 is default, v3 is for legacy support / v4가 기본, v3는 하위 호환용
+  // Cast to MMKVStorageInput so v3 getBuffer (ArrayBufferLike) is accepted / v3 getBuffer(ArrayBufferLike) 허용을 위해 MMKVStorageInput 단언
   useEffect(() => {
     try {
-      registerMMKVDevTools({
+      const storages: MMKVStorageInput = {
         user: userStorage, // v4
         cache: cacheStorage, // v4
         default: defaultStorage, // v4
         legacy: legacyStorage, // v3 (legacy support)
-      });
+      };
+      registerMMKVDevTools(storages);
     } catch (error) {
       console.error('[App] Error registering MMKV DevTools:', error);
       // Don't block app startup / 앱 시작을 막지 않음
