@@ -21,10 +21,14 @@ const config = {
   popupExamplePort: process.env.POPUP_EXAMPLE_PORT
     ? parseInt(process.env.POPUP_EXAMPLE_PORT)
     : 5175,
+  reactNativeDevtoolsPort: process.env.REACT_NATIVE_DEVTOOLS_PORT
+    ? parseInt(process.env.REACT_NATIVE_DEVTOOLS_PORT)
+    : 2420,
   includeExample: process.env.INCLUDE_EXAMPLE !== 'false', // Default: true
   includeIframeExample: process.env.INCLUDE_IFRAME_EXAMPLE !== 'false', // Default: true
   includePopupExample: process.env.INCLUDE_POPUP_EXAMPLE !== 'false', // Default: true
   includeTauri: process.env.INCLUDE_TAURI !== 'false', // Default: true
+  includeReactNativeDevtools: process.env.INCLUDE_REACT_NATIVE_DEVTOOLS !== 'false', // Default: true
   // Include server (default: true, but false when Tauri mode) / 서버 포함 (기본값: true, Tauri 모드일 때는 false)
   includeServer: process.env.INCLUDE_SERVER !== 'false' && process.env.INSPECTOR_MODE !== 'tauri', // Default: true, but false if INSPECTOR_MODE=tauri
   healthCheckTimeout: process.env.HEALTH_CHECK_TIMEOUT
@@ -39,6 +43,7 @@ const colors = {
   server: '\x1b[32m', // Green
   inspector: '\x1b[33m', // Yellow
   tauri: '\x1b[94m', // Bright Blue
+  reactNativeDevtools: '\x1b[96m', // Bright Cyan
   example: '\x1b[35m', // Magenta
   info: '\x1b[34m', // Blue
   error: '\x1b[31m', // Red
@@ -116,6 +121,15 @@ const services: Service[] = [
     optional: true,
   },
   {
+    name: 'REACT_NATIVE_DEVTOOLS',
+    color: colors.reactNativeDevtools,
+    cwd: join(rootDir, 'packages/react-native-devtools'),
+    command: ['bun', 'run', 'dev:hmr'],
+    port: config.reactNativeDevtoolsPort,
+    healthCheckUrl: `http://localhost:${config.reactNativeDevtoolsPort}`,
+    optional: true,
+  },
+  {
     name: 'EXAMPLE',
     color: colors.example,
     cwd: join(rootDir, 'examples/basic'),
@@ -154,6 +168,9 @@ const services: Service[] = [
     return false;
   }
   if (service.name === 'TAURI' && !config.includeTauri) {
+    return false;
+  }
+  if (service.name === 'REACT_NATIVE_DEVTOOLS' && !config.includeReactNativeDevtools) {
     return false;
   }
   if (service.name === 'SERVER' && !config.includeServer) {

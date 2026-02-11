@@ -74,6 +74,7 @@ Chrome DevTools Protocol (CDP)을 활용하여 원격 크롬 브라우저를 제
 - **@ohah/chrome-remote-devtools-client**: CDP 클라이언트 (JavaScript, 웹페이지에 로드)
 - **@ohah/chrome-remote-devtools-inspector**: Inspector UI (React + Vite, 웹/데스크탑 공유)
 - **@ohah/chrome-remote-devtools-inspector-react-native**: React Native Inspector 플러그인 (JavaScript 레이어 콘솔·네트워크 훅, MMKV/Redux 등)
+- **@ohah/chrome-remote-devtools-react-native-devtools**: React Native DevTools 데스크탑 앱 (Electrobun + React + Vite)
 
 ### 통신 흐름
 1. 클라이언트(`client`)가 WebSocket으로 서버에 연결
@@ -89,7 +90,8 @@ chrome-remote-devtools/
 │   └── server/          # WebSocket 중계 서버 (Rust)
 ├── packages/
 │   ├── client/          # CDP 클라이언트 (웹페이지용)
-│   └── inspector/       # Inspector UI (React + Vite, 웹/데스크탑)
+│   ├── inspector/       # Inspector UI (React + Vite, 웹/데스크탑)
+│   └── react-native-devtools/  # React Native DevTools 데스크탑 앱 (Electrobun)
 ├── document/            # RSPress 문서 페이지
 │   ├── docs/            # 문서 소스
 │   └── rspress.config.ts
@@ -128,6 +130,9 @@ cargo run --bin chrome-remote-devtools-server  # Rust 서버만
 bun run dev:inspector       # Inspector 웹만
 bun run dev:inspector:tauri  # Inspector 데스크탑
 bun run dev:docs            # 문서 페이지 (document 패키지)
+bun run dev:react-native-devtools      # React Native DevTools 데스크탑 앱
+bun run dev:react-native-devtools:hmr   # React Native DevTools (HMR)
+# bun run dev 시 React Native DevTools 앱도 기본으로 함께 실행 (끄려면 INCLUDE_REACT_NATIVE_DEVTOOLS=false)
 
 # 코드 품질
 bun run lint                # oxlint
@@ -137,6 +142,7 @@ bun run format:rust         # rustfmt
 # 빌드
 bun run build               # 전체 빌드
 bun run build:docs          # 문서 빌드 (document 패키지)
+bun run build:react-native-devtools  # React Native DevTools 데스크탑 앱
 ```
 
 ### 이 레포 PR·push (ohah 전용)
@@ -275,6 +281,7 @@ function 연결상태업데이트() {
   - 콘솔 훅(JS): `src/console/`
   - 네트워크 훅(JS): `src/network/`
   - MMKV/AsyncStorage/Redux: `src/mmkv/`, `src/async-storage/`, `src/redux-devtools-extension.ts`
+- React Native DevTools: `packages/react-native-devtools/src/`
 - DevTools: `devtools/devtools-frontend/front_end/`
 - 문서: `document/docs/`
 
