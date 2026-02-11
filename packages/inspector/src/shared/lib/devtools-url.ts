@@ -10,8 +10,8 @@ export interface BuildDevToolsUrlOptions {
   clientId: string;
   /** Server URL (default: getServerUrl()) / 서버 URL (기본값: getServerUrl()) */
   serverUrl?: string;
-  /** Client type ('web' | 'react-native' | 'reactotron') / 클라이언트 타입 */
-  clientType?: 'web' | 'react-native' | 'reactotron';
+  /** Client type ('web' | 'react-native') / 클라이언트 타입 */
+  clientType?: 'web' | 'react-native';
 }
 
 /**
@@ -68,7 +68,7 @@ export interface BuildDevToolsUrlDirectOptions {
   /** Stable id for iframe instance (e.g. metro-{targetId}) / iframe instance용 안정 id (예: metro-{targetId}) */
   instanceId: string;
   /** Client type for DevTools UI / DevTools UI용 클라이언트 타입 */
-  clientType?: 'web' | 'react-native' | 'reactotron';
+  clientType?: 'web' | 'react-native';
 }
 
 /**
@@ -123,7 +123,7 @@ export interface BuildDevToolsUrlMetroProxyOptions {
   /** Stable id for iframe instance (e.g. metro-{targetId}) / iframe instance용 안정 id */
   instanceId: string;
   /** Client type for DevTools UI / DevTools UI용 클라이언트 타입 */
-  clientType?: 'web' | 'react-native' | 'reactotron';
+  clientType?: 'web' | 'react-native';
 }
 
 /**

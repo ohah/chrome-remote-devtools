@@ -42,7 +42,7 @@ UI.ViewManager.registerViewExtension({
   condition: () => {
     // Show for React Native (Our Inspector and Metro Debugger) / React Native(Our Inspector·Metro Debugger)에서 표시
     const clientType = Root.Runtime.Runtime.queryParam('clientType');
-    if (clientType === 'react-native' || clientType === 'reactotron') {
+    if (clientType === 'react-native') {
       return true;
     }
     if (clientType === 'web') {

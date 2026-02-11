@@ -13,7 +13,6 @@ pub enum LogType {
     DevTools,
     Server,
     RnInspector,
-    Reactotron,
 }
 
 impl LogType {
@@ -23,7 +22,6 @@ impl LogType {
             LogType::DevTools => "devtools",
             LogType::Server => "server",
             LogType::RnInspector => "rn-inspector",
-            LogType::Reactotron => "reactotron",
         }
     }
 }

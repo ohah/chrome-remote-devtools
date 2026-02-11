@@ -6,7 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useClientsListSSE } from '@/entities/client';
 import { SettingsModal } from '@/features/settings';
-import { useSettingsModalStore, useOpenSettings } from '@/shared/lib';
+import {
+  useSettingsModalStore,
+  useOpenSettings,
+  getServerUrl,
+  parseServerUrlToBind,
+} from '@/shared/lib';
 
 // Tab visibility toggle component / 탭 표시/숨김 토글 컴포넌트
 function TabVisibilityToggle() {
@@ -118,8 +123,6 @@ function TitleBar() {
             <p>Go to home</p>
           </TooltipContent>
         </Tooltip>
-        {/* Reactotron toggle (always show in Tauri) / Reactotron 토글 (Tauri에서 항상 표시) - temporarily hidden / 일시 비표시 */}
-        {/* ReactotronToggle: import from '@/components/ReactotronToggle' when needed */}
         {/* Tab visibility toggle (always show in Tauri) / 탭 표시/숨김 토글 (Tauri에서 항상 표시) */}
         {isTauri && <TabVisibilityToggle />}
       </div>
@@ -224,6 +227,17 @@ function RootComponent() {
   // Only Root subscribes to isSettingsOpen → only Root re-renders when modal toggles / 모달 토글 시 Root만 리렌더
   const isSettingsOpen = useSettingsModalStore((s) => s.isSettingsOpen);
   const closeSettings = useSettingsModalStore((s) => s.closeSettings);
+
+  // Start embedded server on port from Inspector Server URL when running in Tauri /
+  // Tauri 실행 시 인스펙터 Server URL 설정의 포트로 내장 서버 시작
+  useEffect(() => {
+    if (!isTauri) return;
+    const url = getServerUrl();
+    const { port, host } = parseServerUrlToBind(url);
+    import('@tauri-apps/api/core')
+      .then(({ invoke }) => invoke('start_server', { port, host }))
+      .catch((e) => console.error('[inspector] Failed to start embedded server:', e));
+  }, [isTauri]);
 
   // Subscribe to client list SSE for live updates / 클라이언트 목록 실시간 갱신을 위한 SSE 구독
   useClientsListSSE();

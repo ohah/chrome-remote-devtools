@@ -23,8 +23,6 @@ pub struct ServerConfig {
     /// Development mode / 개발 모드
     /// When enabled, additional endpoints like /client.js are available / 활성화되면 /client.js 같은 추가 엔드포인트 사용 가능
     pub dev_mode: bool,
-    /// Enable Reactotron server / Reactotron 서버 활성화
-    pub enable_reactotron_server: bool,
     /// Client.js resource path (for Tauri builds) / Client.js 리소스 경로 (Tauri 빌드용)
     /// This is the resolved path to the bundled client.js file / 번들된 client.js 파일의 해결된 경로
     pub client_js_resource_path: Option<String>,
@@ -43,7 +41,6 @@ impl Default for ServerConfig {
             log_file: None,
             // Default to debug mode in debug builds, production mode in release builds / 디버그 빌드에서는 디버그 모드, 릴리스 빌드에서는 프로덕션 모드
             dev_mode: cfg!(debug_assertions),
-            enable_reactotron_server: false,
             client_js_resource_path: None,
         }
     }
@@ -76,9 +73,6 @@ impl ServerConfig {
             dev_mode: std::env::var("DEV_MODE")
                 .map(|v| v == "true")
                 .unwrap_or_else(|_| cfg!(debug_assertions)),
-            enable_reactotron_server: std::env::var("ENABLE_REACTOTRON_SERVER")
-                .map(|v| v == "true")
-                .unwrap_or(false),
             client_js_resource_path: None, // Resource path is set by Tauri app, not from env / 리소스 경로는 Tauri 앱에서 설정되며 환경 변수에서 가져오지 않음
         }
     }
@@ -114,7 +108,7 @@ mod tests {
     #[test]
     /// Test configuration deserialization / 설정 역직렬화 테스트
     fn test_config_deserialization() {
-        let json = r#"{"port":9000,"host":"127.0.0.1","use_ssl":true,"ssl_cert_path":"cert.pem","ssl_key_path":"key.pem","log_enabled":true,"log_methods":"test","log_file":"log.txt","dev_mode":true,"enable_reactotron_server":false}"#;
+        let json = r#"{"port":9000,"host":"127.0.0.1","use_ssl":true,"ssl_cert_path":"cert.pem","ssl_key_path":"key.pem","log_enabled":true,"log_methods":"test","log_file":"log.txt","dev_mode":true}"#;
         let config: ServerConfig = serde_json::from_str(json).unwrap();
         assert_eq!(config.port, 9000);
         assert_eq!(config.host, "127.0.0.1");

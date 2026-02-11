@@ -8,6 +8,12 @@ export {
   CLIENT_REFRESH_INTERVAL,
   GITHUB_REPO_URL,
 } from './constants';
-export { getServerUrl, setServerUrl, resetServerUrl, useServerUrl } from './server-url';
+export {
+  getServerUrl,
+  setServerUrl,
+  resetServerUrl,
+  useServerUrl,
+  parseServerUrlToBind,
+} from './server-url';
 export { useSettingsModalStore, openSettings, useOpenSettings } from './settings-modal-store';
 export { isValidUrl, sanitizeUrl } from './url-validation';

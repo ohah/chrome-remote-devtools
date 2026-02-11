@@ -6,7 +6,6 @@ mod config;
 mod http_routes;
 mod logging;
 mod react_native;
-mod reactotron_server;
 mod server;
 mod socket_server;
 
@@ -72,31 +71,19 @@ impl ServerHandle {
     pub async fn get_or_create_socket_server(
         &self,
         logger: Arc<Logger>,
-        enable_reactotron: bool,
         force_new: bool,
     ) -> Arc<RwLock<SocketServer>> {
         let mut socket_server_opt = self.socket_server.write().await;
         if force_new {
-            // Create completely new instance / 완전히 새 인스턴스 생성
             eprintln!("[server] 🔄 Creating new SocketServer instance (force_new=true)");
             let _ = io::stderr().flush();
-            let server = Arc::new(RwLock::new(SocketServer::new(logger, enable_reactotron)));
+            let server = Arc::new(RwLock::new(SocketServer::new(logger)));
             *socket_server_opt = Some(server.clone());
             server
         } else if let Some(server) = socket_server_opt.as_ref() {
-            // Update Reactotron server state based on enable_reactotron / enable_reactotron에 따라 Reactotron 서버 상태 업데이트
-            let mut server_guard = server.write().await;
-            if enable_reactotron {
-                server_guard.enable_reactotron_server();
-            } else {
-                server_guard.disable_reactotron_server();
-            }
-            drop(server_guard);
-            // Return existing instance / 기존 인스턴스 반환
             server.clone()
         } else {
-            // Create new instance / 새 인스턴스 생성
-            let server = Arc::new(RwLock::new(SocketServer::new(logger, enable_reactotron)));
+            let server = Arc::new(RwLock::new(SocketServer::new(logger)));
             *socket_server_opt = Some(server.clone());
             server
         }
@@ -152,11 +139,7 @@ impl ServerHandle {
         // Get or create SocketServer instance / SocketServer 인스턴스 가져오기 또는 생성
         // If server was running, create completely new instance / 서버가 실행 중이었으면 완전히 새 인스턴스 생성
         let socket_server_rwlock = self
-            .get_or_create_socket_server(
-                logger.clone(),
-                config.enable_reactotron_server,
-                was_running,
-            )
+            .get_or_create_socket_server(logger.clone(), was_running)
             .await;
 
         // Create shutdown channel / 종료 채널 생성
@@ -168,8 +151,8 @@ impl ServerHandle {
         let config_clone = config.clone();
         let socket_server_clone = socket_server_rwlock.clone();
         eprintln!(
-            "[server] 🚀 Starting server on {}:{} (Reactotron: {})",
-            config.host, config.port, config.enable_reactotron_server
+            "[server] 🚀 Starting server on {}:{}",
+            config.host, config.port
         );
         let _ = io::stderr().flush();
         let handle = tokio::spawn(async move {
