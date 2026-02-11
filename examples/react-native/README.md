@@ -191,7 +191,7 @@ npm run ios
 
 ### Server URL
 
-The example uses `localhost:8080` for both iOS and Android. On **Android emulator or USB device**, run once so that `localhost` reaches the host PC (same as Reactotron):
+The example uses `localhost:8080` for both iOS and Android. On **Android emulator or USB device**, run once so that `localhost` reaches the host PC:
 
 ```bash
 adb reverse tcp:8080 tcp:8080

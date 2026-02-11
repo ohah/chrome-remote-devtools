@@ -571,7 +571,7 @@ async fn handle_websocket_upgrade(
     })
 }
 
-/// Handle root path WebSocket upgrade for Reactotron / Reactotron을 위한 루트 경로 WebSocket 업그레이드 처리
+/// Handle root path WebSocket upgrade / 루트 경로 WebSocket 업그레이드 처리
 async fn handle_root_websocket_upgrade(
     ws: WebSocketUpgrade,
     Query(params): Query<HashMap<String, String>>,

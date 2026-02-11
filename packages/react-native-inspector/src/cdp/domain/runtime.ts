@@ -74,7 +74,7 @@ const originalConsole: Record<string, (...args: unknown[]) => void> = {};
 const originalDescriptors: Record<string, PropertyDescriptor> = {};
 
 /**
- * Send Runtime.consoleAPICalled event (same shape as CDP / Reactotron: timestamp in milliseconds) / Runtime.consoleAPICalled 이벤트 전송 (CDP·Reactotron과 동일: timestamp 밀리초)
+ * Send Runtime.consoleAPICalled event (CDP shape: timestamp in milliseconds) / Runtime.consoleAPICalled 이벤트 전송 (CDP 형식: timestamp 밀리초)
  * DevTools Console expects timestamp in milliseconds; seconds can cause messages not to show / DevTools 콘솔은 밀리초 단위 timestamp 기대, 초 단위면 메시지가 안 보일 수 있음
  */
 function sendConsoleAPICalled(type: string, args: RemoteObject[]): void {
