@@ -16,14 +16,13 @@
   --color-ring: #2563eb;
 }
 
+/* Drag only on title area; buttons must be no-drag / 제목 영역만 드래그, 버튼 영역은 no-drag */
 .titlebar-drag-region {
   -webkit-app-region: drag;
 }
 
-.titlebar-nav-button {
-  -webkit-app-region: no-drag;
-}
-
+.titlebar-no-drag,
+.titlebar-nav-button,
 .titlebar-controls {
   -webkit-app-region: no-drag;
 }

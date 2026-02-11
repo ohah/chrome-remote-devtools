@@ -27,7 +27,7 @@ const config = {
   includeExample: process.env.INCLUDE_EXAMPLE !== 'false', // Default: true
   includeIframeExample: process.env.INCLUDE_IFRAME_EXAMPLE !== 'false', // Default: true
   includePopupExample: process.env.INCLUDE_POPUP_EXAMPLE !== 'false', // Default: true
-  includeTauri: process.env.INCLUDE_TAURI !== 'false', // Default: true
+  includeTauri: process.env.INCLUDE_TAURI === 'true', // Default: false (set INCLUDE_TAURI=true to run Tauri)
   includeReactNativeDevtools: process.env.INCLUDE_REACT_NATIVE_DEVTOOLS !== 'false', // Default: true
   // Include server (default: true, but false when Tauri mode) / 서버 포함 (기본값: true, Tauri 모드일 때는 false)
   includeServer: process.env.INCLUDE_SERVER !== 'false' && process.env.INSPECTOR_MODE !== 'tauri', // Default: true, but false if INSPECTOR_MODE=tauri

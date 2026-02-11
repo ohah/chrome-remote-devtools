@@ -9,10 +9,11 @@ import { useOpenSettings } from '@/shared/lib/settings-store';
 function requestWindow(method: 'closeWindow' | 'minimizeWindow' | 'toggleMaximizeWindow') {
   const rpc = (
     window as Window & {
-      __electrobunRpc?: { request: (m: string, p: unknown) => Promise<unknown> };
+      __electrobunRpc?: { request: Record<string, (params?: unknown) => Promise<unknown>> };
     }
   ).__electrobunRpc;
-  rpc?.request(method, {}).catch(() => {});
+  const fn = rpc?.request?.[method];
+  if (typeof fn === 'function') fn({}).catch(() => {});
 }
 
 export function TitleBar() {
@@ -24,11 +25,17 @@ export function TitleBar() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[1000] h-[35px] bg-gray-700 border-b border-gray-600 select-none grid grid-cols-[1fr_max-content]">
-      {/* Draggable region (Electrobun: electrobun-webkit-app-region-drag) / 드래그 영역 */}
-      <div className="titlebar-drag-region electrobun-webkit-app-region-drag flex items-center">
-        <span className="text-sm text-gray-400 ml-3 font-medium">React Native DevTools</span>
+      {/* Draggable: title only; double-click toggles maximize / 제목 영역만 드래그, 더블클릭 시 최대화 토글 */}
+      <div
+        className="titlebar-drag-region electrobun-webkit-app-region-drag flex items-center min-w-0"
+        onDoubleClick={() => requestWindow('toggleMaximizeWindow')}
+      >
+        <span className="text-sm text-gray-400 ml-3 font-medium truncate">
+          React Native DevTools
+        </span>
       </div>
-      <div className="flex items-center gap-1 pr-1">
+      {/* No-drag: buttons only (clickable) / 드래그 불가: 버튼 영역만 */}
+      <div className="titlebar-no-drag flex items-center gap-1 pr-1 shrink-0">
         {/* App actions first (same order as Tauri Inspector) / 앱 버튼 먼저 */}
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>

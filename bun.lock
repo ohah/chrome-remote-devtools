@@ -119,7 +119,7 @@
         "@react-navigation/native": "^7.1.26",
         "@react-navigation/stack": "^7.6.13",
         "@reduxjs/toolkit": "^2.11.2",
-        "react": "19.2.0",
+        "react": "^19.2.3",
         "react-native": "0.83.1",
         "react-native-device-info": "15.0.1",
         "react-native-gesture-handler": "^2.30.0",
@@ -269,7 +269,7 @@
       "devDependencies": {
         "@redux-devtools/app": "^6.2.2",
         "@types/react": "^19.2.7",
-        "@types/react-dom": "^19.2.0",
+        "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^4.6.0",
         "localforage": "^1.10.0",
         "react": "^19.2.3",
@@ -3844,8 +3844,6 @@
     "chalk/supports-color": ["supports-color@7.2.0", "", { "dependencies": { "has-flag": "^4.0.0" } }, "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw=="],
 
     "chrome-launcher/@types/node": ["@types/node@24.10.4", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-vnDVpYPMzs4wunl27jHrfmwojOGKya0xyM3sH+UE5iv5uPS6vX7UIoh6m+vQc5LGBq52HBKPIn/zcSZVzeDEZg=="],
-
-    "chrome-remote-devtools-react-native-example/react": ["react@19.2.0", "", {}, "sha512-tmbWg6W31tQLeB5cdIBOicJDJRR2KzXsV7uSK9iNfLWQ5bIZfxuPEHp7M8wiHyHnn0DD1i7w3Zmin0FtkrwoCQ=="],
 
     "chrome-remote-devtools-react-native-example/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
