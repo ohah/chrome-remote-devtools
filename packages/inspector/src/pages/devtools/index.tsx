@@ -13,7 +13,7 @@ import {
 import { useServerUrl } from '@/shared/lib';
 import { Tabs, type Tab } from '@/components/tabs';
 import { Smartphone, Globe, Wifi } from 'lucide-react';
-import { getTabsVisibility } from '@/routes/__root';
+import { getTabsVisibility } from '@/features/tabs-visibility';
 import type { Client } from '@/entities/client';
 
 /** One tab per device (key); RN uses deviceId, web use id / 기기(key)당 탭 하나; RN은 deviceId, 웹은 id */

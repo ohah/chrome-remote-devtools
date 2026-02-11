@@ -8,7 +8,7 @@ import { useServerUrl } from '@/shared/lib';
 import { Smartphone, Globe, Upload, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, type Tab } from '@/components/tabs';
-import { getTabsVisibility } from './__root';
+import { getTabsVisibility } from '@/features/tabs-visibility';
 import { useOpenSettings } from '@/shared/lib';
 
 export const Route = createFileRoute('/')({
