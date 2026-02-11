@@ -60,35 +60,6 @@ pub async fn run_server_with_socket_server(
         None,
     );
 
-    // Log Reactotron server status / Reactotron 서버 상태 로깅
-    if config.enable_reactotron_server {
-        eprintln!(
-            "[reactotron] ✅ Reactotron WebSocket server is ENABLED on root path (ws://{}:{})",
-            config.host, config.port
-        );
-        let _ = io::stderr().flush();
-        logger.log(
-            crate::logging::LogType::Server,
-            "reactotron",
-            &format!(
-                "Reactotron WebSocket server enabled on root path (ws://{}:{})",
-                config.host, config.port
-            ),
-            None,
-            None,
-        );
-    } else {
-        eprintln!("[reactotron] ⚠️ Reactotron WebSocket server is DISABLED. Enable it via toggle button in Tauri app.");
-        let _ = io::stderr().flush();
-        logger.log(
-            crate::logging::LogType::Server,
-            "reactotron",
-            "Reactotron WebSocket server disabled",
-            None,
-            None,
-        );
-    }
-
     // Run server with or without TLS / TLS 사용 여부에 따라 서버 실행
     if config.use_ssl {
         // Validate SSL configuration / SSL 설정 검증
@@ -166,10 +137,7 @@ pub async fn run_server(config: ServerConfig) -> Result<(), crate::ServerError> 
     );
 
     // Create socket server / 소켓 서버 생성
-    let socket_server = Arc::new(RwLock::new(SocketServer::new(
-        logger.clone(),
-        config.enable_reactotron_server,
-    )));
+    let socket_server = Arc::new(RwLock::new(SocketServer::new(logger.clone())));
 
     // Create a dummy shutdown receiver that never triggers / 절대 트리거되지 않는 더미 종료 수신자 생성
     let (_shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();

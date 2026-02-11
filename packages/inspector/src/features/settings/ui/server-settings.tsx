@@ -1,6 +1,11 @@
 // Server settings component
 import { useState, useEffect } from 'react';
-import { useServerUrl, DEFAULT_SERVER_URL, DEFAULT_METRO_URL } from '@/shared/lib';
+import {
+  useServerUrl,
+  DEFAULT_SERVER_URL,
+  DEFAULT_METRO_URL,
+  parseServerUrlToBind,
+} from '@/shared/lib';
 
 interface ServerSettingsProps {
   /** Callback when settings are saved */
@@ -8,30 +13,18 @@ interface ServerSettingsProps {
 }
 
 export function ServerSettings({ onSave }: ServerSettingsProps) {
-  const {
-    normalServerUrl,
-    reactotronServerUrl,
-    metroUrl,
-    isReactotronMode,
-    setNormalServerUrl,
-    setReactotronServerUrl,
-    setMetroUrl,
-    resetNormalServerUrl,
-    resetReactotronServerUrl,
-    resetMetroUrl,
-  } = useServerUrl();
-  // Use mode-specific URL / 모드별 URL 사용
-  const currentModeUrl = isReactotronMode ? reactotronServerUrl : normalServerUrl;
+  const { serverUrl, metroUrl, setServerUrl, setMetroUrl, resetServerUrl, resetMetroUrl } =
+    useServerUrl();
+  const currentServerUrl = serverUrl ?? '';
   const currentMetroUrl = metroUrl ?? '';
-  const [serverUrl, setServerUrlValue] = useState(currentModeUrl ?? '');
+  const [serverUrlValue, setServerUrlValue] = useState(currentServerUrl || DEFAULT_SERVER_URL);
   const [metroUrlValue, setMetroUrlValue] = useState(currentMetroUrl || DEFAULT_METRO_URL);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync with store when mode or URL changes / 모드 또는 URL 변경 시 store와 동기화
   useEffect(() => {
-    setServerUrlValue(currentModeUrl ?? '');
-  }, [currentModeUrl, isReactotronMode]);
+    setServerUrlValue(currentServerUrl || DEFAULT_SERVER_URL);
+  }, [currentServerUrl]);
   useEffect(() => {
     setMetroUrlValue(currentMetroUrl || DEFAULT_METRO_URL);
   }, [currentMetroUrl]);
@@ -41,24 +34,28 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
     setIsSaving(true);
 
     try {
-      // Set URL based on current mode / 현재 모드에 따라 URL 설정
-      if (isReactotronMode) {
-        setReactotronServerUrl(serverUrl);
-      } else {
-        setNormalServerUrl(serverUrl);
-      }
+      setServerUrl(serverUrlValue);
       if (metroUrlValue.trim()) {
         setMetroUrl(metroUrlValue.trim());
       } else {
         setMetroUrl(DEFAULT_METRO_URL);
       }
+
+      const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+      if (isTauri) {
+        const { port, host } = parseServerUrlToBind(serverUrlValue);
+        import('@tauri-apps/api/core')
+          .then(({ invoke }) =>
+            invoke('stop_server').then(() => invoke('start_server', { port, host }))
+          )
+          .catch((e) => console.error('[settings] Failed to restart embedded server:', e));
+      }
+
       onSave?.();
-      // Show success message briefly / 성공 메시지 간단히 표시
       setTimeout(() => {
         setIsSaving(false);
       }, 500);
     } catch (err) {
-      // Handle error from Zustand store (may contain Korean text) / Zustand store에서 오는 에러 처리 (한글 포함 가능)
       const errorMessage =
         err instanceof Error && err.message.includes('Invalid URL format')
           ? 'Invalid URL format. Please enter a valid URL (e.g., http://localhost:8080)'
@@ -70,14 +67,8 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
 
   const handleReset = () => {
     setError(null);
-    // Reset both Server URL and Metro URL to defaults / 두 설정 모두 기본값으로
-    if (isReactotronMode) {
-      resetReactotronServerUrl();
-      setServerUrlValue('http://localhost:9090');
-    } else {
-      resetNormalServerUrl();
-      setServerUrlValue('http://localhost:8080');
-    }
+    resetServerUrl();
+    setServerUrlValue(DEFAULT_SERVER_URL);
     resetMetroUrl();
     setMetroUrlValue(DEFAULT_METRO_URL);
     onSave?.();
@@ -92,7 +83,7 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
         <input
           id="server-url"
           type="text"
-          value={serverUrl}
+          value={serverUrlValue}
           onChange={(e) => {
             setServerUrlValue(e.target.value);
             setError(null);
@@ -109,7 +100,6 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
         <p className="mt-2 text-xs text-gray-400">Example: {DEFAULT_SERVER_URL}</p>
       </div>
 
-      {/* Metro URL for /json/list (React Native targets) / React Native 타깃용 Metro URL */}
       <div>
         <label htmlFor="metro-url" className="block text-sm font-medium text-gray-300 mb-2">
           Metro URL (for RN dev menu targets)
@@ -131,7 +121,6 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
         </p>
       </div>
 
-      {/* Actions at bottom: apply to all settings / 하단 액션: 전체 설정에 적용 */}
       <div className="flex justify-end gap-2 pt-2 border-t border-gray-700">
         <button
           type="button"
@@ -143,7 +132,7 @@ export function ServerSettings({ onSave }: ServerSettingsProps) {
         <button
           type="button"
           onClick={handleSave}
-          disabled={isSaving || !serverUrl}
+          disabled={isSaving || !serverUrlValue}
           className="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
         >
           {isSaving ? 'Saving...' : 'Save'}

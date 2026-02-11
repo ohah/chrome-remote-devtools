@@ -8,7 +8,6 @@ mod react_native_handler;
 
 use crate::logging::{LogType, Logger};
 use crate::react_native::ReactNativeInspectorConnectionManager;
-use crate::reactotron_server::ReactotronServer;
 use axum::extract::ws::WebSocket;
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -65,7 +64,6 @@ pub struct SocketServer {
     clients: Arc<RwLock<HashMap<String, Arc<Client>>>>,
     devtools: Arc<RwLock<HashMap<String, Arc<DevTools>>>>,
     pub react_native_inspector_manager: Arc<ReactNativeInspectorConnectionManager>,
-    pub reactotron_server: Option<Arc<ReactotronServer>>,
     pub logger: Arc<Logger>, // Made public for shared server instances / 공유 서버 인스턴스를 위해 public으로 변경
     response_bodies: Arc<RwLock<HashMap<String, String>>>, // Store response bodies for Network.getResponseBody / Network.getResponseBody를 위한 응답 본문 저장
     /// Broadcast sender for client list changes (SSE) / 클라이언트 목록 변경 시 브로드캐스트 (SSE용)
@@ -74,20 +72,7 @@ pub struct SocketServer {
 
 impl SocketServer {
     /// Create new socket server / 새로운 소켓 서버 생성
-    pub fn new(logger: Arc<Logger>, enable_reactotron: bool) -> Self {
-        if enable_reactotron {
-            eprintln!("[reactotron] 🚀 Initializing Reactotron server...");
-            logger.log(
-                LogType::Server,
-                "reactotron",
-                "Initializing Reactotron server",
-                None,
-                None,
-            );
-        } else {
-            eprintln!("[reactotron] ⚠️ Reactotron server is disabled");
-        }
-
+    pub fn new(logger: Arc<Logger>) -> Self {
         let (clients_list_broadcast, _) = broadcast::channel(32);
         Self {
             clients: Arc::new(RwLock::new(HashMap::new())),
@@ -95,11 +80,6 @@ impl SocketServer {
             react_native_inspector_manager: Arc::new(ReactNativeInspectorConnectionManager::new(
                 logger.clone(),
             )),
-            reactotron_server: if enable_reactotron {
-                Some(Arc::new(ReactotronServer::new(logger.clone())))
-            } else {
-                None
-            },
             logger,
             response_bodies: Arc::new(RwLock::new(HashMap::new())),
             clients_list_broadcast,
@@ -123,18 +103,13 @@ impl SocketServer {
             .react_native_inspector_manager
             .get_all_connections()
             .await;
-        let rn_client_ids: HashSet<String> = rn_inspectors
+        let _rn_client_ids: HashSet<String> = rn_inspectors
             .iter()
             .filter_map(|i| i.client_id.clone())
             .collect();
 
         let mut regular_clients: Vec<Value> = Vec::new();
         for client in all_clients_info {
-            if let Some(url) = &client.url {
-                if url.starts_with("reactotron://") && rn_client_ids.contains(&client.id) {
-                    continue;
-                }
-            }
             regular_clients.push(json!({
                 "id": client.id,
                 "type": "web",
@@ -152,23 +127,14 @@ impl SocketServer {
                 .client_id
                 .clone()
                 .unwrap_or_else(|| inspector.id.clone());
-            let (is_reactotron, title) = if let Some(ref cid) = inspector.client_id {
-                if let Some(client) = self.get_client(cid).await {
-                    let is_r = client
-                        .url
-                        .as_ref()
-                        .map(|u| u.starts_with("reactotron://"))
-                        .unwrap_or(false);
-                    (is_r, client.title)
-                } else {
-                    (false, None)
-                }
+            let title = if let Some(ref cid) = inspector.client_id {
+                self.get_client(cid).await.and_then(|c| c.title)
             } else {
-                (false, None)
+                None
             };
             rn_inspector_clients.push(json!({
                 "id": client_id,
-                "type": if is_reactotron { "reactotron" } else { "react-native" },
+                "type": "react-native",
                 "deviceName": inspector.device_name,
                 "appName": inspector.app_name,
                 "deviceId": inspector.device_id,
@@ -178,36 +144,6 @@ impl SocketServer {
 
         let all_clients: Vec<Value> = [regular_clients, rn_inspector_clients].concat();
         json!({ "clients": all_clients })
-    }
-
-    /// Enable Reactotron server if not already enabled / Reactotron 서버가 아직 활성화되지 않았으면 활성화
-    pub fn enable_reactotron_server(&mut self) {
-        if self.reactotron_server.is_none() {
-            eprintln!("[reactotron] 🚀 Enabling Reactotron server...");
-            self.logger.log(
-                LogType::Server,
-                "reactotron",
-                "Enabling Reactotron server",
-                None,
-                None,
-            );
-            self.reactotron_server = Some(Arc::new(ReactotronServer::new(self.logger.clone())));
-        }
-    }
-
-    /// Disable Reactotron server / Reactotron 서버 비활성화
-    pub fn disable_reactotron_server(&mut self) {
-        if self.reactotron_server.is_some() {
-            eprintln!("[reactotron] 🛑 Disabling Reactotron server...");
-            self.logger.log(
-                LogType::Server,
-                "reactotron",
-                "Disabling Reactotron server",
-                None,
-                None,
-            );
-            self.reactotron_server = None;
-        }
     }
 
     /// Clear all client connections and reset state / 모든 클라이언트 연결을 지우고 상태 초기화
@@ -288,59 +224,6 @@ impl SocketServer {
                 })),
                 None,
             );
-        }
-
-        // Handle Reactotron connections on root path / 루트 경로에서 Reactotron 연결 처리
-        // Reactotron clients connect to ws://host:port (no path) / Reactotron 클라이언트는 ws://host:port로 연결 (경로 없음)
-        {
-            let server_guard = server.read().await;
-            if path.is_empty() || path == "/" {
-                if let Some(reactotron_server) = server_guard.reactotron_server.as_ref() {
-                    eprintln!("[reactotron] 🔌 WebSocket connection attempt on root path (path: '{}', reactotron_server enabled: true)", path);
-                    server_guard.logger.log(
-                        LogType::Server,
-                        "reactotron",
-                        &format!(
-                            "Reactotron WebSocket connection attempt on root path (path: '{}')",
-                            path
-                        ),
-                        Some(&serde_json::json!({
-                            "path": path,
-                            "queryParams": query_params,
-                        })),
-                        None,
-                    );
-                    let connection_id = reactotron_server.next_connection_id().await;
-                    let address = query_params
-                        .get("address")
-                        .cloned()
-                        .unwrap_or_else(|| "unknown".to_string());
-                    eprintln!("[reactotron] 🚀 Routing to Reactotron handler (connection_id: {}, address: {})", connection_id, address);
-                    server_guard.logger.log(
-                        LogType::Server,
-                        "reactotron",
-                        &format!(
-                            "Routing to Reactotron handler (connection_id: {}, address: {})",
-                            connection_id, address
-                        ),
-                        None,
-                        None,
-                    );
-                    crate::reactotron_server::handle_reactotron_websocket(
-                        ws,
-                        address,
-                        connection_id,
-                        reactotron_server.connections.clone(),
-                        reactotron_server.subscriptions.clone(),
-                        Some(server.clone()),
-                        server_guard.logger.clone(),
-                    )
-                    .await;
-                    return;
-                } else {
-                    eprintln!("[reactotron] ⚠️ WebSocket connection on root path but Reactotron server is disabled (path: '{}')", path);
-                }
-            }
         }
 
         // Handle React Native Inspector / React Native Inspector 처리
@@ -478,26 +361,12 @@ impl SocketServer {
 
         // Log for debugging / 디버깅을 위해 로깅
         if client_count > 0 {
-            let reactotron_count = clients
-                .values()
-                .filter(|c| {
-                    c.url
-                        .as_ref()
-                        .map(|u| u.starts_with("reactotron://"))
-                        .unwrap_or(false)
-                })
-                .count();
-
             self.logger.log(
                 LogType::Server,
                 "socket-server",
-                &format!(
-                    "📋 get_all_clients: {} total clients ({} Reactotron)",
-                    client_count, reactotron_count
-                ),
+                &format!("📋 get_all_clients: {} total clients", client_count),
                 Some(&serde_json::json!({
                     "total": client_count,
-                    "reactotron": reactotron_count,
                     "clients": clients.values().map(|c| serde_json::json!({
                         "id": c.id,
                         "url": c.url,
@@ -532,235 +401,6 @@ impl SocketServer {
             })
             .collect()
     }
-
-    /// Register Reactotron client as Remote DevTools client / Reactotron 클라이언트를 Remote DevTools 클라이언트로 등록
-    /// Returns a channel sender for sending messages to the client / 클라이언트로 메시지를 보내기 위한 채널 sender 반환
-    pub async fn register_reactotron_client(
-        &self,
-        client_id: String,
-        url: String,
-        title: String,
-        ua: String,
-        logger: Arc<Logger>,
-    ) -> Option<mpsc::UnboundedSender<String>> {
-        let (tx, _rx) = mpsc::unbounded_channel::<String>();
-
-        {
-            let mut clients = self.clients.write().await;
-
-            // Check if client already exists / 클라이언트가 이미 존재하는지 확인
-            if clients.contains_key(&client_id) {
-                logger.log(
-                    LogType::Reactotron,
-                    &client_id,
-                    &format!("Client {} already registered, updating", client_id),
-                    None,
-                    None,
-                );
-            }
-
-            // Create client struct / 클라이언트 구조체 생성
-            let time_str = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map(|d| d.as_secs().to_string())
-                .unwrap_or_else(|_| "0".to_string());
-
-            // Clone values for logging / 로깅을 위해 값 복제
-            let url_for_log = url.clone();
-            let title_for_log = title.clone();
-            let ua_for_log = ua.clone();
-
-            let client = Arc::new(Client {
-                id: client_id.clone(),
-                url: Some(url),
-                title: Some(title),
-                favicon: None,
-                ua: Some(ua),
-                time: Some(time_str),
-                sender: tx.clone(),
-            });
-
-            clients.insert(client_id.clone(), client);
-
-            // Log registration for debugging / 디버깅을 위해 등록 로깅
-            logger.log(
-                LogType::Reactotron,
-                &client_id,
-                &format!(
-                    "📝 Registered Reactotron client in SocketServer: id={}, url={}, title={}",
-                    client_id, url_for_log, title_for_log
-                ),
-                Some(&serde_json::json!({
-                    "clientId": client_id,
-                    "url": url_for_log,
-                    "title": title_for_log,
-                    "ua": ua_for_log,
-                })),
-                Some("register_reactotron_client"),
-            );
-        }
-        self.notify_clients_changed();
-        Some(tx)
-    }
-
-    /// Unregister Reactotron client from Remote DevTools / Reactotron 클라이언트를 Remote DevTools에서 등록 해제
-    pub async fn unregister_reactotron_client(&self, client_id: &str, logger: Arc<Logger>) {
-        let mut clients = self.clients.write().await;
-        if clients.remove(client_id).is_some() {
-            logger.log(
-                LogType::Reactotron,
-                client_id,
-                "Unregistered Reactotron client from Remote DevTools",
-                None,
-                None,
-            );
-        }
-        drop(clients);
-        self.notify_clients_changed();
-    }
-
-    /// Send CDP message to DevTools connected to a client / 클라이언트에 연결된 DevTools로 CDP 메시지 전송
-    pub async fn send_cdp_message_to_devtools(
-        &self,
-        client_id: &str,
-        cdp_message: &serde_json::Value,
-        logger: Arc<Logger>,
-    ) {
-        // Store response body if this is Network.responseReceived event / Network.responseReceived 이벤트인 경우 응답 본문 저장
-        if let Some(method) = cdp_message.get("method").and_then(|m| m.as_str()) {
-            if method == "Network.responseReceived" {
-                if let Some(params) = cdp_message.get("params").and_then(|p| p.as_object()) {
-                    if let Some(request_id) = params.get("requestId").and_then(|r| r.as_str()) {
-                        if let Some(response) = params.get("response").and_then(|r| r.as_object()) {
-                            if let Some(body) = response.get("body").and_then(|b| b.as_str()) {
-                                let mut response_bodies = self.response_bodies.write().await;
-                                response_bodies.insert(request_id.to_string(), body.to_string());
-                                logger.log(
-                                    LogType::Reactotron,
-                                    client_id,
-                                    &format!(
-                                        "💾 Stored response body for requestId: {}",
-                                        request_id
-                                    ),
-                                    Some(&serde_json::json!({
-                                        "requestId": request_id,
-                                        "bodyLength": body.len(),
-                                    })),
-                                    Some("store_response_body"),
-                                );
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        let devtools = self.devtools.read().await;
-        let mut sent_count = 0;
-
-        // Find DevTools connected to this client / 이 클라이언트에 연결된 DevTools 찾기
-        for devtool in devtools.values() {
-            if devtool.client_id.as_ref() == Some(&client_id.to_string()) {
-                // Convert CDP message to JSON string / CDP 메시지를 JSON 문자열로 변환
-                if let Ok(cdp_json) = serde_json::to_string(cdp_message) {
-                    // Log the actual message being sent / 실제로 전송되는 메시지 로깅
-                    logger.log(
-                        LogType::Reactotron,
-                        client_id,
-                        &format!(
-                            "📤 Sending CDP message to DevTools {}: {}",
-                            devtool.id, cdp_json
-                        ),
-                        Some(cdp_message),
-                        cdp_message.get("method").and_then(|m| m.as_str()),
-                    );
-
-                    if let Err(e) = devtool.sender.send(cdp_json.clone()) {
-                        logger.log(
-                            LogType::Reactotron,
-                            client_id,
-                            &format!(
-                                "Failed to send CDP message to DevTools {}: {}",
-                                devtool.id, e
-                            ),
-                            None,
-                            None,
-                        );
-                    } else {
-                        sent_count += 1;
-                    }
-                } else {
-                    logger.log_error(
-                        LogType::Reactotron,
-                        client_id,
-                        "Failed to serialize CDP message to JSON",
-                        Some(
-                            &serde_json::to_string(cdp_message)
-                                .unwrap_or_else(|_| "serialization failed".to_string()),
-                        ),
-                    );
-                }
-            }
-        }
-
-        if sent_count > 0 {
-            logger.log(
-                LogType::Reactotron,
-                client_id,
-                &format!(
-                    "Sent CDP message to {} DevTools: {}",
-                    sent_count,
-                    cdp_message
-                        .get("method")
-                        .and_then(|m| m.as_str())
-                        .unwrap_or("unknown")
-                ),
-                None,
-                None,
-            );
-        }
-    }
-
-    /// Update Reactotron client information / Reactotron 클라이언트 정보 업데이트
-    pub async fn update_reactotron_client(
-        &self,
-        client_id: &str,
-        url: Option<String>,
-        title: Option<String>,
-        ua: Option<String>,
-        logger: Arc<Logger>,
-    ) {
-        let mut clients = self.clients.write().await;
-        if let Some(client) = clients.get_mut(client_id) {
-            // Clone the Arc to get mutable access / 가변 접근을 위해 Arc 복제
-            let client_clone = Arc::clone(client);
-            drop(clients); // Release the write lock / write lock 해제
-
-            // Create a new client with updated information / 업데이트된 정보로 새 클라이언트 생성
-            let mut new_client = client_clone.as_ref().clone();
-            if let Some(url) = url {
-                new_client.url = Some(url);
-            }
-            if let Some(title) = title {
-                new_client.title = Some(title);
-            }
-            if let Some(ua) = ua {
-                new_client.ua = Some(ua);
-            }
-
-            // Replace the client in the map / 맵에서 클라이언트 교체
-            let mut clients = self.clients.write().await;
-            clients.insert(client_id.to_string(), Arc::new(new_client));
-
-            logger.log(
-                LogType::Reactotron,
-                client_id,
-                "Updated Reactotron client information",
-                None,
-                None,
-            );
-        }
-    }
 }
 
 #[cfg(test)]
@@ -778,14 +418,14 @@ mod tests {
     async fn test_socket_server_creation() {
         let logger = create_test_logger();
         // Should not panic / 패닉이 발생하지 않아야 함
-        let _socket_server = SocketServer::new(logger, false);
+        let _socket_server = SocketServer::new(logger);
     }
 
     #[tokio::test]
     /// Test empty clients list initially / 초기에는 빈 클라이언트 목록 반환 테스트
     async fn test_empty_clients_list_initially() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger, false);
+        let socket_server = SocketServer::new(logger);
         let clients = socket_server.get_all_clients().await;
         assert_eq!(clients.len(), 0);
     }
@@ -794,7 +434,7 @@ mod tests {
     /// Test empty inspectors list initially / 초기에는 빈 Inspector 목록 반환 테스트
     async fn test_empty_inspectors_list_initially() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger, false);
+        let socket_server = SocketServer::new(logger);
         let inspectors = socket_server.get_all_inspectors().await;
         assert_eq!(inspectors.len(), 0);
     }
@@ -803,7 +443,7 @@ mod tests {
     /// Test get client by ID when client doesn't exist / 클라이언트가 없을 때 ID로 클라이언트 가져오기 테스트
     async fn test_get_client_by_id_when_not_exists() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger, false);
+        let socket_server = SocketServer::new(logger);
         let client = socket_server.get_client("test-client-1").await;
         assert!(client.is_none());
     }
@@ -812,7 +452,7 @@ mod tests {
     /// Test get all clients returns array / 모든 클라이언트 반환 테스트
     async fn test_get_all_clients_returns_array() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger, false);
+        let socket_server = SocketServer::new(logger);
         let clients = socket_server.get_all_clients().await;
         // Should return a vector / 벡터를 반환해야 함
         assert!(clients.is_empty());
@@ -822,7 +462,7 @@ mod tests {
     /// Test get all inspectors returns array / 모든 Inspector 반환 테스트
     async fn test_get_all_inspectors_returns_array() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger, false);
+        let socket_server = SocketServer::new(logger);
         let inspectors = socket_server.get_all_inspectors().await;
         // Should return a vector / 벡터를 반환해야 함
         assert!(inspectors.is_empty());
@@ -832,7 +472,7 @@ mod tests {
     /// Test get client with empty string / 빈 문자열로 클라이언트 조회 테스트
     async fn test_get_client_with_empty_string() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger, false);
+        let socket_server = SocketServer::new(logger);
         let client = socket_server.get_client("").await;
         assert!(client.is_none());
     }
@@ -841,7 +481,7 @@ mod tests {
     /// Test get client with special characters / 특수 문자가 포함된 클라이언트 ID 조회 테스트
     async fn test_get_client_with_special_characters() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger, false);
+        let socket_server = SocketServer::new(logger);
         let client = socket_server.get_client("test/client-id").await;
         assert!(client.is_none());
     }
@@ -901,7 +541,7 @@ mod message_routing_tests {
     /// Test get client information / 클라이언트 정보 가져오기 테스트
     async fn test_get_client_information() {
         let logger = create_test_logger();
-        let socket_server = SocketServer::new(logger, false);
+        let socket_server = SocketServer::new(logger);
         let client = socket_server.get_client("test-client").await;
         // Should return None when client doesn't exist / 클라이언트가 없을 때 None 반환
         assert!(client.is_none());

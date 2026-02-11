@@ -3,29 +3,19 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface ServerUrlState {
-  /** Normal server URL (default: http://localhost:8080) / 일반 서버 URL (기본값: http://localhost:8080) */
-  normalServerUrl: string | null;
-  /** Reactotron server URL (default: http://localhost:9090) / Reactotron 서버 URL (기본값: http://localhost:9090) */
-  reactotronServerUrl: string | null;
+  /** Server URL (default: http://localhost:8080) / 서버 URL (기본값: http://localhost:8080) */
+  serverUrl: string | null;
   /** Metro bundler URL for /json/list (default: http://localhost:8081) / /json/list용 Metro URL (기본값: http://localhost:8081) */
   metroUrl: string | null;
-  /** Whether Reactotron mode is enabled / Reactotron 모드 활성화 여부 */
-  isReactotronMode: boolean;
-  /** Set normal server URL / 일반 서버 URL 설정 */
-  setNormalServerUrl: (url: string) => void;
-  /** Set Reactotron server URL / Reactotron 서버 URL 설정 */
-  setReactotronServerUrl: (url: string) => void;
+  /** Set server URL / 서버 URL 설정 */
+  setServerUrl: (url: string) => void;
   /** Set Metro URL / Metro URL 설정 */
   setMetroUrl: (url: string) => void;
-  /** Set Reactotron mode / Reactotron 모드 설정 */
-  setReactotronMode: (enabled: boolean) => void;
-  /** Reset normal server URL to default / 일반 서버 URL을 기본값으로 재설정 */
-  resetNormalServerUrl: () => void;
-  /** Reset Reactotron server URL to default / Reactotron 서버 URL을 기본값으로 재설정 */
-  resetReactotronServerUrl: () => void;
+  /** Reset server URL to default / 서버 URL을 기본값으로 재설정 */
+  resetServerUrl: () => void;
   /** Reset Metro URL to default / Metro URL을 기본값으로 재설정 */
   resetMetroUrl: () => void;
-  /** Get current active server URL / 현재 활성 서버 URL 가져오기 */
+  /** Get current server URL / 현재 서버 URL 가져오기 */
   getServerUrl: () => string | null;
   /** Get Metro URL / Metro URL 가져오기 */
   getMetroUrl: () => string | null;
@@ -37,24 +27,12 @@ interface ServerUrlState {
 const useServerUrlStore = create<ServerUrlState>()(
   persist(
     (set, get) => ({
-      normalServerUrl: null,
-      reactotronServerUrl: null,
+      serverUrl: null,
       metroUrl: null,
-      isReactotronMode: false,
-      setNormalServerUrl: (url: string) => {
-        // Validate URL format / URL 형식 검증
+      setServerUrl: (url: string) => {
         try {
           new URL(url);
-          set({ normalServerUrl: url });
-        } catch {
-          throw new Error('Invalid URL format');
-        }
-      },
-      setReactotronServerUrl: (url: string) => {
-        // Validate URL format / URL 형식 검증
-        try {
-          new URL(url);
-          set({ reactotronServerUrl: url });
+          set({ serverUrl: url });
         } catch {
           throw new Error('Invalid URL format');
         }
@@ -67,24 +45,14 @@ const useServerUrlStore = create<ServerUrlState>()(
           throw new Error('Invalid URL format');
         }
       },
-      setReactotronMode: (enabled: boolean) => {
-        set({ isReactotronMode: enabled });
-      },
-      resetNormalServerUrl: () => {
-        set({ normalServerUrl: null });
-      },
-      resetReactotronServerUrl: () => {
-        set({ reactotronServerUrl: null });
+      resetServerUrl: () => {
+        set({ serverUrl: null });
       },
       resetMetroUrl: () => {
         set({ metroUrl: null });
       },
       getServerUrl: () => {
-        const state = get();
-        if (state.isReactotronMode) {
-          return state.reactotronServerUrl ?? 'http://localhost:9090';
-        }
-        return state.normalServerUrl ?? 'http://localhost:8080';
+        return get().serverUrl ?? 'http://localhost:8080';
       },
       getMetroUrl: () => {
         return get().metroUrl ?? 'http://localhost:8081';
@@ -97,70 +65,48 @@ const useServerUrlStore = create<ServerUrlState>()(
 );
 
 /**
- * Get server URL from environment variable or store / 환경 변수 또는 store에서 서버 URL 가져오기
- * @returns Server URL or null if not set / 서버 URL 또는 설정되지 않았으면 null
+ * Parse server URL to bind address (host + port) for embedded server /
+ * 서버 URL을 내장 서버 바인드 주소(host + port)로 파싱
+ * @param url - Full server URL (e.g. http://localhost:8080) / 전체 서버 URL
+ * @returns host (0.0.0.0 for bind-all) and port / 바인드용 host와 port
  */
-export function getServerUrl(): string | null {
-  // Check environment variable first / 먼저 환경 변수 확인
+export function parseServerUrlToBind(url: string): { host: string; port: number } {
+  try {
+    const u = new URL(url);
+    const port = u.port ? parseInt(u.port, 10) : 8080;
+    return {
+      host: '0.0.0.0',
+      port: Number.isNaN(port) || port <= 0 ? 8080 : port,
+    };
+  } catch {
+    return { host: '0.0.0.0', port: 8080 };
+  }
+}
+
+/**
+ * Get server URL from environment variable or store / 환경 변수 또는 store에서 서버 URL 가져오기
+ * @returns Server URL (default http://localhost:8080 when not set) / 서버 URL (미설정 시 기본값)
+ */
+export function getServerUrl(): string {
   if (typeof window !== 'undefined' && import.meta.env.VITE_SERVER_URL) {
     return import.meta.env.VITE_SERVER_URL;
   }
-
-  // Get current active server URL from store / store에서 현재 활성 서버 URL 가져오기
   return useServerUrlStore.getState().getServerUrl();
 }
 
 /**
- * Set normal server URL / 일반 서버 URL 설정
- * @param url - Server URL to save / 저장할 서버 URL
- */
-export function setNormalServerUrl(url: string): void {
-  useServerUrlStore.getState().setNormalServerUrl(url);
-}
-
-/**
- * Set Reactotron server URL / Reactotron 서버 URL 설정
- * @param url - Server URL to save / 저장할 서버 URL
- */
-export function setReactotronServerUrl(url: string): void {
-  useServerUrlStore.getState().setReactotronServerUrl(url);
-}
-
-/**
- * Set Reactotron mode / Reactotron 모드 설정
- * @param enabled - Whether Reactotron mode is enabled / Reactotron 모드 활성화 여부
- */
-export function setReactotronMode(enabled: boolean): void {
-  useServerUrlStore.getState().setReactotronMode(enabled);
-}
-
-/**
- * Set server URL (backward compatibility - sets normal server URL) / 서버 URL 설정 (하위 호환성 - 일반 서버 URL 설정)
+ * Set server URL / 서버 URL 설정
  * @param url - Server URL to save / 저장할 서버 URL
  */
 export function setServerUrl(url: string): void {
-  useServerUrlStore.getState().setNormalServerUrl(url);
+  useServerUrlStore.getState().setServerUrl(url);
 }
 
 /**
- * Reset normal server URL to default / 일반 서버 URL을 기본값으로 재설정
- */
-export function resetNormalServerUrl(): void {
-  useServerUrlStore.getState().resetNormalServerUrl();
-}
-
-/**
- * Reset Reactotron server URL to default / Reactotron 서버 URL을 기본값으로 재설정
- */
-export function resetReactotronServerUrl(): void {
-  useServerUrlStore.getState().resetReactotronServerUrl();
-}
-
-/**
- * Reset server URL to default (backward compatibility - resets normal server URL) / 서버 URL을 기본값으로 재설정 (하위 호환성 - 일반 서버 URL 재설정)
+ * Reset server URL to default / 서버 URL을 기본값으로 재설정
  */
 export function resetServerUrl(): void {
-  useServerUrlStore.getState().resetNormalServerUrl();
+  useServerUrlStore.getState().resetServerUrl();
 }
 
 /**
@@ -172,19 +118,14 @@ export function useServerUrl() {
 
   return {
     serverUrl: store.getServerUrl(),
-    normalServerUrl: store.normalServerUrl,
-    reactotronServerUrl: store.reactotronServerUrl,
+    normalServerUrl: store.serverUrl,
     metroUrl: store.getMetroUrl(),
-    isReactotronMode: store.isReactotronMode,
-    setNormalServerUrl: store.setNormalServerUrl,
-    setReactotronServerUrl: store.setReactotronServerUrl,
+    setServerUrl: store.setServerUrl,
     setMetroUrl: store.setMetroUrl,
-    setReactotronMode: store.setReactotronMode,
-    resetNormalServerUrl: store.resetNormalServerUrl,
-    resetReactotronServerUrl: store.resetReactotronServerUrl,
+    resetServerUrl: store.resetServerUrl,
     resetMetroUrl: store.resetMetroUrl,
     // Backward compatibility / 하위 호환성
-    setServerUrl: store.setNormalServerUrl,
-    resetServerUrl: store.resetNormalServerUrl,
+    setNormalServerUrl: store.setServerUrl,
+    resetNormalServerUrl: store.resetServerUrl,
   };
 }

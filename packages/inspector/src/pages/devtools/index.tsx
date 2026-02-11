@@ -18,7 +18,7 @@ import type { Client } from '@/entities/client';
 
 /** One tab per device (key); RN/Reactotron use deviceId, web use id / 기기(key)당 탭 하나; RN/Reactotron은 deviceId, 웹은 id */
 function getClientUniqueKey(client: Client): string {
-  if (client.type === 'react-native' || client.type === 'reactotron') {
+  if (client.type === 'react-native') {
     return client.deviceId || client.id;
   }
   return client.id;
@@ -261,7 +261,7 @@ function DevToolsPage() {
       }
       const client = filteredClients.find((c) => getClientUniqueKey(c) === key);
       const id = client?.id ?? clientKeyToIdMap.get(key) ?? key;
-      const isRN = client?.type === 'react-native' || client?.type === 'reactotron';
+      const isRN = client?.type === 'react-native';
       if (client) {
         return {
           id: client.id,
@@ -285,7 +285,7 @@ function DevToolsPage() {
   type FrameItem = {
     key: string;
     id: string;
-    type: 'web' | 'react-native' | 'reactotron';
+    type: 'web' | 'react-native';
     deviceName?: string;
     url?: string;
     title?: string;

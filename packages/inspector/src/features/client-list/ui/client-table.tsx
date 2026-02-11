@@ -34,7 +34,7 @@ export function ClientTable({ clients, onSelect }: ClientTableProps) {
         </thead>
         <tbody className="divide-y divide-gray-700">
           {clients.map((client) => {
-            const isReactNative = client.type === 'react-native' || client.type === 'reactotron';
+            const isReactNative = client.type === 'react-native';
             const isWeb = client.type === 'web';
 
             return (
