@@ -72,6 +72,60 @@ async fn is_server_running() -> bool {
     }
 }
 
+/// Result of adb reverse command for frontend / 프론트엔드용 adb reverse 명령 결과
+#[derive(serde::Serialize)]
+struct AdbReverseResult {
+    /// Whether the command succeeded / 명령 성공 여부
+    success: bool,
+    /// Message (success text or error description) / 메시지 (성공 문구 또는 에러 설명)
+    message: String,
+}
+
+/// Run `adb reverse tcp:{port} tcp:{port}` so Android device/emulator can reach the devtools server on host. Port follows Inspector Server URL setting /
+/// Android 기기/에뮬레이터가 호스트의 devtools 서버에 접근하도록 adb reverse 실행. 포트는 인스펙터 Server URL 설정 따름
+/// Returns structured result for UI (success + message) / UI용 구조화 결과(success + message) 반환
+#[tauri::command]
+fn adb_reverse_port(port: u16) -> Result<AdbReverseResult, String> {
+    let tcp_port = format!("tcp:{}", port);
+    let output = std::process::Command::new("adb")
+        .args(["reverse", tcp_port.as_str(), tcp_port.as_str()])
+        .output()
+        .map_err(|e| {
+            let msg = e.to_string();
+            if msg.contains("No such file") || msg.contains("not found") || msg.contains("ENOENT") {
+                "adb not found. Install Android SDK platform-tools and add adb to PATH.".to_string()
+            } else {
+                format!("Failed to run adb: {}", msg)
+            }
+        })?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let combined = format!("{}{}", stdout, stderr).trim().to_string();
+
+    if output.status.success() {
+        let message = if combined.is_empty() {
+            format!("adb reverse tcp:{} tcp:{} succeeded.", port, port)
+        } else {
+            combined
+        };
+        Ok(AdbReverseResult {
+            success: true,
+            message,
+        })
+    } else {
+        let message = if combined.is_empty() {
+            "adb reverse failed. Check that an Android device or emulator is connected (adb devices).".to_string()
+        } else {
+            combined
+        };
+        Ok(AdbReverseResult {
+            success: false,
+            message,
+        })
+    }
+}
+
 /// Fetch URL from Rust (no Origin header) so Metro securityHeadersMiddleware allows the request /
 /// Rust에서 Origin 헤더 없이 요청해 Metro securityHeadersMiddleware 통과
 #[tauri::command]
@@ -109,6 +163,7 @@ pub fn run() {
             start_server,
             stop_server,
             is_server_running,
+            adb_reverse_port,
             fetch_metro_proxy
         ])
         .setup(|_app| {

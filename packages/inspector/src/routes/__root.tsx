@@ -1,7 +1,17 @@
 // Root route
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from 'react';
-import { RefreshCw, Minus, Maximize2, X, Eye, EyeOff, Home, Settings } from 'lucide-react';
+import {
+  RefreshCw,
+  Minus,
+  Maximize2,
+  X,
+  Eye,
+  EyeOff,
+  Home,
+  Settings,
+  Terminal,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useClientsListSSE } from '@/entities/client';
@@ -100,6 +110,27 @@ function TitleBar() {
     }
   };
 
+  const serverPort = parseServerUrlToBind(getServerUrl()).port;
+  // Run adb reverse for Server URL port (Settings) / 설정(Server URL) 포트로 adb reverse 실행
+  const handleAdbReverse = useCallback(() => {
+    if (!isTauri) return;
+    import('@tauri-apps/api/core')
+      .then(({ invoke }) =>
+        invoke<{ success: boolean; message: string }>('adb_reverse_port', { port: serverPort })
+      )
+      .then((result) => {
+        if (result.success) {
+          window.alert(`adb reverse\n\n${result.message}`);
+        } else {
+          window.alert(`adb reverse failed\n\n${result.message}`);
+        }
+      })
+      .catch((err) => {
+        const msg = typeof err === 'string' ? err : (err?.message ?? String(err));
+        window.alert(`adb reverse error\n\n${msg}`);
+      });
+  }, [isTauri, serverPort]);
+
   return (
     <div className="fixed top-0 left-0 right-0 z-[1000] h-[35px] bg-gray-700 border-b border-gray-600 select-none grid grid-cols-[1fr_max-content]">
       <div
@@ -128,6 +159,23 @@ function TitleBar() {
       </div>
       {isTauri && (
         <div className="flex items-center gap-2">
+          {/* adb reverse for Server URL port (Settings) / 설정 Server URL 포트로 adb reverse */}
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleAdbReverse}
+                className="titlebar-nav-button cursor-pointer h-auto px-2.5 py-1.5 rounded text-xs transition-all text-gray-400 hover:text-gray-200 hover:bg-gray-600/50"
+                aria-label={`Run adb reverse for port ${serverPort}`}
+              >
+                <Terminal className="w-3.5 h-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="z-[1001]">
+              <p>Run adb reverse tcp:{serverPort} (Settings Server URL port)</p>
+            </TooltipContent>
+          </Tooltip>
           {/* Host/Settings button (right side of title bar) / 타이틀바 우측 호스트 설정 버튼 */}
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>

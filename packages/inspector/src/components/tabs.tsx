@@ -35,9 +35,17 @@ export function Tabs({ tabs, activeTabId, onTabChange, className }: TabsProps) {
           const isDisconnected = tab.disconnected;
 
           return (
-            <button
+            <div
               key={tab.id}
+              role="tab"
+              tabIndex={isActive ? 0 : -1}
               onClick={() => onTabChange(tab.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onTabChange(tab.id);
+                }
+              }}
               title={isDisconnected ? 'Disconnected' : undefined}
               className={cn(
                 'group relative flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
@@ -47,7 +55,6 @@ export function Tabs({ tabs, activeTabId, onTabChange, className }: TabsProps) {
                 isDisconnected && 'opacity-60 text-gray-500' // Disabled look for disconnected tabs only; no extra text / 연결 해제된 탭은 색만 비활성화
               )}
               aria-selected={isActive}
-              role="tab"
             >
               {tab.icon && <span className="shrink-0">{tab.icon}</span>}
               <span className="whitespace-nowrap">{tab.label}</span>
@@ -55,6 +62,7 @@ export function Tabs({ tabs, activeTabId, onTabChange, className }: TabsProps) {
               <span className="ml-1 w-[18px] flex items-center justify-center">
                 {/* Always show close button but disable functionality / 닫기 버튼은 항상 표시하지만 기능 비활성화 */}
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     // Tab closing is not supported / 탭 닫기는 지원되지 않음
@@ -71,7 +79,7 @@ export function Tabs({ tabs, activeTabId, onTabChange, className }: TabsProps) {
                   <X className="w-3.5 h-3.5" />
                 </button>
               </span>
-            </button>
+            </div>
           );
         })}
       </div>
