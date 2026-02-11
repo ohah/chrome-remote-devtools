@@ -6,11 +6,12 @@ const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
 // Ref for window control RPC (set after mainWindow is created) / 창 제어 RPC용
 let mainWindowRef: BrowserWindow | null = null;
 
-// RPC: fetch URL from main process + window control / CORS 회피용 fetch + 창 닫기·최소화·최대화
+// RPC: fetch URL from main process + window control / CORS 회피용 fetch + 창 제어
 const rpc = BrowserView.defineRPC({
   handlers: {
     requests: {
-      fetchUrl: async ({ url }: { url: string }) => {
+      fetchUrl: async (params?: unknown) => {
+        const { url } = params as { url: string };
         const res = await fetch(url);
         if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
         return res.json();
@@ -19,11 +20,14 @@ const rpc = BrowserView.defineRPC({
         mainWindowRef?.close();
       },
       minimizeWindow: async () => {
-        mainWindowRef?.minimize();
+        if (!mainWindowRef) return;
+        if (mainWindowRef.isMaximized()) mainWindowRef.unmaximize();
+        mainWindowRef.minimize();
       },
+      // Maximize only; restore disabled to avoid CEF freeze on unmaximize/setFrame
       toggleMaximizeWindow: async () => {
-        if (mainWindowRef?.isMaximized()) mainWindowRef?.unmaximize();
-        else mainWindowRef?.maximize();
+        if (!mainWindowRef || mainWindowRef.isMaximized()) return;
+        mainWindowRef.maximize();
       },
     },
   },

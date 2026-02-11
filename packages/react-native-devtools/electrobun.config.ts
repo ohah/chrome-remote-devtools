@@ -15,6 +15,9 @@ export default {
     mac: {
       bundleCEF: true,
       defaultRenderer: 'cef',
+      // Code signing: codesign needs ELECTROBUN_DEVELOPER_ID only.
+      // codesign: true,   // env: ELECTROBUN_DEVELOPER_ID
+      // notarize: true,   // env: ELECTROBUN_APPLEID, ELECTROBUN_APPLEIDPASS, ELECTROBUN_TEAMID (only when notarize)
     },
     linux: {
       bundleCEF: true,
