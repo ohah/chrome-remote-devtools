@@ -1,0 +1,41 @@
+/* Global styles - same as inspector */
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #2563eb;
+  --color-primary-foreground: #fff;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #fff;
+  --color-secondary: #374151;
+  --color-secondary-foreground: #e5e7eb;
+  --color-accent: #374151;
+  --color-accent-foreground: #e5e7eb;
+  --color-background: #111827;
+  --color-foreground: #e5e7eb;
+  --color-input: #374151;
+  --color-ring: #2563eb;
+}
+
+/* Drag only on title area; buttons must be no-drag / 제목 영역만 드래그, 버튼 영역은 no-drag */
+.titlebar-drag-region {
+  -webkit-app-region: drag;
+}
+
+.titlebar-no-drag,
+.titlebar-nav-button,
+.titlebar-controls {
+  -webkit-app-region: no-drag;
+}
+
+/* Cursor pointer for clickable elements / 클릭 가능 요소 커서 */
+button,
+[role='button'],
+a[href],
+.cursor-pointer {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled='true'] {
+  cursor: not-allowed;
+}
