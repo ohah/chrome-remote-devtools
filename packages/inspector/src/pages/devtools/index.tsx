@@ -16,7 +16,7 @@ import { Smartphone, Globe, Wifi } from 'lucide-react';
 import { getTabsVisibility } from '@/routes/__root';
 import type { Client } from '@/entities/client';
 
-/** One tab per device (key); RN/Reactotron use deviceId, web use id / 기기(key)당 탭 하나; RN/Reactotron은 deviceId, 웹은 id */
+/** One tab per device (key); RN uses deviceId, web use id / 기기(key)당 탭 하나; RN은 deviceId, 웹은 id */
 function getClientUniqueKey(client: Client): string {
   if (client.type === 'react-native') {
     return client.deviceId || client.id;

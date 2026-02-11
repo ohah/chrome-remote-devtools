@@ -277,7 +277,7 @@ pub async fn handle_devtools_connection(
                                             );
                                             // Don't set should_forward = false, let it forward to React Native Inspector / should_forward = false를 설정하지 않음, React Native Inspector로 전달되도록 함
                                         } else {
-                                            // For regular clients (e.g., Reactotron), handle in Rust server / 일반 클라이언트(예: Reactotron)의 경우 Rust 서버에서 처리
+                                            // For regular (web) clients, handle in Rust server / 일반(웹) 클라이언트의 경우 Rust 서버에서 처리
                                             let socket_server_for_body = socket_server.clone();
                                             let devtools_for_body = devtools_for_msg.clone();
                                             let devtools_id_for_body = devtools_id_for_msg.clone();
