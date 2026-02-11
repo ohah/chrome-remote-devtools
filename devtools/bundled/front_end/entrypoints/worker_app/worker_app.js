@@ -1349,7 +1349,7 @@ UI6.ViewManager.registerViewExtension({
   order: 50,
   condition: () => {
     const clientType = Root4.Runtime.Runtime.queryParam("clientType");
-    return clientType === "react-native" || clientType === "reactotron";
+    return clientType === "react-native";
   },
   async loadView(universe) {
     const Timeline = await loadTimelineModule();

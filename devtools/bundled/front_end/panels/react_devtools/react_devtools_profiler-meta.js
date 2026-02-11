@@ -30,7 +30,7 @@ UI.ViewManager.registerViewExtension({
   order: 1011,
   condition: () => {
     const clientType = Root.Runtime.Runtime.queryParam("clientType");
-    if (clientType === "react-native" || clientType === "reactotron") {
+    if (clientType === "react-native") {
       return true;
     }
     if (clientType === "web") {

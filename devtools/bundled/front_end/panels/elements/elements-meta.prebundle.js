@@ -645,7 +645,7 @@ UI.Toolbar.registerToolbarItem({
     // Hide for React Native (no DOM inspect) / React Native에서는 숨김 (DOM 검사 없음)
     condition: () => {
         const clientType = Root.Runtime.Runtime.queryParam('clientType');
-        return clientType !== 'react-native' && clientType !== 'reactotron';
+        return clientType !== 'react-native';
     },
 });
 UI.UIUtils.registerRenderer({

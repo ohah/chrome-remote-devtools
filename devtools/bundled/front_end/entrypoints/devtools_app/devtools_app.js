@@ -663,7 +663,7 @@ UI.Toolbar.registerToolbarItem({
   // Hide for React Native (no DOM inspect) / React Native에서는 숨김 (DOM 검사 없음)
   condition: () => {
     const clientType = Root.Runtime.Runtime.queryParam("clientType");
-    return clientType !== "react-native" && clientType !== "reactotron";
+    return clientType !== "react-native";
   }
 });
 UI.UIUtils.registerRenderer({
@@ -2820,7 +2820,7 @@ UI9.ViewManager.registerViewExtension({
   order: 50,
   condition: () => {
     const clientType = Root6.Runtime.Runtime.queryParam("clientType");
-    return clientType === "react-native" || clientType === "reactotron";
+    return clientType === "react-native";
   },
   async loadView(universe) {
     const Timeline = await loadTimelineModule();
@@ -3632,7 +3632,7 @@ UI15.ViewManager.registerViewExtension({
   order: 1010,
   condition: () => {
     const clientType = Root8.Runtime.Runtime.queryParam("clientType");
-    if (clientType === "react-native" || clientType === "reactotron") {
+    if (clientType === "react-native") {
       return true;
     }
     if (clientType === "web") {
@@ -3679,7 +3679,7 @@ UI16.ViewManager.registerViewExtension({
   order: 1011,
   condition: () => {
     const clientType = Root9.Runtime.Runtime.queryParam("clientType");
-    if (clientType === "react-native" || clientType === "reactotron") {
+    if (clientType === "react-native") {
       return true;
     }
     if (clientType === "web") {
